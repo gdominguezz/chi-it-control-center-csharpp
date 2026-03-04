@@ -8,6 +8,8 @@ import io
 import pandas as pd
 from fastapi import Query, UploadFile, File
 from fastapi.responses import StreamingResponse, Response
+import os
+from pathlib import Path
 
 app = FastAPI()
 
@@ -22,6 +24,18 @@ def get_connection():
         user="postgres",
         password="Tristan2468"
     )
+
+# ==========================================================
+# CONFIGURACION PDF
+# ==========================================================
+# Para cambiar al servidor: solo modifica PDF_BASE_PATH
+# PDF_BASE_PATH = r"\\chispeedy\Repository\PDF_DATABASE"
+PDF_BASE_PATH = r"C:\Users\dominguezg\Desktop\archivos\PDF_DATABASE"
+
+def get_pdf_path(modulo: str, id: int) -> Path:
+    carpeta = Path(PDF_BASE_PATH) / modulo
+    carpeta.mkdir(parents=True, exist_ok=True)
+    return carpeta / f"{id}.pdf"
 
 # ==========================================================
 # ARCHIVOS ESTATICOS
@@ -317,20 +331,15 @@ def exportar_preventivos_por_anio(anio: int):
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/PREVENTIVO/PDF/{id}")
 def eliminar_PDF_preventivo(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        UPDATE public."MANTENIMIENTOS_PREVENTIVOS"
-        SET "PDF" = NULL
-        WHERE "Id" = %s
-    """, (id,))
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return {"mensaje": "PDF ELIMINADO"}
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."MANTENIMIENTOS_PREVENTIVOS" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
+    cursor.execute('UPDATE public."MANTENIMIENTOS_PREVENTIVOS" SET "PDF"=NULL WHERE "ID"=%s', (id,))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 # ---------------- ELIMINAR ----------------
 @app.delete("/PREVENTIVO/{id}")
 def eliminar_preventivo(id: int):
@@ -350,294 +359,29 @@ def eliminar_preventivo(id: int):
 
 # ---------------- SUBIR PDF ----------------
 @app.post("/PREVENTIVO/PDF/{id}")
-def subir_PDF_preventivo(id: int, file: UploadFile = File(...)):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    PDF_bytes = file.file.read()
-
-    cursor.execute("""
-        UPDATE public."MANTENIMIENTOS_PREVENTIVOS"
-        SET "PDF"=%s
-        WHERE "Id"=%s
-    """, (psycopg2.Binary(PDF_bytes), id))
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return {"mensaje": "PDF GUARDADO"}
+async def subir_PDF_preventivo(id: int, file: UploadFile = File(...)):
+    contenido = await file.read()
+    ruta = get_pdf_path("PREVENTIVO", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."MANTENIMIENTOS_PREVENTIVOS" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/PREVENTIVO/PDF/{id}")
 def ver_PDF_preventivo(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        'SELECT "PDF" FROM public."MANTENIMIENTOS_PREVENTIVOS" WHERE "Id"=%s',
-        (id,)
-    )
-
-    PDF = cursor.fetchone()
-
-    cursor.close()
-    conn.close()
-
-    if PDF and PDF[0]:
-        return Response(content=PDF[0], media_type="application/PDF")
-
-    return {"mensaje": "NO EXISTE PDF"}
-
-
-
-
-
-
-
-# ==========================================================
-# ================= CORRECTIVOS =============================
-# ==========================================================
-
-
-
-
-
-
-class Correctivo(BaseModel):
-    STATUS: Optional[str] = None
-    FOLIO: Optional[str] = None
-    PLANTA: Optional[str] = None
-    LINEA_PERSONA: Optional[str] = None
-    EQUIPO: Optional[str] = None
-    MARCA: Optional[str] = None
-    MODELO: Optional[str] = None
-    NUMERO_SERIE: Optional[str] = None
-    DESCRIPCION_FALLA: Optional[str] = None
-    ACCESORIO_SOLICITADO: Optional[str] = None
-    FECHA_SOLICITUD: Optional[str] = None
-    REPORTE_ELABORADO_POR: Optional[str] = None
-    TIPO_OBSERVACION: Optional[str] = None
-    TIPO_CORRECTIVO: Optional[str] = None
-    VENCIMIENTO_DIAS: Optional[str] = None
-    FECHA_CONTEO_ACTUAL: Optional[str] = None
-    FECHA_LIMITE_CIERRE: Optional[str] = None
-    CATEGORIA_CORRECTIVO: Optional[str] = None
-    REFACCION_ACCESORIO_COMPRA: Optional[str] = None
-    FECHA_LLEGADA_REFACCION: Optional[str] = None
-    FECHA_REPARACION: Optional[str] = None
-    QUIEN_REALIZO_REPARACION: Optional[str] = None
-    VALIDACION_FUNCIONAMIENTO: Optional[str] = None
-    DESCRIPCION_REPARACION: Optional[str] = None
-    OBSERVACIONES: Optional[str] = None
-    OC_FACTURA: Optional[str] = None
-
-# ---------------- CREAR ----------------
-@app.post("/CORRECTIVO")
-def crear_correctivo(data: Correctivo):
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        INSERT INTO public."MANTENIMIENTOS_CORRECTIVOS"
-        ("STATUS","FOLIO","PLANTA","LINEA_PERSONA","EQUIPO","MARCA",
-         "MODELO","NUMERO_SERIE","DESCRIPCION_FALLA",
-         "ACCESORIO_SOLICITADO","FECHA_SOLICITUD",
-         "REPORTE_ELABORADO_POR","TIPO_OBSERVACION",
-         "TIPO_CORRECTIVO","VENCIMIENTO_DIAS",
-         "FECHA_CONTEO_ACTUAL","FECHA_LIMITE_CIERRE",
-         "CATEGORIA_CORRECTIVO","REFACCION_ACCESORIO_COMPRA",
-         "FECHA_LLEGADA_REFACCION","FECHA_REPARACION",
-         "QUIEN_REALIZO_REPARACION","VALIDACION_FUNCIONAMIENTO",
-         "DESCRIPCION_REPARACION","OBSERVACIONES","OC_FACTURA")
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-                %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-                %s,%s,%s,%s,%s,%s)
-        RETURNING "ID";
-    """, (
-        data.STATUS,
-        data.FOLIO,
-        data.PLANTA,
-        data.LINEA_PERSONA,
-        data.EQUIPO,
-        data.MARCA,
-        data.MODELO,
-        data.NUMERO_SERIE,
-        data.DESCRIPCION_FALLA,
-        data.ACCESORIO_SOLICITADO,
-        data.FECHA_SOLICITUD,
-        data.REPORTE_ELABORADO_POR,
-        data.TIPO_OBSERVACION,
-        data.TIPO_CORRECTIVO,
-        data.VENCIMIENTO_DIAS,
-        data.FECHA_CONTEO_ACTUAL,
-        data.FECHA_LIMITE_CIERRE,
-        data.CATEGORIA_CORRECTIVO,
-        data.REFACCION_ACCESORIO_COMPRA,
-        data.FECHA_LLEGADA_REFACCION,
-        data.FECHA_REPARACION,
-        data.QUIEN_REALIZO_REPARACION,
-        data.VALIDACION_FUNCIONAMIENTO,
-        data.DESCRIPCION_REPARACION,
-        data.OBSERVACIONES,
-        data.OC_FACTURA
-    ))
-
-    new_id = cursor.fetchone()[0]
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return {"ID": new_id}
-# ---------------- PAGINACION CORRECTIVOS ----------------
-@app.get("/CORRECTIVOS")
-def obtener_correctivos(
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1),
-
-    STATUS: str = None,
-    FOLIO: str = None,
-    PLANTA: str = None,
-    LINEA_PERSONA: str = None,
-    EQUIPO: str = None,
-    MARCA: str = None,
-    MODELO: str = None,
-    NUMERO_SERIE: str = None,
-    DESCRIPCION_FALLA: str = None,
-    FECHA_SOLICITUD: str = None,
-    FECHA_REPARACION: str = None,
-    OC_FACTURA: str = None
-):
-
-    offset = (page - 1) * limit
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    filtros = []
-    params = []
-
-    def agregar(campo, valor):
-        if valor:
-            filtros.append(f'"{campo}"::text ILIKE %s')
-            params.append(f"%{valor}%")
-
-    agregar("STATUS", STATUS)
-    agregar("FOLIO", FOLIO)
-    agregar("PLANTA", PLANTA)
-    agregar("LINEA_PERSONA", LINEA_PERSONA)
-    agregar("EQUIPO", EQUIPO)
-    agregar("MARCA", MARCA)
-    agregar("MODELO", MODELO)
-    agregar("NUMERO_SERIE", NUMERO_SERIE)
-    agregar("DESCRIPCION_FALLA", DESCRIPCION_FALLA)
-    agregar("FECHA_SOLICITUD", FECHA_SOLICITUD)
-    agregar("FECHA_REPARACION", FECHA_REPARACION)
-    agregar("OC_FACTURA", OC_FACTURA)
-
-    where = ""
-    if filtros:
-        where = "WHERE " + " AND ".join(filtros)
-
-    cursor.execute(f'''
-        SELECT COUNT(*)
-        FROM public."MANTENIMIENTOS_CORRECTIVOS"
-        {where}
-    ''', params)
-
-    total = cursor.fetchone()[0]
-
-    cursor.execute(f'''
-        SELECT
-        "ID","STATUS","FOLIO","PLANTA","LINEA_PERSONA","EQUIPO",
-        "MARCA","MODELO","NUMERO_SERIE","DESCRIPCION_FALLA",
-        "ACCESORIO_SOLICITADO","FECHA_SOLICITUD",
-        "REPORTE_ELABORADO_POR","TIPO_OBSERVACION",
-        "TIPO_CORRECTIVO","VENCIMIENTO_DIAS",
-        "FECHA_CONTEO_ACTUAL","FECHA_LIMITE_CIERRE",
-        "CATEGORIA_CORRECTIVO","REFACCION_ACCESORIO_COMPRA",
-        "FECHA_LLEGADA_REFACCION","FECHA_REPARACION",
-        "QUIEN_REALIZO_REPARACION","VALIDACION_FUNCIONAMIENTO",
-        "DESCRIPCION_REPARACION","OBSERVACIONES","OC_FACTURA",
-        CASE WHEN "PDF" IS NOT NULL THEN true ELSE false END AS "TIENE_PDF"
-        FROM public."MANTENIMIENTOS_CORRECTIVOS"
-        {where}
-        ORDER BY "ID" DESC
-        LIMIT %s OFFSET %s
-    ''', params + [limit, offset])
-
-    rows = cursor.fetchall()
-    columnas = [desc[0] for desc in cursor.description]
-    resultado = [dict(zip(columnas, row)) for row in rows]
-
-    cursor.close()
-    conn.close()
-
-    return {
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "data": resultado
-    }
-
-
-@app.get("/CORRECTIVOS/EXPORTAR")
-def exportar_correctivos_filtrado(
-    STATUS: str = None,
-    FOLIO: str = None,
-    PLANTA: str = None,
-    EQUIPO: str = None,
-    FECHA_SOLICITUD: str = None,
-    FECHA_REPARACION: str = None
-):
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    filtros = []
-    params = []
-
-    def agregar(campo, valor):
-        if valor:
-            filtros.append(f'"{campo}"::text ILIKE %s')
-            params.append(f"%{valor}%")
-
-    agregar("STATUS", STATUS)
-    agregar("FOLIO", FOLIO)
-    agregar("PLANTA", PLANTA)
-    agregar("EQUIPO", EQUIPO)
-    agregar("FECHA_SOLICITUD", FECHA_SOLICITUD)
-    agregar("FECHA_REPARACION", FECHA_REPARACION)
-
-    where = ""
-    if filtros:
-        where = "WHERE " + " AND ".join(filtros)
-
-    cursor.execute(f'''
-        SELECT *
-        FROM public."MANTENIMIENTOS_CORRECTIVOS"
-        {where}
-        ORDER BY "ID" DESC
-    ''', params)
-
-    rows = cursor.fetchall()
-    columns = [desc[0] for desc in cursor.description]
-
-    df = pd.DataFrame(rows, columns=columns)
-
-    output = io.BytesIO()
-    df.to_excel(output, index=False)
-    output.seek(0)
-
-    cursor.close()
-    conn.close()
-
-    return StreamingResponse(
-        output,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=correctivos_filtrados.xlsx"}
-    )
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."MANTENIMIENTOS_PREVENTIVOS" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone(); cursor.close(); conn.close()
+    if not row or not row[0]:
+        return {"error": "No existe PDF"}
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 @app.get("/CORRECTIVOS/EXPORTAR_TODO")
 def exportar_correctivos_todo():
@@ -688,412 +432,78 @@ def exportar_correctivos_por_anio(anio: int):
 
 
 @app.post("/CORRECTIVO/PDF/{id}")
-def subir_PDF_correctivo(id: int, file: UploadFile = File(...)):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    PDF_bytes = file.file.read()
-
-    cursor.execute("""
-        UPDATE public."MANTENIMIENTOS_CORRECTIVOS"
-        SET "PDF"=%s
-        WHERE "ID"=%s
-    """, (psycopg2.Binary(PDF_bytes), id))
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return {"mensaje": "PDF GUARDADO"}
+async def subir_PDF_correctivo(id: int, file: UploadFile = File(...)):
+    contenido = await file.read()
+    ruta = get_pdf_path("CORRECTIVO", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."MANTENIMIENTOS_CORRECTIVOS" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 @app.get("/CORRECTIVO/PDF/{id}")
 def ver_PDF_correctivo(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."MANTENIMIENTOS_CORRECTIVOS" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone(); cursor.close(); conn.close()
+    if not row or not row[0]:
+        return {"error": "No existe PDF"}
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
-    cursor.execute(
-        'SELECT "PDF" FROM public."MANTENIMIENTOS_CORRECTIVOS" WHERE "ID"=%s',
-        (id,)
-    )
 
-    PDF = cursor.fetchone()
-
-    cursor.close()
-    conn.close()
-
-    if PDF and PDF[0]:
-        return Response(
-            content=PDF[0],
-            media_type="application/PDF"
-        )
-
-    return {"mensaje": "NO EXISTE PDF"}
-
-# ---------------- EDITAR CORRECTIVO ----------------
-@app.put("/CORRECTIVO/{id}")
-def editar_correctivo(id: int, data: Correctivo):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        UPDATE public."MANTENIMIENTOS_CORRECTIVOS"
-        SET
-        "STATUS"=%s,
-        "FOLIO"=%s,
-        "PLANTA"=%s,
-        "LINEA_PERSONA"=%s,
-        "EQUIPO"=%s,
-        "MARCA"=%s,
-        "MODELO"=%s,
-        "NUMERO_SERIE"=%s,
-        "DESCRIPCION_FALLA"=%s,
-        "ACCESORIO_SOLICITADO"=%s,
-        "FECHA_SOLICITUD"=%s,
-        "REPORTE_ELABORADO_POR"=%s,
-        "TIPO_OBSERVACION"=%s,
-        "TIPO_CORRECTIVO"=%s,
-        "VENCIMIENTO_DIAS"=%s,
-        "FECHA_CONTEO_ACTUAL"=%s,
-        "FECHA_LIMITE_CIERRE"=%s,
-        "CATEGORIA_CORRECTIVO"=%s,
-        "REFACCION_ACCESORIO_COMPRA"=%s,
-        "FECHA_LLEGADA_REFACCION"=%s,
-        "FECHA_REPARACION"=%s,
-        "QUIEN_REALIZO_REPARACION"=%s,
-        "VALIDACION_FUNCIONAMIENTO"=%s,
-        "DESCRIPCION_REPARACION"=%s,
-        "OBSERVACIONES"=%s,
-        "OC_FACTURA"=%s
-        WHERE "ID"=%s
-    """, (
-        data.STATUS,
-        data.FOLIO,
-        data.PLANTA,
-        data.LINEA_PERSONA,
-        data.EQUIPO,
-        data.MARCA,
-        data.MODELO,
-        data.NUMERO_SERIE,
-        data.DESCRIPCION_FALLA,
-        data.ACCESORIO_SOLICITADO,
-        data.FECHA_SOLICITUD,
-        data.REPORTE_ELABORADO_POR,
-        data.TIPO_OBSERVACION,
-        data.TIPO_CORRECTIVO,
-        data.VENCIMIENTO_DIAS,
-        data.FECHA_CONTEO_ACTUAL,
-        data.FECHA_LIMITE_CIERRE,
-        data.CATEGORIA_CORRECTIVO,
-        data.REFACCION_ACCESORIO_COMPRA,
-        data.FECHA_LLEGADA_REFACCION,
-        data.FECHA_REPARACION,
-        data.QUIEN_REALIZO_REPARACION,
-        data.VALIDACION_FUNCIONAMIENTO,
-        data.DESCRIPCION_REPARACION,
-        data.OBSERVACIONES,
-        data.OC_FACTURA,
-        id
-    ))
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return {"mensaje": "ACTUALIZADO"}
-
-# ---------------- ELIMINAR CORRECTIVO ----------------
-@app.delete("/CORRECTIVO/{id}")
-def eliminar_correctivo(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        'DELETE FROM public."MANTENIMIENTOS_CORRECTIVOS" WHERE "ID"=%s',
-        (id,)
-    )
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return {"mensaje": "ELIMINADO"}
-
-# ---------------- ELIMINAR PDF CORRECTIVO ----------------
 @app.delete("/CORRECTIVO/PDF/{id}")
 def eliminar_PDF_correctivo(id: int):
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        UPDATE public."MANTENIMIENTOS_CORRECTIVOS"
-        SET "PDF" = NULL
-        WHERE "ID" = %s
-    """, (id,))
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    return {"mensaje": "PDF ELIMINADO"}
-
-
-
-
-# ==========================================================
-# ==================== BAJAS DE EQUIPOS ====================
-# ==========================================================
-
-class Baja(BaseModel):
-    FOLIO: Optional[str] = None
-    ESTADO: Optional[str] = None
-    PLANTA: Optional[str] = None
-    FECHA: Optional[str] = None
-    EQUIPO: Optional[str] = None
-    MARCA: Optional[str] = None
-    MODELO: Optional[str] = None
-    NO_SERIE: Optional[str] = None
-    ACTIVO_FIJO: Optional[str] = None
-    UBICACION_PERSONA: Optional[str] = None
-    MOTIVO_BAJA: Optional[str] = None
-    DIAGNOSTICO: Optional[str] = None
-    COMENTARIOS: Optional[str] = None
-    MOTIVO_CANCELACION: Optional[str] = None
-
-# ---------------- CREAR ----------------
-@app.post("/BAJA")
-def crear_baja(data: Baja):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO public."BAJAS_EQUIPOS"
-        ("FOLIO","ESTADO","PLANTA","FECHA","EQUIPO","MARCA","MODELO",
-         "NO_SERIE","ACTIVO_FIJO","UBICACION_PERSONA","MOTIVO_BAJA",
-         "DIAGNOSTICO","COMENTARIOS","MOTIVO_CANCELACION")
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        RETURNING "ID";
-    """, (
-        data.FOLIO, data.ESTADO, data.PLANTA, data.FECHA,
-        data.EQUIPO, data.MARCA, data.MODELO, data.NO_SERIE,
-        data.ACTIVO_FIJO, data.UBICACION_PERSONA, data.MOTIVO_BAJA,
-        data.DIAGNOSTICO, data.COMENTARIOS, data.MOTIVO_CANCELACION
-    ))
-    new_id = cursor.fetchone()[0]
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"ID": new_id}
-
-# ---------------- EDITAR ----------------
-@app.put("/BAJA/{id}")
-def editar_baja(id: int, data: Baja):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        UPDATE public."BAJAS_EQUIPOS"
-        SET "FOLIO"=%s,"ESTADO"=%s,"PLANTA"=%s,"FECHA"=%s,
-            "EQUIPO"=%s,"MARCA"=%s,"MODELO"=%s,"NO_SERIE"=%s,
-            "ACTIVO_FIJO"=%s,"UBICACION_PERSONA"=%s,"MOTIVO_BAJA"=%s,
-            "DIAGNOSTICO"=%s,"COMENTARIOS"=%s,"MOTIVO_CANCELACION"=%s
-        WHERE "ID"=%s
-    """, (
-        data.FOLIO, data.ESTADO, data.PLANTA, data.FECHA,
-        data.EQUIPO, data.MARCA, data.MODELO, data.NO_SERIE,
-        data.ACTIVO_FIJO, data.UBICACION_PERSONA, data.MOTIVO_BAJA,
-        data.DIAGNOSTICO, data.COMENTARIOS, data.MOTIVO_CANCELACION,
-        id
-    ))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "ACTUALIZADO"}
-
-# ---------------- ELIMINAR ----------------
-@app.delete("/BAJA/{id}")
-def eliminar_baja(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM public."BAJAS_EQUIPOS" WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "ELIMINADO"}
-
-# ---------------- PAGINACION ----------------
-@app.get("/BAJAS")
-def obtener_bajas(
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1),
-    FOLIO: str = None,
-    ESTADO: str = None,
-    PLANTA: str = None,
-    FECHA: str = None,
-    EQUIPO: str = None,
-    MARCA: str = None,
-    MODELO: str = None,
-    NO_SERIE: str = None,
-    ACTIVO_FIJO: str = None,
-    UBICACION_PERSONA: str = None,
-    MOTIVO_BAJA: str = None,
-    DIAGNOSTICO: str = None,
-    COMENTARIOS: str = None,
-    MOTIVO_CANCELACION: str = None
-):
-    offset = (page - 1) * limit
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    filtros = []
-    params = []
-
-    def agregar_filtro(campo, valor):
-        if valor:
-            filtros.append(f'"{campo}"::text ILIKE %s')
-            params.append(f"%{valor}%")
-
-    agregar_filtro("FOLIO", FOLIO)
-    agregar_filtro("ESTADO", ESTADO)
-    agregar_filtro("PLANTA", PLANTA)
-    agregar_filtro("FECHA", FECHA)
-    agregar_filtro("EQUIPO", EQUIPO)
-    agregar_filtro("MARCA", MARCA)
-    agregar_filtro("MODELO", MODELO)
-    agregar_filtro("NO_SERIE", NO_SERIE)
-    agregar_filtro("ACTIVO_FIJO", ACTIVO_FIJO)
-    agregar_filtro("UBICACION_PERSONA", UBICACION_PERSONA)
-    agregar_filtro("MOTIVO_BAJA", MOTIVO_BAJA)
-    agregar_filtro("DIAGNOSTICO", DIAGNOSTICO)
-    agregar_filtro("COMENTARIOS", COMENTARIOS)
-    agregar_filtro("MOTIVO_CANCELACION", MOTIVO_CANCELACION)
-
-    where_clause = ("WHERE " + " AND ".join(filtros)) if filtros else ""
-
-    cursor.execute(f'SELECT COUNT(*) FROM public."BAJAS_EQUIPOS" {where_clause}', params)
-    total = cursor.fetchone()[0]
-
-    cursor.execute(f'''
-        SELECT "ID","FOLIO","ESTADO","PLANTA","FECHA","EQUIPO","MARCA","MODELO",
-               "NO_SERIE","ACTIVO_FIJO","UBICACION_PERSONA","MOTIVO_BAJA",
-               "DIAGNOSTICO","COMENTARIOS","MOTIVO_CANCELACION",
-               CASE WHEN "PDF" IS NOT NULL THEN true ELSE false END AS "TIENE_PDF"
-        FROM public."BAJAS_EQUIPOS"
-        {where_clause}
-        ORDER BY "ID" DESC
-        LIMIT %s OFFSET %s
-    ''', params + [limit, offset])
-
-    rows = cursor.fetchall()
-    columnas = [desc[0] for desc in cursor.description]
-    resultado = [dict(zip(columnas, row)) for row in rows]
-
-    cursor.close()
-    conn.close()
-    return {"total": total, "page": page, "limit": limit, "data": resultado}
-
-# ---------------- SUBIR PDF ----------------
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."MANTENIMIENTOS_CORRECTIVOS" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
+    cursor.execute('UPDATE public."MANTENIMIENTOS_CORRECTIVOS" SET "PDF"=NULL WHERE "ID"=%s', (id,))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
+# ---------------- EXPORTAR TODO ----------------
 @app.post("/BAJA/PDF/{id}")
-def subir_PDF_baja(id: int, file: UploadFile = File(...)):
-    conn = get_connection()
-    cursor = conn.cursor()
-    PDF_bytes = file.file.read()
-    cursor.execute("""
-        UPDATE public."BAJAS_EQUIPOS"
-        SET "PDF"=%s WHERE "ID"=%s
-    """, (psycopg2.Binary(PDF_bytes), id))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+async def subir_PDF_baja(id: int, file: UploadFile = File(...)):
+    contenido = await file.read()
+    ruta = get_pdf_path("BAJA", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."BAJAS_EQUIPOS" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
-# ---------------- VER PDF ----------------
 @app.get("/BAJA/PDF/{id}")
 def ver_PDF_baja(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."BAJAS_EQUIPOS" WHERE "ID"=%s', (id,))
-    PDF = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if PDF and PDF[0]:
-        return Response(content=PDF[0], media_type="application/PDF")
-    return {"mensaje": "NO EXISTE PDF"}
+    row = cursor.fetchone(); cursor.close(); conn.close()
+    if not row or not row[0]:
+        return {"error": "No existe PDF"}
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
-# ---------------- ELIMINAR PDF ----------------
 @app.delete("/BAJA/PDF/{id}")
 def eliminar_PDF_baja(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        UPDATE public."BAJAS_EQUIPOS"
-        SET "PDF" = NULL WHERE "ID"=%s
-    """, (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."BAJAS_EQUIPOS" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
+    cursor.execute('UPDATE public."BAJAS_EQUIPOS" SET "PDF"=NULL WHERE "ID"=%s', (id,))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
-# ---------------- EXPORTAR FILTRADO ----------------
-@app.get("/BAJAS/EXPORTAR")
-def exportar_bajas(
-    FOLIO: str = None, ESTADO: str = None, PLANTA: str = None,
-    FECHA: str = None, EQUIPO: str = None, MARCA: str = None,
-    MODELO: str = None, NO_SERIE: str = None, ACTIVO_FIJO: str = None,
-    UBICACION_PERSONA: str = None, MOTIVO_BAJA: str = None,
-    DIAGNOSTICO: str = None, COMENTARIOS: str = None,
-    MOTIVO_CANCELACION: str = None
-):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    filtros = []
-    params = []
-
-    def agregar(campo, valor):
-        if valor:
-            filtros.append(f'"{campo}"::text ILIKE %s')
-            params.append(f"%{valor}%")
-
-    agregar("FOLIO", FOLIO)
-    agregar("ESTADO", ESTADO)
-    agregar("PLANTA", PLANTA)
-    agregar("FECHA", FECHA)
-    agregar("EQUIPO", EQUIPO)
-    agregar("MARCA", MARCA)
-    agregar("MODELO", MODELO)
-    agregar("NO_SERIE", NO_SERIE)
-    agregar("ACTIVO_FIJO", ACTIVO_FIJO)
-    agregar("UBICACION_PERSONA", UBICACION_PERSONA)
-    agregar("MOTIVO_BAJA", MOTIVO_BAJA)
-    agregar("DIAGNOSTICO", DIAGNOSTICO)
-    agregar("COMENTARIOS", COMENTARIOS)
-    agregar("MOTIVO_CANCELACION", MOTIVO_CANCELACION)
-
-    where = ("WHERE " + " AND ".join(filtros)) if filtros else ""
-
-    cursor.execute(f'''
-        SELECT "ID","FOLIO","ESTADO","PLANTA","FECHA","EQUIPO","MARCA","MODELO",
-               "NO_SERIE","ACTIVO_FIJO","UBICACION_PERSONA","MOTIVO_BAJA",
-               "DIAGNOSTICO","COMENTARIOS","MOTIVO_CANCELACION"
-        FROM public."BAJAS_EQUIPOS" {where} ORDER BY "ID" DESC
-    ''', params)
-
-    rows = cursor.fetchall()
-    columns = [desc[0] for desc in cursor.description]
-    df = pd.DataFrame(rows, columns=columns)
-
-    output = io.BytesIO()
-    df.to_excel(output, index=False)
-    output.seek(0)
-    cursor.close()
-    conn.close()
-
-    return StreamingResponse(
-        output,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=bajas_filtradas.xlsx"}
-    )
-
-# ---------------- EXPORTAR TODO ----------------
 @app.get("/BAJAS/EXPORTAR_TODO")
 def exportar_todo_bajas():
     conn = get_connection()
@@ -1274,100 +684,42 @@ def obtener_PRESUPUESTOS_REQ_VS_OC(
 
 # ---------------- SUBIR PDF ----------------
 @app.post("/PRESUPUESTOS_REQ_VS_OC/PDF/{id}")
-def subir_PDF_PRESUPUESTOS_REQ_VS_OC(id: int, file: UploadFile = File(...)):
-    conn = get_connection()
-    cursor = conn.cursor()
-    PDF_bytes = file.file.read()
-    cursor.execute("""
-        UPDATE public."PRESUPUESTOS_REQ_VS_OC"
-        SET "PDF"=%s WHERE "ID"=%s
-    """, (psycopg2.Binary(PDF_bytes), id))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+async def subir_PDF_PRESUPUESTOS_REQ_VS_OC(id: int, file: UploadFile = File(...)):
+    contenido = await file.read()
+    ruta = get_pdf_path("PRESUPUESTOS_REQ_VS_OC", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."PRESUPUESTOS_REQ_VS_OC" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/PRESUPUESTOS_REQ_VS_OC/PDF/{id}")
 def ver_PDF_PRESUPUESTOS_REQ_VS_OC(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."PRESUPUESTOS_REQ_VS_OC" WHERE "ID"=%s', (id,))
-    PDF = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if PDF and PDF[0]:
-        return Response(content=PDF[0], media_type="application/PDF")
-    return {"mensaje": "NO EXISTE PDF"}
+    row = cursor.fetchone(); cursor.close(); conn.close()
+    if not row or not row[0]:
+        return {"error": "No existe PDF"}
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
-# ---------------- ELIMINAR PDF ----------------
+
 @app.delete("/PRESUPUESTOS_REQ_VS_OC/PDF/{id}")
 def eliminar_PDF_PRESUPUESTOS_REQ_VS_OC(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        UPDATE public."PRESUPUESTOS_REQ_VS_OC"
-        SET "PDF" = NULL WHERE "ID"=%s
-    """, (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
-
-# ---------------- EXPORTAR FILTRADO ----------------
-@app.get("/PRESUPUESTOS_REQ_VS_OC/EXPORTAR")
-def exportar_PRESUPUESTOS_REQ_VS_OC(
-    NO_REQUISICION:   str = None,
-    ORDEN_COMPRA:     str = None,
-    FECHA_COMPRA:     str = None,
-    PO_SUBTOTAL:      str = None,
-    MONEDA:           str = None,
-    OC_SUBTOTAL:      str = None,
-    REGISTRADA_EN_OC: str = None
-):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    filtros = []
-    params = []
-
-    def agregar(campo, valor):
-        if valor:
-            filtros.append(f'"{campo}"::text ILIKE %s')
-            params.append(f"%{valor}%")
-
-    agregar("NO_REQUISICION",   NO_REQUISICION)
-    agregar("ORDEN_COMPRA",     ORDEN_COMPRA)
-    agregar("FECHA_COMPRA",     FECHA_COMPRA)
-    agregar("PO_SUBTOTAL",      PO_SUBTOTAL)
-    agregar("MONEDA",           MONEDA)
-    agregar("OC_SUBTOTAL",      OC_SUBTOTAL)
-    agregar("REGISTRADA_EN_OC", REGISTRADA_EN_OC)
-
-    where = ("WHERE " + " AND ".join(filtros)) if filtros else ""
-
-    cursor.execute(f'''
-        SELECT "ID","NO_REQUISICION","ORDEN_COMPRA","FECHA_COMPRA",
-               "PO_SUBTOTAL","MONEDA","OC_SUBTOTAL","REGISTRADA_EN_OC"
-        FROM public."PRESUPUESTOS_REQ_VS_OC" {where} ORDER BY "ID" DESC
-    ''', params)
-
-    rows = cursor.fetchall()
-    columns = [desc[0] for desc in cursor.description]
-    df = pd.DataFrame(rows, columns=columns)
-
-    output = io.BytesIO()
-    df.to_excel(output, index=False)
-    output.seek(0)
-    cursor.close()
-    conn.close()
-
-    return StreamingResponse(
-        output,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=PRESUPUESTOS_REQ_VS_OC_filtrado.xlsx"}
-    )
-
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."PRESUPUESTOS_REQ_VS_OC" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
+    cursor.execute('UPDATE public."PRESUPUESTOS_REQ_VS_OC" SET "PDF"=NULL WHERE "ID"=%s', (id,))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 # ---------------- EXPORTAR TODO ----------------
 @app.get("/PRESUPUESTOS_REQ_VS_OC/EXPORTAR_TODO")
 def exportar_todo_PRESUPUESTOS_REQ_VS_OC():
@@ -1613,130 +965,42 @@ def obtener_ordenes_de_compra(
 
 # ---------------- SUBIR PDF ----------------
 @app.post("/ORDENES_DE_COMPRA/PDF/{id}")
-def subir_PDF_orden(id: int, file: UploadFile = File(...)):
-    conn = get_connection()
-    cursor = conn.cursor()
-    PDF_bytes = file.file.read()
-    cursor.execute("""
-        UPDATE public."ORDENES_DE_COMPRA"
-        SET "PDF"=%s WHERE "ID"=%s
-    """, (psycopg2.Binary(PDF_bytes), id))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+async def subir_PDF_orden(id: int, file: UploadFile = File(...)):
+    contenido = await file.read()
+    ruta = get_pdf_path("ORDENES_DE_COMPRA", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."ORDENES_DE_COMPRA" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/ORDENES_DE_COMPRA/PDF/{id}")
 def ver_PDF_orden(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."ORDENES_DE_COMPRA" WHERE "ID"=%s', (id,))
-    PDF = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if PDF and PDF[0]:
-        return Response(content=PDF[0], media_type="application/PDF")
-    return {"mensaje": "NO EXISTE PDF"}
+    row = cursor.fetchone(); cursor.close(); conn.close()
+    if not row or not row[0]:
+        return {"error": "No existe PDF"}
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
-# ---------------- ELIMINAR PDF ----------------
+
 @app.delete("/ORDENES_DE_COMPRA/PDF/{id}")
 def eliminar_PDF_orden(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        UPDATE public."ORDENES_DE_COMPRA"
-        SET "PDF" = NULL WHERE "ID"=%s
-    """, (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
-
-# ---------------- EXPORTAR FILTRADO ----------------
-@app.get("/ORDENES_DE_COMPRA/EXPORTAR")
-def exportar_ordenes(
-    ORDEN_DE_COMPRA:                       str = None,
-    FOLIO_CORRECTIVO_SOLICITUD_INVENTARIO: str = None,
-    SOLICITANTE:                           str = None,
-    PRESUPUESTO_MES:                       str = None,
-    SERIE_UBICACION_NO_EMPLEADO:           str = None,
-    ACCESORIO_SOLICITADO:                  str = None,
-    PROVEEDOR_ELEGIDO:                     str = None,
-    PIEZA_SERVICIO:                        str = None,
-    CANTIDAD:                              str = None,
-    PRECIO_UNITARIO:                       str = None,
-    TOTAL_NO_INCLUYE_IVA:                  str = None,
-    MONEDA:                                str = None,
-    COMENTARIOS:                           str = None,
-    REQUISICION:                           str = None,
-    FECHA_OC:                              str = None,
-    OC:                                    str = None,
-    FECHA_ENTRADA:                         str = None,
-    CANTIDAD_REGISTRADA:                   str = None,
-    ESTATUS_OC:                            str = None,
-    HOJA_CONTROL:                          str = None
-):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    filtros = []
-    params = []
-
-    def af(campo, valor):
-        if valor:
-            filtros.append(f'"{campo}"::text ILIKE %s')
-            params.append(f"%{valor}%")
-
-    af("ORDEN_DE_COMPRA",                       ORDEN_DE_COMPRA)
-    af("FOLIO_CORRECTIVO_SOLICITUD_INVENTARIO", FOLIO_CORRECTIVO_SOLICITUD_INVENTARIO)
-    af("SOLICITANTE",                           SOLICITANTE)
-    af("PRESUPUESTO_MES",                       PRESUPUESTO_MES)
-    af("SERIE_UBICACION_NO_EMPLEADO",           SERIE_UBICACION_NO_EMPLEADO)
-    af("ACCESORIO_SOLICITADO",                  ACCESORIO_SOLICITADO)
-    af("PROVEEDOR_ELEGIDO",                     PROVEEDOR_ELEGIDO)
-    af("PIEZA_SERVICIO",                        PIEZA_SERVICIO)
-    af("CANTIDAD",                              CANTIDAD)
-    af("PRECIO_UNITARIO",                       PRECIO_UNITARIO)
-    af("TOTAL_NO_INCLUYE_IVA",                  TOTAL_NO_INCLUYE_IVA)
-    af("MONEDA",                                MONEDA)
-    af("COMENTARIOS",                           COMENTARIOS)
-    af("REQUISICION",                           REQUISICION)
-    af("FECHA_OC",                              FECHA_OC)
-    af("OC",                                    OC)
-    af("FECHA_ENTRADA",                         FECHA_ENTRADA)
-    af("CANTIDAD_REGISTRADA",                   CANTIDAD_REGISTRADA)
-    af("ESTATUS_OC",                            ESTATUS_OC)
-    af("HOJA_CONTROL",                          HOJA_CONTROL)
-
-    where = ("WHERE " + " AND ".join(filtros)) if filtros else ""
-
-    cursor.execute(f'''
-        SELECT "ID","ORDEN_DE_COMPRA","FOLIO_CORRECTIVO_SOLICITUD_INVENTARIO",
-               "SOLICITANTE","PRESUPUESTO_MES","SERIE_UBICACION_NO_EMPLEADO",
-               "ACCESORIO_SOLICITADO","PROVEEDOR_ELEGIDO","PIEZA_SERVICIO",
-               "CANTIDAD","PRECIO_UNITARIO","TOTAL_NO_INCLUYE_IVA","MONEDA",
-               "COMENTARIOS","REQUISICION","FECHA_OC","OC","FECHA_ENTRADA",
-               "CANTIDAD_REGISTRADA","ESTATUS_OC","HOJA_CONTROL"
-        FROM public."ORDENES_DE_COMPRA" {where} ORDER BY "ID" DESC
-    ''', params)
-
-    rows = cursor.fetchall()
-    columns = [desc[0] for desc in cursor.description]
-    df = pd.DataFrame(rows, columns=columns)
-
-    output = io.BytesIO()
-    df.to_excel(output, index=False)
-    output.seek(0)
-    cursor.close()
-    conn.close()
-
-    return StreamingResponse(
-        output,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=ordenes_filtradas.xlsx"}
-    )
-
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."ORDENES_DE_COMPRA" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
+    cursor.execute('UPDATE public."ORDENES_DE_COMPRA" SET "PDF"=NULL WHERE "ID"=%s', (id,))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 # ---------------- EXPORTAR TODO ----------------
 @app.get("/ORDENES_DE_COMPRA/EXPORTAR_TODO")
 def exportar_todo_ordenes():
@@ -1975,39 +1239,39 @@ def eliminar_pantalla(id: int):
 @app.post("/PANTALLAS_NF/PDF/{id}")
 async def subir_pdf_pantallas(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE public."PANTALLAS_NF" SET "PDF"=%s WHERE "ID"=%s',
-        (psycopg2.Binary(contenido), id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
+    ruta = get_pdf_path("PANTALLAS_NF", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."PANTALLAS_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
     return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/PANTALLAS_NF/PDF/{id}")
 def ver_pdf_pantallas(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."PANTALLAS_NF" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/PANTALLAS_NF/PDF/{id}")
 def eliminar_pdf_pantallas(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."PANTALLAS_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."PANTALLAS_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
+    conn.commit(); cursor.close(); conn.close()
     return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
@@ -2291,40 +1555,40 @@ def eliminar_refaccion(id: int):
 @app.post("/REFACCIONES_NF/PDF/{id}")
 async def subir_pdf_refaccion(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE public."REFACCIONES_NF" SET "PDF"=%s WHERE "ID"=%s',
-        (psycopg2.Binary(contenido), id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+    ruta = get_pdf_path("REFACCIONES_NF", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."REFACCIONES_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/REFACCIONES_NF/PDF/{id}")
 def ver_pdf_refaccion(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."REFACCIONES_NF" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/REFACCIONES_NF/PDF/{id}")
 def eliminar_pdf_refaccion(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."REFACCIONES_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."REFACCIONES_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
 @app.get("/REFACCIONES_NF/EXPORTAR")
@@ -2610,40 +1874,40 @@ def eliminar_accesorio(id: int):
 @app.post("/ACCESORIOS_NF/PDF/{id}")
 async def subir_pdf_accesorio(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE public."ACCESORIOS_NF" SET "PDF"=%s WHERE "ID"=%s',
-        (psycopg2.Binary(contenido), id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+    ruta = get_pdf_path("ACCESORIOS_NF", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."ACCESORIOS_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/ACCESORIOS_NF/PDF/{id}")
 def ver_pdf_accesorio(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."ACCESORIOS_NF" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/ACCESORIOS_NF/PDF/{id}")
 def eliminar_pdf_accesorio(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."ACCESORIOS_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."ACCESORIOS_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
 @app.get("/ACCESORIOS_NF/EXPORTAR")
@@ -2967,37 +2231,40 @@ def eliminar_dispositivo(id: int):
 @app.post("/DISPOSITIVOS_NF/PDF/{id}")
 async def subir_pdf_dispositivo(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute('UPDATE public."DISPOSITIVOS_NF" SET "PDF"=%s WHERE "ID"=%s', (psycopg2.Binary(contenido), id))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+    ruta = get_pdf_path("DISPOSITIVOS_NF", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."DISPOSITIVOS_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/DISPOSITIVOS_NF/PDF/{id}")
 def ver_pdf_dispositivo(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."DISPOSITIVOS_NF" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/DISPOSITIVOS_NF/PDF/{id}")
 def eliminar_pdf_dispositivo(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."DISPOSITIVOS_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."DISPOSITIVOS_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
 @app.get("/DISPOSITIVOS_NF/EXPORTAR")
@@ -3280,40 +2547,40 @@ def eliminar_inventario(id: int):
 @app.post("/INVENTARIOS/PDF/{id}")
 async def subir_pdf_inventario(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE public."INVENTARIOS" SET "PDF"=%s WHERE "ID"=%s',
-        (psycopg2.Binary(contenido), id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+    ruta = get_pdf_path("INVENTARIOS", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."INVENTARIOS" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/INVENTARIOS/PDF/{id}")
 def ver_pdf_inventario(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."INVENTARIOS" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/INVENTARIOS/PDF/{id}")
 def eliminar_pdf_inventario(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."INVENTARIOS" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."INVENTARIOS" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
 @app.get("/INVENTARIOS/EXPORTAR")
@@ -3606,40 +2873,40 @@ def eliminar_camara(id: int):
 @app.post("/CAMARAS_DE_AUDIO/PDF/{id}")
 async def subir_pdf_camara(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE public."CAMARAS_DE_AUDIO" SET "PDF"=%s WHERE "ID"=%s',
-        (psycopg2.Binary(contenido), id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+    ruta = get_pdf_path("CAMARAS_DE_AUDIO", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."CAMARAS_DE_AUDIO" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/CAMARAS_DE_AUDIO/PDF/{id}")
 def ver_pdf_camara(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."CAMARAS_DE_AUDIO" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/CAMARAS_DE_AUDIO/PDF/{id}")
 def eliminar_pdf_camara(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."CAMARAS_DE_AUDIO" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."CAMARAS_DE_AUDIO" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
 @app.get("/CAMARAS_DE_AUDIO/EXPORTAR")
@@ -3939,40 +3206,40 @@ def eliminar_periferico(id: int):
 @app.post("/PERIFERICOS_NF/PDF/{id}")
 async def subir_pdf_periferico(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE public."PERIFERICOS_NF" SET "PDF"=%s WHERE "ID"=%s',
-        (psycopg2.Binary(contenido), id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+    ruta = get_pdf_path("PERIFERICOS_NF", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."PERIFERICOS_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/PERIFERICOS_NF/PDF/{id}")
 def ver_pdf_periferico(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."PERIFERICOS_NF" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/PERIFERICOS_NF/PDF/{id}")
 def eliminar_pdf_periferico(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."PERIFERICOS_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."PERIFERICOS_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
 @app.get("/PERIFERICOS_NF/EXPORTAR")
@@ -4255,40 +3522,40 @@ def eliminar_herramienta_nf(id: int):
 @app.post("/HERRAMIENTA_NF/PDF/{id}")
 async def subir_pdf_herramienta(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE public."HERRAMIENTA_NF" SET "PDF"=%s WHERE "ID"=%s',
-        (psycopg2.Binary(contenido), id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+    ruta = get_pdf_path("HERRAMIENTA_NF", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."HERRAMIENTA_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/HERRAMIENTA_NF/PDF/{id}")
 def ver_pdf_herramienta(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."HERRAMIENTA_NF" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/HERRAMIENTA_NF/PDF/{id}")
 def eliminar_pdf_herramienta(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."HERRAMIENTA_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."HERRAMIENTA_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
 @app.get("/HERRAMIENTA_NF/EXPORTAR")
@@ -4612,40 +3879,40 @@ def eliminar_impresora_nf(id: int):
 @app.post("/IMPRESORAS_NF/PDF/{id}")
 async def subir_pdf_impresora(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE public."IMPRESORAS_NF" SET "PDF"=%s WHERE "ID"=%s',
-        (psycopg2.Binary(contenido), id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+    ruta = get_pdf_path("IMPRESORAS_NF", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."IMPRESORAS_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/IMPRESORAS_NF/PDF/{id}")
 def ver_pdf_impresora(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."IMPRESORAS_NF" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/IMPRESORAS_NF/PDF/{id}")
 def eliminar_pdf_impresora(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."IMPRESORAS_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."IMPRESORAS_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
 @app.get("/IMPRESORAS_NF/EXPORTAR")
@@ -4971,40 +4238,40 @@ def eliminar_telefonia_nf(id: int):
 @app.post("/TELEFONIA_NF/PDF/{id}")
 async def subir_pdf_telefonia(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE public."TELEFONIA_NF" SET "PDF"=%s WHERE "ID"=%s',
-        (psycopg2.Binary(contenido), id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+    ruta = get_pdf_path("TELEFONIA_NF", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."TELEFONIA_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/TELEFONIA_NF/PDF/{id}")
 def ver_pdf_telefonia(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."TELEFONIA_NF" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/TELEFONIA_NF/PDF/{id}")
 def eliminar_pdf_telefonia(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."TELEFONIA_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."TELEFONIA_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
 @app.get("/TELEFONIA_NF/EXPORTAR")
@@ -5258,37 +4525,40 @@ def eliminar_consumible(id: int):
 @app.post("/CONSUMIBLES_NF/PDF/{id}")
 async def subir_pdf_consumible(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute('UPDATE public."CONSUMIBLES_NF" SET "PDF"=%s WHERE "ID"=%s', (psycopg2.Binary(contenido), id))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+    ruta = get_pdf_path("CONSUMIBLES_NF", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."CONSUMIBLES_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/CONSUMIBLES_NF/PDF/{id}")
 def ver_pdf_consumible(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."CONSUMIBLES_NF" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/CONSUMIBLES_NF/PDF/{id}")
 def eliminar_pdf_consumible(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."CONSUMIBLES_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."CONSUMIBLES_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
 @app.get("/CONSUMIBLES_NF/EXPORTAR")
@@ -5557,42 +4827,42 @@ def eliminar_radio(id: str):
 
 # ---------------- SUBIR PDF ----------------
 @app.post("/RADIO_NF/PDF/{id}")
-async def subir_pdf_radio(id: str, file: UploadFile = File(...)):
+async def subir_pdf_radio(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE public."RADIO_NF" SET "PDF"=%s WHERE "ID"=%s',
-        (psycopg2.Binary(contenido), id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
+    ruta = get_pdf_path("RADIO_NF", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."RADIO_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
     return {"mensaje": "PDF GUARDADO"}
 
 # ---------------- VER PDF ----------------
 @app.get("/RADIO_NF/PDF/{id}")
-def ver_pdf_radio(id: str):
-    conn = get_connection()
-    cursor = conn.cursor()
+def ver_pdf_radio(id: int):
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."RADIO_NF" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/RADIO_NF/PDF/{id}")
-def eliminar_pdf_radio(id: str):
-    conn = get_connection()
-    cursor = conn.cursor()
+def eliminar_pdf_radio(id: int):
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."RADIO_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."RADIO_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
 @app.get("/RADIO_NF/EXPORTAR")
@@ -5870,40 +5140,40 @@ def eliminar_tinta(id: int):
 @app.post("/TINTAS_TONER_RIBON_NF/PDF/{id}")
 async def subir_pdf_tinta(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE public."TINTAS_TONER_RIBON_NF" SET "PDF"=%s WHERE "ID"=%s',
-        (psycopg2.Binary(contenido), id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF GUARDADO"}
+    ruta = get_pdf_path("TINTAS_TONER_RIBON_NF", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."TINTAS_TONER_RIBON_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF guardado"}
 
 # ---------------- VER PDF ----------------
 @app.get("/TINTAS_TONER_RIBON_NF/PDF/{id}")
 def ver_pdf_tinta(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
     cursor.execute('SELECT "PDF" FROM public."TINTAS_TONER_RIBON_NF" WHERE "ID"=%s', (id,))
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    row = cursor.fetchone(); cursor.close(); conn.close()
     if not row or not row[0]:
         return {"error": "No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]), media_type="application/pdf")
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 # ---------------- ELIMINAR PDF ----------------
 @app.delete("/TINTAS_TONER_RIBON_NF/PDF/{id}")
 def eliminar_pdf_tinta(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."TINTAS_TONER_RIBON_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
     cursor.execute('UPDATE public."TINTAS_TONER_RIBON_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"mensaje": "PDF ELIMINADO"}
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF eliminado"}
 
 # ---------------- EXPORTAR FILTRADO ----------------
 @app.get("/TINTAS_TONER_RIBON_NF/EXPORTAR")
@@ -6119,25 +5389,38 @@ def eliminar_servicio(id: int):
 @app.post("/SERVICIOS_PROVEEDORES_NF/PDF/{id}")
 async def subir_pdf_servicio(id: int, file: UploadFile = File(...)):
     contenido = await file.read()
+    ruta = get_pdf_path("SERVICIOS_PROVEEDORES_NF", id)
+    ruta.write_bytes(contenido)
     conn = get_connection(); cursor = conn.cursor()
-    cursor.execute('UPDATE public."SERVICIOS_PROVEEDORES_NF" SET "PDF"=%s WHERE "ID"=%s',(psycopg2.Binary(contenido),id))
+    cursor.execute('UPDATE public."SERVICIOS_PROVEEDORES_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
     conn.commit(); cursor.close(); conn.close()
-    return {"mensaje":"PDF GUARDADO"}
+    return {"mensaje": "PDF guardado"}
 
 @app.get("/SERVICIOS_PROVEEDORES_NF/PDF/{id}")
 def ver_pdf_servicio(id: int):
     conn = get_connection(); cursor = conn.cursor()
-    cursor.execute('SELECT "PDF" FROM public."SERVICIOS_PROVEEDORES_NF" WHERE "ID"=%s',(id,))
+    cursor.execute('SELECT "PDF" FROM public."SERVICIOS_PROVEEDORES_NF" WHERE "ID"=%s', (id,))
     row = cursor.fetchone(); cursor.close(); conn.close()
-    if not row or not row[0]: return {"error":"No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]),media_type="application/pdf")
+    if not row or not row[0]:
+        return {"error": "No existe PDF"}
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 @app.delete("/SERVICIOS_PROVEEDORES_NF/PDF/{id}")
 def eliminar_pdf_servicio(id: int):
     conn = get_connection(); cursor = conn.cursor()
-    cursor.execute('UPDATE public."SERVICIOS_PROVEEDORES_NF" SET "PDF"=NULL WHERE "ID"=%s',(id,))
+    cursor.execute('SELECT "PDF" FROM public."SERVICIOS_PROVEEDORES_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
+    cursor.execute('UPDATE public."SERVICIOS_PROVEEDORES_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
     conn.commit(); cursor.close(); conn.close()
-    return {"mensaje":"PDF ELIMINADO"}
+    return {"mensaje": "PDF eliminado"}
 
 @app.get("/SERVICIOS_PROVEEDORES_NF/EXPORTAR_TODO")
 def exportar_todo_servicios():
@@ -6323,26 +5606,39 @@ def eliminar_refaccion_red(id: int):
 
 @app.post("/REFACCIONES_RED_NF/PDF/{id}")
 async def subir_pdf_refaccion_red(id: int, file: UploadFile = File(...)):
-    contenido=await file.read()
-    conn=get_connection(); cursor=conn.cursor()
-    cursor.execute('UPDATE public."REFACCIONES_RED_NF" SET "PDF"=%s WHERE "ID"=%s',(psycopg2.Binary(contenido),id))
+    contenido = await file.read()
+    ruta = get_pdf_path("REFACCIONES_RED_NF", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."REFACCIONES_RED_NF" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
     conn.commit(); cursor.close(); conn.close()
-    return {"mensaje":"PDF GUARDADO"}
+    return {"mensaje": "PDF guardado"}
 
 @app.get("/REFACCIONES_RED_NF/PDF/{id}")
 def ver_pdf_refaccion_red(id: int):
-    conn=get_connection(); cursor=conn.cursor()
-    cursor.execute('SELECT "PDF" FROM public."REFACCIONES_RED_NF" WHERE "ID"=%s',(id,))
-    row=cursor.fetchone(); cursor.close(); conn.close()
-    if not row or not row[0]: return {"error":"No existe PDF"}
-    return StreamingResponse(io.BytesIO(row[0]),media_type="application/pdf")
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."REFACCIONES_RED_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone(); cursor.close(); conn.close()
+    if not row or not row[0]:
+        return {"error": "No existe PDF"}
+    ruta = Path(row[0])
+    if not ruta.exists():
+        return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
 
 @app.delete("/REFACCIONES_RED_NF/PDF/{id}")
 def eliminar_pdf_refaccion_red(id: int):
-    conn=get_connection(); cursor=conn.cursor()
-    cursor.execute('UPDATE public."REFACCIONES_RED_NF" SET "PDF"=NULL WHERE "ID"=%s',(id,))
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."REFACCIONES_RED_NF" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
+    cursor.execute('UPDATE public."REFACCIONES_RED_NF" SET "PDF"=NULL WHERE "ID"=%s', (id,))
     conn.commit(); cursor.close(); conn.close()
-    return {"mensaje":"PDF ELIMINADO"}
+    return {"mensaje": "PDF eliminado"}
 
 @app.get("/REFACCIONES_RED_NF/EXPORTAR_TODO")
 def exportar_todo_refacciones_red():
