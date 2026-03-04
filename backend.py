@@ -383,6 +383,296 @@ def ver_PDF_preventivo(id: int):
         data = f.read()
     return Response(content=data, media_type="application/pdf")
 
+# ==========================================================
+# ================= CORRECTIVOS ============================
+# ==========================================================
+
+class Correctivo(BaseModel):
+    STATUS: Optional[str] = None
+    FOLIO: Optional[str] = None
+    PLANTA: Optional[str] = None
+    LINEA_PERSONA: Optional[str] = None
+    EQUIPO: Optional[str] = None
+    MARCA: Optional[str] = None
+    MODELO: Optional[str] = None
+    NUMERO_SERIE: Optional[str] = None
+    DESCRIPCION_FALLA: Optional[str] = None
+    ACCESORIO_SOLICITADO: Optional[str] = None
+    FECHA_SOLICITUD: Optional[str] = None
+    REPORTE_ELABORADO_POR: Optional[str] = None
+    TIPO_OBSERVACION: Optional[str] = None
+    TIPO_CORRECTIVO: Optional[str] = None
+    VENCIMIENTO_DIAS: Optional[str] = None
+    FECHA_CONTEO_ACTUAL: Optional[str] = None
+    FECHA_LIMITE_CIERRE: Optional[str] = None
+    CATEGORIA_CORRECTIVO: Optional[str] = None
+    REFACCION_ACCESORIO_COMPRA: Optional[str] = None
+    FECHA_LLEGADA_REFACCION: Optional[str] = None
+    FECHA_REPARACION: Optional[str] = None
+    QUIEN_REALIZO_REPARACION: Optional[str] = None
+    VALIDACION_FUNCIONAMIENTO: Optional[str] = None
+    DESCRIPCION_REPARACION: Optional[str] = None
+    OBSERVACIONES: Optional[str] = None
+    OC_FACTURA: Optional[str] = None
+
+# ---------------- CREAR ----------------
+@app.post("/CORRECTIVO")
+def crear_correctivo(data: Correctivo):
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO public."MANTENIMIENTOS_CORRECTIVOS"
+        ("STATUS","FOLIO","PLANTA","LINEA_PERSONA","EQUIPO","MARCA",
+         "MODELO","NUMERO_SERIE","DESCRIPCION_FALLA",
+         "ACCESORIO_SOLICITADO","FECHA_SOLICITUD",
+         "REPORTE_ELABORADO_POR","TIPO_OBSERVACION",
+         "TIPO_CORRECTIVO","VENCIMIENTO_DIAS",
+         "FECHA_CONTEO_ACTUAL","FECHA_LIMITE_CIERRE",
+         "CATEGORIA_CORRECTIVO","REFACCION_ACCESORIO_COMPRA",
+         "FECHA_LLEGADA_REFACCION","FECHA_REPARACION",
+         "QUIEN_REALIZO_REPARACION","VALIDACION_FUNCIONAMIENTO",
+         "DESCRIPCION_REPARACION","OBSERVACIONES","OC_FACTURA")
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+                %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+                %s,%s,%s,%s,%s,%s)
+        RETURNING "ID";
+    """, (
+        data.STATUS, data.FOLIO, data.PLANTA, data.LINEA_PERSONA,
+        data.EQUIPO, data.MARCA, data.MODELO, data.NUMERO_SERIE,
+        data.DESCRIPCION_FALLA, data.ACCESORIO_SOLICITADO,
+        data.FECHA_SOLICITUD, data.REPORTE_ELABORADO_POR,
+        data.TIPO_OBSERVACION, data.TIPO_CORRECTIVO, data.VENCIMIENTO_DIAS,
+        data.FECHA_CONTEO_ACTUAL, data.FECHA_LIMITE_CIERRE,
+        data.CATEGORIA_CORRECTIVO, data.REFACCION_ACCESORIO_COMPRA,
+        data.FECHA_LLEGADA_REFACCION, data.FECHA_REPARACION,
+        data.QUIEN_REALIZO_REPARACION, data.VALIDACION_FUNCIONAMIENTO,
+        data.DESCRIPCION_REPARACION, data.OBSERVACIONES, data.OC_FACTURA
+    ))
+    new_id = cursor.fetchone()[0]; conn.commit(); cursor.close(); conn.close()
+    return {"ID": new_id}
+
+# ---------------- EDITAR ----------------
+@app.put("/CORRECTIVO/{id}")
+def editar_correctivo(id: int, data: Correctivo):
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE public."MANTENIMIENTOS_CORRECTIVOS" SET
+        "STATUS"=%s,"FOLIO"=%s,"PLANTA"=%s,"LINEA_PERSONA"=%s,"EQUIPO"=%s,
+        "MARCA"=%s,"MODELO"=%s,"NUMERO_SERIE"=%s,"DESCRIPCION_FALLA"=%s,
+        "ACCESORIO_SOLICITADO"=%s,"FECHA_SOLICITUD"=%s,"REPORTE_ELABORADO_POR"=%s,
+        "TIPO_OBSERVACION"=%s,"TIPO_CORRECTIVO"=%s,"VENCIMIENTO_DIAS"=%s,
+        "FECHA_CONTEO_ACTUAL"=%s,"FECHA_LIMITE_CIERRE"=%s,
+        "CATEGORIA_CORRECTIVO"=%s,"REFACCION_ACCESORIO_COMPRA"=%s,
+        "FECHA_LLEGADA_REFACCION"=%s,"FECHA_REPARACION"=%s,
+        "QUIEN_REALIZO_REPARACION"=%s,"VALIDACION_FUNCIONAMIENTO"=%s,
+        "DESCRIPCION_REPARACION"=%s,"OBSERVACIONES"=%s,"OC_FACTURA"=%s
+        WHERE "ID"=%s
+    """, (
+        data.STATUS, data.FOLIO, data.PLANTA, data.LINEA_PERSONA,
+        data.EQUIPO, data.MARCA, data.MODELO, data.NUMERO_SERIE,
+        data.DESCRIPCION_FALLA, data.ACCESORIO_SOLICITADO,
+        data.FECHA_SOLICITUD, data.REPORTE_ELABORADO_POR,
+        data.TIPO_OBSERVACION, data.TIPO_CORRECTIVO, data.VENCIMIENTO_DIAS,
+        data.FECHA_CONTEO_ACTUAL, data.FECHA_LIMITE_CIERRE,
+        data.CATEGORIA_CORRECTIVO, data.REFACCION_ACCESORIO_COMPRA,
+        data.FECHA_LLEGADA_REFACCION, data.FECHA_REPARACION,
+        data.QUIEN_REALIZO_REPARACION, data.VALIDACION_FUNCIONAMIENTO,
+        data.DESCRIPCION_REPARACION, data.OBSERVACIONES, data.OC_FACTURA, id
+    ))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "ACTUALIZADO"}
+
+# ---------------- ELIMINAR ----------------
+@app.delete("/CORRECTIVO/{id}")
+def eliminar_correctivo(id: int):
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('DELETE FROM public."MANTENIMIENTOS_CORRECTIVOS" WHERE "ID"=%s', (id,))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "ELIMINADO"}
+
+# ---------------- PAGINACION ----------------
+@app.get("/CORRECTIVOS")
+def obtener_correctivos(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1),
+    STATUS: str = None, FOLIO: str = None, PLANTA: str = None,
+    LINEA_PERSONA: str = None, EQUIPO: str = None, MARCA: str = None,
+    MODELO: str = None, NUMERO_SERIE: str = None, DESCRIPCION_FALLA: str = None,
+    ACCESORIO_SOLICITADO: str = None, FECHA_SOLICITUD: str = None,
+    REPORTE_ELABORADO_POR: str = None, TIPO_OBSERVACION: str = None,
+    TIPO_CORRECTIVO: str = None, VENCIMIENTO_DIAS: str = None,
+    FECHA_CONTEO_ACTUAL: str = None, FECHA_LIMITE_CIERRE: str = None,
+    CATEGORIA_CORRECTIVO: str = None, REFACCION_ACCESORIO_COMPRA: str = None,
+    FECHA_LLEGADA_REFACCION: str = None, FECHA_REPARACION: str = None,
+    QUIEN_REALIZO_REPARACION: str = None, VALIDACION_FUNCIONAMIENTO: str = None,
+    DESCRIPCION_REPARACION: str = None, OBSERVACIONES: str = None,
+    OC_FACTURA: str = None
+):
+    offset = (page - 1) * limit
+    conn = get_connection(); cursor = conn.cursor()
+    filtros = []; params = []
+
+    def af(c, v):
+        if v: filtros.append(f'"{c}"::text ILIKE %s'); params.append(f"%{v}%")
+
+    af("STATUS",STATUS); af("FOLIO",FOLIO); af("PLANTA",PLANTA)
+    af("LINEA_PERSONA",LINEA_PERSONA); af("EQUIPO",EQUIPO); af("MARCA",MARCA)
+    af("MODELO",MODELO); af("NUMERO_SERIE",NUMERO_SERIE)
+    af("DESCRIPCION_FALLA",DESCRIPCION_FALLA); af("ACCESORIO_SOLICITADO",ACCESORIO_SOLICITADO)
+    af("FECHA_SOLICITUD",FECHA_SOLICITUD); af("REPORTE_ELABORADO_POR",REPORTE_ELABORADO_POR)
+    af("TIPO_OBSERVACION",TIPO_OBSERVACION); af("TIPO_CORRECTIVO",TIPO_CORRECTIVO)
+    af("VENCIMIENTO_DIAS",VENCIMIENTO_DIAS); af("FECHA_CONTEO_ACTUAL",FECHA_CONTEO_ACTUAL)
+    af("FECHA_LIMITE_CIERRE",FECHA_LIMITE_CIERRE); af("CATEGORIA_CORRECTIVO",CATEGORIA_CORRECTIVO)
+    af("REFACCION_ACCESORIO_COMPRA",REFACCION_ACCESORIO_COMPRA)
+    af("FECHA_LLEGADA_REFACCION",FECHA_LLEGADA_REFACCION); af("FECHA_REPARACION",FECHA_REPARACION)
+    af("QUIEN_REALIZO_REPARACION",QUIEN_REALIZO_REPARACION)
+    af("VALIDACION_FUNCIONAMIENTO",VALIDACION_FUNCIONAMIENTO)
+    af("DESCRIPCION_REPARACION",DESCRIPCION_REPARACION); af("OBSERVACIONES",OBSERVACIONES)
+    af("OC_FACTURA",OC_FACTURA)
+
+    where = ("WHERE " + " AND ".join(filtros)) if filtros else ""
+
+    cursor.execute(f'SELECT COUNT(*) FROM public."MANTENIMIENTOS_CORRECTIVOS" {where}', params)
+    total = cursor.fetchone()[0]
+
+    cursor.execute(f"""
+        SELECT "ID","STATUS","FOLIO","PLANTA","LINEA_PERSONA","EQUIPO","MARCA",
+               "MODELO","NUMERO_SERIE","DESCRIPCION_FALLA","ACCESORIO_SOLICITADO",
+               "FECHA_SOLICITUD","REPORTE_ELABORADO_POR","TIPO_OBSERVACION",
+               "TIPO_CORRECTIVO","VENCIMIENTO_DIAS","FECHA_CONTEO_ACTUAL",
+               "FECHA_LIMITE_CIERRE","CATEGORIA_CORRECTIVO","REFACCION_ACCESORIO_COMPRA",
+               "FECHA_LLEGADA_REFACCION","FECHA_REPARACION","QUIEN_REALIZO_REPARACION",
+               "VALIDACION_FUNCIONAMIENTO","DESCRIPCION_REPARACION","OBSERVACIONES",
+               "OC_FACTURA",
+               CASE WHEN "PDF" IS NOT NULL THEN true ELSE false END AS "TIENE_PDF"
+        FROM public."MANTENIMIENTOS_CORRECTIVOS"
+        {where}
+        ORDER BY "ID" DESC
+        LIMIT %s OFFSET %s
+    """, params + [limit, offset])
+
+    rows = cursor.fetchall()
+    cols = [d[0] for d in cursor.description]
+    cursor.close(); conn.close()
+    return {"total": total, "page": page, "limit": limit,
+            "data": [dict(zip(cols, r)) for r in rows]}
+
+# ==========================================================
+# ==================== BAJAS ===============================
+# ==========================================================
+
+class Baja(BaseModel):
+    FOLIO: Optional[str] = None
+    ESTADO: Optional[str] = None
+    PLANTA: Optional[str] = None
+    FECHA: Optional[str] = None
+    EQUIPO: Optional[str] = None
+    MARCA: Optional[str] = None
+    MODELO: Optional[str] = None
+    NO_SERIE: Optional[str] = None
+    ACTIVO_FIJO: Optional[str] = None
+    UBICACION_PERSONA: Optional[str] = None
+    MOTIVO_BAJA: Optional[str] = None
+    DIAGNOSTICO: Optional[str] = None
+    COMENTARIOS: Optional[str] = None
+    MOTIVO_CANCELACION: Optional[str] = None
+
+# ---------------- CREAR ----------------
+@app.post("/BAJA")
+def crear_baja(data: Baja):
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO public."BAJAS_EQUIPOS"
+        ("FOLIO","ESTADO","PLANTA","FECHA","EQUIPO","MARCA","MODELO",
+         "NO_SERIE","ACTIVO_FIJO","UBICACION_PERSONA","MOTIVO_BAJA",
+         "DIAGNOSTICO","COMENTARIOS","MOTIVO_CANCELACION")
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        RETURNING "ID";
+    """, (
+        data.FOLIO, data.ESTADO, data.PLANTA, data.FECHA, data.EQUIPO,
+        data.MARCA, data.MODELO, data.NO_SERIE, data.ACTIVO_FIJO,
+        data.UBICACION_PERSONA, data.MOTIVO_BAJA, data.DIAGNOSTICO,
+        data.COMENTARIOS, data.MOTIVO_CANCELACION
+    ))
+    new_id = cursor.fetchone()[0]; conn.commit(); cursor.close(); conn.close()
+    return {"ID": new_id}
+
+# ---------------- EDITAR ----------------
+@app.put("/BAJA/{id}")
+def editar_baja(id: int, data: Baja):
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE public."BAJAS_EQUIPOS" SET
+        "FOLIO"=%s,"ESTADO"=%s,"PLANTA"=%s,"FECHA"=%s,"EQUIPO"=%s,
+        "MARCA"=%s,"MODELO"=%s,"NO_SERIE"=%s,"ACTIVO_FIJO"=%s,
+        "UBICACION_PERSONA"=%s,"MOTIVO_BAJA"=%s,"DIAGNOSTICO"=%s,
+        "COMENTARIOS"=%s,"MOTIVO_CANCELACION"=%s
+        WHERE "ID"=%s
+    """, (
+        data.FOLIO, data.ESTADO, data.PLANTA, data.FECHA, data.EQUIPO,
+        data.MARCA, data.MODELO, data.NO_SERIE, data.ACTIVO_FIJO,
+        data.UBICACION_PERSONA, data.MOTIVO_BAJA, data.DIAGNOSTICO,
+        data.COMENTARIOS, data.MOTIVO_CANCELACION, id
+    ))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "ACTUALIZADO"}
+
+# ---------------- ELIMINAR ----------------
+@app.delete("/BAJA/{id}")
+def eliminar_baja(id: int):
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('DELETE FROM public."BAJAS_EQUIPOS" WHERE "ID"=%s', (id,))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "ELIMINADO"}
+
+# ---------------- PAGINACION ----------------
+@app.get("/BAJAS")
+def obtener_bajas(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1),
+    FOLIO: str = None, ESTADO: str = None, PLANTA: str = None,
+    FECHA: str = None, EQUIPO: str = None, MARCA: str = None,
+    MODELO: str = None, NO_SERIE: str = None, ACTIVO_FIJO: str = None,
+    UBICACION_PERSONA: str = None, MOTIVO_BAJA: str = None,
+    DIAGNOSTICO: str = None, COMENTARIOS: str = None,
+    MOTIVO_CANCELACION: str = None
+):
+    offset = (page - 1) * limit
+    conn = get_connection(); cursor = conn.cursor()
+    filtros = []; params = []
+
+    def af(c, v):
+        if v: filtros.append(f'"{c}"::text ILIKE %s'); params.append(f"%{v}%")
+
+    af("FOLIO",FOLIO); af("ESTADO",ESTADO); af("PLANTA",PLANTA)
+    af("FECHA",FECHA); af("EQUIPO",EQUIPO); af("MARCA",MARCA)
+    af("MODELO",MODELO); af("NO_SERIE",NO_SERIE); af("ACTIVO_FIJO",ACTIVO_FIJO)
+    af("UBICACION_PERSONA",UBICACION_PERSONA); af("MOTIVO_BAJA",MOTIVO_BAJA)
+    af("DIAGNOSTICO",DIAGNOSTICO); af("COMENTARIOS",COMENTARIOS)
+    af("MOTIVO_CANCELACION",MOTIVO_CANCELACION)
+
+    where = ("WHERE " + " AND ".join(filtros)) if filtros else ""
+
+    cursor.execute(f'SELECT COUNT(*) FROM public."BAJAS_EQUIPOS" {where}', params)
+    total = cursor.fetchone()[0]
+
+    cursor.execute(f"""
+        SELECT "ID","FOLIO","ESTADO","PLANTA","FECHA","EQUIPO","MARCA","MODELO",
+               "NO_SERIE","ACTIVO_FIJO","UBICACION_PERSONA","MOTIVO_BAJA",
+               "DIAGNOSTICO","COMENTARIOS","MOTIVO_CANCELACION",
+               CASE WHEN "PDF" IS NOT NULL THEN true ELSE false END AS "TIENE_PDF"
+        FROM public."BAJAS_EQUIPOS"
+        {where}
+        ORDER BY "ID" DESC
+        LIMIT %s OFFSET %s
+    """, params + [limit, offset])
+
+    rows = cursor.fetchall()
+    cols = [d[0] for d in cursor.description]
+    cursor.close(); conn.close()
+    return {"total": total, "page": page, "limit": limit,
+            "data": [dict(zip(cols, r)) for r in rows]}
+
+
 @app.get("/CORRECTIVOS/EXPORTAR_TODO")
 def exportar_correctivos_todo():
 
@@ -5753,6 +6043,203 @@ def buscar_global(q: str = Query(..., min_length=1)):
     }
 
 # ==========================================================
+# =================== CONTROL DE VALES =====================
+# ==========================================================
+
+class Vale(BaseModel):
+    NO_EMPLEADO: Optional[str] = None
+    FOLIO: Optional[str] = None
+    NOMBRE: Optional[str] = None
+    PUESTO: Optional[str] = None
+    DISPOSITIVO: Optional[str] = None
+    DESCRIPCION: Optional[str] = None
+    MARCA: Optional[str] = None
+    MODELO: Optional[str] = None
+    NUMERO_SERIE: Optional[str] = None
+    FECHA_ASIGNACION: Optional[str] = None
+    FECHA_CANCELACION: Optional[str] = None
+    ESTADO: Optional[str] = None
+    MOTIVO: Optional[str] = None
+    ASIGNADO_POR: Optional[str] = None
+    RECIBIDO_POR: Optional[str] = None
+    OBSERVACIONES: Optional[str] = None
+    ACCESORIOS: Optional[str] = None
+
+# ---------------- EXPORTAR TODO ----------------
+@app.get("/CONTROL_VALES/EXPORTAR_TODO")
+def exportar_todo_vales():
+    conn = get_connection()
+    df = pd.read_sql("""SELECT "ID","NO_EMPLEADO","FOLIO","NOMBRE","PUESTO","DISPOSITIVO",
+        "DESCRIPCION","MARCA","MODELO","NUMERO_SERIE","FECHA_ASIGNACION","FECHA_CANCELACION",
+        "ESTADO","MOTIVO","ASIGNADO_POR","RECIBIDO_POR","OBSERVACIONES","ACCESORIOS"
+        FROM public."CONTROL_VALES" ORDER BY "ID" DESC""", conn)
+    output = io.BytesIO(); df.to_excel(output, index=False); output.seek(0); conn.close()
+    return StreamingResponse(output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=control_vales_todo.xlsx"})
+
+# ---------------- EXPORTAR FILTRADO ----------------
+@app.get("/CONTROL_VALES/EXPORTAR")
+def exportar_vales_filtrado(
+    NO_EMPLEADO: str=None, FOLIO: str=None, NOMBRE: str=None, PUESTO: str=None,
+    DISPOSITIVO: str=None, DESCRIPCION: str=None, MARCA: str=None, MODELO: str=None,
+    NUMERO_SERIE: str=None, FECHA_ASIGNACION: str=None, FECHA_CANCELACION: str=None,
+    ESTADO: str=None, MOTIVO: str=None, ASIGNADO_POR: str=None, RECIBIDO_POR: str=None,
+    OBSERVACIONES: str=None, ACCESORIOS: str=None
+):
+    conn = get_connection(); cursor = conn.cursor()
+    filtros = []; params = []
+    def af(c,v):
+        if v: filtros.append(f'"{c}"::text ILIKE %s'); params.append(f"%{v}%")
+    af("NO_EMPLEADO",NO_EMPLEADO); af("FOLIO",FOLIO); af("NOMBRE",NOMBRE)
+    af("PUESTO",PUESTO); af("DISPOSITIVO",DISPOSITIVO); af("DESCRIPCION",DESCRIPCION)
+    af("MARCA",MARCA); af("MODELO",MODELO); af("NUMERO_SERIE",NUMERO_SERIE)
+    af("FECHA_ASIGNACION",FECHA_ASIGNACION); af("FECHA_CANCELACION",FECHA_CANCELACION)
+    af("ESTADO",ESTADO); af("MOTIVO",MOTIVO); af("ASIGNADO_POR",ASIGNADO_POR)
+    af("RECIBIDO_POR",RECIBIDO_POR); af("OBSERVACIONES",OBSERVACIONES); af("ACCESORIOS",ACCESORIOS)
+    where = ("WHERE " + " AND ".join(filtros)) if filtros else ""
+    cursor.execute(f"""SELECT "ID","NO_EMPLEADO","FOLIO","NOMBRE","PUESTO","DISPOSITIVO",
+        "DESCRIPCION","MARCA","MODELO","NUMERO_SERIE","FECHA_ASIGNACION","FECHA_CANCELACION",
+        "ESTADO","MOTIVO","ASIGNADO_POR","RECIBIDO_POR","OBSERVACIONES","ACCESORIOS"
+        FROM public."CONTROL_VALES" {where} ORDER BY "ID" DESC""", params)
+    rows = cursor.fetchall(); cols = [d[0] for d in cursor.description]
+    df = pd.DataFrame(rows, columns=cols)
+    output = io.BytesIO(); df.to_excel(output, index=False); output.seek(0)
+    cursor.close(); conn.close()
+    return StreamingResponse(output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=control_vales_filtrado.xlsx"})
+
+# ---------------- EXPORTAR POR AÑO ----------------
+@app.get("/CONTROL_VALES/EXPORTAR_ANIO")
+def exportar_vales_anio(anio: int):
+    conn = get_connection()
+    df = pd.read_sql("""SELECT "ID","NO_EMPLEADO","FOLIO","NOMBRE","PUESTO","DISPOSITIVO",
+        "DESCRIPCION","MARCA","MODELO","NUMERO_SERIE","FECHA_ASIGNACION","FECHA_CANCELACION",
+        "ESTADO","MOTIVO","ASIGNADO_POR","RECIBIDO_POR","OBSERVACIONES","ACCESORIOS"
+        FROM public."CONTROL_VALES"
+        WHERE EXTRACT(YEAR FROM "FECHA_ASIGNACION")=%s ORDER BY "ID" DESC""", conn, params=(anio,))
+    output = io.BytesIO(); df.to_excel(output, index=False); output.seek(0); conn.close()
+    return StreamingResponse(output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename=control_vales_{anio}.xlsx"})
+
+# ---------------- VER PDF ----------------
+@app.get("/CONTROL_VALES/PDF/{id}")
+def ver_pdf_vale(id: int):
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."CONTROL_VALES" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone(); cursor.close(); conn.close()
+    if not row or not row[0]: return {"error": "No existe PDF"}
+    ruta = Path(row[0])
+    if not ruta.exists(): return {"error": "Archivo no encontrado en disco"}
+    with open(ruta, "rb") as f:
+        data = f.read()
+    return Response(content=data, media_type="application/pdf")
+
+# ---------------- CREAR ----------------
+@app.post("/CONTROL_VALES")
+def crear_vale(data: Vale):
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO public."CONTROL_VALES"
+        ("NO_EMPLEADO","FOLIO","NOMBRE","PUESTO","DISPOSITIVO","DESCRIPCION",
+         "MARCA","MODELO","NUMERO_SERIE","FECHA_ASIGNACION","FECHA_CANCELACION",
+         "ESTADO","MOTIVO","ASIGNADO_POR","RECIBIDO_POR","OBSERVACIONES","ACCESORIOS")
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        RETURNING "ID";
+    """, (data.NO_EMPLEADO,data.FOLIO,data.NOMBRE,data.PUESTO,data.DISPOSITIVO,
+          data.DESCRIPCION,data.MARCA,data.MODELO,data.NUMERO_SERIE,
+          data.FECHA_ASIGNACION,data.FECHA_CANCELACION,data.ESTADO,data.MOTIVO,
+          data.ASIGNADO_POR,data.RECIBIDO_POR,data.OBSERVACIONES,data.ACCESORIOS))
+    new_id = cursor.fetchone()[0]; conn.commit(); cursor.close(); conn.close()
+    return {"ID": new_id}
+
+# ---------------- SUBIR PDF ----------------
+@app.post("/CONTROL_VALES/PDF/{id}")
+async def subir_pdf_vale(id: int, file: UploadFile = File(...)):
+    contenido = await file.read()
+    ruta = get_pdf_path("CONTROL_VALES", id)
+    ruta.write_bytes(contenido)
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('UPDATE public."CONTROL_VALES" SET "PDF"=%s WHERE "ID"=%s', (str(ruta), id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF GUARDADO"}
+
+# ---------------- PAGINACION CON FILTROS ----------------
+@app.get("/CONTROL_VALES")
+def obtener_vales(
+    page: int=Query(1,ge=1), limit: int=Query(10,ge=1),
+    NO_EMPLEADO: str=None, FOLIO: str=None, NOMBRE: str=None, PUESTO: str=None,
+    DISPOSITIVO: str=None, DESCRIPCION: str=None, MARCA: str=None, MODELO: str=None,
+    NUMERO_SERIE: str=None, FECHA_ASIGNACION: str=None, FECHA_CANCELACION: str=None,
+    ESTADO: str=None, MOTIVO: str=None, ASIGNADO_POR: str=None, RECIBIDO_POR: str=None,
+    OBSERVACIONES: str=None, ACCESORIOS: str=None
+):
+    offset = (page-1)*limit
+    conn = get_connection(); cursor = conn.cursor()
+    filtros = []; params = []
+    def af(c,v):
+        if v: filtros.append(f'"{c}"::text ILIKE %s'); params.append(f"%{v}%")
+    af("NO_EMPLEADO",NO_EMPLEADO); af("FOLIO",FOLIO); af("NOMBRE",NOMBRE)
+    af("PUESTO",PUESTO); af("DISPOSITIVO",DISPOSITIVO); af("DESCRIPCION",DESCRIPCION)
+    af("MARCA",MARCA); af("MODELO",MODELO); af("NUMERO_SERIE",NUMERO_SERIE)
+    af("FECHA_ASIGNACION",FECHA_ASIGNACION); af("FECHA_CANCELACION",FECHA_CANCELACION)
+    af("ESTADO",ESTADO); af("MOTIVO",MOTIVO); af("ASIGNADO_POR",ASIGNADO_POR)
+    af("RECIBIDO_POR",RECIBIDO_POR); af("OBSERVACIONES",OBSERVACIONES); af("ACCESORIOS",ACCESORIOS)
+    where = ("WHERE " + " AND ".join(filtros)) if filtros else ""
+    cursor.execute(f'SELECT COUNT(*) FROM public."CONTROL_VALES" {where}', params)
+    total = cursor.fetchone()[0]
+    cursor.execute(f"""SELECT "ID","NO_EMPLEADO","FOLIO","NOMBRE","PUESTO","DISPOSITIVO",
+        "DESCRIPCION","MARCA","MODELO","NUMERO_SERIE","FECHA_ASIGNACION","FECHA_CANCELACION",
+        "ESTADO","MOTIVO","ASIGNADO_POR","RECIBIDO_POR","OBSERVACIONES","ACCESORIOS",
+        CASE WHEN "PDF" IS NOT NULL THEN true ELSE false END AS "TIENE_PDF"
+        FROM public."CONTROL_VALES" {where}
+        ORDER BY "ID" DESC LIMIT %s OFFSET %s""", params+[limit,offset])
+    rows = cursor.fetchall(); cols = [d[0] for d in cursor.description]
+    cursor.close(); conn.close()
+    return {"total":total,"page":page,"limit":limit,"data":[dict(zip(cols,r)) for r in rows]}
+
+# ---------------- EDITAR ----------------
+@app.put("/CONTROL_VALES/{id}")
+def editar_vale(id: int, data: Vale):
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE public."CONTROL_VALES" SET
+        "NO_EMPLEADO"=%s,"FOLIO"=%s,"NOMBRE"=%s,"PUESTO"=%s,"DISPOSITIVO"=%s,
+        "DESCRIPCION"=%s,"MARCA"=%s,"MODELO"=%s,"NUMERO_SERIE"=%s,
+        "FECHA_ASIGNACION"=%s,"FECHA_CANCELACION"=%s,"ESTADO"=%s,"MOTIVO"=%s,
+        "ASIGNADO_POR"=%s,"RECIBIDO_POR"=%s,"OBSERVACIONES"=%s,"ACCESORIOS"=%s
+        WHERE "ID"=%s
+    """, (data.NO_EMPLEADO,data.FOLIO,data.NOMBRE,data.PUESTO,data.DISPOSITIVO,
+          data.DESCRIPCION,data.MARCA,data.MODELO,data.NUMERO_SERIE,
+          data.FECHA_ASIGNACION,data.FECHA_CANCELACION,data.ESTADO,data.MOTIVO,
+          data.ASIGNADO_POR,data.RECIBIDO_POR,data.OBSERVACIONES,data.ACCESORIOS,id))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "ACTUALIZADO"}
+
+# ---------------- ELIMINAR ----------------
+@app.delete("/CONTROL_VALES/{id}")
+def eliminar_vale(id: int):
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('DELETE FROM public."CONTROL_VALES" WHERE "ID"=%s', (id,))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "ELIMINADO"}
+
+# ---------------- ELIMINAR PDF ----------------
+@app.delete("/CONTROL_VALES/PDF/{id}")
+def eliminar_pdf_vale(id: int):
+    conn = get_connection(); cursor = conn.cursor()
+    cursor.execute('SELECT "PDF" FROM public."CONTROL_VALES" WHERE "ID"=%s', (id,))
+    row = cursor.fetchone()
+    if row and row[0]:
+        ruta = Path(row[0])
+        if ruta.exists(): ruta.unlink()
+    cursor.execute('UPDATE public."CONTROL_VALES" SET "PDF"=NULL WHERE "ID"=%s', (id,))
+    conn.commit(); cursor.close(); conn.close()
+    return {"mensaje": "PDF ELIMINADO"}
+
+# ==========================================================
 # =================== SISTEMA DE USUARIOS ==================
 # ==========================================================
 import hashlib
@@ -5760,30 +6247,6 @@ from datetime import datetime
 
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
-
-# ── SQL PARA CREAR LA TABLA (ejecutar una sola vez en pgAdmin) ──
-# CREATE TABLE IF NOT EXISTS public."USUARIOS" (
-#     "ID"               SERIAL PRIMARY KEY,
-#     "USUARIO"          character varying NOT NULL UNIQUE,
-#     "NOMBRE"           character varying NOT NULL,
-#     "PASSWORD_HASH"    character varying NOT NULL,
-#     "ROL"              character varying NOT NULL,  -- ADMIN | USUARIO
-#     "PASSWORD_TEMPORAL" boolean DEFAULT true,
-#     "ACTIVO"           boolean DEFAULT true,
-#     "CREATED_AT"       timestamp DEFAULT CURRENT_TIMESTAMP,
-#     "ULTIMO_ACCESO"    timestamp
-# );
-#
-# -- INSERT usuarios iniciales (contraseña temporal: mexico123)
-# INSERT INTO public."USUARIOS" ("USUARIO","NOMBRE","PASSWORD_HASH","ROL","PASSWORD_TEMPORAL") VALUES
-# ('RODRIGUEZFL','FLOR RODRIGUEZ','b977536b80f275309305ef2a9197bc912f957577a1c2235216c7a197e3d6525d','ADMIN',true),
-# ('LUNAI','LUNA I','b977536b80f275309305ef2a9197bc912f957577a1c2235216c7a197e3d6525d','USUARIO',true),
-# ('CHAVEZS','CHAVEZ S','b977536b80f275309305ef2a9197bc912f957577a1c2235216c7a197e3d6525d','USUARIO',true),
-# ('SIFUENTESR','SIFUENTES R','b977536b80f275309305ef2a9197bc912f957577a1c2235216c7a197e3d6525d','USUARIO',true),
-# ('GARCIALU','GARCIA LU','b977536b80f275309305ef2a9197bc912f957577a1c2235216c7a197e3d6525d','USUARIO',true),
-# ('PENAV','PEÑA V','b977536b80f275309305ef2a9197bc912f957577a1c2235216c7a197e3d6525d','USUARIO',true),
-# ('GANDARAJA','GANDARA JA','b977536b80f275309305ef2a9197bc912f957577a1c2235216c7a197e3d6525d','USUARIO',true),
-# ('VLOPEZ','V LOPEZ','b977536b80f275309305ef2a9197bc912f957577a1c2235216c7a197e3d6525d','USUARIO',true);
 
 class LoginRequest(BaseModel):
     usuario: str
