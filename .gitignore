@@ -1,0 +1,10 @@
+env/
+__pycache__/
+*.pyc
+*.exe
+*.db
+*.log
+uploads/
+archivos para vaciar de DB/
+*.xlsx
+*.csv
