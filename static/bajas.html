@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>BAJAS DE EQUIPOS</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#f1f5f9;
+}
+
+.header{
+    background:#1e293b;
+    color:white;
+    padding:15px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.container{
+    padding:20px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:8px;
+    margin-bottom:15px;
+}
+
+input{
+    padding:6px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:12px;
+}
+
+button{
+    padding:6px 12px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:12px;
+}
+
+.save{background:#16a34a;color:white;}
+.delete{background:#dc2626;color:white;}
+.edit{background:#f59e0b;color:white;}
+.pdf{background:#2563eb;color:white;}
+.export{background:#7c3aed;color:white;}
+
+.table-container{
+    width:100%;
+    height:500px;
+    overflow:auto;
+    border:1px solid #ccc;
+    background:white;
+}
+
+table{
+    border-collapse:collapse;
+    min-width:3500px;
+    font-size:11px;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:6px;
+    white-space:nowrap;
+    text-align:center;
+}
+
+th{
+    background:#1e293b;
+    color:white;
+    position:sticky;
+    top:0;
+    z-index:2;
+}
+
+.filter-row input{
+    width:100%;
+    font-size:11px;
+}
+.back{
+    background:#dc2626;
+    font-style: italic; color:#ffffff;
+}
+
+.pagination{
+    margin-top:10px;
+}
+/* AGREGA SI NO EXISTE */
+
+.field{
+display:flex;
+flex-direction:column;
+}
+
+.field label{
+font-size:11px;
+font-weight:bold;
+color:#1e293b;
+margin-bottom:4px;
+text-transform:uppercase;
+letter-spacing:0.3px;
+}
+
+.field input{
+padding:7px;
+border:1px solid #cbd5e1;
+border-radius:5px;
+font-size:12px;
+background:#f8fafc;
+transition:border-color 0.2s;
+}
+
+.field input:focus{
+outline:none;
+border-color:#2563eb;
+background:white;
+box-shadow:0 0 0 2px rgba(37,99,235,0.15);
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+BAJAS DE EQUIPOS
+</div>
+
+<div class="container">
+
+<!-- REEMPLAZA EL BLOQUE form-grid EN bajas.html POR ESTE -->
+
+<div class="form-grid">
+
+<div class="field">
+<label>FOLIO</label>
+<input id="FOLIO">
+</div>
+
+<div class="field">
+<label>ESTADO</label>
+<input id="ESTADO">
+</div>
+
+<div class="field">
+<label>PLANTA</label>
+<input id="PLANTA">
+</div>
+
+<div class="field">
+<label>FECHA</label>
+<input id="FECHA" type="date">
+</div>
+
+<div class="field">
+<label>EQUIPO</label>
+<input id="EQUIPO">
+</div>
+
+<div class="field">
+<label>MARCA</label>
+<input id="MARCA">
+</div>
+
+<div class="field">
+<label>MODELO</label>
+<input id="MODELO">
+</div>
+
+<div class="field">
+<label>NO SERIE</label>
+<input id="NO_SERIE">
+</div>
+
+<div class="field">
+<label>ACTIVO FIJO</label>
+<input id="ACTIVO_FIJO">
+</div>
+
+<div class="field">
+<label>UBICACION / PERSONA</label>
+<input id="UBICACION_PERSONA">
+</div>
+
+<div class="field">
+<label>MOTIVO DE BAJA</label>
+<input id="MOTIVO_BAJA">
+</div>
+
+<div class="field">
+<label>DIAGNOSTICO</label>
+<input id="DIAGNOSTICO">
+</div>
+
+<div class="field">
+<label>COMENTARIOS</label>
+<input id="COMENTARIOS">
+</div>
+
+<div class="field">
+<label>MOTIVO DE CANCELACION</label>
+<input id="MOTIVO_CANCELACION">
+</div>
+
+</div>
+
+<button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
+<button class="edit" onclick="cancelarEdicion()">CANCELAR</button>
+
+<div style="margin-top:15px;">
+<button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
+<button class="export" onclick="exportarTodo()">Exportar Todo</button>
+<input id="anioExportar" type="number" placeholder="Año (ej: 2026)" style="width:120px;">
+<button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
+</div>
+
+<br>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>FOLIO</th>
+<th>ESTADO</th>
+<th>PLANTA</th>
+<th>FECHA</th>
+<th>EQUIPO</th>
+<th>MARCA</th>
+<th>MODELO</th>
+<th>NO_SERIE</th>
+<th>ACTIVO_FIJO</th>
+<th>UBICACION_PERSONA</th>
+<th>MOTIVO_BAJA</th>
+<th>DIAGNOSTICO</th>
+<th>COMENTARIOS</th>
+<th>MOTIVO_CANCELACION</th>
+<th>PDF</th>
+<th>ACCIONES</th>
+</tr>
+
+<tr class="filter-row">
+<th></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th></th>
+<th></th>
+</tr>
+
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+</div>
+
+<div class="pagination">
+<button onclick="anterior()">Anterior</button>
+<span id="paginaInfo"></span>
+<button onclick="siguiente()">Siguiente</button>
+<button class="back" onclick="window.location.href='menu.html'">
+REGRESAR AL MENU PRINCIPAL
+</button>
+</div>
+</div>
+
+<script>
+
+let datosOriginales = [];
+let datosFiltrados = [];
+let paginaActual = 1;
+let limite = 10;
+let totalRegistros = 0;
+let editandoID = null;
+
+function guardar(){
+
+let data = {
+FOLIO:FOLIO.value||null,
+ESTADO:ESTADO.value||null,
+PLANTA:PLANTA.value||null,
+FECHA:FECHA.value||null,
+EQUIPO:EQUIPO.value||null,
+MARCA:MARCA.value||null,
+MODELO:MODELO.value||null,
+NO_SERIE:NO_SERIE.value||null,
+ACTIVO_FIJO:ACTIVO_FIJO.value||null,
+UBICACION_PERSONA:UBICACION_PERSONA.value||null,
+MOTIVO_BAJA:MOTIVO_BAJA.value||null,
+DIAGNOSTICO:DIAGNOSTICO.value||null,
+COMENTARIOS:COMENTARIOS.value||null,
+MOTIVO_CANCELACION:MOTIVO_CANCELACION.value||null
+};
+
+if(editandoID){
+fetch(`/BAJA/${editandoID}`,{
+method:"PUT",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(data)
+}).then(()=>{
+editandoID=null;
+limpiarFormulario();
+cargar();
+});
+}else{
+fetch("/BAJA",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(data)
+}).then(()=>{
+limpiarFormulario();
+cargar();
+});
+}
+}
+
+function obtenerParametros(){
+let filtros=document.querySelectorAll(".filter-row input");
+return new URLSearchParams({
+page:             paginaActual,
+limit:            limite,
+FOLIO:            filtros[0].value,
+ESTADO:           filtros[1].value,
+PLANTA:           filtros[2].value,
+FECHA:            filtros[3].value,
+EQUIPO:           filtros[4].value,
+MARCA:            filtros[5].value,
+MODELO:           filtros[6].value,
+NO_SERIE:         filtros[7].value,
+ACTIVO_FIJO:      filtros[8].value,
+UBICACION_PERSONA:filtros[9].value,
+MOTIVO_BAJA:      filtros[10].value,
+DIAGNOSTICO:      filtros[11].value,
+COMENTARIOS:      filtros[12].value,
+MOTIVO_CANCELACION:filtros[13].value
+});
+}
+
+function cargar(){
+let params=obtenerParametros();
+fetch(`/BAJAS?${params.toString()}`)
+.then(res=>res.json())
+.then(resp=>{
+totalRegistros=resp.total;
+datosOriginales=resp.data;
+datosFiltrados=[...datosOriginales];
+renderizar();
+});
+}
+
+function renderizar(){
+
+tabla.innerHTML="";
+
+datosFiltrados.forEach(row=>{
+tabla.innerHTML+=`
+<tr>
+<td>${row.ID}</td>
+<td>${row.FOLIO??""}</td>
+<td>${row.ESTADO??""}</td>
+<td>${row.PLANTA??""}</td>
+<td>${row.FECHA??""}</td>
+<td>${row.EQUIPO??""}</td>
+<td>${row.MARCA??""}</td>
+<td>${row.MODELO??""}</td>
+<td>${row.NO_SERIE??""}</td>
+<td>${row.ACTIVO_FIJO??""}</td>
+<td>${row.UBICACION_PERSONA??""}</td>
+<td>${row.MOTIVO_BAJA??""}</td>
+<td>${row.DIAGNOSTICO??""}</td>
+<td>${row.COMENTARIOS??""}</td>
+<td>${row.MOTIVO_CANCELACION??""}</td>
+
+<td>
+${row.TIENE_PDF
+? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button>
+   <button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
+: `<input type="file" onchange="subirPDF(${row.ID},this)">`
+}
+</td>
+
+<td>
+<button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
+<button class="delete" onclick="eliminar(${row.ID})">Eliminar</button>
+</td>
+
+</tr>`;
+});
+
+paginaInfo.innerText=`Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
+}
+
+function editar(row){
+editandoID=row.ID;
+Object.keys(row).forEach(key=>{
+if(document.getElementById(key)){
+document.getElementById(key).value=row[key] ?? "";
+}
+});
+window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function limpiarFormulario(){
+document.querySelectorAll(".form-grid input").forEach(i=>i.value="");
+}
+
+function eliminar(id){
+fetch(`/BAJA/${id}`,{method:"DELETE"})
+.then(()=>cargar());
+}
+
+function subirPDF(id,input){
+let file=input.files[0];
+if(!file)return;
+let formData=new FormData();
+formData.append("file",file);
+fetch(`/BAJA/PDF/${id}`,{method:"POST",body:formData})
+.then(()=>cargar());
+}
+
+function verPDF(id){
+window.open(`/BAJA/PDF/${id}`,"_blank");
+}
+
+function eliminarPDF(id){
+if(!confirm("¿Seguro que deseas eliminar el PDF?")) return;
+fetch(`/BAJA/PDF/${id}`,{method:"DELETE"})
+.then(()=>cargar());
+}
+
+function cancelarEdicion(){
+editandoID=null;
+limpiarFormulario();
+}
+
+function exportarFiltrado(){
+let params=obtenerParametros();
+window.open(`/BAJAS/EXPORTAR?${params.toString()}`);
+}
+
+function exportarTodo(){
+window.open(`/BAJAS/EXPORTAR_TODO`);
+}
+
+function exportarPorAnio(){
+let anio=document.getElementById("anioExportar").value;
+if(!anio){alert("Ingresa un año");return;}
+window.open(`/BAJAS/EXPORTAR_ANIO?anio=${anio}`);
+}
+
+function siguiente(){
+if(paginaActual*limite<totalRegistros){paginaActual++;cargar();}
+}
+
+function anterior(){
+if(paginaActual>1){paginaActual--;cargar();}
+}
+
+function filtrar(){
+paginaActual=1;
+cargar();
+}
+
+cargar();
+
+</script>
+
+</body>
+</html>

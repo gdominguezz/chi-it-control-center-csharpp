@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SERVICIOS PROVEEDORES NF</title>
+<style>
+body{font-family:Arial;margin:0;background:#f1f5f9;}
+.header{background:#1e293b;color:white;padding:15px;font-size:20px;font-weight:bold;}
+.container{padding:15px;}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:15px;}
+.field{display:flex;flex-direction:column;}
+.field label{font-size:11px;font-weight:bold;color:#1e293b;margin-bottom:4px;text-transform:uppercase;}
+.field input,.field textarea{padding:7px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;background:#f8fafc;}
+.field textarea{resize:vertical;min-height:60px;}
+.field input:focus,.field textarea:focus{outline:none;border-color:#2563eb;background:white;}
+button{padding:6px 12px;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:bold;margin-right:5px;}
+.save{background:#16a34a;color:white;}.cancel{background:#64748b;color:white;}.delete{background:#dc2626;color:white;}
+.edit{background:#f59e0b;color:white;}.pdf{background:#2563eb;color:white;}.export{background:#7c3aed;color:white;}
+.btn-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px;}
+.table-container{width:100%;height:500px;overflow:auto;border:1px solid #ccc;background:white;}
+table{border-collapse:collapse;min-width:3600px;font-size:11px;}
+th,td{border:1px solid #ccc;padding:6px;white-space:nowrap;text-align:center;}
+th{background:#1e293b;color:white;position:sticky;top:0;z-index:2;}
+.filter-row input{width:100%;font-size:11px;}
+.pagination{margin-top:10px;}
+.back{
+    background:#dc2626;
+    font-style: italic; color:#ffffff;
+}
+</style>
+</head>
+<body>
+<div class="header">SERVICIOS PROVEEDORES NF</div>
+<div class="container">
+
+<div class="form-grid">
+  <div class="field"><label>ID Unico</label><input id="ID_UNICO"></div>
+  <div class="field"><label>OC</label><input id="OC"></div>
+  <div class="field"><label>Folio Cotizacion</label><input id="FOLIO_COTIZACION"></div>
+  <div class="field"><label>Folio Reporte</label><input id="FOLIO_REPORTE"></div>
+  <div class="field"><label>Fecha</label><input id="FECHA"></div>
+  <div class="field"><label>Requisitor</label><input id="REQUISITOR"></div>
+  <div class="field"><label>Cuenta Poliza</label><input id="CUENTA_POLIZA"></div>
+  <div class="field"><label>Servicio / Costo</label><input id="SERVICIO_COSTO"></div>
+  <div class="field"><label>Ubicacion / Planta</label><input id="UBICACION_PLANTA"></div>
+  <div class="field"><label>Area</label><input id="AREA"></div>
+  <div class="field"><label>Cantidad</label><input id="CANTIDAD"></div>
+  <div class="field"><label>Proveedor</label><input id="PROVEEDORES"></div>
+  <div class="field"><label>Panel Faceplate</label><input id="PANEL_FACEPLATE"></div>
+  <div class="field"><label>Switch</label><input id="SWITCH"></div>
+  <div class="field"><label>Personal que Recibio</label><input id="PERSONAL_RECIBIO"></div>
+  <div class="field"><label>Se Finalizo</label><input id="SE_FINALIZO"></div>
+  <div class="field"><label>Costo</label><input id="COSTO"></div>
+  <div class="field" style="grid-column:span 2"><label>Descripcion del Servicio</label><textarea id="DESC_SERVICIO"></textarea></div>
+  <div class="field" style="grid-column:span 2"><label>Descripcion del Trabajo</label><textarea id="DESC_TRABAJO"></textarea></div>
+  <div class="field" style="grid-column:span 2"><label>Material / Equipo</label><textarea id="MATERIAL_EQUIPO"></textarea></div>
+  <div class="field" style="grid-column:span 2"><label>Observaciones</label><textarea id="OBSERVACIONES"></textarea></div>
+</div>
+
+<div class="btn-bar">
+  <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
+  <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
+</div>
+<div class="btn-bar">
+  <button class="export" onclick="exportarTodo()">Exportar Todo</button>
+</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+  <th>ID</th><th>ID UNICO</th><th>OC</th><th>F.COTIZ</th><th>F.REPORTE</th>
+  <th>FECHA</th><th>REQUISITOR</th><th>POLIZA</th><th>SERV/COSTO</th>
+  <th>UBICACION</th><th>AREA</th><th>CANTIDAD</th><th>DESC SERVICIO</th>
+  <th>DESC TRABAJO</th><th>MATERIAL</th><th>OBSERVACIONES</th>
+  <th>PROVEEDOR</th><th>PANEL</th><th>SWITCH</th><th>PERSONAL</th>
+  <th>FINALIZADO</th><th>COSTO</th><th>PDF</th><th>ACCIONES</th>
+</tr>
+<tr class="filter-row">
+  <th></th>
+  <th><input oninput="filtrar()"></th><!-- f[0]  ID_UNICO -->
+  <th><input oninput="filtrar()"></th><!-- f[1]  OC -->
+  <th><input oninput="filtrar()"></th><!-- f[2]  FOLIO_COTIZACION -->
+  <th><input oninput="filtrar()"></th><!-- f[3]  FOLIO_REPORTE -->
+  <th><input oninput="filtrar()"></th><!-- f[4]  FECHA -->
+  <th><input oninput="filtrar()"></th><!-- f[5]  REQUISITOR -->
+  <th><input oninput="filtrar()"></th><!-- f[6]  CUENTA_POLIZA -->
+  <th><input oninput="filtrar()"></th><!-- f[7]  SERVICIO_COSTO -->
+  <th><input oninput="filtrar()"></th><!-- f[8]  UBICACION_PLANTA -->
+  <th><input oninput="filtrar()"></th><!-- f[9]  AREA -->
+  <th><input oninput="filtrar()"></th><!-- f[10] CANTIDAD -->
+  <th><input oninput="filtrar()"></th><!-- f[11] DESC_SERVICIO -->
+  <th><input oninput="filtrar()"></th><!-- f[12] DESC_TRABAJO -->
+  <th></th><th></th>
+  <th><input oninput="filtrar()"></th><!-- f[13] PROVEEDORES -->
+  <th></th><th></th><th></th>
+  <th><input oninput="filtrar()"></th><!-- f[14] SE_FINALIZO -->
+  <th><input oninput="filtrar()"></th><!-- f[15] COSTO -->
+  <th></th><th></th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+</div>
+
+<div class="pagination">
+  <button onclick="anterior()">Anterior</button>
+  <span id="paginaInfo"></span>
+  <button onclick="siguiente()">Siguiente</button>
+  <button class="back" onclick="window.location.href='menu.html'">
+REGRESAR AL MENU PRINCIPAL
+</button>
+</div>
+</div>
+
+<script>
+let paginaActual=1,limite=10,totalRegistros=0,editandoID=null;
+
+function guardar(){
+    let ids=['ID_UNICO','OC','FOLIO_COTIZACION','FOLIO_REPORTE','FECHA','REQUISITOR',
+             'CUENTA_POLIZA','SERVICIO_COSTO','UBICACION_PLANTA','AREA','CANTIDAD',
+             'DESC_SERVICIO','DESC_TRABAJO','MATERIAL_EQUIPO','OBSERVACIONES',
+             'PROVEEDORES','PANEL_FACEPLATE','SWITCH','PERSONAL_RECIBIO','SE_FINALIZO','COSTO'];
+    let data={};
+    ids.forEach(k=>{ let el=document.getElementById(k); data[k]=el&&el.value?el.value:null; });
+    if(editandoID){
+        fetch(`/SERVICIOS_PROVEEDORES_NF/${editandoID}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
+        .then(()=>{editandoID=null;limpiarFormulario();cargar();});
+    } else {
+        fetch("/SERVICIOS_PROVEEDORES_NF",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
+        .then(()=>{limpiarFormulario();cargar();});
+    }
+}
+
+function limpiarFormulario(){ document.querySelectorAll(".form-grid input,.form-grid textarea").forEach(i=>i.value=""); }
+function cancelarEdicion(){ editandoID=null; limpiarFormulario(); }
+
+function obtenerParametros(){
+    let f=document.querySelectorAll(".filter-row input");
+    return new URLSearchParams({
+        page:paginaActual,limit:limite,
+        ID_UNICO:f[0].value,OC:f[1].value,FOLIO_COTIZACION:f[2].value,
+        FOLIO_REPORTE:f[3].value,FECHA:f[4].value,REQUISITOR:f[5].value,
+        CUENTA_POLIZA:f[6].value,SERVICIO_COSTO:f[7].value,UBICACION_PLANTA:f[8].value,
+        AREA:f[9].value,CANTIDAD:f[10].value,DESC_SERVICIO:f[11].value,
+        DESC_TRABAJO:f[12].value,PROVEEDORES:f[13].value,
+        SE_FINALIZO:f[14].value,COSTO:f[15].value
+    });
+}
+
+function cargar(){
+    fetch(`/SERVICIOS_PROVEEDORES_NF?${obtenerParametros().toString()}`)
+    .then(r=>r.json()).then(resp=>{totalRegistros=resp.total;renderizar(resp.data);});
+}
+
+function renderizar(datos){
+    tabla.innerHTML="";
+    datos.forEach(row=>{
+        tabla.innerHTML+=`<tr>
+        <td>${row.ID}</td><td>${row.ID_UNICO??""}</td><td>${row.OC??""}</td>
+        <td>${row.FOLIO_COTIZACION??""}</td><td>${row.FOLIO_REPORTE??""}</td>
+        <td>${row.FECHA??""}</td><td>${row.REQUISITOR??""}</td>
+        <td>${row.CUENTA_POLIZA??""}</td><td>${row.SERVICIO_COSTO??""}</td>
+        <td>${row.UBICACION_PLANTA??""}</td><td>${row.AREA??""}</td>
+        <td>${row.CANTIDAD??""}</td><td>${row.DESC_SERVICIO??""}</td>
+        <td>${row.DESC_TRABAJO??""}</td><td>${row.MATERIAL_EQUIPO??""}</td>
+        <td>${row.OBSERVACIONES??""}</td><td>${row.PROVEEDORES??""}</td>
+        <td>${row.PANEL_FACEPLATE??""}</td><td>${row.SWITCH??""}</td>
+        <td>${row.PERSONAL_RECIBIO??""}</td><td>${row.SE_FINALIZO??""}</td>
+        <td>${row.COSTO??""}</td>
+        <td>${row.TIENE_PDF
+            ?`<button class="pdf" onclick="verPDF(${row.ID})">Ver</button><button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
+            :`<input type="file" onchange="subirPDF(${row.ID},this)">`}</td>
+        <td><button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
+        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button></td>
+        </tr>`;
+    });
+    paginaInfo.innerText=`Pagina ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
+}
+
+function editar(row){ editandoID=row.ID; Object.keys(row).forEach(k=>{let el=document.getElementById(k);if(el)el.value=row[k]??""}); window.scrollTo({top:0,behavior:"smooth"}); }
+function eliminar(id){ if(!confirm("Eliminar?")) return; fetch(`/SERVICIOS_PROVEEDORES_NF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
+function subirPDF(id,input){ let fd=new FormData(); fd.append("file",input.files[0]); fetch(`/SERVICIOS_PROVEEDORES_NF/PDF/${id}`,{method:"POST",body:fd}).then(()=>cargar()); }
+function verPDF(id){ window.open(`/SERVICIOS_PROVEEDORES_NF/PDF/${id}`,"_blank"); }
+function eliminarPDF(id){ if(!confirm("Eliminar PDF?")) return; fetch(`/SERVICIOS_PROVEEDORES_NF/PDF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
+function filtrar(){ paginaActual=1; cargar(); }
+function exportarTodo(){ window.open(`/SERVICIOS_PROVEEDORES_NF/EXPORTAR_TODO`); }
+function siguiente(){ if(paginaActual*limite<totalRegistros){paginaActual++;cargar();} }
+function anterior(){ if(paginaActual>1){paginaActual--;cargar();} }
+cargar();
+</script>
+</body>
+</html>

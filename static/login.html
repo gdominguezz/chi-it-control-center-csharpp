@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACCESO AL SISTEMA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+:root{--bg:#0a0c10;--panel:#0e1117;--border:#1e2a3a;--accent:#00d4ff;--accent2:#0066ff;--text:#c8d8e8;--text-dim:#4a6070;--error:#ff3355;--success:#00ff88;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;overflow:hidden;position:relative;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
+body::after{content:'';position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,102,255,0.08) 0%,transparent 70%);top:-200px;right:-200px;animation:pulse 4s ease-in-out infinite;pointer-events:none;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:0.5;}50%{transform:scale(1.2);opacity:1;}}
+.container{width:420px;position:relative;z-index:10;}
+.brand{text-align:center;margin-bottom:32px;}
+.brand-logo{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px;}
+.logo-icon{width:44px;height:44px;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;position:relative;clip-path:polygon(8px 0%,100% 0%,100% calc(100% - 8px),calc(100% - 8px) 100%,0% 100%,0% 8px);}
+.logo-icon::before{content:'';position:absolute;inset:3px;background:rgba(0,212,255,0.1);}
+.logo-icon svg{width:22px;height:22px;fill:var(--accent);position:relative;z-index:1;}
+.brand-name{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;letter-spacing:4px;color:white;text-transform:uppercase;}
+.brand-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:3px;text-transform:uppercase;}
+.panel{background:var(--panel);border:1px solid var(--border);padding:36px;position:relative;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent);}
+.panel-header{display:flex;align-items:center;gap:10px;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.status-dot{width:8px;height:8px;background:var(--success);border-radius:50%;animation:blink 2s ease-in-out infinite;box-shadow:0 0 8px var(--success);}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.panel-title{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;}
+.field{margin-bottom:20px;}
+.field label{display:block;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.input-wrap{position:relative;display:flex;align-items:center;}
+.input-wrap svg{position:absolute;left:12px;width:16px;height:16px;fill:var(--text-dim);pointer-events:none;transition:fill 0.2s;}
+.field input{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:14px;padding:12px 12px 12px 40px;outline:none;transition:all 0.2s;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));}
+.field input:focus{border-color:var(--accent);background:rgba(0,212,255,0.04);box-shadow:0 0 0 1px rgba(0,212,255,0.2),inset 0 0 20px rgba(0,212,255,0.03);}
+.field input::placeholder{color:var(--text-dim);opacity:0.5;}
+.msg{display:none;align-items:center;gap:8px;padding:10px 14px;margin-bottom:20px;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:1px;}
+.msg.error{background:rgba(255,51,85,0.08);border:1px solid rgba(255,51,85,0.3);color:var(--error);}
+.msg.success{background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.3);color:var(--success);}
+.msg.show{display:flex;animation:shake 0.3s ease;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+.btn-login{width:100%;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;color:#000;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:4px;text-transform:uppercase;padding:14px;cursor:pointer;position:relative;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:all 0.2s;overflow:hidden;}
+.btn-login::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transition:left 0.4s;}
+.btn-login:hover::before{left:100%;}
+.btn-login:hover{filter:brightness(1.15);transform:translateY(-1px);}
+.btn-login:active{transform:translateY(0);}
+.panel-footer{margin-top:24px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.footer-info{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;}
+.corner-deco{position:absolute;width:16px;height:16px;border-color:var(--accent);border-style:solid;opacity:0.4;}
+.corner-deco.tl{top:-1px;left:-1px;border-width:2px 0 0 2px;}
+.corner-deco.tr{top:-1px;right:-1px;border-width:2px 2px 0 0;}
+.corner-deco.bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px;}
+.corner-deco.br{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+@keyframes scanline{0%{transform:translateY(-100%);}100%{transform:translateY(100vh);}}
+.scanline{position:fixed;width:100%;height:2px;background:linear-gradient(90deg,transparent,rgba(0,212,255,0.05),transparent);top:0;left:0;animation:scanline 6s linear infinite;pointer-events:none;z-index:1;}
+/* Nota contraseña temporal */
+.nota-temp{background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.3);color:#ffc800;font-family:'Share Tech Mono',monospace;font-size:11px;padding:10px 14px;margin-bottom:20px;letter-spacing:1px;display:none;}
+.nota-temp.show{display:block;}
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+<div class="container">
+
+  <div class="brand">
+    <div class="brand-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      </div>
+      <div class="brand-name">CHI-IT CONTROL CENTER</div>
+    </div>
+    <div class="brand-sub">Mantenimientos &amp; Control de Presupuesto</div>
+  </div>
+
+  <div class="panel">
+    <div class="corner-deco tl"></div><div class="corner-deco tr"></div>
+    <div class="corner-deco bl"></div><div class="corner-deco br"></div>
+
+    <!-- ── PANEL LOGIN ── -->
+    <div id="panelLogin">
+      <div class="panel-header">
+        <div class="status-dot"></div>
+        <div class="panel-title" id="tituloPanel">Autenticación requerida</div>
+      </div>
+
+      <div class="field">
+        <label>Usuario</label>
+        <div class="input-wrap">
+          <input type="text" id="usuario" placeholder="Ingresa tu usuario" autocomplete="off" onkeydown="if(event.key==='Enter') document.getElementById('password').focus()">
+          <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Contraseña</label>
+        <div class="input-wrap">
+          <input type="password" id="password" placeholder="Ingresa tu contraseña" onkeydown="if(event.key==='Enter') login()">
+          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.8-2.2-5-5-5S7 3.2 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.7 1.4-3.1 3.1-3.1s3.1 1.4 3.1 3.1v2z"/></svg>
+        </div>
+      </div>
+
+      <div class="msg error" id="errorMsg">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        <span id="errorText">Usuario o contraseña incorrectos</span>
+      </div>
+
+      <button class="btn-login" id="btnLogin" onclick="login()">Iniciar sesión</button>
+    </div>
+
+    <!-- ── PANEL CAMBIO DE CONTRASEÑA ── -->
+    <div id="panelCambio" style="display:none;">
+      <div class="panel-header">
+        <div class="status-dot" style="background:#ffc800;box-shadow:0 0 8px #ffc800;"></div>
+        <div class="panel-title">Cambio de contraseña requerido</div>
+      </div>
+
+      <div class="nota-temp show">
+        ⚠ Tu cuenta tiene contraseña temporal.<br>Debes establecer una nueva contraseña para continuar.
+      </div>
+
+      <div class="field">
+        <label>Nueva Contraseña</label>
+        <div class="input-wrap">
+          <input type="password" id="nuevaPassword" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter') document.getElementById('confirmarPassword').focus()">
+          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.8-2.2-5-5-5S7 3.2 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.7 1.4-3.1 3.1-3.1s3.1 1.4 3.1 3.1v2z"/></svg>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Confirmar Contraseña</label>
+        <div class="input-wrap">
+          <input type="password" id="confirmarPassword" placeholder="Repite tu nueva contraseña" onkeydown="if(event.key==='Enter') cambiarPassword()">
+          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.8-2.2-5-5-5S7 3.2 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.7 1.4-3.1 3.1-3.1s3.1 1.4 3.1 3.1v2z"/></svg>
+        </div>
+      </div>
+
+      <div class="msg error" id="errorCambio">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        <span id="errorCambioText"></span>
+      </div>
+      <div class="msg success" id="successCambio">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        <span>Contraseña actualizada. Redirigiendo...</span>
+      </div>
+
+      <button class="btn-login" onclick="cambiarPassword()">Establecer contraseña</button>
+    </div>
+
+    <div class="panel-footer">
+      <span class="footer-info">v2.0.0 &bull; 2026</span>
+      <span class="footer-info" id="clock"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+let usuarioActual = "";
+let passwordActual = "";
+
+async function login(){
+    const u = document.getElementById('usuario').value.trim();
+    const p = document.getElementById('password').value;
+    const err = document.getElementById('errorMsg');
+    const btn = document.getElementById('btnLogin');
+
+    err.classList.remove('show');
+    if(!u || !p){ mostrarError('errorMsg','errorText','Ingresa usuario y contraseña'); return; }
+
+    btn.textContent = 'AUTENTICANDO...';
+    btn.style.pointerEvents = 'none';
+
+    try {
+        const res = await fetch('/LOGIN', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ usuario: u, password: p })
+        });
+        const data = await res.json();
+
+        if(!data.ok){
+            mostrarError('errorMsg','errorText', data.mensaje || 'Usuario o contraseña incorrectos');
+            btn.textContent = 'Iniciar sesión';
+            btn.style.pointerEvents = '';
+            document.getElementById('password').value = '';
+            return;
+        }
+
+        // Guardar en session
+        sessionStorage.setItem('usuario', data.usuario);
+        sessionStorage.setItem('nombre', data.nombre);
+        sessionStorage.setItem('rol', data.rol);
+
+        if(data.password_temporal){
+            // Mostrar panel de cambio de contraseña
+            usuarioActual = data.usuario;
+            passwordActual = p;
+            document.getElementById('panelLogin').style.display = 'none';
+            document.getElementById('panelCambio').style.display = 'block';
+            document.getElementById('nuevaPassword').focus();
+        } else {
+            setTimeout(() => { window.location.href = 'menu.html'; }, 500);
+        }
+    } catch(e){
+        mostrarError('errorMsg','errorText','Error de conexión con el servidor');
+        btn.textContent = 'Iniciar sesión';
+        btn.style.pointerEvents = '';
+    }
+}
+
+async function cambiarPassword(){
+    const nueva = document.getElementById('nuevaPassword').value;
+    const confirmar = document.getElementById('confirmarPassword').value;
+
+    document.getElementById('errorCambio').classList.remove('show');
+    document.getElementById('successCambio').classList.remove('show');
+
+    if(!nueva || !confirmar){
+        mostrarError('errorCambio','errorCambioText','Completa ambos campos'); return;
+    }
+    if(nueva.length < 6){
+        mostrarError('errorCambio','errorCambioText','Mínimo 6 caracteres'); return;
+    }
+    if(nueva !== confirmar){
+        mostrarError('errorCambio','errorCambioText','Las contraseñas no coinciden'); return;
+    }
+    if(nueva === 'mexico123'){
+        mostrarError('errorCambio','errorCambioText','No puedes usar la contraseña temporal'); return;
+    }
+
+    try {
+        const res = await fetch('/CAMBIAR_PASSWORD', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+                usuario: usuarioActual,
+                password_actual: passwordActual,
+                password_nuevo: nueva
+            })
+        });
+        const data = await res.json();
+
+        if(!data.ok){
+            mostrarError('errorCambio','errorCambioText', data.mensaje); return;
+        }
+
+        document.getElementById('successCambio').classList.add('show');
+        setTimeout(() => { window.location.href = 'menu.html'; }, 1500);
+
+    } catch(e){
+        mostrarError('errorCambio','errorCambioText','Error de conexión');
+    }
+}
+
+function mostrarError(divId, spanId, msg){
+    document.getElementById(spanId).textContent = msg;
+    document.getElementById(divId).classList.add('show');
+}
+
+function updateClock(){
+    const now = new Date();
+    document.getElementById('clock').textContent =
+        now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+document.getElementById('usuario').focus();
+</script>
+</body>
+</html>

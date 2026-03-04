@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PANTALLAS NF</title>
+<style>
+body{ font-family:Arial; margin:0; background:#f1f5f9; }
+.header{ background:#1e293b; color:white; padding:15px; font-size:20px; font-weight:bold; }
+.container{ padding:15px; }
+.form-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-bottom:15px; }
+.field{ display:flex; flex-direction:column; }
+.field label{ font-size:11px; font-weight:bold; color:#1e293b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.3px; }
+.field input{ padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:12px; background:#f8fafc; transition:border-color 0.2s; }
+.field input:focus{ outline:none; border-color:#2563eb; background:white; box-shadow:0 0 0 2px rgba(37,99,235,0.15); }
+button{ padding:6px 12px; border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; margin-right:5px; }
+.save{background:#16a34a;color:white;} .cancel{background:#64748b;color:white;} .delete{background:#dc2626;color:white;}
+.edit{background:#f59e0b;color:white;} .pdf{background:#2563eb;color:white;} .export{background:#7c3aed;color:white;}
+.btn-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:12px; }
+.btn-bar input[type="number"]{ padding:6px; border:1px solid #ccc; border-radius:5px; font-size:12px; width:110px; }
+.table-container{ width:100%; height:500px; overflow:auto; border:1px solid #ccc; background:white; }
+table{ border-collapse:collapse; min-width:3600px; font-size:11px; }
+th,td{ border:1px solid #ccc; padding:6px; white-space:nowrap; text-align:center; }
+th{ background:#1e293b; color:white; position:sticky; top:0; z-index:2; }
+.filter-row input{ width:100%; font-size:11px; }
+.pagination{ margin-top:10px; }
+.back{
+    background:#dc2626;
+    font-style: italic; color:#ffffff;
+}
+</style>
+</head>
+<body>
+<div class="header">PANTALLAS NF</div>
+<div class="container">
+<div class="form-grid">
+<div class="field"><label>ID Unico</label><input id="ID_UNICO"></div>
+<div class="field"><label>Subcategoria</label><input id="SUBCATEGORIA"></div>
+<div class="field"><label>Marca</label><input id="MARCA"></div>
+<div class="field"><label>Modelo</label><input id="MODELO"></div>
+<div class="field"><label>No. Serie</label><input id="NO_SERIE"></div>
+<div class="field"><label>Cantidad</label><input id="CANTIDAD"></div>
+<div class="field"><label>Tamaño Pulgadas</label><input id="TAMANO_PULGADAS"></div>
+<div class="field"><label>Accesorios</label><input id="ACCESORIOS"></div>
+<div class="field"><label>MAC WIFI</label><input id="MAC_WIFI"></div>
+<div class="field"><label>MAC Ethernet</label><input id="MAC_ETHERNET"></div>
+<div class="field"><label>Proveedor</label><input id="PROVEEDOR"></div>
+<div class="field"><label>Costo USD</label><input id="COSTO_USD"></div>
+<div class="field"><label>Vida Util (Meses)</label><input id="VIDA_UTIL_MESES"></div>
+<div class="field"><label>Estado</label><input id="ESTADO"></div>
+<div class="field"><label>Disponible</label><input id="DISPONIBLE"></div>
+<div class="field"><label>Fecha Salida</label><input id="FECHA_SALIDA" type="date"></div>
+<div class="field"><label>Destino Planta</label><input id="DESTINO_PLANTA"></div>
+<div class="field"><label>Asignado A</label><input id="ASIGNADO_A"></div>
+<div class="field"><label>Personal IT que Asigna</label><input id="PERSONAL_IT_ASIGNA"></div>
+</div>
+
+<div class="btn-bar">
+    <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
+    <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
+</div>
+<div class="btn-bar">
+    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
+    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
+    <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
+    <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
+</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>ID</th><th>ID UNICO</th><th>SUBCATEGORIA</th><th>MARCA</th><th>MODELO</th>
+<th>NO SERIE</th><th>CANTIDAD</th><th>PULGADAS</th><th>ACCESORIOS</th>
+<th>MAC WIFI</th><th>MAC ETH</th><th>PROVEEDOR</th><th>COSTO USD</th>
+<th>VIDA UTIL</th><th>ESTADO</th><th>DISPONIBLE</th><th>FECHA SALIDA</th>
+<th>DESTINO</th><th>ASIGNADO A</th><th>PERSONAL IT</th><th>PDF</th><th>ACCIONES</th>
+</tr>
+<tr class="filter-row">
+<th></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th></th><th></th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+</div>
+<div class="pagination">
+<button onclick="anterior()">Anterior</button>
+<span id="paginaInfo"></span>
+<button onclick="siguiente()">Siguiente</button>
+<button class="back" onclick="window.location.href='presupuestos_menu.html'">
+REGRESAR A PRESUPUESTOS
+</button>
+</div>
+</div>
+
+<script>
+let paginaActual=1, limite=10, totalRegistros=0, editandoID=null;
+
+function guardar(){
+    let data={
+        ID_UNICO: ID_UNICO.value||null,
+        SUBCATEGORIA: SUBCATEGORIA.value||null, MARCA: MARCA.value||null,
+        MODELO: MODELO.value||null, NO_SERIE: NO_SERIE.value||null,
+        CANTIDAD: CANTIDAD.value||null, TAMANO_PULGADAS: TAMANO_PULGADAS.value||null,
+        ACCESORIOS: ACCESORIOS.value||null, MAC_WIFI: MAC_WIFI.value||null,
+        MAC_ETHERNET: MAC_ETHERNET.value||null, PROVEEDOR: PROVEEDOR.value||null,
+        COSTO_USD: COSTO_USD.value||null, VIDA_UTIL_MESES: VIDA_UTIL_MESES.value||null,
+        ESTADO: ESTADO.value||null, DISPONIBLE: DISPONIBLE.value||null,
+        FECHA_SALIDA: FECHA_SALIDA.value||null, DESTINO_PLANTA: DESTINO_PLANTA.value||null,
+        ASIGNADO_A: ASIGNADO_A.value||null, PERSONAL_IT_ASIGNA: PERSONAL_IT_ASIGNA.value||null
+    };
+    if(editandoID){
+        fetch(`/PANTALLAS_NF/${editandoID}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
+        .then(()=>{ editandoID=null; limpiarFormulario(); cargar(); });
+    } else {
+        fetch("/PANTALLAS_NF",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
+        .then(()=>{ limpiarFormulario(); cargar(); });
+    }
+}
+
+function limpiarFormulario(){ document.querySelectorAll(".form-grid input").forEach(i=>i.value=""); }
+function cancelarEdicion(){ editandoID=null; limpiarFormulario(); }
+
+function obtenerParametros(){
+    let f=document.querySelectorAll(".filter-row input");
+    return new URLSearchParams({
+        page:paginaActual, limit:limite,
+        ID_UNICO:f[0].value, SUBCATEGORIA:f[1].value, MARCA:f[2].value,
+        MODELO:f[3].value, NO_SERIE:f[4].value, CANTIDAD:f[5].value,
+        TAMANO_PULGADAS:f[6].value, ACCESORIOS:f[7].value, MAC_WIFI:f[8].value,
+        MAC_ETHERNET:f[9].value, PROVEEDOR:f[10].value, COSTO_USD:f[11].value,
+        VIDA_UTIL_MESES:f[12].value, ESTADO:f[13].value, DISPONIBLE:f[14].value,
+        FECHA_SALIDA:f[15].value, DESTINO_PLANTA:f[16].value, ASIGNADO_A:f[17].value,
+        PERSONAL_IT_ASIGNA:f[18].value
+    });
+}
+
+function cargar(){
+    fetch(`/PANTALLAS_NF?${obtenerParametros().toString()}`)
+    .then(r=>r.json()).then(resp=>{ totalRegistros=resp.total; renderizar(resp.data); });
+}
+
+function renderizar(datos){
+    tabla.innerHTML="";
+    datos.forEach(row=>{
+        tabla.innerHTML+=`<tr>
+        <td>${row.ID}</td><td>${row.ID_UNICO??""}</td><td>${row.SUBCATEGORIA??""}</td>
+        <td>${row.MARCA??""}</td><td>${row.MODELO??""}</td><td>${row.NO_SERIE??""}</td>
+        <td>${row.CANTIDAD??""}</td><td>${row.TAMANO_PULGADAS??""}</td><td>${row.ACCESORIOS??""}</td>
+        <td>${row.MAC_WIFI??""}</td><td>${row.MAC_ETHERNET??""}</td><td>${row.PROVEEDOR??""}</td>
+        <td>${row.COSTO_USD??""}</td><td>${row.VIDA_UTIL_MESES??""}</td><td>${row.ESTADO??""}</td>
+        <td>${row.DISPONIBLE??""}</td><td>${row.FECHA_SALIDA??""}</td><td>${row.DESTINO_PLANTA??""}</td>
+        <td>${row.ASIGNADO_A??""}</td><td>${row.PERSONAL_IT_ASIGNA??""}</td>
+        <td>${row.TIENE_PDF
+            ? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button><button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
+            : `<input type="file" onchange="subirPDF(${row.ID},this)">`}</td>
+        <td><button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
+        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button></td>
+        </tr>`;
+    });
+    paginaInfo.innerText=`Pagina ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
+}
+
+function editar(row){
+    editandoID=row.ID;
+    Object.keys(row).forEach(key=>{ let el=document.getElementById(key); if(el) el.value=row[key]??""; });
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+function eliminar(id){ if(!confirm("Eliminar este registro?")) return; fetch(`/PANTALLAS_NF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
+function subirPDF(id,input){ let file=input.files[0]; if(!file) return; let fd=new FormData(); fd.append("file",file); fetch(`/PANTALLAS_NF/PDF/${id}`,{method:"POST",body:fd}).then(()=>cargar()); }
+function verPDF(id){ window.open(`/PANTALLAS_NF/PDF/${id}`,"_blank"); }
+function eliminarPDF(id){ if(!confirm("Eliminar el PDF?")) return; fetch(`/PANTALLAS_NF/PDF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
+function filtrar(){ paginaActual=1; cargar(); }
+function exportarFiltrado(){ window.open(`/PANTALLAS_NF/EXPORTAR?${obtenerParametros().toString()}`); }
+function exportarTodo(){ window.open(`/PANTALLAS_NF/EXPORTAR_TODO`); }
+function exportarPorAnio(){ let a=document.getElementById("anioExportar").value; if(!a){alert("Ingresa un año");return;} window.open(`/PANTALLAS_NF/EXPORTAR_ANIO?anio=${a}`); }
+function siguiente(){ if(paginaActual*limite<totalRegistros){ paginaActual++; cargar(); } }
+function anterior(){ if(paginaActual>1){ paginaActual--; cargar(); } }
+
+cargar();
+</script>
+</body>
+</html>

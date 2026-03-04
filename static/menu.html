@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SISTEMA DE GESTION DE RECURSOS</title>
+
+<style>
+body{
+    font-family:Arial;
+    margin:0;
+    background:linear-gradient(135deg,#1e293b,#0f172a);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+.container h1{
+    text-align:center;
+    font-size:48px !important;
+    font-weight:bold;
+    opacity:0;
+    animation:fadeIn 2s ease forwards;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+h1{
+    margin-bottom:40px;
+}
+
+button{
+    padding:20px 40px;
+    margin:15px;
+    font-size:18px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:0.3s;
+}
+
+.preventivo{
+    background:#16a34a;
+    color:white;
+}
+
+.correctivo{
+    background:#2563eb;
+    color:white;
+}
+
+.bajas{
+    background:#eb2525;
+    color:white;
+}
+
+.presupuesto{
+    background:#b3a701;
+    color:white;
+}
+.serviciosp{
+    background:#eb9525;
+    color:white;
+}
+.directoriop{
+    background:#2d0a66;
+    color:white;
+}
+.vales{
+    background:#0c7596;
+    color:white;
+}
+.logout{
+    background:#475569;
+    color:white;
+    font-size:14px;
+    padding:10px 20px;
+    margin:0;
+    border-radius:6px;
+}
+
+button:hover{
+    transform:scale(1.05);
+}
+
+.top-bar{
+    position:fixed;
+    top:0;
+    right:0;
+    padding:12px 20px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:13px;
+    color:#94a3b8;
+}
+
+.top-bar span{
+    color:#e2e8f0;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Barra superior con usuario y cerrar sesión -->
+<div class="top-bar">
+    Bienvenido, <span id="nombreUsuario"></span>
+    <button class="logout" onclick="cerrarSesion()">Cerrar sesión</button>
+</div>
+
+<div class="container">
+    <h1>CHI-IT CONTROL CENTER</h1>
+
+    <button class="preventivo"
+        onclick="window.location.href='/static/preventivos.html'">
+        MANTENIMIENTOS PREVENTIVOS
+    </button>
+
+    <button class="correctivo"
+        onclick="window.location.href='/static/correctivos.html'">
+        MANTENIMIENTOS CORRECTIVOS
+    </button>
+
+    <button class="bajas"
+        onclick="window.location.href='/static/bajas.html'">
+        BAJAS DE EQUIPOS
+    </button>
+
+    <button class="presupuesto"
+        onclick="window.location.href='/static/presupuestos_menu.html'">
+        PRESUPUESTOS
+    </button>
+
+    <button class="vales"
+        onclick="window.location.href='/static/control_vales.html'">
+        CONTROL DE VALES
+    </button>
+
+    <button class="serviciosp"
+        onclick="window.location.href='/static/servicio_proveedores_nf.html'">
+        SERVICIOS POR PROVEEDOR
+    </button>
+
+    <button class="directoriop"
+        onclick="window.location.href='/static/directorio_proveedores_nf.html'">
+        DIRECTORIO DE PROVEEDORES
+    </button>
+</div>
+
+<script>
+// Verificar sesión — si no hay usuario redirige al login
+if (!sessionStorage.getItem('usuario')) {
+    window.location.href = '/static/login.html';
+}
+
+// Mostrar nombre del usuario
+document.getElementById('nombreUsuario').textContent = sessionStorage.getItem('nombre') || sessionStorage.getItem('usuario');
+
+// Cerrar sesión
+function cerrarSesion() {
+    sessionStorage.clear();
+    window.location.href = '/static/login.html';
+}
+</script>
+
+</body>
+</html>

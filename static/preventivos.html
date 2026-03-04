@@ -1,0 +1,402 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>MANTENIMIENTOS PREVENTIVOS</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#f1f5f9;
+}
+
+.header{
+    background:#1e293b;
+    color:white;
+    padding:15px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.container{
+    padding:20px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:8px;
+    margin-bottom:15px;
+}
+
+input{
+    padding:6px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:12px;
+}
+
+button{
+    padding:6px 12px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:12px;
+    margin-right:5px;
+}
+
+.save{background:#16a34a;color:white;}
+.delete{background:#dc2626;color:white;}
+.pdf{background:#2563eb;color:white;}
+.edit{background:#facc15;color:black;}
+.export{background:#7c3aed;color:white;}
+
+.table-container{
+    width:100%;
+    height:500px;
+    overflow:auto;
+    border:1px solid #ccc;
+    margin-top:10px;
+}
+
+table{
+    border-collapse:collapse;
+    width:100%;
+    font-size:12px;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:6px;
+    white-space:nowrap;
+    text-align:center;
+}
+
+th{
+    background:#1e293b;
+    color:white;
+}
+
+.filter-row input{
+    width:100%;
+    font-size:11px;
+}
+
+.pagination{
+    margin-top:10px;
+}
+/* AGREGA ESTE CSS (MISMO ESTILO QUE ORDENES DE COMPRA) */
+
+.field{
+display:flex;
+flex-direction:column;
+}
+
+.field label{
+font-size:11px;
+font-weight:bold;
+color:#1e293b;
+margin-bottom:4px;
+text-transform:uppercase;
+letter-spacing:0.3px;
+}
+.back{
+    background:#dc2626;
+    font-style: italic; color:#ffffff;
+}
+
+.field input{
+padding:7px;
+border:1px solid #cbd5e1;
+border-radius:5px;
+font-size:12px;
+background:#f8fafc;
+transition:border-color 0.2s;
+}
+
+.field input:focus{
+outline:none;
+border-color:#2563eb;
+background:white;
+box-shadow:0 0 0 2px rgba(37,99,235,0.15);
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+MANTENIMIENTOS PREVENTIVOS
+</div>
+
+<div class="container">
+
+<!-- REEMPLAZA TU BLOQUE form-grid EN preventivos.html POR ESTE -->
+
+<div class="form-grid">
+
+<div class="field">
+<label>ID EQUIPO</label>
+<input id="ID_EQUIPO">
+</div>
+
+<div class="field">
+<label>UBICACION</label>
+<input id="UBICACION">
+</div>
+
+<div class="field">
+<label>PLAZO</label>
+<input id="PLAZO">
+</div>
+
+<div class="field">
+<label>REALIZADO POR</label>
+<input id="REALIZADO_POR">
+</div>
+
+<div class="field">
+<label>FECHA REALIZACION</label>
+<input id="FECHA_REALIZACION" type="date">
+</div>
+
+<div class="field">
+<label>OBSERVACIONES</label>
+<input id="OBSERVACIONES">
+</div>
+
+<div class="field">
+<label>NOMBRE DISPOSITIVO</label>
+<input id="nombre_dispositivo">
+</div>
+
+<div class="field">
+<label>PLANTA</label>
+<input id="PLANTA">
+</div>
+
+<div class="field">
+<label>CATEGORIA</label>
+<input id="CATEGORIA_COLOR">
+</div>
+
+</div>
+
+<button class="save" onclick="guardar()">GUARDAR</button>
+
+<!-- 🔥 BOTONES EXPORTAR -->
+<div style="margin-top:15px;">
+<button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
+<button class="export" onclick="exportarTodo()">Exportar Todo</button>
+
+<input id="anioExportar" type="number" placeholder="Año (ej: 2026)" style="width:120px;">
+<button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
+</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>ID_EQUIPO</th>
+<th>UBICACION</th>
+<th>PLAZO</th>
+<th>REALIZADO_POR</th>
+<th>FECHA_REALIZACION</th>
+<th>OBSERVACIONES</th>
+<th>NOMBRE_DISPOSITIVO</th>
+<th>PLANTA</th>
+<th>CATEGORIA_COLOR</th>
+<th>PDF</th>
+<th>ACCIONES</th>
+</tr>
+
+<tr class="filter-row">
+<th></th>
+<th><input id="fID" oninput="aplicarFiltros()"></th>
+<th><input id="fUBICACION" oninput="aplicarFiltros()"></th>
+<th><input id="fPLAZO" oninput="aplicarFiltros()"></th>
+<th><input id="fREALIZADO" oninput="aplicarFiltros()"></th>
+<th><input id="fFECHA" oninput="aplicarFiltros()"></th>
+<th><input id="fOBS" oninput="aplicarFiltros()"></th>
+<th><input id="fNOMBRE" oninput="aplicarFiltros()"></th>
+<th><input id="fPLANTA" oninput="aplicarFiltros()"></th>
+<th><input id="fCATEGORIA" oninput="aplicarFiltros()"></th>
+<th></th>
+<th></th>
+</tr>
+
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+</div>
+
+<div class="pagination">
+<button onclick="anterior()">Anterior</button>
+<span id="paginaInfo"></span>
+<button onclick="siguiente()">Siguiente</button>
+<button class="back" onclick="window.location.href='menu.html'">
+REGRESAR AL MENU PRINCIPAL
+</button>
+</div>
+
+</div>
+
+<script>
+
+let paginaActual = 1;
+let registrosPorPagina = 10;
+let totalPaginas = 1;
+let datosActuales = [];
+
+function obtenerParametros(){
+return new URLSearchParams({
+page: paginaActual,
+limit: registrosPorPagina,
+ID_EQUIPO: fID.value,
+UBICACION: fUBICACION.value,
+PLAZO: fPLAZO.value,
+REALIZADO_POR: fREALIZADO.value,
+FECHA_REALIZACION: fFECHA.value,
+OBSERVACIONES: fOBS.value,
+nombre_dispositivo: fNOMBRE.value,
+PLANTA: fPLANTA.value,
+CATEGORIA_COLOR: fCATEGORIA.value
+});
+}
+
+function cargar(){
+let params = obtenerParametros();
+fetch(`/PREVENTIVOS?${params.toString()}`)
+.then(res=>res.json())
+.then(data=>{
+datosActuales = data.data;
+totalPaginas = Math.ceil(data.total / registrosPorPagina);
+renderizar();
+});
+}
+
+function aplicarFiltros(){
+paginaActual = 1;
+cargar();
+}
+
+function renderizar(){
+tabla.innerHTML="";
+datosActuales.forEach(row=>{
+tabla.innerHTML+=`
+<tr>
+<td>${row.Id}</td>
+<td>${row.ID_EQUIPO ?? ""}</td>
+<td>${row.UBICACION ?? ""}</td>
+<td>${row.PLAZO ?? ""}</td>
+<td>${row.REALIZADO_POR ?? ""}</td>
+<td>${row.FECHA_REALIZACION ?? ""}</td>
+<td>${row.OBSERVACIONES ?? ""}</td>
+<td>${row.nombre_dispositivo ?? ""}</td>
+<td>${row.PLANTA ?? ""}</td>
+<td>${row.CATEGORIA_COLOR ?? ""}</td>
+<td>
+${row.TIENE_PDF
+? `<button class="pdf" onclick="descargarPDF(${row.Id})">Ver PDF</button>
+   <button class="delete" onclick="eliminarPDF(${row.Id})">Quitar</button>`
+: `<input type="file" onchange="subirPDF(${row.Id},this)">`
+}
+</td>
+<td>
+<button class="edit" onclick="editar(${row.Id})">Editar</button>
+<button class="delete" onclick="eliminar(${row.Id})">Eliminar</button>
+</td>
+</tr>
+`;
+});
+paginaInfo.innerText = `Página ${paginaActual} de ${totalPaginas}`;
+}
+
+function siguiente(){
+if(paginaActual < totalPaginas){
+paginaActual++;
+cargar();
+}
+}
+
+function anterior(){
+if(paginaActual > 1){
+paginaActual--;
+cargar();
+}
+}
+
+function eliminar(id){
+fetch(`/PREVENTIVO/${id}`,{method:"DELETE"})
+.then(()=>cargar());
+}
+
+function subirPDF(id,input){
+let file = input.files[0];
+if(!file) return;
+let formData = new FormData();
+formData.append("file",file);
+fetch(`/PREVENTIVO/PDF/${id}`,{
+method:"POST",
+body:formData
+}).then(()=>cargar());
+}
+
+function descargarPDF(id){
+window.open(`/PREVENTIVO/PDF/${id}`,"_blank");
+}
+
+function guardar(){
+fetch("/PREVENTIVO",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+ID_EQUIPO:ID_EQUIPO.value || null,
+UBICACION:UBICACION.value || null,
+PLAZO:PLAZO.value || null,
+REALIZADO_POR:REALIZADO_POR.value || null,
+FECHA_REALIZACION:FECHA_REALIZACION.value || null,
+OBSERVACIONES:OBSERVACIONES.value || null,
+nombre_dispositivo:nombre_dispositivo.value || null,
+PLANTA:PLANTA.value || null,
+CATEGORIA_COLOR:CATEGORIA_COLOR.value || null
+})
+}).then(()=>cargar());
+}
+
+/* 🔥 EXPORTACIONES */
+
+function exportarFiltrado(){
+let params = obtenerParametros();
+window.open(`/PREVENTIVOS/EXPORTAR?${params.toString()}`);
+}
+
+function exportarTodo(){
+window.open(`/PREVENTIVOS/EXPORTAR_TODO`);
+}
+
+function exportarPorAnio(){
+let anio = document.getElementById("anioExportar").value;
+if(!anio){
+alert("Ingresa un año");
+return;
+}
+window.open(`/PREVENTIVOS/EXPORTAR_ANIO?anio=${anio}`);
+}
+
+function eliminarPDF(id){
+    if(!confirm("¿Seguro que deseas eliminar el PDF?")) return;
+    fetch(`/PREVENTIVO/PDF/${id}`, {method:"DELETE"})
+    .then(()=>cargar());
+}
+
+cargar();
+
+</script>
+
+</body>
+</html>
