@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>FORMATO MANTENIMIENTO PREVENTIVO</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f3f4f6;
+padding:20px;
+}
+
+.form-container{
+background:white;
+padding:25px;
+border:2px solid #333;
+max-width:1100px;
+margin:auto;
+}
+
+.header{
+text-align:center;
+font-weight:bold;
+margin-bottom:15px;
+}
+
+.header h2{
+margin:0;
+}
+
+.row{
+display:flex;
+gap:20px;
+margin-bottom:10px;
+}
+
+.field{
+flex:1;
+display:flex;
+flex-direction:column;
+font-size:12px;
+}
+
+.field input{
+border:1px solid #333;
+padding:5px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+font-size:12px;
+margin-top:15px;
+}
+
+th,td{
+border:1px solid #333;
+padding:6px;
+text-align:center;
+}
+
+th{
+background:#e5e7eb;
+}
+
+.actividad{
+text-align:left;
+}
+
+.obs{
+margin-top:15px;
+}
+
+textarea{
+width:100%;
+height:80px;
+border:1px solid #333;
+}
+
+.footer{
+margin-top:20px;
+display:flex;
+justify-content:space-between;
+}
+
+button{
+margin-top:20px;
+padding:10px 20px;
+background:#2563eb;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="form-container">
+
+<div class="header">
+<h2>S-Riko Automotive Hose de Chihuahua</h2>
+<h3>MANTENIMIENTO PREVENTIVO</h3>
+</div>
+
+<div class="row">
+
+<div class="field">
+<label>FECHA</label>
+<input type="date" id="fecha">
+</div>
+
+<div class="field">
+<label>PLANTA</label>
+<input id="planta" readonly>
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="field">
+<label>LINEA / PERSONA</label>
+<input id="linea" readonly>
+</div>
+
+<div class="field">
+<label>REPORTE ELABORADO POR</label>
+<input id="reporte" readonly>
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="field">
+<label>PC / PORTATIL</label>
+<input id="pc" readonly>
+</div>
+
+<div class="field">
+<label>IMPRESORA</label>
+<input id="impresora" readonly>
+</div>
+
+<div class="field">
+<label>UPS</label>
+<input id="ups" readonly>
+</div>
+
+</div>
+
+<table>
+
+<tr>
+<th>Actividad</th>
+<th>Punto a verificar</th>
+<th>Portátil</th>
+<th>PC</th>
+<th>Impresora</th>
+<th>UPS</th>
+</tr>
+
+
+<!-- 1 LIMPIEZA INTERIOR -->
+
+<tr>
+<td class="actividad" rowspan="6">1. Limpieza Interior</td>
+<td>1) Sopletear el gabinete</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+</tr>
+
+<tr>
+<td>2) Limpieza de contactos de memoria RAM</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>3) Sopletear fuente de poder y ventiladores del mismo</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>4) Sopletear la impresora térmica</td>
+<td></td>
+<td></td>
+<td><input type="checkbox"></td>
+<td></td>
+</tr>
+
+<tr>
+<td>5) Limpieza de rodillos de la impresora (No usar alcohol)</td>
+<td></td>
+<td></td>
+<td><input type="checkbox"></td>
+<td></td>
+</tr>
+
+<tr>
+<td>6) Limpieza del cabezal de la impresora térmica</td>
+<td></td>
+<td></td>
+<td><input type="checkbox"></td>
+<td></td>
+</tr>
+
+
+<!-- 2 LIMPIEZA EXTERIOR -->
+
+<tr>
+<td class="actividad" rowspan="10">2. Limpieza Exterior</td>
+<td>1) Limpieza del gabinete</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>2) Limpieza del monitor o pantalla</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>3) Limpieza y sopleteado del teclado y/o touchpad</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>4) Limpieza del ratón</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>5) Limpieza de la impresora térmica</td>
+<td></td>
+<td></td>
+<td><input type="checkbox"></td>
+<td></td>
+</tr>
+
+<tr>
+<td>6) Limpieza de la laptop</td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>7) Limpieza y verificación del UPS</td>
+<td></td>
+<td></td>
+<td></td>
+<td><input type="checkbox"></td>
+</tr>
+
+<tr>
+<td>8) Sopleteado de ventiladores y ranuras de enfriamiento del equipo</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>9) Limpieza exterior del lector óptico (incluye la mica)</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>10) Limpieza del cableado</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+</tr>
+
+
+<!-- 3 PREVENTIVO SOFTWARE -->
+
+<tr>
+<td class="actividad" rowspan="5">3. Preventivo de Software</td>
+<td>1) Actualizaciones del sistema operativo</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>2) Actualizaciones de Office</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>3) Eliminación de archivos temporales y vaciar bandeja de reciclaje</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>4) Revisión del estado del antivirus y escaneo del equipo</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>5) Desfragmentar las unidades de disco duro</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<!-- 4 MONTAJE -->
+
+<tr>
+<td class="actividad" rowspan="3">4. Montaje</td>
+<td>1) Conectar todos los periféricos correspondientes</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+</tr>
+
+<tr>
+<td>2) Verificar que los cables y conectores no presenten daños</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+</tr>
+
+<tr>
+<td>3) Rutear los cables de los periféricos / anclar eliminador de impresora</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+</tr>
+
+
+<!-- 5 INSPECCION -->
+
+<tr>
+<td class="actividad" rowspan="6">5. Inspección</td>
+<td>1) Verificación vida de la pila del UPS</td>
+<td></td>
+<td></td>
+<td></td>
+<td><input type="checkbox"></td>
+</tr>
+
+<tr>
+<td>2) Verificación vida de la pila del BIOS</td>
+<td></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>3) Inspección y funcionamiento del UPS</td>
+<td></td>
+<td></td>
+<td></td>
+<td><input type="checkbox"></td>
+</tr>
+
+<tr>
+<td>4) Encender el equipo y ver que funcione correctamente</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>5) Verificar que los periféricos funcionen correctamente</td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td><input type="checkbox"></td>
+<td></td>
+</tr>
+
+<tr>
+<td>6) Verificar que solo equipo de sistemas esté conectado al UPS</td>
+<td></td>
+<td></td>
+<td></td>
+<td><input type="checkbox"></td>
+</tr>
+
+</table>
+
+<div class="obs">
+
+<label><b>OBSERVACIONES</b></label>
+
+<textarea id="observaciones"></textarea>
+
+</div>
+
+<div class="footer">
+
+<div>
+<label>Requiere mantenimiento correctivo</label><br>
+SI <input type="checkbox" id="si">
+NO <input type="checkbox" id="no">
+</div>
+
+</div>
+
+<div style="text-align:center">
+
+<button onclick="guardarPreventivo()" id="btn_guardar">
+GUARDAR PREVENTIVO
+</button>
+
+<button onclick="cerrar()">CERRAR</button>
+
+</div>
+
+</div>
+<script>
+
+async function cargarDatos(){
+
+let params = new URLSearchParams(window.location.search)
+
+let id = params.get("id")
+let usuario = params.get("usuario")
+
+let res = await fetch("/PREVENTIVO/DATOS/"+id+"?usuario="+usuario)
+
+let data = await res.json()
+
+document.getElementById("planta").value = data.planta
+document.getElementById("linea").value = data.ubicacion
+document.getElementById("reporte").value = data.usuario
+document.getElementById("pc").value = data.pc
+document.getElementById("impresora").value = data.impresora
+document.getElementById("ups").value = data.ups
+
+}
+
+window.onload = async function(){
+
+await cargarDatos()
+await cargarPreventivoGuardado()
+
+}
+
+const params = new URLSearchParams(window.location.search)
+const modo = params.get("modo")
+
+if(modo === "ver"){
+
+document.querySelectorAll("input, textarea").forEach(el=>{
+el.disabled = true
+})
+
+document.getElementById("btn_guardar").style.display = "none"
+
+}
+
+if(modo === "editar"){
+
+document.querySelectorAll("input, textarea").forEach(el=>{
+el.disabled = false
+})
+
+document.getElementById("btn_guardar").style.display = "inline-block"
+
+}
+
+async function guardarPreventivo(){
+
+let params = new URLSearchParams(window.location.search)
+let id = params.get("id")
+
+let observaciones = document.getElementById("observaciones").value
+let fecha = document.getElementById("fecha").value
+
+let checks = []
+
+document.querySelectorAll("input[type=checkbox]").forEach((c,i)=>{
+if(c.checked) checks.push(i)
+})
+
+let res = await fetch("/PREVENTIVO/GUARDAR_DIGITAL/"+id,{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+fecha:fecha,
+observaciones:observaciones,
+checks:checks
+
+})
+
+})
+
+let data = await res.json()
+
+if(data.ok){
+
+alert("Preventivo digital guardado correctamente")
+window.close()
+
+}else{
+
+alert("Error al guardar preventivo")
+console.log(data)
+
+}
+
+}
+
+async function cargarPreventivoGuardado(){
+
+let params = new URLSearchParams(window.location.search)
+let id = params.get("id")
+
+let res = await fetch("/PREVENTIVO/DIGITAL/"+id)
+
+let data = await res.json()
+
+if(!data.existe) return
+
+let checks = data.data.checks
+
+let checkboxes = document.querySelectorAll("input[type=checkbox]")
+
+checks.forEach(i=>{
+if(checkboxes[i]) checkboxes[i].checked = true
+})
+
+document.getElementById("observaciones").value = data.data.observaciones || ""
+document.getElementById("fecha").value = data.data.fecha || ""
+
+}
+
+
+function cerrar(){
+
+window.close()
+
+}
+
+
+</script>
+</body>
+</html>

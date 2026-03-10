@@ -122,43 +122,21 @@ button:hover{
 <div class="container">
     <h1>CHI-IT CONTROL CENTER</h1>
 
+
+
+<div style="display:flex; justify-content:center; margin-top:20px;">
+    
     <button class="preventivo"
         onclick="window.location.href='/static/preventivos.html'">
         MANTENIMIENTOS PREVENTIVOS
     </button>
 
-    <button class="correctivo"
-        onclick="window.location.href='/static/correctivos.html'">
-        MANTENIMIENTOS CORRECTIVOS
-    </button>
+</div>
 
-    <button class="bajas"
-        onclick="window.location.href='/static/bajas.html'">
-        BAJAS DE EQUIPOS
-    </button>
-
-    <button class="presupuesto"
-        onclick="window.location.href='/static/presupuestos_menu.html'">
-        PRESUPUESTOS
-    </button>
-
-    <button class="vales"
-        onclick="window.location.href='/static/control_vales.html'">
-        CONTROL DE VALES
-    </button>
-
-    <button class="serviciosp"
-        onclick="window.location.href='/static/servicio_proveedores_nf.html'">
-        SERVICIOS POR PROVEEDOR
-    </button>
-
-    <button class="directoriop"
-        onclick="window.location.href='/static/directorio_proveedores_nf.html'">
-        DIRECTORIO DE PROVEEDORES
-    </button>
 </div>
 
 <script>
+const rol = sessionStorage.getItem("rol")
 // Verificar sesión — si no hay usuario redirige al login
 if (!sessionStorage.getItem('usuario')) {
     window.location.href = '/static/login.html';

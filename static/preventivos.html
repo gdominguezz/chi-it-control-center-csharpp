@@ -1,402 +1,811 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <title>MANTENIMIENTOS PREVENTIVOS</title>
-
 <style>
-body{
-    margin:0;
-    font-family:Arial;
-    background:#f1f5f9;
-}
+/* ══════════ BASE ══════════ */
+*{box-sizing:border-box;}
+body{margin:0;font-family:Arial;background:#f1f5f9;}
 
 .header{
-    background:#1e293b;
-    color:white;
-    padding:15px;
-    font-size:20px;
-    font-weight:bold;
+    background:#1e293b;color:white;padding:15px 20px;
+    font-size:20px;font-weight:bold;
+    display:flex;justify-content:space-between;align-items:center;
 }
-
-.container{
-    padding:20px;
+.user-info{
+    font-size:13px;background:rgba(255,255,255,0.15);
+    padding:7px 14px;border-radius:6px;
 }
+.container{padding:20px;}
 
 .form-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-    gap:8px;
-    margin-bottom:15px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+    gap:10px;margin-bottom:14px;
 }
-
-input{
-    padding:6px;
-    border:1px solid #ccc;
-    border-radius:5px;
-    font-size:12px;
+.field{display:flex;flex-direction:column;}
+.field label{
+    font-size:11px;font-weight:bold;color:#1e293b;
+    margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;
+}
+.field input{
+    padding:7px;border:1px solid #cbd5e1;border-radius:5px;
+    font-size:12px;background:#f8fafc;transition:border-color .2s;
+}
+.field input:focus{
+    outline:none;border-color:#2563eb;background:white;
+    box-shadow:0 0 0 2px rgba(37,99,235,.15);
 }
 
 button{
-    padding:6px 12px;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-    font-weight:bold;
-    font-size:12px;
-    margin-right:5px;
+    padding:6px 13px;border:none;border-radius:5px;
+    cursor:pointer;font-weight:bold;font-size:12px;margin-right:5px;
 }
+.save     {background:#16a34a;color:white;}
+.delete   {background:#dc2626;color:white;}
+.edit     {background:#f59e0b;color:black;}
+.pdf      {background:#2563eb;color:white;}
+.export   {background:#7c3aed;color:white;}
+.generar   {background:#5208d1;color:white;}
+.reimprimir   {background:#5fc88c;color:white;}
+.historial{background:#0ea5e9;color:white;}
+.back     {background:#dc2626;font-style:italic;color:white;}
 
-.save{background:#16a34a;color:white;}
-.delete{background:#dc2626;color:white;}
-.pdf{background:#2563eb;color:white;}
-.edit{background:#facc15;color:black;}
-.export{background:#7c3aed;color:white;}
-
+/* ══════════ TABLA ══════════ */
 .table-container{
-    width:100%;
-    height:500px;
-    overflow:auto;
-    border:1px solid #ccc;
-    margin-top:10px;
+    width:100%;height:500px;overflow:auto;
+    border:1px solid #ccc;background:white;margin-top:10px;
 }
+table{border-collapse:collapse;min-width:1000px;font-size:11px;}
+th,td{border:1px solid #ccc;padding:6px;white-space:nowrap;text-align:center;}
+th{background:#1e293b;color:white;position:sticky;top:0;z-index:2;}
+.filter-row input{width:100%;font-size:11px;padding:3px;}
+.pagination{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 
-table{
-    border-collapse:collapse;
-    width:100%;
-    font-size:12px;
+/* ══════════ MODALES ══════════ */
+.modal{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.55);
+    justify-content:center;align-items:center;z-index:9999;
 }
+.modal.show{display:flex;}
 
-th,td{
-    border:1px solid #ccc;
-    padding:6px;
-    white-space:nowrap;
-    text-align:center;
+.modal-box{
+    background:white;border-radius:10px;padding:24px;
+    max-height:90vh;overflow-y:auto;
+    box-shadow:0 25px 60px rgba(0,0,0,.35);position:relative;
 }
+.modal-box.form-box {width:min(540px,95vw);}
+.modal-box.hist-box {width:min(900px,95vw);}
 
-th{
-    background:#1e293b;
-    color:white;
+.modal-header{
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:2px solid #e2e8f0;padding-bottom:12px;margin-bottom:18px;
 }
-
-.filter-row input{
-    width:100%;
-    font-size:11px;
+.modal-header h3{margin:0;color:#1e293b;font-size:16px;}
+.close-btn{
+    background:#dc2626;color:white;border:none;
+    padding:5px 12px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:bold;
 }
-
-.pagination{
-    margin-top:10px;
+.modal-footer{
+    display:flex;justify-content:flex-end;gap:8px;
+    border-top:1px solid #e2e8f0;padding-top:14px;margin-top:8px;
 }
-/* AGREGA ESTE CSS (MISMO ESTILO QUE ORDENES DE COMPRA) */
+.modal-footer button{margin-right:0;}
 
-.field{
-display:flex;
-flex-direction:column;
+/* ── Form editar ── */
+.form-field{margin-bottom:13px;display:flex;flex-direction:column;}
+.form-field label{
+    font-size:11px;font-weight:bold;color:#1e293b;
+    margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;
 }
+.form-field input,.form-field textarea{
+    padding:8px;border:1px solid #cbd5e1;border-radius:5px;
+    font-size:12px;background:#f8fafc;font-family:Arial;
+}
+.form-field input:focus,.form-field textarea:focus{
+    outline:none;border-color:#2563eb;background:white;
+    box-shadow:0 0 0 2px rgba(37,99,235,.15);
+}
+.form-field textarea{resize:vertical;min-height:75px;}
 
-.field label{
-font-size:11px;
+/* ── Historial ── */
+.ev-wrap{margin-bottom:22px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;}
+.ev-header{
+    background:#1e293b;color:white;
+    padding:11px 16px;
+    display:flex;flex-wrap:wrap;gap:20px;align-items:center;
+}
+.ev-header span{font-size:12px;}
+.ev-header strong{color:#7dd3fc;}
+.badge-cambio{
+    background:#f59e0b;color:#111;font-size:10px;
+    padding:2px 7px;border-radius:999px;font-weight:bold;
+    text-transform:uppercase;letter-spacing:.3px;margin-left:5px;
+}
+.ev-table{width:100%;border-collapse:collapse;font-size:12px;}
+.ev-table th,.ev-table td{
+    border:1px solid #e5e7eb;padding:8px 10px;text-align:left;
+}
+.ev-table thead th{background:#f1f5f9;color:#374151;font-weight:bold;}
+.ev-table th:first-child{width:22%;}
+.row-changed{background:#fffbeb!important;}
+.row-changed td:nth-child(2){background:#fee2e2;color:#b91c1c;}
+.row-changed td:nth-child(3){background:#dcfce7;color:#15803d;}
+.empty-val{color:#94a3b8;font-style:italic;}
+.sin-hist{text-align:center;padding:40px;color:#64748b;font-size:14px;}
+.color{
 font-weight:bold;
-color:#1e293b;
-margin-bottom:4px;
-text-transform:uppercase;
-letter-spacing:0.3px;
-}
-.back{
-    background:#dc2626;
-    font-style: italic; color:#ffffff;
+text-align:center;
+color:#111;
 }
 
-.field input{
-padding:7px;
-border:1px solid #cbd5e1;
-border-radius:5px;
-font-size:12px;
-background:#f8fafc;
-transition:border-color 0.2s;
+.verde{
+background:#bbf7d0;
 }
 
-.field input:focus{
-outline:none;
-border-color:#2563eb;
-background:white;
-box-shadow:0 0 0 2px rgba(37,99,235,0.15);
+.gris{
+background:#e5e7eb;
+}
+
+.azul{
+background:#bedffb;
+}
+
+.rojo{
+background:#e64444;
+}
+
+.amarillo{
+background:#fef9c3;
+}
+
+.rosa{
+background:#ff7797;
 }
 </style>
 </head>
-
 <body>
 
 <div class="header">
-MANTENIMIENTOS PREVENTIVOS
+    <span>MANTENIMIENTOS PREVENTIVOS</span>
+    <div class="user-info">👤 <strong id="usuarioDisplay">Cargando...</strong></div>
 </div>
 
 <div class="container">
 
-<!-- REEMPLAZA TU BLOQUE form-grid EN preventivos.html POR ESTE -->
+    <!-- Form nuevo registro -->
+    <div class="form-grid">
+        <div class="field"><label>ID Equipo</label>       <input id="ID_EQUIPO"></div>
+        <div class="field"><label>Ubicación</label>       <input id="UBICACION"></div>
+        <div class="field"><label>Nombre Dispositivo</label><input id="nombre_dispositivo"></div>
+        <div class="field"><label>Planta</label>          <input id="PLANTA"></div>
+        <div class="field"><label>Categoría / Color</label><input id="CATEGORIA_COLOR"></div>
+        <div class="field"><label>Observaciones</label><input id="OBSERVACIONES"></div>
+    </div>
 
-<div class="form-grid">
+    <div style="margin-bottom:14px;">
+        <button class="save" onclick="guardar()">GUARDAR</button>
+    </div>
 
-<div class="field">
-<label>ID EQUIPO</label>
-<input id="ID_EQUIPO">
+    <div style="margin-bottom:14px;">
+        <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
+        <button class="export" onclick="exportarTodo()">Exportar Todo</button>
+        <input id="anioExportar" type="number" placeholder="Año (ej: 2026)"
+               style="width:130px;padding:6px;border:1px solid #ccc;border-radius:5px;font-size:12px;">
+        <button class="export" onclick="exportarPorAnio()">Exportar por Año</button><button class="generar" onclick="generarQR()">GENERAR QR POR UBICACION</button>
+        <div style="margin-bottom:15px">
+
+
+        
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ID_EQUIPO</th>
+                    <th>UBICACION</th>
+                    <th>NOMBRE_DISPOSITIVO</th>
+                    <th>PLANTA</th>
+                    <th>CATEGORIA_COLOR</th>
+                    <th>OBSERVACIONES</th>
+                    <th>PDF</th>
+                    <th>ACCIONES</th>
+                </tr>
+                <tr class="filter-row">
+                    <th></th>
+                    <th><input oninput="filtrar()"></th><!-- ID_EQUIPO -->
+                    <th><input oninput="filtrar()"></th><!-- UBICACION -->
+                    <th><input oninput="filtrar()"></th><!-- nombre_dispositivo -->
+                    <th><input oninput="filtrar()"></th><!-- PLANTA -->
+                    <th><input oninput="filtrar()"></th><!-- CATEGORIA_COLOR -->
+                    <th><input oninput="filtrar()"></th><!-- OBSERVACIONES -->
+                    <th></th><th></th>
+                </tr>
+            </thead>
+            <tbody id="tabla"></tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <button onclick="anterior()">◀ Anterior</button>
+        <span id="paginaInfo" style="font-size:13px;color:#475569;"></span>
+        <button onclick="siguiente()">Siguiente ▶</button>
+        <button class="back" onclick="window.location.href='menu.html'">REGRESAR AL MENÚ</button>
+    </div>
 </div>
+<div class="info-panel">
 
-<div class="field">
-<label>UBICACION</label>
-<input id="UBICACION">
-</div>
+<div class="codigo-colores">
 
-<div class="field">
-<label>PLAZO</label>
-<input id="PLAZO">
-</div>
+<h3>CODIGO DE COLORES</h3>
 
-<div class="field">
-<label>REALIZADO POR</label>
-<input id="REALIZADO_POR">
-</div>
-
-<div class="field">
-<label>FECHA REALIZACION</label>
-<input id="FECHA_REALIZACION" type="date">
-</div>
-
-<div class="field">
-<label>OBSERVACIONES</label>
-<input id="OBSERVACIONES">
-</div>
-
-<div class="field">
-<label>NOMBRE DISPOSITIVO</label>
-<input id="nombre_dispositivo">
-</div>
-
-<div class="field">
-<label>PLANTA</label>
-<input id="PLANTA">
-</div>
-
-<div class="field">
-<label>CATEGORIA</label>
-<input id="CATEGORIA_COLOR">
-</div>
-
-</div>
-
-<button class="save" onclick="guardar()">GUARDAR</button>
-
-<!-- 🔥 BOTONES EXPORTAR -->
-<div style="margin-top:15px;">
-<button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
-<button class="export" onclick="exportarTodo()">Exportar Todo</button>
-
-<input id="anioExportar" type="number" placeholder="Año (ej: 2026)" style="width:120px;">
-<button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
-</div>
-
-<div class="table-container">
 <table>
-<thead>
+
 <tr>
-<th>ID</th>
-<th>ID_EQUIPO</th>
-<th>UBICACION</th>
-<th>PLAZO</th>
-<th>REALIZADO_POR</th>
-<th>FECHA_REALIZACION</th>
-<th>OBSERVACIONES</th>
-<th>NOMBRE_DISPOSITIVO</th>
-<th>PLANTA</th>
-<th>CATEGORIA_COLOR</th>
-<th>PDF</th>
-<th>ACCIONES</th>
+<td class="color verde">VERDE</td>
+<td>EQUIPOS CON SISTEMA SRK DE LINEAS</td>
 </tr>
 
-<tr class="filter-row">
-<th></th>
-<th><input id="fID" oninput="aplicarFiltros()"></th>
-<th><input id="fUBICACION" oninput="aplicarFiltros()"></th>
-<th><input id="fPLAZO" oninput="aplicarFiltros()"></th>
-<th><input id="fREALIZADO" oninput="aplicarFiltros()"></th>
-<th><input id="fFECHA" oninput="aplicarFiltros()"></th>
-<th><input id="fOBS" oninput="aplicarFiltros()"></th>
-<th><input id="fNOMBRE" oninput="aplicarFiltros()"></th>
-<th><input id="fPLANTA" oninput="aplicarFiltros()"></th>
-<th><input id="fCATEGORIA" oninput="aplicarFiltros()"></th>
-<th></th>
-<th></th>
+<tr>
+<td class="color gris">GRIS</td>
+<td>TODOS LOS EQUIPOS QUE NO TIENEN SISTEMA SRK</td>
 </tr>
 
-</thead>
-<tbody id="tabla"></tbody>
+<tr>
+<td class="color azul">AZUL</td>
+<td>TODOS LOS EQUIPOS QUE NO ESTAN EN AREA DE PRODUCCION</td>
+</tr>
+
+<tr>
+<td class="color rojo">ROJO</td>
+<td>CORRECTIVOS</td>
+</tr>
+
+<tr>
+<td class="color amarillo">AMARILLO</td>
+<td>TODOS LOS EQUIPOS QUE ESTAN EN INDIVIDUAL</td>
+</tr>
+
+<tr>
+<td class="color rosa">ROSA</td>
+<td>SOPORTE SITE 1 Y 2 STOCK</td>
+</tr>
+
 </table>
+
 </div>
 
-<div class="pagination">
-<button onclick="anterior()">Anterior</button>
-<span id="paginaInfo"></span>
-<button onclick="siguiente()">Siguiente</button>
-<button class="back" onclick="window.location.href='menu.html'">
-REGRESAR AL MENU PRINCIPAL
-</button>
+
+<div class="nomenclatura">
+
+<h3>NOMENCLATURA DE UBICACIONES SITE 1</h3>
+
+<p><b>ANAQUELES:</b> A, T, C, D</p>
+<p><b>NIVELES:</b> 1 al 6</p>
+
+</div>
+
+</div>
+<!-- ════════════════════════════════════════════
+     MODAL EDITAR
+     ════════════════════════════════════════════ -->
+<div id="modalEditar" class="modal">
+    <div class="modal-box form-box">
+        <div class="modal-header">
+            <h3>✏️ Editar Preventivo &nbsp;<span id="editarIdLabel" style="color:#2563eb;">#</span></h3>
+            <button class="close-btn" onclick="cerrarEditar()">✕</button>
+        </div>
+
+        <div class="form-field"><label>ID Equipo</label>
+            <input type="text" id="e_ID_EQUIPO"></div>
+        <div class="form-field"><label>Nombre Dispositivo</label>
+            <input type="text" id="e_nombre_dispositivo"></div>
+        <div class="form-field"><label>Ubicación</label>
+            <input type="text" id="e_UBICACION"></div>
+        <div class="form-field"><label>Planta</label>
+            <input type="text" id="e_PLANTA"></div>
+        <div class="form-field"><label>Categoría / Color</label>
+            <input type="text" id="e_CATEGORIA_COLOR"></div>
+        <div class="form-field"><label>OBSERVACIONES</label>
+            <input type="text" id="e_OBSERVACIONES"></div>
+        <div class="modal-footer">
+            <button class="delete" onclick="cerrarEditar()">Cancelar</button>
+            <button class="save"   onclick="guardarCambios()">💾 Guardar Cambios</button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     MODAL HISTORIAL
+     ════════════════════════════════════════════ -->
+<div id="modalHistorial" class="modal">
+    <div class="modal-box hist-box">
+        <div class="modal-header">
+            <h3>📋 Historial de Cambios — Preventivo&nbsp;
+                <span id="histIdLabel" style="color:#0ea5e9;">#</span>
+            </h3>
+            <button class="close-btn" onclick="cerrarHistorial()">✕</button>
+        </div>
+        <div id="contenidoHistorial"></div>
+        <div class="modal-footer">
+            <button class="delete" onclick="cerrarHistorial()">Cerrar</button>
+        </div>
+    </div>
+</div>
+<!-- ════════════════════════════════════════════
+     MODAL REIMPRIMIR QR
+     ════════════════════════════════════════════ -->
+<div id="modal_reimprimir" class="modal">
+
+<div class="modal_content">
+
+<h3>REIMPRIMIR QR</h3>
+
+<input id="ubicacion_qr" placeholder="ESCRIBE LA UBICACION">
+
+<button onclick="buscarQR()">BUSCAR</button>
+
+<div id="resultado_qr"></div>
+
+<button onclick="cerrarReimpresion()">CERRAR</button>
+
 </div>
 
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded",()=>{
 
-let paginaActual = 1;
-let registrosPorPagina = 10;
-let totalPaginas = 1;
-let datosActuales = [];
+const rol = sessionStorage.getItem("rol")
 
-function obtenerParametros(){
-return new URLSearchParams({
-page: paginaActual,
-limit: registrosPorPagina,
-ID_EQUIPO: fID.value,
-UBICACION: fUBICACION.value,
-PLAZO: fPLAZO.value,
-REALIZADO_POR: fREALIZADO.value,
-FECHA_REALIZACION: fFECHA.value,
-OBSERVACIONES: fOBS.value,
-nombre_dispositivo: fNOMBRE.value,
-PLANTA: fPLANTA.value,
-CATEGORIA_COLOR: fCATEGORIA.value
-});
-}
+if(rol !== "ADMIN"){
 
-function cargar(){
-let params = obtenerParametros();
-fetch(`/PREVENTIVOS?${params.toString()}`)
-.then(res=>res.json())
-.then(data=>{
-datosActuales = data.data;
-totalPaginas = Math.ceil(data.total / registrosPorPagina);
-renderizar();
-});
-}
-
-function aplicarFiltros(){
-paginaActual = 1;
-cargar();
-}
-
-function renderizar(){
-tabla.innerHTML="";
-datosActuales.forEach(row=>{
-tabla.innerHTML+=`
-<tr>
-<td>${row.Id}</td>
-<td>${row.ID_EQUIPO ?? ""}</td>
-<td>${row.UBICACION ?? ""}</td>
-<td>${row.PLAZO ?? ""}</td>
-<td>${row.REALIZADO_POR ?? ""}</td>
-<td>${row.FECHA_REALIZACION ?? ""}</td>
-<td>${row.OBSERVACIONES ?? ""}</td>
-<td>${row.nombre_dispositivo ?? ""}</td>
-<td>${row.PLANTA ?? ""}</td>
-<td>${row.CATEGORIA_COLOR ?? ""}</td>
-<td>
-${row.TIENE_PDF
-? `<button class="pdf" onclick="descargarPDF(${row.Id})">Ver PDF</button>
-   <button class="delete" onclick="eliminarPDF(${row.Id})">Quitar</button>`
-: `<input type="file" onchange="subirPDF(${row.Id},this)">`
-}
-</td>
-<td>
-<button class="edit" onclick="editar(${row.Id})">Editar</button>
-<button class="delete" onclick="eliminar(${row.Id})">Eliminar</button>
-</td>
-</tr>
-`;
-});
-paginaInfo.innerText = `Página ${paginaActual} de ${totalPaginas}`;
-}
-
-function siguiente(){
-if(paginaActual < totalPaginas){
-paginaActual++;
-cargar();
-}
-}
-
-function anterior(){
-if(paginaActual > 1){
-paginaActual--;
-cargar();
-}
-}
-
-function eliminar(id){
-fetch(`/PREVENTIVO/${id}`,{method:"DELETE"})
-.then(()=>cargar());
-}
-
-function subirPDF(id,input){
-let file = input.files[0];
-if(!file) return;
-let formData = new FormData();
-formData.append("file",file);
-fetch(`/PREVENTIVO/PDF/${id}`,{
-method:"POST",
-body:formData
-}).then(()=>cargar());
-}
-
-function descargarPDF(id){
-window.open(`/PREVENTIVO/PDF/${id}`,"_blank");
-}
-
-function guardar(){
-fetch("/PREVENTIVO",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-ID_EQUIPO:ID_EQUIPO.value || null,
-UBICACION:UBICACION.value || null,
-PLAZO:PLAZO.value || null,
-REALIZADO_POR:REALIZADO_POR.value || null,
-FECHA_REALIZACION:FECHA_REALIZACION.value || null,
-OBSERVACIONES:OBSERVACIONES.value || null,
-nombre_dispositivo:nombre_dispositivo.value || null,
-PLANTA:PLANTA.value || null,
-CATEGORIA_COLOR:CATEGORIA_COLOR.value || null
+document.querySelectorAll(".edit").forEach(b=>{
+b.style.display="none"
 })
-}).then(()=>cargar());
+
+document.querySelectorAll(".delete").forEach(b=>{
+b.style.display="none"
+})
+
 }
 
-/* 🔥 EXPORTACIONES */
+})
 
-function exportarFiltrado(){
-let params = obtenerParametros();
-window.open(`/PREVENTIVOS/EXPORTAR?${params.toString()}`);
+// ═══════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════
+let paginaActual   = 1;
+let limite         = 10;
+let totalRegistros = 0;
+let datosActuales  = [];
+let editandoID     = null;
+let usuarioActual  = 'SISTEMA';
+
+const CAMPOS = [
+    {key:'ID_EQUIPO',         label:'ID Equipo'},
+    {key:'UBICACION',         label:'Ubicación'},
+    {key:'nombre_dispositivo',label:'Nombre Dispositivo'},
+    {key:'PLANTA',            label:'Planta'},
+    {key:'CATEGORIA_COLOR',   label:'Categoría / Color'},
+    {key:'OBSERVACIONES',   label:'OBSERVACIONES'},
+];
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+    // Intentar sessionStorage primero (login del sistema)
+    const usr = sessionStorage.getItem('usuario');
+    if (usr) {
+        usuarioActual = usr;
+        document.getElementById('usuarioDisplay').textContent = usr;
+    } else {
+        fetch('/obtener-usuario')
+            .then(r => r.json())
+            .then(d => {
+                usuarioActual = d.usuario || 'SISTEMA';
+                document.getElementById('usuarioDisplay').textContent = usuarioActual;
+            })
+            .catch(() => document.getElementById('usuarioDisplay').textContent = 'Sin sesión');
+    }
+    cargar();
+});
+
+// ═══════════════════════════════════════════
+// CARGA Y RENDERIZADO
+// ═══════════════════════════════════════════
+function obtenerParametros() {
+    const f = document.querySelectorAll('.filter-row input');
+    return new URLSearchParams({
+        page: paginaActual, limit: limite,
+        ID_EQUIPO:          f[0].value,
+        UBICACION:          f[1].value,
+        nombre_dispositivo: f[2].value,
+        PLANTA:             f[3].value,
+        CATEGORIA_COLOR:    f[4].value,
+        OBSERVACIONES:      f[5].value,
+    });
 }
 
-function exportarTodo(){
-window.open(`/PREVENTIVOS/EXPORTAR_TODO`);
+function cargar() {
+    fetch(`/PREVENTIVOS?${obtenerParametros()}`)
+        .then(r => r.json())
+        .then(resp => {
+            totalRegistros = resp.total;
+            datosActuales  = resp.data;
+            renderizar();
+        })
+        .catch(() => {
+            document.getElementById('tabla').innerHTML =
+                '<tr><td colspan="8" style="text-align:center;padding:20px">Error al cargar datos</td></tr>';
+        });
 }
 
-function exportarPorAnio(){
-let anio = document.getElementById("anioExportar").value;
-if(!anio){
-alert("Ingresa un año");
-return;
-}
-window.open(`/PREVENTIVOS/EXPORTAR_ANIO?anio=${anio}`);
+function renderizar() {
+
+    const tbody = document.getElementById('tabla');
+    tbody.innerHTML = '';
+
+    if (!datosActuales.length) {
+        tbody.innerHTML =
+        '<tr><td colspan="8" style="text-align:center;padding:20px">Sin registros</td></tr>';
+        return;
+    }
+
+    datosActuales.forEach(row => {
+
+        let colorFila = "";
+
+        if(row.CATEGORIA_COLOR){
+
+            let c = row.CATEGORIA_COLOR.toLowerCase()
+
+            if(c.includes("verde")) colorFila = "#bbf7d0"
+            if(c.includes("amarillo")) colorFila = "#fef9c3"
+            if(c.includes("rojo")) colorFila = "#FF6666"
+            if(c.includes("gris")) colorFila = "#e5e7eb"
+            if(c.includes("rosa")) colorFila = "#FFC5D3"
+            if(c.includes("azul")) colorFila = "#bedffb"
+
+        }
+
+        tbody.innerHTML += `
+        <tr style="background:${colorFila}">
+            <td>${row.Id}</td>
+            <td>${row.ID_EQUIPO??''}</td>
+            <td>${row.UBICACION??''}</td>
+            <td>${row.nombre_dispositivo??''}</td>
+            <td>${row.PLANTA??''}</td>
+            <td>${row.CATEGORIA_COLOR??''}</td>
+            <td>${row.OBSERVACIONES??''}</td>
+            <td>
+                ${row.TIENE_PDF
+                    ? `<button class="pdf" onclick="verPDF(${row.Id})">Ver PDF</button>
+                       <button class="delete" onclick="eliminarPDF(${row.Id})">Quitar</button>`
+                    : `<input type="file" onchange="subirPDF(${row.Id},this)">`}
+            </td>
+            <td>
+            ${sessionStorage.getItem("rol")==="ADMIN" ? `
+            <button class="edit" onclick="abrirEditar(${row.Id})">✏️ Editar</button>
+            <button class="delete" onclick="eliminar(${row.Id})">🗑️ Eliminar</button>
+            ` : ``}
+
+            <button class="historial" onclick="verHistorial(${row.Id})">📋 Historial</button>
+            </td>
+        </tr>`;
+    });
+
+    document.getElementById('paginaInfo').innerText =
+        `Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)} | Total: ${totalRegistros}`;
 }
 
-function eliminarPDF(id){
-    if(!confirm("¿Seguro que deseas eliminar el PDF?")) return;
-    fetch(`/PREVENTIVO/PDF/${id}`, {method:"DELETE"})
-    .then(()=>cargar());
+function filtrar()   { paginaActual = 1; cargar(); }
+function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
+function anterior()  { if (paginaActual > 1) { paginaActual--; cargar(); } }
+
+// ═══════════════════════════════════════════
+// GUARDAR NUEVO
+// ═══════════════════════════════════════════
+function guardar() {
+    const data = {
+        ID_EQUIPO:          document.getElementById('ID_EQUIPO').value          || null,
+        UBICACION:          document.getElementById('UBICACION').value          || null,
+        nombre_dispositivo: document.getElementById('nombre_dispositivo').value || null,
+        PLANTA:             document.getElementById('PLANTA').value             || null,
+        CATEGORIA_COLOR:    document.getElementById('CATEGORIA_COLOR').value    || null,
+        OBSERVACIONES:      document.getElementById('OBSERVACIONES').value      || null,
+        PLAZO: null, REALIZADO_POR: null, FECHA_REALIZACION: null, OBSERVACIONES: null
+    };
+    fetch('/PREVENTIVO', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+    }).then(r => r.json())
+      .then(d => {
+        if (d.error) { alert('Error: ' + d.error); return; }
+        document.querySelectorAll('.form-grid input').forEach(i => i.value = '');
+        cargar();
+    });
 }
 
-cargar();
+// ═══════════════════════════════════════════
+// ELIMINAR / PDF
+// ═══════════════════════════════════════════
+function eliminar(id) {
+    if (!confirm('¿Eliminar este registro?')) return;
+    fetch(`/PREVENTIVO/${id}`, {method:'DELETE'}).then(() => cargar());
+}
+function subirPDF(id, input) {
+    const fd = new FormData();
+    fd.append('file', input.files[0]);
+    fetch(`/PREVENTIVO/PDF/${id}`, {method:'POST', body:fd}).then(() => cargar());
+}
+function verPDF(id)    { window.open(`/PREVENTIVO/PDF/${id}`, '_blank'); }
+function eliminarPDF(id) {
+    if (!confirm('¿Eliminar el PDF?')) return;
+    fetch(`/PREVENTIVO/PDF/${id}`, {method:'DELETE'}).then(() => cargar());
+}
+
+// ═══════════════════════════════════════════
+// EXPORTAR
+// ═══════════════════════════════════════════
+function exportarFiltrado() { 
+    window.open(`/PREVENTIVOS/EXPORTAR_FILTRADO?${obtenerParametros()}`); 
+}
+function exportarTodo()     { window.open('/PREVENTIVOS/EXPORTAR_TODO'); }
+function exportarPorAnio()  {
+    const a = document.getElementById('anioExportar').value;
+    if (!a) { alert('Ingresa un año'); return; }
+    window.open(`/PREVENTIVOS/EXPORTAR_ANIO?anio=${a}`);
+}
+
+// ═══════════════════════════════════════════
+// MODAL EDITAR
+// ═══════════════════════════════════════════
+function abrirEditar(id) {
+    editandoID = id;
+    document.getElementById('editarIdLabel').textContent = id;
+    const row = datosActuales.find(r => r.Id === id);
+    if (row) {
+        CAMPOS.forEach(({key}) => {
+            const el = document.getElementById('e_' + key);
+            if (el) el.value = row[key] ?? '';
+        });
+    }
+    document.getElementById('modalEditar').classList.add('show');
+    // Scroll al top del modal
+    document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+}
+
+function cerrarEditar() {
+    document.getElementById('modalEditar').classList.remove('show');
+    editandoID = null;
+}
+
+async function guardarCambios() {
+    const datos = {};
+    CAMPOS.forEach(({key}) => {
+        const el = document.getElementById('e_' + key);
+        datos[key] = el ? (el.value || null) : null;
+    });
+
+    try {
+        const res = await fetch(
+            `/PREVENTIVO/${editandoID}?usuario=${encodeURIComponent(usuarioActual)}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Usuario': usuarioActual
+                },
+                body: JSON.stringify(datos)
+            }
+        );
+        const result = await res.json();
+        if (res.ok && !result.error) {
+            cerrarEditar();
+            cargar();
+        } else {
+            alert('Error: ' + (result.error || 'No se pudo guardar'));
+        }
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+// ═══════════════════════════════════════════
+// MODAL HISTORIAL
+// ═══════════════════════════════════════════
+function esc(v) {
+    if (v == null) return '';
+    return String(v)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function norm(v) { return (v == null) ? '' : String(v).trim(); }
+
+function formatFecha(f) {
+    try {
+        const d = new Date(f);
+        if (!isNaN(d)) return d.toLocaleString('es-MX', {
+            year:'numeric', month:'2-digit', day:'2-digit',
+            hour:'2-digit', minute:'2-digit', second:'2-digit'
+        });
+    } catch(e) {}
+    return f ?? '';
+}
+
+function renderEvento(ev) {
+    let antes   = ev.registro_anterior;
+    let despues = ev.registro_nuevo;
+    try { if (typeof antes   === 'string') antes   = JSON.parse(antes);   } catch(e){}
+    try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch(e){}
+
+    const cambiados = new Set();
+    CAMPOS.forEach(({key}) => {
+        if (norm(antes?.[key]) !== norm(despues?.[key])) cambiados.add(key);
+    });
+
+    let filas = '';
+    CAMPOS.forEach(({key, label}) => {
+        const va  = esc(antes?.[key] ?? '');
+        const vd  = esc(despues?.[key] ?? '');
+        const chg = cambiados.has(key);
+        const vacioA = !va || va === 'None';
+        const vacioD = !vd || vd === 'None';
+        filas += `
+        <tr class="${chg ? 'row-changed' : ''}">
+            <td><strong>${esc(label)}</strong>${chg ? ' <span class="badge-cambio">✎ cambio</span>' : ''}</td>
+            <td>${vacioA ? '<span class="empty-val">vacío</span>' : va}</td>
+            <td>${vacioD ? '<span class="empty-val">vacío</span>' : vd}</td>
+        </tr>`;
+    });
+
+    const nCambios = cambiados.size;
+    return `
+    <div class="ev-wrap">
+        <div class="ev-header">
+            <span>🕐 <strong>Fecha y hora:</strong> ${formatFecha(ev.fecha)}</span>
+            <span>👤 <strong>Editado por:</strong> ${esc(ev.usuario) || 'Desconocido'}</span>
+            <span style="margin-left:auto;background:${nCambios>0?'#f59e0b':'#64748b'};
+                color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:bold;">
+                ${nCambios} campo${nCambios!==1?'s':''} modificado${nCambios!==1?'s':''}
+            </span>
+        </div>
+        <table class="ev-table">
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th style="background:#fee2e2;color:#991b1b;">⬅ Antes</th>
+                    <th style="background:#dcfce7;color:#166534;">➡ Después</th>
+                </tr>
+            </thead>
+            <tbody>${filas}</tbody>
+        </table>
+    </div>`;
+}
+
+function verHistorial(id) {
+    document.getElementById('histIdLabel').textContent = id;
+    document.getElementById('contenidoHistorial').innerHTML =
+        '<p style="text-align:center;padding:30px;color:#64748b">Cargando historial...</p>';
+    document.getElementById('modalHistorial').classList.add('show');
+    document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+
+    fetch(`/PREVENTIVOS/${id}/HISTORIAL`)
+        .then(r => r.json())
+        .then(data => {
+            const lista = (data.historial || []).sort(
+                (a,b) => new Date(b.fecha||0) - new Date(a.fecha||0)
+            );
+            if (!lista.length) {
+                document.getElementById('contenidoHistorial').innerHTML =
+                    '<p class="sin-hist">📭 Este registro no tiene ediciones registradas.</p>';
+            } else {
+                document.getElementById('contenidoHistorial').innerHTML =
+                    `<p style="color:#64748b;font-size:12px;margin-bottom:14px">
+                        ${lista.length} edición${lista.length!==1?'es':''} registrada${lista.length!==1?'s':''}
+                    </p>` + lista.map(ev => renderEvento(ev)).join('');
+            }
+        })
+        .catch(() => {
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="color:#dc2626;text-align:center;padding:30px">Error al cargar historial.</p>';
+        });
+}
+
+function cerrarHistorial() {
+    document.getElementById('modalHistorial').classList.remove('show');
+}
+
+// Cerrar con ESC
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
+});
+function generarQR(){
+
+    let ubicacion = prompt("INGRESA LA UBICACION")
+
+    if(!ubicacion) return
+
+    fetch("/QR_MESA_GENERAR/"+encodeURIComponent(ubicacion))
+    .then(r=>r.json())
+    .then(data=>{
+
+        alert("QR GENERADO")
+
+        console.log(data)
+
+    })
+
+}
+async function reimprimirQR(){
+
+    let ubicacion = prompt("UBICACION DEL QR")
+
+    if(!ubicacion) return
+
+    let res = await fetch("/QR_REIMPRIMIR/"+encodeURIComponent(ubicacion))
+
+    let data = await res.json()
+
+    if(data.success){
+
+        window.open(data.qr_url,"_blank")
+
+    }else{
+
+        alert("NO EXISTE QR PARA ESA UBICACION")
+
+    }
+
+}
+
+function abrirReimpresion(){
+
+document.getElementById("modal_reimprimir").style.display="flex";
+
+}
+
+function cerrarReimpresion(){
+
+document.getElementById("modal_reimprimir").style.display="none";
+
+}
+
+
+async function buscarQR(){
+
+let ubicacion = document.getElementById("ubicacion_qr").value;
+
+let res = await fetch("/QR_REIMPRIMIR/"+encodeURIComponent(ubicacion));
+
+let data = await res.json();
+
+let div = document.getElementById("resultado_qr");
+
+if(data.success){
+
+div.innerHTML = `
+<br>
+<a href="${data.qr_url}" target="_blank">VER QR</a>
+<br><br>
+<img src="${data.qr_url}" width="200">
+`;
+
+}else{
+
+div.innerHTML = "NO EXISTE QR PARA ESA UBICACION";
+
+}
+
+}
 
 </script>
-
 </body>
 </html>

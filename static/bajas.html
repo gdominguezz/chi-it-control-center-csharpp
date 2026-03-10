@@ -3,484 +3,656 @@
 <head>
 <meta charset="UTF-8">
 <title>BAJAS DE EQUIPOS</title>
-
 <style>
-body{
-    margin:0;
-    font-family:Arial;
-    background:#f1f5f9;
-}
+/* ══════════ BASE ══════════ */
+*{box-sizing:border-box;}
+body{margin:0;font-family:Arial;background:#f1f5f9;}
 
 .header{
-    background:#1e293b;
-    color:white;
-    padding:15px;
-    font-size:20px;
-    font-weight:bold;
+    background:#1e293b;color:rgb(255, 255, 255);padding:15px 20px;
+    font-size:20px;font-weight:bold;
+    display:flex;justify-content:space-between;align-items:center;
 }
-
-.container{
-    padding:20px;
+.user-info{
+    font-size:13px;background:rgba(255,255,255,0.15);
+    padding:7px 14px;border-radius:6px;
 }
+.container{padding:20px;}
 
 .form-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-    gap:8px;
-    margin-bottom:15px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+    gap:10px;margin-bottom:14px;
 }
-
-input{
-    padding:6px;
-    border:1px solid #ccc;
-    border-radius:5px;
-    font-size:12px;
+.field{display:flex;flex-direction:column;}
+.field label{
+    font-size:11px;font-weight:bold;color:#1e293b;
+    margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;
+}
+.field input{
+    padding:7px;border:1px solid #cbd5e1;border-radius:5px;
+    font-size:12px;background:#f8fafc;transition:border-color .2s;
+}
+.field input:focus{
+    outline:none;border-color:#d4e708;background:white;
+    box-shadow:0 0 0 2px rgba(37,99,235,.15);
 }
 
 button{
-    padding:6px 12px;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-    font-weight:bold;
-    font-size:12px;
+    padding:6px 13px;border:none;border-radius:5px;
+    cursor:pointer;font-weight:bold;font-size:12px;margin-right:5px;
 }
+.save     {background:#16a34a;color:white;}
+.delete   {background:#dc2626;color:white;}
+.edit     {background:#f59e0b;color:black;}
+.pdf      {background:#2563eb;color:white;}
+.export   {background:#7c3aed;color:white;}
+.historial{background:#0ea5e9;color:white;}
+.back     {background:#dc2626;font-style:italic;color:white;}
 
-.save{background:#16a34a;color:white;}
-.delete{background:#dc2626;color:white;}
-.edit{background:#f59e0b;color:white;}
-.pdf{background:#2563eb;color:white;}
-.export{background:#7c3aed;color:white;}
-
+/* ══════════ TABLA ══════════ */
 .table-container{
-    width:100%;
-    height:500px;
-    overflow:auto;
-    border:1px solid #ccc;
-    background:white;
+    width:100%;height:500px;overflow:auto;
+    border:1px solid #ccc;background:white;margin-top:10px;
 }
+table{border-collapse:collapse;min-width:3200px;font-size:11px;}
+th,td{border:1px solid #ccc;padding:6px;white-space:nowrap;text-align:center;}
+th{background:#1e293b;color:white;position:sticky;top:0;z-index:2;}
+.filter-row input{width:100%;font-size:11px;padding:3px;}
+.pagination{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 
-table{
-    border-collapse:collapse;
-    min-width:3500px;
-    font-size:11px;
+/* ══════════ MODALES ══════════ */
+.modal{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.55);
+    justify-content:center;align-items:center;z-index:9999;
 }
+.modal.show{display:flex;}
 
-th,td{
-    border:1px solid #ccc;
-    padding:6px;
-    white-space:nowrap;
-    text-align:center;
+.modal-box{
+    background:white;border-radius:10px;padding:24px;
+    max-height:90vh;overflow-y:auto;
+    box-shadow:0 25px 60px rgba(0,0,0,.35);
 }
+.modal-box.form-box {width:min(560px,95vw);}
+.modal-box.hist-box {width:min(950px,95vw);}
 
-th{
-    background:#1e293b;
-    color:white;
-    position:sticky;
-    top:0;
-    z-index:2;
+.modal-header{
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:2px solid #e2e8f0;padding-bottom:12px;margin-bottom:18px;
 }
+.modal-header h3{margin:0;color:#1e293b;font-size:16px;}
+.close-btn{
+    background:#dc2626;color:white;border:none;
+    padding:5px 12px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:bold;
+}
+.modal-footer{
+    display:flex;justify-content:flex-end;gap:8px;
+    border-top:1px solid #e2e8f0;padding-top:14px;margin-top:8px;
+}
+.modal-footer button{margin-right:0;}
 
-.filter-row input{
-    width:100%;
-    font-size:11px;
+/* ── Form editar ── */
+.form-field{margin-bottom:13px;display:flex;flex-direction:column;}
+.form-field label{
+    font-size:11px;font-weight:bold;color:#1e293b;
+    margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;
 }
-.back{
-    background:#dc2626;
-    font-style: italic; color:#ffffff;
+.form-field input,.form-field textarea{
+    padding:8px;border:1px solid #cbd5e1;border-radius:5px;
+    font-size:12px;background:#f8fafc;font-family:Arial;
 }
+.form-field input:focus,.form-field textarea:focus{
+    outline:none;border-color:#2563eb;background:white;
+    box-shadow:0 0 0 2px rgba(37,99,235,.15);
+}
+.form-field textarea{resize:vertical;min-height:70px;}
 
-.pagination{
-    margin-top:10px;
+/* ── Historial ── */
+.ev-wrap{margin-bottom:22px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;}
+.ev-header{
+    background:#1e293b;color:white;padding:11px 16px;
+    display:flex;flex-wrap:wrap;gap:20px;align-items:center;
 }
-/* AGREGA SI NO EXISTE */
-
-.field{
-display:flex;
-flex-direction:column;
+.ev-header span{font-size:12px;}
+.ev-header strong{color:#7dd3fc;}
+.badge-cambio{
+    background:#f59e0b;color:#111;font-size:10px;
+    padding:2px 7px;border-radius:999px;font-weight:bold;
+    text-transform:uppercase;letter-spacing:.3px;margin-left:5px;
 }
-
-.field label{
-font-size:11px;
-font-weight:bold;
-color:#1e293b;
-margin-bottom:4px;
-text-transform:uppercase;
-letter-spacing:0.3px;
-}
-
-.field input{
-padding:7px;
-border:1px solid #cbd5e1;
-border-radius:5px;
-font-size:12px;
-background:#f8fafc;
-transition:border-color 0.2s;
-}
-
-.field input:focus{
-outline:none;
-border-color:#2563eb;
-background:white;
-box-shadow:0 0 0 2px rgba(37,99,235,0.15);
-}
+.ev-table{width:100%;border-collapse:collapse;font-size:12px;}
+.ev-table th,.ev-table td{border:1px solid #e5e7eb;padding:8px 10px;text-align:left;}
+.ev-table thead th{background:#f1f5f9;color:#374151;font-weight:bold;}
+.ev-table th:first-child{width:22%;}
+.row-changed{background:#fffbeb!important;}
+.row-changed td:nth-child(2){background:#fee2e2;color:#b91c1c;}
+.row-changed td:nth-child(3){background:#dcfce7;color:#15803d;}
+.empty-val{color:#94a3b8;font-style:italic;}
+.sin-hist{text-align:center;padding:40px;color:#64748b;font-size:14px;}
 </style>
 </head>
-
 <body>
 
 <div class="header">
-BAJAS DE EQUIPOS
+    <span>BAJAS DE EQUIPOS</span>
+    <div class="user-info">👤 <strong id="usuarioDisplay">Cargando...</strong></div>
 </div>
 
 <div class="container">
 
-<!-- REEMPLAZA EL BLOQUE form-grid EN bajas.html POR ESTE -->
+    <div class="form-grid">
+        <div class="field"><label>FOLIO</label>                  <input id="FOLIO"></div>
+        <div class="field"><label>ESTADO</label>                 <input id="ESTADO"></div>
+        <div class="field"><label>PLANTA</label>                 <input id="PLANTA"></div>
+        <div class="field"><label>FECHA</label>                  <input id="FECHA" type="date"></div>
+        <div class="field"><label>EQUIPO</label>                 <input id="EQUIPO"></div>
+        <div class="field"><label>MARCA</label>                  <input id="MARCA"></div>
+        <div class="field"><label>MODELO</label>                 <input id="MODELO"></div>
+        <div class="field"><label>NO SERIE</label>               <input id="NO_SERIE"></div>
+        <div class="field"><label>ACTIVO FIJO</label>            <input id="ACTIVO_FIJO"></div>
+        <div class="field"><label>UBICACION / PERSONA</label>    <input id="UBICACION_PERSONA"></div>
+        <div class="field"><label>MOTIVO DE BAJA</label>         <input id="MOTIVO_BAJA"></div>
+        <div class="field"><label>DIAGNOSTICO</label>            <input id="DIAGNOSTICO"></div>
+        <div class="field"><label>COMENTARIOS</label>            <input id="COMENTARIOS"></div>
+        <div class="field"><label>MOTIVO DE CANCELACION</label>  <input id="MOTIVO_CANCELACION"></div>
+    </div>
 
-<div class="form-grid">
+    <div style="margin-bottom:14px;">
+        <button class="save"   onclick="guardar()">GUARDAR</button>
+        <button class="edit"   onclick="cancelarEdicion()" style="background:#64748b;color:white;">CANCELAR</button>
+    </div>
 
-<div class="field">
-<label>FOLIO</label>
-<input id="FOLIO">
+    <div style="margin-bottom:14px;">
+        <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
+        <button class="export" onclick="exportarTodo()">Exportar Todo</button>
+        <input id="anioExportar" type="number" placeholder="Año (ej: 2026)"
+               style="width:130px;padding:6px;border:1px solid #ccc;border-radius:5px;font-size:12px;">
+        <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>FOLIO</th><th>ESTADO</th><th>PLANTA</th><th>FECHA</th>
+                    <th>EQUIPO</th><th>MARCA</th><th>MODELO</th><th>NO_SERIE</th>
+                    <th>ACTIVO_FIJO</th><th>UBICACION_PERSONA</th>
+                    <th>MOTIVO_BAJA</th><th>DIAGNOSTICO</th>
+                    <th>COMENTARIOS</th><th>MOTIVO_CANCELACION</th>
+                    <th>PDF</th><th>ACCIONES</th>
+                </tr>
+                <tr class="filter-row">
+                    <th></th>
+                    <th><input oninput="filtrar()"></th><!-- FOLIO -->
+                    <th><input oninput="filtrar()"></th><!-- ESTADO -->
+                    <th><input oninput="filtrar()"></th><!-- PLANTA -->
+                    <th><input oninput="filtrar()"></th><!-- FECHA -->
+                    <th><input oninput="filtrar()"></th><!-- EQUIPO -->
+                    <th><input oninput="filtrar()"></th><!-- MARCA -->
+                    <th><input oninput="filtrar()"></th><!-- MODELO -->
+                    <th><input oninput="filtrar()"></th><!-- NO_SERIE -->
+                    <th><input oninput="filtrar()"></th><!-- ACTIVO_FIJO -->
+                    <th><input oninput="filtrar()"></th><!-- UBICACION_PERSONA -->
+                    <th><input oninput="filtrar()"></th><!-- MOTIVO_BAJA -->
+                    <th><input oninput="filtrar()"></th><!-- DIAGNOSTICO -->
+                    <th><input oninput="filtrar()"></th><!-- COMENTARIOS -->
+                    <th><input oninput="filtrar()"></th><!-- MOTIVO_CANCELACION -->
+                    <th></th><th></th>
+                </tr>
+            </thead>
+            <tbody id="tabla"></tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <button onclick="anterior()">◀ Anterior</button>
+        <span id="paginaInfo" style="font-size:13px;color:#475569;"></span>
+        <button onclick="siguiente()">Siguiente ▶</button>
+        <button class="back" onclick="window.location.href='menu.html'">REGRESAR AL MENÚ</button>
+    </div>
 </div>
 
-<div class="field">
-<label>ESTADO</label>
-<input id="ESTADO">
+<!-- ════════════════════════════════════════════
+     MODAL EDITAR
+     ════════════════════════════════════════════ -->
+<div id="modalEditar" class="modal">
+    <div class="modal-box form-box">
+        <div class="modal-header">
+            <h3>✏️ Editar Baja &nbsp;<span id="editarIdLabel" style="color:#2563eb;">#</span></h3>
+            <button class="close-btn" onclick="cerrarEditar()">✕</button>
+        </div>
+
+        <div class="form-field"><label>FOLIO</label>
+            <input type="text" id="e_FOLIO"></div>
+        <div class="form-field"><label>ESTADO</label>
+            <input type="text" id="e_ESTADO"></div>
+        <div class="form-field"><label>PLANTA</label>
+            <input type="text" id="e_PLANTA"></div>
+        <div class="form-field"><label>FECHA</label>
+            <input type="date" id="e_FECHA"></div>
+        <div class="form-field"><label>EQUIPO</label>
+            <input type="text" id="e_EQUIPO"></div>
+        <div class="form-field"><label>MARCA</label>
+            <input type="text" id="e_MARCA"></div>
+        <div class="form-field"><label>MODELO</label>
+            <input type="text" id="e_MODELO"></div>
+        <div class="form-field"><label>NO SERIE</label>
+            <input type="text" id="e_NO_SERIE"></div>
+        <div class="form-field"><label>ACTIVO FIJO</label>
+            <input type="text" id="e_ACTIVO_FIJO"></div>
+        <div class="form-field"><label>UBICACION / PERSONA</label>
+            <input type="text" id="e_UBICACION_PERSONA"></div>
+        <div class="form-field"><label>MOTIVO DE BAJA</label>
+            <textarea id="e_MOTIVO_BAJA"></textarea></div>
+        <div class="form-field"><label>DIAGNOSTICO</label>
+            <textarea id="e_DIAGNOSTICO"></textarea></div>
+        <div class="form-field"><label>COMENTARIOS</label>
+            <textarea id="e_COMENTARIOS"></textarea></div>
+        <div class="form-field"><label>MOTIVO DE CANCELACION</label>
+            <textarea id="e_MOTIVO_CANCELACION"></textarea></div>
+
+        <div class="modal-footer">
+            <button class="delete" onclick="cerrarEditar()">Cancelar</button>
+            <button class="save"   onclick="guardarCambios()">💾 Guardar Cambios</button>
+        </div>
+    </div>
 </div>
 
-<div class="field">
-<label>PLANTA</label>
-<input id="PLANTA">
-</div>
-
-<div class="field">
-<label>FECHA</label>
-<input id="FECHA" type="date">
-</div>
-
-<div class="field">
-<label>EQUIPO</label>
-<input id="EQUIPO">
-</div>
-
-<div class="field">
-<label>MARCA</label>
-<input id="MARCA">
-</div>
-
-<div class="field">
-<label>MODELO</label>
-<input id="MODELO">
-</div>
-
-<div class="field">
-<label>NO SERIE</label>
-<input id="NO_SERIE">
-</div>
-
-<div class="field">
-<label>ACTIVO FIJO</label>
-<input id="ACTIVO_FIJO">
-</div>
-
-<div class="field">
-<label>UBICACION / PERSONA</label>
-<input id="UBICACION_PERSONA">
-</div>
-
-<div class="field">
-<label>MOTIVO DE BAJA</label>
-<input id="MOTIVO_BAJA">
-</div>
-
-<div class="field">
-<label>DIAGNOSTICO</label>
-<input id="DIAGNOSTICO">
-</div>
-
-<div class="field">
-<label>COMENTARIOS</label>
-<input id="COMENTARIOS">
-</div>
-
-<div class="field">
-<label>MOTIVO DE CANCELACION</label>
-<input id="MOTIVO_CANCELACION">
-</div>
-
-</div>
-
-<button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
-<button class="edit" onclick="cancelarEdicion()">CANCELAR</button>
-
-<div style="margin-top:15px;">
-<button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
-<button class="export" onclick="exportarTodo()">Exportar Todo</button>
-<input id="anioExportar" type="number" placeholder="Año (ej: 2026)" style="width:120px;">
-<button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
-</div>
-
-<br>
-
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>FOLIO</th>
-<th>ESTADO</th>
-<th>PLANTA</th>
-<th>FECHA</th>
-<th>EQUIPO</th>
-<th>MARCA</th>
-<th>MODELO</th>
-<th>NO_SERIE</th>
-<th>ACTIVO_FIJO</th>
-<th>UBICACION_PERSONA</th>
-<th>MOTIVO_BAJA</th>
-<th>DIAGNOSTICO</th>
-<th>COMENTARIOS</th>
-<th>MOTIVO_CANCELACION</th>
-<th>PDF</th>
-<th>ACCIONES</th>
-</tr>
-
-<tr class="filter-row">
-<th></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th></th>
-<th></th>
-</tr>
-
-</thead>
-<tbody id="tabla"></tbody>
-</table>
-</div>
-
-<div class="pagination">
-<button onclick="anterior()">Anterior</button>
-<span id="paginaInfo"></span>
-<button onclick="siguiente()">Siguiente</button>
-<button class="back" onclick="window.location.href='menu.html'">
-REGRESAR AL MENU PRINCIPAL
-</button>
-</div>
+<!-- ════════════════════════════════════════════
+     MODAL HISTORIAL
+     ════════════════════════════════════════════ -->
+<div id="modalHistorial" class="modal">
+    <div class="modal-box hist-box">
+        <div class="modal-header">
+            <h3>📋 Historial de Cambios — Baja&nbsp;
+                <span id="histIdLabel" style="color:#0ea5e9;">#</span>
+            </h3>
+            <button class="close-btn" onclick="cerrarHistorial()">✕</button>
+        </div>
+        <div id="contenidoHistorial"></div>
+        <div class="modal-footer">
+            <button class="delete" onclick="cerrarHistorial()">Cerrar</button>
+        </div>
+    </div>
 </div>
 
 <script>
-
-let datosOriginales = [];
-let datosFiltrados = [];
-let paginaActual = 1;
-let limite = 10;
+// ═══════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════
+let paginaActual   = 1;
+let limite         = 10;
 let totalRegistros = 0;
-let editandoID = null;
+let datosActuales  = [];
+let editandoID     = null;
+let usuarioActual  = 'SISTEMA';
 
-function guardar(){
+const CAMPOS = [
+    {key:'FOLIO',              label:'Folio'},
+    {key:'ESTADO',             label:'Estado'},
+    {key:'PLANTA',             label:'Planta'},
+    {key:'FECHA',              label:'Fecha'},
+    {key:'EQUIPO',             label:'Equipo'},
+    {key:'MARCA',              label:'Marca'},
+    {key:'MODELO',             label:'Modelo'},
+    {key:'NO_SERIE',           label:'No. Serie'},
+    {key:'ACTIVO_FIJO',        label:'Activo Fijo'},
+    {key:'UBICACION_PERSONA',  label:'Ubicación / Persona'},
+    {key:'MOTIVO_BAJA',        label:'Motivo de Baja'},
+    {key:'DIAGNOSTICO',        label:'Diagnóstico'},
+    {key:'COMENTARIOS',        label:'Comentarios'},
+    {key:'MOTIVO_CANCELACION', label:'Motivo de Cancelación'},
+];
 
-let data = {
-FOLIO:FOLIO.value||null,
-ESTADO:ESTADO.value||null,
-PLANTA:PLANTA.value||null,
-FECHA:FECHA.value||null,
-EQUIPO:EQUIPO.value||null,
-MARCA:MARCA.value||null,
-MODELO:MODELO.value||null,
-NO_SERIE:NO_SERIE.value||null,
-ACTIVO_FIJO:ACTIVO_FIJO.value||null,
-UBICACION_PERSONA:UBICACION_PERSONA.value||null,
-MOTIVO_BAJA:MOTIVO_BAJA.value||null,
-DIAGNOSTICO:DIAGNOSTICO.value||null,
-COMENTARIOS:COMENTARIOS.value||null,
-MOTIVO_CANCELACION:MOTIVO_CANCELACION.value||null
-};
-
-if(editandoID){
-fetch(`/BAJA/${editandoID}`,{
-method:"PUT",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify(data)
-}).then(()=>{
-editandoID=null;
-limpiarFormulario();
-cargar();
-});
-}else{
-fetch("/BAJA",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify(data)
-}).then(()=>{
-limpiarFormulario();
-cargar();
-});
-}
-}
-
-function obtenerParametros(){
-let filtros=document.querySelectorAll(".filter-row input");
-return new URLSearchParams({
-page:             paginaActual,
-limit:            limite,
-FOLIO:            filtros[0].value,
-ESTADO:           filtros[1].value,
-PLANTA:           filtros[2].value,
-FECHA:            filtros[3].value,
-EQUIPO:           filtros[4].value,
-MARCA:            filtros[5].value,
-MODELO:           filtros[6].value,
-NO_SERIE:         filtros[7].value,
-ACTIVO_FIJO:      filtros[8].value,
-UBICACION_PERSONA:filtros[9].value,
-MOTIVO_BAJA:      filtros[10].value,
-DIAGNOSTICO:      filtros[11].value,
-COMENTARIOS:      filtros[12].value,
-MOTIVO_CANCELACION:filtros[13].value
-});
-}
-
-function cargar(){
-let params=obtenerParametros();
-fetch(`/BAJAS?${params.toString()}`)
-.then(res=>res.json())
-.then(resp=>{
-totalRegistros=resp.total;
-datosOriginales=resp.data;
-datosFiltrados=[...datosOriginales];
-renderizar();
-});
-}
-
-function renderizar(){
-
-tabla.innerHTML="";
-
-datosFiltrados.forEach(row=>{
-tabla.innerHTML+=`
-<tr>
-<td>${row.ID}</td>
-<td>${row.FOLIO??""}</td>
-<td>${row.ESTADO??""}</td>
-<td>${row.PLANTA??""}</td>
-<td>${row.FECHA??""}</td>
-<td>${row.EQUIPO??""}</td>
-<td>${row.MARCA??""}</td>
-<td>${row.MODELO??""}</td>
-<td>${row.NO_SERIE??""}</td>
-<td>${row.ACTIVO_FIJO??""}</td>
-<td>${row.UBICACION_PERSONA??""}</td>
-<td>${row.MOTIVO_BAJA??""}</td>
-<td>${row.DIAGNOSTICO??""}</td>
-<td>${row.COMENTARIOS??""}</td>
-<td>${row.MOTIVO_CANCELACION??""}</td>
-
-<td>
-${row.TIENE_PDF
-? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button>
-   <button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
-: `<input type="file" onchange="subirPDF(${row.ID},this)">`
-}
-</td>
-
-<td>
-<button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
-<button class="delete" onclick="eliminar(${row.ID})">Eliminar</button>
-</td>
-
-</tr>`;
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+    const usr = sessionStorage.getItem('usuario');
+    if (usr) {
+        usuarioActual = usr;
+        document.getElementById('usuarioDisplay').textContent = usr;
+    } else {
+        fetch('/obtener-usuario')
+            .then(r => r.json())
+            .then(d => {
+                usuarioActual = d.usuario || 'SISTEMA';
+                document.getElementById('usuarioDisplay').textContent = usuarioActual;
+            })
+            .catch(() => document.getElementById('usuarioDisplay').textContent = 'Sin sesión');
+    }
+    cargar();
 });
 
-paginaInfo.innerText=`Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
+// ═══════════════════════════════════════════
+// CARGA Y RENDERIZADO
+// ═══════════════════════════════════════════
+function obtenerParametros() {
+    const f = document.querySelectorAll('.filter-row input');
+    return new URLSearchParams({
+        page: paginaActual, limit: limite,
+        FOLIO:              f[0].value,
+        ESTADO:             f[1].value,
+        PLANTA:             f[2].value,
+        FECHA:              f[3].value,
+        EQUIPO:             f[4].value,
+        MARCA:              f[5].value,
+        MODELO:             f[6].value,
+        NO_SERIE:           f[7].value,
+        ACTIVO_FIJO:        f[8].value,
+        UBICACION_PERSONA:  f[9].value,
+        MOTIVO_BAJA:        f[10].value,
+        DIAGNOSTICO:        f[11].value,
+        COMENTARIOS:        f[12].value,
+        MOTIVO_CANCELACION: f[13].value,
+    });
 }
 
-function editar(row){
-editandoID=row.ID;
-Object.keys(row).forEach(key=>{
-if(document.getElementById(key)){
-document.getElementById(key).value=row[key] ?? "";
+function cargar() {
+    fetch(`/BAJAS?${obtenerParametros()}`)
+        .then(r => r.json())
+        .then(resp => {
+            totalRegistros = resp.total;
+            datosActuales  = resp.data;
+            renderizar();
+        })
+        .catch(() => {
+            document.getElementById('tabla').innerHTML =
+                '<tr><td colspan="17" style="text-align:center;padding:20px">Error al cargar datos</td></tr>';
+        });
 }
+
+function renderizar() {
+    const tbody = document.getElementById('tabla');
+    tbody.innerHTML = '';
+    if (!datosActuales.length) {
+        tbody.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:20px">Sin registros</td></tr>';
+        return;
+    }
+    datosActuales.forEach(row => {
+        tbody.innerHTML += `
+        <tr>
+            <td>${row.ID}</td>
+            <td>${row.FOLIO??''}</td>
+            <td>${row.ESTADO??''}</td>
+            <td>${row.PLANTA??''}</td>
+            <td>${row.FECHA??''}</td>
+            <td>${row.EQUIPO??''}</td>
+            <td>${row.MARCA??''}</td>
+            <td>${row.MODELO??''}</td>
+            <td>${row.NO_SERIE??''}</td>
+            <td>${row.ACTIVO_FIJO??''}</td>
+            <td>${row.UBICACION_PERSONA??''}</td>
+            <td>${row.MOTIVO_BAJA??''}</td>
+            <td>${row.DIAGNOSTICO??''}</td>
+            <td>${row.COMENTARIOS??''}</td>
+            <td>${row.MOTIVO_CANCELACION??''}</td>
+            <td>
+                ${row.TIENE_PDF
+                    ? `<button class="pdf"    onclick="verPDF(${row.ID})">Ver PDF</button>
+                       <button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
+                    : `<input type="file" onchange="subirPDF(${row.ID},this)">`}
+            </td>
+            <td>
+                <button class="edit"      onclick="abrirEditar(${row.ID})">✏️ Editar</button>
+                <button class="delete"    onclick="eliminar(${row.ID})">🗑️ Eliminar</button>
+                <button class="historial" onclick="verHistorial(${row.ID})">📋 Historial</button>
+            </td>
+        </tr>`;
+    });
+    document.getElementById('paginaInfo').innerText =
+        `Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)} | Total: ${totalRegistros}`;
+}
+
+function filtrar()   { paginaActual = 1; cargar(); }
+function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
+function anterior()  { if (paginaActual > 1) { paginaActual--; cargar(); } }
+
+// ═══════════════════════════════════════════
+// GUARDAR NUEVO
+// ═══════════════════════════════════════════
+function guardar() {
+    const data = {};
+    CAMPOS.forEach(({key}) => {
+        const el = document.getElementById(key);
+        data[key] = el ? (el.value || null) : null;
+    });
+    fetch('/BAJA', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+    }).then(() => {
+        document.querySelectorAll('.form-grid input').forEach(i => i.value = '');
+        cargar();
+    });
+}
+
+function cancelarEdicion() {
+    editandoID = null;
+    document.querySelectorAll('.form-grid input').forEach(i => i.value = '');
+}
+
+// ═══════════════════════════════════════════
+// ELIMINAR / PDF
+// ═══════════════════════════════════════════
+function eliminar(id) {
+    if (!confirm('¿Eliminar este registro?')) return;
+    fetch(`/BAJA/${id}`, {method:'DELETE'}).then(() => cargar());
+}
+function subirPDF(id, input) {
+    const fd = new FormData();
+    fd.append('file', input.files[0]);
+    fetch(`/BAJA/PDF/${id}`, {method:'POST', body:fd}).then(() => cargar());
+}
+function verPDF(id)      { window.open(`/BAJA/PDF/${id}`, '_blank'); }
+function eliminarPDF(id) {
+    if (!confirm('¿Eliminar el PDF?')) return;
+    fetch(`/BAJA/PDF/${id}`, {method:'DELETE'}).then(() => cargar());
+}
+
+// ═══════════════════════════════════════════
+// EXPORTAR
+// ═══════════════════════════════════════════
+function exportarFiltrado() { window.open(`/BAJAS/EXPORTAR?${obtenerParametros()}`); }
+function exportarTodo()     { window.open('/BAJAS/EXPORTAR_TODO'); }
+function exportarPorAnio()  {
+    const a = document.getElementById('anioExportar').value;
+    if (!a) { alert('Ingresa un año'); return; }
+    window.open(`/BAJAS/EXPORTAR_ANIO?anio=${a}`);
+}
+
+// ═══════════════════════════════════════════
+// MODAL EDITAR
+// ═══════════════════════════════════════════
+function abrirEditar(id) {
+    editandoID = id;
+    document.getElementById('editarIdLabel').textContent = id;
+    const row = datosActuales.find(r => r.ID === id);
+    if (row) {
+        CAMPOS.forEach(({key}) => {
+            const el = document.getElementById('e_' + key);
+            if (el) el.value = row[key] ?? '';
+        });
+    }
+    document.getElementById('modalEditar').classList.add('show');
+    document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+}
+
+function cerrarEditar() {
+    document.getElementById('modalEditar').classList.remove('show');
+    editandoID = null;
+}
+
+async function guardarCambios() {
+    const datos = {};
+    CAMPOS.forEach(({key}) => {
+        const el = document.getElementById('e_' + key);
+        datos[key] = el ? (el.value || null) : null;
+    });
+    try {
+        const res = await fetch(
+            `/BAJA/${editandoID}?usuario=${encodeURIComponent(usuarioActual)}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Usuario': usuarioActual
+                },
+                body: JSON.stringify(datos)
+            }
+        );
+        const result = await res.json();
+        if (res.ok && !result.error) {
+            cerrarEditar();
+            cargar();
+        } else {
+            alert('Error: ' + (result.error || 'No se pudo guardar'));
+        }
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+// ═══════════════════════════════════════════
+// MODAL HISTORIAL
+// ═══════════════════════════════════════════
+function esc(v) {
+    if (v == null) return '';
+    return String(v)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function norm(v) { return (v == null) ? '' : String(v).trim(); }
+
+function formatFecha(f) {
+    try {
+        const d = new Date(f);
+        if (!isNaN(d)) return d.toLocaleString('es-MX', {
+            year:'numeric', month:'2-digit', day:'2-digit',
+            hour:'2-digit', minute:'2-digit', second:'2-digit'
+        });
+    } catch(e) {}
+    return f ?? '';
+}
+
+function renderEvento(ev){
+
+    let antes = ev.registro_anterior;
+    let despues = ev.registro_nuevo;
+
+    try{ if(typeof antes==="string") antes=JSON.parse(antes); }catch{}
+    try{ if(typeof despues==="string") despues=JSON.parse(despues); }catch{}
+
+    const cambios=new Set();
+
+    CAMPOS.forEach(({key})=>{
+        if(String(antes?.[key] ?? "") !== String(despues?.[key] ?? "")){
+            cambios.add(key);
+        }
+    });
+
+    let filas="";
+
+    CAMPOS.forEach(({key,label})=>{
+
+        const valorAntes = antes && key in antes ? antes[key] : "";
+        const valorDespues = despues && key in despues ? despues[key] : "";
+
+        const cambiado=cambios.has(key);
+
+        const mostrarAntes =
+            valorAntes===null || valorAntes===""
+            ? '<span class="empty-val">vacío</span>'
+            : valorAntes;
+
+        const mostrarDespues =
+            valorDespues===null || valorDespues===""
+            ? '<span class="empty-val">vacío</span>'
+            : valorDespues;
+
+        filas+=`
+        <tr class="${cambiado?'row-changed':''}">
+            <td>
+                <strong>${label}</strong>
+                ${cambiado?'<span class="badge-cambio">CAMBIO</span>':''}
+            </td>
+
+            <td>${mostrarAntes}</td>
+            <td>${mostrarDespues}</td>
+        </tr>
+        `;
+    });
+
+    return `
+
+    <div class="ev-wrap">
+
+        <div class="ev-header">
+            <span>🕒 Fecha: <strong>${formatFecha(ev.fecha)}</strong></span>
+            <span>👤 Usuario: <strong>${ev.usuario}</strong></span>
+            <span style="margin-left:auto;background:#f59e0b;color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:bold;">
+                ${cambios.size} campo${cambios.size!=1?"s":""} modificado${cambios.size!=1?"s":""}
+            </span>
+        </div>
+
+        <table class="ev-table">
+
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th style="background:#fee2e2">⬅ Antes</th>
+                    <th style="background:#dcfce7">➡ Después</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                ${filas}
+            </tbody>
+
+        </table>
+
+    </div>
+    `;
+}
+
+function verHistorial(id) {
+    document.getElementById('histIdLabel').textContent = id;
+    document.getElementById('contenidoHistorial').innerHTML =
+        '<p style="text-align:center;padding:30px;color:#64748b">Cargando historial...</p>';
+    document.getElementById('modalHistorial').classList.add('show');
+    document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+
+    fetch(`/BAJAS/${id}/HISTORIAL`)
+        .then(r => r.json())
+        .then(data => {
+            const lista = (data.historial || []).sort(
+                (a,b) => new Date(b.fecha||0) - new Date(a.fecha||0)
+            );
+            if (!lista.length) {
+                document.getElementById('contenidoHistorial').innerHTML =
+                    '<p class="sin-hist">📭 Este registro no tiene ediciones registradas.</p>';
+            } else {
+                document.getElementById('contenidoHistorial').innerHTML =
+                    `<p style="color:#64748b;font-size:12px;margin-bottom:14px">
+                        ${lista.length} edición${lista.length!==1?'es':''} registrada${lista.length!==1?'s':''}
+                    </p>` + lista.map(ev => renderEvento(ev)).join('');
+            }
+        })
+        .catch(() => {
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="color:#dc2626;text-align:center;padding:30px">Error al cargar historial.</p>';
+        });
+}
+
+function cerrarHistorial() {
+    document.getElementById('modalHistorial').classList.remove('show');
+}
+
+// Cerrar con ESC
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
 });
-window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function limpiarFormulario(){
-document.querySelectorAll(".form-grid input").forEach(i=>i.value="");
-}
-
-function eliminar(id){
-fetch(`/BAJA/${id}`,{method:"DELETE"})
-.then(()=>cargar());
-}
-
-function subirPDF(id,input){
-let file=input.files[0];
-if(!file)return;
-let formData=new FormData();
-formData.append("file",file);
-fetch(`/BAJA/PDF/${id}`,{method:"POST",body:formData})
-.then(()=>cargar());
-}
-
-function verPDF(id){
-window.open(`/BAJA/PDF/${id}`,"_blank");
-}
-
-function eliminarPDF(id){
-if(!confirm("¿Seguro que deseas eliminar el PDF?")) return;
-fetch(`/BAJA/PDF/${id}`,{method:"DELETE"})
-.then(()=>cargar());
-}
-
-function cancelarEdicion(){
-editandoID=null;
-limpiarFormulario();
-}
-
-function exportarFiltrado(){
-let params=obtenerParametros();
-window.open(`/BAJAS/EXPORTAR?${params.toString()}`);
-}
-
-function exportarTodo(){
-window.open(`/BAJAS/EXPORTAR_TODO`);
-}
-
-function exportarPorAnio(){
-let anio=document.getElementById("anioExportar").value;
-if(!anio){alert("Ingresa un año");return;}
-window.open(`/BAJAS/EXPORTAR_ANIO?anio=${anio}`);
-}
-
-function siguiente(){
-if(paginaActual*limite<totalRegistros){paginaActual++;cargar();}
-}
-
-function anterior(){
-if(paginaActual>1){paginaActual--;cargar();}
-}
-
-function filtrar(){
-paginaActual=1;
-cargar();
-}
-
-cargar();
-
 </script>
-
 </body>
 </html>
