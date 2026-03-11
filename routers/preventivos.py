@@ -906,112 +906,202 @@ def ver_qr_preventivo(ubicacion: str):
         </button>
         """
 
-    html = f"""
-<html>
+    # ── color badge por categoria ──
+    def color_badge(cat):
+        c = (cat or "").lower()
+        if "verde"    in c: return "#10B981","#052e16","Verde"
+        if "amarillo" in c: return "#F59E0B","#1c1400","Amarillo"
+        if "rojo"     in c: return "#EF4444","#1f0000","Rojo"
+        if "gris"     in c: return "#94A3B8","#0f172a","Gris"
+        if "rosa"     in c: return "#F472B6","#1f0011","Rosa"
+        if "azul"     in c: return "#3B82F6","#001233","Azul"
+        return "#64748B","#0f172a", cat or "—"
 
+    def disp_icon(disp):
+        d = (disp or "").upper()
+        if "COMPUTADORA" in d or "CPU" in d: return "🖥️"
+        if "PORTATIL" in d or "LAPTOP" in d:  return "💻"
+        if "IMPRESORA" in d:                  return "🖨️"
+        if "UPS" in d:                        return "🔋"
+        return "🔧"
+
+    html = f"""<!DOCTYPE html>
+<html lang="es">
 <head>
-
-<title>MANTENIMIENTOS PREVENTIVOS</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PM — {ubicacion}</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+:root{{
+  --bg:#0B0F1A;--surface:#111827;--surface2:#1a2235;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --accent:#3B82F6;--text:#F1F5F9;--muted:#64748B;--muted2:#94A3B8;
+  --green:#10B981;--red:#EF4444;--amber:#F59E0B;
+  --radius:14px;
+}}
+*{{box-sizing:border-box;margin:0;padding:0;}}
+body{{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:40px;}}
 
-body {{
-font-family: Arial;
-background:#eef2f7;
-margin:0;
+/* HEADER */
+.top-bar{{
+  background:linear-gradient(135deg,#0f1e35,#0B0F1A);
+  border-bottom:1px solid var(--border2);
+  padding:16px 20px;
+  display:flex;align-items:center;gap:14px;
+  position:sticky;top:0;z-index:100;
+}}
+.top-icon{{
+  width:42px;height:42px;border-radius:10px;
+  background:linear-gradient(135deg,#1D4ED8,#3B82F6);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+  box-shadow:0 0 16px rgba(59,130,246,.4);
+}}
+.top-title{{flex:1;}}
+.top-title h1{{font-size:15px;font-weight:700;letter-spacing:-.01em;}}
+.top-title p{{font-size:11px;color:var(--muted2);margin-top:2px;font-family:'DM Mono',monospace;}}
+
+/* ACTION BUTTONS (global) */
+.global-actions{{
+  padding:16px 20px 8px;
+  display:flex;flex-wrap:wrap;gap:8px;
+}}
+.btn{{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:10px 16px;border:none;border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .2s;letter-spacing:.01em;
+}}
+.btn-primary{{background:var(--accent);color:white;box-shadow:0 4px 12px rgba(59,130,246,.35);}}
+.btn-primary:hover{{background:#2563EB;transform:translateY(-1px);}}
+.btn-success{{background:var(--green);color:white;box-shadow:0 4px 12px rgba(16,185,129,.3);}}
+.btn-success:hover{{background:#059669;transform:translateY(-1px);}}
+.btn-danger{{background:var(--red);color:white;box-shadow:0 4px 12px rgba(239,68,68,.3);}}
+.btn-danger:hover{{background:#DC2626;transform:translateY(-1px);}}
+.btn-amber{{background:var(--amber);color:#1c1400;box-shadow:0 4px 12px rgba(245,158,11,.3);}}
+.btn-amber:hover{{background:#D97706;transform:translateY(-1px);}}
+.btn-ghost{{background:var(--surface2);color:var(--muted2);border:1px solid var(--border2);}}
+.btn-ghost:hover{{color:var(--text);border-color:var(--accent);}}
+
+/* GRID */
+.grid{{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:14px;
+  padding:8px 20px 20px;
 }}
 
-header {{
-background:#2c3e50;
-color:white;
-padding:15px 25px;
-font-size:20px;
-font-weight:bold;
+/* CARD */
+.card{{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  transition:border-color .2s,transform .2s;
+  animation:fadeUp .35s ease both;
+}}
+.card:hover{{border-color:var(--border2);transform:translateY(-2px);}}
+@keyframes fadeUp{{from{{opacity:0;transform:translateY(12px)}}to{{opacity:1;transform:translateY(0)}}}}
+
+/* CARD TOP BAR */
+.card-top{{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface2);
+}}
+.dev-icon{{
+  width:38px;height:38px;border-radius:9px;
+  background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}}
+.dev-name{{flex:1;}}
+.dev-name h3{{font-size:13px;font-weight:700;color:var(--text);}}
+.dev-name span{{font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace;}}
+.color-badge{{
+  padding:4px 10px;border-radius:999px;
+  font-size:10px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
 }}
 
-.container {{
-padding:30px;
+/* CARD BODY */
+.card-body{{padding:14px 16px;}}
+.info-row{{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:10px;margin-bottom:12px;
 }}
-
-.grid {{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
-gap:20px;
+.info-item label{{
+  font-size:9px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:4px;
 }}
-
-.card {{
-background:white;
-border-radius:10px;
-padding:20px;
-box-shadow:0 4px 10px rgba(0,0,0,0.15);
+.info-item input{{
+  width:100%;background:var(--surface2);
+  border:1px solid var(--border2);border-radius:6px;
+  padding:7px 9px;font-size:12px;font-family:'DM Mono',monospace;
+  color:var(--text);transition:border-color .2s;
 }}
-
-.grid_info{{
-display:grid;
-grid-template-columns:1fr 1fr 1fr 1fr;
-gap:20px;
-margin-bottom:15px;
+.info-item input:disabled{{opacity:.6;cursor:default;}}
+.info-item input:not(:disabled){{
+  border-color:var(--accent);background:rgba(59,130,246,.08);
+  box-shadow:0 0 0 3px rgba(59,130,246,.12);
 }}
+.info-item input:focus{{outline:none;}}
 
-.field{{
-display:flex;
-flex-direction:column;
-font-size:13px;
+.obs-label{{
+  font-size:9px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--muted);margin-bottom:4px;
 }}
-
-.label{{
-font-weight:bold;
-color:#2c3e50;
-margin-bottom:3px;
+.obs-field{{
+  width:100%;background:var(--surface2);
+  border:1px solid var(--border2);border-radius:6px;
+  padding:8px 10px;font-size:12px;font-family:'DM Sans',sans-serif;
+  color:var(--text);resize:vertical;min-height:64px;
+  transition:border-color .2s;
 }}
-
-input, textarea {{
-width:100%;
-border:1px solid #ccc;
-border-radius:5px;
-padding:6px;
-font-size:13px;
+.obs-field:disabled{{opacity:.6;cursor:default;}}
+.obs-field:not(:disabled){{
+  border-color:var(--accent);background:rgba(59,130,246,.08);
+  box-shadow:0 0 0 3px rgba(59,130,246,.12);
 }}
+.obs-field:focus{{outline:none;}}
 
-textarea {{
-height:70px;
+/* STATUS ROW */
+.status-row{{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 12px;
+  background:rgba(255,255,255,.03);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  margin:12px -0px;
+  font-size:11px;color:var(--muted2);
 }}
+.status-dot{{width:7px;height:7px;border-radius:50%;flex-shrink:0;}}
+.dot-ok{{background:var(--green);box-shadow:0 0 6px var(--green);}}
+.dot-warn{{background:var(--amber);box-shadow:0 0 6px var(--amber);}}
+.dot-none{{background:var(--muted);}}
 
-.buttons{{
-margin-top:15px;
-display:flex;
-gap:10px;
+/* CARD ACTIONS */
+.card-actions{{
+  display:flex;flex-wrap:wrap;gap:6px;
+  padding:12px 16px;
+  border-top:1px solid var(--border);
+  background:rgba(0,0,0,.15);
 }}
-
-button {{
-padding:7px 14px;
-border:none;
-border-radius:5px;
-cursor:pointer;
-font-size:13px;
-}}
-
-.btn_editar {{background:#3498db;color:white}}
-.btn_guardar {{background:#2ecc71;color:white}}
-.btn_cancelar {{background:#e74c3c;color:white}}
-.btn_salir {{background:#34495e;color:white}}
-.btn_format {{background:#c6d704;color:white}}
-
+.card-actions .btn{{font-size:11px;padding:7px 12px;}}
 </style>
-
 </head>
-
 <body>
 
-<header>
-MANTENIMIENTO PREVENTIVO
-</header>
+<div class="top-bar">
+  <div class="top-icon">🔧</div>
+  <div class="top-title">
+    <h1>Mantenimiento Preventivo</h1>
+    <p>📍 {ubicacion}</p>
+  </div>
+</div>
 
-<div class="container">
-
-<h2>UBICACION: {ubicacion}</h2>
-
-<div style="margin-bottom:20px">
+<div class="global-actions">
 {boton_global}
 </div>
 
@@ -1019,230 +1109,130 @@ MANTENIMIENTO PREVENTIVO
 """
 
     for r in rows:
-
         id_registro = r[0]
-        id_equipo = r[1] or ""
+        id_equipo   = r[1] or ""
         dispositivo = r[2] or ""
-        planta = r[3] or ""
-        color = r[4] or ""
-        fecha = r[5]
-        plazo = r[6]
-        obs = r[7] or ""
+        planta      = r[3] or ""
+        color_cat   = r[4] or ""
+        fecha       = r[5]
+        plazo       = r[6]
+        obs         = r[7] or ""
+
+        badge_color, badge_bg, badge_label = color_badge(color_cat)
+        icon = disp_icon(dispositivo)
+        fecha_str = str(fecha)[:10] if fecha else "Sin registro"
+        plazo_str = plazo if plazo else "No definido"
+
+        # status dot
+        if fecha:
+            dot_class = "dot-ok"
+            dot_label = f"Último PM: {fecha_str}"
+        else:
+            dot_class = "dot-warn"
+            dot_label = "Sin mantenimiento registrado"
 
         html += f"""
-
 <div class="card">
+  <input type="hidden" id="ubicacion_{{id_registro}}" value="{ubicacion}">
 
-<input type="hidden" id="ubicacion_{id_registro}" value="{ubicacion}">
+  <div class="card-top">
+    <div class="dev-icon">{icon}</div>
+    <div class="dev-name">
+      <h3>{dispositivo or "Dispositivo"}</h3>
+      <span>{id_equipo}</span>
+    </div>
+    <span class="color-badge" style="background:{badge_bg};color:{badge_color};border:1px solid {badge_color}40">{badge_label}</span>
+  </div>
 
-<div class="grid_info">
+  <div class="card-body">
+    <div class="info-row">
+      <div class="info-item">
+        <label>ID Equipo</label>
+        <input id="equipo_{id_registro}" value="{id_equipo}" disabled>
+      </div>
+      <div class="info-item">
+        <label>Dispositivo</label>
+        <input id="disp_{id_registro}" value="{dispositivo}" disabled>
+      </div>
+      <div class="info-item">
+        <label>Planta</label>
+        <input id="planta_{id_registro}" value="{planta}" disabled>
+      </div>
+      <div class="info-item">
+        <label>Color</label>
+        <input id="color_{id_registro}" value="{color_cat}" disabled>
+      </div>
+    </div>
 
-<div class="field">
-<div class="label">ID EQUIPO</div>
-<input id="equipo_{id_registro}" value="{id_equipo}" disabled>
-</div>
+    <div class="status-row">
+      <span class="status-dot {dot_class}"></span>
+      <span>{dot_label}</span>
+      <span style="margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#475569">Plazo: {plazo_str}</span>
+    </div>
 
-<div class="field">
-<div class="label">DISPOSITIVO</div>
-<input id="disp_{id_registro}" value="{dispositivo}" disabled>
-</div>
+    <div style="margin-top:10px">
+      <div class="obs-label">Observaciones</div>
+      <textarea class="obs-field" id="obs_{id_registro}" disabled>{obs}</textarea>
+    </div>
+  </div>
 
-<div class="field">
-<div class="label">PLANTA</div>
-<input id="planta_{id_registro}" value="{planta}" disabled>
-</div>
-
-<div class="field">
-<div class="label">COLOR</div>
-<input id="color_{id_registro}" value="{color}" disabled>
-</div>
-
-</div>
-
-<div class="grid_info">
-
-<div class="field">
-<div class="label">ULTIMO MANTENIMIENTO</div>
-<input value="{fecha if fecha else 'SIN REGISTRO'}" disabled>
-</div>
-
-<div class="field">
-<div class="label">PLAZO</div>
-<input value="{plazo if plazo else 'NO DEFINIDO'}" disabled>
-</div>
-
-</div>
-
-<div class="field">
-
-<div class="label">OBSERVACIONES</div>
-
-<textarea id="obs_{id_registro}" disabled>{obs}</textarea>
-
-</div>
-
-<div class="buttons">
-
-<button class="btn_editar" onclick="abrirLogin({id_registro})">EDITAR</button>
-
-<button class="btn_guardar" onclick="guardarCambios({id_registro})">GUARDAR</button>
-
-<button class="btn_cancelar" onclick="location.reload()">CANCELAR</button>
-
-<button class="btn_salir" onclick="window.close()">SALIR</button>
-
-</div>
-
+  <div class="card-actions">
+    <button class="btn btn-primary" onclick="abrirLogin({id_registro})">✏️ Editar</button>
+    <button class="btn btn-success" onclick="guardarCambios({id_registro})">💾 Guardar</button>
+    <button class="btn btn-ghost"   onclick="location.reload()">↩ Cancelar</button>
+    <button class="btn btn-ghost"   onclick="window.close()">✕ Salir</button>
+  </div>
 </div>
 """
 
     html += """
-
 </div>
 
 <script>
-
 function abrirFormatoGlobal(id){
-
-let usuario = prompt("Ingrese su usuario")
-
-if(!usuario){
-alert("Usuario requerido")
-return
+  let usuario = prompt("Ingrese su usuario")
+  if(!usuario){ alert("Usuario requerido"); return }
+  window.open("/static/formato_preventivo_virtual.html?id="+id+"&usuario="+usuario,"_blank","width=1200,height=900")
 }
-
-window.open(
-"/static/formato_preventivo_virtual.html?id="+id+"&usuario="+usuario,
-"_blank",
-"width=1200,height=900"
-)
-
-}
-
 function verPreventivoDigital(id){
-
-window.open(
-"/static/formato_preventivo_virtual.html?id="+id+"&modo=ver",
-"_blank"
-)
-
+  window.open("/static/formato_preventivo_virtual.html?id="+id+"&modo=ver","_blank")
 }
-
-function verPreventivoDigital(id){
-
-window.open(
-"/static/formato_preventivo_virtual.html?id="+id+"&modo=ver",
-"_blank"
-)
-
-}
-
 function editarPreventivo(id){
-
-window.open(
-"/static/formato_preventivo_virtual.html?id="+id+"&modo=editar",
-"_blank"
-)
-
+  window.open("/static/formato_preventivo_virtual.html?id="+id+"&modo=editar","_blank")
 }
 function abrirLogin(id){
-
-let usuario = prompt("Ingrese su usuario")
-
-if(!usuario){
-alert("Usuario requerido")
-return
-}
-
-document.getElementById("equipo_"+id).disabled = false
-document.getElementById("disp_"+id).disabled = false
-document.getElementById("planta_"+id).disabled = false
-document.getElementById("color_"+id).disabled = false
-document.getElementById("obs_"+id).disabled = false
-
+  let usuario = prompt("Ingrese su usuario")
+  if(!usuario){ alert("Usuario requerido"); return }
+  document.getElementById("equipo_"+id).disabled = false
+  document.getElementById("disp_"+id).disabled   = false
+  document.getElementById("planta_"+id).disabled = false
+  document.getElementById("color_"+id).disabled  = false
+  document.getElementById("obs_"+id).disabled    = false
 }
 async function eliminarPreventivo(id){
-
-let confirmar = confirm("¿Eliminar preventivo digital?")
-
-if(!confirmar) return
-
-let res = await fetch("/PREVENTIVO/ELIMINAR_DIGITAL/"+id,{
-method:"DELETE"
-})
-
-let data = await res.json()
-
-if(data.ok){
-
-alert("Preventivo eliminado")
-location.reload()
-
-}else{
-
-alert("Error al eliminar")
-
-}
-
+  if(!confirm("¿Eliminar preventivo digital?")) return
+  let res  = await fetch("/PREVENTIVO/ELIMINAR_DIGITAL/"+id,{method:"DELETE"})
+  let data = await res.json()
+  if(data.ok){ alert("Preventivo eliminado"); location.reload() }
+  else alert("Error al eliminar")
 }
 async function guardarCambios(id){
-
-let id_equipo = document.getElementById("equipo_"+id).value
-let dispositivo = document.getElementById("disp_"+id).value
-let planta = document.getElementById("planta_"+id).value
-let color = document.getElementById("color_"+id).value
-let obs = document.getElementById("obs_"+id).value
-let ubicacion = document.getElementById("ubicacion_"+id).value
-
-let datos = {
-ID_EQUIPO: id_equipo,
-UBICACION: ubicacion,
-nombre_dispositivo: dispositivo,
-PLANTA: planta,
-CATEGORIA_COLOR: color,
-OBSERVACIONES: obs
+  let datos = {
+    ID_EQUIPO:          document.getElementById("equipo_"+id).value,
+    UBICACION:          document.getElementById("ubicacion_"+id).value,
+    nombre_dispositivo: document.getElementById("disp_"+id).value,
+    PLANTA:             document.getElementById("planta_"+id).value,
+    CATEGORIA_COLOR:    document.getElementById("color_"+id).value,
+    OBSERVACIONES:      document.getElementById("obs_"+id).value
+  }
+  let res  = await fetch("/PREVENTIVO/"+id,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(datos)})
+  let data = await res.json()
+  if(data.mensaje){ alert("CAMBIOS GUARDADOS"); location.reload() }
+  else{ alert("ERROR AL GUARDAR"); console.log(data) }
 }
-
-let res = await fetch("/PREVENTIVO/"+id,{
-method:"PUT",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify(datos)
-})
-
-let data = await res.json()
-
-if(data.mensaje){
-alert("CAMBIOS GUARDADOS")
-location.reload()
-}else{
-alert("ERROR AL GUARDAR")
-console.log(data)
-}
-
-}
-async function generarTodosQR(){
-
-if(!confirm("Esto generará QR para TODAS las ubicaciones ¿continuar?"))
-return
-
-let res = await fetch("/QR_GENERAR_TODOS")
-
-let data = await res.json()
-
-alert("QR generados: " + data.total)
-
-console.log(data)
-
-}
-
 </script>
-
 </body>
 </html>
 """
 
     return html
-
-

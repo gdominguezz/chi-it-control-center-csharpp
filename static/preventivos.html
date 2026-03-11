@@ -194,6 +194,8 @@ background:#ff7797;
         <input id="anioExportar" type="number" placeholder="Año (ej: 2026)"
                style="width:130px;padding:6px;border:1px solid #ccc;border-radius:5px;font-size:12px;">
         <button class="export" onclick="exportarPorAnio()">Exportar por Año</button><button class="generar" onclick="generarQR()">GENERAR QR POR UBICACION</button>
+        <button class="reimprimir" onclick="reimprimirQR()">REIMPRIMIR QR</button>
+        <button class="generar" onclick="generarTodosQR()">GENERAR TODOS LOS QR</button>
         <div style="margin-bottom:15px">
 
 
@@ -727,6 +729,12 @@ function cerrarHistorial() {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
 });
+async function generarTodosQR(){
+    if(!confirm("¿Generar QR para TODAS las ubicaciones?")) return
+    let res = await fetch("/QR_GENERAR_TODOS")
+    let data = await res.json()
+    alert("QR generados: " + data.total + " ubicaciones")
+}
 function generarQR(){
 
     let ubicacion = prompt("INGRESA LA UBICACION")
