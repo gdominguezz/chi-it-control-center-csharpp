@@ -45,13 +45,13 @@ def _crear_tabla_auditoria():
     conn = get_connection(); cursor = conn.cursor()
     try:
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS public."AUDITORIA_PREVENTIVOS" (
-                "ID"                SERIAL PRIMARY KEY,
-                "REGISTRO_ID"       INTEGER NOT NULL,
-                "FECHA_CAMBIO"      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                "USUARIO"           VARCHAR(100),
-                "REGISTRO_ANTERIOR" TEXT,
-                "REGISTRO_NUEVO"    TEXT
+            CREATE TABLE IF NOT EXISTS public.auditoria_preventivos (
+                id                SERIAL PRIMARY KEY,
+                registro_id       INTEGER NOT NULL,
+                fecha_cambio      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                usuario           VARCHAR(100),
+                registro_anterior TEXT,
+                registro_nuevo    TEXT
             )
         """)
         conn.commit()
@@ -68,8 +68,8 @@ def _registrar_auditoria(registro_id, usuario, anterior, nuevo):
     try:
         conn = get_connection(); cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO public."AUDITORIA_PREVENTIVOS"
-            ("REGISTRO_ID","USUARIO","REGISTRO_ANTERIOR","REGISTRO_NUEVO","FECHA_CAMBIO")
+            INSERT INTO public.auditoria_preventivos
+            (registro_id,usuario,registro_anterior,registro_nuevo,fecha_cambio)
             VALUES (%s,%s,%s,%s,%s)
         """, (registro_id, usuario,
               json.dumps(anterior, default=str),
@@ -115,28 +115,28 @@ def obtener_preventivos(
     params = []
 
     if ID_EQUIPO:
-        where += ' AND "ID_EQUIPO" ILIKE %s'
+        where += ' AND id_equipo ILIKE %s'
         params.append(f"%{ID_EQUIPO}%")
 
     if UBICACION:
-        where += ' AND "UBICACION" ILIKE %s'
+        where += ' AND ubicacion ILIKE %s'
         params.append(f"%{UBICACION}%")
 
     if nombre_dispositivo:
-        where += ' AND "nombre_dispositivo" ILIKE %s'
+        where += ' AND nombre_dispositivo ILIKE %s'
         params.append(f"%{nombre_dispositivo}%")
 
     if PLANTA:
-        where += ' AND "PLANTA" ILIKE %s'
+        where += ' AND planta ILIKE %s'
         params.append(f"%{PLANTA}%")
 
     if CATEGORIA_COLOR:
-        where += ' AND "CATEGORIA_COLOR" ILIKE %s'
+        where += ' AND categoria_color ILIKE %s'
         params.append(f"%{CATEGORIA_COLOR}%")
 
     # total de registros
     cursor.execute(
-        f'SELECT COUNT(*) FROM public."MANTENIMIENTOS_PREVENTIVOS" {where}',
+        f'SELECT COUNT(*) FROM public.mantenimientos_preventivos {where}',
         params
     )
 
@@ -146,10 +146,10 @@ def obtener_preventivos(
 
     cursor.execute(f"""
         SELECT *,
-        CASE WHEN "PDF" IS NOT NULL THEN true ELSE false END AS "TIENE_PDF"
-        FROM public."MANTENIMIENTOS_PREVENTIVOS"
+        CASE WHEN pdf IS NOT NULL THEN true ELSE false END AS tiene_pdf
+        FROM public.mantenimientos_preventivos
         {where}
-        ORDER BY "Id" DESC
+        ORDER BY id DESC
         LIMIT %s OFFSET %s
     """, params + [limit, offset])
 
@@ -175,10 +175,10 @@ def obtener_datos_preventivo(id: int, usuario: str = None):
 
     cursor.execute("""
     SELECT
-        "UBICACION",
-        "PLANTA"
-    FROM public."MANTENIMIENTOS_PREVENTIVOS"
-    WHERE "Id"=%s
+        ubicacion,
+        planta
+    FROM public.mantenimientos_preventivos
+    WHERE id=%s
     """,(id,))
 
     base = cursor.fetchone()
@@ -193,10 +193,10 @@ def obtener_datos_preventivo(id: int, usuario: str = None):
 
     cursor.execute("""
     SELECT
-        "ID_EQUIPO",
-        "nombre_dispositivo"
-    FROM public."MANTENIMIENTOS_PREVENTIVOS"
-    WHERE "UBICACION"=%s
+        id_equipo,
+        nombre_dispositivo
+    FROM public.mantenimientos_preventivos
+    WHERE ubicacion=%s
     """,(ubicacion,))
 
     rows = cursor.fetchall()
@@ -224,9 +224,9 @@ def obtener_datos_preventivo(id: int, usuario: str = None):
     if usuario:
 
         cursor.execute("""
-        SELECT "NOMBRE"
-        FROM public."USUARIOS"
-        WHERE "USUARIO"=%s
+        SELECT nombre
+        FROM public.usuarios
+        WHERE usuario=%s
         """,(usuario.upper(),))
 
         user_row = cursor.fetchone()
@@ -255,9 +255,9 @@ def obtener_historial_preventivo(id: int):
 
         # Registro actual
         cursor.execute("""
-            SELECT "Id","ID_EQUIPO","UBICACION","PLAZO","REALIZADO_POR",
-                   "FECHA_REALIZACION","OBSERVACIONES","nombre_dispositivo","PLANTA","CATEGORIA_COLOR"
-            FROM public."MANTENIMIENTOS_PREVENTIVOS" WHERE "Id"=%s
+            SELECT id,id_equipo,ubicacion,plazo,realizado_por,
+                   fecha_realizacion,observaciones,nombre_dispositivo,planta,categoria_color
+            FROM public.mantenimientos_preventivos WHERE id=%s
         """, (id,))
         row = cursor.fetchone()
         if not row:
@@ -269,9 +269,9 @@ def obtener_historial_preventivo(id: int):
 
         # Historial
         cursor.execute("""
-            SELECT "ID","FECHA_CAMBIO","USUARIO","REGISTRO_ANTERIOR","REGISTRO_NUEVO"
-            FROM public."AUDITORIA_PREVENTIVOS"
-            WHERE "REGISTRO_ID"=%s ORDER BY "FECHA_CAMBIO" DESC
+            SELECT id,fecha_cambio,usuario,registro_anterior,registro_nuevo
+            FROM public.auditoria_preventivos
+            WHERE registro_id=%s ORDER BY fecha_cambio DESC
         """, (id,))
 
         historial = []
@@ -298,16 +298,16 @@ def crear_preventivo(data: Preventivo):
     conn = get_connection(); cursor = conn.cursor()
     try:
         cursor.execute("""
-            INSERT INTO public."MANTENIMIENTOS_PREVENTIVOS"
-            ("ID_EQUIPO","UBICACION","PLAZO","REALIZADO_POR",
-             "FECHA_REALIZACION","OBSERVACIONES","nombre_dispositivo","PLANTA","CATEGORIA_COLOR")
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING "Id"
+            INSERT INTO public.mantenimientos_preventivos
+            (id_equipo,ubicacion,plazo,realizado_por,
+             fecha_realizacion,observaciones,nombre_dispositivo,planta,categoria_color)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id
         """, (data.ID_EQUIPO, data.UBICACION, data.PLAZO, data.REALIZADO_POR,
               data.FECHA_REALIZACION, data.OBSERVACIONES,
               data.nombre_dispositivo, data.PLANTA, data.CATEGORIA_COLOR))
         new_id = cursor.fetchone()[0]
         conn.commit(); cursor.close(); conn.close()
-        return {"ID": new_id}
+        return {"id": new_id}
     except Exception as e:
         cursor.close(); conn.close()
         return {"error": str(e)}
@@ -319,9 +319,9 @@ def generar_qr_todos():
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT DISTINCT "UBICACION"
-    FROM public."MANTENIMIENTOS_PREVENTIVOS"
-    WHERE "UBICACION" IS NOT NULL
+    SELECT DISTINCT ubicacion
+    FROM public.mantenimientos_preventivos
+    WHERE ubicacion IS NOT NULL
     """)
 
     ubicaciones = cursor.fetchall()
@@ -361,26 +361,26 @@ def editar_preventivo(
     try:
         # Registro anterior
         cursor.execute("""
-            SELECT "ID_EQUIPO","UBICACION","PLAZO","REALIZADO_POR",
-                   "FECHA_REALIZACION","OBSERVACIONES","nombre_dispositivo","PLANTA","CATEGORIA_COLOR"
-            FROM public."MANTENIMIENTOS_PREVENTIVOS" WHERE "Id"=%s
+            SELECT id_equipo,ubicacion,plazo,realizado_por,
+                   fecha_realizacion,observaciones,nombre_dispositivo,planta,categoria_color
+            FROM public.mantenimientos_preventivos WHERE id=%s
         """, (id,))
         row = cursor.fetchone()
         anterior = {
-            "ID_EQUIPO": row[0], "UBICACION": row[1], "PLAZO": row[2],
-            "REALIZADO_POR": row[3],
-            "FECHA_REALIZACION": str(row[4]) if row[4] else None,
-            "OBSERVACIONES": row[5], "nombre_dispositivo": row[6],
-            "PLANTA": row[7], "CATEGORIA_COLOR": row[8]
+            "id_equipo": row[0], "ubicacion": row[1], "plazo": row[2],
+            "realizado_por": row[3],
+            "fecha_realizacion": str(row[4]) if row[4] else None,
+            "observaciones": row[5], "nombre_dispositivo": row[6],
+            "planta": row[7], "categoria_color": row[8]
         } if row else {}
 
         # Actualizar
         cursor.execute("""
-            UPDATE public."MANTENIMIENTOS_PREVENTIVOS" SET
-            "ID_EQUIPO"=%s,"UBICACION"=%s,"PLAZO"=%s,"REALIZADO_POR"=%s,
-            "FECHA_REALIZACION"=%s,"OBSERVACIONES"=%s,
-            "nombre_dispositivo"=%s,"PLANTA"=%s,"CATEGORIA_COLOR"=%s
-            WHERE "Id"=%s
+            UPDATE public.mantenimientos_preventivos SET
+            id_equipo=%s,ubicacion=%s,plazo=%s,realizado_por=%s,
+            fecha_realizacion=%s,observaciones=%s,
+            nombre_dispositivo=%s,planta=%s,categoria_color=%s
+            WHERE id=%s
         """, (data.ID_EQUIPO, data.UBICACION, data.PLAZO, data.REALIZADO_POR,
               data.FECHA_REALIZACION, data.OBSERVACIONES,
               data.nombre_dispositivo, data.PLANTA, data.CATEGORIA_COLOR, id))
@@ -388,12 +388,12 @@ def editar_preventivo(
 
         # Auditoría
         nuevo = {
-            "ID_EQUIPO": data.ID_EQUIPO, "UBICACION": data.UBICACION,
-            "PLAZO": data.PLAZO, "REALIZADO_POR": data.REALIZADO_POR,
-            "FECHA_REALIZACION": data.FECHA_REALIZACION,
-            "OBSERVACIONES": data.OBSERVACIONES,
+            "id_equipo": data.ID_EQUIPO, "ubicacion": data.UBICACION,
+            "plazo": data.PLAZO, "realizado_por": data.REALIZADO_POR,
+            "fecha_realizacion": data.FECHA_REALIZACION,
+            "observaciones": data.OBSERVACIONES,
             "nombre_dispositivo": data.nombre_dispositivo,
-            "PLANTA": data.PLANTA, "CATEGORIA_COLOR": data.CATEGORIA_COLOR
+            "planta": data.PLANTA, "categoria_color": data.CATEGORIA_COLOR
         }
         usr = _obtener_usuario(request, usuario)
         _registrar_auditoria(id, usr, anterior, nuevo)
@@ -417,9 +417,9 @@ def eliminar_preventivo(id: int, request: Request):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT "ROL"
-    FROM public."USUARIOS"
-    WHERE "USUARIO"=%s
+    SELECT rol
+    FROM public.usuarios
+    WHERE usuario=%s
     """,(usuario,))
 
     rol = cursor.fetchone()[0]
@@ -428,8 +428,8 @@ def eliminar_preventivo(id: int, request: Request):
         return {"error":"No tienes permiso para eliminar"}
 
     cursor.execute("""
-    DELETE FROM public."MANTENIMIENTOS_PREVENTIVOS"
-    WHERE "Id"=%s
+    DELETE FROM public.mantenimientos_preventivos
+    WHERE id=%s
     """,(id,))
 
     conn.commit()
@@ -451,7 +451,7 @@ async def subir_pdf_preventivo(id: int, file: UploadFile = File(...)):
         ruta.write_bytes(contenido)
 
         conn = get_connection(); cursor = conn.cursor()
-        cursor.execute('UPDATE public."MANTENIMIENTOS_PREVENTIVOS" SET "PDF"=%s WHERE "Id"=%s',
+        cursor.execute('UPDATE public.mantenimientos_preventivos SET pdf=%s WHERE id=%s',
                        (str(ruta), id))
         conn.commit(); cursor.close(); conn.close()
         return {"mensaje": "PDF subido"}
@@ -473,7 +473,7 @@ def eliminar_pdf_preventivo(id: int):
         ruta = _pdf_path(id)
         if ruta.exists(): ruta.unlink()
         conn = get_connection(); cursor = conn.cursor()
-        cursor.execute('UPDATE public."MANTENIMIENTOS_PREVENTIVOS" SET "PDF"=NULL WHERE "Id"=%s', (id,))
+        cursor.execute('UPDATE public.mantenimientos_preventivos SET pdf=NULL WHERE id=%s', (id,))
         conn.commit(); cursor.close(); conn.close()
         return {"mensaje": "PDF eliminado"}
     except Exception as e:
@@ -489,7 +489,7 @@ def exportar_preventivos_todo():
     conn = get_connection()
 
     df = pd.read_sql(
-        'SELECT * FROM public."MANTENIMIENTOS_PREVENTIVOS" ORDER BY "Id" DESC',
+        'SELECT * FROM public.mantenimientos_preventivos ORDER BY id DESC',
         conn
     )
 
@@ -505,7 +505,7 @@ def exportar_preventivos_todo():
 
         for row in range(2, len(df)+2):
 
-            color = str(df.iloc[row-2]["CATEGORIA_COLOR"]).lower()
+            color = str(df.iloc[row-2]["categoria_color"]).lower()
 
             fill = None
 
@@ -558,41 +558,41 @@ def exportar_preventivos_filtrado(
     params = []
 
     if ID_EQUIPO:
-        where += ' AND "ID_EQUIPO" ILIKE %s'
+        where += ' AND id_equipo ILIKE %s'
         params.append(f"%{ID_EQUIPO}%")
 
     if UBICACION:
-        where += ' AND "UBICACION" ILIKE %s'
+        where += ' AND ubicacion ILIKE %s'
         params.append(f"%{UBICACION}%")
 
     if nombre_dispositivo:
-        where += ' AND "nombre_dispositivo" ILIKE %s'
+        where += ' AND nombre_dispositivo ILIKE %s'
         params.append(f"%{nombre_dispositivo}%")
 
     if PLANTA:
-        where += ' AND "PLANTA" ILIKE %s'
+        where += ' AND planta ILIKE %s'
         params.append(f"%{PLANTA}%")
 
     if CATEGORIA_COLOR:
-        where += ' AND "CATEGORIA_COLOR" ILIKE %s'
+        where += ' AND categoria_color ILIKE %s'
         params.append(f"%{CATEGORIA_COLOR}%")
 
     if OBSERVACIONES:
-        where += ' AND "OBSERVACIONES" ILIKE %s'
+        where += ' AND observaciones ILIKE %s'
         params.append(f"%{OBSERVACIONES}%")
 
     query = f"""
     SELECT
-    "Id",
-    "ID_EQUIPO",
-    "UBICACION",
-    "nombre_dispositivo",
-    "PLANTA",
-    "CATEGORIA_COLOR",
-    "OBSERVACIONES"
-    FROM public."MANTENIMIENTOS_PREVENTIVOS"
+    id,
+    id_equipo,
+    ubicacion,
+    nombre_dispositivo,
+    planta,
+    categoria_color,
+    observaciones
+    FROM public.mantenimientos_preventivos
     {where}
-    ORDER BY "Id" DESC
+    ORDER BY id DESC
     """
 
     df = pd.read_sql(query, conn, params=params)
@@ -601,7 +601,7 @@ def exportar_preventivos_filtrado(
     # ───────── COLORES ─────────
     def aplicar_color(row):
 
-        color = str(row["CATEGORIA_COLOR"]).lower()
+        color = str(row["categoria_color"]).lower()
 
         if "verde" in color:
             return ['background-color: #bbf7d0']*len(row)
@@ -647,9 +647,9 @@ def exportar_preventivos_anio(anio: int = Query(...)):
 
     df = pd.read_sql("""
         SELECT *
-        FROM public."MANTENIMIENTOS_PREVENTIVOS"
-        WHERE EXTRACT(YEAR FROM "FECHA_REALIZACION") = %s
-        ORDER BY "Id" DESC
+        FROM public.mantenimientos_preventivos
+        WHERE EXTRACT(YEAR FROM fecha_realizacion) = %s
+        ORDER BY id DESC
     """, conn, params=(anio,))
 
     conn.close()
@@ -664,7 +664,7 @@ def exportar_preventivos_anio(anio: int = Query(...)):
 
         for row in range(2, len(df)+2):
 
-            color = str(df.iloc[row-2]["CATEGORIA_COLOR"]).lower()
+            color = str(df.iloc[row-2]["categoria_color"]).lower()
 
             fill = None
 
@@ -777,11 +777,11 @@ def guardar_preventivo_digital(id:int, data:dict):
     cursor = conn.cursor()
 
     cursor.execute("""
-    UPDATE public."MANTENIMIENTOS_PREVENTIVOS"
+    UPDATE public.mantenimientos_preventivos
     SET
-        "PREVENTIVO_DIGITAL" = %s,
-        "FECHA_REALIZACION" = NOW()
-    WHERE "Id" = %s
+        preventivo_digital = %s,
+        fecha_realizacion = NOW()
+    WHERE id = %s
     """,(json.dumps(data), id))
 
     conn.commit()
@@ -797,9 +797,9 @@ def obtener_preventivo_digital(id:int):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT "PREVENTIVO_DIGITAL"
-    FROM public."MANTENIMIENTOS_PREVENTIVOS"
-    WHERE "Id"=%s
+    SELECT preventivo_digital
+    FROM public.mantenimientos_preventivos
+    WHERE id=%s
     """,(id,))
 
     row = cursor.fetchone()
@@ -827,9 +827,9 @@ def eliminar_preventivo_digital(id:int):
     cursor = conn.cursor()
 
     cursor.execute("""
-    UPDATE public."MANTENIMIENTOS_PREVENTIVOS"
-    SET "PREVENTIVO_DIGITAL" = NULL
-    WHERE "Id" = %s
+    UPDATE public.mantenimientos_preventivos
+    SET preventivo_digital = NULL
+    WHERE id = %s
     """,(id,))
 
     conn.commit()
@@ -847,18 +847,18 @@ def ver_qr_preventivo(ubicacion: str):
 
     cursor.execute("""
     SELECT
-    "Id",
-    "ID_EQUIPO",
-    "nombre_dispositivo",
-    "PLANTA",
-    "CATEGORIA_COLOR",
-    "FECHA_REALIZACION",
-    "PLAZO",
-    "OBSERVACIONES",
-    "PREVENTIVO_DIGITAL"
-    FROM public."MANTENIMIENTOS_PREVENTIVOS"
-    WHERE "UBICACION"=%s
-    ORDER BY "nombre_dispositivo"
+    id,
+    id_equipo,
+    nombre_dispositivo,
+    planta,
+    categoria_color,
+    fecha_realizacion,
+    plazo,
+    observaciones,
+    preventivo_digital
+    FROM public.mantenimientos_preventivos
+    WHERE ubicacion=%s
+    ORDER BY nombre_dispositivo
     """,(ubicacion,))
 
     rows = cursor.fetchall()
@@ -881,32 +881,26 @@ def ver_qr_preventivo(ubicacion: str):
     if preventivo_existe:
 
         boton_global = f"""
-        <button class="btn_format"
-        onclick="verPreventivoDigital({primer_id})">
-        VER PREVENTIVO DIGITAL
+        <button class="btn btn-primary" onclick="verPreventivoDigital({primer_id})">
+          <span>👁</span> Ver Preventivo
         </button>
-
-        <button class="btn_editar"
-        onclick="editarPreventivo({primer_id})">
-        EDITAR PREVENTIVO
+        <button class="btn btn-success" onclick="editarPreventivo({primer_id})">
+          <span>✏️</span> Editar Preventivo
         </button>
-
-        <button class="btn_cancelar"
-        onclick="eliminarPreventivo({primer_id})">
-        ELIMINAR PREVENTIVO
+        <button class="btn btn-danger" onclick="eliminarPreventivo({primer_id})">
+          <span>🗑</span> Eliminar Preventivo
         </button>
         """
 
     else:
 
         boton_global = f"""
-        <button class="btn_format"
-        onclick="abrirFormatoGlobal({primer_id})">
-        GENERAR PREVENTIVO
+        <button class="btn btn-primary" style="font-size:15px;padding:14px 28px;box-shadow:0 0 24px rgba(59,130,246,.45);" onclick="abrirFormatoGlobal({primer_id})">
+          <span>📋</span> Generar Preventivo
         </button>
         """
 
-    # ── color badge por categoria ──
+    # ── helpers ──
     def color_badge(cat):
         c = (cat or "").lower()
         if "verde"    in c: return "#10B981","#052e16","Verde"
@@ -920,9 +914,9 @@ def ver_qr_preventivo(ubicacion: str):
     def disp_icon(disp):
         d = (disp or "").upper()
         if "COMPUTADORA" in d or "CPU" in d: return "🖥️"
-        if "PORTATIL" in d or "LAPTOP" in d:  return "💻"
-        if "IMPRESORA" in d:                  return "🖨️"
-        if "UPS" in d:                        return "🔋"
+        if "PORTATIL" in d or "LAPTOP" in d: return "💻"
+        if "IMPRESORA" in d:                 return "🖨️"
+        if "UPS" in d:                       return "🔋"
         return "🔧"
 
     html = f"""<!DOCTYPE html>
@@ -933,178 +927,59 @@ def ver_qr_preventivo(ubicacion: str):
 <title>PM — {ubicacion}</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{{
-  --bg:#0B0F1A;--surface:#111827;--surface2:#1a2235;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
-  --accent:#3B82F6;--text:#F1F5F9;--muted:#64748B;--muted2:#94A3B8;
-  --green:#10B981;--red:#EF4444;--amber:#F59E0B;
-  --radius:14px;
-}}
+:root{{--bg:#0B0F1A;--surface:#111827;--surface2:#1a2235;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--accent:#3B82F6;--text:#F1F5F9;--muted:#64748B;--muted2:#94A3B8;--green:#10B981;--red:#EF4444;--amber:#F59E0B;--radius:14px;}}
 *{{box-sizing:border-box;margin:0;padding:0;}}
 body{{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:40px;}}
-
-/* HEADER */
-.top-bar{{
-  background:linear-gradient(135deg,#0f1e35,#0B0F1A);
-  border-bottom:1px solid var(--border2);
-  padding:16px 20px;
-  display:flex;align-items:center;gap:14px;
-  position:sticky;top:0;z-index:100;
-}}
-.top-icon{{
-  width:42px;height:42px;border-radius:10px;
-  background:linear-gradient(135deg,#1D4ED8,#3B82F6);
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;flex-shrink:0;
-  box-shadow:0 0 16px rgba(59,130,246,.4);
-}}
+.top-bar{{background:linear-gradient(135deg,#0f1e35,#0B0F1A);border-bottom:1px solid var(--border2);padding:16px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;}}
+.top-icon{{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#1D4ED8,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 0 16px rgba(59,130,246,.4);}}
 .top-title{{flex:1;}}
-.top-title h1{{font-size:15px;font-weight:700;letter-spacing:-.01em;}}
+.top-title h1{{font-size:15px;font-weight:700;}}
 .top-title p{{font-size:11px;color:var(--muted2);margin-top:2px;font-family:'DM Mono',monospace;}}
-
-/* ACTION BUTTONS (global) */
-.global-actions{{
-  padding:16px 20px 8px;
-  display:flex;flex-wrap:wrap;gap:8px;
-}}
-.btn{{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:10px 16px;border:none;border-radius:8px;
-  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
-  cursor:pointer;transition:all .2s;letter-spacing:.01em;
-}}
+.global-actions{{padding:16px 20px 8px;display:flex;flex-wrap:wrap;gap:8px;}}
+.btn{{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}}
 .btn-primary{{background:var(--accent);color:white;box-shadow:0 4px 12px rgba(59,130,246,.35);}}
 .btn-primary:hover{{background:#2563EB;transform:translateY(-1px);}}
-.btn-success{{background:var(--green);color:white;box-shadow:0 4px 12px rgba(16,185,129,.3);}}
+.btn-success{{background:var(--green);color:white;}}
 .btn-success:hover{{background:#059669;transform:translateY(-1px);}}
-.btn-danger{{background:var(--red);color:white;box-shadow:0 4px 12px rgba(239,68,68,.3);}}
-.btn-danger:hover{{background:#DC2626;transform:translateY(-1px);}}
-.btn-amber{{background:var(--amber);color:#1c1400;box-shadow:0 4px 12px rgba(245,158,11,.3);}}
-.btn-amber:hover{{background:#D97706;transform:translateY(-1px);}}
+.btn-danger{{background:var(--red);color:white;}}
 .btn-ghost{{background:var(--surface2);color:var(--muted2);border:1px solid var(--border2);}}
 .btn-ghost:hover{{color:var(--text);border-color:var(--accent);}}
-
-/* GRID */
-.grid{{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-  gap:14px;
-  padding:8px 20px 20px;
-}}
-
-/* CARD */
-.card{{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  overflow:hidden;
-  transition:border-color .2s,transform .2s;
-  animation:fadeUp .35s ease both;
-}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;padding:8px 20px 20px;}}
+.card{{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s,transform .2s;animation:fadeUp .35s ease both;}}
 .card:hover{{border-color:var(--border2);transform:translateY(-2px);}}
 @keyframes fadeUp{{from{{opacity:0;transform:translateY(12px)}}to{{opacity:1;transform:translateY(0)}}}}
-
-/* CARD TOP BAR */
-.card-top{{
-  display:flex;align-items:center;gap:12px;
-  padding:14px 16px;
-  border-bottom:1px solid var(--border);
-  background:var(--surface2);
-}}
-.dev-icon{{
-  width:38px;height:38px;border-radius:9px;
-  background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);
-  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
-}}
+.card-top{{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--surface2);}}
+.dev-icon{{width:38px;height:38px;border-radius:9px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}}
 .dev-name{{flex:1;}}
-.dev-name h3{{font-size:13px;font-weight:700;color:var(--text);}}
+.dev-name h3{{font-size:13px;font-weight:700;}}
 .dev-name span{{font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace;}}
-.color-badge{{
-  padding:4px 10px;border-radius:999px;
-  font-size:10px;font-weight:700;
-  letter-spacing:.06em;text-transform:uppercase;
-}}
-
-/* CARD BODY */
+.color-badge{{padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}}
 .card-body{{padding:14px 16px;}}
-.info-row{{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:10px;margin-bottom:12px;
-}}
-.info-item label{{
-  font-size:9px;font-weight:600;text-transform:uppercase;
-  letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:4px;
-}}
-.info-item input{{
-  width:100%;background:var(--surface2);
-  border:1px solid var(--border2);border-radius:6px;
-  padding:7px 9px;font-size:12px;font-family:'DM Mono',monospace;
-  color:var(--text);transition:border-color .2s;
-}}
-.info-item input:disabled{{opacity:.6;cursor:default;}}
-.info-item input:not(:disabled){{
-  border-color:var(--accent);background:rgba(59,130,246,.08);
-  box-shadow:0 0 0 3px rgba(59,130,246,.12);
-}}
+.info-row{{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}}
+.info-item label{{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:4px;}}
+.info-item input{{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:7px 9px;font-size:12px;font-family:'DM Mono',monospace;color:var(--text);}}
+.info-item input:disabled{{opacity:.6;}}
+.info-item input:not(:disabled){{border-color:var(--accent);background:rgba(59,130,246,.08);box-shadow:0 0 0 3px rgba(59,130,246,.12);}}
 .info-item input:focus{{outline:none;}}
-
-.obs-label{{
-  font-size:9px;font-weight:600;text-transform:uppercase;
-  letter-spacing:.1em;color:var(--muted);margin-bottom:4px;
-}}
-.obs-field{{
-  width:100%;background:var(--surface2);
-  border:1px solid var(--border2);border-radius:6px;
-  padding:8px 10px;font-size:12px;font-family:'DM Sans',sans-serif;
-  color:var(--text);resize:vertical;min-height:64px;
-  transition:border-color .2s;
-}}
-.obs-field:disabled{{opacity:.6;cursor:default;}}
-.obs-field:not(:disabled){{
-  border-color:var(--accent);background:rgba(59,130,246,.08);
-  box-shadow:0 0 0 3px rgba(59,130,246,.12);
-}}
-.obs-field:focus{{outline:none;}}
-
-/* STATUS ROW */
-.status-row{{
-  display:flex;align-items:center;gap:8px;
-  padding:9px 12px;
-  background:rgba(255,255,255,.03);
-  border-top:1px solid var(--border);
-  border-bottom:1px solid var(--border);
-  margin:12px -0px;
-  font-size:11px;color:var(--muted2);
-}}
+.status-row{{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(255,255,255,.03);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:12px 0;font-size:11px;color:var(--muted2);}}
 .status-dot{{width:7px;height:7px;border-radius:50%;flex-shrink:0;}}
 .dot-ok{{background:var(--green);box-shadow:0 0 6px var(--green);}}
 .dot-warn{{background:var(--amber);box-shadow:0 0 6px var(--amber);}}
-.dot-none{{background:var(--muted);}}
-
-/* CARD ACTIONS */
-.card-actions{{
-  display:flex;flex-wrap:wrap;gap:6px;
-  padding:12px 16px;
-  border-top:1px solid var(--border);
-  background:rgba(0,0,0,.15);
-}}
+.obs-label{{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px;}}
+.obs-field{{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--text);resize:vertical;min-height:64px;font-family:'DM Sans',sans-serif;}}
+.obs-field:disabled{{opacity:.6;}}
+.obs-field:not(:disabled){{border-color:var(--accent);background:rgba(59,130,246,.08);}}
+.obs-field:focus{{outline:none;}}
+.card-actions{{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;border-top:1px solid var(--border);background:rgba(0,0,0,.15);}}
 .card-actions .btn{{font-size:11px;padding:7px 12px;}}
 </style>
 </head>
 <body>
-
 <div class="top-bar">
   <div class="top-icon">🔧</div>
-  <div class="top-title">
-    <h1>Mantenimiento Preventivo</h1>
-    <p>📍 {ubicacion}</p>
-  </div>
+  <div class="top-title"><h1>Mantenimiento Preventivo</h1><p>📍 {ubicacion}</p></div>
 </div>
-
-<div class="global-actions">
-{boton_global}
-</div>
-
+<div class="global-actions">{boton_global}</div>
 <div class="grid">
 """
 
@@ -1119,63 +994,37 @@ body{{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);mi
         obs         = r[7] or ""
 
         badge_color, badge_bg, badge_label = color_badge(color_cat)
-        icon = disp_icon(dispositivo)
+        icon      = disp_icon(dispositivo)
         fecha_str = str(fecha)[:10] if fecha else "Sin registro"
         plazo_str = plazo if plazo else "No definido"
-
-        # status dot
-        if fecha:
-            dot_class = "dot-ok"
-            dot_label = f"Último PM: {fecha_str}"
-        else:
-            dot_class = "dot-warn"
-            dot_label = "Sin mantenimiento registrado"
+        dot_class = "dot-ok" if fecha else "dot-warn"
+        dot_label = f"Último PM: {fecha_str}" if fecha else "Sin mantenimiento registrado"
 
         html += f"""
 <div class="card">
-  <input type="hidden" id="ubicacion_{{id_registro}}" value="{ubicacion}">
-
+  <input type="hidden" id="ubicacion_{id_registro}" value="{ubicacion}">
   <div class="card-top">
     <div class="dev-icon">{icon}</div>
-    <div class="dev-name">
-      <h3>{dispositivo or "Dispositivo"}</h3>
-      <span>{id_equipo}</span>
-    </div>
+    <div class="dev-name"><h3>{dispositivo or "Dispositivo"}</h3><span>{id_equipo}</span></div>
     <span class="color-badge" style="background:{badge_bg};color:{badge_color};border:1px solid {badge_color}40">{badge_label}</span>
   </div>
-
   <div class="card-body">
     <div class="info-row">
-      <div class="info-item">
-        <label>ID Equipo</label>
-        <input id="equipo_{id_registro}" value="{id_equipo}" disabled>
-      </div>
-      <div class="info-item">
-        <label>Dispositivo</label>
-        <input id="disp_{id_registro}" value="{dispositivo}" disabled>
-      </div>
-      <div class="info-item">
-        <label>Planta</label>
-        <input id="planta_{id_registro}" value="{planta}" disabled>
-      </div>
-      <div class="info-item">
-        <label>Color</label>
-        <input id="color_{id_registro}" value="{color_cat}" disabled>
-      </div>
+      <div class="info-item"><label>ID Equipo</label><input id="equipo_{id_registro}" value="{id_equipo}" disabled></div>
+      <div class="info-item"><label>Dispositivo</label><input id="disp_{id_registro}" value="{dispositivo}" disabled></div>
+      <div class="info-item"><label>Planta</label><input id="planta_{id_registro}" value="{planta}" disabled></div>
+      <div class="info-item"><label>Color</label><input id="color_{id_registro}" value="{color_cat}" disabled></div>
     </div>
-
     <div class="status-row">
       <span class="status-dot {dot_class}"></span>
       <span>{dot_label}</span>
       <span style="margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#475569">Plazo: {plazo_str}</span>
     </div>
-
     <div style="margin-top:10px">
       <div class="obs-label">Observaciones</div>
       <textarea class="obs-field" id="obs_{id_registro}" disabled>{obs}</textarea>
     </div>
   </div>
-
   <div class="card-actions">
     <button class="btn btn-primary" onclick="abrirLogin({id_registro})">✏️ Editar</button>
     <button class="btn btn-success" onclick="guardarCambios({id_registro})">💾 Guardar</button>
@@ -1187,22 +1036,20 @@ body{{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);mi
 
     html += """
 </div>
-
 <script>
 function abrirFormatoGlobal(id){
   let usuario = prompt("Ingrese su usuario")
   if(!usuario){ alert("Usuario requerido"); return }
   window.open("/static/formato_preventivo_virtual.html?id="+id+"&usuario="+usuario,"_blank","width=1200,height=900")
 }
-function verPreventivoDigital(id){
-  window.open("/static/formato_preventivo_virtual.html?id="+id+"&modo=ver","_blank")
-}
-function editarPreventivo(id){
-  window.open("/static/formato_preventivo_virtual.html?id="+id+"&modo=editar","_blank")
-}
+function verPreventivoDigital(id){ window.open("/static/formato_preventivo_virtual.html?id="+id+"&modo=ver","_blank") }
+function editarPreventivo(id)    { window.open("/static/formato_preventivo_virtual.html?id="+id+"&modo=editar","_blank") }
+let usuarioTarjeta = {};
+
 function abrirLogin(id){
   let usuario = prompt("Ingrese su usuario")
   if(!usuario){ alert("Usuario requerido"); return }
+  usuarioTarjeta[id] = usuario;
   document.getElementById("equipo_"+id).disabled = false
   document.getElementById("disp_"+id).disabled   = false
   document.getElementById("planta_"+id).disabled = false
@@ -1225,7 +1072,12 @@ async function guardarCambios(id){
     CATEGORIA_COLOR:    document.getElementById("color_"+id).value,
     OBSERVACIONES:      document.getElementById("obs_"+id).value
   }
-  let res  = await fetch("/PREVENTIVO/"+id,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(datos)})
+  let usuario = usuarioTarjeta[id] || "SISTEMA"
+  let res  = await fetch("/PREVENTIVO/"+id+"?usuario="+encodeURIComponent(usuario),{
+    method:"PUT",
+    headers:{"Content-Type":"application/json","X-Usuario":usuario},
+    body:JSON.stringify(datos)
+  })
   let data = await res.json()
   if(data.mensaje){ alert("CAMBIOS GUARDADOS"); location.reload() }
   else{ alert("ERROR AL GUARDAR"); console.log(data) }

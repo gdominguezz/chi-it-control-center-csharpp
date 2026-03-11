@@ -2,385 +2,403 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>MANTENIMIENTOS PREVENTIVOS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mantenimientos Preventivos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ══════════ BASE ══════════ */
-*{box-sizing:border-box;}
-body{margin:0;font-family:Arial;background:#f1f5f9;}
+:root{
+  --bg:#0B0F1A;--surface:#111827;--surface2:#1a2235;--surface3:#1e293b;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --accent:#3B82F6;--text:#F1F5F9;--muted:#64748B;--muted2:#94A3B8;
+  --green:#10B981;--red:#EF4444;--amber:#F59E0B;--purple:#8B5CF6;--cyan:#06B6D4;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-.header{
-    background:#1e293b;color:white;padding:15px 20px;
-    font-size:20px;font-weight:bold;
-    display:flex;justify-content:space-between;align-items:center;
+/* ── TOP BAR ── */
+.topbar{
+  background:linear-gradient(135deg,#0f1e35,#0B0F1A);
+  border-bottom:1px solid var(--border2);
+  padding:14px 24px;
+  display:flex;align-items:center;gap:16px;
+  position:sticky;top:0;z-index:200;
 }
-.user-info{
-    font-size:13px;background:rgba(255,255,255,0.15);
-    padding:7px 14px;border-radius:6px;
+.topbar-icon{
+  width:44px;height:44px;border-radius:11px;
+  background:linear-gradient(135deg,#1D4ED8,#3B82F6);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  box-shadow:0 0 20px rgba(59,130,246,.4);flex-shrink:0;
 }
-.container{padding:20px;}
+.topbar-title{flex:1;}
+.topbar-title h1{font-size:16px;font-weight:700;letter-spacing:-.01em;}
+.topbar-title p{font-size:11px;color:var(--muted2);margin-top:1px;font-family:'DM Mono',monospace;}
+.user-chip{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 14px;border-radius:999px;
+  background:rgba(255,255,255,.06);border:1px solid var(--border2);
+  font-size:12px;font-weight:500;
+}
+.user-chip span{color:var(--muted2);}
+
+/* ── MAIN LAYOUT ── */
+.main{max-width:1400px;margin:0 auto;padding:20px 24px;}
+
+/* ── PANEL NUEVO REGISTRO ── */
+.panel{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:20px 24px;margin-bottom:16px;
+}
+.panel-title{
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.panel-title::before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px;display:inline-block;}
 
 .form-grid{
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
-    gap:10px;margin-bottom:14px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;
+  margin-bottom:14px;
 }
-.field{display:flex;flex-direction:column;}
 .field label{
-    font-size:11px;font-weight:bold;color:#1e293b;
-    margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;
+  font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);display:block;margin-bottom:5px;
 }
 .field input{
-    padding:7px;border:1px solid #cbd5e1;border-radius:5px;
-    font-size:12px;background:#f8fafc;transition:border-color .2s;
+  width:100%;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:7px;padding:8px 10px;font-size:12px;font-family:'DM Mono',monospace;
+  color:var(--text);transition:border-color .2s,box-shadow .2s;
 }
-.field input:focus{
-    outline:none;border-color:#2563eb;background:white;
-    box-shadow:0 0 0 2px rgba(37,99,235,.15);
+.field input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+
+/* ── BOTONES ── */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 16px;border:none;border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.btn-primary {background:var(--accent);color:white;box-shadow:0 3px 10px rgba(59,130,246,.3);}
+.btn-primary:hover{background:#2563EB;transform:translateY(-1px);}
+.btn-success {background:var(--green);color:white;box-shadow:0 3px 10px rgba(16,185,129,.25);}
+.btn-success:hover{background:#059669;transform:translateY(-1px);}
+.btn-danger  {background:var(--red);color:white;box-shadow:0 3px 10px rgba(239,68,68,.25);}
+.btn-danger:hover{background:#DC2626;transform:translateY(-1px);}
+.btn-amber   {background:var(--amber);color:#1c1400;}
+.btn-amber:hover{background:#D97706;}
+.btn-purple  {background:var(--purple);color:white;}
+.btn-purple:hover{background:#7C3AED;}
+.btn-cyan    {background:var(--cyan);color:#001a1f;}
+.btn-cyan:hover{background:#0891B2;}
+.btn-ghost   {background:var(--surface2);color:var(--muted2);border:1px solid var(--border2);}
+.btn-ghost:hover{color:var(--text);border-color:var(--accent);}
+.btn-sm{padding:8px 13px;font-size:12px;}
+
+/* ── TOOLBAR ── */
+.toolbar{
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  padding:14px 24px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;margin-bottom:16px;
+}
+.toolbar-sep{width:1px;height:24px;background:var(--border2);margin:0 4px;}
+.anio-input{
+  background:var(--surface2);border:1px solid var(--border2);border-radius:7px;
+  padding:8px 10px;font-size:12px;font-family:'DM Mono',monospace;color:var(--text);
+  width:110px;
+}
+.anio-input:focus{outline:none;border-color:var(--accent);}
+
+/* ── TABLA ── */
+.table-wrap{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;margin-bottom:16px;
+}
+.table-scroll{overflow-x:auto;max-height:calc(100vh - 380px);min-height:420px;overflow-y:auto;}
+table{border-collapse:collapse;width:100%;min-width:1000px;font-size:14px;}
+thead{position:sticky;top:0;z-index:10;}
+thead tr:first-child th{
+  background:var(--surface3);color:var(--muted2);
+  padding:13px 16px;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;
+  border-bottom:1px solid var(--border2);white-space:nowrap;
+}
+.filter-row th{
+  background:var(--surface2);padding:6px 8px;
+  border-bottom:1px solid var(--border2);
+}
+.filter-row input{
+  width:100%;background:rgba(255,255,255,.04);
+  border:1px solid var(--border2);border-radius:5px;
+  padding:7px 9px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;
+}
+.filter-row input:focus{outline:none;border-color:var(--accent);}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover td{filter:brightness(1.15);}
+td{padding:13px 16px;color:var(--text);vertical-align:middle;line-height:1.4;}
+td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
+
+.color-pill{
+  display:inline-block;padding:3px 10px;border-radius:999px;
+  font-size:12px;font-weight:700;letter-spacing:.04em;
 }
 
-button{
-    padding:6px 13px;border:none;border-radius:5px;
-    cursor:pointer;font-weight:bold;font-size:12px;margin-right:5px;
+/* ── PAGINACIÓN ── */
+.pagination{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 24px;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  margin-bottom:16px;
 }
-.save     {background:#16a34a;color:white;}
-.delete   {background:#dc2626;color:white;}
-.edit     {background:#f59e0b;color:black;}
-.pdf      {background:#2563eb;color:white;}
-.export   {background:#7c3aed;color:white;}
-.generar   {background:#5208d1;color:white;}
-.reimprimir   {background:#5fc88c;color:white;}
-.historial{background:#0ea5e9;color:white;}
-.back     {background:#dc2626;font-style:italic;color:white;}
+.page-info{font-size:12px;font-family:'DM Mono',monospace;color:var(--muted2);}
 
-/* ══════════ TABLA ══════════ */
-.table-container{
-    width:100%;height:500px;overflow:auto;
-    border:1px solid #ccc;background:white;margin-top:10px;
+/* ── INFO PANEL INFERIOR ── */
+.info-bottom{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;
 }
-table{border-collapse:collapse;min-width:1000px;font-size:11px;}
-th,td{border:1px solid #ccc;padding:6px;white-space:nowrap;text-align:center;}
-th{background:#1e293b;color:white;position:sticky;top:0;z-index:2;}
-.filter-row input{width:100%;font-size:11px;padding:3px;}
-.pagination{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+@media(max-width:700px){.info-bottom{grid-template-columns:1fr;}}
+.info-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:18px 20px;
+}
+.info-card h3{
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.info-card h3::before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px;display:inline-block;}
+.color-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;border-radius:8px;
+  background:var(--surface2);margin-bottom:6px;font-size:12px;
+}
+.color-dot{width:14px;height:14px;border-radius:4px;flex-shrink:0;}
+.nomen-item{
+  padding:6px 0;border-bottom:1px solid var(--border);
+  font-size:12px;display:flex;gap:10px;
+}
+.nomen-item:last-child{border-bottom:none;}
+.nomen-item b{color:var(--accent);font-family:'DM Mono',monospace;min-width:100px;}
 
-/* ══════════ MODALES ══════════ */
+/* ── MODALES ── */
 .modal{
-    display:none;position:fixed;inset:0;
-    background:rgba(0,0,0,0.55);
-    justify-content:center;align-items:center;z-index:9999;
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  justify-content:center;align-items:center;z-index:9999;
 }
 .modal.show{display:flex;}
-
 .modal-box{
-    background:white;border-radius:10px;padding:24px;
-    max-height:90vh;overflow-y:auto;
-    box-shadow:0 25px 60px rgba(0,0,0,.35);position:relative;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:16px;padding:24px;
+  max-height:90vh;overflow-y:auto;
+  box-shadow:0 30px 80px rgba(0,0,0,.6);position:relative;
+  animation:modalIn .2s ease;
 }
-.modal-box.form-box {width:min(540px,95vw);}
-.modal-box.hist-box {width:min(900px,95vw);}
-
+@keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.modal-box.form-box{width:min(520px,95vw);}
+.modal-box.hist-box{width:min(880px,95vw);}
 .modal-header{
-    display:flex;justify-content:space-between;align-items:center;
-    border-bottom:2px solid #e2e8f0;padding-bottom:12px;margin-bottom:18px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border2);padding-bottom:14px;margin-bottom:20px;
 }
-.modal-header h3{margin:0;color:#1e293b;font-size:16px;}
-.close-btn{
-    background:#dc2626;color:white;border:none;
-    padding:5px 12px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:bold;
-}
+.modal-header h3{font-size:15px;font-weight:700;color:var(--text);}
 .modal-footer{
-    display:flex;justify-content:flex-end;gap:8px;
-    border-top:1px solid #e2e8f0;padding-top:14px;margin-top:8px;
+  display:flex;justify-content:flex-end;gap:8px;
+  border-top:1px solid var(--border);padding-top:16px;margin-top:16px;
 }
-.modal-footer button{margin-right:0;}
 
-/* ── Form editar ── */
-.form-field{margin-bottom:13px;display:flex;flex-direction:column;}
+/* ── FORM EDITAR ── */
+.form-field{margin-bottom:14px;}
 .form-field label{
-    font-size:11px;font-weight:bold;color:#1e293b;
-    margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;
+  font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);display:block;margin-bottom:5px;
 }
 .form-field input,.form-field textarea{
-    padding:8px;border:1px solid #cbd5e1;border-radius:5px;
-    font-size:12px;background:#f8fafc;font-family:Arial;
+  width:100%;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:7px;padding:9px 11px;font-size:12px;
+  font-family:'DM Mono',monospace;color:var(--text);
+  transition:border-color .2s;
 }
 .form-field input:focus,.form-field textarea:focus{
-    outline:none;border-color:#2563eb;background:white;
-    box-shadow:0 0 0 2px rgba(37,99,235,.15);
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(59,130,246,.12);
 }
-.form-field textarea{resize:vertical;min-height:75px;}
+.form-field textarea{resize:vertical;min-height:80px;font-family:'DM Sans',sans-serif;}
 
-/* ── Historial ── */
-.ev-wrap{margin-bottom:22px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;}
-.ev-header{
-    background:#1e293b;color:white;
-    padding:11px 16px;
-    display:flex;flex-wrap:wrap;gap:20px;align-items:center;
+/* ── HISTORIAL ── */
+.ev-wrap{
+  margin-bottom:16px;border:1px solid var(--border2);
+  border-radius:10px;overflow:hidden;
 }
-.ev-header span{font-size:12px;}
-.ev-header strong{color:#7dd3fc;}
+.ev-header{
+  background:var(--surface2);padding:12px 16px;
+  display:flex;flex-wrap:wrap;gap:16px;align-items:center;
+  border-bottom:1px solid var(--border);
+}
+.ev-header span{font-size:12px;color:var(--muted2);}
+.ev-header strong{color:var(--text);}
 .badge-cambio{
-    background:#f59e0b;color:#111;font-size:10px;
-    padding:2px 7px;border-radius:999px;font-weight:bold;
-    text-transform:uppercase;letter-spacing:.3px;margin-left:5px;
+  background:rgba(245,158,11,.2);color:var(--amber);
+  font-size:10px;padding:2px 8px;border-radius:999px;
+  font-weight:700;letter-spacing:.05em;margin-left:6px;
+  border:1px solid rgba(245,158,11,.3);
 }
 .ev-table{width:100%;border-collapse:collapse;font-size:12px;}
-.ev-table th,.ev-table td{
-    border:1px solid #e5e7eb;padding:8px 10px;text-align:left;
-}
-.ev-table thead th{background:#f1f5f9;color:#374151;font-weight:bold;}
+.ev-table th,.ev-table td{border:1px solid var(--border);padding:9px 12px;text-align:left;}
+.ev-table thead th{background:var(--surface3);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
 .ev-table th:first-child{width:22%;}
-.row-changed{background:#fffbeb!important;}
-.row-changed td:nth-child(2){background:#fee2e2;color:#b91c1c;}
-.row-changed td:nth-child(3){background:#dcfce7;color:#15803d;}
-.empty-val{color:#94a3b8;font-style:italic;}
-.sin-hist{text-align:center;padding:40px;color:#64748b;font-size:14px;}
-.color{
-font-weight:bold;
-text-align:center;
-color:#111;
-}
-
-.verde{
-background:#bbf7d0;
-}
-
-.gris{
-background:#e5e7eb;
-}
-
-.azul{
-background:#bedffb;
-}
-
-.rojo{
-background:#e64444;
-}
-
-.amarillo{
-background:#fef9c3;
-}
-
-.rosa{
-background:#ff7797;
+.row-changed td:nth-child(2){background:rgba(239,68,68,.08);color:#fca5a5;}
+.row-changed td:nth-child(3){background:rgba(16,185,129,.08);color:#6ee7b7;}
+.empty-val{color:var(--muted);font-style:italic;}
+.sin-hist{text-align:center;padding:50px;color:var(--muted);font-size:14px;}
+.n-cambios-badge{
+  margin-left:auto;padding:3px 12px;border-radius:999px;
+  font-size:11px;font-weight:700;
 }
 </style>
 </head>
 <body>
 
-<div class="header">
-    <span>MANTENIMIENTOS PREVENTIVOS</span>
-    <div class="user-info">👤 <strong id="usuarioDisplay">Cargando...</strong></div>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-icon">🛡️</div>
+  <div class="topbar-title">
+    <h1>Mantenimientos Preventivos</h1>
+    <p>S-Riko Automotive Hose de Chihuahua</p>
+  </div>
+  <div class="user-chip">👤 <span id="usuarioDisplay">Cargando...</span></div>
 </div>
 
-<div class="container">
+<div class="main">
 
-    <!-- Form nuevo registro -->
+  <!-- NUEVO REGISTRO -->
+  <div class="panel">
+    <div class="panel-title">Nuevo registro</div>
     <div class="form-grid">
-        <div class="field"><label>ID Equipo</label>       <input id="ID_EQUIPO"></div>
-        <div class="field"><label>Ubicación</label>       <input id="UBICACION"></div>
-        <div class="field"><label>Nombre Dispositivo</label><input id="nombre_dispositivo"></div>
-        <div class="field"><label>Planta</label>          <input id="PLANTA"></div>
-        <div class="field"><label>Categoría / Color</label><input id="CATEGORIA_COLOR"></div>
-        <div class="field"><label>Observaciones</label><input id="OBSERVACIONES"></div>
+      <div class="field"><label>ID Equipo</label><input id="ID_EQUIPO" placeholder="Ej: EQ-001"></div>
+      <div class="field"><label>Ubicación</label><input id="UBICACION" placeholder="Ej: ANAQUEL-A1"></div>
+      <div class="field"><label>Nombre Dispositivo</label><input id="nombre_dispositivo" placeholder="Ej: Computadora de escritorio"></div>
+      <div class="field"><label>Planta</label><input id="PLANTA" placeholder="Ej: SITE 1"></div>
+      <div class="field"><label>Categoría / Color</label><input id="CATEGORIA_COLOR" placeholder="Ej: Verde"></div>
+      <div class="field"><label>Observaciones</label><input id="OBSERVACIONES" placeholder="Notas..."></div>
     </div>
+    <button class="btn btn-success" onclick="guardar()">💾 Guardar Registro</button>
+  </div>
 
-    <div style="margin-bottom:14px;">
-        <button class="save" onclick="guardar()">GUARDAR</button>
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <button class="btn btn-purple" onclick="exportarFiltrado()">📊 Exportar Filtrado</button>
+    <button class="btn btn-purple" onclick="exportarTodo()">📦 Exportar Todo</button>
+    <input class="anio-input" id="anioExportar" type="number" placeholder="Año (ej: 2026)">
+    <button class="btn btn-purple" onclick="exportarPorAnio()">📅 Por Año</button>
+    <div class="toolbar-sep"></div>
+    <button class="btn btn-cyan" onclick="generarQR()">📷 QR por Ubicación</button>
+    <button class="btn btn-cyan" onclick="reimprimirQR()">🖨️ Reimprimir QR</button>
+    <button class="btn btn-cyan" onclick="generarTodosQR()">⚡ Generar Todos los QR</button>
+    <div class="toolbar-sep"></div>
+    <button class="btn btn-ghost" onclick="window.location.href='menu.html'">← Menú</button>
+  </div>
+
+  <!-- TABLA -->
+  <div class="table-wrap">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>ID Equipo</th>
+            <th>Ubicación</th>
+            <th>Nombre Dispositivo</th>
+            <th>Planta</th>
+            <th>Categoría / Color</th>
+            <th>Observaciones</th>
+            <th>PDF</th>
+            <th>Acciones</th>
+          </tr>
+          <tr class="filter-row">
+            <th></th>
+            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+            <th></th><th></th>
+          </tr>
+        </thead>
+        <tbody id="tabla"></tbody>
+      </table>
     </div>
+  </div>
 
-    <div style="margin-bottom:14px;">
-        <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
-        <button class="export" onclick="exportarTodo()">Exportar Todo</button>
-        <input id="anioExportar" type="number" placeholder="Año (ej: 2026)"
-               style="width:130px;padding:6px;border:1px solid #ccc;border-radius:5px;font-size:12px;">
-        <button class="export" onclick="exportarPorAnio()">Exportar por Año</button><button class="generar" onclick="generarQR()">GENERAR QR POR UBICACION</button>
-        <button class="reimprimir" onclick="reimprimirQR()">REIMPRIMIR QR</button>
-        <button class="generar" onclick="generarTodosQR()">GENERAR TODOS LOS QR</button>
-        <div style="margin-bottom:15px">
+  <!-- PAGINACIÓN -->
+  <div class="pagination">
+    <button class="btn btn-ghost" onclick="anterior()">◀ Anterior</button>
+    <span class="page-info" id="paginaInfo"></span>
+    <button class="btn btn-ghost" onclick="siguiente()">Siguiente ▶</button>
+  </div>
 
-
-        
+  <!-- INFO INFERIOR -->
+  <div class="info-bottom">
+    <div class="info-card">
+      <h3>Código de Colores</h3>
+      <div class="color-row"><div class="color-dot" style="background:#10B981"></div><span>Verde — Equipos con sistema SRK de líneas</span></div>
+      <div class="color-row"><div class="color-dot" style="background:#94A3B8"></div><span>Gris — Equipos sin sistema SRK</span></div>
+      <div class="color-row"><div class="color-dot" style="background:#3B82F6"></div><span>Azul — Equipos fuera de área de producción</span></div>
+      <div class="color-row"><div class="color-dot" style="background:#EF4444"></div><span>Rojo — Correctivos</span></div>
+      <div class="color-row"><div class="color-dot" style="background:#F59E0B"></div><span>Amarillo — Equipos en individual</span></div>
+      <div class="color-row"><div class="color-dot" style="background:#F472B6"></div><span>Rosa — Soporte Site 1 y 2 Stock</span></div>
     </div>
-
-    <!-- Tabla -->
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>ID_EQUIPO</th>
-                    <th>UBICACION</th>
-                    <th>NOMBRE_DISPOSITIVO</th>
-                    <th>PLANTA</th>
-                    <th>CATEGORIA_COLOR</th>
-                    <th>OBSERVACIONES</th>
-                    <th>PDF</th>
-                    <th>ACCIONES</th>
-                </tr>
-                <tr class="filter-row">
-                    <th></th>
-                    <th><input oninput="filtrar()"></th><!-- ID_EQUIPO -->
-                    <th><input oninput="filtrar()"></th><!-- UBICACION -->
-                    <th><input oninput="filtrar()"></th><!-- nombre_dispositivo -->
-                    <th><input oninput="filtrar()"></th><!-- PLANTA -->
-                    <th><input oninput="filtrar()"></th><!-- CATEGORIA_COLOR -->
-                    <th><input oninput="filtrar()"></th><!-- OBSERVACIONES -->
-                    <th></th><th></th>
-                </tr>
-            </thead>
-            <tbody id="tabla"></tbody>
-        </table>
+    <div class="info-card">
+      <h3>Nomenclatura — Site 1</h3>
+      <div class="nomen-item"><b>ANAQUELES</b><span>A, T, C, D</span></div>
+      <div class="nomen-item"><b>NIVELES</b><span>1 al 6</span></div>
     </div>
-
-    <div class="pagination">
-        <button onclick="anterior()">◀ Anterior</button>
-        <span id="paginaInfo" style="font-size:13px;color:#475569;"></span>
-        <button onclick="siguiente()">Siguiente ▶</button>
-        <button class="back" onclick="window.location.href='menu.html'">REGRESAR AL MENÚ</button>
-    </div>
-</div>
-<div class="info-panel">
-
-<div class="codigo-colores">
-
-<h3>CODIGO DE COLORES</h3>
-
-<table>
-
-<tr>
-<td class="color verde">VERDE</td>
-<td>EQUIPOS CON SISTEMA SRK DE LINEAS</td>
-</tr>
-
-<tr>
-<td class="color gris">GRIS</td>
-<td>TODOS LOS EQUIPOS QUE NO TIENEN SISTEMA SRK</td>
-</tr>
-
-<tr>
-<td class="color azul">AZUL</td>
-<td>TODOS LOS EQUIPOS QUE NO ESTAN EN AREA DE PRODUCCION</td>
-</tr>
-
-<tr>
-<td class="color rojo">ROJO</td>
-<td>CORRECTIVOS</td>
-</tr>
-
-<tr>
-<td class="color amarillo">AMARILLO</td>
-<td>TODOS LOS EQUIPOS QUE ESTAN EN INDIVIDUAL</td>
-</tr>
-
-<tr>
-<td class="color rosa">ROSA</td>
-<td>SOPORTE SITE 1 Y 2 STOCK</td>
-</tr>
-
-</table>
+  </div>
 
 </div>
 
-
-<div class="nomenclatura">
-
-<h3>NOMENCLATURA DE UBICACIONES SITE 1</h3>
-
-<p><b>ANAQUELES:</b> A, T, C, D</p>
-<p><b>NIVELES:</b> 1 al 6</p>
-
-</div>
-
-</div>
-<!-- ════════════════════════════════════════════
-     MODAL EDITAR
-     ════════════════════════════════════════════ -->
+<!-- ═══ MODAL EDITAR ═══ -->
 <div id="modalEditar" class="modal">
-    <div class="modal-box form-box">
-        <div class="modal-header">
-            <h3>✏️ Editar Preventivo &nbsp;<span id="editarIdLabel" style="color:#2563eb;">#</span></h3>
-            <button class="close-btn" onclick="cerrarEditar()">✕</button>
-        </div>
-
-        <div class="form-field"><label>ID Equipo</label>
-            <input type="text" id="e_ID_EQUIPO"></div>
-        <div class="form-field"><label>Nombre Dispositivo</label>
-            <input type="text" id="e_nombre_dispositivo"></div>
-        <div class="form-field"><label>Ubicación</label>
-            <input type="text" id="e_UBICACION"></div>
-        <div class="form-field"><label>Planta</label>
-            <input type="text" id="e_PLANTA"></div>
-        <div class="form-field"><label>Categoría / Color</label>
-            <input type="text" id="e_CATEGORIA_COLOR"></div>
-        <div class="form-field"><label>OBSERVACIONES</label>
-            <input type="text" id="e_OBSERVACIONES"></div>
-        <div class="modal-footer">
-            <button class="delete" onclick="cerrarEditar()">Cancelar</button>
-            <button class="save"   onclick="guardarCambios()">💾 Guardar Cambios</button>
-        </div>
+  <div class="modal-box form-box">
+    <div class="modal-header">
+      <h3>✏️ Editar Preventivo <span id="editarIdLabel" style="color:var(--accent);font-family:'DM Mono',monospace;">#</span></h3>
+      <button class="btn btn-danger btn-sm" onclick="cerrarEditar()">✕</button>
     </div>
+    <div class="form-field"><label>ID Equipo</label><input type="text" id="e_ID_EQUIPO"></div>
+    <div class="form-field"><label>Nombre Dispositivo</label><input type="text" id="e_nombre_dispositivo"></div>
+    <div class="form-field"><label>Ubicación</label><input type="text" id="e_UBICACION"></div>
+    <div class="form-field"><label>Planta</label><input type="text" id="e_PLANTA"></div>
+    <div class="form-field"><label>Categoría / Color</label><input type="text" id="e_CATEGORIA_COLOR"></div>
+    <div class="form-field"><label>Observaciones</label><input type="text" id="e_OBSERVACIONES"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
+      <button class="btn btn-success" onclick="guardarCambios()">💾 Guardar Cambios</button>
+    </div>
+  </div>
 </div>
 
-<!-- ════════════════════════════════════════════
-     MODAL HISTORIAL
-     ════════════════════════════════════════════ -->
+<!-- ═══ MODAL HISTORIAL ═══ -->
 <div id="modalHistorial" class="modal">
-    <div class="modal-box hist-box">
-        <div class="modal-header">
-            <h3>📋 Historial de Cambios — Preventivo&nbsp;
-                <span id="histIdLabel" style="color:#0ea5e9;">#</span>
-            </h3>
-            <button class="close-btn" onclick="cerrarHistorial()">✕</button>
-        </div>
-        <div id="contenidoHistorial"></div>
-        <div class="modal-footer">
-            <button class="delete" onclick="cerrarHistorial()">Cerrar</button>
-        </div>
+  <div class="modal-box hist-box">
+    <div class="modal-header">
+      <h3>📋 Historial de Cambios — <span id="histIdLabel" style="color:var(--cyan);font-family:'DM Mono',monospace;">#</span></h3>
+      <button class="btn btn-danger btn-sm" onclick="cerrarHistorial()">✕</button>
     </div>
-</div>
-<!-- ════════════════════════════════════════════
-     MODAL REIMPRIMIR QR
-     ════════════════════════════════════════════ -->
-<div id="modal_reimprimir" class="modal">
-
-<div class="modal_content">
-
-<h3>REIMPRIMIR QR</h3>
-
-<input id="ubicacion_qr" placeholder="ESCRIBE LA UBICACION">
-
-<button onclick="buscarQR()">BUSCAR</button>
-
-<div id="resultado_qr"></div>
-
-<button onclick="cerrarReimpresion()">CERRAR</button>
-
-</div>
-
+    <div id="contenidoHistorial"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarHistorial()">Cerrar</button>
+    </div>
+  </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
-
-const rol = sessionStorage.getItem("rol")
-
-if(rol !== "ADMIN"){
-
-document.querySelectorAll(".edit").forEach(b=>{
-b.style.display="none"
+  const rol = sessionStorage.getItem("rol")
+  if(rol !== "ADMIN"){
+    document.querySelectorAll(".btn-amber,.btn-danger").forEach(b=>b.style.display="none")
+  }
 })
 
-document.querySelectorAll(".delete").forEach(b=>{
-b.style.display="none"
-})
-
-}
-
-})
-
-// ═══════════════════════════════════════════
-// ESTADO GLOBAL
-// ═══════════════════════════════════════════
+// ═══ ESTADO GLOBAL ═══
 let paginaActual   = 1;
 let limite         = 10;
 let totalRegistros = 0;
@@ -389,431 +407,305 @@ let editandoID     = null;
 let usuarioActual  = 'SISTEMA';
 
 const CAMPOS = [
-    {key:'ID_EQUIPO',         label:'ID Equipo'},
-    {key:'UBICACION',         label:'Ubicación'},
-    {key:'nombre_dispositivo',label:'Nombre Dispositivo'},
-    {key:'PLANTA',            label:'Planta'},
-    {key:'CATEGORIA_COLOR',   label:'Categoría / Color'},
-    {key:'OBSERVACIONES',   label:'OBSERVACIONES'},
+  {key:'ID_EQUIPO',          label:'ID Equipo'},
+  {key:'UBICACION',          label:'Ubicación'},
+  {key:'nombre_dispositivo', label:'Nombre Dispositivo'},
+  {key:'PLANTA',             label:'Planta'},
+  {key:'CATEGORIA_COLOR',    label:'Categoría / Color'},
+  {key:'OBSERVACIONES',      label:'Observaciones'},
 ];
+const KEY_MAP = {
+  'ID_EQUIPO':         'id_equipo',
+  'UBICACION':         'ubicacion',
+  'nombre_dispositivo':'nombre_dispositivo',
+  'PLANTA':            'planta',
+  'CATEGORIA_COLOR':   'categoria_color',
+  'OBSERVACIONES':     'observaciones',
+};
 
-// ═══════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════
+// ═══ INIT ═══
 window.addEventListener('DOMContentLoaded', () => {
-    // Intentar sessionStorage primero (login del sistema)
-    const usr = sessionStorage.getItem('usuario');
-    if (usr) {
-        usuarioActual = usr;
-        document.getElementById('usuarioDisplay').textContent = usr;
+  const usr = sessionStorage.getItem('usuario');
+  if(usr){
+    usuarioActual = usr;
+    document.getElementById('usuarioDisplay').textContent = usr;
+  } else {
+    fetch('/obtener-usuario').then(r=>r.json()).then(d=>{
+      usuarioActual = d.usuario || 'SISTEMA';
+      document.getElementById('usuarioDisplay').textContent = usuarioActual;
+    }).catch(()=>document.getElementById('usuarioDisplay').textContent='Sin sesión');
+  }
+  cargar();
+});
+
+// ═══ CARGA ═══
+function obtenerParametros(){
+  const f = document.querySelectorAll('.filter-row input');
+  return new URLSearchParams({
+    page:paginaActual, limit:limite,
+    ID_EQUIPO:f[0].value, UBICACION:f[1].value,
+    nombre_dispositivo:f[2].value, PLANTA:f[3].value,
+    CATEGORIA_COLOR:f[4].value, OBSERVACIONES:f[5].value,
+  });
+}
+
+function cargar(){
+  fetch(`/PREVENTIVOS?${obtenerParametros()}`).then(r=>r.json()).then(resp=>{
+    totalRegistros = resp.total;
+    datosActuales  = resp.data;
+    renderizar();
+  }).catch(()=>{
+    document.getElementById('tabla').innerHTML=
+      '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted)">Error al cargar datos</td></tr>';
+  });
+}
+
+function colorPill(cat){
+  const c = (cat||'').toLowerCase();
+  if(c.includes('verde'))   return {bg:'rgba(16,185,129,.15)',color:'#6EE7B7',label:cat};
+  if(c.includes('amarillo'))return {bg:'rgba(245,158,11,.15)', color:'#FCD34D',label:cat};
+  if(c.includes('rojo'))    return {bg:'rgba(239,68,68,.15)',  color:'#FCA5A5',label:cat};
+  if(c.includes('gris'))    return {bg:'rgba(148,163,184,.15)',color:'#CBD5E1',label:cat};
+  if(c.includes('rosa'))    return {bg:'rgba(244,114,182,.15)',color:'#F9A8D4',label:cat};
+  if(c.includes('azul'))    return {bg:'rgba(59,130,246,.15)', color:'#93C5FD',label:cat};
+  return {bg:'rgba(100,116,139,.15)',color:'#94A3B8',label:cat||'—'};
+}
+
+function rowBg(cat){
+  const c = (cat||'').toLowerCase();
+  if(c.includes('verde'))   return 'rgba(16,185,129,.18)';
+  if(c.includes('amarillo'))return 'rgba(245,158,11,.18)';
+  if(c.includes('rojo'))    return 'rgba(239,68,68,.18)';
+  if(c.includes('gris'))    return 'rgba(148,163,184,.14)';
+  if(c.includes('rosa'))    return 'rgba(244,114,182,.18)';
+  if(c.includes('azul'))    return 'rgba(59,130,246,.18)';
+  return '';
+}
+
+function renderizar(){
+  const tbody = document.getElementById('tabla');
+  tbody.innerHTML = '';
+  if(!datosActuales.length){
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
+    return;
+  }
+  const esAdmin = sessionStorage.getItem("rol")==="ADMIN";
+  datosActuales.forEach(row=>{
+    const pill = colorPill(row.categoria_color);
+    const bg   = rowBg(row.categoria_color);
+    const tdStyle = bg ? `style="background:${bg}"` : '';
+    tbody.innerHTML += `
+    <tr>
+      <td class="mono" ${tdStyle}>${row.id}</td>
+      <td class="mono" ${tdStyle}>${row.id_equipo??'—'}</td>
+      <td ${tdStyle}>${row.ubicacion??'—'}</td>
+      <td ${tdStyle}>${row.nombre_dispositivo??'—'}</td>
+      <td class="mono" ${tdStyle}>${row.planta??'—'}</td>
+      <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label||'—'}</span></td>
+      <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones??''}">${row.observaciones??'—'}</td>
+      <td ${tdStyle}>
+        ${row.tiene_pdf
+          ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.id})">📄 Ver</button>
+             <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
+          : `<input type="file" onchange="subirPDF(${row.id},this)"
+               style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
+      </td>
+      <td ${tdStyle} style="white-space:nowrap;">
+        ${esAdmin ? `
+        <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
+        ` : ''}
+        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
+      </td>
+    </tr>`;
+  });
+  document.getElementById('paginaInfo').textContent =
+    `Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)} | Total: ${totalRegistros}`;
+}
+
+function filtrar()   { paginaActual=1; cargar(); }
+function siguiente() { if(paginaActual*limite<totalRegistros){paginaActual++;cargar();} }
+function anterior()  { if(paginaActual>1){paginaActual--;cargar();} }
+
+// ═══ GUARDAR NUEVO ═══
+function guardar(){
+  const data={
+    ID_EQUIPO:          document.getElementById('ID_EQUIPO').value||null,
+    UBICACION:          document.getElementById('UBICACION').value||null,
+    nombre_dispositivo: document.getElementById('nombre_dispositivo').value||null,
+    PLANTA:             document.getElementById('PLANTA').value||null,
+    CATEGORIA_COLOR:    document.getElementById('CATEGORIA_COLOR').value||null,
+    OBSERVACIONES:      document.getElementById('OBSERVACIONES').value||null,
+    PLAZO:null, REALIZADO_POR:null, FECHA_REALIZACION:null
+  };
+  fetch('/PREVENTIVO',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+    .then(r=>r.json()).then(d=>{
+      if(d.error){alert('Error: '+d.error);return;}
+      document.querySelectorAll('.form-grid input').forEach(i=>i.value='');
+      cargar();
+    });
+}
+
+// ═══ ELIMINAR / PDF ═══
+function eliminar(id){
+  if(!confirm('¿Eliminar este registro?'))return;
+  fetch(`/PREVENTIVO/${id}`,{method:'DELETE'}).then(()=>cargar());
+}
+function subirPDF(id,input){
+  const fd=new FormData();fd.append('file',input.files[0]);
+  fetch(`/PREVENTIVO/PDF/${id}`,{method:'POST',body:fd}).then(()=>cargar());
+}
+function verPDF(id)   {window.open(`/PREVENTIVO/PDF/${id}`,'_blank');}
+function eliminarPDF(id){
+  if(!confirm('¿Eliminar el PDF?'))return;
+  fetch(`/PREVENTIVO/PDF/${id}`,{method:'DELETE'}).then(()=>cargar());
+}
+
+// ═══ EXPORTAR ═══
+function exportarFiltrado(){window.open(`/PREVENTIVOS/EXPORTAR_FILTRADO?${obtenerParametros()}`);}
+function exportarTodo()    {window.open('/PREVENTIVOS/EXPORTAR_TODO');}
+function exportarPorAnio() {
+  const a=document.getElementById('anioExportar').value;
+  if(!a){alert('Ingresa un año');return;}
+  window.open(`/PREVENTIVOS/EXPORTAR_ANIO?anio=${a}`);
+}
+
+// ═══ MODAL EDITAR ═══
+function abrirEditar(id){
+  editandoID=id;
+  document.getElementById('editarIdLabel').textContent=id;
+  const row=datosActuales.find(r=>r.id===id);
+  if(row){
+    CAMPOS.forEach(({key})=>{
+      const el=document.getElementById('e_'+key);
+      const apiKey=KEY_MAP[key]||key;
+      if(el) el.value=row[apiKey]??'';
+    });
+  }
+  document.getElementById('modalEditar').classList.add('show');
+  document.querySelector('#modalEditar .modal-box').scrollTop=0;
+}
+function cerrarEditar(){
+  document.getElementById('modalEditar').classList.remove('show');
+  editandoID=null;
+}
+async function guardarCambios(){
+  const datos={};
+  CAMPOS.forEach(({key})=>{
+    const el=document.getElementById('e_'+key);
+    datos[key]=el?(el.value||null):null;
+  });
+  try{
+    const res=await fetch(
+      `/PREVENTIVO/${editandoID}?usuario=${encodeURIComponent(usuarioActual)}`,
+      {method:'PUT',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(datos)}
+    );
+    const result=await res.json();
+    if(res.ok&&!result.error){cerrarEditar();cargar();}
+    else alert('Error: '+(result.error||'No se pudo guardar'));
+  }catch(e){alert('Error: '+e.message);}
+}
+
+// ═══ MODAL HISTORIAL ═══
+function esc(v){
+  if(v==null)return'';
+  return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function norm(v){return(v==null)?'':String(v).trim();}
+function formatFecha(f){
+  try{const d=new Date(f);if(!isNaN(d))return d.toLocaleString('es-MX',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});}catch(e){}
+  return f??'';
+}
+
+function renderEvento(ev){
+  let antes=ev.registro_anterior;
+  let despues=ev.registro_nuevo;
+  try{if(typeof antes==='string')antes=JSON.parse(antes);}catch(e){}
+  try{if(typeof despues==='string')despues=JSON.parse(despues);}catch(e){}
+  const cambiados=new Set();
+  CAMPOS.forEach(({key})=>{
+    const apiKey=KEY_MAP[key]||key;
+    if(norm(antes?.[apiKey])!==norm(despues?.[apiKey]))cambiados.add(key);
+  });
+  let filas='';
+  CAMPOS.forEach(({key,label})=>{
+    const apiKey=KEY_MAP[key]||key;
+    const va=esc(antes?.[apiKey]??'');
+    const vd=esc(despues?.[apiKey]??'');
+    const chg=cambiados.has(key);
+    filas+=`
+    <tr class="${chg?'row-changed':''}">
+      <td><strong>${esc(label)}</strong>${chg?` <span class="badge-cambio">✎ cambio</span>`:''}</td>
+      <td>${!va||va==='None'?'<span class="empty-val">vacío</span>':va}</td>
+      <td>${!vd||vd==='None'?'<span class="empty-val">vacío</span>':vd}</td>
+    </tr>`;
+  });
+  const n=cambiados.size;
+  return `
+  <div class="ev-wrap">
+    <div class="ev-header">
+      <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+      <span>👤 <strong>${esc(ev.usuario)||'Desconocido'}</strong></span>
+      <span class="n-cambios-badge" style="background:${n>0?'rgba(245,158,11,.2)':'rgba(100,116,139,.2)'};color:${n>0?'#FCD34D':'#94A3B8'};border:1px solid ${n>0?'rgba(245,158,11,.3)':'rgba(100,116,139,.3)'}">
+        ${n} campo${n!==1?'s':''} modificado${n!==1?'s':''}
+      </span>
+    </div>
+    <table class="ev-table">
+      <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+      <tbody>${filas}</tbody>
+    </table>
+  </div>`;
+}
+
+function verHistorial(id){
+  document.getElementById('histIdLabel').textContent=id;
+  document.getElementById('contenidoHistorial').innerHTML=
+    '<p style="text-align:center;padding:40px;color:var(--muted)">Cargando...</p>';
+  document.getElementById('modalHistorial').classList.add('show');
+  document.querySelector('#modalHistorial .modal-box').scrollTop=0;
+  fetch(`/PREVENTIVOS/${id}/HISTORIAL`).then(r=>r.json()).then(data=>{
+    const lista=(data.historial||[]).sort((a,b)=>new Date(b.fecha||0)-new Date(a.fecha||0));
+    if(!lista.length){
+      document.getElementById('contenidoHistorial').innerHTML=
+        '<p class="sin-hist">📭 Sin ediciones registradas</p>';
     } else {
-        fetch('/obtener-usuario')
-            .then(r => r.json())
-            .then(d => {
-                usuarioActual = d.usuario || 'SISTEMA';
-                document.getElementById('usuarioDisplay').textContent = usuarioActual;
-            })
-            .catch(() => document.getElementById('usuarioDisplay').textContent = 'Sin sesión');
+      document.getElementById('contenidoHistorial').innerHTML=
+        `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
+          ${lista.length} edición${lista.length!==1?'es':''} registrada${lista.length!==1?'s':''}
+        </p>`+lista.map(ev=>renderEvento(ev)).join('');
     }
-    cargar();
+  }).catch(()=>{
+    document.getElementById('contenidoHistorial').innerHTML=
+      '<p style="color:var(--red);text-align:center;padding:30px">Error al cargar historial</p>';
+  });
+}
+function cerrarHistorial(){document.getElementById('modalHistorial').classList.remove('show');}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){cerrarEditar();cerrarHistorial();}
 });
 
-// ═══════════════════════════════════════════
-// CARGA Y RENDERIZADO
-// ═══════════════════════════════════════════
-function obtenerParametros() {
-    const f = document.querySelectorAll('.filter-row input');
-    return new URLSearchParams({
-        page: paginaActual, limit: limite,
-        ID_EQUIPO:          f[0].value,
-        UBICACION:          f[1].value,
-        nombre_dispositivo: f[2].value,
-        PLANTA:             f[3].value,
-        CATEGORIA_COLOR:    f[4].value,
-        OBSERVACIONES:      f[5].value,
-    });
-}
-
-function cargar() {
-    fetch(`/PREVENTIVOS?${obtenerParametros()}`)
-        .then(r => r.json())
-        .then(resp => {
-            totalRegistros = resp.total;
-            datosActuales  = resp.data;
-            renderizar();
-        })
-        .catch(() => {
-            document.getElementById('tabla').innerHTML =
-                '<tr><td colspan="8" style="text-align:center;padding:20px">Error al cargar datos</td></tr>';
-        });
-}
-
-function renderizar() {
-
-    const tbody = document.getElementById('tabla');
-    tbody.innerHTML = '';
-
-    if (!datosActuales.length) {
-        tbody.innerHTML =
-        '<tr><td colspan="8" style="text-align:center;padding:20px">Sin registros</td></tr>';
-        return;
-    }
-
-    datosActuales.forEach(row => {
-
-        let colorFila = "";
-
-        if(row.CATEGORIA_COLOR){
-
-            let c = row.CATEGORIA_COLOR.toLowerCase()
-
-            if(c.includes("verde")) colorFila = "#bbf7d0"
-            if(c.includes("amarillo")) colorFila = "#fef9c3"
-            if(c.includes("rojo")) colorFila = "#FF6666"
-            if(c.includes("gris")) colorFila = "#e5e7eb"
-            if(c.includes("rosa")) colorFila = "#FFC5D3"
-            if(c.includes("azul")) colorFila = "#bedffb"
-
-        }
-
-        tbody.innerHTML += `
-        <tr style="background:${colorFila}">
-            <td>${row.Id}</td>
-            <td>${row.ID_EQUIPO??''}</td>
-            <td>${row.UBICACION??''}</td>
-            <td>${row.nombre_dispositivo??''}</td>
-            <td>${row.PLANTA??''}</td>
-            <td>${row.CATEGORIA_COLOR??''}</td>
-            <td>${row.OBSERVACIONES??''}</td>
-            <td>
-                ${row.TIENE_PDF
-                    ? `<button class="pdf" onclick="verPDF(${row.Id})">Ver PDF</button>
-                       <button class="delete" onclick="eliminarPDF(${row.Id})">Quitar</button>`
-                    : `<input type="file" onchange="subirPDF(${row.Id},this)">`}
-            </td>
-            <td>
-            ${sessionStorage.getItem("rol")==="ADMIN" ? `
-            <button class="edit" onclick="abrirEditar(${row.Id})">✏️ Editar</button>
-            <button class="delete" onclick="eliminar(${row.Id})">🗑️ Eliminar</button>
-            ` : ``}
-
-            <button class="historial" onclick="verHistorial(${row.Id})">📋 Historial</button>
-            </td>
-        </tr>`;
-    });
-
-    document.getElementById('paginaInfo').innerText =
-        `Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)} | Total: ${totalRegistros}`;
-}
-
-function filtrar()   { paginaActual = 1; cargar(); }
-function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
-function anterior()  { if (paginaActual > 1) { paginaActual--; cargar(); } }
-
-// ═══════════════════════════════════════════
-// GUARDAR NUEVO
-// ═══════════════════════════════════════════
-function guardar() {
-    const data = {
-        ID_EQUIPO:          document.getElementById('ID_EQUIPO').value          || null,
-        UBICACION:          document.getElementById('UBICACION').value          || null,
-        nombre_dispositivo: document.getElementById('nombre_dispositivo').value || null,
-        PLANTA:             document.getElementById('PLANTA').value             || null,
-        CATEGORIA_COLOR:    document.getElementById('CATEGORIA_COLOR').value    || null,
-        OBSERVACIONES:      document.getElementById('OBSERVACIONES').value      || null,
-        PLAZO: null, REALIZADO_POR: null, FECHA_REALIZACION: null, OBSERVACIONES: null
-    };
-    fetch('/PREVENTIVO', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(data)
-    }).then(r => r.json())
-      .then(d => {
-        if (d.error) { alert('Error: ' + d.error); return; }
-        document.querySelectorAll('.form-grid input').forEach(i => i.value = '');
-        cargar();
-    });
-}
-
-// ═══════════════════════════════════════════
-// ELIMINAR / PDF
-// ═══════════════════════════════════════════
-function eliminar(id) {
-    if (!confirm('¿Eliminar este registro?')) return;
-    fetch(`/PREVENTIVO/${id}`, {method:'DELETE'}).then(() => cargar());
-}
-function subirPDF(id, input) {
-    const fd = new FormData();
-    fd.append('file', input.files[0]);
-    fetch(`/PREVENTIVO/PDF/${id}`, {method:'POST', body:fd}).then(() => cargar());
-}
-function verPDF(id)    { window.open(`/PREVENTIVO/PDF/${id}`, '_blank'); }
-function eliminarPDF(id) {
-    if (!confirm('¿Eliminar el PDF?')) return;
-    fetch(`/PREVENTIVO/PDF/${id}`, {method:'DELETE'}).then(() => cargar());
-}
-
-// ═══════════════════════════════════════════
-// EXPORTAR
-// ═══════════════════════════════════════════
-function exportarFiltrado() { 
-    window.open(`/PREVENTIVOS/EXPORTAR_FILTRADO?${obtenerParametros()}`); 
-}
-function exportarTodo()     { window.open('/PREVENTIVOS/EXPORTAR_TODO'); }
-function exportarPorAnio()  {
-    const a = document.getElementById('anioExportar').value;
-    if (!a) { alert('Ingresa un año'); return; }
-    window.open(`/PREVENTIVOS/EXPORTAR_ANIO?anio=${a}`);
-}
-
-// ═══════════════════════════════════════════
-// MODAL EDITAR
-// ═══════════════════════════════════════════
-function abrirEditar(id) {
-    editandoID = id;
-    document.getElementById('editarIdLabel').textContent = id;
-    const row = datosActuales.find(r => r.Id === id);
-    if (row) {
-        CAMPOS.forEach(({key}) => {
-            const el = document.getElementById('e_' + key);
-            if (el) el.value = row[key] ?? '';
-        });
-    }
-    document.getElementById('modalEditar').classList.add('show');
-    // Scroll al top del modal
-    document.querySelector('#modalEditar .modal-box').scrollTop = 0;
-}
-
-function cerrarEditar() {
-    document.getElementById('modalEditar').classList.remove('show');
-    editandoID = null;
-}
-
-async function guardarCambios() {
-    const datos = {};
-    CAMPOS.forEach(({key}) => {
-        const el = document.getElementById('e_' + key);
-        datos[key] = el ? (el.value || null) : null;
-    });
-
-    try {
-        const res = await fetch(
-            `/PREVENTIVO/${editandoID}?usuario=${encodeURIComponent(usuarioActual)}`,
-            {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Usuario': usuarioActual
-                },
-                body: JSON.stringify(datos)
-            }
-        );
-        const result = await res.json();
-        if (res.ok && !result.error) {
-            cerrarEditar();
-            cargar();
-        } else {
-            alert('Error: ' + (result.error || 'No se pudo guardar'));
-        }
-    } catch(e) {
-        alert('Error: ' + e.message);
-    }
-}
-
-// ═══════════════════════════════════════════
-// MODAL HISTORIAL
-// ═══════════════════════════════════════════
-function esc(v) {
-    if (v == null) return '';
-    return String(v)
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function norm(v) { return (v == null) ? '' : String(v).trim(); }
-
-function formatFecha(f) {
-    try {
-        const d = new Date(f);
-        if (!isNaN(d)) return d.toLocaleString('es-MX', {
-            year:'numeric', month:'2-digit', day:'2-digit',
-            hour:'2-digit', minute:'2-digit', second:'2-digit'
-        });
-    } catch(e) {}
-    return f ?? '';
-}
-
-function renderEvento(ev) {
-    let antes   = ev.registro_anterior;
-    let despues = ev.registro_nuevo;
-    try { if (typeof antes   === 'string') antes   = JSON.parse(antes);   } catch(e){}
-    try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch(e){}
-
-    const cambiados = new Set();
-    CAMPOS.forEach(({key}) => {
-        if (norm(antes?.[key]) !== norm(despues?.[key])) cambiados.add(key);
-    });
-
-    let filas = '';
-    CAMPOS.forEach(({key, label}) => {
-        const va  = esc(antes?.[key] ?? '');
-        const vd  = esc(despues?.[key] ?? '');
-        const chg = cambiados.has(key);
-        const vacioA = !va || va === 'None';
-        const vacioD = !vd || vd === 'None';
-        filas += `
-        <tr class="${chg ? 'row-changed' : ''}">
-            <td><strong>${esc(label)}</strong>${chg ? ' <span class="badge-cambio">✎ cambio</span>' : ''}</td>
-            <td>${vacioA ? '<span class="empty-val">vacío</span>' : va}</td>
-            <td>${vacioD ? '<span class="empty-val">vacío</span>' : vd}</td>
-        </tr>`;
-    });
-
-    const nCambios = cambiados.size;
-    return `
-    <div class="ev-wrap">
-        <div class="ev-header">
-            <span>🕐 <strong>Fecha y hora:</strong> ${formatFecha(ev.fecha)}</span>
-            <span>👤 <strong>Editado por:</strong> ${esc(ev.usuario) || 'Desconocido'}</span>
-            <span style="margin-left:auto;background:${nCambios>0?'#f59e0b':'#64748b'};
-                color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:bold;">
-                ${nCambios} campo${nCambios!==1?'s':''} modificado${nCambios!==1?'s':''}
-            </span>
-        </div>
-        <table class="ev-table">
-            <thead>
-                <tr>
-                    <th>Campo</th>
-                    <th style="background:#fee2e2;color:#991b1b;">⬅ Antes</th>
-                    <th style="background:#dcfce7;color:#166534;">➡ Después</th>
-                </tr>
-            </thead>
-            <tbody>${filas}</tbody>
-        </table>
-    </div>`;
-}
-
-function verHistorial(id) {
-    document.getElementById('histIdLabel').textContent = id;
-    document.getElementById('contenidoHistorial').innerHTML =
-        '<p style="text-align:center;padding:30px;color:#64748b">Cargando historial...</p>';
-    document.getElementById('modalHistorial').classList.add('show');
-    document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
-
-    fetch(`/PREVENTIVOS/${id}/HISTORIAL`)
-        .then(r => r.json())
-        .then(data => {
-            const lista = (data.historial || []).sort(
-                (a,b) => new Date(b.fecha||0) - new Date(a.fecha||0)
-            );
-            if (!lista.length) {
-                document.getElementById('contenidoHistorial').innerHTML =
-                    '<p class="sin-hist">📭 Este registro no tiene ediciones registradas.</p>';
-            } else {
-                document.getElementById('contenidoHistorial').innerHTML =
-                    `<p style="color:#64748b;font-size:12px;margin-bottom:14px">
-                        ${lista.length} edición${lista.length!==1?'es':''} registrada${lista.length!==1?'s':''}
-                    </p>` + lista.map(ev => renderEvento(ev)).join('');
-            }
-        })
-        .catch(() => {
-            document.getElementById('contenidoHistorial').innerHTML =
-                '<p style="color:#dc2626;text-align:center;padding:30px">Error al cargar historial.</p>';
-        });
-}
-
-function cerrarHistorial() {
-    document.getElementById('modalHistorial').classList.remove('show');
-}
-
-// Cerrar con ESC
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
-});
+// ═══ QR ═══
 async function generarTodosQR(){
-    if(!confirm("¿Generar QR para TODAS las ubicaciones?")) return
-    let res = await fetch("/QR_GENERAR_TODOS")
-    let data = await res.json()
-    alert("QR generados: " + data.total + " ubicaciones")
+  if(!confirm("¿Generar QR para TODAS las ubicaciones?"))return;
+  const res=await fetch("/QR_GENERAR_TODOS");
+  const data=await res.json();
+  alert("✅ QR generados: "+data.total+" ubicaciones");
 }
 function generarQR(){
-
-    let ubicacion = prompt("INGRESA LA UBICACION")
-
-    if(!ubicacion) return
-
-    fetch("/QR_MESA_GENERAR/"+encodeURIComponent(ubicacion))
-    .then(r=>r.json())
-    .then(data=>{
-
-        alert("QR GENERADO")
-
-        console.log(data)
-
-    })
-
+  const ubicacion=prompt("Ingresa la ubicación");
+  if(!ubicacion)return;
+  fetch("/QR_MESA_GENERAR/"+encodeURIComponent(ubicacion))
+    .then(r=>r.json()).then(()=>alert("✅ QR generado"));
 }
 async function reimprimirQR(){
-
-    let ubicacion = prompt("UBICACION DEL QR")
-
-    if(!ubicacion) return
-
-    let res = await fetch("/QR_REIMPRIMIR/"+encodeURIComponent(ubicacion))
-
-    let data = await res.json()
-
-    if(data.success){
-
-        window.open(data.qr_url,"_blank")
-
-    }else{
-
-        alert("NO EXISTE QR PARA ESA UBICACION")
-
-    }
-
+  const ubicacion=prompt("Ubicación del QR");
+  if(!ubicacion)return;
+  const res=await fetch("/QR_REIMPRIMIR/"+encodeURIComponent(ubicacion));
+  const data=await res.json();
+  if(data.success) window.open(data.qr_url,"_blank");
+  else alert("❌ No existe QR para esa ubicación");
 }
-
-function abrirReimpresion(){
-
-document.getElementById("modal_reimprimir").style.display="flex";
-
-}
-
-function cerrarReimpresion(){
-
-document.getElementById("modal_reimprimir").style.display="none";
-
-}
-
-
-async function buscarQR(){
-
-let ubicacion = document.getElementById("ubicacion_qr").value;
-
-let res = await fetch("/QR_REIMPRIMIR/"+encodeURIComponent(ubicacion));
-
-let data = await res.json();
-
-let div = document.getElementById("resultado_qr");
-
-if(data.success){
-
-div.innerHTML = `
-<br>
-<a href="${data.qr_url}" target="_blank">VER QR</a>
-<br><br>
-<img src="${data.qr_url}" width="200">
-`;
-
-}else{
-
-div.innerHTML = "NO EXISTE QR PARA ESA UBICACION";
-
-}
-
-}
-
 </script>
 </body>
 </html>

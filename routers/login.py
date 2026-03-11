@@ -34,9 +34,9 @@ def login(data: LoginRequest):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT "ID","USUARIO","NOMBRE","ROL","PASSWORD_HASH","PASSWORD_TEMPORAL","ACTIVO"
-        FROM public."USUARIOS"
-        WHERE "USUARIO" = %s
+        SELECT id,usuario,nombre,rol,password_hash,password_temporal,activo
+        FROM public.usuarios
+        WHERE usuario = %s
     """, (data.usuario.upper(),))
 
     row = cursor.fetchone()
@@ -60,7 +60,7 @@ def login(data: LoginRequest):
 
     # actualizar último acceso
     cursor.execute(
-        'UPDATE public."USUARIOS" SET "ULTIMO_ACCESO"=%s WHERE "ID"=%s',
+        'UPDATE public.usuarios SET ultimo_acceso=%s WHERE id=%s',
         (datetime.now(), id_)
     )
 
@@ -96,9 +96,9 @@ def cambiar_password(data: CambioPasswordRequest):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT "ID","PASSWORD_HASH"
-        FROM public."USUARIOS"
-        WHERE "USUARIO" = %s
+        SELECT id,password_hash
+        FROM public.usuarios
+        WHERE usuario = %s
     """, (data.usuario.upper(),))
 
     row = cursor.fetchone()
@@ -123,9 +123,9 @@ def cambiar_password(data: CambioPasswordRequest):
     nuevo_hash = hash_password(data.password_nuevo)
 
     cursor.execute("""
-        UPDATE public."USUARIOS"
-        SET "PASSWORD_HASH"=%s, "PASSWORD_TEMPORAL"=false
-        WHERE "ID"=%s
+        UPDATE public.usuarios
+        SET password_hash=%s, password_temporal=false
+        WHERE id=%s
     """, (nuevo_hash, id_))
 
     conn.commit()
@@ -149,9 +149,9 @@ def obtener_usuario(request: Request):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT "NOMBRE"
-        FROM public."USUARIOS"
-        WHERE "USUARIO"=%s
+        SELECT nombre
+        FROM public.usuarios
+        WHERE usuario=%s
     """, (usuario,))
 
     row = cursor.fetchone()
