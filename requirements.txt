@@ -6,3 +6,5 @@ pandas
 openpyxl
 python-multipart
 gunicorn
+qrcode
+pathlib

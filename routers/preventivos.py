@@ -38,7 +38,7 @@ class Preventivo(BaseModel):
     nombre_dispositivo:Optional[str] = None
     PLANTA:            Optional[str] = None
     CATEGORIA_COLOR:   Optional[str] = None
-    OBSERVACIONES:     Optional[str] = None
+    ANIO_CREACION:     Optional[int] = None
 
 # ── Tabla de auditoría (se crea al importar el router) ───
 def _crear_tabla_auditoria():
@@ -105,7 +105,8 @@ def obtener_preventivos(
     UBICACION: Optional[str] = Query(None),
     nombre_dispositivo: Optional[str] = Query(None),
     PLANTA: Optional[str] = Query(None),
-    CATEGORIA_COLOR: Optional[str] = Query(None)
+    CATEGORIA_COLOR: Optional[str] = Query(None),
+    ANIO_CREACION: Optional[str] = Query(None)
 ):
 
     conn = get_connection()
@@ -133,6 +134,13 @@ def obtener_preventivos(
     if CATEGORIA_COLOR:
         where += ' AND categoria_color ILIKE %s'
         params.append(f"%{CATEGORIA_COLOR}%")
+
+    if ANIO_CREACION and ANIO_CREACION.strip():
+        try:
+            where += ' AND anio_creacion = %s'
+            params.append(int(ANIO_CREACION))
+        except ValueError:
+            pass
 
     # total de registros
     cursor.execute(
@@ -256,7 +264,7 @@ def obtener_historial_preventivo(id: int):
         # Registro actual
         cursor.execute("""
             SELECT id,id_equipo,ubicacion,plazo,realizado_por,
-                   fecha_realizacion,observaciones,nombre_dispositivo,planta,categoria_color
+                   fecha_realizacion,observaciones,nombre_dispositivo,planta,categoria_color,anio_creacion
             FROM public.mantenimientos_preventivos WHERE id=%s
         """, (id,))
         row = cursor.fetchone()
@@ -300,11 +308,11 @@ def crear_preventivo(data: Preventivo):
         cursor.execute("""
             INSERT INTO public.mantenimientos_preventivos
             (id_equipo,ubicacion,plazo,realizado_por,
-             fecha_realizacion,observaciones,nombre_dispositivo,planta,categoria_color)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id
+             fecha_realizacion,observaciones,nombre_dispositivo,planta,categoria_color,anio_creacion)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id
         """, (data.ID_EQUIPO, data.UBICACION, data.PLAZO, data.REALIZADO_POR,
               data.FECHA_REALIZACION, data.OBSERVACIONES,
-              data.nombre_dispositivo, data.PLANTA, data.CATEGORIA_COLOR))
+              data.nombre_dispositivo, data.PLANTA, data.CATEGORIA_COLOR, data.ANIO_CREACION))
         new_id = cursor.fetchone()[0]
         conn.commit(); cursor.close(); conn.close()
         return {"id": new_id}
@@ -362,7 +370,7 @@ def editar_preventivo(
         # Registro anterior
         cursor.execute("""
             SELECT id_equipo,ubicacion,plazo,realizado_por,
-                   fecha_realizacion,observaciones,nombre_dispositivo,planta,categoria_color
+                   fecha_realizacion,observaciones,nombre_dispositivo,planta,categoria_color,anio_creacion
             FROM public.mantenimientos_preventivos WHERE id=%s
         """, (id,))
         row = cursor.fetchone()
@@ -371,7 +379,8 @@ def editar_preventivo(
             "realizado_por": row[3],
             "fecha_realizacion": str(row[4]) if row[4] else None,
             "observaciones": row[5], "nombre_dispositivo": row[6],
-            "planta": row[7], "categoria_color": row[8]
+            "planta": row[7], "categoria_color": row[8],
+            "anio_creacion": row[9]
         } if row else {}
 
         # Actualizar
@@ -379,11 +388,11 @@ def editar_preventivo(
             UPDATE public.mantenimientos_preventivos SET
             id_equipo=%s,ubicacion=%s,plazo=%s,realizado_por=%s,
             fecha_realizacion=%s,observaciones=%s,
-            nombre_dispositivo=%s,planta=%s,categoria_color=%s
+            nombre_dispositivo=%s,planta=%s,categoria_color=%s,anio_creacion=%s
             WHERE id=%s
         """, (data.ID_EQUIPO, data.UBICACION, data.PLAZO, data.REALIZADO_POR,
               data.FECHA_REALIZACION, data.OBSERVACIONES,
-              data.nombre_dispositivo, data.PLANTA, data.CATEGORIA_COLOR, id))
+              data.nombre_dispositivo, data.PLANTA, data.CATEGORIA_COLOR, data.ANIO_CREACION, id))
         conn.commit()
 
         # Auditoría
@@ -393,7 +402,8 @@ def editar_preventivo(
             "fecha_realizacion": data.FECHA_REALIZACION,
             "observaciones": data.OBSERVACIONES,
             "nombre_dispositivo": data.nombre_dispositivo,
-            "planta": data.PLANTA, "categoria_color": data.CATEGORIA_COLOR
+            "planta": data.PLANTA, "categoria_color": data.CATEGORIA_COLOR,
+            "anio_creacion": data.ANIO_CREACION
         }
         usr = _obtener_usuario(request, usuario)
         _registrar_auditoria(id, usr, anterior, nuevo)
@@ -648,7 +658,7 @@ def exportar_preventivos_anio(anio: int = Query(...)):
     df = pd.read_sql("""
         SELECT *
         FROM public.mantenimientos_preventivos
-        WHERE EXTRACT(YEAR FROM fecha_realizacion) = %s
+        WHERE anio_creacion = %s
         ORDER BY id DESC
     """, conn, params=(anio,))
 

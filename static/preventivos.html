@@ -113,11 +113,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   border-radius:14px;overflow:hidden;margin-bottom:16px;
 }
 .table-scroll{overflow-x:auto;max-height:calc(100vh - 380px);min-height:420px;overflow-y:auto;}
-table{border-collapse:collapse;width:100%;min-width:1000px;font-size:14px;}
+table{border-collapse:collapse;width:100%;min-width:1400px;font-size:13px;}
 thead{position:sticky;top:0;z-index:10;}
 thead tr:first-child th{
   background:var(--surface3);color:var(--muted2);
-  padding:13px 16px;font-size:11px;font-weight:700;
+  padding:11px 12px;font-size:11px;font-weight:700;
   text-transform:uppercase;letter-spacing:.08em;
   border-bottom:1px solid var(--border2);white-space:nowrap;
 }
@@ -134,7 +134,7 @@ thead tr:first-child th{
 tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
 tbody tr:last-child{border-bottom:none;}
 tbody tr:hover td{filter:brightness(1.15);}
-td{padding:13px 16px;color:var(--text);vertical-align:middle;line-height:1.4;}
+td{padding:10px 12px;color:var(--text);vertical-align:middle;line-height:1.4;}
 td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
 
 .color-pill{
@@ -273,12 +273,13 @@ td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
   <div class="panel">
     <div class="panel-title">Nuevo registro</div>
     <div class="form-grid">
-      <div class="field"><label>ID Equipo</label><input id="ID_EQUIPO" placeholder="Ej: EQ-001"></div>
-      <div class="field"><label>Ubicación</label><input id="UBICACION" placeholder="Ej: ANAQUEL-A1"></div>
+      <div class="field"><label>ID Equipo</label><input id="ID_EQUIPO" placeholder="Ej: EQ1234"></div>
+      <div class="field"><label>Ubicación</label><input id="UBICACION" placeholder="Ej: LINEA #"></div>
       <div class="field"><label>Nombre Dispositivo</label><input id="nombre_dispositivo" placeholder="Ej: Computadora de escritorio"></div>
-      <div class="field"><label>Planta</label><input id="PLANTA" placeholder="Ej: SITE 1"></div>
+      <div class="field"><label>Planta</label><input id="PLANTA" placeholder="Ej: B1,B2,B3,B4"></div>
       <div class="field"><label>Categoría / Color</label><input id="CATEGORIA_COLOR" placeholder="Ej: Verde"></div>
       <div class="field"><label>Observaciones</label><input id="OBSERVACIONES" placeholder="Notas..."></div>
+      <div class="field"><label>Año de Creación</label><input id="ANIO_CREACION" type="number" placeholder="Ej: 2026"></div>
     </div>
     <button class="btn btn-success" onclick="guardar()">💾 Guardar Registro</button>
   </div>
@@ -301,6 +302,18 @@ td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
   <div class="table-wrap">
     <div class="table-scroll">
       <table>
+        <colgroup>
+          <col style="width:55px">   <!-- ID -->
+          <col style="width:100px">  <!-- ID Equipo -->
+          <col style="width:180px">  <!-- Ubicación -->
+          <col style="width:160px">  <!-- Nombre Dispositivo -->
+          <col style="width:110px">  <!-- Planta -->
+          <col style="width:120px">  <!-- Categoría/Color -->
+          <col style="width:160px">  <!-- Observaciones -->
+          <col style="width:90px">   <!-- Año Creación -->
+          <col style="width:200px">  <!-- PDF -->
+          <col style="width:160px">  <!-- Acciones -->
+        </colgroup>
         <thead>
           <tr>
             <th>ID</th>
@@ -310,6 +323,7 @@ td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
             <th>Planta</th>
             <th>Categoría / Color</th>
             <th>Observaciones</th>
+            <th>Año Creación</th>
             <th>PDF</th>
             <th>Acciones</th>
           </tr>
@@ -321,6 +335,7 @@ td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
             <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
             <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
             <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+            <th><input oninput="filtrar()" placeholder="Año..." type="number"></th>
             <th></th><th></th>
           </tr>
         </thead>
@@ -369,6 +384,7 @@ td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
     <div class="form-field"><label>Planta</label><input type="text" id="e_PLANTA"></div>
     <div class="form-field"><label>Categoría / Color</label><input type="text" id="e_CATEGORIA_COLOR"></div>
     <div class="form-field"><label>Observaciones</label><input type="text" id="e_OBSERVACIONES"></div>
+    <div class="form-field"><label>Año de Creación</label><input type="number" id="e_ANIO_CREACION"></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
       <button class="btn btn-success" onclick="guardarCambios()">💾 Guardar Cambios</button>
@@ -413,6 +429,7 @@ const CAMPOS = [
   {key:'PLANTA',             label:'Planta'},
   {key:'CATEGORIA_COLOR',    label:'Categoría / Color'},
   {key:'OBSERVACIONES',      label:'Observaciones'},
+  {key:'ANIO_CREACION',      label:'Año de Creación'},
 ];
 const KEY_MAP = {
   'ID_EQUIPO':         'id_equipo',
@@ -421,6 +438,7 @@ const KEY_MAP = {
   'PLANTA':            'planta',
   'CATEGORIA_COLOR':   'categoria_color',
   'OBSERVACIONES':     'observaciones',
+  'ANIO_CREACION':     'anio_creacion',
 };
 
 // ═══ INIT ═══
@@ -446,6 +464,7 @@ function obtenerParametros(){
     ID_EQUIPO:f[0].value, UBICACION:f[1].value,
     nombre_dispositivo:f[2].value, PLANTA:f[3].value,
     CATEGORIA_COLOR:f[4].value, OBSERVACIONES:f[5].value,
+    ANIO_CREACION:f[6].value,
   });
 }
 
@@ -456,7 +475,7 @@ function cargar(){
     renderizar();
   }).catch(()=>{
     document.getElementById('tabla').innerHTML=
-      '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted)">Error al cargar datos</td></tr>';
+      '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Error al cargar datos</td></tr>';
   });
 }
 
@@ -486,7 +505,7 @@ function renderizar(){
   const tbody = document.getElementById('tabla');
   tbody.innerHTML = '';
   if(!datosActuales.length){
-    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
+    tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
     return;
   }
   const esAdmin = sessionStorage.getItem("rol")==="ADMIN";
@@ -503,6 +522,7 @@ function renderizar(){
       <td class="mono" ${tdStyle}>${row.planta??'—'}</td>
       <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label||'—'}</span></td>
       <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones??''}">${row.observaciones??'—'}</td>
+      <td class="mono" ${tdStyle}>${row.anio_creacion??'—'}</td>
       <td ${tdStyle}>
         ${row.tiene_pdf
           ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.id})">📄 Ver</button>
@@ -536,6 +556,7 @@ function guardar(){
     PLANTA:             document.getElementById('PLANTA').value||null,
     CATEGORIA_COLOR:    document.getElementById('CATEGORIA_COLOR').value||null,
     OBSERVACIONES:      document.getElementById('OBSERVACIONES').value||null,
+    ANIO_CREACION:      document.getElementById('ANIO_CREACION').value ? parseInt(document.getElementById('ANIO_CREACION').value) : null,
     PLAZO:null, REALIZADO_POR:null, FECHA_REALIZACION:null
   };
   fetch('/PREVENTIVO',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
