@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 import hashlib, json, io
 import pandas as pd
 import qrcode
-from database import get_connection
+from database import db_conn
 from urllib.parse import quote
 from PIL import Image, ImageDraw, ImageFont
 from openpyxl.styles import PatternFill
@@ -42,23 +42,23 @@ class Preventivo(BaseModel):
 
 # ── Tabla de auditoría (se crea al importar el router) ───
 def _crear_tabla_auditoria():
-    conn = get_connection(); cursor = conn.cursor()
     try:
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS public.auditoria_preventivos (
-                id                SERIAL PRIMARY KEY,
-                registro_id       INTEGER NOT NULL,
-                fecha_cambio      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                usuario           VARCHAR(100),
-                registro_anterior TEXT,
-                registro_nuevo    TEXT
-            )
-        """)
-        conn.commit()
+        with db_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS public.auditoria_preventivos (
+                    id                SERIAL PRIMARY KEY,
+                    registro_id       INTEGER NOT NULL,
+                    fecha_cambio      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    usuario           VARCHAR(100),
+                    registro_anterior TEXT,
+                    registro_nuevo    TEXT
+                )
+            """)
+            conn.commit()
+            cursor.close()
     except Exception as e:
         print(f"Error creando AUDITORIA_PREVENTIVOS: {e}")
-    finally:
-        cursor.close(); conn.close()
 
 _crear_tabla_auditoria()
 
@@ -66,16 +66,18 @@ _crear_tabla_auditoria()
 # ── Helpers ──────────────────────────────────────────────
 def _registrar_auditoria(registro_id, usuario, anterior, nuevo):
     try:
-        conn = get_connection(); cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO public.auditoria_preventivos
-            (registro_id,usuario,registro_anterior,registro_nuevo,fecha_cambio)
-            VALUES (%s,%s,%s,%s,%s)
-        """, (registro_id, usuario,
-              json.dumps(anterior, default=str),
-              json.dumps(nuevo,    default=str),
-              datetime.now()))
-        conn.commit(); cursor.close(); conn.close()
+        with db_conn() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO public.auditoria_preventivos
+                (registro_id,usuario,registro_anterior,registro_nuevo,fecha_cambio)
+                VALUES (%s,%s,%s,%s,%s)
+            """, (registro_id, usuario,
+                  json.dumps(anterior, default=str),
+                  json.dumps(nuevo,    default=str),
+                  datetime.now()))
+            conn.commit()
+            cursor.close()
     except Exception as e:
         print(f"Error auditoria preventivo: {e}")
 
@@ -109,8 +111,8 @@ def obtener_preventivos(
     ANIO_CREACION: Optional[str] = Query(None)
 ):
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
 
     where = "WHERE 1=1"
     params = []
@@ -164,8 +166,6 @@ def obtener_preventivos(
     columnas = [d[0] for d in cursor.description]
     data = [dict(zip(columnas, row)) for row in cursor.fetchall()]
 
-    cursor.close()
-    conn.close()
 
     return {
         "data": data,
@@ -178,8 +178,8 @@ def obtener_preventivos(
 @router.get("/PREVENTIVO/DATOS/{id}")
 def obtener_datos_preventivo(id: int, usuario: str = None):
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
 
     cursor.execute("""
     SELECT
@@ -192,8 +192,6 @@ def obtener_datos_preventivo(id: int, usuario: str = None):
     base = cursor.fetchone()
 
     if not base:
-        cursor.close()
-        conn.close()
         return {"error":"Registro no encontrado"}
 
     ubicacion = base[0]
@@ -242,8 +240,6 @@ def obtener_datos_preventivo(id: int, usuario: str = None):
         if user_row:
             nombre_usuario = user_row[0]
 
-    cursor.close()
-    conn.close()
 
     return {
         "planta": planta,
@@ -259,7 +255,8 @@ def obtener_datos_preventivo(id: int, usuario: str = None):
 @router.get("/PREVENTIVOS/{id}/HISTORIAL")
 def obtener_historial_preventivo(id: int):
     try:
-        conn = get_connection(); cursor = conn.cursor()
+        with db_conn() as conn:
+         cursor = conn.cursor()
 
         # Registro actual
         cursor.execute("""
@@ -269,7 +266,7 @@ def obtener_historial_preventivo(id: int):
         """, (id,))
         row = cursor.fetchone()
         if not row:
-            cursor.close(); conn.close()
+            cursor.close()
             return {"success": False, "error": "Registro no encontrado"}
 
         cols_actual  = [d[0] for d in cursor.description]
@@ -292,7 +289,6 @@ def obtener_historial_preventivo(id: int):
                 "registro_nuevo":    json.loads(r[4]) if r[4] else {}
             })
 
-        cursor.close(); conn.close()
         return {"success": True, "registro_actual": reg_actual, "historial": historial}
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -303,7 +299,8 @@ def obtener_historial_preventivo(id: int):
 # ════════════════════════════════════════════════════════
 @router.post("/PREVENTIVO")
 def crear_preventivo(data: Preventivo):
-    conn = get_connection(); cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
     try:
         cursor.execute("""
             INSERT INTO public.mantenimientos_preventivos
@@ -314,17 +311,16 @@ def crear_preventivo(data: Preventivo):
               data.FECHA_REALIZACION, data.OBSERVACIONES,
               data.nombre_dispositivo, data.PLANTA, data.CATEGORIA_COLOR, data.ANIO_CREACION))
         new_id = cursor.fetchone()[0]
-        conn.commit(); cursor.close(); conn.close()
+        conn.commit(); cursor.close()
         return {"id": new_id}
     except Exception as e:
-        cursor.close(); conn.close()
         return {"error": str(e)}
     
 @router.get("/QR_GENERAR_TODOS")
 def generar_qr_todos():
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
 
     cursor.execute("""
     SELECT DISTINCT ubicacion
@@ -334,8 +330,6 @@ def generar_qr_todos():
 
     ubicaciones = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
 
     generados = []
 
@@ -365,7 +359,8 @@ def editar_preventivo(
     id: int, data: Preventivo, request: Request,
     usuario: Optional[str] = Query(None)
 ):
-    conn = get_connection(); cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
     try:
         # Registro anterior
         cursor.execute("""
@@ -408,10 +403,8 @@ def editar_preventivo(
         usr = _obtener_usuario(request, usuario)
         _registrar_auditoria(id, usr, anterior, nuevo)
 
-        cursor.close(); conn.close()
         return {"mensaje": "ACTUALIZADO"}
     except Exception as e:
-        cursor.close(); conn.close()
         return {"error": str(e)}
 
 
@@ -423,8 +416,8 @@ def eliminar_preventivo(id: int, request: Request):
 
     usuario = request.cookies.get("usuario")
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
 
     cursor.execute("""
     SELECT rol
@@ -444,8 +437,6 @@ def eliminar_preventivo(id: int, request: Request):
 
     conn.commit()
 
-    cursor.close()
-    conn.close()
 
     return {"ok":True}
 
@@ -460,10 +451,11 @@ async def subir_pdf_preventivo(id: int, file: UploadFile = File(...)):
         ruta = _pdf_path(id)
         ruta.write_bytes(contenido)
 
-        conn = get_connection(); cursor = conn.cursor()
+        with db_conn() as conn:
+         cursor = conn.cursor()
         cursor.execute('UPDATE public.mantenimientos_preventivos SET pdf=%s WHERE id=%s',
                        (str(ruta), id))
-        conn.commit(); cursor.close(); conn.close()
+        conn.commit(); cursor.close()
         return {"mensaje": "PDF subido"}
     except Exception as e:
         return {"error": str(e)}
@@ -482,9 +474,10 @@ def eliminar_pdf_preventivo(id: int):
     try:
         ruta = _pdf_path(id)
         if ruta.exists(): ruta.unlink()
-        conn = get_connection(); cursor = conn.cursor()
+        with db_conn() as conn:
+         cursor = conn.cursor()
         cursor.execute('UPDATE public.mantenimientos_preventivos SET pdf=NULL WHERE id=%s', (id,))
-        conn.commit(); cursor.close(); conn.close()
+        conn.commit(); cursor.close()
         return {"mensaje": "PDF eliminado"}
     except Exception as e:
         return {"error": str(e)}
@@ -496,14 +489,11 @@ def eliminar_pdf_preventivo(id: int):
 @router.get("/PREVENTIVOS/EXPORTAR_TODO")
 def exportar_preventivos_todo():
 
-    conn = get_connection()
-
-    df = pd.read_sql(
+    with db_conn() as conn:
+     df = pd.read_sql(
         'SELECT * FROM public.mantenimientos_preventivos ORDER BY id DESC',
         conn
     )
-
-    conn.close()
 
     buffer = io.BytesIO()
 
@@ -562,8 +552,6 @@ def exportar_preventivos_filtrado(
     OBSERVACIONES: Optional[str] = Query(None)
 ):
 
-    conn = get_connection()
-
     where = "WHERE 1=1"
     params = []
 
@@ -605,8 +593,8 @@ def exportar_preventivos_filtrado(
     ORDER BY id DESC
     """
 
-    df = pd.read_sql(query, conn, params=params)
-    conn.close()
+    with db_conn() as conn:
+        df = pd.read_sql(query, conn, params=params)
 
     # ───────── COLORES ─────────
     def aplicar_color(row):
@@ -653,16 +641,13 @@ def exportar_preventivos_filtrado(
 @router.get("/PREVENTIVOS/EXPORTAR_ANIO")
 def exportar_preventivos_anio(anio: int = Query(...)):
 
-    conn = get_connection()
-
-    df = pd.read_sql("""
+    with db_conn() as conn:
+     df = pd.read_sql("""
         SELECT *
         FROM public.mantenimientos_preventivos
         WHERE anio_creacion = %s
         ORDER BY id DESC
     """, conn, params=(anio,))
-
-    conn.close()
 
     buffer = io.BytesIO()
 
@@ -783,8 +768,8 @@ def generar_qr_mesa(ubicacion: str, request: Request = None):
 @router.post("/PREVENTIVO/GUARDAR_DIGITAL/{id}")
 def guardar_preventivo_digital(id:int, data:dict):
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
 
     cursor.execute("""
     UPDATE public.mantenimientos_preventivos
@@ -796,15 +781,13 @@ def guardar_preventivo_digital(id:int, data:dict):
 
     conn.commit()
 
-    cursor.close()
-    conn.close()
 
     return {"ok":True}
 @router.get("/PREVENTIVO/DIGITAL/{id}")
 def obtener_preventivo_digital(id:int):
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
 
     cursor.execute("""
     SELECT preventivo_digital
@@ -814,8 +797,6 @@ def obtener_preventivo_digital(id:int):
 
     row = cursor.fetchone()
 
-    cursor.close()
-    conn.close()
 
     if not row or not row[0]:
         return {"existe": False}
@@ -833,8 +814,8 @@ def obtener_preventivo_digital(id:int):
 @router.delete("/PREVENTIVO/ELIMINAR_DIGITAL/{id}")
 def eliminar_preventivo_digital(id:int):
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
 
     cursor.execute("""
     UPDATE public.mantenimientos_preventivos
@@ -844,16 +825,14 @@ def eliminar_preventivo_digital(id:int):
 
     conn.commit()
 
-    cursor.close()
-    conn.close()
 
     return {"ok":True}
 
 @router.get("/preventivos/qr/{ubicacion}", response_class=HTMLResponse)
 def ver_qr_preventivo(ubicacion: str):
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
 
     cursor.execute("""
     SELECT
@@ -873,8 +852,6 @@ def ver_qr_preventivo(ubicacion: str):
 
     rows = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
 
     # verificar si ya existe preventivo digital en alguno
     preventivo_existe = False

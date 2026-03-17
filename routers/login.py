@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from datetime import datetime
 import hashlib
 
-from database import get_connection
+from database import db_conn
 
 router = APIRouter()
 
@@ -30,8 +30,8 @@ def hash_password(password: str) -> str:
 @router.post("/LOGIN")
 def login(data: LoginRequest):
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
 
     cursor.execute("""
         SELECT id,usuario,nombre,rol,password_hash,password_temporal,activo
@@ -43,19 +43,16 @@ def login(data: LoginRequest):
 
     if not row:
         cursor.close()
-        conn.close()
         return {"ok": False, "mensaje": "Usuario o contraseña incorrectos"}
 
     id_, usuario, nombre, rol, pwd_hash, pwd_temporal, activo = row
 
     if not activo:
         cursor.close()
-        conn.close()
         return {"ok": False, "mensaje": "Usuario desactivado"}
 
     if hash_password(data.password) != pwd_hash:
         cursor.close()
-        conn.close()
         return {"ok": False, "mensaje": "Usuario o contraseña incorrectos"}
 
     # actualizar último acceso
@@ -66,8 +63,6 @@ def login(data: LoginRequest):
 
     conn.commit()
 
-    cursor.close()
-    conn.close()
 
     # crear respuesta
     response = JSONResponse({
@@ -92,8 +87,8 @@ def login(data: LoginRequest):
 @router.post("/CAMBIAR_PASSWORD")
 def cambiar_password(data: CambioPasswordRequest):
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
 
     cursor.execute("""
         SELECT id,password_hash
@@ -105,19 +100,16 @@ def cambiar_password(data: CambioPasswordRequest):
 
     if not row:
         cursor.close()
-        conn.close()
         return {"ok": False, "mensaje": "Usuario no encontrado"}
 
     id_, pwd_hash = row
 
     if hash_password(data.password_actual) != pwd_hash:
         cursor.close()
-        conn.close()
         return {"ok": False, "mensaje": "Contraseña actual incorrecta"}
 
     if len(data.password_nuevo) < 6:
         cursor.close()
-        conn.close()
         return {"ok": False, "mensaje": "La nueva contraseña debe tener al menos 6 caracteres"}
 
     nuevo_hash = hash_password(data.password_nuevo)
@@ -130,8 +122,6 @@ def cambiar_password(data: CambioPasswordRequest):
 
     conn.commit()
 
-    cursor.close()
-    conn.close()
 
     return {"ok": True, "mensaje": "Contraseña actualizada correctamente"}
 
@@ -145,8 +135,8 @@ def obtener_usuario(request: Request):
     if not usuario:
         return {"usuario": "SISTEMA"}
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    with db_conn() as conn:
+     cursor = conn.cursor()
 
     cursor.execute("""
         SELECT nombre
@@ -156,8 +146,6 @@ def obtener_usuario(request: Request):
 
     row = cursor.fetchone()
 
-    cursor.close()
-    conn.close()
 
     if row:
         return {"usuario": row[0]}
