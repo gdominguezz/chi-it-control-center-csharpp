@@ -1,11 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Mantenimiento Preventivo — S-Riko</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
 <style>
 :root {
   --bg:        #0B0F1A;
@@ -420,378 +420,356 @@ body {
 .s5 { --sec-color: #EF4444; }
 </style>
 </head>
-
 <body>
 <div class="page">
-
-  <!-- HEADER -->
-  <div class="page-header">
-    <div class="header-icon">🔧</div>
-    <div class="header-text">
-      <h1>Mantenimiento Preventivo</h1>
-      <p>S-Riko Automotive Hose de Chihuahua</p>
-    </div>
-    <div class="header-badge" id="modoBadge">— Cargando —</div>
-  </div>
-
-  <!-- DATOS GENERALES -->
-  <div class="card">
-    <div class="card-title">Datos del reporte</div>
-    <div class="fields-grid">
-      <div class="field">
-        <label>Fecha</label>
-        <input type="date" id="fecha">
-      </div>
-      <div class="field">
-        <label>Planta</label>
-        <input id="planta" readonly>
-      </div>
-      <div class="field">
-        <label>Línea / Persona</label>
-        <input id="linea" readonly>
-      </div>
-      <div class="field">
-        <label>Elaborado por</label>
-        <input id="reporte" readonly>
-      </div>
-      <div class="field">
-        <label>PC / Portátil</label>
-        <input id="pc" readonly>
-      </div>
-      <div class="field">
-        <label>Impresora</label>
-        <input id="impresora" readonly>
-      </div>
-      <div class="field">
-        <label>UPS</label>
-        <input id="ups" readonly>
-      </div>
-    </div>
-  </div>
-
-  <!-- ACTIVIDADES -->
-  <div class="card">
-    <div class="card-title">Actividades de mantenimiento</div>
-
-    <!-- progress -->
-    <div class="progress-wrap">
-      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-      <div class="progress-label" id="progressLabel">0 / 0</div>
-    </div>
-
-    <table class="act-table">
-      <thead>
-        <tr>
-          <th style="width:32px"></th>
-          <th style="width:24px">#</th>
-          <th>Punto a verificar</th>
-          <th>Portátil</th>
-          <th>PC</th>
-          <th>Impresora</th>
-          <th>UPS</th>
-        </tr>
-      </thead>
-      <tbody>
-
-        <!-- ───── 1. LIMPIEZA INTERIOR ───── -->
-        <tr class="section-divider"><td colspan="7"><span class="section-divider-label">1 · Limpieza Interior</span></td></tr>
-
-        <tr>
-          <td class="chk-cell section-label-cell section-first" rowspan="6"><span class="section-label s1">Lim. Interior</span></td>
-          <td class="act-num">1</td>
-          <td class="act-desc">Sopletear el gabinete</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">2</td>
-          <td class="act-desc">Limpieza de contactos de memoria RAM</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">3</td>
-          <td class="act-desc">Sopletear fuente de poder y ventiladores</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">4</td>
-          <td class="act-desc">Sopletear la impresora térmica</td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">5</td>
-          <td class="act-desc">Limpieza de rodillos de la impresora (no usar alcohol)</td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">6</td>
-          <td class="act-desc">Limpieza del cabezal de la impresora térmica</td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-
-        <!-- ───── 2. LIMPIEZA EXTERIOR ───── -->
-        <tr class="section-divider"><td colspan="7"><span class="section-divider-label">2 · Limpieza Exterior</span></td></tr>
-
-        <tr>
-          <td class="chk-cell section-label-cell section-first" rowspan="10"><span class="section-label s2">Lim. Exterior</span></td>
-          <td class="act-num">1</td>
-          <td class="act-desc">Limpieza del gabinete</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">2</td>
-          <td class="act-desc">Limpieza del monitor o pantalla</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">3</td>
-          <td class="act-desc">Limpieza y sopleteado del teclado y/o touchpad</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">4</td>
-          <td class="act-desc">Limpieza del ratón</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">5</td>
-          <td class="act-desc">Limpieza de la impresora térmica</td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">6</td>
-          <td class="act-desc">Limpieza de la laptop</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">7</td>
-          <td class="act-desc">Limpieza y verificación del UPS</td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-        </tr>
-        <tr>
-          <td class="act-num">8</td>
-          <td class="act-desc">Sopleteado de ventiladores y ranuras de enfriamiento</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">9</td>
-          <td class="act-desc">Limpieza exterior del lector óptico (incluye la mica)</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">10</td>
-          <td class="act-desc">Limpieza del cableado</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-        </tr>
-
-        <!-- ───── 3. PREVENTIVO SOFTWARE ───── -->
-        <tr class="section-divider"><td colspan="7"><span class="section-divider-label">3 · Preventivo de Software</span></td></tr>
-
-        <tr>
-          <td class="chk-cell section-label-cell section-first" rowspan="5"><span class="section-label s3">Software</span></td>
-          <td class="act-num">1</td>
-          <td class="act-desc">Actualizaciones del sistema operativo</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">2</td>
-          <td class="act-desc">Actualizaciones de Office</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">3</td>
-          <td class="act-desc">Eliminación de archivos temporales y vaciar reciclaje</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">4</td>
-          <td class="act-desc">Revisión del estado del antivirus y escaneo del equipo</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">5</td>
-          <td class="act-desc">Desfragmentar las unidades de disco duro</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-
-        <!-- ───── 4. MONTAJE ───── -->
-        <tr class="section-divider"><td colspan="7"><span class="section-divider-label">4 · Montaje</span></td></tr>
-
-        <tr>
-          <td class="chk-cell section-label-cell section-first" rowspan="3"><span class="section-label s4">Montaje</span></td>
-          <td class="act-num">1</td>
-          <td class="act-desc">Conectar todos los periféricos correspondientes</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-        </tr>
-        <tr>
-          <td class="act-num">2</td>
-          <td class="act-desc">Verificar que los cables y conectores no presenten daños</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-        </tr>
-        <tr>
-          <td class="act-num">3</td>
-          <td class="act-desc">Rutear cables de periféricos / anclar eliminador de impresora</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-
-        <!-- ───── 5. INSPECCIÓN ───── -->
-        <tr class="section-divider"><td colspan="7"><span class="section-divider-label">5 · Inspección</span></td></tr>
-
-        <tr>
-          <td class="chk-cell section-label-cell section-first" rowspan="6"><span class="section-label s5">Inspección</span></td>
-          <td class="act-num">1</td>
-          <td class="act-desc">Verificación vida de la pila del UPS</td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-        </tr>
-        <tr>
-          <td class="act-num">2</td>
-          <td class="act-desc">Verificación vida de la pila del BIOS</td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">3</td>
-          <td class="act-desc">Inspección y funcionamiento del UPS</td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-        </tr>
-        <tr>
-          <td class="act-num">4</td>
-          <td class="act-desc">Encender el equipo y ver que funcione correctamente</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">5</td>
-          <td class="act-desc">Verificar que los periféricos funcionen correctamente</td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-        </tr>
-        <tr>
-          <td class="act-num">6</td>
-          <td class="act-desc">Verificar que solo equipo IT esté conectado al UPS</td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><span class="chk-empty"></span></td>
-          <td class="chk-cell"><label class="chk-wrap"><input type="checkbox"><span class="chk-icon">✓</span></label></td>
-        </tr>
-
-      </tbody>
-    </table>
-  </div>
-
-  <!-- BOTTOM: OBSERVACIONES + CORRECTIVO -->
-  <div class="bottom-grid">
-    <div class="card" style="margin-bottom:0">
-      <div class="card-title">Observaciones</div>
-      <textarea class="obs-area" id="observaciones" placeholder="Anota cualquier hallazgo, anomalía o recomendación…"></textarea>
-    </div>
-
-    <div class="correctivo-card">
-      <div class="card-title">¿Requiere correctivo?</div>
-      <div class="radio-group">
-        <label class="radio-opt opt-si">
-          <input type="checkbox" id="si"> Sí, requiere correctivo
+<!-- HEADER -->
+<div class="page-header">
+<div class="header-icon">🔧</div>
+<div class="header-text">
+<h1>Mantenimiento Preventivo</h1>
+<p>S-Riko Automotive Hose de Chihuahua</p>
+</div>
+<div class="header-badge" id="modoBadge">— Cargando —</div>
+</div>
+<!-- DATOS GENERALES -->
+<div class="card">
+<div class="card-title">Datos del reporte</div>
+<div class="fields-grid">
+<div class="field">
+<label>Fecha</label>
+<input id="fecha" type="date"/>
+</div>
+<div class="field">
+<label>Planta</label>
+<input id="planta" readonly=""/>
+</div>
+<div class="field">
+<label>Línea / Persona</label>
+<input id="linea" readonly=""/>
+</div>
+<div class="field">
+<label>Elaborado por</label>
+<input id="reporte" readonly=""/>
+</div>
+<div class="field">
+<label>PC / Portátil</label>
+<input id="pc" readonly=""/>
+</div>
+<div class="field">
+<label>Impresora</label>
+<input id="impresora" readonly=""/>
+</div>
+<div class="field">
+<label>UPS</label>
+<input id="ups" readonly=""/>
+</div>
+</div>
+</div>
+<!-- ACTIVIDADES -->
+<div class="card">
+<div class="card-title">Actividades de mantenimiento</div>
+<!-- progress -->
+<div class="progress-wrap">
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="progress-label" id="progressLabel">0 / 0</div>
+</div>
+<table class="act-table">
+<thead>
+<tr>
+<th style="width:32px"></th>
+<th style="width:24px">#</th>
+<th>Punto a verificar</th>
+<th>Portátil</th>
+<th>PC</th>
+<th>Impresora</th>
+<th>UPS</th>
+</tr>
+</thead>
+<tbody>
+<!-- ───── 1. LIMPIEZA INTERIOR ───── -->
+<tr class="section-divider"><td colspan="7"><span class="section-divider-label">1 · Limpieza Interior</span></td></tr>
+<tr>
+<td class="chk-cell section-label-cell section-first" rowspan="6"><span class="section-label s1">Lim. Interior</span></td>
+<td class="act-num">1</td>
+<td class="act-desc">Sopletear el gabinete</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">2</td>
+<td class="act-desc">Limpieza de contactos de memoria RAM</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">3</td>
+<td class="act-desc">Sopletear fuente de poder y ventiladores</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">4</td>
+<td class="act-desc">Sopletear la impresora térmica</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">5</td>
+<td class="act-desc">Limpieza de rodillos de la impresora (no usar alcohol)</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">6</td>
+<td class="act-desc">Limpieza del cabezal de la impresora térmica</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<!-- ───── 2. LIMPIEZA EXTERIOR ───── -->
+<tr class="section-divider"><td colspan="7"><span class="section-divider-label">2 · Limpieza Exterior</span></td></tr>
+<tr>
+<td class="chk-cell section-label-cell section-first" rowspan="10"><span class="section-label s2">Lim. Exterior</span></td>
+<td class="act-num">1</td>
+<td class="act-desc">Limpieza del gabinete</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">2</td>
+<td class="act-desc">Limpieza del monitor o pantalla</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">3</td>
+<td class="act-desc">Limpieza y sopleteado del teclado y/o touchpad</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">4</td>
+<td class="act-desc">Limpieza del ratón</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">5</td>
+<td class="act-desc">Limpieza de la impresora térmica</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">6</td>
+<td class="act-desc">Limpieza de la laptop</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">7</td>
+<td class="act-desc">Limpieza y verificación del UPS</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+<tr>
+<td class="act-num">8</td>
+<td class="act-desc">Sopleteado de ventiladores y ranuras de enfriamiento</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">9</td>
+<td class="act-desc">Limpieza exterior del lector óptico (incluye la mica)</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">10</td>
+<td class="act-desc">Limpieza del cableado</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+<!-- ───── 3. PREVENTIVO SOFTWARE ───── -->
+<tr class="section-divider"><td colspan="7"><span class="section-divider-label">3 · Preventivo de Software</span></td></tr>
+<tr>
+<td class="chk-cell section-label-cell section-first" rowspan="5"><span class="section-label s3">Software</span></td>
+<td class="act-num">1</td>
+<td class="act-desc">Actualizaciones del sistema operativo</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">2</td>
+<td class="act-desc">Actualizaciones de Office</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">3</td>
+<td class="act-desc">Eliminación de archivos temporales y vaciar reciclaje</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">4</td>
+<td class="act-desc">Revisión del estado del antivirus y escaneo del equipo</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">5</td>
+<td class="act-desc">Desfragmentar las unidades de disco duro</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<!-- ───── 4. MONTAJE ───── -->
+<tr class="section-divider"><td colspan="7"><span class="section-divider-label">4 · Montaje</span></td></tr>
+<tr>
+<td class="chk-cell section-label-cell section-first" rowspan="3"><span class="section-label s4">Montaje</span></td>
+<td class="act-num">1</td>
+<td class="act-desc">Conectar todos los periféricos correspondientes</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+<tr>
+<td class="act-num">2</td>
+<td class="act-desc">Verificar que los cables y conectores no presenten daños</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+<tr>
+<td class="act-num">3</td>
+<td class="act-desc">Rutear cables de periféricos / anclar eliminador de impresora</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<!-- ───── 5. INSPECCIÓN ───── -->
+<tr class="section-divider"><td colspan="7"><span class="section-divider-label">5 · Inspección</span></td></tr>
+<tr>
+<td class="chk-cell section-label-cell section-first" rowspan="6"><span class="section-label s5">Inspección</span></td>
+<td class="act-num">1</td>
+<td class="act-desc">Verificación vida de la pila del UPS</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+<tr>
+<td class="act-num">2</td>
+<td class="act-desc">Verificación vida de la pila del BIOS</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">3</td>
+<td class="act-desc">Inspección y funcionamiento del UPS</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+<tr>
+<td class="act-num">4</td>
+<td class="act-desc">Encender el equipo y ver que funcione correctamente</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">5</td>
+<td class="act-desc">Verificar que los periféricos funcionen correctamente</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">6</td>
+<td class="act-desc">Verificar que solo equipo IT esté conectado al UPS</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- BOTTOM: OBSERVACIONES + CORRECTIVO -->
+<div class="bottom-grid">
+<div class="card" style="margin-bottom:0">
+<div class="card-title">Observaciones</div>
+<textarea class="obs-area" id="observaciones" placeholder="Anota cualquier hallazgo, anomalía o recomendación…"></textarea>
+</div>
+<div class="correctivo-card">
+<div class="card-title">¿Requiere correctivo?</div>
+<div class="radio-group">
+<label class="radio-opt opt-si">
+<input id="si" type="checkbox"/> Sí, requiere correctivo
         </label>
-        <label class="radio-opt opt-no">
-          <input type="checkbox" id="no"> No requiere correctivo
+<label class="radio-opt opt-no">
+<input id="no" type="checkbox"/> No requiere correctivo
         </label>
-      </div>
-    </div>
-  </div>
-
-  <!-- ACTIONS -->
-  <div class="actions">
-    <button class="btn btn-ghost" onclick="cerrar()">✕ Cerrar</button>
-    <button class="btn btn-primary" onclick="guardarPreventivo()" id="btn_guardar">
+</div>
+</div>
+</div>
+<!-- ACTIONS -->
+<div class="actions">
+<button class="btn btn-ghost" onclick="cerrar()">✕ Cerrar</button>
+<button class="btn btn-primary" id="btn_guardar" onclick="guardarPreventivo()">
       💾 Guardar Preventivo
     </button>
-  </div>
-
 </div>
-
+</div>
 <script>
 // ── PROGRESS BAR ──
 function updateProgress() {
@@ -829,6 +807,9 @@ if (modo === 'ver') {
   badge.textContent = '🆕 Nuevo preventivo';
 }
 
+// ── IDs numéricos de cada dispositivo (se llenan al cargar) ──
+let idRegistros = { portatil: null, pc: null, impresora: null, ups: null };
+
 // ── CARGAR DATOS ──
 async function cargarDatos() {
   const id      = params.get('id');
@@ -841,6 +822,14 @@ async function cargarDatos() {
   document.getElementById('pc').value        = data.pc        || '';
   document.getElementById('impresora').value = data.impresora || '';
   document.getElementById('ups').value       = data.ups       || '';
+
+  // Guardar IDs numéricos para saber qué registros actualizar al guardar
+  idRegistros.portatil  = data.id_portatil  || null;
+  idRegistros.pc        = data.id_pc        || null;
+  idRegistros.impresora = data.id_impresora || null;
+  idRegistros.ups       = data.id_ups       || null;
+
+  console.log('[DEBUG] idRegistros cargados:', idRegistros);
 }
 
 async function cargarPreventivoGuardado() {
@@ -864,18 +853,40 @@ window.onload = async function () {
 
 // ── GUARDAR ──
 async function guardarPreventivo() {
-  const id           = params.get('id');
+  const id            = params.get('id');
   const observaciones = document.getElementById('observaciones').value;
   const fecha         = document.getElementById('fecha').value;
   const checks        = [];
-  document.querySelectorAll('.chk-wrap input[type=checkbox]').forEach((c, i) => {
-    if (c.checked) checks.push(i);
+
+  // Detectar qué columnas tuvieron al menos 1 check usando data-col
+  const dispositivoCheck = { portatil: false, pc: false, impresora: false, ups: false };
+
+  document.querySelectorAll('.chk-wrap input[type=checkbox]').forEach((cb, i) => {
+    if (cb.checked) {
+      checks.push(i);
+      const col = cb.getAttribute('data-col');
+      if (col && dispositivoCheck.hasOwnProperty(col)) {
+        dispositivoCheck[col] = true;
+      }
+    }
   });
+
+  console.log('[DEBUG] dispositivoCheck:', dispositivoCheck);
+  console.log('[DEBUG] idRegistros:', idRegistros);
+
+  // Construir lista de IDs que recibieron al menos 1 check
+  const ids_con_check = [];
+  if (dispositivoCheck.portatil  && idRegistros.portatil)  ids_con_check.push(idRegistros.portatil);
+  if (dispositivoCheck.pc        && idRegistros.pc)         ids_con_check.push(idRegistros.pc);
+  if (dispositivoCheck.impresora && idRegistros.impresora)  ids_con_check.push(idRegistros.impresora);
+  if (dispositivoCheck.ups       && idRegistros.ups)        ids_con_check.push(idRegistros.ups);
+
+  console.log('[DEBUG] ids_con_check:', ids_con_check);
 
   const res  = await fetch('/PREVENTIVO/GUARDAR_DIGITAL/' + id, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ fecha, observaciones, checks })
+    body:    JSON.stringify({ fecha, observaciones, checks, ids_con_check })
   });
   const data = await res.json();
 
@@ -887,7 +898,6 @@ async function guardarPreventivo() {
     console.error(data);
   }
 }
-
 function cerrar() { window.close(); }
 </script>
 </body>

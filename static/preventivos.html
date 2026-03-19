@@ -113,7 +113,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   border-radius:14px;overflow:hidden;margin-bottom:16px;
 }
 .table-scroll{overflow-x:auto;max-height:calc(100vh - 380px);min-height:420px;overflow-y:auto;}
-table{border-collapse:collapse;width:100%;min-width:1400px;font-size:13px;}
+.table-scroll::-webkit-scrollbar{width:7px;height:7px;}
+.table-scroll::-webkit-scrollbar-track{background:var(--surface2);border-radius:999px;}
+.table-scroll::-webkit-scrollbar-thumb{background:#334155;border-radius:999px;}
+.table-scroll::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+.table-scroll::-webkit-scrollbar-corner{background:var(--surface2);}
+table{border-collapse:collapse;width:100%;min-width:1280px;font-size:13px;}
 thead{position:sticky;top:0;z-index:10;}
 thead tr:first-child th{
   background:var(--surface3);color:var(--muted2);
@@ -226,7 +231,7 @@ td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
 /* ── HISTORIAL ── */
 .ev-wrap{
   margin-bottom:16px;border:1px solid var(--border2);
-  border-radius:10px;overflow:hidden;
+  border-radius:10px;overflow-x:auto;
 }
 .ev-header{
   background:var(--surface2);padding:12px 16px;
@@ -241,7 +246,7 @@ td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
   font-weight:700;letter-spacing:.05em;margin-left:6px;
   border:1px solid rgba(245,158,11,.3);
 }
-.ev-table{width:100%;border-collapse:collapse;font-size:12px;}
+.ev-table{width:100%;min-width:600px;border-collapse:collapse;font-size:12px;}
 .ev-table th,.ev-table td{border:1px solid var(--border);padding:9px 12px;text-align:left;}
 .ev-table thead th{background:var(--surface3);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
 .ev-table th:first-child{width:22%;}
@@ -292,7 +297,7 @@ td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
     <button class="btn btn-purple" onclick="exportarPorAnio()">📅 Por Año</button>
     <div class="toolbar-sep"></div>
     <button class="btn btn-cyan" onclick="generarQR()">📷 QR por Ubicación</button>
-    <button class="btn btn-cyan" onclick="reimprimirQR()">🖨️ Reimprimir QR</button>
+    
     <button class="btn btn-cyan" onclick="generarTodosQR()">⚡ Generar Todos los QR</button>
     <div class="toolbar-sep"></div>
     <button class="btn btn-ghost" onclick="window.location.href='menu.html'">← Menú</button>
@@ -303,16 +308,16 @@ td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
     <div class="table-scroll">
       <table>
         <colgroup>
-          <col style="width:55px">   <!-- ID -->
-          <col style="width:100px">  <!-- ID Equipo -->
-          <col style="width:180px">  <!-- Ubicación -->
-          <col style="width:160px">  <!-- Nombre Dispositivo -->
-          <col style="width:110px">  <!-- Planta -->
-          <col style="width:120px">  <!-- Categoría/Color -->
-          <col style="width:160px">  <!-- Observaciones -->
-          <col style="width:90px">   <!-- Año Creación -->
-          <col style="width:200px">  <!-- PDF -->
-          <col style="width:160px">  <!-- Acciones -->
+          <col style="width:50px">   <!-- ID -->
+          <col style="width:110px">  <!-- ID Equipo -->
+          <col style="width:170px">  <!-- Ubicación -->
+          <col style="width:150px">  <!-- Nombre Dispositivo -->
+          <col style="width:70px">   <!-- Planta -->
+          <col style="width:110px">  <!-- Categoría/Color -->
+          <col style="width:140px">  <!-- Observaciones -->
+          <col style="width:75px">   <!-- Año Creación -->
+          <col style="width:190px">  <!-- PDF -->
+          <col style="width:210px">  <!-- Acciones -->
         </colgroup>
         <thead>
           <tr>
@@ -329,13 +334,13 @@ td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
           </tr>
           <tr class="filter-row">
             <th></th>
-            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
-            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
-            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
-            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
-            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
-            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
-            <th><input oninput="filtrar()" placeholder="Año..." type="number"></th>
+            <th><input id="f_ID_EQUIPO"         placeholder="Filtrar..."></th>
+            <th><input id="f_UBICACION"          placeholder="Filtrar..."></th>
+            <th><input id="f_nombre_dispositivo" placeholder="Filtrar..."></th>
+            <th><input id="f_PLANTA"             placeholder="Filtrar..."></th>
+            <th><input id="f_CATEGORIA_COLOR"    placeholder="Filtrar..."></th>
+            <th><input id="f_OBSERVACIONES"      placeholder="Filtrar..."></th>
+            <th><input id="f_ANIO_CREACION"      placeholder="Año..." type="number"></th>
             <th></th><th></th>
           </tr>
         </thead>
@@ -399,7 +404,7 @@ td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2);}
       <h3>📋 Historial de Cambios — <span id="histIdLabel" style="color:var(--cyan);font-family:'DM Mono',monospace;">#</span></h3>
       <button class="btn btn-danger btn-sm" onclick="cerrarHistorial()">✕</button>
     </div>
-    <div id="contenidoHistorial"></div>
+    <div id="contenidoHistorial" style="overflow-y:auto;overflow-x:auto;max-height:55vh;"></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="cerrarHistorial()">Cerrar</button>
     </div>
@@ -453,18 +458,31 @@ window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('usuarioDisplay').textContent = usuarioActual;
     }).catch(()=>document.getElementById('usuarioDisplay').textContent='Sin sesión');
   }
+  // Conectar filtros con debounce
+  document.querySelectorAll('.filter-row input').forEach(inp => {
+    inp.addEventListener('input', filtrar);
+  });
   cargar();
 });
 
 // ═══ CARGA ═══
+let _debounceTimer = null;
+
+function filtrar() {
+  clearTimeout(_debounceTimer);
+  _debounceTimer = setTimeout(() => { paginaActual = 1; cargar(); }, 400);
+}
+
 function obtenerParametros(){
-  const f = document.querySelectorAll('.filter-row input');
   return new URLSearchParams({
     page:paginaActual, limit:limite,
-    ID_EQUIPO:f[0].value, UBICACION:f[1].value,
-    nombre_dispositivo:f[2].value, PLANTA:f[3].value,
-    CATEGORIA_COLOR:f[4].value, OBSERVACIONES:f[5].value,
-    ANIO_CREACION:f[6].value,
+    ID_EQUIPO:         document.getElementById('f_ID_EQUIPO').value,
+    UBICACION:         document.getElementById('f_UBICACION').value,
+    nombre_dispositivo:document.getElementById('f_nombre_dispositivo').value,
+    PLANTA:            document.getElementById('f_PLANTA').value,
+    CATEGORIA_COLOR:   document.getElementById('f_CATEGORIA_COLOR').value,
+    OBSERVACIONES:     document.getElementById('f_OBSERVACIONES').value,
+    ANIO_CREACION:     document.getElementById('f_ANIO_CREACION').value,
   });
 }
 
@@ -543,7 +561,7 @@ function renderizar(){
     `Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)} | Total: ${totalRegistros}`;
 }
 
-function filtrar()   { paginaActual=1; cargar(); }
+// filtrar() definida arriba con debounce
 function siguiente() { if(paginaActual*limite<totalRegistros){paginaActual++;cargar();} }
 function anterior()  { if(paginaActual>1){paginaActual--;cargar();} }
 
@@ -707,26 +725,19 @@ document.addEventListener('keydown',e=>{
 });
 
 // ═══ QR ═══
-async function generarTodosQR(){
-  if(!confirm("¿Generar QR para TODAS las ubicaciones?"))return;
-  const res=await fetch("/QR_GENERAR_TODOS");
-  const data=await res.json();
-  alert("✅ QR generados: "+data.total+" ubicaciones");
+function generarTodosQR(){
+    window.location.href = "/QR_GENERAR_TODOS"
 }
 function generarQR(){
-  const ubicacion=prompt("Ingresa la ubicación");
-  if(!ubicacion)return;
-  fetch("/QR_MESA_GENERAR/"+encodeURIComponent(ubicacion))
-    .then(r=>r.json()).then(()=>alert("✅ QR generado"));
+    let ubicacion = prompt("Ingresa la ubicación")
+
+    if(!ubicacion) return
+
+    let url = `/QR_MESA_GENERAR/${encodeURIComponent(ubicacion)}`
+
+    window.open(url, "_blank")
 }
-async function reimprimirQR(){
-  const ubicacion=prompt("Ubicación del QR");
-  if(!ubicacion)return;
-  const res=await fetch("/QR_REIMPRIMIR/"+encodeURIComponent(ubicacion));
-  const data=await res.json();
-  if(data.success) window.open(data.qr_url,"_blank");
-  else alert("❌ No existe QR para esa ubicación");
-}
+
 </script>
 </body>
 </html>
