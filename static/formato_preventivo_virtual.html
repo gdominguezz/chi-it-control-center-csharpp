@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mantenimiento Preventivo — S-Riko</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:        #0B0F1A;
+  --surface:   #111827;
+  --surface2:  #1a2235;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.12);
+  --accent:    #3B82F6;
+  --accent2:   #60A5FA;
+  --green:     #10B981;
+  --amber:     #F59E0B;
+  --red:       #EF4444;
+  --text:      #F1F5F9;
+  --muted:     #64748B;
+  --muted2:    #94A3B8;
+  --check-bg:  #1E3A5F;
+  --check-on:  #3B82F6;
+  --radius:    10px;
+  --font:      'DM Sans', sans-serif;
+  --mono:      'DM Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 24px 16px 48px;
+}
+
+/* ── PAGE WRAPPER ── */
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  animation: fadeUp .45s ease both;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(18px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── HEADER ── */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border2);
+}
+.header-icon {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, #1D4ED8, #3B82F6);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(59,130,246,.35);
+}
+.header-text h1 {
+  font-size: 18px; font-weight: 700; letter-spacing: -.01em;
+  color: var(--text);
+}
+.header-text p {
+  font-size: 12px; color: var(--muted2); margin-top: 2px;
+  font-family: var(--mono);
+}
+.header-badge {
+  margin-left: auto;
+  background: rgba(59,130,246,.15);
+  border: 1px solid rgba(59,130,246,.3);
+  color: var(--accent2);
+  font-size: 11px; font-family: var(--mono);
+  padding: 5px 12px; border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted2);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px; height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* ── FIELDS GRID ── */
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+.field {
+  display: flex; flex-direction: column; gap: 5px;
+}
+.field label {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted);
+}
+.field input {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 7px;
+  padding: 9px 11px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text);
+  transition: border-color .2s, box-shadow .2s;
+  width: 100%;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+.field input[readonly] {
+  opacity: .65; cursor: default;
+}
+.field input[type="date"] {
+  color-scheme: dark;
+}
+
+/* ── SECTION TABS ── */
+.section-tabs {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.sec-tab {
+  font-size: 11px; font-weight: 600;
+  padding: 5px 13px; border-radius: 999px;
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+  background: transparent;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: var(--font);
+}
+.sec-tab.active, .sec-tab:hover {
+  background: rgba(59,130,246,.15);
+  border-color: rgba(59,130,246,.4);
+  color: var(--accent2);
+}
+
+/* ── ACTIVITIES TABLE ── */
+.act-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 4px;
+  font-size: 12px;
+}
+.act-table thead th {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted);
+  padding: 6px 10px;
+  text-align: center;
+  background: transparent;
+}
+.act-table thead th:first-child { text-align: left; padding-left: 14px; }
+.act-table thead th:nth-child(2) { text-align: left; }
+
+.act-table tbody tr {
+  background: var(--surface2);
+  transition: background .15s;
+}
+.act-table tbody tr:hover { background: #1e2d45; }
+
+.act-table td {
+  padding: 10px 10px;
+  border: none;
+  vertical-align: middle;
+}
+.act-table td:first-child {
+  border-radius: 8px 0 0 8px;
+  padding-left: 14px;
+}
+.act-table td:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+/* Section label cell */
+.section-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .1em;
+  color: var(--accent2);
+  white-space: nowrap;
+  width: 28px;
+  padding: 8px 6px !important;
+  text-align: center;
+}
+.section-label-cell {
+  width: 32px;
+  background: rgba(59,130,246,.08) !important;
+  border-radius: 8px 0 0 8px !important;
+}
+
+/* first row of a section gets top radius */
+.section-first td.section-label-cell { border-radius: 8px 0 0 0 !important; }
+.section-last  td.section-label-cell { border-radius: 0 0 0 8px !important; }
+.section-only  td.section-label-cell { border-radius: 8px 0 0 8px !important; }
+
+.act-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  width: 24px;
+  text-align: right;
+  padding-right: 6px !important;
+}
+.act-desc {
+  color: var(--muted2);
+  font-size: 12px;
+  text-align: left !important;
+  min-width: 280px;
+}
+
+/* ── CUSTOM CHECKBOX ── */
+.chk-cell { text-align: center; width: 54px; }
+.chk-wrap {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  background: var(--check-bg);
+  border: 1.5px solid rgba(59,130,246,.25);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all .18s;
+  position: relative;
+}
+.chk-wrap:hover {
+  border-color: var(--accent);
+  background: rgba(59,130,246,.2);
+}
+.chk-wrap input[type=checkbox] {
+  position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; margin: 0;
+}
+.chk-wrap .chk-icon {
+  font-size: 14px;
+  color: transparent;
+  pointer-events: none;
+  transition: all .15s;
+  line-height: 1;
+}
+.chk-wrap input:checked ~ .chk-icon { color: var(--accent2); }
+.chk-wrap input:checked { background: transparent; }
+.chk-wrap:has(input:checked) {
+  background: rgba(59,130,246,.25);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(59,130,246,.3);
+}
+
+/* Empty cell (no applies) */
+.chk-empty {
+  display: inline-block;
+  width: 28px; height: 28px;
+  background: rgba(255,255,255,.03);
+  border: 1.5px solid rgba(255,255,255,.04);
+  border-radius: 7px;
+}
+
+/* ── SECTION DIVIDER ROW ── */
+.section-divider td {
+  padding: 6px 0 2px !important;
+  background: transparent !important;
+}
+.section-divider-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .1em;
+  color: var(--accent);
+  padding-left: 4px;
+}
+.section-divider-label::after {
+  content: '';
+  flex: 1;
+  display: block;
+  height: 1px;
+  width: 60px;
+  background: rgba(59,130,246,.2);
+}
+
+/* ── BOTTOM CARDS ── */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 16px;
+  margin-top: 16px;
+}
+.obs-area {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 7px;
+  padding: 11px;
+  font-size: 12px;
+  font-family: var(--font);
+  color: var(--text);
+  resize: vertical;
+  min-height: 90px;
+  width: 100%;
+  transition: border-color .2s, box-shadow .2s;
+}
+.obs-area:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+
+.correctivo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+}
+.correctivo-card .card-title { margin-bottom: 14px; }
+
+.radio-group { display: flex; flex-direction: column; gap: 10px; }
+.radio-opt {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border2);
+  background: var(--surface2);
+  transition: all .2s;
+  font-size: 13px; font-weight: 600;
+}
+.radio-opt:hover { border-color: var(--accent); }
+.radio-opt input[type=checkbox] {
+  width: 18px; height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.radio-opt.opt-si  { color: var(--green); }
+.radio-opt.opt-no  { color: var(--muted2); }
+
+/* ── ACTION BUTTONS ── */
+.actions {
+  display: flex; justify-content: flex-end; gap: 10px;
+  margin-top: 24px; padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 11px 22px;
+  border: none; border-radius: 8px;
+  font-family: var(--font);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .01em;
+}
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 4px 14px rgba(59,130,246,.35);
+}
+.btn-primary:hover {
+  background: #2563EB;
+  box-shadow: 0 6px 20px rgba(59,130,246,.5);
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  background: var(--surface2);
+  color: var(--muted2);
+  border: 1px solid var(--border2);
+}
+.btn-ghost:hover { background: var(--surface); color: var(--text); }
+
+/* ── PROGRESS BAR ── */
+.progress-wrap {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.progress-bar {
+  flex: 1; height: 5px;
+  background: var(--border2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #60A5FA);
+  border-radius: 999px;
+  transition: width .4s ease;
+}
+.progress-label {
+  font-size: 11px; font-family: var(--mono);
+  color: var(--muted2); white-space: nowrap;
+}
+
+/* ── SECTION COLOR ACCENTS ── */
+.s1 { --sec-color: #3B82F6; }
+.s2 { --sec-color: #10B981; }
+.s3 { --sec-color: #8B5CF6; }
+.s4 { --sec-color: #F59E0B; }
+.s5 { --sec-color: #EF4444; }
+</style>
+</head>
+<body>
+<div class="page">
+<!-- HEADER -->
+<div class="page-header">
+<div class="header-icon">🔧</div>
+<div class="header-text">
+<h1>Mantenimiento Preventivo</h1>
+<p>S-Riko Automotive Hose de Chihuahua</p>
+</div>
+<div class="header-badge" id="modoBadge">— Cargando —</div>
+</div>
+<!-- DATOS GENERALES -->
+<div class="card">
+<div class="card-title">Datos del reporte</div>
+<div class="fields-grid">
+<div class="field">
+<label>Fecha</label>
+<input id="fecha" type="date"/>
+</div>
+<div class="field">
+<label>Planta</label>
+<input id="planta" readonly=""/>
+</div>
+<div class="field">
+<label>Línea / Persona</label>
+<input id="linea" readonly=""/>
+</div>
+<div class="field">
+<label>Elaborado por</label>
+<input id="reporte" readonly=""/>
+</div>
+<div class="field">
+<label>PC / Portátil</label>
+<input id="pc" readonly=""/>
+</div>
+<div class="field">
+<label>Impresora</label>
+<input id="impresora" readonly=""/>
+</div>
+<div class="field">
+<label>UPS</label>
+<input id="ups" readonly=""/>
+</div>
+</div>
+</div>
+<!-- ACTIVIDADES -->
+<div class="card">
+<div class="card-title">Actividades de mantenimiento</div>
+<!-- progress -->
+<div class="progress-wrap">
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="progress-label" id="progressLabel">0 / 0</div>
+</div>
+<table class="act-table">
+<thead>
+<tr>
+<th style="width:32px"></th>
+<th style="width:24px">#</th>
+<th>Punto a verificar</th>
+<th>Portátil</th>
+<th>PC</th>
+<th>Impresora</th>
+<th>UPS</th>
+</tr>
+</thead>
+<tbody>
+<!-- ───── 1. LIMPIEZA INTERIOR ───── -->
+<tr class="section-divider"><td colspan="7"><span class="section-divider-label">1 · Limpieza Interior</span></td></tr>
+<tr>
+<td class="chk-cell section-label-cell section-first" rowspan="6"><span class="section-label s1">Lim. Interior</span></td>
+<td class="act-num">1</td>
+<td class="act-desc">Sopletear el gabinete</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">2</td>
+<td class="act-desc">Limpieza de contactos de memoria RAM</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">3</td>
+<td class="act-desc">Sopletear fuente de poder y ventiladores</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">4</td>
+<td class="act-desc">Sopletear la impresora térmica</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">5</td>
+<td class="act-desc">Limpieza de rodillos de la impresora (no usar alcohol)</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">6</td>
+<td class="act-desc">Limpieza del cabezal de la impresora térmica</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<!-- ───── 2. LIMPIEZA EXTERIOR ───── -->
+<tr class="section-divider"><td colspan="7"><span class="section-divider-label">2 · Limpieza Exterior</span></td></tr>
+<tr>
+<td class="chk-cell section-label-cell section-first" rowspan="10"><span class="section-label s2">Lim. Exterior</span></td>
+<td class="act-num">1</td>
+<td class="act-desc">Limpieza del gabinete</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">2</td>
+<td class="act-desc">Limpieza del monitor o pantalla</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">3</td>
+<td class="act-desc">Limpieza y sopleteado del teclado y/o touchpad</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">4</td>
+<td class="act-desc">Limpieza del ratón</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">5</td>
+<td class="act-desc">Limpieza de la impresora térmica</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">6</td>
+<td class="act-desc">Limpieza de la laptop</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">7</td>
+<td class="act-desc">Limpieza y verificación del UPS</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+<tr>
+<td class="act-num">8</td>
+<td class="act-desc">Sopleteado de ventiladores y ranuras de enfriamiento</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">9</td>
+<td class="act-desc">Limpieza exterior del lector óptico (incluye la mica)</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">10</td>
+<td class="act-desc">Limpieza del cableado</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+<!-- ───── 3. PREVENTIVO SOFTWARE ───── -->
+<tr class="section-divider"><td colspan="7"><span class="section-divider-label">3 · Preventivo de Software</span></td></tr>
+<tr>
+<td class="chk-cell section-label-cell section-first" rowspan="5"><span class="section-label s3">Software</span></td>
+<td class="act-num">1</td>
+<td class="act-desc">Actualizaciones del sistema operativo</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">2</td>
+<td class="act-desc">Actualizaciones de Office</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">3</td>
+<td class="act-desc">Eliminación de archivos temporales y vaciar reciclaje</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">4</td>
+<td class="act-desc">Revisión del estado del antivirus y escaneo del equipo</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">5</td>
+<td class="act-desc">Desfragmentar las unidades de disco duro</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<!-- ───── 4. MONTAJE ───── -->
+<tr class="section-divider"><td colspan="7"><span class="section-divider-label">4 · Montaje</span></td></tr>
+<tr>
+<td class="chk-cell section-label-cell section-first" rowspan="3"><span class="section-label s4">Montaje</span></td>
+<td class="act-num">1</td>
+<td class="act-desc">Conectar todos los periféricos correspondientes</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+<tr>
+<td class="act-num">2</td>
+<td class="act-desc">Verificar que los cables y conectores no presenten daños</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+<tr>
+<td class="act-num">3</td>
+<td class="act-desc">Rutear cables de periféricos / anclar eliminador de impresora</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<!-- ───── 5. INSPECCIÓN ───── -->
+<tr class="section-divider"><td colspan="7"><span class="section-divider-label">5 · Inspección</span></td></tr>
+<tr>
+<td class="chk-cell section-label-cell section-first" rowspan="6"><span class="section-label s5">Inspección</span></td>
+<td class="act-num">1</td>
+<td class="act-desc">Verificación vida de la pila del UPS</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+<tr>
+<td class="act-num">2</td>
+<td class="act-desc">Verificación vida de la pila del BIOS</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">3</td>
+<td class="act-desc">Inspección y funcionamiento del UPS</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+<tr>
+<td class="act-num">4</td>
+<td class="act-desc">Encender el equipo y ver que funcione correctamente</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">5</td>
+<td class="act-desc">Verificar que los periféricos funcionen correctamente</td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="portatil" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="pc" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="impresora" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+</tr>
+<tr>
+<td class="act-num">6</td>
+<td class="act-desc">Verificar que solo equipo IT esté conectado al UPS</td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><span class="chk-empty"></span></td>
+<td class="chk-cell"><label class="chk-wrap"><input data-col="ups" type="checkbox"/><span class="chk-icon">✓</span></label></td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- BOTTOM: OBSERVACIONES + CORRECTIVO -->
+<div class="bottom-grid">
+<div class="card" style="margin-bottom:0">
+<div class="card-title">Observaciones</div>
+<textarea class="obs-area" id="observaciones" placeholder="Anota cualquier hallazgo, anomalía o recomendación…"></textarea>
+</div>
+<div class="correctivo-card">
+<div class="card-title">¿Requiere correctivo?</div>
+<div class="radio-group">
+<label class="radio-opt opt-si">
+<input id="si" type="checkbox"/> Sí, requiere correctivo
+        </label>
+<label class="radio-opt opt-no">
+<input id="no" type="checkbox"/> No requiere correctivo
+        </label>
+</div>
+</div>
+</div>
+<!-- ACTIONS -->
+<div class="actions">
+<button class="btn btn-ghost" onclick="cerrar()">✕ Cerrar</button>
+<button class="btn btn-primary" id="btn_guardar" onclick="guardarPreventivo()">
+      💾 Guardar Preventivo
+    </button>
+</div>
+</div>
+<script>
+// ── PROGRESS BAR ──
+function updateProgress() {
+  const all  = document.querySelectorAll('.chk-wrap input[type=checkbox]');
+  const done = document.querySelectorAll('.chk-wrap input[type=checkbox]:checked');
+  const pct  = all.length ? Math.round(done.length / all.length * 100) : 0;
+  document.getElementById('progressFill').style.width  = pct + '%';
+  document.getElementById('progressLabel').textContent = `${done.length} / ${all.length} verificados`;
+}
+document.querySelectorAll('.chk-wrap input[type=checkbox]').forEach(cb => {
+  cb.addEventListener('change', updateProgress);
+});
+updateProgress();
+
+// ── MODO BADGE ──
+const params = new URLSearchParams(window.location.search);
+const modo   = params.get('modo');
+const badge  = document.getElementById('modoBadge');
+
+if (modo === 'ver') {
+  badge.textContent = '👁 Modo solo lectura';
+  badge.style.background = 'rgba(100,116,139,.15)';
+  badge.style.borderColor = 'rgba(100,116,139,.3)';
+  badge.style.color = '#94A3B8';
+  document.querySelectorAll('input, textarea').forEach(el => el.disabled = true);
+  document.getElementById('btn_guardar').style.display = 'none';
+} else if (modo === 'editar') {
+  badge.textContent = '✏️ Modo edición';
+  badge.style.background = 'rgba(245,158,11,.12)';
+  badge.style.borderColor = 'rgba(245,158,11,.35)';
+  badge.style.color = '#F59E0B';
+  document.querySelectorAll('input, textarea').forEach(el => el.disabled = false);
+  document.getElementById('btn_guardar').style.display = 'inline-flex';
+} else {
+  badge.textContent = '🆕 Nuevo preventivo';
+}
+
+// ── IDs numéricos de cada dispositivo (se llenan al cargar) ──
+let idRegistros = { portatil: null, pc: null, impresora: null, ups: null };
+
+// ── CARGAR DATOS ──
+async function cargarDatos() {
+  const id      = params.get('id');
+  const usuario = params.get('usuario');
+  const res  = await fetch('/PREVENTIVO/DATOS/' + id + '?usuario=' + usuario);
+  const data = await res.json();
+  document.getElementById('planta').value    = data.planta    || '';
+  document.getElementById('linea').value     = data.ubicacion || '';
+  document.getElementById('reporte').value   = data.usuario   || '';
+  document.getElementById('pc').value        = data.pc        || '';
+  document.getElementById('impresora').value = data.impresora || '';
+  document.getElementById('ups').value       = data.ups       || '';
+
+  // Guardar IDs numéricos para saber qué registros actualizar al guardar
+  idRegistros.portatil  = data.id_portatil  || null;
+  idRegistros.pc        = data.id_pc        || null;
+  idRegistros.impresora = data.id_impresora || null;
+  idRegistros.ups       = data.id_ups       || null;
+
+  console.log('[DEBUG] idRegistros cargados:', idRegistros);
+}
+
+async function cargarPreventivoGuardado() {
+  const id  = params.get('id');
+  const res  = await fetch('/PREVENTIVO/DIGITAL/' + id);
+  const data = await res.json();
+  if (!data.existe) return;
+  const checkboxes = document.querySelectorAll('.chk-wrap input[type=checkbox]');
+  (data.data.checks || []).forEach(i => {
+    if (checkboxes[i]) checkboxes[i].checked = true;
+  });
+  document.getElementById('observaciones').value = data.data.observaciones || '';
+  document.getElementById('fecha').value          = data.data.fecha         || '';
+  updateProgress();
+}
+
+window.onload = async function () {
+  await cargarDatos();
+  await cargarPreventivoGuardado();
+};
+
+// ── GUARDAR ──
+async function guardarPreventivo() {
+  const id            = params.get('id');
+  const observaciones = document.getElementById('observaciones').value;
+  const fecha         = document.getElementById('fecha').value;
+  const checks        = [];
+
+  // Detectar qué columnas tuvieron al menos 1 check usando data-col
+  const dispositivoCheck = { portatil: false, pc: false, impresora: false, ups: false };
+
+  document.querySelectorAll('.chk-wrap input[type=checkbox]').forEach((cb, i) => {
+    if (cb.checked) {
+      checks.push(i);
+      const col = cb.getAttribute('data-col');
+      if (col && dispositivoCheck.hasOwnProperty(col)) {
+        dispositivoCheck[col] = true;
+      }
+    }
+  });
+
+  console.log('[DEBUG] dispositivoCheck:', dispositivoCheck);
+  console.log('[DEBUG] idRegistros:', idRegistros);
+
+  // Construir lista de IDs que recibieron al menos 1 check
+  const ids_con_check = [];
+  if (dispositivoCheck.portatil  && idRegistros.portatil)  ids_con_check.push(idRegistros.portatil);
+  if (dispositivoCheck.pc        && idRegistros.pc)         ids_con_check.push(idRegistros.pc);
+  if (dispositivoCheck.impresora && idRegistros.impresora)  ids_con_check.push(idRegistros.impresora);
+  if (dispositivoCheck.ups       && idRegistros.ups)        ids_con_check.push(idRegistros.ups);
+
+  console.log('[DEBUG] ids_con_check:', ids_con_check);
+
+  const res  = await fetch('/PREVENTIVO/GUARDAR_DIGITAL/' + id, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ fecha, observaciones, checks, ids_con_check })
+  });
+  const data = await res.json();
+
+  if (data.ok) {
+    alert('Preventivo guardado correctamente ✓');
+    window.close();
+  } else {
+    alert('Error al guardar el preventivo');
+    console.error(data);
+  }
+}
+function cerrar() { window.close(); }
+</script>
+</body>
+</html>
