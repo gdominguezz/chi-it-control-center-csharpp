@@ -10,20 +10,20 @@ namespace ChiIT.Controllers;
 [ApiController]
 public class PreventivoController : ControllerBase
 {
-    private readonly DbConnectionPool  _db;
-    private readonly AuditoriaService  _auditoria;
-    private readonly ExcelService      _excel;
-    private readonly QrService         _qr;
-    private readonly string            _pdfDir;
+    private readonly DbConnectionPool _db;
+    private readonly AuditoriaService _auditoria;
+    private readonly ExcelService _excel;
+    private readonly QrService _qr;
+    private readonly string _pdfDir;
 
     public PreventivoController(DbConnectionPool db, AuditoriaService auditoria,
                                 ExcelService excel, QrService qr, IConfiguration config)
     {
-        _db        = db;
+        _db = db;
         _auditoria = auditoria;
-        _excel     = excel;
-        _qr        = qr;
-        _pdfDir    = config["AppSettings:PdfDir"] ?? "PDF_DATABASE/PREVENTIVOS";
+        _excel = excel;
+        _qr = qr;
+        _pdfDir = config["AppSettings:PdfDir"] ?? "PDF_DATABASE/PREVENTIVOS";
         Directory.CreateDirectory(_pdfDir);
     }
 
@@ -31,9 +31,9 @@ public class PreventivoController : ControllerBase
     [HttpGet("PREVENTIVOS")]
     public IActionResult ObtenerPreventivos([FromQuery] FiltrosPreventivo f)
     {
-        var where  = "WHERE 1=1";
-        var parms  = new List<NpgsqlParameter>();
-        int pIdx   = 1;
+        var where = "WHERE 1=1";
+        var parms = new List<NpgsqlParameter>();
+        int pIdx = 1;
 
         void Add(string clause, object val)
         {
@@ -41,12 +41,12 @@ public class PreventivoController : ControllerBase
             parms.Add(new NpgsqlParameter($"p{pIdx++}", $"%{val}%"));
         }
 
-        if (!string.IsNullOrWhiteSpace(f.ID_EQUIPO))          Add("id_equipo",          f.ID_EQUIPO);
-        if (!string.IsNullOrWhiteSpace(f.UBICACION))          Add("ubicacion",           f.UBICACION);
-        if (!string.IsNullOrWhiteSpace(f.nombre_dispositivo)) Add("nombre_dispositivo",  f.nombre_dispositivo);
-        if (!string.IsNullOrWhiteSpace(f.PLANTA))             Add("planta",              f.PLANTA);
-        if (!string.IsNullOrWhiteSpace(f.CATEGORIA_COLOR))    Add("categoria_color",     f.CATEGORIA_COLOR);
-        if (!string.IsNullOrWhiteSpace(f.OBSERVACIONES))      Add("observaciones",       f.OBSERVACIONES);
+        if (!string.IsNullOrWhiteSpace(f.ID_EQUIPO)) Add("id_equipo", f.ID_EQUIPO);
+        if (!string.IsNullOrWhiteSpace(f.UBICACION)) Add("ubicacion", f.UBICACION);
+        if (!string.IsNullOrWhiteSpace(f.nombre_dispositivo)) Add("nombre_dispositivo", f.nombre_dispositivo);
+        if (!string.IsNullOrWhiteSpace(f.PLANTA)) Add("planta", f.PLANTA);
+        if (!string.IsNullOrWhiteSpace(f.CATEGORIA_COLOR)) Add("categoria_color", f.CATEGORIA_COLOR);
+        if (!string.IsNullOrWhiteSpace(f.OBSERVACIONES)) Add("observaciones", f.OBSERVACIONES);
 
         if (!string.IsNullOrWhiteSpace(f.ANIO_CREACION) && int.TryParse(f.ANIO_CREACION, out int anio))
         {
@@ -56,16 +56,20 @@ public class PreventivoController : ControllerBase
 
         using var conn = _db.Open();
 
+        // Helper para clonar parámetros — Npgsql no permite reusar el mismo objeto en dos comandos
+        NpgsqlParameter[] ClonarParams() =>
+            parms.Select(p => new NpgsqlParameter(p.ParameterName, p.Value)).ToArray();
+
         // Total
         using var cntCmd = conn.CreateCommand();
         cntCmd.CommandText = $"SELECT COUNT(*) FROM public.mantenimientos_preventivos {where}";
-        cntCmd.Parameters.AddRange(parms.ToArray());
+        cntCmd.Parameters.AddRange(ClonarParams());
         var total = Convert.ToInt64(cntCmd.ExecuteScalar()!);
 
         // Datos paginados
         int offset = (f.Page - 1) * f.Limit;
         parms.Add(new NpgsqlParameter($"p{pIdx++}", f.Limit));
-        parms.Add(new NpgsqlParameter($"p{pIdx}",   offset));
+        parms.Add(new NpgsqlParameter($"p{pIdx}", offset));
 
         using var cmd = conn.CreateCommand();
         cmd.CommandText = $"""
@@ -85,7 +89,7 @@ public class PreventivoController : ControllerBase
               END, id DESC
             LIMIT @p{pIdx - 1} OFFSET @p{pIdx}
             """;
-        cmd.Parameters.AddRange(parms.ToArray());
+        cmd.Parameters.AddRange(ClonarParams());
 
         using var reader = cmd.ExecuteReader();
         var data = new List<Dictionary<string, object?>>();
@@ -105,14 +109,14 @@ public class PreventivoController : ControllerBase
     public IActionResult ObtenerDatos(int id, [FromQuery] string? usuario)
     {
         using var conn = _db.Open();
-        using var cmd  = conn.CreateCommand();
+        using var cmd = conn.CreateCommand();
         cmd.CommandText = "SELECT ubicacion, planta FROM public.mantenimientos_preventivos WHERE id=@id";
         cmd.Parameters.AddWithValue("id", id);
 
         using var r = cmd.ExecuteReader();
         if (!r.Read()) return Ok(new { error = "Registro no encontrado" });
         var ubicacion = r.GetString(0);
-        var planta    = r.IsDBNull(1) ? "" : r.GetString(1);
+        var planta = r.IsDBNull(1) ? "" : r.GetString(1);
         r.Close();
 
         // Equipos en la misma ubicación
@@ -120,25 +124,25 @@ public class PreventivoController : ControllerBase
         cmd2.CommandText = "SELECT id, id_equipo, nombre_dispositivo FROM public.mantenimientos_preventivos WHERE ubicacion=@u";
         cmd2.Parameters.AddWithValue("u", ubicacion);
 
-        string pc="", impresora="", ups="", portatil="";
-        int? idPc=null, idPortatil=null, idImpresora=null, idUps=null;
+        string pc = "", impresora = "", ups = "", portatil = "";
+        int? idPc = null, idPortatil = null, idImpresora = null, idUps = null;
 
         using var r2 = cmd2.ExecuteReader();
         while (r2.Read())
         {
             var regId = r2.GetInt64(0);
             var equipo = r2.IsDBNull(1) ? "" : r2.GetString(1);
-            var disp   = (r2.IsDBNull(2) ? "" : r2.GetString(2)).ToUpper();
+            var disp = (r2.IsDBNull(2) ? "" : r2.GetString(2)).ToUpper();
 
             if (disp.Contains("PORTATIL") || disp.Contains("LAPTOP"))
-                { portatil = equipo; idPortatil = (int)regId; }
+            { portatil = equipo; idPortatil = (int)regId; }
             else if (disp.Contains("COMPUTADORA") || disp.Contains("CPU"))
-                { pc = equipo; idPc = (int)regId; }
+            { pc = equipo; idPc = (int)regId; }
 
             if (disp.Contains("IMPRESORA"))
-                { impresora = equipo; idImpresora = (int)regId; }
+            { impresora = equipo; idImpresora = (int)regId; }
             if (disp.Contains("UPS"))
-                { ups = equipo; idUps = (int)regId; }
+            { ups = equipo; idUps = (int)regId; }
         }
         r2.Close();
 
@@ -152,10 +156,20 @@ public class PreventivoController : ControllerBase
             nombreUsuario = cu.ExecuteScalar()?.ToString() ?? "";
         }
 
-        return Ok(new { planta, ubicacion, usuario = nombreUsuario,
-                        portatil, pc, impresora, ups,
-                        id_portatil=idPortatil, id_pc=idPc,
-                        id_impresora=idImpresora, id_ups=idUps });
+        return Ok(new
+        {
+            planta,
+            ubicacion,
+            usuario = nombreUsuario,
+            portatil,
+            pc,
+            impresora,
+            ups,
+            id_portatil = idPortatil,
+            id_pc = idPc,
+            id_impresora = idImpresora,
+            id_ups = idUps
+        });
     }
 
     // ── GET /PREVENTIVOS/{id}/HISTORIAL ──────────────────
@@ -194,11 +208,11 @@ public class PreventivoController : ControllerBase
         {
             historial.Add(new
             {
-                id                 = r2.GetInt32(0),
-                fecha              = r2.IsDBNull(1) ? null : r2.GetDateTime(1).ToString("o"),
-                usuario            = r2.IsDBNull(2) ? null : r2.GetString(2),
-                registro_anterior  = r2.IsDBNull(3) ? (object)new{} : JsonSerializer.Deserialize<object>(r2.GetString(3))!,
-                registro_nuevo     = r2.IsDBNull(4) ? (object)new{} : JsonSerializer.Deserialize<object>(r2.GetString(4))!,
+                id = r2.GetInt32(0),
+                fecha = r2.IsDBNull(1) ? null : r2.GetDateTime(1).ToString("o"),
+                usuario = r2.IsDBNull(2) ? null : r2.GetString(2),
+                registro_anterior = r2.IsDBNull(3) ? (object)new { } : JsonSerializer.Deserialize<object>(r2.GetString(3))!,
+                registro_nuevo = r2.IsDBNull(4) ? (object)new { } : JsonSerializer.Deserialize<object>(r2.GetString(4))!,
             });
         }
 
@@ -212,23 +226,23 @@ public class PreventivoController : ControllerBase
         try
         {
             using var conn = _db.Open();
-            using var cmd  = conn.CreateCommand();
+            using var cmd = conn.CreateCommand();
             cmd.CommandText = """
                 INSERT INTO public.mantenimientos_preventivos
                 (id_equipo,ubicacion,plazo,realizado_por,fecha_realizacion,
                  observaciones,nombre_dispositivo,planta,categoria_color,anio_creacion)
                 VALUES (@e,@u,@p,@rp,@fr,@o,@nd,@pl,@cc,@ac) RETURNING id
                 """;
-            cmd.Parameters.AddWithValue("e",  (object?)data.ID_EQUIPO         ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("u",  (object?)data.UBICACION         ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("p",  (object?)data.PLAZO             ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("rp", (object?)data.REALIZADO_POR     ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("e", (object?)data.ID_EQUIPO ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("u", (object?)data.UBICACION ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("p", (object?)data.PLAZO ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("rp", (object?)data.REALIZADO_POR ?? DBNull.Value);
             cmd.Parameters.AddWithValue("fr", (object?)data.FECHA_REALIZACION ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("o",  (object?)data.OBSERVACIONES     ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("nd", (object?)data.nombre_dispositivo?? DBNull.Value);
-            cmd.Parameters.AddWithValue("pl", (object?)data.PLANTA            ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("cc", (object?)data.CATEGORIA_COLOR   ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("ac", (object?)data.ANIO_CREACION     ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("o", (object?)data.OBSERVACIONES ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("nd", (object?)data.nombre_dispositivo ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("pl", (object?)data.PLANTA ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("cc", (object?)data.CATEGORIA_COLOR ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("ac", (object?)data.ANIO_CREACION ?? DBNull.Value);
 
             var newId = cmd.ExecuteScalar();
             return Ok(new { id = newId });
@@ -274,38 +288,32 @@ public class PreventivoController : ControllerBase
                 nombre_dispositivo=@nd, planta=@pl, categoria_color=@cc, anio_creacion=@ac
                 WHERE id=@id
                 """;
-            upd.Parameters.AddWithValue("e",  (object?)data.ID_EQUIPO         ?? DBNull.Value);
-            upd.Parameters.AddWithValue("u",  (object?)data.UBICACION         ?? DBNull.Value);
-            upd.Parameters.AddWithValue("p",  (object?)data.PLAZO             ?? DBNull.Value);
-            upd.Parameters.AddWithValue("rp", (object?)data.REALIZADO_POR     ?? DBNull.Value);
+            upd.Parameters.AddWithValue("e", (object?)data.ID_EQUIPO ?? DBNull.Value);
+            upd.Parameters.AddWithValue("u", (object?)data.UBICACION ?? DBNull.Value);
+            upd.Parameters.AddWithValue("p", (object?)data.PLAZO ?? DBNull.Value);
+            upd.Parameters.AddWithValue("rp", (object?)data.REALIZADO_POR ?? DBNull.Value);
             upd.Parameters.AddWithValue("fr", (object?)data.FECHA_REALIZACION ?? DBNull.Value);
-            upd.Parameters.AddWithValue("o",  (object?)data.OBSERVACIONES     ?? DBNull.Value);
-            upd.Parameters.AddWithValue("nd", (object?)data.nombre_dispositivo?? DBNull.Value);
-            upd.Parameters.AddWithValue("pl", (object?)data.PLANTA            ?? DBNull.Value);
-            upd.Parameters.AddWithValue("cc", (object?)data.CATEGORIA_COLOR   ?? DBNull.Value);
-            upd.Parameters.AddWithValue("ac", (object?)data.ANIO_CREACION     ?? DBNull.Value);
+            upd.Parameters.AddWithValue("o", (object?)data.OBSERVACIONES ?? DBNull.Value);
+            upd.Parameters.AddWithValue("nd", (object?)data.nombre_dispositivo ?? DBNull.Value);
+            upd.Parameters.AddWithValue("pl", (object?)data.PLANTA ?? DBNull.Value);
+            upd.Parameters.AddWithValue("cc", (object?)data.CATEGORIA_COLOR ?? DBNull.Value);
+            upd.Parameters.AddWithValue("ac", (object?)data.ANIO_CREACION ?? DBNull.Value);
             upd.Parameters.AddWithValue("id", id);
             upd.ExecuteNonQuery();
 
-            using var selNuevo = conn.CreateCommand();
-            selNuevo.CommandText = """
-                SELECT id_equipo,ubicacion,plazo,realizado_por,fecha_realizacion,
-                       observaciones,nombre_dispositivo,planta,categoria_color,anio_creacion
-                FROM public.mantenimientos_preventivos
-                WHERE id=@id
-            """;
-            selNuevo.Parameters.AddWithValue("id", id);
-
-            Dictionary<string, object?> nuevo = new();
-
-            using (var r = selNuevo.ExecuteReader())
+            var nuevo = new
             {
-                if (r.Read())
-                {
-                    for (int i = 0; i < r.FieldCount; i++)
-                        nuevo[r.GetName(i)] = r.IsDBNull(i) ? null : r.GetValue(i);
-                }
-            }
+                data.ID_EQUIPO,
+                data.UBICACION,
+                data.PLAZO,
+                data.REALIZADO_POR,
+                data.FECHA_REALIZACION,
+                data.OBSERVACIONES,
+                data.nombre_dispositivo,
+                data.PLANTA,
+                data.CATEGORIA_COLOR,
+                data.ANIO_CREACION
+            };
 
             _auditoria.Registrar(id, usr, anterior, nuevo);
 
@@ -350,9 +358,9 @@ public class PreventivoController : ControllerBase
             await file.CopyToAsync(fs);
 
             using var conn = _db.Open();
-            using var cmd  = conn.CreateCommand();
+            using var cmd = conn.CreateCommand();
             cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET pdf=@p WHERE id=@id";
-            cmd.Parameters.AddWithValue("p",  path);
+            cmd.Parameters.AddWithValue("p", path);
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 
@@ -378,7 +386,7 @@ public class PreventivoController : ControllerBase
             if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
 
             using var conn = _db.Open();
-            using var cmd  = conn.CreateCommand();
+            using var cmd = conn.CreateCommand();
             cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET pdf=NULL WHERE id=@id";
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
@@ -393,7 +401,7 @@ public class PreventivoController : ControllerBase
     public IActionResult ExportarTodo()
     {
         using var conn = _db.Open();
-        using var cmd  = conn.CreateCommand();
+        using var cmd = conn.CreateCommand();
         cmd.CommandText = "SELECT * FROM public.mantenimientos_preventivos ORDER BY id DESC";
         using var reader = cmd.ExecuteReader();
         var bytes = _excel.GenerarExcel(reader, "Preventivos");
@@ -406,7 +414,7 @@ public class PreventivoController : ControllerBase
     {
         var where = "WHERE 1=1";
         var parms = new List<NpgsqlParameter>();
-        int pIdx  = 1;
+        int pIdx = 1;
 
         void Add(string col, string? val)
         {
@@ -415,15 +423,15 @@ public class PreventivoController : ControllerBase
             parms.Add(new NpgsqlParameter($"p{pIdx++}", $"%{val}%"));
         }
 
-        Add("id_equipo",         f.ID_EQUIPO);
-        Add("ubicacion",         f.UBICACION);
-        Add("nombre_dispositivo",f.nombre_dispositivo);
-        Add("planta",            f.PLANTA);
-        Add("categoria_color",   f.CATEGORIA_COLOR);
-        Add("observaciones",     f.OBSERVACIONES);
+        Add("id_equipo", f.ID_EQUIPO);
+        Add("ubicacion", f.UBICACION);
+        Add("nombre_dispositivo", f.nombre_dispositivo);
+        Add("planta", f.PLANTA);
+        Add("categoria_color", f.CATEGORIA_COLOR);
+        Add("observaciones", f.OBSERVACIONES);
 
         using var conn = _db.Open();
-        using var cmd  = conn.CreateCommand();
+        using var cmd = conn.CreateCommand();
         cmd.CommandText = $"""
             SELECT id,id_equipo,ubicacion,nombre_dispositivo,planta,categoria_color,observaciones
             FROM public.mantenimientos_preventivos {where} ORDER BY id DESC
@@ -439,7 +447,7 @@ public class PreventivoController : ControllerBase
     public IActionResult ExportarAnio([FromQuery] int anio)
     {
         using var conn = _db.Open();
-        using var cmd  = conn.CreateCommand();
+        using var cmd = conn.CreateCommand();
         cmd.CommandText = "SELECT * FROM public.mantenimientos_preventivos WHERE anio_creacion=@a ORDER BY id DESC";
         cmd.Parameters.AddWithValue("a", anio);
         using var reader = cmd.ExecuteReader();
@@ -460,7 +468,7 @@ public class PreventivoController : ControllerBase
     public IActionResult GenerarTodosQr()
     {
         using var conn = _db.Open();
-        using var cmd  = conn.CreateCommand();
+        using var cmd = conn.CreateCommand();
         cmd.CommandText = "SELECT DISTINCT ubicacion FROM public.mantenimientos_preventivos WHERE ubicacion IS NOT NULL";
 
         var ubicaciones = new List<string>();
@@ -468,7 +476,7 @@ public class PreventivoController : ControllerBase
         while (r.Read()) ubicaciones.Add(r.GetString(0));
         r.Close();
 
-        using var ms  = new MemoryStream();
+        using var ms = new MemoryStream();
         using var zip = new System.IO.Compression.ZipArchive(ms, System.IO.Compression.ZipArchiveMode.Create, true);
 
         foreach (var ub in ubicaciones)
@@ -491,7 +499,7 @@ public class PreventivoController : ControllerBase
     [HttpGet("QR_REIMPRIMIR/{ubicacion}")]
     public IActionResult ReimprimirQr(string ubicacion)
     {
-        var ub   = Uri.UnescapeDataString(ubicacion);
+        var ub = Uri.UnescapeDataString(ubicacion);
         var path = Path.Combine("QR_CODES/MESAS", $"{ub}.png");
         if (!System.IO.File.Exists(path))
             return Ok(new { success = false });
@@ -505,9 +513,9 @@ public class PreventivoController : ControllerBase
         try
         {
             using var conn = _db.Open();
-            using var cmd  = conn.CreateCommand();
+            using var cmd = conn.CreateCommand();
             cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET preventivo_digital=@d WHERE id=@id";
-            cmd.Parameters.AddWithValue("d",NpgsqlTypes.NpgsqlDbType.Jsonb,JsonSerializer.Serialize(data));
+            cmd.Parameters.Add("d", NpgsqlTypes.NpgsqlDbType.Jsonb).Value = JsonSerializer.Serialize(data);
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 
@@ -541,7 +549,7 @@ public class PreventivoController : ControllerBase
         try
         {
             using var conn = _db.Open();
-            using var cmd  = conn.CreateCommand();
+            using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT preventivo_digital FROM public.mantenimientos_preventivos WHERE id=@id";
             cmd.Parameters.AddWithValue("id", id);
             var raw = cmd.ExecuteScalar();
@@ -559,7 +567,7 @@ public class PreventivoController : ControllerBase
         try
         {
             using var conn = _db.Open();
-            using var cmd  = conn.CreateCommand();
+            using var cmd = conn.CreateCommand();
             cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET preventivo_digital=NULL WHERE id=@id";
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
@@ -575,7 +583,7 @@ public class PreventivoController : ControllerBase
         try
         {
             using var conn = _db.Open();
-            using var cmd  = conn.CreateCommand();
+            using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT nombre FROM public.usuarios WHERE usuario=@u AND activo=true";
             cmd.Parameters.AddWithValue("u", usuario.ToUpper());
             var nombre = cmd.ExecuteScalar()?.ToString();
@@ -594,21 +602,21 @@ public class PreventivoController : ControllerBase
             if (string.IsNullOrWhiteSpace(data.Fecha))
                 return Ok(new { ok = false, error = "Fecha requerida" });
 
-            var fechaRea  = DateOnly.Parse(data.Fecha);
+            var fechaRea = DateOnly.Parse(data.Fecha);
             var proximoPm = fechaRea.AddMonths(6);
-            var proxStr   = proximoPm.ToString("yyyy-MM-dd");
+            var proxStr = proximoPm.ToString("yyyy-MM-dd");
 
             var json = JsonSerializer.Serialize(new
             {
-                usuario       = data.Usuario,
-                fecha         = data.Fecha,
-                proximo_pm    = proxStr,
-                checks        = data.Checks,
+                usuario = data.Usuario,
+                fecha = data.Fecha,
+                proximo_pm = proxStr,
+                checks = data.Checks,
                 observaciones = data.Observaciones
             });
 
             using var conn = _db.Open();
-            using var cmd  = conn.CreateCommand();
+            using var cmd = conn.CreateCommand();
             cmd.CommandText = """
                 UPDATE public.mantenimientos_preventivos
                 SET fecha_realizacion=@fr, plazo=@pl, realizado_por=@rp,
@@ -618,8 +626,8 @@ public class PreventivoController : ControllerBase
             cmd.Parameters.AddWithValue("fr", fechaRea.ToDateTime(TimeOnly.MinValue));
             cmd.Parameters.AddWithValue("pl", proxStr);
             cmd.Parameters.AddWithValue("rp", data.Usuario.ToUpper());
-            cmd.Parameters.AddWithValue("o",  data.Observaciones);
-            cmd.Parameters.AddWithValue("pd",NpgsqlTypes.NpgsqlDbType.Jsonb,json);
+            cmd.Parameters.AddWithValue("o", data.Observaciones);
+            cmd.Parameters.Add("pd", NpgsqlTypes.NpgsqlDbType.Jsonb).Value = json;
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 

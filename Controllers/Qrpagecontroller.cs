@@ -20,7 +20,8 @@ public class QrPageController : ControllerBase
         cmd.CommandText = """
             SELECT id, id_equipo, nombre_dispositivo, planta,
                    categoria_color, fecha_realizacion, plazo, observaciones,
-                   CASE WHEN preventivo_digital IS NOT NULL THEN true ELSE false END AS tiene_pm
+                   CASE WHEN preventivo_digital IS NOT NULL THEN true ELSE false END AS tiene_pm,
+                   anio_creacion
             FROM public.mantenimientos_preventivos
             WHERE ubicacion = @u
             ORDER BY nombre_dispositivo
@@ -28,7 +29,7 @@ public class QrPageController : ControllerBase
         cmd.Parameters.AddWithValue("u", ubicacion);
 
         var rows = new List<(long id, string idEquipo, string dispositivo, string planta,
-                             string colorCat, string? fecha, string? plazo, string obs, bool tienePm)>();
+                             string colorCat, string? fecha, string? plazo, string obs, bool tienePm, int? anio)>();
 
         using var r = cmd.ExecuteReader();
         while (r.Read())
@@ -40,7 +41,8 @@ public class QrPageController : ControllerBase
                       r.IsDBNull(5) ? null : r.GetDateTime(5).ToString("yyyy-MM-dd"),
                       r.IsDBNull(6) ? null : r.GetString(6),
                       r.IsDBNull(7) ? "" : r.GetString(7),
-                      !r.IsDBNull(8) && r.GetBoolean(8)));
+                      !r.IsDBNull(8) && r.GetBoolean(8),
+                      r.IsDBNull(9) ? (int?)null : r.GetInt32(9)));
 
         var cards = new StringBuilder();
         foreach (var row in rows)
@@ -63,6 +65,7 @@ public class QrPageController : ControllerBase
 
             cards.Append("<div class=\"card\" data-tiene-pm=\"" + (row.tienePm ? "true" : "false") + "\">\n");
             cards.Append("  <input type=\"hidden\" id=\"ubicacion_" + row.id + "\" value=\"" + Esc(ubicacion) + "\">\n");
+            cards.Append("  <input type=\"hidden\" id=\"anio_" + row.id + "\" value=\"" + (row.anio?.ToString() ?? "") + "\">\n");  // kept for legacy
             cards.Append("  <div class=\"card-top\">\n");
             cards.Append("    <div class=\"dev-icon\">" + icon + "</div>\n");
             cards.Append("    <div class=\"dev-name\"><h3>" + Esc(row.dispositivo) + "</h3><span>" + Esc(row.idEquipo) + "</span></div>\n");
@@ -74,13 +77,14 @@ public class QrPageController : ControllerBase
             cards.Append("      <div class=\"info-item\"><label>Dispositivo</label><input id=\"disp_" + row.id + "\" value=\"" + Esc(row.dispositivo) + "\" disabled></div>\n");
             cards.Append("      <div class=\"info-item\"><label>Planta</label><input id=\"planta_" + row.id + "\" value=\"" + Esc(row.planta) + "\" disabled></div>\n");
             cards.Append("      <div class=\"info-item\"><label>Color</label><input id=\"color_" + row.id + "\" value=\"" + Esc(row.colorCat) + "\" disabled></div>\n");
+            cards.Append("      <div class=\"info-item\"><label>Año Creación</label><input id=\"anio_vis_" + row.id + "\" value=\"" + (row.anio?.ToString() ?? "") + "\" disabled></div>\n");
             cards.Append("    </div>\n");
             cards.Append("    <div class=\"status-row\">\n");
             cards.Append("      <span class=\"status-dot " + dotClass + "\"></span>\n");
             cards.Append("      <span>" + dotLabel + "</span>\n");
             cards.Append("      <span style=\"margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#475569\">Plazo: " + plazoStr + "</span>\n");
             cards.Append("    </div>\n");
-            cards.Append("    <div id=\"obswrap_" + row.id + "\" style=\"display:none;margin-top:10px\">\n");
+            cards.Append("    <div id=\"obswrap_" + row.id + "\" style=\"display:block;margin-top:10px\">\n");
             cards.Append("      <div class=\"obs-label\">Observaciones</div>\n");
             cards.Append("      <textarea class=\"obs-edit-field\" id=\"obs_" + row.id + "\" disabled>" + Esc(row.obs) + "</textarea>\n");
             cards.Append("    </div>\n");
@@ -149,7 +153,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine(".top-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#1D4ED8,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}");
         sb.AppendLine(".top-title{flex:1;}.top-title h1{font-size:15px;font-weight:700;}.top-title p{font-size:11px;color:var(--muted2);margin-top:2px;}");
         sb.AppendLine(".user-chip{display:none;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);font-size:12px;font-weight:600;color:#6ee7b7;}");
-        sb.AppendLine(".btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}");
+        sb.AppendLine("@keyframes pop{0%{transform:scale(1)}30%{transform:scale(.88)}65%{transform:scale(1.08)}100%{transform:scale(1)}}@keyframes ripple{0%{transform:translate(-50%,-50%) scale(0);opacity:.5}100%{transform:translate(-50%,-50%) scale(4);opacity:0}}.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:transform .15s,filter .15s;position:relative;overflow:hidden;}.btn.animating{animation:pop .35s cubic-bezier(.36,.07,.19,.97) forwards;}.btn-ripple{position:absolute;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.4);pointer-events:none;animation:ripple .5s ease forwards;}.btn:hover{transform:translateY(-2px);filter:brightness(1.1);}");
         sb.AppendLine(".btn-primary{background:var(--accent);color:white;}.btn-success{background:var(--green);color:white;}");
         sb.AppendLine(".btn-ghost{background:var(--surface2);color:var(--muted2);border:1px solid var(--border2);}");
         sb.AppendLine(".btn-blue{background:#3B82F6;color:white;}.btn-green{background:#10B981;color:white;}");
@@ -163,7 +167,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine(".dev-name{flex:1;}.dev-name h3{font-size:13px;font-weight:700;}.dev-name span{font-size:11px;color:var(--muted2);}");
         sb.AppendLine(".color-badge{padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;}");
         sb.AppendLine(".card-body{padding:14px 16px;}");
-        sb.AppendLine(".info-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}");
+        sb.AppendLine(".info-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;}");
         sb.AppendLine(".info-item label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:4px;}");
         sb.AppendLine(".info-item input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:7px 9px;font-size:12px;color:var(--text);opacity:.6;}");
         sb.AppendLine(".status-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;font-size:11px;color:var(--muted2);}");
@@ -340,16 +344,32 @@ public class QrPageController : ControllerBase
         sb.AppendLine("    card.querySelectorAll('.status-row span')[2].textContent='Plazo: No definido';");
         sb.AppendLine("  }else toast('Error al eliminar',false);");
         sb.AppendLine("}");
-        sb.AppendLine("function abrirEditar(id){if(!usuarioActual){abrirLogin();return;}usuarioTarjeta[id]=usuarioActual;['equipo_','disp_','planta_','color_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=false;});document.getElementById('obswrap_'+id).style.display='block';document.getElementById('obs_'+id).disabled=false;}");
-        sb.AppendLine("function cancelarEditar(id){['equipo_','disp_','planta_','color_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=true;});document.getElementById('obswrap_'+id).style.display='none';document.getElementById('obs_'+id).disabled=true;}");
+        sb.AppendLine("function abrirEditar(id){if(!usuarioActual){abrirLogin();return;}usuarioTarjeta[id]=usuarioActual;['equipo_','disp_','planta_','color_','anio_vis_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=false;});document.getElementById('obs_'+id).disabled=false;}");
+        sb.AppendLine("function cancelarEditar(id){['equipo_','disp_','planta_','color_','anio_vis_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=true;});document.getElementById('obs_'+id).disabled=true;}");
         sb.AppendLine("async function guardarCambios(id){");
-        sb.AppendLine("  const datos={ID_EQUIPO:document.getElementById('equipo_'+id).value,UBICACION:document.getElementById('ubicacion_'+id).value,nombre_dispositivo:document.getElementById('disp_'+id).value,PLANTA:document.getElementById('planta_'+id).value,CATEGORIA_COLOR:document.getElementById('color_'+id).value,OBSERVACIONES:document.getElementById('obs_'+id).value};");
+        sb.AppendLine("  const anioVal=document.getElementById('anio_vis_'+id)?.value;  const datos={ID_EQUIPO:document.getElementById('equipo_'+id).value,UBICACION:document.getElementById('ubicacion_'+id).value,nombre_dispositivo:document.getElementById('disp_'+id).value,PLANTA:document.getElementById('planta_'+id).value,CATEGORIA_COLOR:document.getElementById('color_'+id).value,OBSERVACIONES:document.getElementById('obs_'+id).value,ANIO_CREACION:anioVal?parseInt(anioVal):null};");
         sb.AppendLine("  const usuario=usuarioTarjeta[id]||usuarioActual||'SISTEMA';");
         sb.AppendLine("  const res=await fetch('/PREVENTIVO/'+id+'?usuario='+encodeURIComponent(usuario),{method:'PUT',headers:{'Content-Type':'application/json','X-Usuario':usuario},body:JSON.stringify(datos)});");
         sb.AppendLine("  const data=await res.json();");
         sb.AppendLine("  if(data.mensaje){toast('Cambios guardados',true);cancelarEditar(id);}else toast('Error al guardar',false);");
         sb.AppendLine("}");
         sb.AppendLine("function toast(msg,ok){const t=document.createElement('div');t.className='toast '+(ok?'toast-ok':'toast-err');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}");
+        sb.AppendLine("// Animación de botones");
+        sb.AppendLine("document.addEventListener('click',function(e){");
+        sb.AppendLine("  const btn=e.target.closest('.btn');");
+        sb.AppendLine("  if(!btn)return;");
+        sb.AppendLine("  btn.classList.remove('animating');");
+        sb.AppendLine("  void btn.offsetWidth;");
+        sb.AppendLine("  btn.classList.add('animating');");
+        sb.AppendLine("  btn.addEventListener('animationend',()=>btn.classList.remove('animating'),{once:true});");
+        sb.AppendLine("  const r=document.createElement('span');");
+        sb.AppendLine("  r.className='btn-ripple';");
+        sb.AppendLine("  const rect=btn.getBoundingClientRect();");
+        sb.AppendLine("  r.style.left=(e.clientX-rect.left)+'px';");
+        sb.AppendLine("  r.style.top=(e.clientY-rect.top)+'px';");
+        sb.AppendLine("  btn.appendChild(r);");
+        sb.AppendLine("  setTimeout(()=>r.remove(),500);");
+        sb.AppendLine("});");
         sb.AppendLine("</script></body></html>");
         return sb.ToString();
     }
