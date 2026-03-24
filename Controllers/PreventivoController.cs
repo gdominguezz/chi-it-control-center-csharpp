@@ -287,10 +287,25 @@ public class PreventivoController : ControllerBase
             upd.Parameters.AddWithValue("id", id);
             upd.ExecuteNonQuery();
 
-            var nuevo = new { data.ID_EQUIPO, data.UBICACION, data.PLAZO,
-                              data.REALIZADO_POR, data.FECHA_REALIZACION,
-                              data.OBSERVACIONES, data.nombre_dispositivo,
-                              data.PLANTA, data.CATEGORIA_COLOR, data.ANIO_CREACION };
+            using var selNuevo = conn.CreateCommand();
+            selNuevo.CommandText = """
+                SELECT id_equipo,ubicacion,plazo,realizado_por,fecha_realizacion,
+                       observaciones,nombre_dispositivo,planta,categoria_color,anio_creacion
+                FROM public.mantenimientos_preventivos
+                WHERE id=@id
+            """;
+            selNuevo.Parameters.AddWithValue("id", id);
+
+            Dictionary<string, object?> nuevo = new();
+
+            using (var r = selNuevo.ExecuteReader())
+            {
+                if (r.Read())
+                {
+                    for (int i = 0; i < r.FieldCount; i++)
+                        nuevo[r.GetName(i)] = r.IsDBNull(i) ? null : r.GetValue(i);
+                }
+            }
 
             _auditoria.Registrar(id, usr, anterior, nuevo);
 
@@ -492,7 +507,7 @@ public class PreventivoController : ControllerBase
             using var conn = _db.Open();
             using var cmd  = conn.CreateCommand();
             cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET preventivo_digital=@d WHERE id=@id";
-            cmd.Parameters.Add(new NpgsqlParameter("d", NpgsqlTypes.NpgsqlDbType.Jsonb) { Value = JsonSerializer.Serialize(data) });
+            cmd.Parameters.AddWithValue("d",NpgsqlTypes.NpgsqlDbType.Jsonb,JsonSerializer.Serialize(data));
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 
@@ -604,7 +619,7 @@ public class PreventivoController : ControllerBase
             cmd.Parameters.AddWithValue("pl", proxStr);
             cmd.Parameters.AddWithValue("rp", data.Usuario.ToUpper());
             cmd.Parameters.AddWithValue("o",  data.Observaciones);
-            cmd.Parameters.Add(new NpgsqlParameter("pd", NpgsqlTypes.NpgsqlDbType.Jsonb) { Value = json });
+            cmd.Parameters.AddWithValue("pd",NpgsqlTypes.NpgsqlDbType.Jsonb,json);
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 
