@@ -16,7 +16,7 @@ public class QrPageController : ControllerBase
         ubicacion = Uri.UnescapeDataString(ubicacion);
 
         using var conn = _db.Open();
-        using var cmd  = conn.CreateCommand();
+        using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT id, id_equipo, nombre_dispositivo, planta,
                    categoria_color, fecha_realizacion, plazo, observaciones,
@@ -48,7 +48,7 @@ public class QrPageController : ControllerBase
         foreach (var row in rows)
         {
             var (badgeColor, badgeBg, badgeLabel) = ColorBadge(row.colorCat);
-            var icon     = DispIcon(row.dispositivo);
+            var icon = DispIcon(row.dispositivo);
             var fechaStr = row.fecha ?? "Sin registro";
             var plazoStr = row.plazo ?? "No definido";
             var dotClass = row.fecha != null ? "dot-ok" : "dot-warn";
@@ -58,9 +58,9 @@ public class QrPageController : ControllerBase
             // Siempre generar los 4 botones — todos ocultos, se muestran al login segun estado
             string btnPm =
                 "<button class=\"pm-btn btn-pm btn btn-purple\" id=\"btn_hacer_" + row.id + "\" onclick=\"abrirForm(" + row.id + ")\" style=\"display:none\">📋 Hacer Preventivo</button>\n" +
-                "<button class=\"pm-btn btn-ver btn btn-cyan\"   id=\"btn_ver_"   + row.id + "\" onclick=\"verPM(" + row.id + ")\" style=\"display:none\">👁 Ver PM</button>\n" +
-                "<button class=\"pm-btn btn-edit btn btn-amber\"  id=\"btn_edit_"  + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ")\" style=\"display:none\">✏️ Editar PM</button>\n" +
-                "<button class=\"pm-btn btn-del btn btn-danger\" id=\"btn_del_"   + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ")\" style=\"display:none\">🗑 Eliminar</button>";
+                "<button class=\"pm-btn btn-ver btn btn-cyan\"   id=\"btn_ver_" + row.id + "\" onclick=\"verPM(" + row.id + ")\" style=\"display:none\">👁 Ver PM</button>\n" +
+                "<button class=\"pm-btn btn-edit btn btn-amber\"  id=\"btn_edit_" + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ")\" style=\"display:none\">✏️ Editar PM</button>\n" +
+                "<button class=\"pm-btn btn-del btn btn-danger\" id=\"btn_del_" + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ")\" style=\"display:none\">🗑 Eliminar</button>";
             bool tienePmFlag = row.tienePm;
 
             cards.Append("<div class=\"card\" data-tiene-pm=\"" + (row.tienePm ? "true" : "false") + "\">\n");
@@ -70,6 +70,7 @@ public class QrPageController : ControllerBase
             cards.Append("    <div class=\"dev-icon\">" + icon + "</div>\n");
             cards.Append("    <div class=\"dev-name\"><h3>" + Esc(row.dispositivo) + "</h3><span>" + Esc(row.idEquipo) + "</span></div>\n");
             cards.Append("    <span class=\"color-badge\" style=\"background:" + badgeBg + ";color:" + badgeColor + ";border:1px solid " + badgeColor + "40\">" + badgeLabel + "</span>\n");
+            cards.Append("    <span class=\"edit-mode-badge\">✏️ Editando</span>\n");
             cards.Append("  </div>\n");
             cards.Append("  <div class=\"card-body\">\n");
             cards.Append("    <div class=\"info-row\">\n");
@@ -186,6 +187,13 @@ public class QrPageController : ControllerBase
         sb.AppendLine(".date-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--text);color-scheme:dark;margin-bottom:8px;}");
         sb.AppendLine(".obs-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px;}");
         sb.AppendLine(".obs-edit-field{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--text);resize:vertical;min-height:52px;}");
+        sb.AppendLine("/* ── Modo edición ── */");
+        sb.AppendLine(".card.editing{border-color:rgba(245,158,11,.55);box-shadow:0 0 0 2px rgba(245,158,11,.18);}");
+        sb.AppendLine(".card.editing .card-top{background:rgba(245,158,11,.08);}");
+        sb.AppendLine(".edit-mode-badge{display:none;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.07em;animation:badgePulse 2s ease-in-out infinite;}");
+        sb.AppendLine(".card.editing .edit-mode-badge{display:inline-flex;}");
+        sb.AppendLine(".card.editing .info-item input:not([disabled]),.card.editing textarea:not([disabled]){border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.06);opacity:1;}");
+        sb.AppendLine("@keyframes badgePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(245,158,11,.3)}50%{opacity:.8;box-shadow:0 0 0 5px rgba(245,158,11,0)}}");
         sb.AppendLine(".form-actions{display:flex;gap:8px;justify-content:flex-end;}");
         sb.AppendLine(".card-actions{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;border-top:1px solid var(--border);background:rgba(0,0,0,.15);}");
         sb.AppendLine(".card-actions .btn{font-size:11px;padding:7px 12px;}");
@@ -344,8 +352,8 @@ public class QrPageController : ControllerBase
         sb.AppendLine("    card.querySelectorAll('.status-row span')[2].textContent='Plazo: No definido';");
         sb.AppendLine("  }else toast('Error al eliminar',false);");
         sb.AppendLine("}");
-        sb.AppendLine("function abrirEditar(id){if(!usuarioActual){abrirLogin();return;}usuarioTarjeta[id]=usuarioActual;['equipo_','disp_','planta_','color_','anio_vis_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=false;});document.getElementById('obs_'+id).disabled=false;}");
-        sb.AppendLine("function cancelarEditar(id){['equipo_','disp_','planta_','color_','anio_vis_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=true;});document.getElementById('obs_'+id).disabled=true;}");
+        sb.AppendLine("function abrirEditar(id){if(!usuarioActual){abrirLogin();return;}usuarioTarjeta[id]=usuarioActual;['equipo_','disp_','planta_','color_','anio_vis_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=false;});document.getElementById('obs_'+id).disabled=false;const card=document.getElementById('btn_hacer_'+id)?.closest('.card')||document.getElementById('equipo_'+id)?.closest('.card');if(card)card.classList.add('editing');}");
+        sb.AppendLine("function cancelarEditar(id){['equipo_','disp_','planta_','color_','anio_vis_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=true;});document.getElementById('obs_'+id).disabled=true;const card=document.getElementById('equipo_'+id)?.closest('.card');if(card)card.classList.remove('editing');}");
         sb.AppendLine("async function guardarCambios(id){");
         sb.AppendLine("  const anioVal=document.getElementById('anio_vis_'+id)?.value;  const datos={ID_EQUIPO:document.getElementById('equipo_'+id).value,UBICACION:document.getElementById('ubicacion_'+id).value,nombre_dispositivo:document.getElementById('disp_'+id).value,PLANTA:document.getElementById('planta_'+id).value,CATEGORIA_COLOR:document.getElementById('color_'+id).value,OBSERVACIONES:document.getElementById('obs_'+id).value,ANIO_CREACION:anioVal?parseInt(anioVal):null};");
         sb.AppendLine("  const usuario=usuarioTarjeta[id]||usuarioActual||'SISTEMA';");
@@ -375,27 +383,27 @@ public class QrPageController : ControllerBase
     }
 
     private static string Esc(string? s) =>
-        (s ?? "").Replace("&","&amp;").Replace("<","&lt;").Replace(">","&gt;").Replace("\"","&quot;");
+        (s ?? "").Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
 
     private static (string color, string bg, string label) ColorBadge(string cat)
     {
         var c = cat.ToLower();
-        if (c.Contains("verde"))    return ("#10B981","#052e16","Verde");
-        if (c.Contains("amarillo")) return ("#F59E0B","#1c1400","Amarillo");
-        if (c.Contains("rojo"))     return ("#EF4444","#1f0000","Rojo");
-        if (c.Contains("gris"))     return ("#94A3B8","#0f172a","Gris");
-        if (c.Contains("rosa"))     return ("#F472B6","#1f0011","Rosa");
-        if (c.Contains("azul"))     return ("#3B82F6","#001233","Azul");
-        return ("#64748B","#0f172a", string.IsNullOrEmpty(cat) ? "—" : cat);
+        if (c.Contains("verde")) return ("#10B981", "#052e16", "Verde");
+        if (c.Contains("amarillo")) return ("#F59E0B", "#1c1400", "Amarillo");
+        if (c.Contains("rojo")) return ("#EF4444", "#1f0000", "Rojo");
+        if (c.Contains("gris")) return ("#94A3B8", "#0f172a", "Gris");
+        if (c.Contains("rosa")) return ("#F472B6", "#1f0011", "Rosa");
+        if (c.Contains("azul")) return ("#3B82F6", "#001233", "Azul");
+        return ("#64748B", "#0f172a", string.IsNullOrEmpty(cat) ? "—" : cat);
     }
 
     private static string DispIcon(string disp)
     {
         var d = disp.ToUpper();
-        if (d.Contains("COMPUTADORA") || d.Contains("CPU"))    return "🖥️";
-        if (d.Contains("PORTATIL")    || d.Contains("LAPTOP")) return "💻";
-        if (d.Contains("IMPRESORA"))                            return "🖨️";
-        if (d.Contains("UPS"))                                  return "🔋";
+        if (d.Contains("COMPUTADORA") || d.Contains("CPU")) return "🖥️";
+        if (d.Contains("PORTATIL") || d.Contains("LAPTOP")) return "💻";
+        if (d.Contains("IMPRESORA")) return "🖨️";
+        if (d.Contains("UPS")) return "🔋";
         return "🔧";
     }
 
@@ -411,13 +419,13 @@ public class QrPageController : ControllerBase
     {
         var d = disp.ToUpper();
         if (d.Contains("COMPUTADORA") || d.Contains("CPU"))
-            return new List<string> {"Sopletear el gabinete","Limpieza de contactos de memoria RAM","Sopletear fuente de poder y ventiladores","Limpieza del gabinete","Limpieza del monitor o pantalla","Limpieza y sopleteado del teclado y mouse","Sopleteado de ventiladores y ranuras de enfriamiento","Limpieza exterior del lector óptico","Limpieza del cableado","Actualizaciones del sistema operativo","Actualizaciones de Office","Eliminación de archivos temporales y vaciar reciclaje","Revisión del antivirus y escaneo","Desfragmentar las unidades de disco duro","Conectar todos los periféricos correspondientes","Verificar cables y conectores sin daños","Encender el equipo y verificar funcionamiento","Verificar que los periféricos funcionen correctamente","Verificación vida de la pila del BIOS"};
+            return new List<string> { "Sopletear el gabinete", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del gabinete", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y mouse", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza exterior del lector óptico", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente", "Verificación vida de la pila del BIOS" };
         if (d.Contains("PORTATIL") || d.Contains("LAPTOP"))
-            return new List<string> {"Sopletear el gabinete / chasis","Limpieza de contactos de memoria RAM","Sopletear fuente de poder y ventiladores","Limpieza del monitor o pantalla","Limpieza y sopleteado del teclado y touchpad","Sopleteado de ventiladores y ranuras de enfriamiento","Limpieza del cableado","Actualizaciones del sistema operativo","Actualizaciones de Office","Eliminación de archivos temporales y vaciar reciclaje","Revisión del antivirus y escaneo","Desfragmentar las unidades de disco duro","Conectar todos los periféricos correspondientes","Verificar cables y conectores sin daños","Encender el equipo y verificar funcionamiento","Verificar que los periféricos funcionen correctamente"};
+            return new List<string> { "Sopletear el gabinete / chasis", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y touchpad", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente" };
         if (d.Contains("IMPRESORA"))
-            return new List<string> {"Sopletear la impresora térmica","Limpieza de rodillos (no usar alcohol)","Limpieza del cabezal de la impresora térmica","Limpieza exterior de la impresora","Limpieza del cableado","Rutear cables / anclar eliminador de impresora","Conectar todos los periféricos correspondientes","Verificar cables y conectores sin daños","Verificar que los periféricos funcionen correctamente"};
+            return new List<string> { "Sopletear la impresora térmica", "Limpieza de rodillos (no usar alcohol)", "Limpieza del cabezal de la impresora térmica", "Limpieza exterior de la impresora", "Limpieza del cableado", "Rutear cables / anclar eliminador de impresora", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificar que los periféricos funcionen correctamente" };
         if (d.Contains("UPS"))
-            return new List<string> {"Limpieza y verificación del UPS","Limpieza del cableado","Conectar todos los periféricos correspondientes","Verificar cables y conectores sin daños","Verificación vida de la pila del UPS","Inspección y funcionamiento del UPS","Verificar que solo equipo IT esté conectado al UPS"};
-        return new List<string> {"Inspección general","Limpieza exterior","Verificación de funcionamiento"};
+            return new List<string> { "Limpieza y verificación del UPS", "Limpieza del cableado", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificación vida de la pila del UPS", "Inspección y funcionamiento del UPS", "Verificar que solo equipo IT esté conectado al UPS" };
+        return new List<string> { "Inspección general", "Limpieza exterior", "Verificación de funcionamiento" };
     }
 }

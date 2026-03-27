@@ -279,13 +279,21 @@ public class PreventivoController : ControllerBase
                         anterior[r.GetName(i)] = r.IsDBNull(i) ? null : r.GetValue(i);
             }
 
-            // Actualizar
+            // Actualizar — COALESCE preserva plazo/realizado_por/fecha_realizacion
+            // si llegan null (ej: edición desde página QR que no envía esos campos)
             using var upd = conn.CreateCommand();
             upd.CommandText = """
                 UPDATE public.mantenimientos_preventivos SET
-                id_equipo=@e, ubicacion=@u, plazo=@p, realizado_por=@rp,
-                fecha_realizacion=@fr, observaciones=@o,
-                nombre_dispositivo=@nd, planta=@pl, categoria_color=@cc, anio_creacion=@ac
+                id_equipo          = @e,
+                ubicacion          = @u,
+                plazo              = COALESCE(@p,  plazo),
+                realizado_por      = COALESCE(@rp, realizado_por),
+                fecha_realizacion  = COALESCE(@fr, fecha_realizacion),
+                observaciones      = @o,
+                nombre_dispositivo = @nd,
+                planta             = @pl,
+                categoria_color    = @cc,
+                anio_creacion      = @ac
                 WHERE id=@id
                 """;
             upd.Parameters.AddWithValue("e", (object?)data.ID_EQUIPO ?? DBNull.Value);
@@ -301,19 +309,22 @@ public class PreventivoController : ControllerBase
             upd.Parameters.AddWithValue("id", id);
             upd.ExecuteNonQuery();
 
-            var nuevo = new
+            // Leer estado REAL post-UPDATE para que registro_nuevo en auditoría
+            // refleje los valores definitivos (incluyendo los preservados por COALESCE)
+            Dictionary<string, object?> nuevo = new();
+            using var post = conn.CreateCommand();
+            post.CommandText = """
+                SELECT id_equipo,ubicacion,plazo,realizado_por,fecha_realizacion,
+                       observaciones,nombre_dispositivo,planta,categoria_color,anio_creacion
+                FROM public.mantenimientos_preventivos WHERE id=@id
+                """;
+            post.Parameters.AddWithValue("id", id);
+            using (var rPost = post.ExecuteReader())
             {
-                data.ID_EQUIPO,
-                data.UBICACION,
-                data.PLAZO,
-                data.REALIZADO_POR,
-                data.FECHA_REALIZACION,
-                data.OBSERVACIONES,
-                data.nombre_dispositivo,
-                data.PLANTA,
-                data.CATEGORIA_COLOR,
-                data.ANIO_CREACION
-            };
+                if (rPost.Read())
+                    for (int i = 0; i < rPost.FieldCount; i++)
+                        nuevo[rPost.GetName(i)] = rPost.IsDBNull(i) ? null : rPost.GetValue(i);
+            }
 
             _auditoria.Registrar(id, usr, anterior, nuevo);
 
