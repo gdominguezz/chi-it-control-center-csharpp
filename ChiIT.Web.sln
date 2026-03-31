@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11620.152 stable
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChiIT.Web", "ChiIT.Web.csproj", "{2AC49A39-132D-357B-CF8C-D926A99BAA68}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2AC49A39-132D-357B-CF8C-D926A99BAA68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AC49A39-132D-357B-CF8C-D926A99BAA68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AC49A39-132D-357B-CF8C-D926A99BAA68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AC49A39-132D-357B-CF8C-D926A99BAA68}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {481E97E5-9203-41DB-80B4-E2F60F053ADF}
+	EndGlobalSection
+EndGlobal
