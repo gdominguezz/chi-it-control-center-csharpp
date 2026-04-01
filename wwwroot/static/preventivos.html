@@ -1025,7 +1025,6 @@
                             <col style="width:140px">  <!-- Observaciones -->
                             <col style="width:75px">   <!-- Año Creación -->
                             <col style="width:190px">  <!-- PDF -->
-                            <col style="width:90px">   <!-- QR Equipo -->
                             <col style="width:210px">  <!-- Acciones -->
                         </colgroup>
                         <thead>
@@ -1039,7 +1038,6 @@
                                 <th>Observaciones</th>
                                 <th>Año Creación</th>
                                 <th>PDF de Preventivo Fisico</th>
-                                <th>QR por Equipo</th>
                                 <th>Acciones</th>
                             </tr>
                             <tr class="filter-row">
@@ -1051,7 +1049,6 @@
                                 <th><input id="f_CATEGORIA_COLOR" placeholder="Filtrar..."></th>
                                 <th><input id="f_OBSERVACIONES" placeholder="Filtrar..."></th>
                                 <th><input id="f_ANIO_CREACION" placeholder="Año..." type="number"></th>
-                                <th></th>
                                 <th></th>
                                 <th></th>
                             </tr>
@@ -1140,6 +1137,12 @@
                     <div class="db-card-header">📅 Mantenimientos esta semana</div>
                     <div class="db-card-body" id="db-semana"></div>
                 </div>
+                <div class="db-card">
+                    <div class="db-card-header">⏭️ PM próxima semana <span style="font-size:10px;color:var(--amber);margin-left:6px;">por vencer</span></div>
+                    <div class="db-card-body" id="db-proxima-semana"></div>
+                </div>
+            </div>
+            <div class="db-grid">
                 <div class="db-card">
                     <div class="db-card-header">🗓️ Próximos PM este mes</div>
                     <div class="db-card-body" id="db-proximos"></div>
@@ -1240,7 +1243,7 @@
                 renderizar();
             }).catch(() => {
                 document.getElementById('tabla').innerHTML =
-                    '<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--muted)">Error al cargar datos</td></tr>';
+                    '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Error al cargar datos</td></tr>';
             });
         }
 
@@ -1270,7 +1273,7 @@
             const tbody = document.getElementById('tabla');
             tbody.innerHTML = '';
             if (!datosActuales.length) {
-                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
                 return;
             }
             const esAdmin = rolActual === "ADMIN";
@@ -1294,13 +1297,6 @@
                              <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
                         : `<input type="file" onchange="subirPDF(${row.id},this)"
                                style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
-                      </td>
-                      <td ${tdStyle} style="text-align:center;">
-                        <img src="/QR_EQUIPO/${row.id}"
-                             style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
-                             title="QR: ${row.id_equipo ?? row.id}"
-                             onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
-                             loading="lazy">
                       </td>
                       <td ${tdStyle} style="white-space:nowrap;">
                         ${esAdmin ? `
@@ -1521,6 +1517,7 @@
             renderTabla('db-semana', data.esta_semana,
                 ['Equipo', 'Dispositivo', 'Ubicación', 'Fecha', 'Técnico'],
                 r => [r.id_equipo, r.dispositivo, r.ubicacion, r.fecha, r.realizado_por || '—']);
+            renderProximaSemana('db-proxima-semana', data.proxima_semana);
             renderProximos('db-proximos', data.proximos_mes);
             renderVencidos('db-vencidos', data.vencidos);
             renderTabla('db-ultimos', data.ultimos,
@@ -1588,6 +1585,31 @@
             const trs = data.map(r => `<tr>${rowFn(r).map(v => `<td>${v || '—'}</td>`).join('')}</tr>`).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
+        }
+
+        function renderProximaSemana(elId, data) {
+            if (!data || !data.length) {
+                document.getElementById(elId).innerHTML = '<p class="db-empty">✅ Sin PM programados la próxima semana</p>';
+                return;
+            }
+            const trs = data.map(r => {
+                const diasRestantes = Math.ceil((new Date(r.plazo) - new Date()) / 86400000);
+                const badge = `<span class="db-badge proximo-badge">En ${diasRestantes}d</span>`;
+                return `<tr>
+                      <td>${r.id_equipo || '—'}</td>
+                      <td>${r.dispositivo || '—'}</td>
+                      <td><b>${r.ubicacion || '—'}</b></td>
+                      <td>${r.planta || '—'}</td>
+                      <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
+                      <td>${r.ultimo_pm || 'Nunca'}</td>
+                      <td>${badge}</td>
+                    </tr>`;
+            }).join('');
+            document.getElementById(elId).innerHTML =
+                `<div style="overflow-x:auto"><table class="db-table">
+                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                      <tbody>${trs}</tbody>
+                    </table></div>`;
         }
 
         function renderProximos(elId, data) {
