@@ -2,6 +2,7 @@ using ChiIT.Data;
 using ChiIT.Models;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
+using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -13,6 +14,50 @@ public class LoginController : ControllerBase
     private readonly DbConnectionPool _db;
     private readonly IWebHostEnvironment _env;
 
+    // ── Control de intentos fallidos ─────────────────────
+    // Clave: usuario en mayúsculas
+    // Valor: (cantidad de intentos fallidos, momento del último intento)
+    private static readonly ConcurrentDictionary<string, (int intentos, DateTime ultimo)> _intentos = new();
+
+    private const int MAX_INTENTOS = 5;               // bloquear después de 5 fallos
+    private const int MINUTOS_BLOQUEO = 10;             // bloqueo dura 10 minutos
+
+    private bool EstasBloqueado(string usuario, out int minutosRestantes)
+    {
+        minutosRestantes = 0;
+        if (!_intentos.TryGetValue(usuario, out var estado)) return false;
+
+        // Si ya pasó el tiempo de bloqueo, limpiar
+        if (DateTime.UtcNow - estado.ultimo > TimeSpan.FromMinutes(MINUTOS_BLOQUEO))
+        {
+            _intentos.TryRemove(usuario, out _);
+            return false;
+        }
+
+        if (estado.intentos >= MAX_INTENTOS)
+        {
+            minutosRestantes = MINUTOS_BLOQUEO - (int)(DateTime.UtcNow - estado.ultimo).TotalMinutes;
+            minutosRestantes = Math.Max(1, minutosRestantes);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void RegistrarFallo(string usuario)
+    {
+        _intentos.AddOrUpdate(
+            usuario,
+            _ => (1, DateTime.UtcNow),
+            (_, anterior) => (anterior.intentos + 1, DateTime.UtcNow)
+        );
+    }
+
+    private void LimpiarIntentos(string usuario)
+    {
+        _intentos.TryRemove(usuario, out _);
+    }
+
     public LoginController(DbConnectionPool db, IWebHostEnvironment env)
     {
         _db = db;
@@ -23,6 +68,16 @@ public class LoginController : ControllerBase
     [HttpPost("LOGIN")]
     public IActionResult Login([FromBody] LoginRequest req)
     {
+        var usuarioUpper = req.Usuario.ToUpper();
+
+        // Verificar si está bloqueado
+        if (EstasBloqueado(usuarioUpper, out int minutosRestantes))
+            return Ok(new
+            {
+                ok = false,
+                mensaje = $"Usuario bloqueado por demasiados intentos fallidos. Intenta en {minutosRestantes} minuto{(minutosRestantes != 1 ? "s" : "")}."
+            });
+
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
@@ -30,11 +85,14 @@ public class LoginController : ControllerBase
             FROM public.usuarios
             WHERE usuario = @usr
             """;
-        cmd.Parameters.AddWithValue("usr", req.Usuario.ToUpper());
+        cmd.Parameters.AddWithValue("usr", usuarioUpper);
 
         using var reader = cmd.ExecuteReader();
         if (!reader.Read())
+        {
+            RegistrarFallo(usuarioUpper);
             return Ok(new { ok = false, mensaje = "Usuario o contraseña incorrectos" });
+        }
 
         var id = reader.GetInt32(0);
         var usuario = reader.GetString(1);
@@ -49,7 +107,21 @@ public class LoginController : ControllerBase
             return Ok(new { ok = false, mensaje = "Usuario desactivado" });
 
         if (HashPassword(req.Password) != pwdHash)
-            return Ok(new { ok = false, mensaje = "Usuario o contraseña incorrectos" });
+        {
+            RegistrarFallo(usuarioUpper);
+
+            // Calcular intentos restantes para informar al usuario
+            _intentos.TryGetValue(usuarioUpper, out var estado);
+            int intentosRestantes = MAX_INTENTOS - estado.intentos;
+            string mensaje = intentosRestantes > 0
+                ? $"Usuario o contraseña incorrectos. Te quedan {intentosRestantes} intento{(intentosRestantes != 1 ? "s" : "")}."
+                : $"Usuario bloqueado por {MINUTOS_BLOQUEO} minutos.";
+
+            return Ok(new { ok = false, mensaje });
+        }
+
+        // Login exitoso — limpiar intentos fallidos
+        LimpiarIntentos(usuarioUpper);
 
         // Actualizar último acceso
         using var upd = conn.CreateCommand();

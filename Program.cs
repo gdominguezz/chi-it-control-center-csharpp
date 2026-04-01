@@ -1,5 +1,4 @@
 using ChiIT.Data;
-using ChiIT.Middleware;
 using ChiIT.Services;
 
 // ── Zona horaria México/Chihuahua ──
@@ -20,9 +19,6 @@ builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
     p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
 var app = builder.Build();
-
-// ── Filtro de IP — solo red interna 172.24.104.x ──
-app.UseMiddleware<IpFilterMiddleware>();
 
 app.UseCors();
 
