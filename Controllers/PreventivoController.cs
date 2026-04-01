@@ -532,6 +532,28 @@ public class PreventivoController : ControllerBase
         return Ok(new { success = true, qr_url = $"/QR_CODES/MESAS/{Uri.EscapeDataString(ub)}.png" });
     }
 
+    // ── QR POR EQUIPO ─────────────────────────────────────
+    [HttpGet("QR_EQUIPO/{id:int}")]
+    public IActionResult QrPorEquipo(int id)
+    {
+        try
+        {
+            using var conn = _db.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT id_equipo FROM public.mantenimientos_preventivos WHERE id=@id";
+            cmd.Parameters.AddWithValue("id", id);
+
+            var raw = cmd.ExecuteScalar();
+            var idEquipo = (raw == null || raw == DBNull.Value || string.IsNullOrWhiteSpace(raw.ToString()))
+                           ? id.ToString()
+                           : raw.ToString()!.Trim();
+
+            var bytes = _qr.GenerarPorEquipo(idEquipo);
+            return File(bytes, "image/png");
+        }
+        catch (Exception ex) { return StatusCode(500, ex.Message); }
+    }
+
     // ── PREVENTIVO DIGITAL ────────────────────────────────
     [HttpPost("PREVENTIVO/GUARDAR_DIGITAL/{id:int}")]
     public IActionResult GuardarDigital(int id, [FromBody] GuardarDigitalRequest data)
