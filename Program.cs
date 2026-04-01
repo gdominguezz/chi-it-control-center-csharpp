@@ -8,15 +8,6 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Necesario para leer la IP real detrás del proxy de Render
-builder.Services.Configure<Microsoft.AspNetCore.HttpOverrides.ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
-                             | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
-});
-
 // ── Servicios ──
 builder.Services.AddControllers();
 builder.Services.AddSingleton<DbConnectionPool>();
@@ -24,13 +15,11 @@ builder.Services.AddScoped<AuditoriaService>();
 builder.Services.AddScoped<ExcelService>();
 builder.Services.AddScoped<QrService>();
 
-// CORS — permite que los HTMLs hagan fetch desde cualquier origen en la red local
+// CORS
 builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
     p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
 var app = builder.Build();
-
-app.UseForwardedHeaders();
 
 // ── Filtro de IP — solo red interna 172.24.104.x ──
 app.UseMiddleware<IpFilterMiddleware>();
@@ -38,8 +27,8 @@ app.UseMiddleware<IpFilterMiddleware>();
 app.UseCors();
 
 // ── Archivos estáticos (HTML, CSS, JS) ──
-app.UseStaticFiles();          // sirve /wwwroot/
-app.UseDefaultFiles();         // index.html por defecto
+app.UseStaticFiles();
+app.UseDefaultFiles();
 
 // ── Ruta raíz → login ──
 app.MapGet("/", () => Results.Redirect("/static/login.html"));
