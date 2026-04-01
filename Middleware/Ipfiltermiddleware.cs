@@ -21,19 +21,23 @@ public class IpFilterMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var ip = ObtenerIpReal(context);
+        var ipStr = ip.ToString();
 
+        // Loguear siempre la IP para diagnóstico
+        _logger.LogInformation("Petición desde IP: {IP} → {Path}", ipStr, context.Request.Path);
+
+        // Permitir loopback (health checks internos de Render)
         if (IPAddress.IsLoopback(ip))
         {
             await _next(context);
             return;
         }
 
-        var ipStr = ip.ToString();
         var permitida = _prefijosPermitidos.Any(p => ipStr.StartsWith(p));
 
         if (!permitida)
         {
-            _logger.LogWarning("Acceso bloqueado desde IP: {IP} → {Path}", ipStr, context.Request.Path);
+            _logger.LogWarning("Acceso BLOQUEADO desde IP: {IP}", ipStr);
             context.Response.StatusCode = 403;
             context.Response.ContentType = "text/html; charset=utf-8";
             await context.Response.WriteAsync(PaginaBloqueo(ipStr));
@@ -45,13 +49,27 @@ public class IpFilterMiddleware
 
     private static IPAddress ObtenerIpReal(HttpContext context)
     {
-        var forwarded = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-        if (!string.IsNullOrWhiteSpace(forwarded))
+        // Render y proxies usan distintos headers — probar en orden de prioridad
+        string[] headersOrden = {
+            "CF-Connecting-IP",   // Cloudflare
+            "X-Real-IP",          // nginx
+            "X-Forwarded-For",    // estándar (puede ser lista separada por comas)
+            "X-Client-IP",
+            "True-Client-IP"
+        };
+
+        foreach (var header in headersOrden)
         {
-            var primera = forwarded.Split(',')[0].Trim();
-            if (IPAddress.TryParse(primera, out var ipForwarded))
-                return ipForwarded;
+            var valor = context.Request.Headers[header].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(valor)) continue;
+
+            // X-Forwarded-For puede ser "ip1, ip2, ip3" — tomar la primera (cliente original)
+            var candidata = valor.Split(',')[0].Trim();
+            if (IPAddress.TryParse(candidata, out var ip))
+                return ip;
         }
+
+        // Fallback: IP directa de la conexión TCP
         return context.Connection.RemoteIpAddress ?? IPAddress.Loopback;
     }
 
