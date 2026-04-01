@@ -31,7 +31,6 @@ app.MapControllers();
 Directory.CreateDirectory("PDF_DATABASE/PREVENTIVOS");
 Directory.CreateDirectory("QR_CODES/MESAS");
 
-app.Run("http://0.0.0.0:10000");
-
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8000";
+// ── Puerto dinámico para Render ──
+var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 app.Run($"http://0.0.0.0:{port}");

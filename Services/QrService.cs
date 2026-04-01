@@ -15,7 +15,7 @@ public class QrService
     public QrService(IConfiguration config)
     {
         _baseUrl = config["AppSettings:ServerBaseUrl"] ?? "http://172.24.104.1:8000";
-        _qrDir   = config["AppSettings:QrDir"]        ?? "QR_CODES/MESAS";
+        _qrDir = config["AppSettings:QrDir"] ?? "QR_CODES/MESAS";
         Directory.CreateDirectory(_qrDir);
     }
 
@@ -44,8 +44,36 @@ public class QrService
         {
             ctx.DrawImage(qrImg, new Point(0, 0), 1f);
 
-            // Texto centrado
-            var font = SystemFonts.CreateFont("Arial", 20, FontStyle.Regular);
+            // Obtener fuente compatible con Linux/Render
+            // Arial no existe en Linux; usamos la primera fuente disponible del sistema
+            Font font;
+            string[] candidatas = { "Arial", "Liberation Sans", "DejaVu Sans", "FreeSans", "Noto Sans", "Ubuntu" };
+            FontFamily? familia = null;
+
+            foreach (var nombre in candidatas)
+            {
+                if (SystemFonts.TryGet(nombre, out var f))
+                {
+                    familia = f;
+                    break;
+                }
+            }
+
+            if (familia.HasValue)
+            {
+                font = familia.Value.CreateFont(20, FontStyle.Regular);
+            }
+            else
+            {
+                // Último recurso: tomar la primera fuente que haya en el sistema
+                var todasFuentes = SystemFonts.Families.ToList();
+                if (todasFuentes.Count > 0)
+                    font = todasFuentes[0].CreateFont(20, FontStyle.Regular);
+                else
+                    // Si no hay NINGUNA fuente, devolver el QR sin texto
+                    return;
+            }
+
             var opts = new RichTextOptions(font)
             {
                 HorizontalAlignment = HorizontalAlignment.Center,
