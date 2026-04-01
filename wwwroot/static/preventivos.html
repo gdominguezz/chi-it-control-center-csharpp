@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Mantenimientos Preventivos</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         :root {
             --bg: #0B0F1A;
@@ -972,6 +973,116 @@
             color: var(--muted);
             font-size: 13px;
         }
+        /* ── TÉCNICO DEL MES ── */
+        .tecnico-podio {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 16px;
+            gap: 10px;
+        }
+
+        .tecnico-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1D4ED8, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: 0 0 0 4px rgba(139,92,246,.3), 0 0 30px rgba(139,92,246,.4);
+            animation: pulseAvatar 2s infinite;
+            position: relative;
+        }
+
+            .tecnico-avatar::after {
+                content: '🏆';
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                font-size: 22px;
+                animation: bounce 1s infinite alternate;
+            }
+
+        @keyframes pulseAvatar {
+            0%, 100% {
+                box-shadow: 0 0 0 4px rgba(139,92,246,.3), 0 0 30px rgba(139,92,246,.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(139,92,246,.15), 0 0 50px rgba(139,92,246,.6);
+            }
+        }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-4px);
+            }
+        }
+
+        .tecnico-nombre {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            text-align: center;
+            letter-spacing: -.01em;
+        }
+
+        .tecnico-badge {
+            background: linear-gradient(135deg, rgba(139,92,246,.2), rgba(59,130,246,.2));
+            border: 1px solid rgba(139,92,246,.4);
+            border-radius: 999px;
+            padding: 4px 14px;
+            font-size: 12px;
+            font-family: 'DM Mono', monospace;
+            color: #C4B5FD;
+        }
+
+        .tecnico-sub {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+        }
+
+        .tecnico-ranking {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .tecnico-rank-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 4px;
+            background: rgba(255,255,255,.03);
+        }
+
+        .rank-pos {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+            min-width: 18px;
+        }
+
+        .rank-nombre {
+            flex: 1;
+            color: var(--muted2);
+        }
+
+        .rank-total {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+        }
     </style>
 </head>
 <body>
@@ -1180,16 +1291,44 @@
         <!-- DASHBOARD TAB -->
         <div id="tab-dashboard" class="tab-content">
             <div class="db-kpis" id="db-kpis"></div>
-            <div class="db-grid">
+
+            <!-- GRÁFICAS FILA 1 -->
+            <div class="db-grid" style="grid-template-columns:1fr 1fr 1fr;">
                 <div class="db-card">
                     <div class="db-card-header">🎨 Equipos por Categoría</div>
-                    <div class="db-card-body" id="db-colores"></div>
+                    <div class="db-card-body" style="display:flex;justify-content:center;align-items:center;min-height:220px">
+                        <canvas id="chart-colores" width="220" height="220"></canvas>
+                    </div>
                 </div>
                 <div class="db-card">
-                    <div class="db-card-header">🏭 Equipos por Planta</div>
-                    <div class="db-card-body" id="db-plantas"></div>
+                    <div class="db-card-header">🏭 PM por Planta</div>
+                    <div class="db-card-body" style="min-height:220px">
+                        <canvas id="chart-plantas" height="220"></canvas>
+                    </div>
+                </div>
+                <div class="db-card">
+                    <div class="db-card-header">📋 PM Digital vs Sin PM</div>
+                    <div class="db-card-body" style="display:flex;justify-content:center;align-items:center;min-height:220px">
+                        <canvas id="chart-digital" width="220" height="220"></canvas>
+                    </div>
                 </div>
             </div>
+
+            <!-- GRÁFICA LÍNEA + TÉCNICO DEL MES -->
+            <div class="db-grid" style="grid-template-columns:2fr 1fr;">
+                <div class="db-card">
+                    <div class="db-card-header">📈 PM Realizados por Mes (últimos 12 meses)</div>
+                    <div class="db-card-body" style="min-height:220px">
+                        <canvas id="chart-meses" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="db-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                    <div class="db-card-header" style="width:100%">🏆 Técnico del Mes</div>
+                    <div class="db-card-body" style="width:100%" id="db-tecnico-mes"></div>
+                </div>
+            </div>
+
+            <!-- SEMANA ACTUAL Y PRÓXIMA -->
             <div class="db-grid">
                 <div class="db-card">
                     <div class="db-card-header">📅 Mantenimientos esta semana</div>
@@ -1579,7 +1718,13 @@
         // ══════════════════════════════════════════
         // DASHBOARD
         // ══════════════════════════════════════════
+        // ── Variables para destruir charts al recargar ──
         let dashCargado = false;
+        let _charts = {};
+        function crearChart(id, config) {
+            if (_charts[id]) _charts[id].destroy();
+            _charts[id] = new Chart(document.getElementById(id), config);
+        }
 
         async function cargarDashboard() {
             if (dashCargado) return;
@@ -1587,9 +1732,100 @@
             const res = await fetch('/DASHBOARD');
             const data = await res.json();
             dashCargado = true;
+
             renderKpis(data.kpis);
-            renderBarras('db-colores', data.por_color, d => d.categoria, d => d.total, colorFromCat);
-            renderBarras('db-plantas', data.por_planta, d => d.planta, d => d.total, () => '#3B82F6');
+
+            // ── Dona: categoría de color ──
+            const colores = data.por_color;
+            crearChart('chart-colores', {
+                type: 'doughnut',
+                data: {
+                    labels: colores.map(d => d.categoria),
+                    datasets: [{
+                        data: colores.map(d => d.total),
+                        backgroundColor: colores.map(d => colorFromCat(d.categoria)),
+                        borderWidth: 2,
+                        borderColor: '#111827'
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 11 }, boxWidth: 12 } } },
+                    cutout: '65%'
+                }
+            });
+
+            // ── Barras: PM por planta ──
+            const plantas = data.por_planta;
+            crearChart('chart-plantas', {
+                type: 'bar',
+                data: {
+                    labels: plantas.map(d => d.planta),
+                    datasets: [{
+                        label: 'Equipos',
+                        data: plantas.map(d => d.total),
+                        backgroundColor: 'rgba(59,130,246,.7)',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#64748B' }, grid: { color: 'rgba(255,255,255,.05)' } },
+                        y: { ticks: { color: '#94A3B8' }, grid: { display: false } }
+                    }
+                }
+            });
+
+            // ── Dona: PM digital vs sin PM ──
+            const dig = data.pm_digital;
+            crearChart('chart-digital', {
+                type: 'doughnut',
+                data: {
+                    labels: ['Con PM Digital', 'Sin PM Digital'],
+                    datasets: [{
+                        data: [dig.con_digital, dig.sin_digital],
+                        backgroundColor: ['rgba(16,185,129,.8)', 'rgba(239,68,68,.8)'],
+                        borderWidth: 2,
+                        borderColor: '#111827'
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 11 }, boxWidth: 12 } } },
+                    cutout: '65%'
+                }
+            });
+
+            // ── Línea: PM por mes ──
+            const meses = data.pm_por_mes;
+            crearChart('chart-meses', {
+                type: 'line',
+                data: {
+                    labels: meses.map(d => d.mes),
+                    datasets: [{
+                        label: 'PM realizados',
+                        data: meses.map(d => d.total),
+                        borderColor: '#8B5CF6',
+                        backgroundColor: 'rgba(139,92,246,.15)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#8B5CF6',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+                        y: { ticks: { color: '#64748B' }, grid: { color: 'rgba(255,255,255,.04)' }, beginAtZero: true }
+                    }
+                }
+            });
+
+            // ── Técnico del mes ──
+            renderTecnicoMes(data.tecnicos_mes);
+
             renderTabla('db-semana', data.esta_semana,
                 ['Equipo', 'Dispositivo', 'Ubicación', 'Fecha', 'Técnico'],
                 r => [r.id_equipo, r.dispositivo, r.ubicacion, r.fecha, r.realizado_por || '—']);
@@ -1599,6 +1835,32 @@
             renderTabla('db-ultimos', data.ultimos,
                 ['Equipo', 'Dispositivo', 'Ubicación', 'Planta', 'Fecha', 'Técnico'],
                 r => [r.id_equipo, r.dispositivo, r.ubicacion, r.planta, r.fecha, r.realizado_por || '—']);
+        }
+
+        function renderTecnicoMes(tecnicos) {
+            const el = document.getElementById('db-tecnico-mes');
+            if (!tecnicos || !tecnicos.length) {
+                el.innerHTML = '<p class="db-empty">Sin registros este mes</p>';
+                return;
+            }
+            const top = tecnicos[0];
+            const resto = tecnicos.slice(1);
+            const medallas = ['🥈', '🥉', '4️⃣', '5️⃣'];
+            const rankingHtml = resto.map((t, i) => `
+                    <div class="tecnico-rank-item">
+                        <span class="rank-pos">${medallas[i] || (i + 2) + '°'}</span>
+                        <span class="rank-nombre">${t.tecnico}</span>
+                        <span class="rank-total">${t.total} PM</span>
+                    </div>`).join('');
+
+            el.innerHTML = `
+                    <div class="tecnico-podio">
+                        <div class="tecnico-avatar">👷</div>
+                        <div class="tecnico-sub">Técnico del mes</div>
+                        <div class="tecnico-nombre">${top.tecnico}</div>
+                        <div class="tecnico-badge">${top.total} mantenimientos</div>
+                        ${resto.length ? `<div class="tecnico-ranking">${rankingHtml}</div>` : ''}
+                    </div>`;
         }
 
         function renderKpis(k) {

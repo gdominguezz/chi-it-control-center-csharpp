@@ -120,33 +120,6 @@ public class DashboardController : ControllerBase
             });
         semanaR.Close();
 
-        // ── 5b. Mantenimientos de la PRÓXIMA semana ───────
-        using var proxSemCmd = conn.CreateCommand();
-        proxSemCmd.CommandText = """
-            SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
-                   fecha_realizacion, plazo, realizado_por
-            FROM public.mantenimientos_preventivos
-            WHERE plazo IS NOT NULL
-              AND plazo::date >= date_trunc('week', CURRENT_DATE) + interval '7 days'
-              AND plazo::date <  date_trunc('week', CURRENT_DATE) + interval '14 days'
-            ORDER BY plazo::date ASC
-            """;
-        var proximaSemana = new List<object>();
-        using var proxSemR = proxSemCmd.ExecuteReader();
-        while (proxSemR.Read())
-            proximaSemana.Add(new
-            {
-                id = proxSemR.GetInt64(0),
-                id_equipo = proxSemR.IsDBNull(1) ? "" : proxSemR.GetString(1),
-                dispositivo = proxSemR.IsDBNull(2) ? "" : proxSemR.GetString(2),
-                ubicacion = proxSemR.IsDBNull(3) ? "" : proxSemR.GetString(3),
-                planta = proxSemR.IsDBNull(4) ? "" : proxSemR.GetString(4),
-                ultimo_pm = proxSemR.IsDBNull(5) ? "" : proxSemR.GetDateTime(5).ToString("yyyy-MM-dd"),
-                plazo = proxSemR.IsDBNull(6) ? "" : proxSemR.GetString(6),
-                realizado_por = proxSemR.IsDBNull(7) ? "" : proxSemR.GetString(7),
-            });
-        proxSemR.Close();
-
         // ── 6. Próximos PM del mes actual (por plazo) ─────
         using var mesCmd = conn.CreateCommand();
         mesCmd.CommandText = """
@@ -200,6 +173,59 @@ public class DashboardController : ControllerBase
             });
         vencidosR.Close();
 
+        // ── 8. PM por mes (últimos 12 meses) ──────────────
+        using var mesHistCmd = conn.CreateCommand();
+        mesHistCmd.CommandText = """
+            SELECT TO_CHAR(fecha_realizacion, 'YYYY-MM') AS mes,
+                   COUNT(*) AS total
+            FROM public.mantenimientos_preventivos
+            WHERE fecha_realizacion IS NOT NULL
+              AND fecha_realizacion >= NOW() - INTERVAL '12 months'
+            GROUP BY mes
+            ORDER BY mes ASC
+            """;
+        var pmPorMes = new List<object>();
+        using var mesHistR = mesHistCmd.ExecuteReader();
+        while (mesHistR.Read())
+            pmPorMes.Add(new { mes = mesHistR.GetString(0), total = mesHistR.GetInt64(1) });
+        mesHistR.Close();
+
+        // ── 9. PM digital vs sin PM digital ───────────────
+        using var digitalCmd = conn.CreateCommand();
+        digitalCmd.CommandText = """
+            SELECT
+              COUNT(*) FILTER (WHERE preventivo_digital IS NOT NULL) AS con_digital,
+              COUNT(*) FILTER (WHERE preventivo_digital IS NULL)     AS sin_digital
+            FROM public.mantenimientos_preventivos
+            """;
+        using var digitalR = digitalCmd.ExecuteReader();
+        digitalR.Read();
+        var pmDigital = new
+        {
+            con_digital = digitalR.GetInt64(0),
+            sin_digital = digitalR.GetInt64(1)
+        };
+        digitalR.Close();
+
+        // ── 10. Técnico del mes ────────────────────────────
+        using var tecnicoCmd = conn.CreateCommand();
+        tecnicoCmd.CommandText = """
+            SELECT COALESCE(realizado_por, 'SIN ASIGNAR') AS tecnico,
+                   COUNT(*) AS total
+            FROM public.mantenimientos_preventivos
+            WHERE fecha_realizacion >= date_trunc('month', CURRENT_DATE)
+              AND fecha_realizacion <  date_trunc('month', CURRENT_DATE) + INTERVAL '1 month'
+              AND realizado_por IS NOT NULL
+            GROUP BY tecnico
+            ORDER BY total DESC
+            LIMIT 5
+            """;
+        var tecnicosMes = new List<object>();
+        using var tecnicoR = tecnicoCmd.ExecuteReader();
+        while (tecnicoR.Read())
+            tecnicosMes.Add(new { tecnico = tecnicoR.GetString(0), total = tecnicoR.GetInt64(1) });
+        tecnicoR.Close();
+
         return Ok(new
         {
             kpis,
@@ -207,9 +233,11 @@ public class DashboardController : ControllerBase
             por_planta = porPlanta,
             ultimos,
             esta_semana = estaSemana,
-            proxima_semana = proximaSemana,
             proximos_mes = proximos,
             vencidos = vencidosList,
+            pm_por_mes = pmPorMes,
+            pm_digital = pmDigital,
+            tecnicos_mes = tecnicosMes,
         });
     }
 }
