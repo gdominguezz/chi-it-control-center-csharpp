@@ -471,7 +471,22 @@ public class PreventivoController : ControllerBase
     [HttpGet("QR_MESA_GENERAR/{ubicacion}")]
     public IActionResult GenerarQr(string ubicacion)
     {
-        var bytes = _qr.Generar(Uri.UnescapeDataString(ubicacion));
+        var ub = Uri.UnescapeDataString(ubicacion).Trim();
+
+        // Validar que la ubicación exista en la DB
+        using var conn = _db.Open();
+        using var chk = conn.CreateCommand();
+        chk.CommandText = """
+            SELECT COUNT(*) FROM public.mantenimientos_preventivos
+            WHERE TRIM(LOWER(ubicacion)) = TRIM(LOWER(@u))
+            """;
+        chk.Parameters.AddWithValue("u", ub);
+        var existe = Convert.ToInt64(chk.ExecuteScalar()!) > 0;
+
+        if (!existe)
+            return BadRequest(new { error = $"La ubicación '{ub}' no existe en la base de datos. Verifica el nombre exacto." });
+
+        var bytes = _qr.Generar(ub);
         return File(bytes, "image/png");
     }
 
@@ -515,36 +530,6 @@ public class PreventivoController : ControllerBase
         if (!System.IO.File.Exists(path))
             return Ok(new { success = false });
         return Ok(new { success = true, qr_url = $"/QR_CODES/MESAS/{Uri.EscapeDataString(ub)}.png" });
-    }
-
-    // ── QR POR EQUIPO (nuevo) ─────────────────────────────
-    /// <summary>
-    /// GET /QR_EQUIPO/{id}
-    /// Devuelve la imagen PNG del QR que contiene el ID de equipo del registro.
-    /// Si el registro no tiene id_equipo usa el id interno como fallback.
-    /// </summary>
-    [HttpGet("QR_EQUIPO/{id:int}")]
-    public IActionResult QrPorEquipo(int id)
-    {
-        try
-        {
-            using var conn = _db.Open();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT id_equipo FROM public.mantenimientos_preventivos WHERE id=@id";
-            cmd.Parameters.AddWithValue("id", id);
-
-            var raw = cmd.ExecuteScalar();
-            var idEquipo = (raw == null || raw == DBNull.Value || string.IsNullOrWhiteSpace(raw.ToString()))
-                           ? id.ToString()          // fallback: usar el id del registro
-                           : raw.ToString()!.Trim();
-
-            var bytes = _qr.GenerarPorEquipo(idEquipo);
-            return File(bytes, "image/png");
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
     }
 
     // ── PREVENTIVO DIGITAL ────────────────────────────────
