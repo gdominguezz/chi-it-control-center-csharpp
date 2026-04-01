@@ -23,7 +23,7 @@ public class QrPageController : ControllerBase
                    CASE WHEN preventivo_digital IS NOT NULL THEN true ELSE false END AS tiene_pm,
                    anio_creacion
             FROM public.mantenimientos_preventivos
-            WHERE ubicacion = @u
+            WHERE TRIM(LOWER(ubicacion)) = TRIM(LOWER(@u))
             ORDER BY nombre_dispositivo
             """;
         cmd.Parameters.AddWithValue("u", ubicacion);
