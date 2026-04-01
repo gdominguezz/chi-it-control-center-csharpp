@@ -10,15 +10,10 @@ RUN dotnet publish -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 
-# Instalar fuentes para generación de QR con texto
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    fonts-liberation \
-    fontconfig \
-    && fc-cache -fv \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends fonts-liberation fontconfig && fc-cache -fv && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/publish .
 
 ENV ASPNETCORE_URLS=http://0.0.0.0:10000
 
-ENTRYPOINT ["dotnet", "ChiIT.Web.dll"]dotnet", "ChiIT.Web.dll"]
+ENTRYPOINT ["dotnet", "ChiIT.Web.dll"]
