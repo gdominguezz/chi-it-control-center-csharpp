@@ -17,16 +17,16 @@ public class AdminUsuariosPageController : ControllerBase
     {
         // Verificar que sea ADMIN
         var usr = Request.Cookies["usuario"] ?? usuario ?? "";
-        if (!string.IsNullOrWhiteSpace(usr))
-        {
-            using var conn = _db.Open();
-            using var chk = conn.CreateCommand();
-            chk.CommandText = "SELECT rol FROM public.usuarios WHERE usuario=@u AND activo=true";
-            chk.Parameters.AddWithValue("u", usr.ToUpper());
-            var rol = chk.ExecuteScalar()?.ToString();
-            if (rol != "ADMIN")
-                return Content(HtmlAccesoDenegado(), "text/html; charset=utf-8");
-        }
+        if (string.IsNullOrWhiteSpace(usr))
+            return Content(HtmlAccesoDenegado(), "text/html; charset=utf-8");
+
+        using var conn = _db.Open();
+        using var chk = conn.CreateCommand();
+        chk.CommandText = "SELECT rol FROM public.usuarios WHERE usuario=@u AND activo=true";
+        chk.Parameters.AddWithValue("u", usr.ToUpper());
+        var rol = chk.ExecuteScalar()?.ToString();
+        if (rol != "ADMIN")
+            return Content(HtmlAccesoDenegado(), "text/html; charset=utf-8");
 
         return Content(HtmlPage(), "text/html; charset=utf-8");
     }
