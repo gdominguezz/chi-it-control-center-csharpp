@@ -1098,106 +1098,95 @@
             gap: 10px;
         }
 
-        .tecnico-avatar {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1D4ED8, #8B5CF6);
+        /* ── SEMÁFORO DE SALUD ── */
+        .salud-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+            padding: 4px 0;
+        }
+
+        .salud-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .salud-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .salud-dot-label {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            box-shadow: 0 0 0 4px rgba(139,92,246,.3), 0 0 30px rgba(139,92,246,.4);
-            animation: pulseAvatar 2s infinite;
-            position: relative;
-        }
-
-            .tecnico-avatar::after {
-                content: '🏆';
-                position: absolute;
-                top: -8px;
-                right: -8px;
-                font-size: 22px;
-                animation: bounce 1s infinite alternate;
-            }
-
-        @keyframes pulseAvatar {
-            0%, 100% {
-                box-shadow: 0 0 0 4px rgba(139,92,246,.3), 0 0 30px rgba(139,92,246,.4);
-            }
-
-            50% {
-                box-shadow: 0 0 0 8px rgba(139,92,246,.15), 0 0 50px rgba(139,92,246,.6);
-            }
-        }
-
-        @keyframes bounce {
-            from {
-                transform: translateY(0);
-            }
-
-            to {
-                transform: translateY(-4px);
-            }
-        }
-
-        .tecnico-nombre {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text);
-            text-align: center;
-            letter-spacing: -.01em;
-        }
-
-        .tecnico-badge {
-            background: linear-gradient(135deg, rgba(139,92,246,.2), rgba(59,130,246,.2));
-            border: 1px solid rgba(139,92,246,.4);
-            border-radius: 999px;
-            padding: 4px 14px;
+            gap: 7px;
             font-size: 12px;
-            font-family: 'DM Mono', monospace;
-            color: #C4B5FD;
+            font-weight: 600;
+            color: var(--muted2);
         }
 
-        .tecnico-sub {
+        .salud-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .salud-pct {
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .salud-bar-track {
+            height: 8px;
+            background: rgba(255,255,255,.06);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .salud-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width .8s cubic-bezier(.4,0,.2,1);
+        }
+
+        .salud-count {
+            font-size: 10px;
+            color: var(--muted);
+            font-family: 'DM Mono', monospace;
+        }
+
+        .salud-score {
+            margin-top: 10px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .salud-score-num {
+            font-size: 36px;
+            font-weight: 700;
+            font-family: 'DM Mono', monospace;
+            line-height: 1;
+        }
+
+        .salud-score-label {
             font-size: 10px;
             color: var(--muted);
             text-transform: uppercase;
             letter-spacing: .1em;
         }
 
-        .tecnico-ranking {
-            width: 100%;
-            margin-top: 8px;
-        }
-
-        .tecnico-rank-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 5px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            margin-bottom: 4px;
-            background: rgba(255,255,255,.03);
-        }
-
-        .rank-pos {
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            color: var(--muted);
-            min-width: 18px;
-        }
-
-        .rank-nombre {
-            flex: 1;
-            color: var(--muted2);
-        }
-
-        .rank-total {
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            color: var(--accent);
+        .salud-score-emoji {
+            font-size: 22px;
+            margin-top: 2px;
         }
     </style>
 </head>
@@ -1460,9 +1449,9 @@
                         <canvas id="chart-meses" height="200"></canvas>
                     </div>
                 </div>
-                <div class="db-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
-                    <div class="db-card-header" style="width:100%">🏆 Técnico del Mes</div>
-                    <div class="db-card-body" style="width:100%" id="db-tecnico-mes"></div>
+                <div class="db-card">
+                    <div class="db-card-header">🚦 Salud del Parque</div>
+                    <div class="db-card-body" id="db-salud-parque"></div>
                 </div>
             </div>
 
@@ -1641,37 +1630,37 @@
                 const bg = rowBg(row.categoria_color);
                 const tdStyle = bg ? `style="background:${bg}"` : '';
                 tbody.innerHTML += `
-                    <tr>
-                      <td class="mono" ${tdStyle}>${row.id}</td>
-                      <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
-                      <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
-                      <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
-                      <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
-                      <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
-                      <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
-                      <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
-                      <td ${tdStyle}>
-                        ${row.tiene_pdf
+                        <tr>
+                          <td class="mono" ${tdStyle}>${row.id}</td>
+                          <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
+                          <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
+                          <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
+                          <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
+                          <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
+                          <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
+                          <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
+                          <td ${tdStyle}>
+                            ${row.tiene_pdf
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.id})">📄 Ver</button>
-                             <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
+                                 <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
                         : `<input type="file" onchange="subirPDF(${row.id},this)"
-                               style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
-                      </td>
-                      <td ${tdStyle} style="text-align:center;">
-                        <img src="/QR_EQUIPO/${row.id}"
-                             style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
-                             title="QR: ${row.id_equipo ?? row.id}"
-                             onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
-                             loading="lazy">
-                      </td>
-                      <td ${tdStyle} style="white-space:nowrap;">
-                        ${esAdmin ? `
-                        <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
-                        <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
-                        ` : ''}
-                        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
-                      </td>
-                    </tr>`;
+                                   style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
+                          </td>
+                          <td ${tdStyle} style="text-align:center;">
+                            <img src="/QR_EQUIPO/${row.id}"
+                                 style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
+                                 title="QR: ${row.id_equipo ?? row.id}"
+                                 onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
+                                 loading="lazy">
+                          </td>
+                          <td ${tdStyle} style="white-space:nowrap;">
+                            ${esAdmin ? `
+                            <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
+                            ` : ''}
+                            <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
+                          </td>
+                        </tr>`;
             });
             document.getElementById('paginaInfo').textContent =
                 `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite)} | Total: ${totalRegistros}`;
@@ -1790,27 +1779,27 @@
                 const vd = esc(despues?.[apiKey] ?? '');
                 const chg = cambiados.has(key);
                 filas += `
-                    <tr class="${chg ? 'row-changed' : ''}">
-                      <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                      <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                      <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                    </tr>`;
+                        <tr class="${chg ? 'row-changed' : ''}">
+                          <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                          <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                          <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                        </tr>`;
             });
             const n = cambiados.size;
             return `
-                  <div class="ev-wrap">
-                    <div class="ev-header">
-                      <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                      <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                      <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                        ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-                    <table class="ev-table">
-                      <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                      <tbody>${filas}</tbody>
-                    </table>
-                  </div>`;
+                      <div class="ev-wrap">
+                        <div class="ev-header">
+                          <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                          <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                          <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                            ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <table class="ev-table">
+                          <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                          <tbody>${filas}</tbody>
+                        </table>
+                      </div>`;
         }
 
         function verHistorial(id) {
@@ -1827,8 +1816,8 @@
                 } else {
                     document.getElementById('contenidoHistorial').innerHTML =
                         `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                          ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                        </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                              ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                            </p>`+ lista.map(ev => renderEvento(ev)).join('');
                 }
             }).catch(() => {
                 document.getElementById('contenidoHistorial').innerHTML =
@@ -1996,8 +1985,8 @@
                 }
             });
 
-            // ── Técnico del mes ──
-            renderTecnicoMes(data.tecnicos_mes);
+            // ── Salud del parque ──
+            renderSaludParque(data.kpis, data.proximos_mes);
 
             renderTabla('db-semana', data.esta_semana,
                 ['Equipo', 'Dispositivo', 'Ubicación', 'Fecha', 'Técnico'],
@@ -2010,60 +1999,89 @@
                 r => [r.id_equipo, r.dispositivo, r.ubicacion, r.planta, r.fecha, r.realizado_por || '—']);
         }
 
-        function renderTecnicoMes(tecnicos) {
-            const el = document.getElementById('db-tecnico-mes');
-            if (!tecnicos || !tecnicos.length) {
-                el.innerHTML = '<p class="db-empty">Sin registros este mes</p>';
-                return;
-            }
-            const top = tecnicos[0];
-            const resto = tecnicos.slice(1);
-            const medallas = ['🥈', '🥉', '4️⃣', '5️⃣'];
-            const rankingHtml = resto.map((t, i) => `
-                    <div class="tecnico-rank-item">
-                        <span class="rank-pos">${medallas[i] || (i + 2) + '°'}</span>
-                        <span class="rank-nombre">${t.tecnico}</span>
-                        <span class="rank-total">${t.total} PM</span>
-                    </div>`).join('');
+        function renderSaludParque(k, proximos) {
+            const el = document.getElementById('db-salud-parque');
+            if (!k) { el.innerHTML = '<p class="db-empty">Sin datos</p>'; return; }
+
+            const total = k.total || 1;
+            const vencidos = k.vencidos || 0;
+            const proximosMes = proximos ? proximos.filter(p => {
+                const dias = Math.ceil((new Date(p.plazo) - new Date()) / 86400000);
+                return dias >= 0 && dias <= 31;
+            }).length : 0;
+            const saludables = Math.max(0, total - vencidos - proximosMes);
+
+            const pVenc = Math.round(vencidos / total * 100);
+            const pProx = Math.round(proximosMes / total * 100);
+            const pSano = Math.round(saludables / total * 100);
+
+            // Score de salud: 100 - peso de vencidos y en riesgo
+            const score = Math.max(0, Math.round(100 - (vencidos / total * 60) - (proximosMes / total * 20)));
+            const emoji = score >= 80 ? '😊' : score >= 50 ? '😐' : '😟';
+            const scoreColor = score >= 80 ? '#10B981' : score >= 50 ? '#F59E0B' : '#EF4444';
 
             el.innerHTML = `
-                    <div class="tecnico-podio">
-                        <div class="tecnico-avatar">👷</div>
-                        <div class="tecnico-sub">Técnico del mes</div>
-                        <div class="tecnico-nombre">${top.tecnico}</div>
-                        <div class="tecnico-badge">${top.total} mantenimientos</div>
-                        ${resto.length ? `<div class="tecnico-ranking">${rankingHtml}</div>` : ''}
+                    <div class="salud-wrap">
+                        <div class="salud-item">
+                            <div class="salud-label-row">
+                                <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
+                                <span class="salud-pct" style="color:#10B981">${pSano}%</span>
+                            </div>
+                            <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
+                            <span class="salud-count">${saludables} equipos</span>
+                        </div>
+                        <div class="salud-item">
+                            <div class="salud-label-row">
+                                <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
+                                <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
+                            </div>
+                            <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
+                            <span class="salud-count">${proximosMes} equipos</span>
+                        </div>
+                        <div class="salud-item">
+                            <div class="salud-label-row">
+                                <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
+                                <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
+                            </div>
+                            <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
+                            <span class="salud-count">${vencidos} equipos</span>
+                        </div>
+                        <div class="salud-score">
+                            <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
+                            <div class="salud-score-label">Índice de salud</div>
+                            <div class="salud-score-emoji">${emoji}</div>
+                        </div>
                     </div>`;
         }
 
         function renderKpis(k) {
             document.getElementById('db-kpis').innerHTML = `
-                    <div class="kpi-card kpi-verde">
-                      <div class="kpi-label">Total Equipos</div>
-                      <div class="kpi-value">${k.total}</div>
-                      <div class="kpi-sub">registrados en el sistema</div>
-                    </div>
-                    <div class="kpi-card kpi-azul">
-                      <div class="kpi-label">Con PM Digital</div>
-                      <div class="kpi-value">${k.con_pm}</div>
-                      <div class="kpi-sub">${Math.round(k.con_pm / k.total * 100) || 0}% del total</div>
-                    </div>
-                    <div class="kpi-card kpi-amber">
-                      <div class="kpi-label">Sin PM Digital</div>
-                      <div class="kpi-value">${k.sin_pm}</div>
-                      <div class="kpi-sub">pendientes de atender</div>
-                    </div>
-                    <div class="kpi-card kpi-rojo">
-                      <div class="kpi-label">Vencidos</div>
-                      <div class="kpi-value">${k.vencidos}</div>
-                      <div class="kpi-sub">plazo ya pasó</div>
-                    </div>
-                    <div class="kpi-card kpi-purple">
-                      <div class="kpi-label">Esta Semana</div>
-                      <div class="kpi-value">${k.semana}</div>
-                      <div class="kpi-sub">mantenimientos realizados</div>
-                    </div>
-                  `;
+                        <div class="kpi-card kpi-verde">
+                          <div class="kpi-label">Total Equipos</div>
+                          <div class="kpi-value">${k.total}</div>
+                          <div class="kpi-sub">registrados en el sistema</div>
+                        </div>
+                        <div class="kpi-card kpi-azul">
+                          <div class="kpi-label">Con PM Digital</div>
+                          <div class="kpi-value">${k.con_pm}</div>
+                          <div class="kpi-sub">${Math.round(k.con_pm / k.total * 100) || 0}% del total</div>
+                        </div>
+                        <div class="kpi-card kpi-amber">
+                          <div class="kpi-label">Sin PM Digital</div>
+                          <div class="kpi-value">${k.sin_pm}</div>
+                          <div class="kpi-sub">pendientes de atender</div>
+                        </div>
+                        <div class="kpi-card kpi-rojo">
+                          <div class="kpi-label">Vencidos</div>
+                          <div class="kpi-value">${k.vencidos}</div>
+                          <div class="kpi-sub">plazo ya pasó</div>
+                        </div>
+                        <div class="kpi-card kpi-purple">
+                          <div class="kpi-label">Esta Semana</div>
+                          <div class="kpi-value">${k.semana}</div>
+                          <div class="kpi-sub">mantenimientos realizados</div>
+                        </div>
+                      `;
         }
 
         function colorFromCat(cat) {
@@ -2081,13 +2099,13 @@
             if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">Sin datos</p>'; return; }
             const max = Math.max(...data.map(valFn));
             document.getElementById(elId).innerHTML = data.map(d => `
-                    <div class="bar-wrap">
-                      <span class="bar-label">${labelFn(d)}</span>
-                      <div class="bar-track">
-                        <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
-                      </div>
-                      <span class="bar-count">${valFn(d)}</span>
-                    </div>`).join('');
+                        <div class="bar-wrap">
+                          <span class="bar-label">${labelFn(d)}</span>
+                          <div class="bar-track">
+                            <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
+                          </div>
+                          <span class="bar-count">${valFn(d)}</span>
+                        </div>`).join('');
         }
 
         function renderTabla(elId, data, headers, rowFn) {
@@ -2107,20 +2125,20 @@
                 const diasRestantes = Math.ceil((new Date(r.plazo) - new Date()) / 86400000);
                 const badge = `<span class="db-badge proximo-badge">En ${diasRestantes}d</span>`;
                 return `<tr>
-                      <td>${r.id_equipo || '—'}</td>
-                      <td>${r.dispositivo || '—'}</td>
-                      <td><b>${r.ubicacion || '—'}</b></td>
-                      <td>${r.planta || '—'}</td>
-                      <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
-                      <td>${r.ultimo_pm || 'Nunca'}</td>
-                      <td>${badge}</td>
-                    </tr>`;
+                          <td>${r.id_equipo || '—'}</td>
+                          <td>${r.dispositivo || '—'}</td>
+                          <td><b>${r.ubicacion || '—'}</b></td>
+                          <td>${r.planta || '—'}</td>
+                          <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
+                          <td>${r.ultimo_pm || 'Nunca'}</td>
+                          <td>${badge}</td>
+                        </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                      <tbody>${trs}</tbody>
-                    </table></div>`;
+                          <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                          <tbody>${trs}</tbody>
+                        </table></div>`;
         }
 
         function renderProximos(elId, data) {
@@ -2133,19 +2151,19 @@
                         ? `<span class="db-badge proximo-badge">Hoy</span>`
                         : `<span class="db-badge proximo-badge">En ${dias}d</span>`;
                 return `<tr>
-                      <td>${r.id_equipo || '—'}</td>
-                      <td>${r.dispositivo || '—'}</td>
-                      <td><b>${r.ubicacion || '—'}</b></td>
-                      <td>${r.planta || '—'}</td>
-                      <td>${r.plazo}</td>
-                      <td>${badge}</td>
-                    </tr>`;
+                          <td>${r.id_equipo || '—'}</td>
+                          <td>${r.dispositivo || '—'}</td>
+                          <td><b>${r.ubicacion || '—'}</b></td>
+                          <td>${r.planta || '—'}</td>
+                          <td>${r.plazo}</td>
+                          <td>${badge}</td>
+                        </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
-                      <tbody>${trs}</tbody>
-                    </table></div>`;
+                          <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
+                          <tbody>${trs}</tbody>
+                        </table></div>`;
         }
 
         function renderVencidos(elId, data) {
@@ -2153,20 +2171,20 @@
             const trs = data.map(r => {
                 const dias = Math.abs(Math.ceil((new Date(r.plazo) - new Date()) / 86400000));
                 return `<tr>
-                      <td>${r.id_equipo || '—'}</td>
-                      <td>${r.dispositivo || '—'}</td>
-                      <td><b>${r.ubicacion || '—'}</b></td>
-                      <td>${r.planta || '—'}</td>
-                      <td style="color:var(--red)">${r.plazo}</td>
-                      <td>${r.ultimo_pm || 'Nunca'}</td>
-                      <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
-                    </tr>`;
+                          <td>${r.id_equipo || '—'}</td>
+                          <td>${r.dispositivo || '—'}</td>
+                          <td><b>${r.ubicacion || '—'}</b></td>
+                          <td>${r.planta || '—'}</td>
+                          <td style="color:var(--red)">${r.plazo}</td>
+                          <td>${r.ultimo_pm || 'Nunca'}</td>
+                          <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
+                        </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                      <tbody>${trs}</tbody>
-                    </table></div>`;
+                          <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                          <tbody>${trs}</tbody>
+                        </table></div>`;
         }
 
     </script>
