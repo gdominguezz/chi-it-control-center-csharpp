@@ -658,6 +658,27 @@ public class PreventivoController : ControllerBase
         }
         catch (Exception ex) { return Ok(new { existe = false, error = ex.Message }); }
     }
+    //PREVENTIVO DIGITAL DE PERIODO 2
+    [HttpPost("PREVENTIVO/P2/{id:int}")]
+    public IActionResult GuardarP2(int id, [FromBody] JsonElement data)
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+
+        cmd.CommandText = """
+        UPDATE public.mantenimientos_preventivos
+        SET preventivo_digital_p2 = @json,
+            fecha_realizacion_p2 = NOW()
+        WHERE id = @id
+    """;
+
+        cmd.Parameters.AddWithValue("json", data.ToString());
+        cmd.Parameters.AddWithValue("id", id);
+
+        cmd.ExecuteNonQuery();
+
+        return Ok(new { ok = true });
+    }
 
     // ── GUARDAR PM INDIVIDUAL ─────────────────────────────
     [HttpPost("PREVENTIVO/GUARDAR_PM/{id:int}")]
