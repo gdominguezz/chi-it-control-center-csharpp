@@ -449,7 +449,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("  try{");
         sb.AppendLine("    const res=await fetch(url,{method,headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(body)});");
         sb.AppendLine("    const data=await res.json();");
-        sb.AppendLine("    if(data.ok){cerrarModal();toast(id?'Usuario actualizado':'Usuario creado correctamente',true);function toggleChipAdmin(){document.getElementById("userChipAdmin").classList.toggle("open");}document.addEventListener("click",e=>{const c=document.getElementById("userChipAdmin");if(c&&!c.contains(e.target))c.classList.remove("open");});async function cerrarSesionAdmin(){await fetch(" / LOGOUT",{method:"POST",credentials:"include"});window.location.href=" /static/ login.html";}fetch(" / obtener - usuario",{credentials:"include"}).then(r=>r.json()).then(d=>{if(!d||!d.usuario){window.location.href=" /static/ login.html";return;}document.getElementById("adminNombreChip").textContent=d.nombre||d.usuario;document.getElementById("adminDropNombre").textContent=d.nombre||d.usuario;document.getElementById("adminDropRol").textContent=d.rol||"ADMIN";}).catch(()=>{window.location.href=" /static/ login.html";});cargarUsuarios();}");
+        sb.AppendLine("    if(data.ok){cerrarModal();toast(id?'Usuario actualizado':'Usuario creado correctamente',true);cargarUsuarios();}");
         sb.AppendLine("    else{errEl.textContent=data.error||'Error desconocido';errEl.style.display='block';}");
         sb.AppendLine("  }catch(e){errEl.textContent='Error de conexión';errEl.style.display='block';}");
         sb.AppendLine("  btn.disabled=false;btn.textContent=id?'💾 Guardar Cambios':'💾 Crear Usuario';");
