@@ -27,6 +27,24 @@ public class PreventivoController : ControllerBase
         Directory.CreateDirectory(_pdfDir);
     }
 
+    // ── GET /PREVENTIVOS/UBICACIONES ─────────────────────
+    [HttpGet("PREVENTIVOS/UBICACIONES")]
+    public IActionResult ObtenerUbicaciones()
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT DISTINCT TRIM(ubicacion) AS ubicacion
+            FROM public.mantenimientos_preventivos
+            WHERE ubicacion IS NOT NULL AND TRIM(ubicacion) <> ''
+            ORDER BY ubicacion ASC
+            """;
+        var lista = new List<string>();
+        using var r = cmd.ExecuteReader();
+        while (r.Read()) lista.Add(r.GetString(0));
+        return Ok(new { ubicaciones = lista });
+    }
+
     // ── GET /PREVENTIVOS ─────────────────────────────────
     [HttpGet("PREVENTIVOS")]
     public IActionResult ObtenerPreventivos([FromQuery] FiltrosPreventivo f)

@@ -97,6 +97,49 @@
                 color: var(--muted2);
             }
 
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-topbar {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 13px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .btn-topbar-menu {
+            background: rgba(255,255,255,.07);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
+        }
+
+            .btn-topbar-menu:hover {
+                background: rgba(255,255,255,.12);
+                color: var(--text);
+            }
+
+        .btn-topbar-logout {
+            background: rgba(239,68,68,.12);
+            color: #FCA5A5;
+            border: 1px solid rgba(239,68,68,.25);
+        }
+
+            .btn-topbar-logout:hover {
+                background: rgba(239,68,68,.22);
+                color: #fff;
+            }
+
         /* ── MAIN LAYOUT ── */
         .main {
             max-width: 1400px;
@@ -1094,7 +1137,11 @@
             <h1>Mantenimientos Preventivos</h1>
             <p>S-Riko Automotive Hose de Chihuahua</p>
         </div>
-        <div class="user-chip">👤 <span id="usuarioDisplay">Cargando...</span></div>
+        <div class="topbar-actions">
+            <div class="user-chip">👤 <span id="usuarioDisplay">Cargando...</span></div>
+            <button class="btn-topbar btn-topbar-menu" onclick="window.location.href='/static/menu.html'">☰ Menú</button>
+            <button class="btn-topbar btn-topbar-logout" onclick="cerrarSesion()">⏻ Salir</button>
+        </div>
     </div>
 
     <div class="main">
@@ -1112,7 +1159,11 @@
                 <div class="panel-title">Nuevo registro</div>
                 <div class="form-grid">
                     <div class="field"><label>ID Equipo</label><input id="ID_EQUIPO" placeholder="Ej: EQ1234"></div>
-                    <div class="field"><label>Ubicación</label><input id="UBICACION" placeholder="Ej: LINEA #"></div>
+                    <div class="field">
+                        <label>Ubicación</label>
+                        <input id="UBICACION" placeholder="Ej: LINEA #" autocomplete="off" list="lista-ubicaciones">
+                        <datalist id="lista-ubicaciones"></datalist>
+                    </div>
                     <div class="field">
                         <label>Nombre Dispositivo</label>
                         <select id="nombre_dispositivo">
@@ -1263,7 +1314,11 @@
                 </div>
                 <div class="form-field"><label>ID Equipo</label><input type="text" id="e_ID_EQUIPO"></div>
                 <div class="form-field"><label>Nombre Dispositivo</label><input type="text" id="e_nombre_dispositivo"></div>
-                <div class="form-field"><label>Ubicación</label><input type="text" id="e_UBICACION"></div>
+                <div class="form-field">
+                    <label>Ubicación</label>
+                    <input type="text" id="e_UBICACION" autocomplete="off" list="lista-ubicaciones-edit">
+                    <datalist id="lista-ubicaciones-edit"></datalist>
+                </div>
                 <div class="form-field"><label>Planta</label><input type="text" id="e_PLANTA"></div>
                 <div class="form-field"><label>Categoría / Color</label><input type="text" id="e_CATEGORIA_COLOR"></div>
                 <div class="form-field"><label>Observaciones</label><input type="text" id="e_OBSERVACIONES"></div>
@@ -1394,23 +1449,45 @@
 
         // ═══ INIT ═══
         window.addEventListener('DOMContentLoaded', () => {
-            // Siempre obtener usuario Y rol desde el servidor (fuente de verdad)
+            // Verificar sesión — si no hay, redirigir al login
             fetch('/obtener-usuario', { credentials: 'include' })
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) { window.location.href = '/static/login.html'; return null; }
+                    return r.json();
+                })
                 .then(d => {
+                    if (!d) return;
+                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
                     usuarioActual = d.usuario || 'SISTEMA';
                     rolActual = (d.rol || '').trim().toUpperCase();
                     document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
                 })
                 .catch(() => {
-                    document.getElementById('usuarioDisplay').textContent = 'Sin sesión';
+                    window.location.href = '/static/login.html';
                 });
             // Conectar filtros con debounce
             document.querySelectorAll('.filter-row input').forEach(inp => {
                 inp.addEventListener('input', filtrar);
             });
+            cargarUbicaciones();
             cargar();
         });
+
+        // ═══ UBICACIONES AUTOCOMPLETADO ═══
+        async function cargarUbicaciones() {
+            try {
+                const res = await fetch('/PREVENTIVOS/UBICACIONES');
+                const data = await res.json();
+                const ids = ['lista-ubicaciones', 'lista-ubicaciones-edit'];
+                ids.forEach(id => {
+                    const dl = document.getElementById(id);
+                    if (!dl) return;
+                    dl.innerHTML = data.ubicaciones
+                        .map(u => `<option value="${u}">`)
+                        .join('');
+                });
+            } catch (e) { console.warn('No se pudieron cargar ubicaciones', e); }
+        }
 
         // ═══ CARGA ═══
         let _debounceTimer = null;
@@ -1672,6 +1749,10 @@
                 document.getElementById('contenidoHistorial').innerHTML =
                     '<p style="color:var(--red);text-align:center;padding:30px">Error al cargar historial</p>';
             });
+        }
+        function cerrarSesion() {
+            fetch('/LOGOUT', { method: 'POST', credentials: 'include' })
+                .finally(() => { window.location.href = '/static/login.html'; });
         }
         function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
 
