@@ -91,54 +91,127 @@
             border: 1px solid var(--border2);
             font-size: 12px;
             font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background .2s, border-color .2s;
         }
+
+            .user-chip:hover {
+                background: rgba(255,255,255,.1);
+                border-color: var(--accent);
+            }
 
             .user-chip span {
                 color: var(--muted2);
             }
 
+            .user-chip .chip-arrow {
+                font-size: 9px;
+                color: var(--muted);
+                transition: transform .2s;
+            }
+
+            .user-chip.open .chip-arrow {
+                transform: rotate(180deg);
+            }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
+
+            .dropdown-header .d-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            .dropdown-header .d-role {
+                font-size: 10px;
+                color: var(--muted);
+                font-family: 'DM Mono', monospace;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                margin-top: 2px;
+            }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: background .15s, color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: var(--text);
+            }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        .dropdown-sep {
+            height: 1px;
+            background: var(--border);
+            margin: 6px 0;
+        }
+
         .topbar-actions {
             display: flex;
             align-items: center;
             gap: 8px;
+            position: relative;
         }
-
-        .btn-topbar {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 7px 13px;
-            border: none;
-            border-radius: 8px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all .2s;
-            white-space: nowrap;
-        }
-
-        .btn-topbar-menu {
-            background: rgba(255,255,255,.07);
-            color: var(--muted2);
-            border: 1px solid var(--border2);
-        }
-
-            .btn-topbar-menu:hover {
-                background: rgba(255,255,255,.12);
-                color: var(--text);
-            }
-
-        .btn-topbar-logout {
-            background: rgba(239,68,68,.12);
-            color: #FCA5A5;
-            border: 1px solid rgba(239,68,68,.25);
-        }
-
-            .btn-topbar-logout:hover {
-                background: rgba(239,68,68,.22);
-                color: #fff;
-            }
 
         /* ── MAIN LAYOUT ── */
         .main {
@@ -1138,9 +1211,19 @@
             <p>S-Riko Automotive Hose de Chihuahua</p>
         </div>
         <div class="topbar-actions">
-            <div class="user-chip">👤 <span id="usuarioDisplay">Cargando...</span></div>
-            <button class="btn-topbar btn-topbar-menu" onclick="window.location.href='/static/menu.html'">☰ Menú</button>
-            <button class="btn-topbar btn-topbar-logout" onclick="cerrarSesion()">⏻ Salir</button>
+            <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
+                👤 <span id="usuarioDisplay">Cargando...</span>
+                <span class="chip-arrow">▼</span>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name" id="dropdownNombre">—</div>
+                        <div class="d-role" id="dropdownRol">—</div>
+                    </div>
+                    <button class="dropdown-item" onclick="window.location.href='/static/menu.html'">☰ &nbsp;Menú principal</button>
+                    <div class="dropdown-sep"></div>
+                    <button class="dropdown-item danger" onclick="cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1461,6 +1544,8 @@
                     usuarioActual = d.usuario || 'SISTEMA';
                     rolActual = (d.rol || '').trim().toUpperCase();
                     document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownRol').textContent = rolActual;
                 })
                 .catch(() => {
                     window.location.href = '/static/login.html';
@@ -1750,6 +1835,13 @@
                     '<p style="color:var(--red);text-align:center;padding:30px">Error al cargar historial</p>';
             });
         }
+        function toggleDropdown() {
+            document.getElementById('userChipMain').classList.toggle('open');
+        }
+        document.addEventListener('click', e => {
+            const chip = document.getElementById('userChipMain');
+            if (chip && !chip.contains(e.target)) chip.classList.remove('open');
+        });
         function cerrarSesion() {
             fetch('/LOGOUT', { method: 'POST', credentials: 'include' })
                 .finally(() => { window.location.href = '/static/login.html'; });

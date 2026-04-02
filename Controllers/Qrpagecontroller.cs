@@ -51,8 +51,11 @@ public class QrPageController : ControllerBase
             var icon = DispIcon(row.dispositivo);
             var fechaStr = row.fecha ?? "Sin registro";
             var plazoStr = row.plazo ?? "No definido";
-            var dotClass = row.fecha != null ? "dot-ok" : "dot-warn";
-            var dotLabel = row.fecha != null ? "Último PM: " + fechaStr : "Sin mantenimiento registrado";
+            // Mostrar "Último PM" solo si hay preventivo_digital registrado
+            var dotClass = row.tienePm ? "dot-ok" : "dot-warn";
+            var dotLabel = row.tienePm
+                ? "Último PM: " + fechaStr
+                : "Sin mantenimiento registrado";
             var actsHtml = ActsHtml(row.dispositivo);
 
             // Siempre generar los 4 botones — todos ocultos, se muestran al login segun estado

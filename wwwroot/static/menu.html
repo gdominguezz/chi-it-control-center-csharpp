@@ -123,20 +123,159 @@
             color: #94a3b8;
         }
 
-            .top-bar span {
-                color: #e2e8f0;
-                font-weight: bold;
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.13);
+            font-size: 12px;
+            font-weight: 600;
+            color: #94A3B8;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background .2s, border-color .2s;
+        }
+
+            .user-chip:hover {
+                background: rgba(255,255,255,.12);
+                border-color: #3B82F6;
             }
+
+        .chip-arrow {
+            font-size: 9px;
+            color: #64748B;
+            transition: transform .2s;
+        }
+
+        .user-chip.open .chip-arrow {
+            transform: rotate(180deg);
+        }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 210px;
+            background: #111827;
+            border: 1px solid rgba(255,255,255,.13);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.6);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid rgba(255,255,255,.07);
+            margin-bottom: 6px;
+        }
+
+        .d-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #F1F5F9;
+        }
+
+        .d-role {
+            font-size: 10px;
+            color: #64748B;
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-top: 2px;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: #94A3B8;
+            transition: background .15s, color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: Arial, sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: #F1F5F9;
+            }
+
+            .dropdown-item.admin-item {
+                color: #C4B5FD;
+            }
+
+                .dropdown-item.admin-item:hover {
+                    background: rgba(139,92,246,.1);
+                    color: #fff;
+                }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        .dropdown-sep {
+            height: 1px;
+            background: rgba(255,255,255,.07);
+            margin: 6px 0;
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- Barra superior con usuario y cerrar sesión -->
+    <!-- Barra superior con dropdown de usuario -->
     <div class="top-bar">
-        Bienvenido, <span id="nombreUsuario"></span>
-        <button class="admin-btn" id="btnAdmin" onclick="window.location.href='/admin/usuarios'">⚙️ Administración</button>
-        <button class="logout" onclick="cerrarSesion()">Cerrar sesión</button>
+        <div class="user-chip" id="menuUserChip" onclick="toggleChipMenu()">
+            👤 <span id="nombreUsuario">Cargando...</span>
+            <span class="chip-arrow">▼</span>
+            <div class="user-dropdown">
+                <div class="dropdown-header">
+                    <div class="d-name" id="menuDropNombre">—</div>
+                    <div class="d-role" id="menuDropRol">—</div>
+                </div>
+                <button class="dropdown-item admin-item" id="btnAdmin" style="display:none"
+                        onclick="window.location.href='/admin/usuarios'">
+                    ⚙️ &nbsp;Administración
+                </button>
+                <div class="dropdown-sep" id="adminSep" style="display:none"></div>
+                <button class="dropdown-item danger" onclick="cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
+            </div>
+        </div>
     </div>
 
     <div class="container">
@@ -223,7 +362,14 @@
     </div>
 
     <script>
-        // ── Verificar sesión con cookie HTTP (server-side) ──────────────
+        function toggleChipMenu() {
+            document.getElementById('menuUserChip').classList.toggle('open');
+        }
+        document.addEventListener('click', e => {
+            const chip = document.getElementById('menuUserChip');
+            if (chip && !chip.contains(e.target)) chip.classList.remove('open');
+        });
+
         async function verificarSesion() {
             try {
                 const res = await fetch("/obtener-usuario", { credentials: "include" });
@@ -232,15 +378,15 @@
                 const data = await res.json();
                 if (!data.usuario) { window.location.href = "/static/login.html"; return; }
 
-                // Mostrar nombre — preferir sessionStorage (más actualizado), fallback al servidor
-                const nombreGuardado = sessionStorage.getItem('nombre');
-                document.getElementById('nombreUsuario').textContent = nombreGuardado || data.nombre || data.usuario;
+                const nombre = data.nombre || data.usuario;
+                document.getElementById('nombreUsuario').textContent = nombre;
+                document.getElementById('menuDropNombre').textContent = nombre;
+                document.getElementById('menuDropRol').textContent = data.rol || 'USER';
 
-                // Mostrar botón admin según rol devuelto por el servidor (fuente de verdad)
                 if (data.rol === 'ADMIN') {
-                    document.getElementById('btnAdmin').style.display = 'inline-flex';
+                    document.getElementById('btnAdmin').style.display = 'flex';
+                    document.getElementById('adminSep').style.display = 'block';
                 }
-
             } catch {
                 window.location.href = "/static/login.html";
             }
@@ -248,7 +394,6 @@
 
         verificarSesion();
 
-        // ── Cerrar sesión — eliminar cookie en servidor + limpiar storage ──
         async function cerrarSesion() {
             try { await fetch("/LOGOUT", { method: "POST", credentials: "include" }); } catch { }
             sessionStorage.clear();

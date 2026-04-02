@@ -1,5 +1,7 @@
 ﻿using ChiIT.Data;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
+using SixLabors.ImageSharp.Drawing.Processing;
 using System.Text;
 
 namespace ChiIT.Controllers;
@@ -58,7 +60,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine(".top-bar{background:linear-gradient(135deg,#0a1628,#080C14);border-bottom:1px solid var(--border2);padding:14px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);}");
         sb.AppendLine(".top-icon{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#1D4ED8,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0;box-shadow:0 4px 14px rgba(59,130,246,.35);}");
         sb.AppendLine(".top-title{flex:1;}.top-title h1{font-size:16px;font-weight:700;letter-spacing:-.01em;}.top-title p{font-size:11px;color:var(--muted2);margin-top:2px;}");
-        sb.AppendLine(".top-actions{display:flex;gap:8px;align-items:center;}");
+        sb.AppendLine(".top-actions{display:flex;gap:8px;align-items:center;position:relative;}.user-chip{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);font-size:12px;font-weight:600;color:#94A3B8;cursor:pointer;position:relative;user-select:none;transition:background .2s,border-color .2s;}.user-chip:hover{background:rgba(255,255,255,.12);border-color:#3B82F6;}.chip-arrow{font-size:9px;color:#64748B;transition:transform .2s;}.user-chip.open .chip-arrow{transform:rotate(180deg);}.user-dropdown{display:none;position:absolute;top:calc(100% + 10px);right:0;min-width:210px;background:#111827;border:1px solid rgba(255,255,255,.13);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.6);padding:8px;z-index:999;animation:dropIn .15s ease;}@keyframes dropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}.user-chip.open .user-dropdown{display:block;}.dropdown-header{padding:10px 12px 8px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:6px;}.d-name{font-size:13px;font-weight:700;color:#F1F5F9;}.d-role{font-size:10px;color:#64748B;font-family:monospace;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}.dropdown-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;color:#94A3B8;transition:background .15s,color .15s;border:none;background:none;width:100%;text-align:left;font-family:inherit;}.dropdown-item:hover{background:rgba(255,255,255,.06);color:#F1F5F9;}.dropdown-item.danger{color:#FCA5A5;}.dropdown-item.danger:hover{background:rgba(239,68,68,.1);color:#fff;}.dropdown-sep{height:1px;background:rgba(255,255,255,.07);margin:6px 0;}");
 
         // ── Botones ────────────────────────────────────────────────────────
         sb.AppendLine("@keyframes pop{0%{transform:scale(1)}30%{transform:scale(.88)}65%{transform:scale(1.08)}100%{transform:scale(1)}}");
@@ -447,7 +449,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("  try{");
         sb.AppendLine("    const res=await fetch(url,{method,headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(body)});");
         sb.AppendLine("    const data=await res.json();");
-        sb.AppendLine("    if(data.ok){cerrarModal();toast(id?'Usuario actualizado':'Usuario creado correctamente',true);cargarUsuarios();}");
+        sb.AppendLine("    if(data.ok){cerrarModal();toast(id?'Usuario actualizado':'Usuario creado correctamente',true);function toggleChipAdmin(){document.getElementById("userChipAdmin").classList.toggle("open");}document.addEventListener("click",e=>{const c=document.getElementById("userChipAdmin");if(c&&!c.contains(e.target))c.classList.remove("open");});async function cerrarSesionAdmin(){await fetch(" / LOGOUT",{method:"POST",credentials:"include"});window.location.href=" /static/ login.html";}fetch(" / obtener - usuario",{credentials:"include"}).then(r=>r.json()).then(d=>{if(!d||!d.usuario){window.location.href=" /static/ login.html";return;}document.getElementById("adminNombreChip").textContent=d.nombre||d.usuario;document.getElementById("adminDropNombre").textContent=d.nombre||d.usuario;document.getElementById("adminDropRol").textContent=d.rol||"ADMIN";}).catch(()=>{window.location.href=" /static/ login.html";});cargarUsuarios();}");
         sb.AppendLine("    else{errEl.textContent=data.error||'Error desconocido';errEl.style.display='block';}");
         sb.AppendLine("  }catch(e){errEl.textContent='Error de conexión';errEl.style.display='block';}");
         sb.AppendLine("  btn.disabled=false;btn.textContent=id?'💾 Guardar Cambios':'💾 Crear Usuario';");
@@ -465,7 +467,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("    async()=>{");
         sb.AppendLine("      const res=await fetch(`/admin/usuarios/api/${id}/estado`,{method:'PATCH',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify({activo:!activo})});");
         sb.AppendLine("      const data=await res.json();");
-        sb.AppendLine("      if(data.ok){toast(`Usuario ${accion==='activar'?'activado':'desactivado'}`,true);document.getElementById('filtroActivo').value='';cargarUsuarios();}");
+        sb.AppendLine("      if(data.ok){toast(`Usuario ${accion==='activar'?'activado':'desactivado'}`,true);document.getElementById('filtroActivo').value='';function toggleChipAdmin(){document.getElementById("userChipAdmin").classList.toggle("open");}document.addEventListener("click",e=>{const c=document.getElementById("userChipAdmin");if(c&&!c.contains(e.target))c.classList.remove("open");});async function cerrarSesionAdmin(){await fetch(" / LOGOUT",{method:"POST",credentials:"include"});window.location.href=" /static/ login.html";}fetch(" / obtener - usuario",{credentials:"include"}).then(r=>r.json()).then(d=>{if(!d||!d.usuario){window.location.href=" /static/ login.html";return;}document.getElementById("adminNombreChip").textContent=d.nombre||d.usuario;document.getElementById("adminDropNombre").textContent=d.nombre||d.usuario;document.getElementById("adminDropRol").textContent=d.rol||"ADMIN";}).catch(()=>{window.location.href=" /static/ login.html";});cargarUsuarios();}");
         sb.AppendLine("      else toast('Error: '+(data.error||'desconocido'),false);");
         sb.AppendLine("    }");
         sb.AppendLine("  );");
@@ -504,7 +506,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("  if(pwd!==pwd2){errEl.textContent='Las contraseñas no coinciden';errEl.style.display='block';return;}");
         sb.AppendLine("  const res=await fetch(`/admin/usuarios/api/${id}/reset-password`,{method:'PATCH',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify({password:pwd})});");
         sb.AppendLine("  const data=await res.json();");
-        sb.AppendLine("  if(data.ok){cerrarReset();toast('Contraseña restablecida',true);cargarUsuarios();}");
+        sb.AppendLine("  if(data.ok){cerrarReset();toast('Contraseña restablecida',true);function toggleChipAdmin(){document.getElementById("userChipAdmin").classList.toggle("open");}document.addEventListener("click",e=>{const c=document.getElementById("userChipAdmin");if(c&&!c.contains(e.target))c.classList.remove("open");});async function cerrarSesionAdmin(){await fetch(" / LOGOUT",{method:"POST",credentials:"include"});window.location.href=" /static/ login.html";}fetch(" / obtener - usuario",{credentials:"include"}).then(r=>r.json()).then(d=>{if(!d||!d.usuario){window.location.href=" /static/ login.html";return;}document.getElementById("adminNombreChip").textContent=d.nombre||d.usuario;document.getElementById("adminDropNombre").textContent=d.nombre||d.usuario;document.getElementById("adminDropRol").textContent=d.rol||"ADMIN";}).catch(()=>{window.location.href=" /static/ login.html";});cargarUsuarios();}");
         sb.AppendLine("  else{errEl.textContent=data.error||'Error';errEl.style.display='block';}");
         sb.AppendLine("}");
 
@@ -518,7 +520,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("document.addEventListener('keydown',e=>{if(e.key==='Escape'){cerrarModal();cerrarConfirm();cerrarReset();}});");
 
         // Init
-        sb.AppendLine("cargarUsuarios();");
+        sb.AppendLine("function toggleChipAdmin(){document.getElementById("userChipAdmin").classList.toggle("open");}document.addEventListener("click",e=>{const c=document.getElementById("userChipAdmin");if(c&&!c.contains(e.target))c.classList.remove("open");});async function cerrarSesionAdmin(){await fetch(" / LOGOUT",{method:"POST",credentials:"include"});window.location.href=" /static/ login.html";}fetch(" / obtener - usuario",{credentials:"include"}).then(r=>r.json()).then(d=>{if(!d||!d.usuario){window.location.href=" /static/ login.html";return;}document.getElementById("adminNombreChip").textContent=d.nombre||d.usuario;document.getElementById("adminDropNombre").textContent=d.nombre||d.usuario;document.getElementById("adminDropRol").textContent=d.rol||"ADMIN";}).catch(()=>{window.location.href=" /static/ login.html";});cargarUsuarios();");
         sb.AppendLine("</script></body></html>");
 
         return sb.ToString();
