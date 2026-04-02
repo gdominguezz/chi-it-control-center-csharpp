@@ -21,7 +21,8 @@ public class QrPageController : ControllerBase
             SELECT id, id_equipo, nombre_dispositivo, planta,
                    categoria_color, fecha_realizacion, plazo, observaciones,
                    CASE WHEN preventivo_digital IS NOT NULL THEN true ELSE false END AS tiene_pm,
-                   anio_creacion
+                   anio_creacion,
+                   CASE WHEN preventivo_digital_p2 IS NOT NULL THEN true ELSE false END AS tiene_pm2
             FROM public.mantenimientos_preventivos
             WHERE TRIM(LOWER(ubicacion)) = TRIM(LOWER(@u))
             ORDER BY nombre_dispositivo
@@ -29,7 +30,7 @@ public class QrPageController : ControllerBase
         cmd.Parameters.AddWithValue("u", ubicacion);
 
         var rows = new List<(long id, string idEquipo, string dispositivo, string planta,
-                             string colorCat, string? fecha, string? plazo, string obs, bool tienePm, int? anio)>();
+                             string colorCat, string? fecha, string? plazo, string obs, bool tienePm, int? anio, bool tienePm2)>();
 
         using var r = cmd.ExecuteReader();
         while (r.Read())
@@ -42,7 +43,8 @@ public class QrPageController : ControllerBase
                       r.IsDBNull(6) ? null : r.GetString(6),
                       r.IsDBNull(7) ? "" : r.GetString(7),
                       !r.IsDBNull(8) && r.GetBoolean(8),
-                      r.IsDBNull(9) ? (int?)null : r.GetInt32(9)));
+                      r.IsDBNull(9) ? (int?)null : r.GetInt32(9),
+                      !r.IsDBNull(10) && r.GetBoolean(10)));
 
         var cards = new StringBuilder();
         foreach (var row in rows)
@@ -54,19 +56,25 @@ public class QrPageController : ControllerBase
             // Mostrar "Último PM" solo si hay preventivo_digital registrado
             var dotClass = row.tienePm ? "dot-ok" : "dot-warn";
             var dotLabel = row.tienePm
-                ? "Último PM: " + fechaStr
-                : "Sin mantenimiento registrado";
+                ? "Último PM P1: " + fechaStr
+                : "P1: Sin registro · P2: Sin registro";
             var actsHtml = ActsHtml(row.dispositivo);
 
             // Siempre generar los 4 botones — todos ocultos, se muestran al login segun estado
             string btnPm =
-                "<button class=\"pm-btn btn-pm btn btn-purple\" id=\"btn_hacer_" + row.id + "\" onclick=\"abrirForm(" + row.id + ")\" style=\"display:none\">📋 Hacer Preventivo</button>\n" +
-                "<button class=\"pm-btn btn-ver btn btn-cyan\"   id=\"btn_ver_" + row.id + "\" onclick=\"verPM(" + row.id + ")\" style=\"display:none\">👁 Ver PM</button>\n" +
-                "<button class=\"pm-btn btn-edit btn btn-amber\"  id=\"btn_edit_" + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ")\" style=\"display:none\">✏️ Editar PM</button>\n" +
-                "<button class=\"pm-btn btn-del btn btn-danger\" id=\"btn_del_" + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ")\" style=\"display:none\">🗑 Eliminar</button>";
+                // ── Período 1 ──
+                "<button class=\"pm-btn btn-pm btn-p1 btn btn-purple\" id=\"btn_hacer1_" + row.id + "\" onclick=\"abrirForm(" + row.id + ",1)\" style=\"display:none\">📋 P1</button>\n" +
+                "<button class=\"pm-btn btn-ver btn-ver1 btn btn-cyan\" id=\"btn_ver1_" + row.id + "\" onclick=\"verPM(" + row.id + ",1)\" style=\"display:none\">👁 Ver P1</button>\n" +
+                "<button class=\"pm-btn btn-edit btn-edit1 btn btn-amber\" id=\"btn_edit1_" + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ",1)\" style=\"display:none\">✏️ P1</button>\n" +
+                "<button class=\"pm-btn btn-del btn-del1 btn btn-danger\" id=\"btn_del1_" + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ",1)\" style=\"display:none\">🗑 P1</button>\n" +
+                // ── Período 2 ──
+                "<button class=\"pm-btn btn-pm btn-p2 btn btn-purple\" id=\"btn_hacer2_" + row.id + "\" onclick=\"abrirForm(" + row.id + ",2)\" style=\"display:none\">📋 P2</button>\n" +
+                "<button class=\"pm-btn btn-ver btn-ver2 btn btn-cyan\" id=\"btn_ver2_" + row.id + "\" onclick=\"verPM(" + row.id + ",2)\" style=\"display:none\">👁 Ver P2</button>\n" +
+                "<button class=\"pm-btn btn-edit btn-edit2 btn btn-amber\" id=\"btn_edit2_" + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ",2)\" style=\"display:none\">✏️ P2</button>\n" +
+                "<button class=\"pm-btn btn-del btn-del2 btn btn-danger\" id=\"btn_del2_" + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ",2)\" style=\"display:none\">🗑 P2</button>";
             bool tienePmFlag = row.tienePm;
 
-            cards.Append("<div class=\"card\" data-tiene-pm=\"" + (row.tienePm ? "true" : "false") + "\">\n");
+            cards.Append("<div class=\"card\" data-tiene-pm=\"" + (row.tienePm ? "true" : "false") + "\" data-tiene-pm2=\"" + (row.tienePm2 ? "true" : "false") + "\">\n");
             cards.Append("  <input type=\"hidden\" id=\"ubicacion_" + row.id + "\" value=\"" + Esc(ubicacion) + "\">\n");
             cards.Append("  <input type=\"hidden\" id=\"anio_" + row.id + "\" value=\"" + (row.anio?.ToString() ?? "") + "\">\n");  // kept for legacy
             cards.Append("  <div class=\"card-top\">\n");
@@ -78,54 +86,123 @@ public class QrPageController : ControllerBase
             cards.Append("  <div class=\"card-body\">\n");
             cards.Append("    <div class=\"info-row\">\n");
             cards.Append("      <div class=\"info-item\"><label>ID Equipo</label><input id=\"equipo_" + row.id + "\" value=\"" + Esc(row.idEquipo) + "\" disabled></div>\n");
-            cards.Append("      <div class=\"info-item\"><label>Dispositivo</label><input id=\"disp_" + row.id + "\" value=\"" + Esc(row.dispositivo) + "\" disabled></div>\n");
-            cards.Append("      <div class=\"info-item\"><label>Planta</label><input id=\"planta_" + row.id + "\" value=\"" + Esc(row.planta) + "\" disabled></div>\n");
-            cards.Append("      <div class=\"info-item\"><label>Color</label><input id=\"color_" + row.id + "\" value=\"" + Esc(row.colorCat) + "\" disabled></div>\n");
-            cards.Append("      <div class=\"info-item\"><label>Año Creación</label><input id=\"anio_vis_" + row.id + "\" value=\"" + (row.anio?.ToString() ?? "") + "\" disabled></div>\n");
+            cards.Append("      <div class=\"info-item\"><label>Dispositivo</label>" +
+                "<select id=\"disp_" + row.id + "\" disabled>" +
+                "<option value=\"COMPUTADORA DE ESCRITORIO\"" + (row.dispositivo == "COMPUTADORA DE ESCRITORIO" ? " selected" : "") + ">🖥️ Computadora de Escritorio</option>" +
+                "<option value=\"LAPTOP\"" + (row.dispositivo == "LAPTOP" ? " selected" : "") + ">💻 Laptop</option>" +
+                "<option value=\"IMPRESORA TERMICA\"" + (row.dispositivo == "IMPRESORA TERMICA" ? " selected" : "") + ">🖨️ Impresora Térmica</option>" +
+                "<option value=\"UPS\"" + (row.dispositivo == "UPS" ? " selected" : "") + ">🔋 UPS</option>" +
+                "</select></div>\n");
+            cards.Append("      <div class=\"info-item\"><label>Planta</label>" +
+                "<select id=\"planta_" + row.id + "\" disabled>" +
+                "<option value=\"B1\"" + (row.planta == "B1" ? " selected" : "") + ">B1</option>" +
+                "<option value=\"B2\"" + (row.planta == "B2" ? " selected" : "") + ">B2</option>" +
+                "<option value=\"PLANTA SATELITE\"" + (row.planta == "PLANTA SATELITE" ? " selected" : "") + ">Planta Satélite</option>" +
+                "<option value=\"BODEGA\"" + (row.planta == "BODEGA" ? " selected" : "") + ">Bodega</option>" +
+                "<option value=\"PLANTA MIXING\"" + (row.planta == "PLANTA MIXING" ? " selected" : "") + ">Planta Mixing</option>" +
+                "</select></div>\n");
+            cards.Append("      <div class=\"info-item\"><label>Color</label>" +
+                "<select id=\"color_" + row.id + "\" disabled>" +
+                "<option value=\"Verde\"" + (row.colorCat.ToLower().Contains("verde") ? " selected" : "") + ">🟢 Verde</option>" +
+                "<option value=\"Gris\"" + (row.colorCat.ToLower().Contains("gris") ? " selected" : "") + ">⚫ Gris</option>" +
+                "<option value=\"Azul\"" + (row.colorCat.ToLower().Contains("azul") ? " selected" : "") + ">🔵 Azul</option>" +
+                "<option value=\"Rojo\"" + (row.colorCat.ToLower().Contains("rojo") ? " selected" : "") + ">🔴 Rojo</option>" +
+                "<option value=\"Amarillo\"" + (row.colorCat.ToLower().Contains("amarillo") ? " selected" : "") + ">🟡 Amarillo</option>" +
+                "<option value=\"Rosa\"" + (row.colorCat.ToLower().Contains("rosa") ? " selected" : "") + ">🩷 Rosa</option>" +
+                "</select></div>\n");
+            cards.Append("      <div class=\"info-item\"><label>Año Creación</label>" +
+                "<select id=\"anio_vis_" + row.id + "\" disabled>" +
+                "<option value=\"\">--</option>" +
+                "<option value=\"2022\"" + (row.anio == 2022 ? " selected" : "") + ">2022</option>" +
+                "<option value=\"2023\"" + (row.anio == 2023 ? " selected" : "") + ">2023</option>" +
+                "<option value=\"2024\"" + (row.anio == 2024 ? " selected" : "") + ">2024</option>" +
+                "<option value=\"2025\"" + (row.anio == 2025 ? " selected" : "") + ">2025</option>" +
+                "<option value=\"2026\"" + (row.anio == 2026 ? " selected" : "") + ">2026</option>" +
+                "<option value=\"2027\"" + (row.anio == 2027 ? " selected" : "") + ">2027</option>" +
+                "</select></div>\n");
             cards.Append("    </div>\n");
             cards.Append("    <div class=\"status-row\">\n");
             cards.Append("      <span class=\"status-dot " + dotClass + "\"></span>\n");
             cards.Append("      <span>" + dotLabel + "</span>\n");
             cards.Append("      <span style=\"margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#475569\">Plazo: " + plazoStr + "</span>\n");
             cards.Append("    </div>\n");
+            cards.Append("    <div class=\"periodos-estado\">\n");
+            cards.Append("      <span class=\"periodo-badge " + (row.tienePm ? "periodo-ok" : "periodo-pend") + "\" id=\"pbadge1_" + row.id + "\">📋 P1: " + (row.tienePm ? "✅ Registrado" : "⏳ Pendiente") + "</span>\n");
+            cards.Append("      <span class=\"periodo-badge " + (row.tienePm2 ? "periodo-ok" : "periodo-pend") + "\" id=\"pbadge2_" + row.id + "\">📋 P2: " + (row.tienePm2 ? "✅ Registrado" : "⏳ Pendiente") + "</span>\n");
+            cards.Append("    </div>\n");
             cards.Append("    <div id=\"obswrap_" + row.id + "\" style=\"display:block;margin-top:10px\">\n");
             cards.Append("      <div class=\"obs-label\">Observaciones</div>\n");
             cards.Append("      <textarea class=\"obs-edit-field\" id=\"obs_" + row.id + "\" disabled>" + Esc(row.obs) + "</textarea>\n");
             cards.Append("    </div>\n");
-            cards.Append("    <div class=\"mini-form\" id=\"form_" + row.id + "\" style=\"display:none\">\n");
-            cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px\">📋 Actividades</div>\n");
+            cards.Append("    <div class=\"mini-form\" id=\"form1_" + row.id + "\" style=\"display:none\">\n");
+            cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px\">📋 Período 1 — Actividades</div>\n");
             cards.Append("      <div class=\"acts-list\">" + actsHtml + "</div>\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
-            cards.Append("      <input type=\"date\" class=\"date-input\" id=\"fecha_" + row.id + "\">\n");
+            cards.Append("      <input type=\"date\" class=\"date-input\" id=\"fecha1_" + row.id + "\">\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
-            cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm_" + row.id + "\" placeholder=\"Observaciones...\"></textarea>\n");
+            cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm1_" + row.id + "\" placeholder=\"Observaciones P1...\"></textarea>\n");
             cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
-            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cancelarForm(" + row.id + ")\">✕ Cancelar</button>\n");
-            cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ")\">💾 Guardar</button>\n");
+            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cancelarForm(" + row.id + ",1)\">✕ Cancelar</button>\n");
+            cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ",1)\">💾 Guardar P1</button>\n");
             cards.Append("      </div>\n    </div>\n");
-            cards.Append("    <div class=\"mini-form\" id=\"ver_" + row.id + "\" style=\"display:none\">\n");
-            cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:#06B6D4\">👁 Preventivo registrado</div>\n");
-            cards.Append("      <div class=\"acts-list\" id=\"ver_acts_" + row.id + "\" style=\"max-height:180px;overflow-y:auto\"></div>\n");
+            cards.Append("    <div class=\"mini-form\" id=\"ver1_" + row.id + "\" style=\"display:none\">\n");
+            cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:#06B6D4\">👁 Período 1 — Registrado</div>\n");
+            cards.Append("      <div class=\"acts-list\" id=\"ver_acts1_" + row.id + "\" style=\"max-height:180px;overflow-y:auto\"></div>\n");
             cards.Append("      <div style=\"margin-top:10px;font-size:11px;color:var(--muted2);display:flex;flex-wrap:wrap;gap:8px\">\n");
-            cards.Append("        <span>👤 <b id=\"ver_usuario_" + row.id + "\"></b></span>\n");
-            cards.Append("        <span>📅 <b id=\"ver_fecha_" + row.id + "\"></b></span>\n");
-            cards.Append("        <span>⏭ <b id=\"ver_proximo_" + row.id + "\"></b></span>\n");
+            cards.Append("        <span>👤 <b id=\"ver_usuario1_" + row.id + "\"></b></span>\n");
+            cards.Append("        <span>📅 <b id=\"ver_fecha1_" + row.id + "\"></b></span>\n");
+            cards.Append("        <span>⏭ <b id=\"ver_proximo1_" + row.id + "\"></b></span>\n");
             cards.Append("      </div>\n");
-            cards.Append("      <div style=\"margin-top:6px;font-size:11px;color:var(--muted2)\" id=\"ver_obs_" + row.id + "\"></div>\n");
+            cards.Append("      <div style=\"margin-top:6px;font-size:11px;color:var(--muted2)\" id=\"ver_obs1_" + row.id + "\"></div>\n");
             cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
-            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cerrarVer(" + row.id + ")\">✕ Cerrar</button>\n");
+            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cerrarVer(" + row.id + ",1)\">✕ Cerrar</button>\n");
             cards.Append("      </div>\n    </div>\n");
-            cards.Append("    <div class=\"mini-form\" id=\"edit_pm_" + row.id + "\" style=\"display:none\">\n");
-            cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Preventivo</div>\n");
-            cards.Append("      <div class=\"acts-list\" id=\"edit_acts_" + row.id + "\">" + actsHtml + "</div>\n");
+            cards.Append("    <div class=\"mini-form\" id=\"edit_pm1_" + row.id + "\" style=\"display:none\">\n");
+            cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 1</div>\n");
+            cards.Append("      <div class=\"acts-list\" id=\"edit_acts1_" + row.id + "\">" + actsHtml + "</div>\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
-            cards.Append("      <input type=\"date\" class=\"date-input\" id=\"edit_fecha_" + row.id + "\">\n");
+            cards.Append("      <input type=\"date\" class=\"date-input\" id=\"edit_fecha1_" + row.id + "\">\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
-            cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"edit_obs_pm_" + row.id + "\" placeholder=\"Observaciones...\"></textarea>\n");
+            cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"edit_obs_pm1_" + row.id + "\" placeholder=\"Observaciones...\"></textarea>\n");
             cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
-            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cerrarEditarPM(" + row.id + ")\">✕ Cancelar</button>\n");
-            cards.Append("        <button class=\"btn btn-amber\" onclick=\"guardarEditarPM(" + row.id + ")\">💾 Guardar Cambios</button>\n");
-            cards.Append("      </div>\n    </div>\n  </div>\n");
+            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cerrarEditarPM(" + row.id + ",1)\">✕ Cancelar</button>\n");
+            cards.Append("        <button class=\"btn btn-amber\" onclick=\"guardarEditarPM(" + row.id + ",1)\">💾 Guardar P1</button>\n");
+            cards.Append("      </div>\n    </div>\n");
+            cards.Append("    <div class=\"mini-form\" id=\"form2_" + row.id + "\" style=\"display:none\">\n");
+            cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px\">📋 Período 2 — Actividades</div>\n");
+            cards.Append("      <div class=\"acts-list\">" + actsHtml + "</div>\n");
+            cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
+            cards.Append("      <input type=\"date\" class=\"date-input\" id=\"fecha2_" + row.id + "\">\n");
+            cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
+            cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm2_" + row.id + "\" placeholder=\"Observaciones P2...\"></textarea>\n");
+            cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
+            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cancelarForm(" + row.id + ",2)\">✕ Cancelar</button>\n");
+            cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ",2)\">💾 Guardar P2</button>\n");
+            cards.Append("      </div>\n    </div>\n");
+            cards.Append("    <div class=\"mini-form\" id=\"ver2_" + row.id + "\" style=\"display:none\">\n");
+            cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:#06B6D4\">👁 Período 2 — Registrado</div>\n");
+            cards.Append("      <div class=\"acts-list\" id=\"ver_acts2_" + row.id + "\" style=\"max-height:180px;overflow-y:auto\"></div>\n");
+            cards.Append("      <div style=\"margin-top:10px;font-size:11px;color:var(--muted2);display:flex;flex-wrap:wrap;gap:8px\">\n");
+            cards.Append("        <span>👤 <b id=\"ver_usuario2_" + row.id + "\"></b></span>\n");
+            cards.Append("        <span>📅 <b id=\"ver_fecha2_" + row.id + "\"></b></span>\n");
+            cards.Append("        <span>⏭ <b id=\"ver_proximo2_" + row.id + "\"></b></span>\n");
+            cards.Append("      </div>\n");
+            cards.Append("      <div style=\"margin-top:6px;font-size:11px;color:var(--muted2)\" id=\"ver_obs2_" + row.id + "\"></div>\n");
+            cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
+            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cerrarVer(" + row.id + ",2)\">✕ Cerrar</button>\n");
+            cards.Append("      </div>\n    </div>\n");
+            cards.Append("    <div class=\"mini-form\" id=\"edit_pm2_" + row.id + "\" style=\"display:none\">\n");
+            cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 2</div>\n");
+            cards.Append("      <div class=\"acts-list\" id=\"edit_acts2_" + row.id + "\">" + actsHtml + "</div>\n");
+            cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
+            cards.Append("      <input type=\"date\" class=\"date-input\" id=\"edit_fecha2_" + row.id + "\">\n");
+            cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
+            cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"edit_obs_pm2_" + row.id + "\" placeholder=\"Observaciones...\"></textarea>\n");
+            cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
+            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cerrarEditarPM(" + row.id + ",2)\">✕ Cancelar</button>\n");
+            cards.Append("        <button class=\"btn btn-amber\" onclick=\"guardarEditarPM(" + row.id + ",2)\">💾 Guardar P2</button>\n");
+            cards.Append("      </div>\n    </div>\n");
+            cards.Append("  </div>\n");
             cards.Append("  <div class=\"card-actions\">\n");
             cards.Append("    <button class=\"btn btn-blue\" onclick=\"abrirEditar(" + row.id + ")\">✏️ Editar</button>\n");
             cards.Append("    <button class=\"btn btn-green\" onclick=\"guardarCambios(" + row.id + ")\">💾 Guardar</button>\n");
@@ -173,7 +250,10 @@ public class QrPageController : ControllerBase
         sb.AppendLine(".card-body{padding:14px 16px;}");
         sb.AppendLine(".info-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;}");
         sb.AppendLine(".info-item label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:4px;}");
-        sb.AppendLine(".info-item input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:7px 9px;font-size:12px;color:var(--text);opacity:.6;}");
+        sb.AppendLine(".info-item input,.info-item select{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:7px 9px;font-size:12px;color:var(--text);opacity:.6;font-family:'DM Sans',sans-serif;}\n"
+            + ".info-item select{cursor:pointer;appearance:none;padding-right:22px;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2364748B' d='M5 7L0 2h10z'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 7px center;}\n"
+            + ".info-item select option{background:#1a2235;color:#F1F5F9;}\n"
+            + ".card.editing .info-item select:not([disabled]){border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.06);opacity:1;}");
         sb.AppendLine(".status-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;font-size:11px;color:var(--muted2);}");
         sb.AppendLine(".status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}");
         sb.AppendLine(".dot-ok{background:var(--green);box-shadow:0 0 6px var(--green);}.dot-warn{background:var(--amber);box-shadow:0 0 6px var(--amber);}");
@@ -210,11 +290,33 @@ public class QrPageController : ControllerBase
         sb.AppendLine(".toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;pointer-events:none;}");
         sb.AppendLine(".toast-ok{background:#052e16;border:1px solid #10B981;color:#6ee7b7;}");
         sb.AppendLine(".toast-err{background:#1f0000;border:1px solid #EF4444;color:#fca5a5;}");
+        sb.AppendLine(".periodos-estado{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap;}");
+        sb.AppendLine(".periodo-badge{padding:4px 12px;border-radius:999px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace;}");
+        sb.AppendLine(".periodo-ok{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.4);color:#6ee7b7;}");
+        sb.AppendLine(".periodo-pend{background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.35);color:#fcd34d;}");
+        // Dropdown de usuario
+        sb.AppendLine(".user-chip{display:none;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);font-size:12px;font-weight:600;color:#6ee7b7;cursor:pointer;position:relative;user-select:none;}");
+        sb.AppendLine(".chip-arrow{font-size:9px;color:#6ee7b7;transition:transform .2s;}");
+        sb.AppendLine(".user-chip.open .chip-arrow{transform:rotate(180deg);}");
+        sb.AppendLine(".user-dropdown{display:none;position:absolute;top:calc(100% + 10px);right:0;min-width:190px;background:#111827;border:1px solid rgba(255,255,255,.13);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.6);padding:8px;z-index:999;}");
+        sb.AppendLine(".user-chip.open .user-dropdown{display:block;}");
+        sb.AppendLine(".drop-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;color:#94A3B8;background:none;border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;transition:background .15s,color .15s;}");
+        sb.AppendLine(".drop-item:hover{background:rgba(255,255,255,.06);color:#F1F5F9;}");
+        sb.AppendLine(".drop-item.danger{color:#FCA5A5;}");
+        sb.AppendLine(".drop-item.danger:hover{background:rgba(239,68,68,.1);color:#fff;}");
+        sb.AppendLine(".drop-sep{height:1px;background:rgba(255,255,255,.07);margin:6px 0;}");
         sb.AppendLine("</style></head><body>");
         sb.AppendLine("<div class=\"top-bar\">");
         sb.AppendLine("  <div class=\"top-icon\">🔧</div>");
         sb.AppendLine("  <div class=\"top-title\"><h1>Mantenimiento Preventivo</h1><p>📍 " + ubicacion + "</p></div>");
-        sb.AppendLine("  <div class=\"user-chip\" id=\"userChip\">👤 <span id=\"userNombre\"></span></div>");
+        sb.AppendLine("  <div class=\"user-chip\" id=\"userChip\" onclick=\"toggleChipQr()\">");
+        sb.AppendLine("    👤 <span id=\"userNombre\"></span> <span class=\"chip-arrow\">▼</span>");
+        sb.AppendLine("    <div class=\"user-dropdown\">");
+        sb.AppendLine("      <button class=\"drop-item\" onclick=\"window.close()\">🚪 &nbsp;Salir de la página</button>");
+        sb.AppendLine("      <div class=\"drop-sep\"></div>");
+        sb.AppendLine("      <button class=\"drop-item danger\" onclick=\"cerrarSesionQr()\">⏻ &nbsp;Cerrar sesión</button>");
+        sb.AppendLine("    </div>");
+        sb.AppendLine("  </div>");
         sb.AppendLine("  <button class=\"btn btn-login\" id=\"btnLogin\" onclick=\"abrirLogin()\">🔑 Iniciar Sesión</button>");
         sb.AppendLine("</div>");
         sb.AppendLine("<div class=\"grid\">");
@@ -237,6 +339,9 @@ public class QrPageController : ControllerBase
         sb.AppendLine("</div>");
         sb.AppendLine("<script>");
         sb.AppendLine("let usuarioActual=null,nombreActual=null,usuarioTarjeta={};");
+        sb.AppendLine("function toggleChipQr(){document.getElementById('userChip').classList.toggle('open');}");
+        sb.AppendLine("document.addEventListener('click',e=>{const c=document.getElementById('userChip');if(c&&!c.contains(e.target))c.classList.remove('open');});");
+        sb.AppendLine("async function cerrarSesionQr(){try{await fetch('/LOGOUT',{method:'POST',credentials:'include'});}catch(e){}usuarioActual=null;nombreActual=null;document.getElementById('userChip').style.display='none';document.getElementById('btnLogin').style.display='inline-flex';document.querySelectorAll('.pm-btn').forEach(b=>b.style.display='none');toast('Sesión cerrada',true);}");
         sb.AppendLine("function abrirLogin(){document.getElementById('modalLogin').classList.add('show');setTimeout(()=>document.getElementById('inputUsuario').focus(),100);}");
         sb.AppendLine("function cerrarLogin(){");
         sb.AppendLine("  document.getElementById('modalLogin').classList.remove('show');");
@@ -261,98 +366,97 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  document.getElementById('userChip').style.display='flex';");
         sb.AppendLine("  document.getElementById('btnLogin').style.display='none';");
         sb.AppendLine("  document.querySelectorAll('.card').forEach(card=>{");
-        sb.AppendLine("    const tienePm=card.dataset.tienePm==='true';");
-        sb.AppendLine("    card.querySelectorAll('.btn-pm').forEach(b=>b.style.display=tienePm?'none':'inline-flex');");
-        sb.AppendLine("    card.querySelectorAll('.btn-ver,.btn-edit,.btn-del').forEach(b=>b.style.display=tienePm?'inline-flex':'none');");
+        sb.AppendLine("    const p1=card.dataset.tienePm==='true';const p2=card.dataset.tienePm2==='true';");
+        sb.AppendLine("    const b1hacer=card.querySelector('.btn-p1');const b2hacer=card.querySelector('.btn-p2');");
+        sb.AppendLine("    const b1ver=card.querySelector('.btn-ver1');const b1edit=card.querySelector('.btn-edit1');const b1del=card.querySelector('.btn-del1');");
+        sb.AppendLine("    const b2ver=card.querySelector('.btn-ver2');const b2edit=card.querySelector('.btn-edit2');const b2del=card.querySelector('.btn-del2');");
+        sb.AppendLine("    if(b1hacer)b1hacer.style.display=p1?'none':'inline-flex';");
+        sb.AppendLine("    if(b1ver)b1ver.style.display=p1?'inline-flex':'none';if(b1edit)b1edit.style.display=p1?'inline-flex':'none';if(b1del)b1del.style.display=p1?'inline-flex':'none';");
+        sb.AppendLine("    if(b2hacer)b2hacer.style.display=p2?'none':'inline-flex';");
+        sb.AppendLine("    if(b2ver)b2ver.style.display=p2?'inline-flex':'none';if(b2edit)b2edit.style.display=p2?'inline-flex':'none';if(b2del)b2del.style.display=p2?'inline-flex':'none';");
         sb.AppendLine("  });");
         sb.AppendLine("  cerrarLogin();toast('Sesión iniciada — '+nombreActual,true);");
         sb.AppendLine("}");
-        sb.AppendLine("function abrirForm(id){if(!usuarioActual){abrirLogin();return;}document.getElementById('form_'+id).style.display='block';document.getElementById('fecha_'+id).value=new Date().toISOString().split('T')[0];}");
-        sb.AppendLine("function cancelarForm(id){document.getElementById('form_'+id).style.display='none';document.querySelectorAll('#form_'+id+' input[type=checkbox]').forEach(cb=>cb.checked=false);}");
-        sb.AppendLine("async function guardarPreventivo(id){");
-        sb.AppendLine("  const fecha=document.getElementById('fecha_'+id).value;");
+        sb.AppendLine("function abrirForm(id,p){if(!usuarioActual){abrirLogin();return;}document.getElementById('form'+p+'_'+id).style.display='block';document.getElementById('fecha'+p+'_'+id).value=new Date().toISOString().split('T')[0];}");
+        sb.AppendLine("function cancelarForm(id,p){document.getElementById('form'+p+'_'+id).style.display='none';document.querySelectorAll('#form'+p+'_'+id+' input[type=checkbox]').forEach(cb=>cb.checked=false);}");
+        sb.AppendLine("async function guardarPreventivo(id,p){");
+        sb.AppendLine("  const fecha=document.getElementById('fecha'+p+'_'+id).value;");
         sb.AppendLine("  if(!fecha){toast('Selecciona la fecha',false);return;}");
-        sb.AppendLine("  const cbs=document.querySelectorAll('#form_'+id+' input[type=checkbox]');");
+        sb.AppendLine("  const cbs=document.querySelectorAll('#form'+p+'_'+id+' input[type=checkbox]');");
         sb.AppendLine("  const checks=[];cbs.forEach((cb,i)=>{if(cb.checked)checks.push(i);});");
         sb.AppendLine("  if(!checks.length){toast('Marca al menos una actividad',false);return;}");
-        sb.AppendLine("  const obs=document.getElementById('obs_pm_'+id)?.value||'';");
-        sb.AppendLine("  const btn=document.querySelector('#form_'+id+' .btn-success');");
+        sb.AppendLine("  const obs=document.getElementById('obs_pm'+p+'_'+id)?.value||'';");
+        sb.AppendLine("  const btn=document.querySelector('#form'+p+'_'+id+' .btn-success');");
         sb.AppendLine("  btn.disabled=true;btn.textContent='Guardando...';");
-        sb.AppendLine("  const res=await fetch('/PREVENTIVO/GUARDAR_PM/'+id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:usuarioActual,fecha,checks,observaciones:obs})});");
+        sb.AppendLine("  const endpoint=p===2?'/PREVENTIVO/GUARDAR_PM_P2/'+id:'/PREVENTIVO/GUARDAR_PM/'+id;");
+        sb.AppendLine("  const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:usuarioActual,fecha,checks,observaciones:obs})});");
         sb.AppendLine("  const data=await res.json();");
         sb.AppendLine("  if(data.ok){");
-        sb.AppendLine("    toast('Guardado. Proximo PM: '+data.proximo_pm,true);");
-        sb.AppendLine("    const card=document.getElementById('form_'+id).closest('.card');");
-        sb.AppendLine("    card.querySelector('.status-dot').className='status-dot dot-ok';");
-        sb.AppendLine("    card.querySelectorAll('.status-row span')[1].textContent='Último PM: '+fecha;");
-        sb.AppendLine("    card.querySelectorAll('.status-row span')[2].textContent='Plazo: '+data.proximo_pm;");
-        sb.AppendLine("    cancelarForm(id);");
-        sb.AppendLine("    // Intercambiar botones: quitar btn-purple, mostrar ver/editar/eliminar");
-        sb.AppendLine("    card.dataset.tienePm='true'; card.querySelectorAll('.btn-pm').forEach(b=>b.style.display='none');");
-        sb.AppendLine("    card.querySelectorAll('.btn-ver,.btn-edit,.btn-del').forEach(b=>b.style.display='inline-flex');");
-        sb.AppendLine("  }else{btn.disabled=false;btn.textContent='Guardar';toast('Error: '+(data.error||'desconocido'),false);}");
+        sb.AppendLine("    toast('P'+p+' guardado. Próximo: '+data.proximo_pm,true);");
+        sb.AppendLine("    const card=document.getElementById('form'+p+'_'+id).closest('.card');");
+        sb.AppendLine("    cancelarForm(id,p);");
+        sb.AppendLine("    const badge=document.getElementById('pbadge'+p+'_'+id);");
+        sb.AppendLine("    if(badge){badge.textContent='📋 P'+p+': ✅ Registrado';badge.className='periodo-badge periodo-ok';}");
+        sb.AppendLine("    if(p===1){card.dataset.tienePm='true';card.querySelector('.btn-p1').style.display='none';card.querySelector('.btn-ver1').style.display='inline-flex';card.querySelector('.btn-edit1').style.display='inline-flex';card.querySelector('.btn-del1').style.display='inline-flex';}");
+        sb.AppendLine("    else{card.dataset.tienePm2='true';card.querySelector('.btn-p2').style.display='none';card.querySelector('.btn-ver2').style.display='inline-flex';card.querySelector('.btn-edit2').style.display='inline-flex';card.querySelector('.btn-del2').style.display='inline-flex';}");
+        sb.AppendLine("  }else{btn.disabled=false;btn.textContent='Guardar P'+p;toast('Error: '+(data.error||'desconocido'),false);}");
         sb.AppendLine("}");
-        sb.AppendLine("async function verPM(id){");
-        sb.AppendLine("  const res=await fetch('/PREVENTIVO/DIGITAL/'+id);const data=await res.json();");
-        sb.AppendLine("  if(!data.existe){toast('No hay preventivo guardado',false);return;}");
+        sb.AppendLine("async function verPM(id,p){");
+        sb.AppendLine("  const endpoint=p===2?'/PREVENTIVO/DIGITAL_P2/'+id:'/PREVENTIVO/DIGITAL/'+id;const res=await fetch(endpoint);const data=await res.json();");
+        sb.AppendLine("  if(!data.existe){toast('No hay PM de P'+p+' guardado',false);return;}");
         sb.AppendLine("  const pm=data.data;");
-        sb.AppendLine("  const actsEl=document.getElementById('ver_acts_'+id);");
-        sb.AppendLine("  const allActs=Array.from(document.querySelectorAll('#edit_acts_'+id+' .act-text')).map(e=>e.textContent);");
+        sb.AppendLine("  const actsEl=document.getElementById('ver_acts'+p+'_'+id);");
+        sb.AppendLine("  const allActs=Array.from(document.querySelectorAll('#edit_acts'+p+'_'+id+' .act-text')).map(e=>e.textContent);");
         sb.AppendLine("  actsEl.innerHTML='';");
         sb.AppendLine("  allActs.forEach((act,i)=>{const m=pm.checks&&pm.checks.includes(i);actsEl.innerHTML+='<div class=\"act-item\" style=\"opacity:'+(m?1:.35)+'\"><span class=\"act-check\" style=\"'+(m?'background:var(--accent);border-color:var(--accent);color:white':'')+'\">'+( m?'\\u2713':'')+' </span><span class=\"act-text\">'+act+'</span></div>';});");
-        sb.AppendLine("  document.getElementById('ver_usuario_'+id).textContent=pm.usuario||'—';");
-        sb.AppendLine("  document.getElementById('ver_fecha_'+id).textContent=pm.fecha||'—';");
-        sb.AppendLine("  document.getElementById('ver_proximo_'+id).textContent=pm.proximo_pm||'—';");
-        sb.AppendLine("  const o=document.getElementById('ver_obs_'+id);if(o)o.textContent=pm.observaciones?'📝 '+pm.observaciones:'';");
-        sb.AppendLine("  document.getElementById('ver_'+id).style.display='block';");
+        sb.AppendLine("  document.getElementById('ver_usuario'+p+'_'+id).textContent=pm.usuario||'—';");
+        sb.AppendLine("  document.getElementById('ver_fecha'+p+'_'+id).textContent=pm.fecha||'—';");
+        sb.AppendLine("  document.getElementById('ver_proximo'+p+'_'+id).textContent=pm.proximo_pm||'—';");
+        sb.AppendLine("  const o=document.getElementById('ver_obs'+p+'_'+id);if(o)o.textContent=pm.observaciones?'📝 '+pm.observaciones:'';");
+        sb.AppendLine("  document.getElementById('ver'+p+'_'+id).style.display='block';");
         sb.AppendLine("}");
-        sb.AppendLine("function cerrarVer(id){document.getElementById('ver_'+id).style.display='none';}");
-        sb.AppendLine("async function abrirEditarPM(id){");
+        sb.AppendLine("function cerrarVer(id,p){document.getElementById('ver'+p+'_'+id).style.display='none';}");
+        sb.AppendLine("async function abrirEditarPM(id,p){");
         sb.AppendLine("  if(!usuarioActual){abrirLogin();return;}");
-        sb.AppendLine("  const res=await fetch('/PREVENTIVO/DIGITAL/'+id);const data=await res.json();");
-        sb.AppendLine("  const cbs=document.querySelectorAll('#edit_acts_'+id+' input[type=checkbox]');");
+        sb.AppendLine("  const endpoint=p===2?'/PREVENTIVO/DIGITAL_P2/'+id:'/PREVENTIVO/DIGITAL/'+id;const res=await fetch(endpoint);const data=await res.json();");
+        sb.AppendLine("  const cbs=document.querySelectorAll('#edit_acts'+p+'_'+id+' input[type=checkbox]');");
         sb.AppendLine("  cbs.forEach(cb=>cb.checked=false);");
         sb.AppendLine("  if(data.existe&&data.data.checks)data.data.checks.forEach(i=>{if(cbs[i])cbs[i].checked=true;});");
-        sb.AppendLine("  const f=document.getElementById('edit_fecha_'+id);if(f)f.value=data.existe?(data.data.fecha||''):'';");
-        sb.AppendLine("  const o=document.getElementById('edit_obs_pm_'+id);if(o)o.value=data.existe?(data.data.observaciones||''):'';");
-        sb.AppendLine("  document.getElementById('edit_pm_'+id).style.display='block';");
+        sb.AppendLine("  const f=document.getElementById('edit_fecha'+p+'_'+id);if(f)f.value=data.existe?(data.data.fecha||''):'';");
+        sb.AppendLine("  const o=document.getElementById('edit_obs_pm'+p+'_'+id);if(o)o.value=data.existe?(data.data.observaciones||''):'';");
+        sb.AppendLine("  document.getElementById('edit_pm'+p+'_'+id).style.display='block';");
         sb.AppendLine("}");
-        sb.AppendLine("function cerrarEditarPM(id){document.getElementById('edit_pm_'+id).style.display='none';}");
-        sb.AppendLine("async function guardarEditarPM(id){");
-        sb.AppendLine("  const fecha=document.getElementById('edit_fecha_'+id).value;");
+        sb.AppendLine("function cerrarEditarPM(id,p){document.getElementById('edit_pm'+p+'_'+id).style.display='none';}");
+        sb.AppendLine("async function guardarEditarPM(id,p){");
+        sb.AppendLine("  const fecha=document.getElementById('edit_fecha'+p+'_'+id).value;");
         sb.AppendLine("  if(!fecha){toast('Selecciona la fecha',false);return;}");
-        sb.AppendLine("  const cbs=document.querySelectorAll('#edit_acts_'+id+' input[type=checkbox]');");
+        sb.AppendLine("  const cbs=document.querySelectorAll('#edit_acts'+p+'_'+id+' input[type=checkbox]');");
         sb.AppendLine("  const checks=[];cbs.forEach((cb,i)=>{if(cb.checked)checks.push(i);});");
         sb.AppendLine("  if(!checks.length){toast('Marca al menos una actividad',false);return;}");
-        sb.AppendLine("  const obs=document.getElementById('edit_obs_pm_'+id).value;");
-        sb.AppendLine("  const btn=document.querySelector('#edit_pm_'+id+' .btn-amber');");
+        sb.AppendLine("  const obs=document.getElementById('edit_obs_pm'+p+'_'+id).value;");
+        sb.AppendLine("  const btn=document.querySelector('#edit_pm'+p+'_'+id+' .btn-amber');");
         sb.AppendLine("  btn.disabled=true;btn.textContent='Guardando...';");
-        sb.AppendLine("  const res=await fetch('/PREVENTIVO/GUARDAR_PM/'+id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:usuarioActual,fecha,checks,observaciones:obs})});");
+        sb.AppendLine("  const endpoint=p===2?'/PREVENTIVO/GUARDAR_PM_P2/'+id:'/PREVENTIVO/GUARDAR_PM/'+id;");
+        sb.AppendLine("  const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:usuarioActual,fecha,checks,observaciones:obs})});");
         sb.AppendLine("  const data=await res.json();");
         sb.AppendLine("  if(data.ok){");
-        sb.AppendLine("    toast('Actualizado. Proximo PM: '+data.proximo_pm,true);");
-        sb.AppendLine("    const card=document.getElementById('edit_pm_'+id).closest('.card');");
-        sb.AppendLine("    card.querySelector('.status-dot').className='status-dot dot-ok';");
-        sb.AppendLine("    card.querySelectorAll('.status-row span')[1].textContent='Último PM: '+fecha;");
-        sb.AppendLine("    card.querySelectorAll('.status-row span')[2].textContent='Plazo: '+data.proximo_pm;");
-        sb.AppendLine("    cerrarEditarPM(id);");
-        sb.AppendLine("  }else{btn.disabled=false;btn.textContent='Guardar Cambios';toast('Error: '+(data.error||'desconocido'),false);}");
+        sb.AppendLine("    toast('P'+p+' actualizado. Próximo: '+data.proximo_pm,true);");
+        sb.AppendLine("    const badge=document.getElementById('pbadge'+p+'_'+id);if(badge){badge.textContent='📋 P'+p+': ✅ Registrado';badge.className='periodo-badge periodo-ok';}");
+        sb.AppendLine("    cerrarEditarPM(id,p);");
+        sb.AppendLine("  }else{btn.disabled=false;btn.textContent='Guardar P'+p;toast('Error: '+(data.error||'desconocido'),false);}");
         sb.AppendLine("}");
-        sb.AppendLine("async function eliminarPreventivo(id){");
-        sb.AppendLine("  if(!confirm('Eliminar el preventivo guardado?'))return;");
-        sb.AppendLine("  const res=await fetch('/PREVENTIVO/ELIMINAR_DIGITAL/'+id,{method:'DELETE'});");
-        sb.AppendLine("  const data=await res.json();");
+        sb.AppendLine("async function eliminarPreventivo(id,p){");
+        sb.AppendLine("  if(!confirm('Eliminar el PM de Período '+p+'?'))return;");
+        sb.AppendLine("  const endpoint=p===2?'/PREVENTIVO/ELIMINAR_DIGITAL_P2/'+id:'/PREVENTIVO/ELIMINAR_DIGITAL/'+id;");
+        sb.AppendLine("  const res=await fetch(endpoint,{method:'DELETE'});const data=await res.json();");
         sb.AppendLine("  if(data.ok){");
-        sb.AppendLine("    toast('Preventivo eliminado',true);");
-        sb.AppendLine("    document.getElementById('ver_'+id).style.display='none';");
-        sb.AppendLine("    document.getElementById('edit_pm_'+id).style.display='none';");
-        sb.AppendLine("    // Intercambiar botones: ocultar ver/editar/eliminar, mostrar hacer preventivo");
-        sb.AppendLine("    const card=document.getElementById('btn_del_'+id).closest('.card');");
-        sb.AppendLine("    card.dataset.tienePm='false'; card.querySelectorAll('.btn-ver,.btn-edit,.btn-del').forEach(b=>b.style.display='none');");
-        sb.AppendLine("    card.querySelectorAll('.btn-pm').forEach(b=>b.style.display='inline-flex');");
-        sb.AppendLine("    card.querySelector('.status-dot').className='status-dot dot-warn';");
-        sb.AppendLine("    card.querySelectorAll('.status-row span')[1].textContent='Sin mantenimiento registrado';");
-        sb.AppendLine("    card.querySelectorAll('.status-row span')[2].textContent='Plazo: No definido';");
+        sb.AppendLine("    toast('PM P'+p+' eliminado',true);");
+        sb.AppendLine("    document.getElementById('ver'+p+'_'+id).style.display='none';");
+        sb.AppendLine("    document.getElementById('edit_pm'+p+'_'+id).style.display='none';");
+        sb.AppendLine("    const badge=document.getElementById('pbadge'+p+'_'+id);if(badge){badge.textContent='📋 P'+p+': ⏳ Pendiente';badge.className='periodo-badge periodo-pend';}");
+        sb.AppendLine("    const card=document.getElementById('btn_del'+p+'_'+id).closest('.card');");
+        sb.AppendLine("    if(p===1){card.dataset.tienePm='false';card.querySelector('.btn-p1').style.display='inline-flex';card.querySelector('.btn-ver1').style.display='none';card.querySelector('.btn-edit1').style.display='none';card.querySelector('.btn-del1').style.display='none';}");
+        sb.AppendLine("    else{card.dataset.tienePm2='false';card.querySelector('.btn-p2').style.display='inline-flex';card.querySelector('.btn-ver2').style.display='none';card.querySelector('.btn-edit2').style.display='none';card.querySelector('.btn-del2').style.display='none';}");
         sb.AppendLine("  }else toast('Error al eliminar',false);");
         sb.AppendLine("}");
         sb.AppendLine("function abrirEditar(id){if(!usuarioActual){abrirLogin();return;}usuarioTarjeta[id]=usuarioActual;['equipo_','disp_','planta_','color_','anio_vis_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=false;});document.getElementById('obs_'+id).disabled=false;const card=document.getElementById('btn_hacer_'+id)?.closest('.card')||document.getElementById('equipo_'+id)?.closest('.card');if(card)card.classList.add('editing');}");
