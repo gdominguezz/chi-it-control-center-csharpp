@@ -680,6 +680,82 @@ public class PreventivoController : ControllerBase
         return Ok(new { ok = true });
     }
 
+    // ── GUARDAR PM PERÍODO 2 ──────────────────────────────
+    [HttpPost("PREVENTIVO/GUARDAR_PM_P2/{id:int}")]
+    public IActionResult GuardarPmP2(int id, [FromBody] GuardarPmRequest data)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(data.Fecha))
+                return Ok(new { ok = false, error = "Fecha requerida" });
+
+            var fechaRea = DateOnly.Parse(data.Fecha);
+            var proximoPm = fechaRea.AddMonths(6);
+            var proxStr = proximoPm.ToString("yyyy-MM-dd");
+
+            var json = JsonSerializer.Serialize(new
+            {
+                usuario = data.Usuario,
+                fecha = data.Fecha,
+                proximo_pm = proxStr,
+                checks = data.Checks,
+                observaciones = data.Observaciones
+            });
+
+            using var conn = _db.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                UPDATE public.mantenimientos_preventivos
+                SET fecha_realizacion_p2=@fr, realizado_por=@rp,
+                    preventivo_digital_p2=@pd
+                WHERE id=@id
+                """;
+            cmd.Parameters.AddWithValue("fr", fechaRea.ToDateTime(TimeOnly.MinValue));
+            cmd.Parameters.AddWithValue("rp", data.Usuario.ToUpper());
+            cmd.Parameters.Add("pd", NpgsqlTypes.NpgsqlDbType.Jsonb).Value = json;
+            cmd.Parameters.AddWithValue("id", id);
+            cmd.ExecuteNonQuery();
+
+            return Ok(new { ok = true, proximo_pm = proxStr });
+        }
+        catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+    }
+
+    // ── OBTENER PM PERÍODO 2 ──────────────────────────────
+    [HttpGet("PREVENTIVO/DIGITAL_P2/{id:int}")]
+    public IActionResult ObtenerDigitalP2(int id)
+    {
+        try
+        {
+            using var conn = _db.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT preventivo_digital_p2 FROM public.mantenimientos_preventivos WHERE id=@id";
+            cmd.Parameters.AddWithValue("id", id);
+            var raw = cmd.ExecuteScalar();
+            if (raw == null || raw == DBNull.Value)
+                return Ok(new { existe = false });
+            var data = JsonSerializer.Deserialize<object>(raw.ToString()!);
+            return Ok(new { existe = true, data });
+        }
+        catch (Exception ex) { return Ok(new { existe = false, error = ex.Message }); }
+    }
+
+    // ── ELIMINAR PM PERÍODO 2 ─────────────────────────────
+    [HttpDelete("PREVENTIVO/ELIMINAR_DIGITAL_P2/{id:int}")]
+    public IActionResult EliminarDigitalP2(int id)
+    {
+        try
+        {
+            using var conn = _db.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET preventivo_digital_p2=NULL, fecha_realizacion_p2=NULL WHERE id=@id";
+            cmd.Parameters.AddWithValue("id", id);
+            cmd.ExecuteNonQuery();
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex) { return Ok(new { error = ex.Message }); }
+    }
+
     // ── GUARDAR PM INDIVIDUAL ─────────────────────────────
     [HttpPost("PREVENTIVO/GUARDAR_PM/{id:int}")]
     public IActionResult GuardarPmIndividual(int id, [FromBody] GuardarPmRequest data)
