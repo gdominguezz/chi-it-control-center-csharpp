@@ -711,7 +711,7 @@ public class PreventivoController : ControllerBase
                 WHERE id=@id
                 """;
             cmd.Parameters.AddWithValue("fr", fechaRea.ToDateTime(TimeOnly.MinValue));
-            cmd.Parameters.AddWithValue("pl", proxStr);
+            cmd.Parameters.AddWithValue("pl", proximoPm.ToDateTime(TimeOnly.MinValue));
             cmd.Parameters.AddWithValue("rp", data.Usuario.ToUpper());
             cmd.Parameters.Add("pd", NpgsqlTypes.NpgsqlDbType.Jsonb).Value = json;
             cmd.Parameters.AddWithValue("id", id);
