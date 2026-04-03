@@ -211,19 +211,23 @@ public class DashboardController : ControllerBase
             // ── 7. Vencidos P1 + P2 ───────────────────────────
             using var vencidosCmd = conn.CreateCommand();
             vencidosCmd.CommandText = """
-                SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
-                       plazo AS plazo_fecha, fecha_realizacion AS ultimo_pm, categoria_color, 1 AS periodo
-                FROM public.mantenimientos_preventivos
-                WHERE plazo IS NOT NULL AND plazo::date < CURRENT_DATE
-                LIMIT 25
+                SELECT * FROM (
+                    SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
+                           plazo AS plazo_fecha, fecha_realizacion AS ultimo_pm, categoria_color, 1 AS periodo
+                    FROM public.mantenimientos_preventivos
+                    WHERE plazo IS NOT NULL AND plazo::date < CURRENT_DATE
+                    LIMIT 25
+                ) vp1
 
                 UNION ALL
 
-                SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
-                       TO_CHAR(plazo_p2, 'YYYY-MM-DD') AS plazo_fecha, fecha_realizacion_p2 AS ultimo_pm, categoria_color, 2 AS periodo
-                FROM public.mantenimientos_preventivos
-                WHERE plazo_p2 IS NOT NULL AND plazo_p2 < CURRENT_DATE
-                LIMIT 25
+                SELECT * FROM (
+                    SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
+                           TO_CHAR(plazo_p2, 'YYYY-MM-DD') AS plazo_fecha, fecha_realizacion_p2 AS ultimo_pm, categoria_color, 2 AS periodo
+                    FROM public.mantenimientos_preventivos
+                    WHERE plazo_p2 IS NOT NULL AND plazo_p2 < CURRENT_DATE
+                    LIMIT 25
+                ) vp2
 
                 ORDER BY plazo_fecha ASC
                 """;
