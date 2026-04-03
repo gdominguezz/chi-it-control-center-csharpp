@@ -211,6 +211,7 @@ public class QrPageController : ControllerBase
             cards.Append("      <button class=\"btn btn-blue\" onclick=\"abrirEditar(" + row.id + ")\">✏️ Editar</button>\n");
             cards.Append("      <button class=\"btn btn-green\" onclick=\"guardarCambios(" + row.id + ")\">💾 Guardar</button>\n");
             cards.Append("      <button class=\"btn btn-ghost\" onclick=\"cancelarTodo(" + row.id + ")\">↩ Cancelar</button>\n");
+            cards.Append("      <button class=\"btn btn-ghost\" onclick=\"window.close()\">✕ Salir</button>\n");
             cards.Append("    </div>\n");
             cards.Append("    " + btnPm + "\n");
             cards.Append("  </div>\n</div>\n");
@@ -321,7 +322,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  <div class=\"user-chip\" id=\"userChip\" onclick=\"toggleChipQr()\">");
         sb.AppendLine("    👤 <span id=\"userNombre\"></span> <span class=\"chip-arrow\">▼</span>");
         sb.AppendLine("    <div class=\"user-dropdown\">");
-        sb.AppendLine("      <button class=\"drop-item\" onclick=\"menu.html\">🏠 &nbsp;Menu principal</button>");
+        sb.AppendLine("      <button class=\"drop-item\" onclick=\"window.location.href='/menu.html'\">🏠 &nbsp;Menu principal</button>");
         sb.AppendLine("      <div class=\"drop-sep\"></div>");
         sb.AppendLine("      <button class=\"drop-item danger\" onclick=\"cerrarSesionQr()\">⏻ &nbsp;Cerrar sesión</button>");
         sb.AppendLine("    </div>");
