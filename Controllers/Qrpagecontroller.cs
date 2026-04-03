@@ -322,7 +322,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  <div class=\"user-chip\" id=\"userChip\" onclick=\"toggleChipQr()\">");
         sb.AppendLine("    👤 <span id=\"userNombre\"></span> <span class=\"chip-arrow\">▼</span>");
         sb.AppendLine("    <div class=\"user-dropdown\">");
-        sb.AppendLine("      <button class=\"drop-item\" onclick=\"window.location.href='/menu.html'\">🏠 &nbsp;Menu principal</button>");
+        sb.AppendLine("      <button class=\"drop-item\" onclick=\"window.location.href='https://chi-it-control-center-csharpp.onrender.com/static/menu.html'\">🏠 &nbsp;Menu principal</button>");
         sb.AppendLine("      <div class=\"drop-sep\"></div>");
         sb.AppendLine("      <button class=\"drop-item danger\" onclick=\"cerrarSesionQr()\">⏻ &nbsp;Cerrar sesión</button>");
         sb.AppendLine("    </div>");
