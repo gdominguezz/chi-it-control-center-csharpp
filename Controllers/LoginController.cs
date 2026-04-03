@@ -148,14 +148,14 @@ public class LoginController : ControllerBase
         Response.Cookies.Append("usuario", usuario, new CookieOptions
         {
             HttpOnly = true,
-            SameSite = SameSiteMode.Strict,
-            Secure = false  // cambiar a true si usas HTTPS
+            SameSite = SameSiteMode.Lax,
+            Secure = true
         });
         Response.Cookies.Append("rol", rol, new CookieOptions
         {
             HttpOnly = false,  // el JS del menú necesita leerlo
-            SameSite = SameSiteMode.Strict,
-            Secure = false
+            SameSite = SameSiteMode.Lax,
+            Secure = true
         });
 
         return Ok(new { ok = true, usuario, nombre, rol, password_temporal = pwdTemporal });
@@ -213,14 +213,14 @@ public class LoginController : ControllerBase
         Response.Cookies.Append("usuario", req.Usuario.ToUpper(), new CookieOptions
         {
             HttpOnly = true,
-            SameSite = SameSiteMode.Strict,
-            Secure = false
+            SameSite = SameSiteMode.Lax,
+            Secure = true
         });
         Response.Cookies.Append("rol", rolUsuario, new CookieOptions
         {
             HttpOnly = false,
-            SameSite = SameSiteMode.Strict,
-            Secure = false
+            SameSite = SameSiteMode.Lax,
+            Secure = true
         });
 
         return Ok(new { ok = true, mensaje = "Contraseña actualizada correctamente", nombre = nombreUsuario, rol = rolUsuario });
