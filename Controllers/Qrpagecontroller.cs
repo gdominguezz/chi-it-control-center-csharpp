@@ -22,7 +22,8 @@ public class QrPageController : ControllerBase
                    categoria_color, fecha_realizacion, plazo, observaciones,
                    CASE WHEN preventivo_digital IS NOT NULL THEN true ELSE false END AS tiene_pm,
                    anio_creacion,
-                   CASE WHEN preventivo_digital_p2 IS NOT NULL THEN true ELSE false END AS tiene_pm2
+                   CASE WHEN preventivo_digital_p2 IS NOT NULL THEN true ELSE false END AS tiene_pm2,
+                   fecha_realizacion_p2, plazo_p2
             FROM public.mantenimientos_preventivos
             WHERE TRIM(LOWER(ubicacion)) = TRIM(LOWER(@u))
             ORDER BY nombre_dispositivo
@@ -30,7 +31,7 @@ public class QrPageController : ControllerBase
         cmd.Parameters.AddWithValue("u", ubicacion);
 
         var rows = new List<(long id, string idEquipo, string dispositivo, string planta,
-                             string colorCat, string? fecha, string? plazo, string obs, bool tienePm, int? anio, bool tienePm2)>();
+                             string colorCat, string? fecha, string? plazo, string obs, bool tienePm, int? anio, bool tienePm2, string? fechaP2, string? plazoP2)>();
 
         using var r = cmd.ExecuteReader();
         while (r.Read())
@@ -44,7 +45,9 @@ public class QrPageController : ControllerBase
                       r.IsDBNull(7) ? "" : r.GetString(7),
                       !r.IsDBNull(8) && r.GetBoolean(8),
                       r.IsDBNull(9) ? (int?)null : r.GetInt32(9),
-                      !r.IsDBNull(10) && r.GetBoolean(10)));
+                      !r.IsDBNull(10) && r.GetBoolean(10),
+                      r.IsDBNull(11) ? null : r.GetDateTime(11).ToString("yyyy-MM-dd"),
+                      r.IsDBNull(12) ? null : r.GetString(12)));
 
         var cards = new StringBuilder();
         foreach (var row in rows)
@@ -53,6 +56,7 @@ public class QrPageController : ControllerBase
             var icon = DispIcon(row.dispositivo);
             var fechaStr = row.fecha ?? "Sin registro";
             var plazoStr = row.plazo ?? "No definido";
+            var plazoP2Str = row.plazoP2 ?? "No definido";
             // Mostrar "Último PM" solo si hay preventivo_digital registrado
             var dotClass = row.tienePm ? "dot-ok" : "dot-warn";
             var dotLabel = row.tienePm
@@ -132,7 +136,10 @@ public class QrPageController : ControllerBase
             cards.Append("    <div class=\"status-row\">\n");
             cards.Append("      <span class=\"status-dot " + dotClass + "\"></span>\n");
             cards.Append("      <span>" + dotLabel + "</span>\n");
-            cards.Append("      <span style=\"margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#475569\">Plazo: <span id=\"plazo_" + row.id + "\">" + plazoStr + "</span></span>\n");
+            cards.Append("      <span style=\"margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#475569;display:flex;flex-direction:column;align-items:flex-end;gap:2px\">" +
+                "<span>P1: <span id=\"plazo_" + row.id + "\">" + plazoStr + "</span></span>" +
+                "<span>P2: <span id=\"plazo_p2_" + row.id + "\">" + plazoP2Str + "</span></span>" +
+                "</span>\n");
             cards.Append("    </div>\n");
             cards.Append("    <div class=\"periodos-estado\">\n");
             cards.Append("      <span class=\"periodo-badge " + (row.tienePm ? "periodo-ok" : "periodo-pend") + "\" id=\"pbadge1_" + row.id + "\">📋 P1: " + (row.tienePm ? "✅ Registrado" : "⏳ Pendiente") + "</span>\n");
@@ -410,7 +417,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("    cancelarForm(id,p);");
         sb.AppendLine("    const badge=document.getElementById('pbadge'+p+'_'+id);");
         sb.AppendLine("    if(badge){badge.textContent='📋 P'+p+': ✅ Registrado';badge.className='periodo-badge periodo-ok';}");
-        sb.AppendLine("    const plazoEl=document.getElementById('plazo_'+id);if(plazoEl&&data.proximo_pm){plazoEl.textContent=data.proximo_pm;}");
+        sb.AppendLine("    const plazoEl=document.getElementById(p===2?'plazo_p2_'+id:'plazo_'+id);if(plazoEl&&data.proximo_pm){plazoEl.textContent=data.proximo_pm;}");
         sb.AppendLine("    if(p===1){card.dataset.tienePm='true';card.querySelector('.btn-p1').style.display='none';card.querySelector('.btn-ver1').style.display='inline-flex';card.querySelector('.btn-edit1').style.display='inline-flex';card.querySelector('.btn-del1').style.display='inline-flex';}");
         sb.AppendLine("    else{card.dataset.tienePm2='true';card.querySelector('.btn-p2').style.display='none';card.querySelector('.btn-ver2').style.display='inline-flex';card.querySelector('.btn-edit2').style.display='inline-flex';card.querySelector('.btn-del2').style.display='inline-flex';}");
         sb.AppendLine("  }else{btn.disabled=false;btn.textContent='Guardar P'+p;toast('Error: '+(data.error||'desconocido'),false);}");
@@ -456,7 +463,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  if(data.ok){");
         sb.AppendLine("    toast('P'+p+' actualizado. Próximo: '+data.proximo_pm,true);");
         sb.AppendLine("    const badge=document.getElementById('pbadge'+p+'_'+id);if(badge){badge.textContent='📋 P'+p+': ✅ Registrado';badge.className='periodo-badge periodo-ok';}");
-        sb.AppendLine("    const plazoEl=document.getElementById('plazo_'+id);if(plazoEl&&data.proximo_pm){plazoEl.textContent=data.proximo_pm;}");
+        sb.AppendLine("    const plazoEl=document.getElementById(p===2?'plazo_p2_'+id:'plazo_'+id);if(plazoEl&&data.proximo_pm){plazoEl.textContent=data.proximo_pm;}");
         sb.AppendLine("    cerrarEditarPM(id,p);");
         sb.AppendLine("  }else{btn.disabled=false;btn.textContent='Guardar P'+p;toast('Error: '+(data.error||'desconocido'),false);}");
         sb.AppendLine("}");

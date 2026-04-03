@@ -706,11 +706,12 @@ public class PreventivoController : ControllerBase
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
                 UPDATE public.mantenimientos_preventivos
-                SET fecha_realizacion_p2=@fr, realizado_por=@rp,
+                SET fecha_realizacion_p2=@fr, plazo_p2=@pl, realizado_por_p2=@rp,
                     preventivo_digital_p2=@pd
                 WHERE id=@id
                 """;
             cmd.Parameters.AddWithValue("fr", fechaRea.ToDateTime(TimeOnly.MinValue));
+            cmd.Parameters.AddWithValue("pl", proxStr);
             cmd.Parameters.AddWithValue("rp", data.Usuario.ToUpper());
             cmd.Parameters.Add("pd", NpgsqlTypes.NpgsqlDbType.Jsonb).Value = json;
             cmd.Parameters.AddWithValue("id", id);
@@ -748,7 +749,7 @@ public class PreventivoController : ControllerBase
         {
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET preventivo_digital_p2=NULL, fecha_realizacion_p2=NULL WHERE id=@id";
+            cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET preventivo_digital_p2=NULL, fecha_realizacion_p2=NULL, plazo_p2=NULL, realizado_por_p2=NULL WHERE id=@id";
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
             return Ok(new { ok = true });
