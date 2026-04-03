@@ -132,7 +132,7 @@ public class QrPageController : ControllerBase
             cards.Append("    <div class=\"status-row\">\n");
             cards.Append("      <span class=\"status-dot " + dotClass + "\"></span>\n");
             cards.Append("      <span>" + dotLabel + "</span>\n");
-            cards.Append("      <span style=\"margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#475569\">Plazo: " + plazoStr + "</span>\n");
+            cards.Append("      <span style=\"margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#475569\">Plazo: <span id=\"plazo_" + row.id + "\">" + plazoStr + "</span></span>\n");
             cards.Append("    </div>\n");
             cards.Append("    <div class=\"periodos-estado\">\n");
             cards.Append("      <span class=\"periodo-badge " + (row.tienePm ? "periodo-ok" : "periodo-pend") + "\" id=\"pbadge1_" + row.id + "\">📋 P1: " + (row.tienePm ? "✅ Registrado" : "⏳ Pendiente") + "</span>\n");
@@ -150,7 +150,6 @@ public class QrPageController : ControllerBase
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
             cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm1_" + row.id + "\" placeholder=\"Observaciones P1...\"></textarea>\n");
             cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
-            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cancelarForm(" + row.id + ",1)\">✕ Cancelar</button>\n");
             cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ",1)\">💾 Guardar P1</button>\n");
             cards.Append("      </div>\n    </div>\n");
             cards.Append("    <div class=\"mini-form\" id=\"ver1_" + row.id + "\" style=\"display:none\">\n");
@@ -163,7 +162,6 @@ public class QrPageController : ControllerBase
             cards.Append("      </div>\n");
             cards.Append("      <div style=\"margin-top:6px;font-size:11px;color:var(--muted2)\" id=\"ver_obs1_" + row.id + "\"></div>\n");
             cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
-            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cerrarVer(" + row.id + ",1)\">✕ Cerrar</button>\n");
             cards.Append("      </div>\n    </div>\n");
             cards.Append("    <div class=\"mini-form\" id=\"edit_pm1_" + row.id + "\" style=\"display:none\">\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 1</div>\n");
@@ -173,7 +171,6 @@ public class QrPageController : ControllerBase
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
             cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"edit_obs_pm1_" + row.id + "\" placeholder=\"Observaciones...\"></textarea>\n");
             cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
-            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cerrarEditarPM(" + row.id + ",1)\">✕ Cancelar</button>\n");
             cards.Append("        <button class=\"btn btn-amber\" onclick=\"guardarEditarPM(" + row.id + ",1)\">💾 Guardar P1</button>\n");
             cards.Append("      </div>\n    </div>\n");
             cards.Append("    <div class=\"mini-form\" id=\"form2_" + row.id + "\" style=\"display:none\">\n");
@@ -184,7 +181,6 @@ public class QrPageController : ControllerBase
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
             cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm2_" + row.id + "\" placeholder=\"Observaciones P2...\"></textarea>\n");
             cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
-            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cancelarForm(" + row.id + ",2)\">✕ Cancelar</button>\n");
             cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ",2)\">💾 Guardar P2</button>\n");
             cards.Append("      </div>\n    </div>\n");
             cards.Append("    <div class=\"mini-form\" id=\"ver2_" + row.id + "\" style=\"display:none\">\n");
@@ -197,7 +193,6 @@ public class QrPageController : ControllerBase
             cards.Append("      </div>\n");
             cards.Append("      <div style=\"margin-top:6px;font-size:11px;color:var(--muted2)\" id=\"ver_obs2_" + row.id + "\"></div>\n");
             cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
-            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cerrarVer(" + row.id + ",2)\">✕ Cerrar</button>\n");
             cards.Append("      </div>\n    </div>\n");
             cards.Append("    <div class=\"mini-form\" id=\"edit_pm2_" + row.id + "\" style=\"display:none\">\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 2</div>\n");
@@ -207,7 +202,6 @@ public class QrPageController : ControllerBase
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
             cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"edit_obs_pm2_" + row.id + "\" placeholder=\"Observaciones...\"></textarea>\n");
             cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
-            cards.Append("        <button class=\"btn btn-ghost\" onclick=\"cerrarEditarPM(" + row.id + ",2)\">✕ Cancelar</button>\n");
             cards.Append("        <button class=\"btn btn-amber\" onclick=\"guardarEditarPM(" + row.id + ",2)\">💾 Guardar P2</button>\n");
             cards.Append("      </div>\n    </div>\n");
             cards.Append("  </div>\n");
@@ -215,7 +209,7 @@ public class QrPageController : ControllerBase
             cards.Append("    <div class=\"ca-edit-row\">\n");
             cards.Append("      <button class=\"btn btn-blue\" onclick=\"abrirEditar(" + row.id + ")\">✏️ Editar</button>\n");
             cards.Append("      <button class=\"btn btn-green\" onclick=\"guardarCambios(" + row.id + ")\">💾 Guardar</button>\n");
-            cards.Append("      <button class=\"btn btn-ghost\" onclick=\"cancelarEditar(" + row.id + ")\">↩ Cancelar</button>\n");
+            cards.Append("      <button class=\"btn btn-ghost\" onclick=\"cancelarTodo(" + row.id + ")\">↩ Cancelar</button>\n");
             cards.Append("      <button class=\"btn btn-ghost\" onclick=\"window.close()\">✕ Salir</button>\n");
             cards.Append("    </div>\n");
             cards.Append("    " + btnPm + "\n");
@@ -416,6 +410,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("    cancelarForm(id,p);");
         sb.AppendLine("    const badge=document.getElementById('pbadge'+p+'_'+id);");
         sb.AppendLine("    if(badge){badge.textContent='📋 P'+p+': ✅ Registrado';badge.className='periodo-badge periodo-ok';}");
+        sb.AppendLine("    const plazoEl=document.getElementById('plazo_'+id);if(plazoEl&&data.proximo_pm){plazoEl.textContent=data.proximo_pm;}");
         sb.AppendLine("    if(p===1){card.dataset.tienePm='true';card.querySelector('.btn-p1').style.display='none';card.querySelector('.btn-ver1').style.display='inline-flex';card.querySelector('.btn-edit1').style.display='inline-flex';card.querySelector('.btn-del1').style.display='inline-flex';}");
         sb.AppendLine("    else{card.dataset.tienePm2='true';card.querySelector('.btn-p2').style.display='none';card.querySelector('.btn-ver2').style.display='inline-flex';card.querySelector('.btn-edit2').style.display='inline-flex';card.querySelector('.btn-del2').style.display='inline-flex';}");
         sb.AppendLine("  }else{btn.disabled=false;btn.textContent='Guardar P'+p;toast('Error: '+(data.error||'desconocido'),false);}");
@@ -461,6 +456,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  if(data.ok){");
         sb.AppendLine("    toast('P'+p+' actualizado. Próximo: '+data.proximo_pm,true);");
         sb.AppendLine("    const badge=document.getElementById('pbadge'+p+'_'+id);if(badge){badge.textContent='📋 P'+p+': ✅ Registrado';badge.className='periodo-badge periodo-ok';}");
+        sb.AppendLine("    const plazoEl=document.getElementById('plazo_'+id);if(plazoEl&&data.proximo_pm){plazoEl.textContent=data.proximo_pm;}");
         sb.AppendLine("    cerrarEditarPM(id,p);");
         sb.AppendLine("  }else{btn.disabled=false;btn.textContent='Guardar P'+p;toast('Error: '+(data.error||'desconocido'),false);}");
         sb.AppendLine("}");
@@ -480,12 +476,31 @@ public class QrPageController : ControllerBase
         sb.AppendLine("}");
         sb.AppendLine("function abrirEditar(id){if(!usuarioActual){abrirLogin();return;}usuarioTarjeta[id]=usuarioActual;['equipo_','disp_','planta_','color_','anio_vis_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=false;});document.getElementById('obs_'+id).disabled=false;const card=document.getElementById('btn_hacer_'+id)?.closest('.card')||document.getElementById('equipo_'+id)?.closest('.card');if(card)card.classList.add('editing');}");
         sb.AppendLine("function cancelarEditar(id){['equipo_','disp_','planta_','color_','anio_vis_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=true;});document.getElementById('obs_'+id).disabled=true;const card=document.getElementById('equipo_'+id)?.closest('.card');if(card)card.classList.remove('editing');}");
+        sb.AppendLine("function cancelarTodo(id){");
+        sb.AppendLine("  // Cerrar formularios de registro");
+        sb.AppendLine("  [1,2].forEach(p=>{");
+        sb.AppendLine("    const f=document.getElementById('form'+p+'_'+id);if(f&&f.style.display!=='none'){f.style.display='none';f.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=false);}");
+        sb.AppendLine("    const v=document.getElementById('ver'+p+'_'+id);if(v)v.style.display='none';");
+        sb.AppendLine("    const e=document.getElementById('edit_pm'+p+'_'+id);if(e)e.style.display='none';");
+        sb.AppendLine("  });");
+        sb.AppendLine("  // Cancelar modo edición si está activo");
+        sb.AppendLine("  cancelarEditar(id);");
+        sb.AppendLine("}");
         sb.AppendLine("async function guardarCambios(id){");
         sb.AppendLine("  const anioVal=document.getElementById('anio_vis_'+id)?.value;  const datos={ID_EQUIPO:document.getElementById('equipo_'+id).value,UBICACION:document.getElementById('ubicacion_'+id).value,nombre_dispositivo:document.getElementById('disp_'+id).value,PLANTA:document.getElementById('planta_'+id).value,CATEGORIA_COLOR:document.getElementById('color_'+id).value,OBSERVACIONES:document.getElementById('obs_'+id).value,ANIO_CREACION:anioVal?parseInt(anioVal):null};");
         sb.AppendLine("  const usuario=usuarioTarjeta[id]||usuarioActual||'SISTEMA';");
         sb.AppendLine("  const res=await fetch('/PREVENTIVO/'+id+'?usuario='+encodeURIComponent(usuario),{method:'PUT',headers:{'Content-Type':'application/json','X-Usuario':usuario},body:JSON.stringify(datos)});");
         sb.AppendLine("  const data=await res.json();");
-        sb.AppendLine("  if(data.mensaje){toast('Cambios guardados',true);cancelarEditar(id);}else toast('Error al guardar',false);");
+        sb.AppendLine("  if(data.mensaje){");
+        sb.AppendLine("    toast('Cambios guardados',true);");
+        sb.AppendLine("    // Actualizar el encabezado de la tarjeta en tiempo real");
+        sb.AppendLine("    const card=document.getElementById('equipo_'+id).closest('.card');");
+        sb.AppendLine("    const h3=card.querySelector('.dev-name h3');if(h3)h3.textContent=datos.nombre_dispositivo;");
+        sb.AppendLine("    const idSpan=card.querySelector('.dev-name span');if(idSpan)idSpan.textContent=datos.ID_EQUIPO;");
+        sb.AppendLine("    const colorMap={'verde':['#10B981','#052e16','Verde'],'amarillo':['#F59E0B','#1c1400','Amarillo'],'rojo':['#EF4444','#1f0000','Rojo'],'gris':['#94A3B8','#0f172a','Gris'],'rosa':['#F472B6','#1f0011','Rosa'],'azul':['#3B82F6','#001233','Azul']};");
+        sb.AppendLine("    const cb=card.querySelector('.color-badge');if(cb){const cm=colorMap[datos.CATEGORIA_COLOR.toLowerCase()];if(cm){cb.style.background=cm[1];cb.style.color=cm[0];cb.style.borderColor=cm[0]+'40';cb.textContent=cm[2];}}");
+        sb.AppendLine("    cancelarEditar(id);");
+        sb.AppendLine("  }else toast('Error al guardar',false);");
         sb.AppendLine("}");
         sb.AppendLine("function toast(msg,ok){const t=document.createElement('div');t.className='toast '+(ok?'toast-ok':'toast-err');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}");
         sb.AppendLine("// Animación de botones");
