@@ -55,13 +55,8 @@ public class QrPageController : ControllerBase
             var (badgeColor, badgeBg, badgeLabel) = ColorBadge(row.colorCat);
             var icon = DispIcon(row.dispositivo);
             var fechaStr = row.fecha ?? "Sin registro";
-            var plazoStr = row.plazo ?? "No definido";
-            var plazoP2Str = row.plazoP2 ?? "No definido";
-            // Mostrar "Último PM" solo si hay preventivo_digital registrado
-            var dotClass = row.tienePm ? "dot-ok" : "dot-warn";
-            var dotLabel = row.tienePm
-                ? "Último PM P1: " + fechaStr
-                : "P1: Sin registro · P2: Sin registro";
+            var plazoStr = row.tienePm ? (row.plazo ?? "No definido") : "Sin PM";
+            var plazoP2Str = row.tienePm2 ? (row.plazoP2 ?? "No definido") : "Sin PM";
             var actsHtml = ActsHtml(row.dispositivo);
 
             // Siempre generar los botones PM organizados en filas por período
@@ -134,8 +129,7 @@ public class QrPageController : ControllerBase
                 "</select></div>\n");
             cards.Append("    </div>\n");
             cards.Append("    <div class=\"status-row\">\n");
-            cards.Append("      <span class=\"status-dot " + dotClass + "\"></span>\n");
-            cards.Append("      <span>" + dotLabel + "</span>\n");
+            cards.Append("      <span style=\"font-family:'DM Mono',monospace;font-size:10px;color:#64748B;font-weight:600;text-transform:uppercase;letter-spacing:.06em\">Próximo PM</span>\n");
             cards.Append("      <span style=\"margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#475569;display:flex;flex-direction:column;align-items:flex-end;gap:2px\">" +
                 "<span>P1: <span id=\"plazo_" + row.id + "\">" + plazoStr + "</span></span>" +
                 "<span>P2: <span id=\"plazo_p2_" + row.id + "\">" + plazoP2Str + "</span></span>" +
@@ -476,6 +470,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("    document.getElementById('ver'+p+'_'+id).style.display='none';");
         sb.AppendLine("    document.getElementById('edit_pm'+p+'_'+id).style.display='none';");
         sb.AppendLine("    const badge=document.getElementById('pbadge'+p+'_'+id);if(badge){badge.textContent='📋 P'+p+': ⏳ Pendiente';badge.className='periodo-badge periodo-pend';}");
+        sb.AppendLine("    const plazoEl=document.getElementById(p===2?'plazo_p2_'+id:'plazo_'+id);if(plazoEl)plazoEl.textContent='Sin PM';");
         sb.AppendLine("    const card=document.getElementById('btn_del'+p+'_'+id).closest('.card');");
         sb.AppendLine("    if(p===1){card.dataset.tienePm='false';card.querySelector('.btn-p1').style.display='inline-flex';card.querySelector('.btn-ver1').style.display='none';card.querySelector('.btn-edit1').style.display='none';card.querySelector('.btn-del1').style.display='none';}");
         sb.AppendLine("    else{card.dataset.tienePm2='false';card.querySelector('.btn-p2').style.display='inline-flex';card.querySelector('.btn-ver2').style.display='none';card.querySelector('.btn-edit2').style.display='none';card.querySelector('.btn-del2').style.display='none';}");
@@ -567,11 +562,11 @@ public class QrPageController : ControllerBase
     {
         var d = disp.ToUpper();
         if (d.Contains("COMPUTADORA") || d.Contains("CPU"))
-            return new List<string> { "Sopletear el gabinete", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del gabinete", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y mouse", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza exterior del lector óptico", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente", "Verificación vida de la pila del BIOS" };
+            return new List<string> { "Sopletear el gabinete", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del gabinete", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y mouse", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza exterior del lector óptico", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente", "Verificación vida de la pila del BIOS","Cambiar Qr del Dispositivo","Cambiar Qr del Area"};
         if (d.Contains("PORTATIL") || d.Contains("LAPTOP"))
-            return new List<string> { "Sopletear el gabinete / chasis", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y touchpad", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente" };
+            return new List<string> { "Sopletear el gabinete / chasis", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y touchpad", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente","Cambiar Qr de la Laptop" };
         if (d.Contains("IMPRESORA"))
-            return new List<string> { "Sopletear la impresora térmica", "Limpieza de rodillos (no usar alcohol)", "Limpieza del cabezal de la impresora térmica", "Limpieza exterior de la impresora", "Limpieza del cableado", "Rutear cables / anclar eliminador de impresora", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificar que los periféricos funcionen correctamente" };
+            return new List<string> { "Sopletear la impresora térmica", "Limpieza de rodillos (no usar alcohol)", "Limpieza del cabezal de la impresora térmica", "Limpieza exterior de la impresora", "Limpieza del cableado", "Rutear cables / anclar eliminador de impresora", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificar que los periféricos funcionen correctamente","Cambiar Qr del Dispositivo","cambiar Qr del Dispositivo" };
         if (d.Contains("UPS"))
             return new List<string> { "Limpieza y verificación del UPS", "Limpieza del cableado", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificación vida de la pila del UPS", "Inspección y funcionamiento del UPS", "Verificar que solo equipo IT esté conectado al UPS" };
         return new List<string> { "Inspección general", "Limpieza exterior", "Verificación de funcionamiento" };
