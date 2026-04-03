@@ -60,18 +60,26 @@ public class QrPageController : ControllerBase
                 : "P1: Sin registro · P2: Sin registro";
             var actsHtml = ActsHtml(row.dispositivo);
 
-            // Siempre generar los 4 botones — todos ocultos, se muestran al login segun estado
+            // Siempre generar los botones PM organizados en filas por período
             string btnPm =
-                // ── Período 1 ──
-                "<button class=\"pm-btn btn-pm btn-p1 btn btn-purple\" id=\"btn_hacer1_" + row.id + "\" onclick=\"abrirForm(" + row.id + ",1)\" style=\"display:none\">📋 P1</button>\n" +
-                "<button class=\"pm-btn btn-ver btn-ver1 btn btn-cyan\" id=\"btn_ver1_" + row.id + "\" onclick=\"verPM(" + row.id + ",1)\" style=\"display:none\">👁 Ver P1</button>\n" +
-                "<button class=\"pm-btn btn-edit btn-edit1 btn btn-amber\" id=\"btn_edit1_" + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ",1)\" style=\"display:none\">✏️ P1</button>\n" +
-                "<button class=\"pm-btn btn-del btn-del1 btn btn-danger\" id=\"btn_del1_" + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ",1)\" style=\"display:none\">🗑 P1</button>\n" +
-                // ── Período 2 ──
-                "<button class=\"pm-btn btn-pm btn-p2 btn btn-purple\" id=\"btn_hacer2_" + row.id + "\" onclick=\"abrirForm(" + row.id + ",2)\" style=\"display:none\">📋 P2</button>\n" +
-                "<button class=\"pm-btn btn-ver btn-ver2 btn btn-cyan\" id=\"btn_ver2_" + row.id + "\" onclick=\"verPM(" + row.id + ",2)\" style=\"display:none\">👁 Ver P2</button>\n" +
-                "<button class=\"pm-btn btn-edit btn-edit2 btn btn-amber\" id=\"btn_edit2_" + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ",2)\" style=\"display:none\">✏️ P2</button>\n" +
-                "<button class=\"pm-btn btn-del btn-del2 btn btn-danger\" id=\"btn_del2_" + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ",2)\" style=\"display:none\">🗑 P2</button>";
+                "<div class=\"pm-section\" id=\"pm_section_" + row.id + "\" style=\"display:none\">" +
+                  // ── Período 1 ──
+                  "<div class=\"pm-row\">" +
+                    "<span class=\"pm-row-label\">Período 1</span>" +
+                    "<button class=\"pm-btn btn-pm btn-p1 btn btn-purple\" id=\"btn_hacer1_" + row.id + "\" onclick=\"abrirForm(" + row.id + ",1)\">📋 Registrar</button>" +
+                    "<button class=\"pm-btn btn-ver btn-ver1 btn btn-cyan\" id=\"btn_ver1_" + row.id + "\" onclick=\"verPM(" + row.id + ",1)\" style=\"display:none\">👁 Ver</button>" +
+                    "<button class=\"pm-btn btn-edit btn-edit1 btn btn-amber\" id=\"btn_edit1_" + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ",1)\" style=\"display:none\">✏️ Editar</button>" +
+                    "<button class=\"pm-btn btn-del btn-del1 btn btn-danger\" id=\"btn_del1_" + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ",1)\" style=\"display:none\">🗑</button>" +
+                  "</div>" +
+                  // ── Período 2 ──
+                  "<div class=\"pm-row\">" +
+                    "<span class=\"pm-row-label\">Período 2</span>" +
+                    "<button class=\"pm-btn btn-pm btn-p2 btn btn-purple\" id=\"btn_hacer2_" + row.id + "\" onclick=\"abrirForm(" + row.id + ",2)\">📋 Registrar</button>" +
+                    "<button class=\"pm-btn btn-ver btn-ver2 btn btn-cyan\" id=\"btn_ver2_" + row.id + "\" onclick=\"verPM(" + row.id + ",2)\" style=\"display:none\">👁 Ver</button>" +
+                    "<button class=\"pm-btn btn-edit btn-edit2 btn btn-amber\" id=\"btn_edit2_" + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ",2)\" style=\"display:none\">✏️ Editar</button>" +
+                    "<button class=\"pm-btn btn-del btn-del2 btn btn-danger\" id=\"btn_del2_" + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ",2)\" style=\"display:none\">🗑</button>" +
+                  "</div>" +
+                "</div>";
             bool tienePmFlag = row.tienePm;
 
             cards.Append("<div class=\"card\" data-tiene-pm=\"" + (row.tienePm ? "true" : "false") + "\" data-tiene-pm2=\"" + (row.tienePm2 ? "true" : "false") + "\">\n");
@@ -204,10 +212,12 @@ public class QrPageController : ControllerBase
             cards.Append("      </div>\n    </div>\n");
             cards.Append("  </div>\n");
             cards.Append("  <div class=\"card-actions\">\n");
-            cards.Append("    <button class=\"btn btn-blue\" onclick=\"abrirEditar(" + row.id + ")\">✏️ Editar</button>\n");
-            cards.Append("    <button class=\"btn btn-green\" onclick=\"guardarCambios(" + row.id + ")\">💾 Guardar</button>\n");
-            cards.Append("    <button class=\"btn btn-ghost\" onclick=\"cancelarEditar(" + row.id + ")\">↩ Cancelar</button>\n");
-            cards.Append("    <button class=\"btn btn-ghost\" onclick=\"window.close()\">✕ Salir</button>\n");
+            cards.Append("    <div class=\"ca-edit-row\">\n");
+            cards.Append("      <button class=\"btn btn-blue\" onclick=\"abrirEditar(" + row.id + ")\">✏️ Editar</button>\n");
+            cards.Append("      <button class=\"btn btn-green\" onclick=\"guardarCambios(" + row.id + ")\">💾 Guardar</button>\n");
+            cards.Append("      <button class=\"btn btn-ghost\" onclick=\"cancelarEditar(" + row.id + ")\">↩ Cancelar</button>\n");
+            cards.Append("      <button class=\"btn btn-ghost\" onclick=\"window.close()\">✕ Salir</button>\n");
+            cards.Append("    </div>\n");
             cards.Append("    " + btnPm + "\n");
             cards.Append("  </div>\n</div>\n");
         }
@@ -257,7 +267,14 @@ public class QrPageController : ControllerBase
         sb.AppendLine(".status-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;font-size:11px;color:var(--muted2);}");
         sb.AppendLine(".status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}");
         sb.AppendLine(".dot-ok{background:var(--green);box-shadow:0 0 6px var(--green);}.dot-warn{background:var(--amber);box-shadow:0 0 6px var(--amber);}");
-        sb.AppendLine(".pm-btn{font-size:12px !important;padding:8px 14px !important;}");
+        sb.AppendLine(".pm-btn{font-size:12px !important;padding:7px 13px !important;}");
+        sb.AppendLine(".card-actions{padding:12px 16px;border-top:1px solid var(--border);background:rgba(0,0,0,.15);display:flex;flex-direction:column;gap:10px;}");
+        sb.AppendLine(".ca-edit-row{display:flex;flex-wrap:wrap;gap:6px;}");
+        sb.AppendLine(".ca-edit-row .btn{font-size:11px;padding:7px 12px;}");
+        sb.AppendLine(".pm-section{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border);padding-top:10px;}");
+        sb.AppendLine(".pm-row{display:flex;align-items:center;gap:6px;}");
+        sb.AppendLine(".pm-row-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);min-width:60px;flex-shrink:0;}");
+        sb.AppendLine(".pm-row .btn{font-size:11px;padding:7px 12px;flex-shrink:0;}");
         sb.AppendLine(".mini-form{border-top:1px solid var(--border);padding-top:12px;margin-top:4px;}");
         sb.AppendLine(".form-sep{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:8px;}");
         sb.AppendLine(".acts-list{display:flex;flex-direction:column;gap:3px;margin-bottom:4px;max-height:220px;overflow-y:auto;}");
@@ -278,8 +295,6 @@ public class QrPageController : ControllerBase
         sb.AppendLine(".card.editing .info-item input:not([disabled]),.card.editing textarea:not([disabled]){border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.06);opacity:1;}");
         sb.AppendLine("@keyframes badgePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(245,158,11,.3)}50%{opacity:.8;box-shadow:0 0 0 5px rgba(245,158,11,0)}}");
         sb.AppendLine(".form-actions{display:flex;gap:8px;justify-content:flex-end;}");
-        sb.AppendLine(".card-actions{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;border-top:1px solid var(--border);background:rgba(0,0,0,.15);}");
-        sb.AppendLine(".card-actions .btn{font-size:11px;padding:7px 12px;}");
         sb.AppendLine(".modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);justify-content:center;align-items:center;z-index:9999;}");
         sb.AppendLine(".modal.show{display:flex;}");
         sb.AppendLine(".modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:28px;width:min(360px,95vw);}");
@@ -341,7 +356,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("let usuarioActual=null,nombreActual=null,usuarioTarjeta={};");
         sb.AppendLine("function toggleChipQr(){document.getElementById('userChip').classList.toggle('open');}");
         sb.AppendLine("document.addEventListener('click',e=>{const c=document.getElementById('userChip');if(c&&!c.contains(e.target))c.classList.remove('open');});");
-        sb.AppendLine("async function cerrarSesionQr(){try{await fetch('/LOGOUT',{method:'POST',credentials:'include'});}catch(e){}usuarioActual=null;nombreActual=null;document.getElementById('userChip').style.display='none';document.getElementById('btnLogin').style.display='inline-flex';document.querySelectorAll('.pm-btn').forEach(b=>b.style.display='none');toast('Sesión cerrada',true);}");
+        sb.AppendLine("async function cerrarSesionQr(){try{await fetch('/LOGOUT',{method:'POST',credentials:'include'});}catch(e){}usuarioActual=null;nombreActual=null;document.getElementById('userChip').style.display='none';document.getElementById('btnLogin').style.display='inline-flex';document.querySelectorAll('.pm-section').forEach(s=>s.style.display='none');toast('Sesión cerrada',true);}");
         sb.AppendLine("function abrirLogin(){document.getElementById('modalLogin').classList.add('show');setTimeout(()=>document.getElementById('inputUsuario').focus(),100);}");
         sb.AppendLine("function cerrarLogin(){");
         sb.AppendLine("  document.getElementById('modalLogin').classList.remove('show');");
@@ -362,18 +377,22 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  btn.disabled=false;btn.textContent='Entrar →';");
         sb.AppendLine("  if(!data.ok){errEl.textContent=data.mensaje||'Credenciales incorrectas';errEl.style.display='block';return;}");
         sb.AppendLine("  usuarioActual=data.usuario;nombreActual=data.nombre||data.usuario;");
+        sb.AppendLine("  const esAdmin=data.rol==='ADMIN';");
         sb.AppendLine("  document.getElementById('userNombre').textContent=nombreActual;");
         sb.AppendLine("  document.getElementById('userChip').style.display='flex';");
         sb.AppendLine("  document.getElementById('btnLogin').style.display='none';");
         sb.AppendLine("  document.querySelectorAll('.card').forEach(card=>{");
         sb.AppendLine("    const p1=card.dataset.tienePm==='true';const p2=card.dataset.tienePm2==='true';");
+        sb.AppendLine("    const sec=card.querySelector('.pm-section');if(sec)sec.style.display='flex';");
         sb.AppendLine("    const b1hacer=card.querySelector('.btn-p1');const b2hacer=card.querySelector('.btn-p2');");
         sb.AppendLine("    const b1ver=card.querySelector('.btn-ver1');const b1edit=card.querySelector('.btn-edit1');const b1del=card.querySelector('.btn-del1');");
         sb.AppendLine("    const b2ver=card.querySelector('.btn-ver2');const b2edit=card.querySelector('.btn-edit2');const b2del=card.querySelector('.btn-del2');");
         sb.AppendLine("    if(b1hacer)b1hacer.style.display=p1?'none':'inline-flex';");
-        sb.AppendLine("    if(b1ver)b1ver.style.display=p1?'inline-flex':'none';if(b1edit)b1edit.style.display=p1?'inline-flex':'none';if(b1del)b1del.style.display=p1?'inline-flex':'none';");
+        sb.AppendLine("    if(b1ver)b1ver.style.display=p1?'inline-flex':'none';if(b1edit)b1edit.style.display=p1?'inline-flex':'none';");
+        sb.AppendLine("    if(b1del)b1del.style.display=(p1&&esAdmin)?'inline-flex':'none';");
         sb.AppendLine("    if(b2hacer)b2hacer.style.display=p2?'none':'inline-flex';");
-        sb.AppendLine("    if(b2ver)b2ver.style.display=p2?'inline-flex':'none';if(b2edit)b2edit.style.display=p2?'inline-flex':'none';if(b2del)b2del.style.display=p2?'inline-flex':'none';");
+        sb.AppendLine("    if(b2ver)b2ver.style.display=p2?'inline-flex':'none';if(b2edit)b2edit.style.display=p2?'inline-flex':'none';");
+        sb.AppendLine("    if(b2del)b2del.style.display=(p2&&esAdmin)?'inline-flex':'none';");
         sb.AppendLine("  });");
         sb.AppendLine("  cerrarLogin();toast('Sesión iniciada — '+nombreActual,true);");
         sb.AppendLine("}");
