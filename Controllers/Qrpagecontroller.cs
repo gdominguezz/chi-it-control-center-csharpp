@@ -146,6 +146,7 @@ public class QrPageController : ControllerBase
             cards.Append("    <div class=\"mini-form\" id=\"form1_" + row.id + "\" style=\"display:none\">\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px\">📋 Período 1 — Actividades</div>\n");
             cards.Append("      <div class=\"acts-list\">" + actsHtml + "</div>\n");
+            cards.Append("      <label class=\"act-item act-correctivo\"><input type=\"checkbox\" id=\"req_correctivo1_" + row.id + "\"><span class=\"act-check\"></span><span class=\"act-text\">⚠️ Requiere Correctivo</span></label>\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
             cards.Append("      <input type=\"date\" class=\"date-input\" id=\"fecha1_" + row.id + "\">\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
@@ -167,6 +168,7 @@ public class QrPageController : ControllerBase
             cards.Append("    <div class=\"mini-form\" id=\"edit_pm1_" + row.id + "\" style=\"display:none\">\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 1</div>\n");
             cards.Append("      <div class=\"acts-list\" id=\"edit_acts1_" + row.id + "\">" + actsHtml + "</div>\n");
+            cards.Append("      <label class=\"act-item act-correctivo\"><input type=\"checkbox\" id=\"req_correctivo_edit1_" + row.id + "\"><span class=\"act-check\"></span><span class=\"act-text\">⚠️ Requiere Correctivo</span></label>\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
             cards.Append("      <input type=\"date\" class=\"date-input\" id=\"edit_fecha1_" + row.id + "\">\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
@@ -177,6 +179,7 @@ public class QrPageController : ControllerBase
             cards.Append("    <div class=\"mini-form\" id=\"form2_" + row.id + "\" style=\"display:none\">\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px\">📋 Período 2 — Actividades</div>\n");
             cards.Append("      <div class=\"acts-list\">" + actsHtml + "</div>\n");
+            cards.Append("      <label class=\"act-item act-correctivo\"><input type=\"checkbox\" id=\"req_correctivo2_" + row.id + "\"><span class=\"act-check\"></span><span class=\"act-text\">⚠️ Requiere Correctivo</span></label>\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
             cards.Append("      <input type=\"date\" class=\"date-input\" id=\"fecha2_" + row.id + "\">\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
@@ -198,6 +201,7 @@ public class QrPageController : ControllerBase
             cards.Append("    <div class=\"mini-form\" id=\"edit_pm2_" + row.id + "\" style=\"display:none\">\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 2</div>\n");
             cards.Append("      <div class=\"acts-list\" id=\"edit_acts2_" + row.id + "\">" + actsHtml + "</div>\n");
+            cards.Append("      <label class=\"act-item act-correctivo\"><input type=\"checkbox\" id=\"req_correctivo_edit2_" + row.id + "\"><span class=\"act-check\"></span><span class=\"act-text\">⚠️ Requiere Correctivo</span></label>\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
             cards.Append("      <input type=\"date\" class=\"date-input\" id=\"edit_fecha2_" + row.id + "\">\n");
             cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
@@ -315,6 +319,13 @@ public class QrPageController : ControllerBase
         sb.AppendLine(".drop-item.danger{color:#FCA5A5;}");
         sb.AppendLine(".drop-item.danger:hover{background:rgba(239,68,68,.1);color:#fff;}");
         sb.AppendLine(".drop-sep{height:1px;background:rgba(255,255,255,.07);margin:6px 0;}");
+        sb.AppendLine("/* ── Requiere Correctivo ── */");
+        sb.AppendLine(".act-correctivo{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.35);transition:background .15s;}");
+        sb.AppendLine(".act-correctivo:hover{background:rgba(239,68,68,.14);}");
+        sb.AppendLine(".act-correctivo .act-text{color:#FCA5A5 !important;font-weight:700 !important;font-size:13px !important;}");
+        sb.AppendLine(".act-correctivo .act-check{border-color:rgba(239,68,68,.5) !important;}");
+        sb.AppendLine(".act-correctivo input:checked ~ .act-check{background:#EF4444 !important;border-color:#EF4444 !important;}");
+        sb.AppendLine(".act-correctivo input:checked ~ .act-text{color:#ff8080 !important;}");
         sb.AppendLine("</style></head><body>");
         sb.AppendLine("<div class=\"top-bar\">");
         sb.AppendLine("  <div class=\"top-icon\">🔧</div>");
@@ -400,11 +411,12 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  const checks=[];cbs.forEach((cb,i)=>{if(cb.checked)checks.push(i);});");
         sb.AppendLine("  if(!checks.length){toast('Marca al menos una actividad',false);return;}");
         sb.AppendLine("  const obs=document.getElementById('obs_pm'+p+'_'+id)?.value||'';");
+        sb.AppendLine("  const reqCorr=document.getElementById('req_correctivo'+p+'_'+id)?.checked||false;");
         sb.AppendLine("  const btn=document.querySelector('#form'+p+'_'+id+' .btn-success');");
         sb.AppendLine("  btn.disabled=true;btn.textContent='Guardando...';");
         sb.AppendLine("  try{");
         sb.AppendLine("    const endpoint=p===2?'/PREVENTIVO/GUARDAR_PM_P2/'+id:'/PREVENTIVO/GUARDAR_PM/'+id;");
-        sb.AppendLine("    const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:usuarioActual,fecha,checks,observaciones:obs})});");
+        sb.AppendLine("    const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:usuarioActual,fecha,checks,observaciones:obs,requiere_correctivo:reqCorr})});");
         sb.AppendLine("    const data=await res.json();");
         sb.AppendLine("    if(data.ok){");
         sb.AppendLine("      toast('P'+p+' guardado. Próximo: '+data.proximo_pm,true);");
@@ -442,6 +454,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  if(data.existe&&data.data.checks)data.data.checks.forEach(i=>{if(cbs[i])cbs[i].checked=true;});");
         sb.AppendLine("  const f=document.getElementById('edit_fecha'+p+'_'+id);if(f)f.value=data.existe?(data.data.fecha||''):'';");
         sb.AppendLine("  const o=document.getElementById('edit_obs_pm'+p+'_'+id);if(o)o.value=data.existe?(data.data.observaciones||''):'';");
+        sb.AppendLine("  const rc=document.getElementById('req_correctivo_edit'+p+'_'+id);if(rc)rc.checked=data.existe?(data.data.requiere_correctivo||false):false;");
         sb.AppendLine("  document.getElementById('edit_pm'+p+'_'+id).style.display='block';");
         sb.AppendLine("}");
         sb.AppendLine("function cerrarEditarPM(id,p){document.getElementById('edit_pm'+p+'_'+id).style.display='none';}");
@@ -452,11 +465,12 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  const checks=[];cbs.forEach((cb,i)=>{if(cb.checked)checks.push(i);});");
         sb.AppendLine("  if(!checks.length){toast('Marca al menos una actividad',false);return;}");
         sb.AppendLine("  const obs=document.getElementById('edit_obs_pm'+p+'_'+id).value;");
+        sb.AppendLine("  const reqCorr=document.getElementById('req_correctivo_edit'+p+'_'+id)?.checked||false;");
         sb.AppendLine("  const btn=document.querySelector('#edit_pm'+p+'_'+id+' .btn-amber');");
         sb.AppendLine("  btn.disabled=true;btn.textContent='Guardando...';");
         sb.AppendLine("  try{");
         sb.AppendLine("    const endpoint=p===2?'/PREVENTIVO/GUARDAR_PM_P2/'+id:'/PREVENTIVO/GUARDAR_PM/'+id;");
-        sb.AppendLine("    const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:usuarioActual,fecha,checks,observaciones:obs})});");
+        sb.AppendLine("    const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:usuarioActual,fecha,checks,observaciones:obs,requiere_correctivo:reqCorr})});");
         sb.AppendLine("    const data=await res.json();");
         sb.AppendLine("    if(data.ok){");
         sb.AppendLine("      toast('P'+p+' actualizado. Próximo: '+data.proximo_pm,true);");
