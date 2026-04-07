@@ -218,6 +218,14 @@ public class QrPageController : ControllerBase
             cards.Append("      <button class=\"btn btn-ghost\" onclick=\"window.close()\">✕ Salir</button>\n");
             cards.Append("    </div>\n");
             cards.Append("    " + btnPm + "\n");
+            // ── Sección QR del dispositivo ──
+            cards.Append("    <div class=\"qr-section\">\n");
+            cards.Append("      <div class=\"form-sep\" style=\"margin:10px 0 6px\">📷 QR del Dispositivo</div>\n");
+            cards.Append("      <div style=\"display:flex;align-items:center;gap:14px;\">\n");
+            cards.Append("        <div id=\"qr_" + row.id + "\" data-equipo=\"" + Esc(row.idEquipo) + "\" style=\"background:white;padding:8px;border-radius:8px;width:90px;height:90px;flex-shrink:0;\"></div>\n");
+            cards.Append("        <button class=\"btn btn-ghost\" style=\"font-size:11px;padding:7px 14px;\" onclick=\"imprimirQrsCard(" + row.id + ",'" + Esc(ubicacion) + "','" + Esc(row.dispositivo) + "','" + Esc(row.idEquipo) + "')\">🖨️ Imprimir 3 QR</button>\n");
+            cards.Append("      </div>\n");
+            cards.Append("    </div>\n");
             cards.Append("  </div>\n</div>\n");
         }
 
@@ -235,6 +243,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
         sb.AppendLine("<title>PM — " + ubicacion + "</title>");
         sb.AppendLine("<link href=\"https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap\" rel=\"stylesheet\">");
+        sb.AppendLine("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js\"></script>");
         sb.AppendLine("<style>");
         sb.AppendLine(":root{--bg:#0B0F1A;--surface:#111827;--surface2:#1a2235;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--accent:#3B82F6;--text:#F1F5F9;--muted:#64748B;--muted2:#94A3B8;--green:#10B981;--red:#EF4444;--amber:#F59E0B;--radius:14px;}");
         sb.AppendLine("*{box-sizing:border-box;margin:0;padding:0;}");
@@ -326,6 +335,8 @@ public class QrPageController : ControllerBase
         sb.AppendLine(".act-correctivo .act-check{border-color:rgba(239,68,68,.5) !important;}");
         sb.AppendLine(".act-correctivo input:checked ~ .act-check{background:#EF4444 !important;border-color:#EF4444 !important;}");
         sb.AppendLine(".act-correctivo input:checked ~ .act-text{color:#ff8080 !important;}");
+        sb.AppendLine(".qr-section{border-top:1px solid var(--border);padding-top:10px;margin-top:4px;}");
+        sb.AppendLine(".qr-section .form-sep{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:6px;}");
         sb.AppendLine("</style></head><body>");
         sb.AppendLine("<div class=\"top-bar\">");
         sb.AppendLine("  <div class=\"top-icon\">🔧</div>");
@@ -541,6 +552,49 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  btn.appendChild(r);");
         sb.AppendLine("  setTimeout(()=>r.remove(),500);");
         sb.AppendLine("});");
+        // ── Generar QR de cada dispositivo al cargar ──
+        sb.AppendLine("document.addEventListener('DOMContentLoaded',function(){");
+        sb.AppendLine("  document.querySelectorAll('[id^=\"qr_\"]').forEach(function(el){");
+        sb.AppendLine("    const equipo=el.getAttribute('data-equipo')||'SIN-ID';");
+        sb.AppendLine("    new QRCode(el,{text:equipo,width:74,height:74,correctLevel:QRCode.CorrectLevel.M});");
+        sb.AppendLine("  });");
+        sb.AppendLine("});");
+        // ── Función imprimir 3 QR ──
+        sb.AppendLine("function imprimirQrsCard(id,ubicacion,dispositivo,equipo){");
+        sb.AppendLine("  const w=window.open('','_blank','width=780,height=520');");
+        sb.AppendLine("  w.document.write('<!DOCTYPE html><html><head><meta charset=\"UTF-8\">');");
+        sb.AppendLine("  w.document.write('<title>Imprimir QR \u2014 '+dispositivo+'</title>');");
+        sb.AppendLine("  w.document.write('<script src=\"https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js\"><\\/script>');");
+        sb.AppendLine("  w.document.write('<style>');");
+        sb.AppendLine("  w.document.write('*{box-sizing:border-box;margin:0;padding:0;}');");
+        sb.AppendLine("  w.document.write('body{font-family:sans-serif;display:flex;flex-direction:column;align-items:center;padding:24px;background:#fff;gap:20px;}');");
+        sb.AppendLine("  w.document.write('.titulo{font-size:14px;font-weight:700;color:#1e293b;text-align:center;}');");
+        sb.AppendLine("  w.document.write('.subtitulo{font-size:11px;color:#64748b;text-align:center;margin-top:2px;}');");
+        sb.AppendLine("  w.document.write('.qrs-row{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}');");
+        sb.AppendLine("  w.document.write('.qr-card{display:flex;flex-direction:column;align-items:center;gap:8px;border:1px solid #e2e8f0;border-radius:12px;padding:16px 20px;}');");
+        sb.AppendLine("  w.document.write('.qr-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;text-align:center;}');");
+        sb.AppendLine("  w.document.write('.qr-sub{font-size:12px;font-weight:600;color:#1e293b;text-align:center;max-width:150px;}');");
+        sb.AppendLine("  w.document.write('.qr-sub small{display:block;font-size:10px;color:#94a3b8;font-weight:400;}');");
+        sb.AppendLine("  w.document.write('.qr-id{font-size:11px;font-weight:700;color:#1e293b;margin-top:4px;font-family:monospace;letter-spacing:.04em;}');");
+        sb.AppendLine("  w.document.write('.btn-print{margin-top:4px;padding:10px 28px;background:#3B82F6;color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}');");
+        sb.AppendLine("  w.document.write('@media print{.btn-print{display:none!important;}}');");
+        sb.AppendLine("  w.document.write('</style></head><body>');");
+        sb.AppendLine("  w.document.write('<div class=\"titulo\">Códigos QR \u2014 '+dispositivo+'</div>');");
+        sb.AppendLine("  w.document.write('<div class=\"subtitulo\">'+equipo+' &nbsp;&bull;&nbsp; '+ubicacion+'</div>');");
+        sb.AppendLine("  w.document.write('<div class=\"qrs-row\">');");
+        sb.AppendLine("  w.document.write('<div class=\"qr-card\"><div id=\"qrA\"></div><div class=\"qr-label\">\ud83d\udccd \u00c1rea</div><div class=\"qr-sub\">'+ubicacion+'</div><div class=\"qr-id\">'+ubicacion+'</div></div>');");
+        sb.AppendLine("  w.document.write('<div class=\"qr-card\"><div id=\"qrD\"></div><div class=\"qr-label\">\ud83d\udda5\ufe0f Dispositivo</div><div class=\"qr-sub\">'+dispositivo+'<small>'+equipo+'</small></div><div class=\"qr-id\">'+equipo+'</div></div>');");
+        sb.AppendLine("  w.document.write('<div class=\"qr-card\"><div id=\"qrP\"></div><div class=\"qr-label\">\ud83d\udccb PM Digital</div><div class=\"qr-sub\">Preventivo #'+id+'<small>'+equipo+'</small></div><div class=\"qr-id\">'+equipo+'</div></div>');");
+        sb.AppendLine("  w.document.write('</div>');");
+        sb.AppendLine("  w.document.write('<button class=\"btn-print\" onclick=\"window.print()\">🖨️ Imprimir</button>');");
+        sb.AppendLine("  w.document.write('<script>');");
+        sb.AppendLine("  w.document.write('new QRCode(document.getElementById(\"qrA\"),{text:\"'+ubicacion+'\",width:150,height:150,correctLevel:QRCode.CorrectLevel.M});');");
+        sb.AppendLine("  w.document.write('new QRCode(document.getElementById(\"qrD\"),{text:\"'+equipo+'\",width:150,height:150,correctLevel:QRCode.CorrectLevel.M});');");
+        sb.AppendLine("  w.document.write('new QRCode(document.getElementById(\"qrP\"),{text:\"'+equipo+'\",width:150,height:150,correctLevel:QRCode.CorrectLevel.M});');");
+        sb.AppendLine("  w.document.write('setTimeout(()=>window.print(),900);');");
+        sb.AppendLine("  w.document.write('<\\/script></body></html>');");
+        sb.AppendLine("  w.document.close();");
+        sb.AppendLine("}");
         sb.AppendLine("</script></body></html>");
         return sb.ToString();
     }
