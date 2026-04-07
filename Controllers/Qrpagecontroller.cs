@@ -594,6 +594,13 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  html+='.eti-id{font-size:7.5pt;font-weight:700;color:#3B82F6;font-family:monospace;text-align:center;}';");
         sb.AppendLine("  html+='.eti-sep{width:80%;height:1px;background:#e2e8f0;margin:1mm 0;}';");
         sb.AppendLine("  html+='.eti-ubicacion{font-size:6.5pt;color:#94a3b8;text-align:center;}';");
+        // Estilos para el QR general grande
+        sb.AppendLine("  html+='.eti-qr-general-wrap{display:flex;flex-direction:column;align-items:center;gap:2mm;width:100%;padding:4mm 5mm;background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:6px;border:1.5px solid #3B82F6;margin-bottom:3mm;}';");
+        sb.AppendLine("  html+='.eti-qr-general-label{font-size:7pt;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.12em;text-align:center;}';");
+        sb.AppendLine("  html+='.eti-qr-general-title{font-size:9.5pt;font-weight:700;color:#f1f5f9;text-align:center;line-height:1.25;}';");
+        sb.AppendLine("  html+='.eti-qr-general-sub{font-size:6.5pt;color:#3B82F6;text-align:center;letter-spacing:.06em;}';");
+        sb.AppendLine("  html+='.eti-qr-general-box{background:white;padding:5px;border-radius:5px;box-shadow:0 0 0 2px #3B82F6,0 0 0 4px #0f172a;}';");
+        sb.AppendLine("  html+='.eti-qr-general-divider{width:70%;height:1px;background:rgba(59,130,246,.35);margin:1mm 0;}';");
         // Al imprimir: sin fondo gris, tamaño exacto, sin sombra
         sb.AppendLine("  html+='@media print{body{background:#fff!important;padding:0!important;gap:0!important;}.no-print{display:none!important;}.etiqueta{width:100mm;min-height:160mm;box-shadow:none!important;border-radius:0!important;padding:6mm 5mm;}}';");
         sb.AppendLine("  html+='</style></head><body>';");
@@ -602,6 +609,16 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  const ubicacion=document.querySelector('.top-title p')?.textContent||'';");
         sb.AppendLine("  html+='<div class=\"etiqueta\">';");
         sb.AppendLine("  html+='<div class=\"eti-titulo\">📋 Dispositivos — '+ubicacion+'</div>';");
+        // ── QR General del área ──
+        sb.AppendLine("  const urlGeneral=window.location.href;");
+        sb.AppendLine("  html+='<div class=\"eti-qr-general-wrap\">';");
+        sb.AppendLine("  html+='<div class=\"eti-qr-general-label\">🌐 Acceso General al Área</div>';");
+        sb.AppendLine("  html+='<div class=\"eti-qr-general-box\" id=\"qr_general\"></div>';");
+        sb.AppendLine("  html+='<div class=\"eti-qr-general-divider\"></div>';");
+        sb.AppendLine("  html+='<div class=\"eti-qr-general-title\">'+ubicacion+'</div>';");
+        sb.AppendLine("  html+='<div class=\"eti-qr-general-sub\">📋 Ver todos los dispositivos del área</div>';");
+        sb.AppendLine("  html+='</div>';");
+        // ── QRs individuales ──
         sb.AppendLine("  html+='<div class=\"eti-qrs\">';");
         sb.AppendLine("  tarjetas.forEach(function(t,i){");
         sb.AppendLine("    html+='<div class=\"eti-item\">';");
@@ -615,6 +632,8 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  html+='<div class=\"eti-ubicacion\">'+ubicacion+'</div>';");
         sb.AppendLine("  html+='</div>';");  // cierra etiqueta
         sb.AppendLine("  html+='<script>';");
+        // QR general grande (140px ~37mm) centrado — apunta a la URL de la página actual
+        sb.AppendLine("  html+='new QRCode(document.getElementById(\"qr_general\"),{text:\"'+window.location.href+'\",width:140,height:140,correctLevel:QRCode.CorrectLevel.M});';");
         // QR de 26mm (~98px a 96dpi) para que quepan 3 en 10cm de ancho
         sb.AppendLine("  tarjetas.forEach(function(t,i){");
         sb.AppendLine("    html+='new QRCode(document.getElementById(\"qr'+i+'\"),{text:\"'+t.equipo+'\",width:98,height:98,correctLevel:QRCode.CorrectLevel.M});';");
