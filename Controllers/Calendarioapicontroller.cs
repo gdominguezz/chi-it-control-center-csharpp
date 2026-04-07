@@ -11,8 +11,6 @@ public class CalendarioApiController : ControllerBase
     public CalendarioApiController(DbConnectionPool db) => _db = db;
 
     // ── Clasificación de dispositivos ────────────────────────────────────
-    // LAPTOPS          → LAPTOP
-    // EQUIPOS DE CÓMPUTO → COMPUTADORA DE ESCRITORIO | UPS | IMPRESORA TERMICA
     private static string ClasificarTipo(string dispositivo)
     {
         var d = (dispositivo ?? "").Trim().ToUpperInvariant();
@@ -22,15 +20,14 @@ public class CalendarioApiController : ControllerBase
         return "otros";
     }
 
+    // ── Plantas principales que comparten plazos proporcionalmente ────────
+    // B1 y B2 se mezclan semana a semana en proporción a su tamaño.
+    // El resto se asigna al final en bloques.
+    private static readonly HashSet<string> PlantasPrincipales =
+        new(StringComparer.OrdinalIgnoreCase) { "B1", "B2" };
+
     // ═════════════════════════════════════════════════════════════════════
     // GET /CALENDARIO/API?anio=2025
-    // Respuesta:
-    //   {
-    //     anio,
-    //     config: { laptops: { p1_activo, p2_activo, ... }, computo: { ... } },
-    //     laptops: { plantas_orden: [], calendario: { planta: { semana: {p1:[],p2:[]} } } },
-    //     computo:  { plantas_orden: [], calendario: { ... } }
-    //   }
     // ═════════════════════════════════════════════════════════════════════
     [HttpGet("CALENDARIO/API")]
     public IActionResult ObtenerCalendario([FromQuery] int? anio)
@@ -40,25 +37,21 @@ public class CalendarioApiController : ControllerBase
         using var conn = _db.Open();
         var config = LeerConfig(conn);
 
-        // ── Leer todos los equipos y agrupar por planta+tipo ──
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT
                 COALESCE(planta, 'Sin planta') AS planta,
-                id,
-                id_equipo,
-                nombre_dispositivo,
-                ubicacion,
-                categoria_color,
-                fecha_realizacion              AS fecha_p1,
-                realizado_por                  AS tecnico_p1,
-                fecha_realizacion_p2           AS fecha_p2,
-                realizado_por_p2               AS tecnico_p2
+                id, id_equipo, nombre_dispositivo, ubicacion, categoria_color,
+                fecha_realizacion   AS fecha_p1,
+                realizado_por       AS tecnico_p1,
+                fecha_realizacion_p2 AS fecha_p2,
+                realizado_por_p2    AS tecnico_p2,
+                plazo               AS plazo_p1,
+                plazo_p2            AS plazo_p2
             FROM public.mantenimientos_preventivos
             ORDER BY planta, nombre_dispositivo, id_equipo
             """;
 
-        // planta → tipo → lista
         var datos = new Dictionary<string, Dictionary<string, List<EquipoCalendario>>>();
 
         using var r = cmd.ExecuteReader();
@@ -84,150 +77,212 @@ public class CalendarioApiController : ControllerBase
                 TecnicoP1 = r.IsDBNull(7) ? "" : r.GetString(7),
                 FechaP2 = r.IsDBNull(8) ? null : r.GetDateTime(8),
                 TecnicoP2 = r.IsDBNull(9) ? "" : r.GetString(9),
+                PlazoP1 = r.IsDBNull(10) ? null : r.GetString(10),
+                PlazoP2 = r.IsDBNull(11) ? null : r.GetString(11),
             });
         }
         r.Close();
 
-        // ── Ordenar plantas: mayor cantidad de equipos primero ──
-        var plantasOrdenLaptops = datos.Keys
-            .OrderByDescending(p => datos[p]["laptops"].Count)
-            .ThenBy(p => p)
-            .ToList();
+        // Ordenar plantas: principales primero (B1, B2), resto por cantidad desc
+        List<string> OrdenarPlantas(string tipo) =>
+            datos.Keys
+                .OrderByDescending(p => PlantasPrincipales.Contains(p) ? 1 : 0)
+                .ThenByDescending(p => datos[p][tipo].Count)
+                .ThenBy(p => p)
+                .ToList();
 
-        var plantasOrdenComputo = datos.Keys
-            .OrderByDescending(p => datos[p]["computo"].Count)
-            .ThenBy(p => p)
-            .ToList();
+        var plantasLaptops = OrdenarPlantas("laptops");
+        var plantasComputo = OrdenarPlantas("computo");
 
-        // ── Construir calendarios ──
-        var calLaptops = ConstruirCalendario(datos, "laptops", config, plantasOrdenLaptops);
-        var calComputo = ConstruirCalendario(datos, "computo", config, plantasOrdenComputo);
+        var calLaptops = ConstruirCalendario(datos, "laptops", config, plantasLaptops);
+        var calComputo = ConstruirCalendario(datos, "computo", config, plantasComputo);
 
         return Ok(new
         {
             anio = year,
             config = SerializarConfig(config),
-            laptops = new { plantas_orden = plantasOrdenLaptops, calendario = calLaptops },
-            computo = new { plantas_orden = plantasOrdenComputo, calendario = calComputo },
+            laptops = new { plantas_orden = plantasLaptops, calendario = calLaptops },
+            computo = new { plantas_orden = plantasComputo, calendario = calComputo },
         });
     }
 
-    // ── Construir el calendario completo de un tipo ───────────────────────
-    // Las plantas se distribuyen en orden (más equipos primero).
-    // La distribución de semanas es CONTINUA entre plantas:
-    //   B1 ocupa Plazo 8,9,10 → B2 arranca en Plazo 11 → Bodega en Plazo 14 …
+    // ═════════════════════════════════════════════════════════════════════
+    // Construir calendario para un tipo (laptops | computo)
+    //
+    // Regla de distribución:
+    //   1. B1 y B2 se mezclan proporcionalmente semana a semana.
+    //      Cada semana recibe: round(30 * proporcion_planta) equipos de cada una.
+    //   2. Las demás plantas van al final, una tras otra, en bloques de ~30.
+    //
+    // Resultado: dict planta → semana → { p1:[], p2:[] }
+    //   Cada equipo tiene el plazo (número de semana) que le fue asignado.
+    // ═════════════════════════════════════════════════════════════════════
     private static Dictionary<string, Dictionary<int, SemanaData>> ConstruirCalendario(
         Dictionary<string, Dictionary<string, List<EquipoCalendario>>> datos,
         string tipo,
         ConfigPeriodos config,
         List<string> plantasOrden)
     {
-        var resultado = new Dictionary<string, Dictionary<int, SemanaData>>();
-
         DateTime? inicioP1 = tipo == "laptops" ? config.LaptopsP1 : config.ComputoP1;
         DateTime? inicioP2 = tipo == "laptops" ? config.LaptopsP2 : config.ComputoP2;
 
-        int offsetP1 = 0; // semanas acumuladas entre plantas (P1)
-        int offsetP2 = 0; // semanas acumuladas entre plantas (P2)
+        // resultado final: planta → semana → SemanaData
+        var resultado = new Dictionary<string, Dictionary<int, SemanaData>>();
+        foreach (var p in plantasOrden) resultado[p] = new Dictionary<int, SemanaData>();
 
-        foreach (var planta in plantasOrden)
+        foreach (int periodo in new[] { 1, 2 })
         {
-            if (!datos.ContainsKey(planta)) continue;
+            DateTime? inicio = periodo == 1 ? inicioP1 : inicioP2;
+            if (inicio == null) continue;
 
-            var equipos = datos[planta].GetValueOrDefault(tipo) ?? new();
-            var ordenados = equipos
-                .OrderBy(e => e.Dispositivo, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(e => e.IdEquipo, StringComparer.OrdinalIgnoreCase)
+            int semanaBase = SemanaISO(inicio.Value);
+            int totalSemsAnio = SemanasEnAnio(inicio.Value.Year);
+            const int POR_SEMANA = 30; // total equipos por semana entre todas las principales
+
+            // Separar plantas principales de las demás
+            var principales = plantasOrden
+                .Where(p => PlantasPrincipales.Contains(p) && datos.ContainsKey(p))
+                .ToList();
+            var secundarias = plantasOrden
+                .Where(p => !PlantasPrincipales.Contains(p) && datos.ContainsKey(p))
                 .ToList();
 
-            var semanas = new Dictionary<int, SemanaData>();
+            // Ordenar equipos de cada planta
+            var equiposPorPlanta = new Dictionary<string, List<EquipoCalendario>>();
+            foreach (var planta in plantasOrden)
+            {
+                if (!datos.ContainsKey(planta)) continue;
+                equiposPorPlanta[planta] = datos[planta]
+                    .GetValueOrDefault(tipo, new())
+                    .OrderBy(e => e.Dispositivo, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(e => e.IdEquipo, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            }
 
-            if (inicioP1 != null && ordenados.Count > 0)
-                offsetP1 = DistribuirEnSemanas(ordenados, inicioP1.Value, 1, semanas, offsetP1);
+            // ── FASE 1: Distribuir B1 y B2 proporcionalmente ──────────────
+            // Calcular cuántos equipos de cada principal por semana (proporcional)
+            int totalPrincipales = principales.Sum(p =>
+                equiposPorPlanta.GetValueOrDefault(p)?.Count ?? 0);
 
-            if (inicioP2 != null && ordenados.Count > 0)
-                offsetP2 = DistribuirEnSemanas(ordenados, inicioP2.Value, 2, semanas, offsetP2);
+            // Índice de avance por planta
+            var idx = new Dictionary<string, int>();
+            foreach (var p in principales) idx[p] = 0;
 
-            resultado[planta] = semanas;
+            // Cuántos equipos por semana le tocan a cada planta principal
+            var porSemana = new Dictionary<string, int>();
+            foreach (var p in principales)
+            {
+                int cnt = equiposPorPlanta.GetValueOrDefault(p)?.Count ?? 0;
+                porSemana[p] = totalPrincipales > 0
+                    ? (int)Math.Round((double)cnt / totalPrincipales * POR_SEMANA)
+                    : 0;
+                // Mínimo 1 si tiene equipos
+                if (porSemana[p] == 0 && cnt > 0) porSemana[p] = 1;
+            }
+
+            int semOffset = 0;
+
+            // Seguir hasta que todas las principales terminen
+            bool HayPendientes() => principales.Any(p =>
+                idx.GetValueOrDefault(p) < (equiposPorPlanta.GetValueOrDefault(p)?.Count ?? 0));
+
+            while (HayPendientes())
+            {
+                int semRaw = semanaBase + semOffset;
+                int semNum = ((semRaw - 1) % totalSemsAnio) + 1;
+                semOffset++;
+
+                foreach (var planta in principales)
+                {
+                    var lista = equiposPorPlanta.GetValueOrDefault(planta);
+                    if (lista == null || lista.Count == 0) continue;
+
+                    int pSem = porSemana[planta];
+                    int start = idx[planta];
+                    int end = Math.Min(start + pSem, lista.Count);
+                    if (start >= lista.Count) continue;
+
+                    if (!resultado[planta].ContainsKey(semNum))
+                        resultado[planta][semNum] = new SemanaData();
+
+                    var semData = resultado[planta][semNum];
+                    var destLista = periodo == 1 ? semData.P1 : semData.P2;
+
+                    for (int i = start; i < end; i++)
+                    {
+                        var eq = lista[i];
+                        var fechaReal = periodo == 1 ? eq.FechaP1 : eq.FechaP2;
+                        var tecnico = (periodo == 1 ? eq.TecnicoP1 : eq.TecnicoP2) ?? "";
+                        destLista.Add(new EquipoSemana
+                        {
+                            Id = eq.Id,
+                            IdEquipo = eq.IdEquipo,
+                            Dispositivo = eq.Dispositivo,
+                            Ubicacion = eq.Ubicacion,
+                            Color = eq.Color,
+                            Planta = planta,
+                            Fecha = fechaReal?.ToString("yyyy-MM-dd"),
+                            PlazoSemana = semNum,
+                            Tecnico = tecnico,
+                            Realizado = fechaReal != null,
+                        });
+                    }
+
+                    idx[planta] = end;
+                }
+            }
+
+            // ── FASE 2: Plantas secundarias al final en bloques de ~30 ────
+            foreach (var planta in secundarias)
+            {
+                var lista = equiposPorPlanta.GetValueOrDefault(planta);
+                if (lista == null || lista.Count == 0) continue;
+
+                int i = 0;
+                while (i < lista.Count)
+                {
+                    int semRaw = semanaBase + semOffset;
+                    int semNum = ((semRaw - 1) % totalSemsAnio) + 1;
+
+                    if (!resultado[planta].ContainsKey(semNum))
+                        resultado[planta][semNum] = new SemanaData();
+
+                    var semData = resultado[planta][semNum];
+                    var destLista = periodo == 1 ? semData.P1 : semData.P2;
+
+                    int cant = Math.Min(POR_SEMANA, lista.Count - i);
+                    for (int j = 0; j < cant; j++, i++)
+                    {
+                        var eq = lista[i];
+                        var fechaReal = periodo == 1 ? eq.FechaP1 : eq.FechaP2;
+                        var tecnico = (periodo == 1 ? eq.TecnicoP1 : eq.TecnicoP2) ?? "";
+                        destLista.Add(new EquipoSemana
+                        {
+                            Id = eq.Id,
+                            IdEquipo = eq.IdEquipo,
+                            Dispositivo = eq.Dispositivo,
+                            Ubicacion = eq.Ubicacion,
+                            Color = eq.Color,
+                            Planta = planta,
+                            Fecha = fechaReal?.ToString("yyyy-MM-dd"),
+                            PlazoSemana = semNum,
+                            Tecnico = tecnico,
+                            Realizado = fechaReal != null,
+                        });
+                    }
+                    semOffset++;
+                }
+            }
         }
 
         return resultado;
     }
 
-    // ── Distribuir equipos de UNA planta en semanas ───────────────────────
-    // Devuelve el offset acumulado para que la siguiente planta continúe.
-    private static int DistribuirEnSemanas(
-        List<EquipoCalendario> equipos,
-        DateTime fechaInicio,
-        int periodo,
-        Dictionary<int, SemanaData> semanas,
-        int offsetInicial)
-    {
-        const int MIN = 24, MAX = 30;
-        int total = equipos.Count;
-        if (total == 0) return offsetInicial;
-
-        // Calcular tamaño de lote (24-30 por semana)
-        int semanasNec = (int)Math.Ceiling((double)total / MAX);
-        int porSemana = (int)Math.Ceiling((double)total / semanasNec);
-        porSemana = Math.Max(MIN, Math.Min(MAX, porSemana));
-
-        int semanaBase = SemanaISO(fechaInicio);
-        int totalSemsAnio = SemanasEnAnio(fechaInicio.Year);
-
-        int idx = 0, offset = offsetInicial;
-
-        while (idx < total)
-        {
-            int semRaw = semanaBase + offset;
-            // Wraparound anual
-            int semNum = ((semRaw - 1) % totalSemsAnio) + 1;
-
-            int restantes = total - idx;
-            int cant = Math.Min(porSemana, restantes);
-
-            // Si la última tanda es < 24, la dejamos igual (excepción permitida al final)
-            if (cant < MIN && restantes <= cant)
-                cant = restantes;
-
-            string plazoLabel = $"Plazo {semNum}";
-
-            if (!semanas.ContainsKey(semNum))
-                semanas[semNum] = new SemanaData();
-
-            var lista = periodo == 1
-                ? semanas[semNum].P1
-                : semanas[semNum].P2;
-
-            for (int i = 0; i < cant && idx < total; i++, idx++)
-            {
-                var eq = equipos[idx];
-                var fechaReal = periodo == 1 ? eq.FechaP1 : eq.FechaP2;
-                var tecnico = (periodo == 1 ? eq.TecnicoP1 : eq.TecnicoP2) ?? "";
-
-                lista.Add(new EquipoSemana
-                {
-                    Id = eq.Id,
-                    IdEquipo = eq.IdEquipo,
-                    Dispositivo = eq.Dispositivo,
-                    Ubicacion = eq.Ubicacion,
-                    Color = eq.Color,
-                    Fecha = fechaReal?.ToString("yyyy-MM-dd"),
-                    Plazo = plazoLabel,
-                    Tecnico = tecnico,
-                    Realizado = fechaReal != null,
-                });
-            }
-
-            offset++;
-        }
-
-        return offset;
-    }
-
     // ═════════════════════════════════════════════════════════════════════
     // POST /CALENDARIO/PERIODO
-    // Body: { "tipo": "laptops"|"computo", "periodo": 1|2, "fecha": "2025-02-03" }
+    // Body: { "tipo": "laptops"|"computo", "periodo": 1|2, "fecha": "2025-01-06" }
+    // Guarda la fecha de inicio Y escribe el campo plazo/plazo_p2 en cada
+    // equipo de la BD con la semana que le fue asignada.
     // Solo ADMIN
     // ═════════════════════════════════════════════════════════════════════
     [HttpPost("CALENDARIO/PERIODO")]
@@ -244,16 +299,119 @@ public class CalendarioApiController : ControllerBase
 
         string tipo = tipoEl.GetString() ?? "";
         int periodo = periodoEl.GetInt32();
+
         if (tipo != "laptops" && tipo != "computo")
             return BadRequest(new { error = "Tipo inválido" });
         if (!DateTime.TryParse(fechaEl.GetString(), out var fecha))
             return BadRequest(new { error = "Fecha inválida" });
 
+        // Validar que P2 empiece en semana 27 o posterior (segundo semestre)
+        if (periodo == 2)
+        {
+            int semanaFecha = SemanaISO(fecha);
+            if (semanaFecha < 27)
+                return BadRequest(new
+                {
+                    error = $"El Período 2 debe iniciar en semana 27 o posterior (julio en adelante). " +
+                            $"La fecha seleccionada cae en semana {semanaFecha}."
+                });
+        }
+
         using var conn = _db.Open();
         GuardarConfig(conn, tipo, periodo, fecha);
 
+        // Leer todos los equipos del tipo para calcular y escribir plazos
+        var config = LeerConfig(conn);
+
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT
+                COALESCE(planta,'Sin planta') AS planta,
+                id, id_equipo, nombre_dispositivo, ubicacion, categoria_color,
+                fecha_realizacion, realizado_por,
+                fecha_realizacion_p2, realizado_por_p2,
+                plazo, plazo_p2
+            FROM public.mantenimientos_preventivos
+            ORDER BY planta, nombre_dispositivo, id_equipo
+            """;
+
+        var datos = new Dictionary<string, Dictionary<string, List<EquipoCalendario>>>();
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            var planta = r.GetString(0);
+            var disp = r.IsDBNull(3) ? "" : r.GetString(3);
+            var t = ClasificarTipo(disp);
+            if (t == "otros") continue;
+
+            if (!datos.ContainsKey(planta))
+                datos[planta] = new() { ["laptops"] = new(), ["computo"] = new() };
+
+            datos[planta][t].Add(new EquipoCalendario
+            {
+                Id = r.GetInt64(1),
+                IdEquipo = r.IsDBNull(2) ? "" : r.GetString(2),
+                Dispositivo = disp,
+                Ubicacion = r.IsDBNull(4) ? "" : r.GetString(4),
+                Color = r.IsDBNull(5) ? "" : r.GetString(5),
+                FechaP1 = r.IsDBNull(6) ? null : r.GetDateTime(6),
+                TecnicoP1 = r.IsDBNull(7) ? "" : r.GetString(7),
+                FechaP2 = r.IsDBNull(8) ? null : r.GetDateTime(8),
+                TecnicoP2 = r.IsDBNull(9) ? "" : r.GetString(9),
+                PlazoP1 = r.IsDBNull(10) ? null : r.GetString(10),
+                PlazoP2 = r.IsDBNull(11) ? null : r.GetString(11),
+            });
+        }
+        r.Close();
+
+        List<string> OrdenarPlantas() =>
+            datos.Keys
+                .OrderByDescending(p => PlantasPrincipales.Contains(p) ? 1 : 0)
+                .ThenByDescending(p => datos[p][tipo].Count)
+                .ThenBy(p => p)
+                .ToList();
+
+        var calendarioPorPlanta = ConstruirCalendario(datos, tipo, config, OrdenarPlantas());
+
+        // Escribir el plazo calculado de vuelta a cada equipo en la BD
+        string campoFecha = periodo == 1 ? "plazo" : "plazo_p2";
+        int actualizados = 0;
+
+        foreach (var (planta, semanas) in calendarioPorPlanta)
+        {
+            foreach (var (semNum, semData) in semanas)
+            {
+                var listaEquipos = periodo == 1 ? semData.P1 : semData.P2;
+                foreach (var eq in listaEquipos)
+                {
+                    // Calcular fecha del lunes de esa semana como valor de plazo
+                    var fechaLunes = FechaLunesDeSemana(fecha.Year, semNum);
+                    string plazoStr = fechaLunes.ToString("yyyy-MM-dd");
+
+                    using var upd = conn.CreateCommand();
+                    upd.CommandText = $"""
+                        UPDATE public.mantenimientos_preventivos
+                        SET {campoFecha} = @p
+                        WHERE id = @id
+                        """;
+                    upd.Parameters.AddWithValue("@p", plazoStr);
+                    upd.Parameters.AddWithValue("@id", eq.Id);
+                    upd.ExecuteNonQuery();
+                    actualizados++;
+                }
+            }
+        }
+
         int semana = SemanaISO(fecha);
-        return Ok(new { ok = true, tipo, periodo, fecha = fecha.ToString("yyyy-MM-dd"), semana });
+        return Ok(new
+        {
+            ok = true,
+            tipo,
+            periodo,
+            fecha = fecha.ToString("yyyy-MM-dd"),
+            semana,
+            actualizados,
+        });
     }
 
     // ── DELETE /CALENDARIO/PERIODO/{tipo}/{periodo} ───────────────────────
@@ -266,6 +424,17 @@ public class CalendarioApiController : ControllerBase
 
         using var conn = _db.Open();
         EliminarConfig(conn, tipo, periodo);
+
+        // Limpiar el campo plazo de los equipos del tipo
+        string campo = periodo == 1 ? "plazo" : "plazo_p2";
+        using var cmd = conn.CreateCommand();
+        // Solo equipos del tipo indicado
+        string filtro = tipo == "laptops"
+            ? "nombre_dispositivo ILIKE 'LAPTOP'"
+            : "nombre_dispositivo NOT ILIKE 'LAPTOP'";
+        cmd.CommandText = $"UPDATE public.mantenimientos_preventivos SET {campo} = NULL WHERE {filtro}";
+        cmd.ExecuteNonQuery();
+
         return Ok(new { ok = true });
     }
 
@@ -293,7 +462,7 @@ public class CalendarioApiController : ControllerBase
         return Ok(new { plantas = lista });
     }
 
-    // ── Serializar config para el frontend ───────────────────────────────
+    // ── Serializar config ─────────────────────────────────────────────────
     private static object SerializarConfig(ConfigPeriodos cfg) => new
     {
         laptops = new
@@ -354,7 +523,7 @@ public class CalendarioApiController : ControllerBase
                 }
             }
         }
-        catch { /* tabla aún no existe o sin datos */ }
+        catch { }
         return cfg;
     }
 
@@ -380,6 +549,17 @@ public class CalendarioApiController : ControllerBase
         del.ExecuteNonQuery();
     }
 
+    // ── Fecha del lunes de una semana ISO dada ────────────────────────────
+    private static DateTime FechaLunesDeSemana(int anio, int semana)
+    {
+        // ISO 8601: semana 1 es la que contiene el primer jueves del año
+        var ene4 = new DateTime(anio, 1, 4);
+        int diaSemana = (int)ene4.DayOfWeek;
+        if (diaSemana == 0) diaSemana = 7; // domingo = 7
+        var lunesSem1 = ene4.AddDays(1 - diaSemana);
+        return lunesSem1.AddDays((semana - 1) * 7);
+    }
+
     // ── Semana ISO ────────────────────────────────────────────────────────
     private static int SemanaISO(DateTime fecha)
     {
@@ -398,8 +578,6 @@ public class CalendarioApiController : ControllerBase
     // ── Sesión ────────────────────────────────────────────────────────────
     private UsuarioSesion? ObtenerUsuarioActual()
     {
-        // LoginController setea: cookie "usuario" (HTTP-only) y cookie "rol" (legible por JS)
-        // También aceptamos los headers X-Usuario y X-Rol que usan otros controllers
         var rol = Request.Cookies["rol"]
                ?? Request.Headers["X-Rol"].FirstOrDefault()
                ?? Request.Headers["X-User-Rol"].FirstOrDefault();
@@ -410,7 +588,6 @@ public class CalendarioApiController : ControllerBase
                   ?? "SISTEMA";
 
         if (string.IsNullOrEmpty(rol)) return null;
-
         return new UsuarioSesion
         {
             Nombre = nombre,
@@ -431,6 +608,8 @@ internal class EquipoCalendario
     public string TecnicoP1 { get; set; } = "";
     public DateTime? FechaP2 { get; set; }
     public string TecnicoP2 { get; set; } = "";
+    public string? PlazoP1 { get; set; }
+    public string? PlazoP2 { get; set; }
 }
 
 internal class EquipoSemana
@@ -440,8 +619,9 @@ internal class EquipoSemana
     public string Dispositivo { get; set; } = "";
     public string Ubicacion { get; set; } = "";
     public string Color { get; set; } = "";
+    public string Planta { get; set; } = "";
     public string? Fecha { get; set; }
-    public string? Plazo { get; set; }
+    public int PlazoSemana { get; set; }  // número de semana ISO asignado
     public string Tecnico { get; set; } = "";
     public bool Realizado { get; set; }
 }
