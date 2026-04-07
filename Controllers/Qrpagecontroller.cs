@@ -561,9 +561,8 @@ public class QrPageController : ControllerBase
         sb.AppendLine("    new QRCode(el,{text:equipo,width:74,height:74,correctLevel:QRCode.CorrectLevel.M});");
         sb.AppendLine("  });");
         sb.AppendLine("});");
-        // ── Función imprimir 3 QR ──
+        // ── Función imprimir QRs — etiquetadora 10cm x 16cm, todos en una sola hoja ──
         sb.AppendLine("function imprimirTodosQr(){");
-        sb.AppendLine("  // Recoger todos los dispositivos de las tarjetas visibles");
         sb.AppendLine("  const tarjetas=[];");
         sb.AppendLine("  document.querySelectorAll('[id^=\"qr_\"]').forEach(function(el){");
         sb.AppendLine("    const equipo=el.getAttribute('data-equipo')||'';");
@@ -572,41 +571,54 @@ public class QrPageController : ControllerBase
         sb.AppendLine("    if(equipo) tarjetas.push({equipo,disp});");
         sb.AppendLine("  });");
         sb.AppendLine("  if(!tarjetas.length){alert('No hay dispositivos para imprimir.');return;}");
-        sb.AppendLine("  const w=window.open('','_blank','width=860,height=600');");
+        sb.AppendLine("  const w=window.open('','_blank','width=420,height=680');");
         sb.AppendLine("  let html='<!DOCTYPE html><html><head><meta charset=\"UTF-8\">';");
-        sb.AppendLine("  html+='<title>Imprimir QR — Dispositivos</title>';");
+        sb.AppendLine("  html+='<title>Imprimir QR — Etiquetadora</title>';");
         sb.AppendLine("  html+='<script src=\"https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js\"><\\/script>';");
         sb.AppendLine("  html+='<style>';");
+        sb.AppendLine("  /* Tamaño real de la etiqueta: 10cm ancho x 16cm alto */");
+        sb.AppendLine("  html+='@page{size:100mm 160mm;margin:0;}';");
         sb.AppendLine("  html+='*{box-sizing:border-box;margin:0;padding:0;}';");
-        sb.AppendLine("  html+='body{font-family:sans-serif;background:#fff;padding:24px;display:flex;flex-direction:column;align-items:center;gap:20px;}';");
-        sb.AppendLine("  html+='h1{font-size:15px;font-weight:700;color:#1e293b;}';");
-        sb.AppendLine("  html+='p.sub{font-size:11px;color:#64748b;margin-top:2px;}';");
-        sb.AppendLine("  html+='.qrs-row{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;}';");
-        sb.AppendLine("  html+='.qr-card{display:flex;flex-direction:column;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;}';");
-        sb.AppendLine("  html+='.qr-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;text-align:center;}';");
-        sb.AppendLine("  html+='.qr-disp{font-size:11px;font-weight:600;color:#1e293b;text-align:center;max-width:140px;}';");
-        sb.AppendLine("  html+='.qr-id{font-size:12px;font-weight:700;color:#3B82F6;font-family:monospace;text-align:center;margin-top:2px;}';");
+        // Pantalla: centrar preview con fondo gris
+        sb.AppendLine("  html+='body{font-family:Arial,sans-serif;background:#e5e7eb;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;gap:16px;min-height:100vh;}';");
+        sb.AppendLine("  html+='.no-print{display:flex;gap:10px;align-items:center;margin-bottom:4px;}';");
         sb.AppendLine("  html+='.btn-print{padding:10px 28px;background:#3B82F6;color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}';");
-        sb.AppendLine("  html+='@media print{.btn-print{display:none!important;}}';");
+        sb.AppendLine("  html+='.btn-print:hover{background:#2563EB;}';");
+        // La etiqueta en pantalla muestra una sombra para simular la hoja
+        sb.AppendLine("  html+='.etiqueta{width:100mm;background:#fff;box-shadow:0 4px 24px #0002;border-radius:6px;padding:6mm 5mm;display:flex;flex-direction:column;align-items:center;gap:4mm;page-break-after:always;}';");
+        sb.AppendLine("  html+='.etiqueta:last-child{page-break-after:auto;}';");
+        sb.AppendLine("  html+='.eti-titulo{font-size:8pt;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;text-align:center;}';");
+        sb.AppendLine("  html+='.eti-qrs{display:flex;flex-direction:row;justify-content:center;align-items:flex-start;flex-wrap:wrap;gap:4mm;width:100%;}';");
+        sb.AppendLine("  html+='.eti-item{display:flex;flex-direction:column;align-items:center;gap:1.5mm;}';");
+        sb.AppendLine("  html+='.eti-disp{font-size:7pt;font-weight:700;color:#1e293b;text-align:center;max-width:28mm;line-height:1.2;}';");
+        sb.AppendLine("  html+='.eti-id{font-size:7.5pt;font-weight:700;color:#3B82F6;font-family:monospace;text-align:center;}';");
+        sb.AppendLine("  html+='.eti-sep{width:80%;height:1px;background:#e2e8f0;margin:1mm 0;}';");
+        sb.AppendLine("  html+='.eti-ubicacion{font-size:6.5pt;color:#94a3b8;text-align:center;}';");
+        // Al imprimir: sin fondo gris, tamaño exacto, sin sombra
+        sb.AppendLine("  html+='@media print{body{background:#fff!important;padding:0!important;gap:0!important;}.no-print{display:none!important;}.etiqueta{width:100mm;min-height:160mm;box-shadow:none!important;border-radius:0!important;padding:6mm 5mm;}}';");
         sb.AppendLine("  html+='</style></head><body>';");
-        sb.AppendLine("  html+='<h1>🖨️ QR de Dispositivos</h1>';");
-        sb.AppendLine("  html+='<p class=\"sub\">Ubicación: ' + document.querySelector('.top-title p')?.textContent + '</p>';");
-        sb.AppendLine("  html+='<div class=\"qrs-row\">';");
+        sb.AppendLine("  html+='<div class=\"no-print\"><button class=\"btn-print\" onclick=\"window.print()\">🖨️ Imprimir etiqueta</button></div>';");
+        // Una sola etiqueta con todos los QR juntos
+        sb.AppendLine("  const ubicacion=document.querySelector('.top-title p')?.textContent||'';");
+        sb.AppendLine("  html+='<div class=\"etiqueta\">';");
+        sb.AppendLine("  html+='<div class=\"eti-titulo\">📋 Dispositivos — '+ubicacion+'</div>';");
+        sb.AppendLine("  html+='<div class=\"eti-qrs\">';");
         sb.AppendLine("  tarjetas.forEach(function(t,i){");
-        sb.AppendLine("    html+='<div class=\"qr-card\">';");
+        sb.AppendLine("    html+='<div class=\"eti-item\">';");
         sb.AppendLine("    html+='<div id=\"qr'+i+'\"></div>';");
-        sb.AppendLine("    html+='<div class=\"qr-label\">🖥️ Dispositivo</div>';");
-        sb.AppendLine("    html+='<div class=\"qr-disp\">'+t.disp+'</div>';");
-        sb.AppendLine("    html+='<div class=\"qr-id\">'+t.equipo+'</div>';");
+        sb.AppendLine("    html+='<div class=\"eti-disp\">'+t.disp+'</div>';");
+        sb.AppendLine("    html+='<div class=\"eti-id\">'+t.equipo+'</div>';");
         sb.AppendLine("    html+='</div>';");
         sb.AppendLine("  });");
-        sb.AppendLine("  html+='</div>';");
-        sb.AppendLine("  html+='<button class=\"btn-print\" onclick=\"window.print()\">🖨️ Imprimir</button>';");
+        sb.AppendLine("  html+='</div>';");  // cierra eti-qrs
+        sb.AppendLine("  html+='<div class=\"eti-sep\"></div>';");
+        sb.AppendLine("  html+='<div class=\"eti-ubicacion\">'+ubicacion+'</div>';");
+        sb.AppendLine("  html+='</div>';");  // cierra etiqueta
         sb.AppendLine("  html+='<script>';");
+        // QR de 26mm (~98px a 96dpi) para que quepan 3 en 10cm de ancho
         sb.AppendLine("  tarjetas.forEach(function(t,i){");
-        sb.AppendLine("    html+='new QRCode(document.getElementById(\"qr'+i+'\"),{text:\"'+t.equipo+'\",width:140,height:140,correctLevel:QRCode.CorrectLevel.M});';");
+        sb.AppendLine("    html+='new QRCode(document.getElementById(\"qr'+i+'\"),{text:\"'+t.equipo+'\",width:98,height:98,correctLevel:QRCode.CorrectLevel.M});';");
         sb.AppendLine("  });");
-        sb.AppendLine("  html+='setTimeout(()=>window.print(),900);';");
         sb.AppendLine("  html+='<\\/script></body></html>';");
         sb.AppendLine("  w.document.write(html);");
         sb.AppendLine("  w.document.close();");
