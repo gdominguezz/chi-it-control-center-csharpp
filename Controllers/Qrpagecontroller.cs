@@ -634,7 +634,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  html+='</div>';");  // cierra etiqueta
         sb.AppendLine("  html+='<script>';");
         // QR general grande (140px ~37mm) — urlGeneral fue capturada en la ventana padre antes de abrir la nueva
-        sb.AppendLine("  html+='new QRCode(document.getElementById(\"qr_general\"),{text:\"'+urlGeneral+'\",width:50,height:50,correctLevel:QRCode.CorrectLevel.M});';");
+        sb.AppendLine("  html+='new QRCode(document.getElementById(\"qr_general\"),{text:\"'+urlGeneral+'\",width:98,height:98,correctLevel:QRCode.CorrectLevel.M});';");
         // QR de 26mm (~98px a 96dpi) para que quepan 3 en 10cm de ancho
         sb.AppendLine("  tarjetas.forEach(function(t,i){");
         sb.AppendLine("    html+='new QRCode(document.getElementById(\"qr'+i+'\"),{text:\"'+t.equipo+'\",width:98,height:98,correctLevel:QRCode.CorrectLevel.M});';");
