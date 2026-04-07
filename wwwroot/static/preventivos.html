@@ -1489,95 +1489,146 @@
         <!-- ═══ CALENDARIO TAB ═══ -->
         <div id="tab-calendario" class="tab-content">
 
-            <!-- ── PANEL: Configuración de Períodos ── -->
-            <div id="cal-panel-config" style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:18px 22px;margin-bottom:14px;">
+            <!-- ════════════════════════════════════════════════════
+                 PANEL ADMIN: Configuración de los 4 períodos
+                 Solo visible para ADMIN (se oculta con JS)
+            ════════════════════════════════════════════════════ -->
+            <div id="cal-panel-config" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:18px 22px;margin-bottom:14px;">
                 <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
                     <span style="display:inline-block;width:3px;height:14px;background:var(--accent);border-radius:2px;"></span>
-                    Configuración de Períodos de Mantenimiento
+                    ⚙️ Configuración de Períodos — Solo Administrador
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="cal-config-grid">
 
-                    <!-- P1 -->
-                    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;" id="cal-card-p1">
-                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                            <span style="width:10px;height:10px;border-radius:50%;background:#8B5CF6;display:inline-block;flex-shrink:0;"></span>
-                            <span style="font-size:13px;font-weight:700;color:var(--text);">Período 1</span>
-                            <span id="cal-p1-status" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);">Sin iniciar</span>
+                <!-- ── LAPTOPS ── -->
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:12px;font-weight:700;color:#c4b5fd;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                        💻 <span>Laptops</span>
+                        <span style="font-size:10px;font-weight:400;color:var(--muted2);margin-left:4px;">— solo dispositivos LAPTOP</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <!-- Laptops P1 -->
+                        <div style="background:var(--surface2);border:1px solid rgba(139,92,246,.25);border-radius:10px;padding:14px;">
+                            <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#8B5CF6;flex-shrink:0;"></span>
+                                <span style="font-size:12px;font-weight:700;">Período 1</span>
+                                <span id="cfg-laptops-p1-status" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);">Sin iniciar</span>
+                            </div>
+                            <div id="cfg-laptops-p1-info" style="font-size:11px;color:var(--muted2);margin-bottom:8px;min-height:28px;"></div>
+                            <input type="date" id="cfg-laptops-p1-fecha" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;margin-bottom:8px;">
+                            <div style="display:flex;gap:6px;">
+                                <button onclick="calConfirmar('laptops',1)" style="flex:1;padding:8px 10px;background:#8B5CF6;border:none;border-radius:7px;color:white;font-size:11px;font-weight:700;cursor:pointer;">✅ Aceptar</button>
+                                <button onclick="calResetear('laptops',1)" id="cfg-laptops-p1-reset" style="display:none;padding:8px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-size:11px;font-weight:600;cursor:pointer;">🗑</button>
+                            </div>
                         </div>
-                        <div id="cal-p1-info" style="font-size:12px;color:var(--muted2);margin-bottom:12px;min-height:36px;"></div>
-                        <div style="display:flex;flex-direction:column;gap:8px;" id="cal-p1-form">
-                            <label style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Fecha de inicio del Período 1</label>
-                            <input type="date" id="cal-p1-fecha" style="background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:8px 11px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;width:100%;">
-                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                                <button onclick="calConfirmarPeriodo(1)" style="flex:1;padding:9px 14px;background:#8B5CF6;border:none;border-radius:8px;color:white;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;">
-                                    ✅ Aceptar e Iniciar P1
-                                </button>
-                                <button onclick="calResetearPeriodo(1)" id="cal-p1-reset" style="display:none;padding:9px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;color:var(--muted2);font-size:12px;font-weight:600;cursor:pointer;">
-                                    🗑 Reiniciar
-                                </button>
+                        <!-- Laptops P2 -->
+                        <div style="background:var(--surface2);border:1px solid rgba(6,182,212,.25);border-radius:10px;padding:14px;">
+                            <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#06B6D4;flex-shrink:0;"></span>
+                                <span style="font-size:12px;font-weight:700;">Período 2</span>
+                                <span id="cfg-laptops-p2-status" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);">Sin iniciar</span>
+                            </div>
+                            <div id="cfg-laptops-p2-info" style="font-size:11px;color:var(--muted2);margin-bottom:8px;min-height:28px;"></div>
+                            <input type="date" id="cfg-laptops-p2-fecha" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;margin-bottom:8px;">
+                            <div style="display:flex;gap:6px;">
+                                <button onclick="calConfirmar('laptops',2)" style="flex:1;padding:8px 10px;background:#06B6D4;border:none;border-radius:7px;color:#001a1f;font-size:11px;font-weight:700;cursor:pointer;">✅ Aceptar</button>
+                                <button onclick="calResetear('laptops',2)" id="cfg-laptops-p2-reset" style="display:none;padding:8px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-size:11px;font-weight:600;cursor:pointer;">🗑</button>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- P2 (solo ADMIN) -->
-                    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;" id="cal-card-p2">
-                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                            <span style="width:10px;height:10px;border-radius:50%;background:#06B6D4;display:inline-block;flex-shrink:0;"></span>
-                            <span style="font-size:13px;font-weight:700;color:var(--text);">Período 2</span>
-                            <span id="cal-p2-status" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);">Sin iniciar</span>
-                        </div>
-                        <div id="cal-p2-info" style="font-size:12px;color:var(--muted2);margin-bottom:12px;min-height:36px;"></div>
-                        <!-- Solo visible para ADMIN -->
-                        <div id="cal-p2-form" style="display:none;flex-direction:column;gap:8px;">
-                            <label style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Fecha de inicio del Período 2 <span style="color:#06B6D4;">(Solo Admin)</span></label>
-                            <input type="date" id="cal-p2-fecha" style="background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:8px 11px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;width:100%;">
-                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                                <button onclick="calConfirmarPeriodo(2)" style="flex:1;padding:9px 14px;background:#06B6D4;border:none;border-radius:8px;color:#001a1f;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;">
-                                    ✅ Aceptar e Iniciar P2
-                                </button>
-                                <button onclick="calResetearPeriodo(2)" id="cal-p2-reset" style="display:none;padding:9px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;color:var(--muted2);font-size:12px;font-weight:600;cursor:pointer;">
-                                    🗑 Reiniciar
-                                </button>
+                <!-- ── EQUIPOS DE CÓMPUTO ── -->
+                <div>
+                    <div style="font-size:12px;font-weight:700;color:#6ee7b7;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                        🖥️ <span>Equipos de Cómputo</span>
+                        <span style="font-size:10px;font-weight:400;color:var(--muted2);margin-left:4px;">— Computadora de Escritorio, UPS, Impresora Térmica</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <!-- Computo P1 -->
+                        <div style="background:var(--surface2);border:1px solid rgba(16,185,129,.25);border-radius:10px;padding:14px;">
+                            <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#10B981;flex-shrink:0;"></span>
+                                <span style="font-size:12px;font-weight:700;">Período 1</span>
+                                <span id="cfg-computo-p1-status" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);">Sin iniciar</span>
+                            </div>
+                            <div id="cfg-computo-p1-info" style="font-size:11px;color:var(--muted2);margin-bottom:8px;min-height:28px;"></div>
+                            <input type="date" id="cfg-computo-p1-fecha" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;margin-bottom:8px;">
+                            <div style="display:flex;gap:6px;">
+                                <button onclick="calConfirmar('computo',1)" style="flex:1;padding:8px 10px;background:#10B981;border:none;border-radius:7px;color:white;font-size:11px;font-weight:700;cursor:pointer;">✅ Aceptar</button>
+                                <button onclick="calResetear('computo',1)" id="cfg-computo-p1-reset" style="display:none;padding:8px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-size:11px;font-weight:600;cursor:pointer;">🗑</button>
                             </div>
                         </div>
-                        <div id="cal-p2-noadmin" style="font-size:12px;color:var(--muted);padding:8px 0;">
-                            🔒 Solo los administradores pueden configurar el Período 2.
+                        <!-- Computo P2 -->
+                        <div style="background:var(--surface2);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:14px;">
+                            <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#F59E0B;flex-shrink:0;"></span>
+                                <span style="font-size:12px;font-weight:700;">Período 2</span>
+                                <span id="cfg-computo-p2-status" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);">Sin iniciar</span>
+                            </div>
+                            <div id="cfg-computo-p2-info" style="font-size:11px;color:var(--muted2);margin-bottom:8px;min-height:28px;"></div>
+                            <input type="date" id="cfg-computo-p2-fecha" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;margin-bottom:8px;">
+                            <div style="display:flex;gap:6px;">
+                                <button onclick="calConfirmar('computo',2)" style="flex:1;padding:8px 10px;background:#F59E0B;border:none;border-radius:7px;color:#1c1400;font-size:11px;font-weight:700;cursor:pointer;">✅ Aceptar</button>
+                                <button onclick="calResetear('computo',2)" id="cfg-computo-p2-reset" style="display:none;padding:8px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-size:11px;font-weight:600;cursor:pointer;">🗑</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Toolbar calendario -->
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0 14px;margin-bottom:12px;">
-                <!-- Período toggle -->
-                <div style="display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:3px;">
-                    <button class="tab-btn cal-periodo-btn active" id="cal-btnP1" onclick="calSetPeriodo(1)" style="padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:var(--accent);color:white;">Período 1</button>
-                    <button class="cal-periodo-btn" id="cal-btnP2" onclick="calSetPeriodo(2)" style="padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted2);">Período 2</button>
-                    <button class="cal-periodo-btn" id="cal-btnAmbos" onclick="calSetPeriodo(0)" style="padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted2);">Ambos</button>
+            <!-- ════════════════════════════════════════════════════
+                 SUB-TABS: Laptops / Equipos de Cómputo
+            ════════════════════════════════════════════════════ -->
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding-top:4px;">
+                <!-- Tipo de equipo -->
+                <div style="display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:3px;">
+                    <button id="cal-btnLaptops" onclick="calSetTipo('laptops')"
+                            style="padding:6px 18px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:#8B5CF6;color:white;display:flex;align-items:center;gap:5px;">
+                        💻 Laptops
+                    </button>
+                    <button id="cal-btnComputo" onclick="calSetTipo('computo')"
+                            style="padding:6px 18px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--muted2);display:flex;align-items:center;gap:5px;">
+                        🖥️ Equipos de Cómputo
+                    </button>
                 </div>
+
+                <!-- Período -->
+                <div style="display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:3px;">
+                    <button id="cal-btnP1" onclick="calSetPeriodo(1)" style="padding:5px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:var(--accent);color:white;">P1</button>
+                    <button id="cal-btnP2" onclick="calSetPeriodo(2)" style="padding:5px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted2);">P2</button>
+                    <button id="cal-btnAmbos" onclick="calSetPeriodo(0)" style="padding:5px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted2);">Ambos</button>
+                </div>
+
                 <!-- Año -->
                 <label style="font-size:11px;color:var(--muted2);">Año</label>
-                <select id="cal-selAnio" onchange="calCargar()" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 11px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;"></select>
-                <!-- Filtros -->
-                <label style="font-size:11px;color:var(--muted2);">Buscar equipo</label>
-                <input type="text" id="cal-filtroEquipo" placeholder="Dispositivo o ID..." style="min-width:180px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);" oninput="calFiltrarEquipo(this.value)">
+                <select id="cal-selAnio" onchange="calCargar()" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 11px;font-size:12px;color:var(--text);"></select>
+
+                <!-- Buscar -->
+                <label style="font-size:11px;color:var(--muted2);">Buscar</label>
+                <input type="text" id="cal-filtroEquipo" placeholder="Dispositivo o ID..." style="min-width:170px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);" oninput="calFiltrarEquipo(this.value)">
+
+                <!-- Ir a plazo -->
                 <label style="font-size:11px;color:var(--muted2);">Ir a plazo</label>
-                <input type="number" id="cal-jumpSemana" min="1" max="53" placeholder="—" style="width:75px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);text-align:center;" onchange="calIrASemana(this.value)">
-                <button onclick="calCargar()" style="display:flex;align-items:center;gap:5px;padding:7px 13px;background:var(--accent);border:none;border-radius:7px;color:white;font-size:12px;font-weight:600;cursor:pointer;">🔄 Actualizar</button>
+                <input type="number" id="cal-jumpSemana" min="1" max="53" placeholder="—" style="width:72px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);text-align:center;" onchange="calIrASemana(this.value)">
+
+                <button onclick="calCargar()" style="display:flex;align-items:center;gap:5px;padding:7px 13px;background:var(--accent);border:none;border-radius:7px;color:white;font-size:12px;font-weight:600;cursor:pointer;margin-left:auto;">🔄 Actualizar</button>
             </div>
 
-            <!-- Nav plantas -->
+            <!-- ── Estado: tipo seleccionado + plantas ── -->
+            <div id="cal-tipo-label" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;padding:0 2px;"></div>
+
+            <!-- Nav plantas (ordenadas mayor→menor) -->
             <div id="cal-plantNav" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0;border-bottom:1px solid var(--border);padding-bottom:0;"></div>
 
-            <!-- Estado del calendario: bloqueado si no hay período configurado -->
+            <!-- Mensaje bloqueado -->
             <div id="cal-bloqueado-msg" style="display:none;background:var(--surface);border:1px dashed var(--border2);border-radius:12px;padding:36px;text-align:center;margin-top:12px;">
                 <div style="font-size:32px;margin-bottom:12px;">📅</div>
                 <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">Calendario no iniciado</div>
-                <div style="font-size:12px;color:var(--muted2);">Selecciona una fecha de inicio para el Período 1 en el panel de arriba para activar el calendario.</div>
+                <div style="font-size:12px;color:var(--muted2);" id="cal-bloqueado-detalle">Un administrador debe configurar la fecha de inicio del Período 1 para este tipo de equipo.</div>
             </div>
 
-            <!-- Calendario container -->
-            <div style="padding:16px 0;overflow-x:auto;" id="cal-wrap">
+            <!-- Calendario -->
+            <div style="padding:12px 0;overflow-x:auto;" id="cal-wrap">
                 <div id="cal-container" style="color:var(--muted);text-align:center;padding:40px;font-size:13px;">Cargando calendario...</div>
             </div>
 
@@ -2277,12 +2328,18 @@
             }
 
             // ══════════════════════════════════════════
-            // CALENDARIO — Sistema de Períodos con distribución automática
+            // CALENDARIO — Laptops / Equipos de Cómputo
+            //              Plantas ordenadas mayor→menor
+            //              4 períodos independientes (solo ADMIN)
             // ══════════════════════════════════════════
-            let calDatos = null, calPlanta = null, calPeriodo = 1, calIniciado = false;
-            let calConfigActual = { p1_activo: false, p2_activo: false, inicio_p1: null, inicio_p2: null, semana_inicio_p1: null, semana_inicio_p2: null };
+            let calDatos = null;   // respuesta completa de la API
+            let calPlanta = null;
+            let calTipo = 'laptops'; // 'laptops' | 'computo'
+            let calPeriodo = 1;      // 1 | 2 | 0 = ambos
+            let calIniciado = false;
+            let calConfig = { laptops: {}, computo: {} };
 
-            // Poblar selector de año del calendario
+            // Poblar selector de año
             (function () {
                 const sel = document.getElementById('cal-selAnio');
                 const hoy = new Date().getFullYear();
@@ -2300,115 +2357,121 @@
                 calCargarConfig().then(() => calCargar());
             }
 
-            // ── Cargar config de períodos desde el servidor ──
+            // ── Cargar config desde el servidor ──────────────────────────
             async function calCargarConfig() {
                 try {
                     const res = await fetch('/CALENDARIO/CONFIG');
                     if (!res.ok) return;
-                    calConfigActual = await res.json();
-                } catch (e) { /* sin conexión, usar valores vacíos */ }
+                    calConfig = await res.json();
+                } catch (e) { /* sin red */ }
                 calActualizarPanelConfig();
             }
 
-            // ── Actualizar UI del panel de configuración según estado ──
+            // ── Mostrar/ocultar panel admin según rol ─────────────────────
             function calActualizarPanelConfig() {
-                const cfg = calConfigActual;
                 const esAdmin = rolActual === 'ADMIN' || rolActual === 'admin';
+                document.getElementById('cal-panel-config').style.display = esAdmin ? 'block' : 'none';
+                if (!esAdmin) return;
 
-                // ── P1 ──
-                const p1Status = document.getElementById('cal-p1-status');
-                const p1Info = document.getElementById('cal-p1-info');
-                const p1Reset = document.getElementById('cal-p1-reset');
-                if (cfg.p1_activo && cfg.inicio_p1) {
-                    const d = new Date(cfg.inicio_p1 + 'T00:00:00');
-                    const fmtd = d.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                    p1Status.textContent = '✅ Activo';
-                    p1Status.style.background = 'rgba(16,185,129,.15)';
-                    p1Status.style.borderColor = 'rgba(16,185,129,.3)';
-                    p1Status.style.color = '#6ee7b7';
-                    p1Info.innerHTML = `<span style="color:#6ee7b7;font-weight:600;">Iniciado el ${fmtd}</span><br><span style="color:var(--muted2);">Equipos distribuidos desde <strong style="color:#c4b5fd;">Plazo ${cfg.semana_inicio_p1}</strong> en adelante · 24–30 equipos/semana</span>`;
-                    p1Reset.style.display = 'inline-flex';
-                    document.getElementById('cal-p1-fecha').value = cfg.inicio_p1;
-                } else {
-                    p1Status.textContent = 'Sin iniciar';
-                    p1Status.style.background = 'rgba(100,116,139,.15)';
-                    p1Status.style.borderColor = 'rgba(100,116,139,.3)';
-                    p1Status.style.color = 'var(--muted2)';
-                    p1Info.innerHTML = '<span style="color:var(--muted2);">Elige una fecha de inicio para distribuir todos los equipos semana a semana.</span>';
-                    p1Reset.style.display = 'none';
-                }
+                // Actualizar las 4 tarjetas de configuración
+                const pares = [
+                    { tipo: 'laptops', periodo: 1, colOk: '#c4b5fd', colBorder: 'rgba(139,92,246,.3)' },
+                    { tipo: 'laptops', periodo: 2, colOk: '#67e8f9', colBorder: 'rgba(6,182,212,.3)' },
+                    { tipo: 'computo', periodo: 1, colOk: '#6ee7b7', colBorder: 'rgba(16,185,129,.3)' },
+                    { tipo: 'computo', periodo: 2, colOk: '#fcd34d', colBorder: 'rgba(245,158,11,.3)' },
+                ];
 
-                // ── P2 ──
-                const p2Status = document.getElementById('cal-p2-status');
-                const p2Info = document.getElementById('cal-p2-info');
-                const p2Form = document.getElementById('cal-p2-form');
-                const p2NoAdmin = document.getElementById('cal-p2-noadmin');
-                const p2Reset = document.getElementById('cal-p2-reset');
+                pares.forEach(({ tipo, periodo, colOk, colBorder }) => {
+                    const cfg = calConfig[tipo] || {};
+                    const clave = `p${periodo}`;
+                    const activo = cfg[`p${periodo}_activo`];
+                    const fecha = cfg[`inicio_p${periodo}`];
+                    const semana = cfg[`semana_inicio_p${periodo}`];
 
-                if (cfg.p2_activo && cfg.inicio_p2) {
-                    const d = new Date(cfg.inicio_p2 + 'T00:00:00');
-                    const fmtd = d.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                    p2Status.textContent = '✅ Activo';
-                    p2Status.style.background = 'rgba(6,182,212,.15)';
-                    p2Status.style.borderColor = 'rgba(6,182,212,.3)';
-                    p2Status.style.color = '#67e8f9';
-                    p2Info.innerHTML = `<span style="color:#67e8f9;font-weight:600;">Iniciado el ${fmtd}</span><br><span style="color:var(--muted2);">Equipos distribuidos desde <strong style="color:#67e8f9;">Plazo ${cfg.semana_inicio_p2}</strong> en adelante · 24–30 equipos/semana</span>`;
-                    if (esAdmin) { p2Reset.style.display = 'inline-flex'; }
-                    if (esAdmin) { document.getElementById('cal-p2-fecha').value = cfg.inicio_p2; }
-                } else {
-                    p2Status.textContent = 'Sin iniciar';
-                    p2Status.style.background = 'rgba(100,116,139,.15)';
-                    p2Status.style.borderColor = 'rgba(100,116,139,.3)';
-                    p2Status.style.color = 'var(--muted2)';
-                    p2Info.innerHTML = '<span style="color:var(--muted2);">El Período 2 aún no ha sido iniciado por un administrador.</span>';
-                    if (esAdmin) p2Reset.style.display = 'none';
-                }
+                    const statusEl = document.getElementById(`cfg-${tipo}-p${periodo}-status`);
+                    const infoEl = document.getElementById(`cfg-${tipo}-p${periodo}-info`);
+                    const resetEl = document.getElementById(`cfg-${tipo}-p${periodo}-reset`);
+                    const fechaEl = document.getElementById(`cfg-${tipo}-p${periodo}-fecha`);
 
-                // Mostrar u ocultar formulario P2 según rol
-                if (esAdmin) {
-                    p2Form.style.display = 'flex';
-                    p2NoAdmin.style.display = 'none';
-                } else {
-                    p2Form.style.display = 'none';
-                    p2NoAdmin.style.display = 'block';
-                }
+                    if (activo && fecha) {
+                        const d = new Date(fecha + 'T00:00:00');
+                        const fmtd = d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+                        statusEl.textContent = '✅ Activo';
+                        statusEl.style.cssText = `margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;`;
+                        infoEl.innerHTML = `<span style="color:${colOk};font-weight:600;">Desde ${fmtd} · <strong>Plazo ${semana}</strong></span>`;
+                        fechaEl.value = fecha;
+                        resetEl.style.display = 'inline-flex';
+                    } else {
+                        statusEl.textContent = 'Sin iniciar';
+                        statusEl.style.cssText = `margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);`;
+                        infoEl.innerHTML = '<span style="color:var(--muted);">Sin configurar</span>';
+                        resetEl.style.display = 'none';
+                    }
+                });
             }
 
-            // ── Confirmar inicio de período ──
+            // ── Confirmar inicio de período ───────────────────────────────
+
             async function calConfirmarPeriodo(periodo) {
+
                 const fechaEl = document.getElementById(`cal-p${periodo}-fecha`);
+
+                if (!fechaEl) {
+                    alert("❌ No se encontró el selector de fecha.");
+                    return;
+                }
+
                 const fecha = fechaEl.value;
+
                 if (!fecha) {
                     alert(`⚠ Debes seleccionar una fecha para el Período ${periodo}.`);
                     return;
                 }
 
+                // tipo requerido por la API
+                const tipo = "computo"; // o "laptops" según el calendario que estés usando
+
                 const d = new Date(fecha + 'T00:00:00');
-                const fmtd = d.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                const fmtd = d.toLocaleDateString('es-MX', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
                 const semNum = calIsoWeekFromStr(fecha);
 
                 const confirmado = confirm(
                     `¿Seguro que quieres iniciar el Período ${periodo} en esta fecha?\n\n` +
                     `📅 Fecha: ${fmtd}\n` +
                     `📌 Plazo de inicio: Plazo ${semNum}\n\n` +
-                    `Todos los equipos de cada planta se distribuirán semana a semana (24–30 por semana) ` +
-                    `en orden alfabético a partir de este plazo.`
+                    `Todos los equipos se distribuirán semana a semana (24–30 por semana).`
                 );
+
                 if (!confirmado) return;
 
                 try {
+
                     const res = await fetch('/CALENDARIO/PERIODO', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ periodo, fecha })
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            tipo: tipo,
+                            periodo: periodo,
+                            fecha: fecha
+                        })
                     });
+
                     if (!res.ok) {
                         const err = await res.json().catch(() => ({}));
                         alert('❌ ' + (err.error || `Error al guardar Período ${periodo}`));
                         return;
                     }
+
                     const data = await res.json();
-                    // Actualizar config local
+
                     if (periodo === 1) {
                         calConfigActual.p1_activo = true;
                         calConfigActual.inicio_p1 = fecha;
@@ -2418,142 +2481,187 @@
                         calConfigActual.inicio_p2 = fecha;
                         calConfigActual.semana_inicio_p2 = semNum;
                     }
-                    calActualizarPanelConfig();
-                    await calCargar();
-                    // Ir al plazo de inicio
-                    setTimeout(() => calIrASemana(semNum), 400);
-                } catch (e) {
-                    alert('❌ Error de conexión al guardar el período.');
+
+                    alert(`✅ Período ${periodo} iniciado correctamente`);
+
+                } catch (err) {
+                    console.error(err);
+                    alert("❌ Error al conectar con el servidor.");
                 }
             }
 
-            // ── Resetear período ──
-            async function calResetearPeriodo(periodo) {
-                if (!confirm(`¿Deseas reiniciar la configuración del Período ${periodo}?\nEsto desactivará el calendario de ese período.`)) return;
+            // ── Resetear período ──────────────────────────────────────────
+            async function calResetear(tipo, periodo) {
+                if (!confirm(`¿Reiniciar ${tipo} P${periodo}? Esto desactivará ese calendario.`)) return;
                 try {
-                    await fetch(`/CALENDARIO/PERIODO/${periodo}`, { method: 'DELETE' });
-                    if (periodo === 1) { calConfigActual.p1_activo = false; calConfigActual.inicio_p1 = null; calConfigActual.semana_inicio_p1 = null; }
-                    else { calConfigActual.p2_activo = false; calConfigActual.inicio_p2 = null; calConfigActual.semana_inicio_p2 = null; }
+                    await fetch(`/CALENDARIO/PERIODO/${tipo}/${periodo}`, { method: 'DELETE' });
+                    if (!calConfig[tipo]) calConfig[tipo] = {};
+                    calConfig[tipo][`p${periodo}_activo`] = false;
+                    calConfig[tipo][`inicio_p${periodo}`] = null;
+                    calConfig[tipo][`semana_inicio_p${periodo}`] = null;
                     calActualizarPanelConfig();
                     await calCargar();
                 } catch (e) { alert('❌ Error al reiniciar.'); }
             }
 
-            async function calCargar() {
-                const wrapEl = document.getElementById('cal-wrap');
-                const bloqEl = document.getElementById('cal-bloqueado-msg');
-                const navEl = document.getElementById('cal-plantNav');
-
-                // Si P1 no está activo, bloquear el calendario
-                if (!calConfigActual.p1_activo) {
-                    wrapEl.style.display = 'none';
-                    navEl.style.display = 'none';
-                    bloqEl.style.display = 'block';
-                    return;
+            // ── Cambiar tipo de equipo ────────────────────────────────────
+            function calSetTipo(tipo) {
+                calTipo = tipo;
+                const btnL = document.getElementById('cal-btnLaptops');
+                const btnC = document.getElementById('cal-btnComputo');
+                if (tipo === 'laptops') {
+                    btnL.style.background = '#8B5CF6'; btnL.style.color = 'white';
+                    btnC.style.background = 'transparent'; btnC.style.color = 'var(--muted2)';
+                } else {
+                    btnC.style.background = '#10B981'; btnC.style.color = 'white';
+                    btnL.style.background = 'transparent'; btnL.style.color = 'var(--muted2)';
                 }
-                bloqEl.style.display = 'none';
-                wrapEl.style.display = 'block';
-                navEl.style.display = '';
-
-                document.getElementById('cal-container').innerHTML = '<div style="color:var(--muted2);text-align:center;padding:40px;font-size:13px;">Cargando...</div>';
-                const anio = document.getElementById('cal-selAnio').value;
-                try {
-                    const res = await fetch('/CALENDARIO/API?anio=' + anio);
-                    calDatos = await res.json();
-                    // Actualizar config si viene en la respuesta
-                    if (calDatos.config) {
-                        calConfigActual = { ...calConfigActual, ...calDatos.config };
-                        calActualizarPanelConfig();
-                    }
-                    calConstruirNav(calDatos.plantas);
-                    if (!calPlanta || !calDatos.plantas.includes(calPlanta))
-                        calPlanta = calDatos.plantas[0] || null;
-                    calRender();
-                    // Ir a la semana de inicio del período seleccionado
-                    const semInicio = calPeriodo === 2
-                        ? (calConfigActual.semana_inicio_p2 || calIsoWeek(new Date()))
-                        : (calConfigActual.semana_inicio_p1 || calIsoWeek(new Date()));
-                    document.getElementById('cal-jumpSemana').value = semInicio;
-                    setTimeout(() => { const el = document.getElementById('cal-semana-' + semInicio); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
-                } catch (e) {
-                    document.getElementById('cal-container').innerHTML = '<div style="color:#fca5a5;text-align:center;padding:40px;">Error al cargar calendario</div>';
-                }
+                calPlanta = null; // reset planta al cambiar tipo
+                calRenderNav();
+                calRender();
             }
 
-            function calConstruirNav(plantas) {
-                const nav = document.getElementById('cal-plantNav');
-                nav.innerHTML = '';
-                plantas.forEach(p => {
-                    const t = document.createElement('button');
-                    t.style.cssText = 'padding:8px 18px;border-radius:8px 8px 0 0;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;border-bottom:none;color:var(--muted2);background:transparent;transition:all .15s;white-space:nowrap;font-family:\'DM Sans\',sans-serif;';
-                    if (p === calPlanta) { t.style.color = 'var(--text)'; t.style.background = 'var(--surface2)'; t.style.borderColor = 'var(--border2)'; }
-                    t.textContent = p;
-                    t.onclick = () => {
-                        calPlanta = p;
-                        nav.querySelectorAll('button').forEach(b => { b.style.color = 'var(--muted2)'; b.style.background = 'transparent'; b.style.borderColor = 'transparent'; });
-                        t.style.color = 'var(--text)'; t.style.background = 'var(--surface2)'; t.style.borderColor = 'var(--border2)';
-                        calRender();
-                    };
-                    nav.appendChild(t);
-                });
-            }
-
+            // ── Cambiar período ───────────────────────────────────────────
             function calSetPeriodo(p) {
-                // Si P2 no está activo, no cambiar a P2
-                if (p === 2 && !calConfigActual.p2_activo) {
-                    alert('⚠ El Período 2 aún no ha sido iniciado. Un administrador debe configurar la fecha de inicio.');
-                    return;
+                // Si P2 no está activo para el tipo actual, avisar
+                if (p === 2) {
+                    const cfg = calConfig[calTipo] || {};
+                    if (!cfg.p2_activo) {
+                        alert(`⚠ El Período 2 de ${calTipo === 'laptops' ? 'Laptops' : 'Equipos de Cómputo'} aún no ha sido configurado por el administrador.`);
+                        return;
+                    }
                 }
                 calPeriodo = p;
                 ['cal-btnP1', 'cal-btnP2', 'cal-btnAmbos'].forEach(id => {
                     const el = document.getElementById(id);
                     el.style.background = 'transparent'; el.style.color = 'var(--muted2)';
                 });
-                const active = p === 1 ? 'cal-btnP1' : p === 2 ? 'cal-btnP2' : 'cal-btnAmbos';
-                document.getElementById(active).style.background = 'var(--accent)';
-                document.getElementById(active).style.color = 'white';
+                const actId = p === 1 ? 'cal-btnP1' : p === 2 ? 'cal-btnP2' : 'cal-btnAmbos';
+                document.getElementById(actId).style.background = 'var(--accent)';
+                document.getElementById(actId).style.color = 'white';
                 calRender();
             }
 
-            function calRender() {
-                if (!calDatos || !calPlanta) {
-                    document.getElementById('cal-container').innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px;">Sin datos</div>';
+            // ── Cargar datos desde la API ─────────────────────────────────
+            async function calCargar() {
+                const cfg = calConfig[calTipo] || {};
+
+                // Si P1 no activo → bloquear
+                if (!cfg.p1_activo) {
+                    document.getElementById('cal-wrap').style.display = 'none';
+                    document.getElementById('cal-plantNav').style.display = 'none';
+                    document.getElementById('cal-bloqueado-msg').style.display = 'block';
+                    const tipoLabel = calTipo === 'laptops' ? 'Laptops' : 'Equipos de Cómputo';
+                    document.getElementById('cal-bloqueado-detalle').textContent =
+                        `Un administrador debe configurar la fecha de inicio del Período 1 para ${tipoLabel}.`;
                     return;
                 }
+
+                document.getElementById('cal-bloqueado-msg').style.display = 'none';
+                document.getElementById('cal-wrap').style.display = 'block';
+                document.getElementById('cal-plantNav').style.display = '';
+                document.getElementById('cal-container').innerHTML =
+                    '<div style="color:var(--muted2);text-align:center;padding:40px;">Cargando...</div>';
+
+                const anio = document.getElementById('cal-selAnio').value;
+                try {
+                    const res = await fetch('/CALENDARIO/API?anio=' + anio);
+                    calDatos = await res.json();
+                    if (calDatos.config) calConfig = { ...calConfig, ...calDatos.config };
+                    calActualizarPanelConfig();
+                    calRenderNav();
+                    calRender();
+                    // Ir al plazo de inicio
+                    const cfgActual = calConfig[calTipo] || {};
+                    const semI = cfgActual.semana_inicio_p1 || calIsoWeek(new Date());
+                    document.getElementById('cal-jumpSemana').value = semI;
+                    setTimeout(() => calIrASemana(semI), 350);
+                } catch (e) {
+                    document.getElementById('cal-container').innerHTML =
+                        '<div style="color:#fca5a5;text-align:center;padding:40px;">Error al cargar el calendario</div>';
+                }
+            }
+
+            // ── Construir nav de plantas ──────────────────────────────────
+            function calRenderNav() {
+                if (!calDatos) return;
+                const datos = calTipo === 'laptops' ? calDatos.laptops : calDatos.computo;
+                if (!datos) return;
+
+                const plantasOrden = datos.plantas_orden || [];
+                const nav = document.getElementById('cal-plantNav');
+                nav.innerHTML = '';
+
+                // Etiqueta de tipo
+                const tipoLabel = calTipo === 'laptops'
+                    ? '💻 Laptops — plantas ordenadas de mayor a menor'
+                    : '🖥️ Equipos de Cómputo — plantas ordenadas de mayor a menor';
+                document.getElementById('cal-tipo-label').textContent = tipoLabel;
+
+                // Si no tenemos planta activa, elegir la primera
+                if (!calPlanta || !plantasOrden.includes(calPlanta))
+                    calPlanta = plantasOrden[0] || null;
+
+                plantasOrden.forEach((p, idx) => {
+                    const t = document.createElement('button');
+                    const calDatosPlanta = datos.calendario[p] || {};
+                    const totalEqs = Object.values(calDatosPlanta)
+                        .reduce((acc, s) => acc + (s.p1 || []).length + (s.p2 || []).length, 0);
+
+                    const isActive = p === calPlanta;
+                    t.style.cssText = `padding:7px 16px;border-radius:8px 8px 0 0;font-size:12px;font-weight:600;cursor:pointer;border:1px solid ${isActive ? 'var(--border2)' : 'transparent'};border-bottom:none;color:${isActive ? 'var(--text)' : 'var(--muted2)'};background:${isActive ? 'var(--surface2)' : 'transparent'};transition:all .15s;white-space:nowrap;font-family:'DM Sans',sans-serif;`;
+                    t.innerHTML = `${p} <span style="font-size:10px;color:var(--muted);margin-left:3px;">(${totalEqs})</span>`;
+                    t.onclick = () => {
+                        calPlanta = p;
+                        nav.querySelectorAll('button').forEach(b => {
+                            b.style.color = 'var(--muted2)';
+                            b.style.background = 'transparent';
+                            b.style.borderColor = 'transparent';
+                        });
+                        t.style.color = 'var(--text)';
+                        t.style.background = 'var(--surface2)';
+                        t.style.borderColor = 'var(--border2)';
+                        calRender();
+                    };
+                    nav.appendChild(t);
+                });
+            }
+
+            // ── Renderizar el calendario de la planta activa ──────────────
+            function calRender() {
+                if (!calDatos) return;
+                const datos = calTipo === 'laptops' ? calDatos.laptops : calDatos.computo;
+                if (!datos || !calPlanta) {
+                    document.getElementById('cal-container').innerHTML =
+                        '<div style="color:var(--muted);text-align:center;padding:40px;">Sin datos para mostrar</div>';
+                    return;
+                }
+
+                const calPlantaDatos = datos.calendario[calPlanta] || {};
                 const anio = parseInt(document.getElementById('cal-selAnio').value);
-                const calPlantaDatos = calDatos.calendario[calPlanta] || {};
                 const hoy = new Date();
-                const semanaActual = calIsoWeek(hoy);
-                const total = calSemanasEnAnio(anio);
+                const semActual = calIsoWeek(hoy);
 
-                // Recopilar todas las semanas que tienen equipos para mostrar
-                const semanasConEquipos = new Set();
-                Object.keys(calPlantaDatos).forEach(s => semanasConEquipos.add(parseInt(s)));
-
-                // Semana de inicio según período activo
-                const semInicioP1 = calConfigActual.semana_inicio_p1 || 1;
-                const semInicioP2 = calConfigActual.semana_inicio_p2 || 1;
-                const semInicio = calPeriodo === 2 ? semInicioP2 : semInicioP1;
+                // Semanas que tienen equipos del período seleccionado
+                const semanasAMostrar = [];
+                Object.keys(calPlantaDatos).forEach(s => {
+                    const sn = parseInt(s);
+                    const sem = calPlantaDatos[sn] || {};
+                    let tiene = false;
+                    if (calPeriodo === 1 && (sem.p1 || []).length > 0) tiene = true;
+                    else if (calPeriodo === 2 && (sem.p2 || []).length > 0) tiene = true;
+                    else if (calPeriodo === 0 && ((sem.p1 || []).length + (sem.p2 || []).length) > 0) tiene = true;
+                    if (tiene) semanasAMostrar.push(sn);
+                });
+                // Siempre mostrar la semana actual si está en el año correcto
+                if (anio === hoy.getFullYear() && !semanasAMostrar.includes(semActual))
+                    semanasAMostrar.push(semActual);
+                semanasAMostrar.sort((a, b) => a - b);
 
                 let html = '<div style="display:flex;flex-direction:column;gap:8px;min-width:860px;">';
 
-                // Solo mostrar semanas que tienen equipos (o la actual si está en rango)
-                const semanasAMostrar = [];
-                for (let s = 1; s <= total; s++) {
-                    const sem = calPlantaDatos[s];
-                    let tieneEqEnPeriodo = false;
-                    if (sem) {
-                        if (calPeriodo === 1 && (sem.p1 || []).length > 0) tieneEqEnPeriodo = true;
-                        else if (calPeriodo === 2 && (sem.p2 || []).length > 0) tieneEqEnPeriodo = true;
-                        else if (calPeriodo === 0 && ((sem.p1 || []).length > 0 || (sem.p2 || []).length > 0)) tieneEqEnPeriodo = true;
-                    }
-                    if (tieneEqEnPeriodo || (s === semanaActual && anio === hoy.getFullYear())) {
-                        semanasAMostrar.push(s);
-                    }
-                }
-
                 if (semanasAMostrar.length === 0) {
-                    html += '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">No hay equipos distribuidos para el período seleccionado en esta planta.</div>';
+                    html += '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">No hay equipos distribuidos para la selección actual.</div>';
                 } else {
                     semanasAMostrar.forEach(s => {
                         const sem = calPlantaDatos[s] || { p1: [], p2: [] };
@@ -2561,20 +2669,21 @@
                         if (calPeriodo === 1) equipos = (sem.p1 || []).map(e => ({ ...e, _p: 1 }));
                         else if (calPeriodo === 2) equipos = (sem.p2 || []).map(e => ({ ...e, _p: 2 }));
                         else equipos = [...(sem.p1 || []).map(e => ({ ...e, _p: 1 })), ...(sem.p2 || []).map(e => ({ ...e, _p: 2 }))];
+
                         const tieneEq = equipos.length > 0;
-                        const esActual = s === semanaActual && anio === hoy.getFullYear();
+                        const esActual = s === semActual && anio === hoy.getFullYear();
                         const { lunes, domingo } = calRangoSemana(anio, s);
                         let borderColor = tieneEq ? 'rgba(59,130,246,.25)' : 'rgba(255,255,255,0.07)';
                         if (esActual) borderColor = 'rgba(16,185,129,.4)';
-                        const isOpen = esActual;
-                        // Etiqueta del plazo = número de semana
-                        const plazoLabel = `Plazo ${s}`;
 
                         html += `<div style="background:var(--surface);border:1px solid ${borderColor};border-radius:12px;overflow:hidden;${esActual ? 'box-shadow:0 0 0 1px rgba(16,185,129,.15)' : ''}" id="cal-semana-${s}">`;
+
+                        // ── Header ──
                         html += `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;background:var(--surface2);" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">`;
-                        // Plazo en lugar de "Semana X"
-                        html += `<span style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);min-width:72px;">${plazoLabel}</span>`;
-                        html += `<span style="font-size:11px;color:var(--muted2);flex:1;">${calFmtFecha(lunes)} — ${calFmtFecha(domingo)}${esActual ? '<span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;font-size:10px;font-weight:700;margin-left:6px;">● Esta semana</span>' : ''}</span>`;
+                        html += `<span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:800;color:var(--accent);min-width:72px;">Plazo ${s}</span>`;
+                        html += `<span style="font-size:11px;color:var(--muted2);flex:1;">${calFmtFecha(lunes)} — ${calFmtFecha(domingo)}`;
+                        if (esActual) html += `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;font-size:10px;font-weight:700;margin-left:8px;">● Esta semana</span>`;
+                        html += `</span>`;
                         if (tieneEq) {
                             const ok = equipos.filter(e => e.realizado).length;
                             const pend = equipos.filter(e => !e.realizado).length;
@@ -2583,29 +2692,25 @@
                             if (pend > 0) html += `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#fcd34d;">⏳ ${pend}</span>`;
                         }
                         html += `<span style="font-size:10px;color:var(--muted);">▼</span>`;
-                        html += `</div>`; // header
-                        html += `<div style="display:${isOpen ? 'block' : 'none'};padding:10px 14px;border-top:1px solid var(--border);">`;
+                        html += `</div>`;
+
+                        // ── Body ──
+                        html += `<div style="display:${esActual ? 'block' : 'none'};padding:10px 14px;border-top:1px solid var(--border);">`;
                         if (!tieneEq) {
-                            html += `<div style="text-align:center;padding:18px;color:var(--muted);font-size:12px;">Sin equipos programados en este plazo</div>`;
+                            html += `<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px;">Sin equipos en este plazo</div>`;
                         } else {
                             html += `<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>`;
-                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">#</th>`;
-                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Período</th>`;
-                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">ID Equipo</th>`;
-                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Dispositivo</th>`;
-                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Ubicación</th>`;
-                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Color</th>`;
-                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Plazo</th>`;
-                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Técnico</th>`;
-                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">PM Digital</th>`;
+                            ['#', 'Per.', 'ID Equipo', 'Dispositivo', 'Ubicación', 'Color', 'Plazo', 'Técnico', 'PM Digital'].forEach(th => {
+                                html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">${th}</th>`;
+                            });
                             html += `</tr></thead><tbody>`;
                             equipos.forEach((e, idx) => {
-                                const pmEstado = e.realizado
-                                    ? '<span style="color:#6ee7b7;font-size:11px;">✓ Realizado</span>'
-                                    : '<span style="color:#fcd34d;font-size:11px;">⏳ Pendiente</span>';
                                 const pColor = e._p === 1 ? 'rgba(139,92,246,.15)' : 'rgba(6,182,212,.15)';
                                 const pText = e._p === 1 ? '#c4b5fd' : '#67e8f9';
                                 const pBorder = e._p === 1 ? 'rgba(139,92,246,.3)' : 'rgba(6,182,212,.3)';
+                                const pmEst = e.realizado
+                                    ? '<span style="color:#6ee7b7;font-size:11px;">✓ Realizado</span>'
+                                    : '<span style="color:#fcd34d;font-size:11px;">⏳ Pendiente</span>';
                                 html += `<tr>`;
                                 html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;font-family:monospace;">${idx + 1}</td>`;
                                 html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:${pColor};color:${pText};border:1px solid ${pBorder};">P${e._p}</span></td>`;
@@ -2613,26 +2718,25 @@
                                 html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calEsc(e.dispositivo)}</td>`;
                                 html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calEsc(e.ubicacion)}</td>`;
                                 html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calColorTag(e.color)}</td>`;
-                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;color:var(--accent);font-weight:700;">${calEsc(e.plazo) || plazoLabel}</td>`;
+                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;color:var(--accent);font-weight:700;">${calEsc(e.plazo) || 'Plazo ' + s}</td>`;
                                 html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calEsc(e.tecnico || '—')}</td>`;
-                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${pmEstado}</td>`;
+                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${pmEst}</td>`;
                                 html += `</tr>`;
                             });
                             html += `</tbody></table>`;
                         }
-                        html += `</div>`; // body
-                        html += `</div>`; // row
+                        html += `</div></div>`;
                     });
                 }
                 html += '</div>';
                 document.getElementById('cal-container').innerHTML = html;
             }
 
+            // ── Ir a un plazo específico ──────────────────────────────────
             function calIrASemana(s) {
                 if (!s) return;
                 const el = document.getElementById('cal-semana-' + s);
                 if (!el) return;
-                // Abrir el body
                 const body = el.querySelector('div:last-child');
                 if (body) body.style.display = 'block';
                 el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2645,7 +2749,7 @@
                 });
             }
 
-            // ── Helpers ISO ──
+            // ── Helpers ISO ───────────────────────────────────────────────
             function calIsoWeek(d) {
                 const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
                 const day = date.getUTCDay() || 7;
@@ -2653,10 +2757,7 @@
                 const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
                 return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
             }
-            function calIsoWeekFromStr(str) {
-                const d = new Date(str + 'T00:00:00');
-                return calIsoWeek(d);
-            }
+            function calIsoWeekFromStr(str) { return calIsoWeek(new Date(str + 'T00:00:00')); }
             function calSemanasEnAnio(y) {
                 const d28 = new Date(y, 11, 28);
                 return calIsoWeek(d28) === 1 ? 52 : calIsoWeek(d28);
@@ -2672,7 +2773,9 @@
                 if (!d) return '—';
                 return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
             }
-            function calEsc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+            function calEsc(s) {
+                return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
             function calColorTag(c) {
                 const v = (c || '').toLowerCase();
                 const map = {
@@ -2688,7 +2791,6 @@
                 }
                 return `<span style="padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;background:var(--surface2);color:var(--muted2);border:1px solid var(--border2);">${c || '—'}</span>`;
             }
-
         </script>
 </body>
 </html>
