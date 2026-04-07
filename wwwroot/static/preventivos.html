@@ -1221,7 +1221,6 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('tabla')">📋 Registros</button>
             <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard</button>
-            <button class="tab-btn" onclick="switchTab('calendario')">📅 Calendario</button>
         </div>
 
         <!-- CONTENIDO TABLA -->
@@ -1486,1354 +1485,701 @@
                 </div>
             </div>
         </div><!-- /tab-dashboard -->
-        <!-- ═══ CALENDARIO TAB ═══ -->
-        <div id="tab-calendario" class="tab-content">
 
-            <!-- ════════════════════════════════════════════════════
-                 PANEL ADMIN: Configuración de los 4 períodos
-                 Solo visible para ADMIN (se oculta con JS)
-            ════════════════════════════════════════════════════ -->
-            <div id="cal-panel-config" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:18px 22px;margin-bottom:14px;">
-                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-                    <span style="display:inline-block;width:3px;height:14px;background:var(--accent);border-radius:2px;"></span>
-                    ⚙️ Configuración de Períodos — Solo Administrador
-                </div>
+    </div><!-- /main -->
 
-                <!-- ── LAPTOPS ── -->
-                <div style="margin-bottom:16px;">
-                    <div style="font-size:12px;font-weight:700;color:#c4b5fd;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-                        💻 <span>Laptops</span>
-                        <span style="font-size:10px;font-weight:400;color:var(--muted2);margin-left:4px;">— solo dispositivos LAPTOP</span>
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                        <!-- Laptops P1 -->
-                        <div style="background:var(--surface2);border:1px solid rgba(139,92,246,.25);border-radius:10px;padding:14px;">
-                            <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
-                                <span style="width:8px;height:8px;border-radius:50%;background:#8B5CF6;flex-shrink:0;"></span>
-                                <span style="font-size:12px;font-weight:700;">Período 1</span>
-                                <span id="cfg-laptops-p1-status" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);">Sin iniciar</span>
-                            </div>
-                            <div id="cfg-laptops-p1-info" style="font-size:11px;color:var(--muted2);margin-bottom:8px;min-height:28px;"></div>
-                            <input type="date" id="cfg-laptops-p1-fecha" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;margin-bottom:8px;">
-                            <div style="display:flex;gap:6px;">
-                                <button onclick="calConfirmar('laptops',1)" style="flex:1;padding:8px 10px;background:#8B5CF6;border:none;border-radius:7px;color:white;font-size:11px;font-weight:700;cursor:pointer;">✅ Aceptar</button>
-                                <button onclick="calResetear('laptops',1)" id="cfg-laptops-p1-reset" style="display:none;padding:8px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-size:11px;font-weight:600;cursor:pointer;">🗑</button>
-                            </div>
-                        </div>
-                        <!-- Laptops P2 -->
-                        <div style="background:var(--surface2);border:1px solid rgba(6,182,212,.25);border-radius:10px;padding:14px;">
-                            <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
-                                <span style="width:8px;height:8px;border-radius:50%;background:#06B6D4;flex-shrink:0;"></span>
-                                <span style="font-size:12px;font-weight:700;">Período 2</span>
-                                <span id="cfg-laptops-p2-status" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);">Sin iniciar</span>
-                            </div>
-                            <div id="cfg-laptops-p2-info" style="font-size:11px;color:var(--muted2);margin-bottom:8px;min-height:28px;"></div>
-                            <input type="date" id="cfg-laptops-p2-fecha" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;margin-bottom:8px;">
-                            <div style="display:flex;gap:6px;">
-                                <button onclick="calConfirmar('laptops',2)" style="flex:1;padding:8px 10px;background:#06B6D4;border:none;border-radius:7px;color:#001a1f;font-size:11px;font-weight:700;cursor:pointer;">✅ Aceptar</button>
-                                <button onclick="calResetear('laptops',2)" id="cfg-laptops-p2-reset" style="display:none;padding:8px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-size:11px;font-weight:600;cursor:pointer;">🗑</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <script>
+        // El control de rol se maneja dentro de renderizar() con esAdmin
 
-                <!-- ── EQUIPOS DE CÓMPUTO ── -->
-                <div>
-                    <div style="font-size:12px;font-weight:700;color:#6ee7b7;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-                        🖥️ <span>Equipos de Cómputo</span>
-                        <span style="font-size:10px;font-weight:400;color:var(--muted2);margin-left:4px;">— Computadora de Escritorio, UPS, Impresora Térmica</span>
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                        <!-- Computo P1 -->
-                        <div style="background:var(--surface2);border:1px solid rgba(16,185,129,.25);border-radius:10px;padding:14px;">
-                            <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
-                                <span style="width:8px;height:8px;border-radius:50%;background:#10B981;flex-shrink:0;"></span>
-                                <span style="font-size:12px;font-weight:700;">Período 1</span>
-                                <span id="cfg-computo-p1-status" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);">Sin iniciar</span>
-                            </div>
-                            <div id="cfg-computo-p1-info" style="font-size:11px;color:var(--muted2);margin-bottom:8px;min-height:28px;"></div>
-                            <input type="date" id="cfg-computo-p1-fecha" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;margin-bottom:8px;">
-                            <div style="display:flex;gap:6px;">
-                                <button onclick="calConfirmar('computo',1)" style="flex:1;padding:8px 10px;background:#10B981;border:none;border-radius:7px;color:white;font-size:11px;font-weight:700;cursor:pointer;">✅ Aceptar</button>
-                                <button onclick="calResetear('computo',1)" id="cfg-computo-p1-reset" style="display:none;padding:8px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-size:11px;font-weight:600;cursor:pointer;">🗑</button>
-                            </div>
-                        </div>
-                        <!-- Computo P2 -->
-                        <div style="background:var(--surface2);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:14px;">
-                            <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
-                                <span style="width:8px;height:8px;border-radius:50%;background:#F59E0B;flex-shrink:0;"></span>
-                                <span style="font-size:12px;font-weight:700;">Período 2</span>
-                                <span id="cfg-computo-p2-status" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);">Sin iniciar</span>
-                            </div>
-                            <div id="cfg-computo-p2-info" style="font-size:11px;color:var(--muted2);margin-bottom:8px;min-height:28px;"></div>
-                            <input type="date" id="cfg-computo-p2-fecha" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;margin-bottom:8px;">
-                            <div style="display:flex;gap:6px;">
-                                <button onclick="calConfirmar('computo',2)" style="flex:1;padding:8px 10px;background:#F59E0B;border:none;border-radius:7px;color:#1c1400;font-size:11px;font-weight:700;cursor:pointer;">✅ Aceptar</button>
-                                <button onclick="calResetear('computo',2)" id="cfg-computo-p2-reset" style="display:none;padding:8px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-size:11px;font-weight:600;cursor:pointer;">🗑</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        // ═══ ESTADO GLOBAL ═══
+        let paginaActual = 1;
+        let limite = 10;
+        let totalRegistros = 0;
+        let datosActuales = [];
+        let editandoID = null;
+        let usuarioActual = 'SISTEMA';
+        let rolActual = '';
 
-            <!-- ════════════════════════════════════════════════════
-                 SUB-TABS: Laptops / Equipos de Cómputo
-            ════════════════════════════════════════════════════ -->
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding-top:4px;">
-                <!-- Tipo de equipo -->
-                <div style="display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:3px;">
-                    <button id="cal-btnLaptops" onclick="calSetTipo('laptops')"
-                            style="padding:6px 18px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:#8B5CF6;color:white;display:flex;align-items:center;gap:5px;">
-                        💻 Laptops
-                    </button>
-                    <button id="cal-btnComputo" onclick="calSetTipo('computo')"
-                            style="padding:6px 18px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--muted2);display:flex;align-items:center;gap:5px;">
-                        🖥️ Equipos de Cómputo
-                    </button>
-                </div>
+        const CAMPOS = [
+            { key: 'ID_EQUIPO', label: 'ID Equipo' },
+            { key: 'UBICACION', label: 'Ubicación' },
+            { key: 'nombre_dispositivo', label: 'Nombre Dispositivo' },
+            { key: 'PLANTA', label: 'Planta' },
+            { key: 'CATEGORIA_COLOR', label: 'Categoría / Color' },
+            { key: 'OBSERVACIONES', label: 'Observaciones' },
+            { key: 'ANIO_CREACION', label: 'Año de Creación' },
+        ];
+        const KEY_MAP = {
+            'ID_EQUIPO': 'id_equipo',
+            'UBICACION': 'ubicacion',
+            'nombre_dispositivo': 'nombre_dispositivo',
+            'PLANTA': 'planta',
+            'CATEGORIA_COLOR': 'categoria_color',
+            'OBSERVACIONES': 'observaciones',
+            'ANIO_CREACION': 'anio_creacion',
+        };
 
-                <!-- Período -->
-                <div style="display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:3px;">
-                    <button id="cal-btnP1" onclick="calSetPeriodo(1)" style="padding:5px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:var(--accent);color:white;">P1</button>
-                    <button id="cal-btnP2" onclick="calSetPeriodo(2)" style="padding:5px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted2);">P2</button>
-                    <button id="cal-btnAmbos" onclick="calSetPeriodo(0)" style="padding:5px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted2);">Ambos</button>
-                </div>
-
-                <!-- Año -->
-                <label style="font-size:11px;color:var(--muted2);">Año</label>
-                <select id="cal-selAnio" onchange="calCargar()" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 11px;font-size:12px;color:var(--text);"></select>
-
-                <!-- Buscar -->
-                <label style="font-size:11px;color:var(--muted2);">Buscar</label>
-                <input type="text" id="cal-filtroEquipo" placeholder="Dispositivo o ID..." style="min-width:170px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);" oninput="calFiltrarEquipo(this.value)">
-
-                <!-- Ir a plazo -->
-                <label style="font-size:11px;color:var(--muted2);">Ir a plazo</label>
-                <input type="number" id="cal-jumpSemana" min="1" max="53" placeholder="—" style="width:72px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);text-align:center;" onchange="calIrASemana(this.value)">
-
-                <button onclick="calCargar()" style="display:flex;align-items:center;gap:5px;padding:7px 13px;background:var(--accent);border:none;border-radius:7px;color:white;font-size:12px;font-weight:600;cursor:pointer;margin-left:auto;">🔄 Actualizar</button>
-            </div>
-
-            <!-- ── Estado: tipo seleccionado + plantas ── -->
-            <div id="cal-tipo-label" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;padding:0 2px;"></div>
-
-            <!-- Nav plantas (ordenadas mayor→menor) -->
-            <div id="cal-plantNav" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0;border-bottom:1px solid var(--border);padding-bottom:0;"></div>
-
-            <!-- Mensaje bloqueado -->
-            <div id="cal-bloqueado-msg" style="display:none;background:var(--surface);border:1px dashed var(--border2);border-radius:12px;padding:36px;text-align:center;margin-top:12px;">
-                <div style="font-size:32px;margin-bottom:12px;">📅</div>
-                <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">Calendario no iniciado</div>
-                <div style="font-size:12px;color:var(--muted2);" id="cal-bloqueado-detalle">Un administrador debe configurar la fecha de inicio del Período 1 para este tipo de equipo.</div>
-            </div>
-
-            <!-- Calendario -->
-            <div style="padding:12px 0;overflow-x:auto;" id="cal-wrap">
-                <div id="cal-container" style="color:var(--muted);text-align:center;padding:40px;font-size:13px;">Cargando calendario...</div>
-            </div>
-
-        </div><!-- /tab-calendario -->
-
-        <script>
-            // El control de rol se maneja dentro de renderizar() con esAdmin
-
-            // ═══ ESTADO GLOBAL ═══
-            let paginaActual = 1;
-            let limite = 10;
-            let totalRegistros = 0;
-            let datosActuales = [];
-            let editandoID = null;
-            let usuarioActual = 'SISTEMA';
-            let rolActual = '';
-
-            const CAMPOS = [
-                { key: 'ID_EQUIPO', label: 'ID Equipo' },
-                { key: 'UBICACION', label: 'Ubicación' },
-                { key: 'nombre_dispositivo', label: 'Nombre Dispositivo' },
-                { key: 'PLANTA', label: 'Planta' },
-                { key: 'CATEGORIA_COLOR', label: 'Categoría / Color' },
-                { key: 'OBSERVACIONES', label: 'Observaciones' },
-                { key: 'ANIO_CREACION', label: 'Año de Creación' },
-            ];
-            const KEY_MAP = {
-                'ID_EQUIPO': 'id_equipo',
-                'UBICACION': 'ubicacion',
-                'nombre_dispositivo': 'nombre_dispositivo',
-                'PLANTA': 'planta',
-                'CATEGORIA_COLOR': 'categoria_color',
-                'OBSERVACIONES': 'observaciones',
-                'ANIO_CREACION': 'anio_creacion',
-            };
-
-            // ═══ INIT ═══
-            window.addEventListener('DOMContentLoaded', () => {
-                // Verificar sesión — si no hay, redirigir al login
-                fetch('/obtener-usuario', { credentials: 'include' })
-                    .then(r => {
-                        if (!r.ok) { window.location.href = '/static/login.html'; return null; }
-                        return r.json();
-                    })
-                    .then(d => {
-                        if (!d) return;
-                        if (!d.usuario) { window.location.href = '/static/login.html'; return; }
-                        usuarioActual = d.usuario || 'SISTEMA';
-                        rolActual = (d.rol || '').trim().toUpperCase();
-                        document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
-                        document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
-                        document.getElementById('dropdownRol').textContent = rolActual;
-                    })
-                    .catch(() => {
-                        window.location.href = '/static/login.html';
-                    });
-                // Conectar filtros con debounce
-                document.querySelectorAll('.filter-row input').forEach(inp => {
-                    inp.addEventListener('input', filtrar);
+        // ═══ INIT ═══
+        window.addEventListener('DOMContentLoaded', () => {
+            // Verificar sesión — si no hay, redirigir al login
+            fetch('/obtener-usuario', { credentials: 'include' })
+                .then(r => {
+                    if (!r.ok) { window.location.href = '/static/login.html'; return null; }
+                    return r.json();
+                })
+                .then(d => {
+                    if (!d) return;
+                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
+                    usuarioActual = d.usuario || 'SISTEMA';
+                    rolActual = (d.rol || '').trim().toUpperCase();
+                    document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownRol').textContent = rolActual;
+                })
+                .catch(() => {
+                    window.location.href = '/static/login.html';
                 });
-                cargarUbicaciones();
-                cargar();
+            // Conectar filtros con debounce
+            document.querySelectorAll('.filter-row input').forEach(inp => {
+                inp.addEventListener('input', filtrar);
             });
+            cargarUbicaciones();
+            cargar();
+        });
 
-            // ═══ UBICACIONES AUTOCOMPLETADO ═══
-            async function cargarUbicaciones() {
-                try {
-                    const res = await fetch('/PREVENTIVOS/UBICACIONES');
-                    const data = await res.json();
-                    const ids = ['lista-ubicaciones', 'lista-ubicaciones-edit'];
-                    ids.forEach(id => {
-                        const dl = document.getElementById(id);
-                        if (!dl) return;
-                        dl.innerHTML = data.ubicaciones
-                            .map(u => `<option value="${u}">`)
-                            .join('');
-                    });
-                } catch (e) { console.warn('No se pudieron cargar ubicaciones', e); }
-            }
-
-            // ═══ CARGA ═══
-            let _debounceTimer = null;
-
-            function filtrar() {
-                clearTimeout(_debounceTimer);
-                _debounceTimer = setTimeout(() => { paginaActual = 1; cargar(); }, 400);
-            }
-
-            function obtenerParametros() {
-                return new URLSearchParams({
-                    page: paginaActual, limit: limite,
-                    ID_EQUIPO: document.getElementById('f_ID_EQUIPO').value,
-                    UBICACION: document.getElementById('f_UBICACION').value,
-                    nombre_dispositivo: document.getElementById('f_nombre_dispositivo').value,
-                    PLANTA: document.getElementById('f_PLANTA').value,
-                    CATEGORIA_COLOR: document.getElementById('f_CATEGORIA_COLOR').value,
-                    OBSERVACIONES: document.getElementById('f_OBSERVACIONES').value,
-                    ANIO_CREACION: document.getElementById('f_ANIO_CREACION').value,
+        // ═══ UBICACIONES AUTOCOMPLETADO ═══
+        async function cargarUbicaciones() {
+            try {
+                const res = await fetch('/PREVENTIVOS/UBICACIONES');
+                const data = await res.json();
+                const ids = ['lista-ubicaciones', 'lista-ubicaciones-edit'];
+                ids.forEach(id => {
+                    const dl = document.getElementById(id);
+                    if (!dl) return;
+                    dl.innerHTML = data.ubicaciones
+                        .map(u => `<option value="${u}">`)
+                        .join('');
                 });
-            }
+            } catch (e) { console.warn('No se pudieron cargar ubicaciones', e); }
+        }
 
-            function cargar() {
-                fetch(`/PREVENTIVOS?${obtenerParametros()}`).then(r => r.json()).then(resp => {
-                    totalRegistros = resp.total;
-                    datosActuales = resp.data;
-                    renderizar();
-                }).catch(() => {
-                    document.getElementById('tabla').innerHTML =
-                        '<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--muted)">Error al cargar datos</td></tr>';
+        // ═══ CARGA ═══
+        let _debounceTimer = null;
+
+        function filtrar() {
+            clearTimeout(_debounceTimer);
+            _debounceTimer = setTimeout(() => { paginaActual = 1; cargar(); }, 400);
+        }
+
+        function obtenerParametros() {
+            return new URLSearchParams({
+                page: paginaActual, limit: limite,
+                ID_EQUIPO: document.getElementById('f_ID_EQUIPO').value,
+                UBICACION: document.getElementById('f_UBICACION').value,
+                nombre_dispositivo: document.getElementById('f_nombre_dispositivo').value,
+                PLANTA: document.getElementById('f_PLANTA').value,
+                CATEGORIA_COLOR: document.getElementById('f_CATEGORIA_COLOR').value,
+                OBSERVACIONES: document.getElementById('f_OBSERVACIONES').value,
+                ANIO_CREACION: document.getElementById('f_ANIO_CREACION').value,
+            });
+        }
+
+        function cargar() {
+            fetch(`/PREVENTIVOS?${obtenerParametros()}`).then(r => r.json()).then(resp => {
+                totalRegistros = resp.total;
+                datosActuales = resp.data;
+                renderizar();
+            }).catch(() => {
+                document.getElementById('tabla').innerHTML =
+                    '<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--muted)">Error al cargar datos</td></tr>';
+            });
+        }
+
+        function colorPill(cat) {
+            const c = (cat || '').toLowerCase();
+            if (c.includes('verde')) return { bg: 'rgba(16,185,129,.15)', color: '#6EE7B7', label: cat };
+            if (c.includes('amarillo')) return { bg: 'rgba(245,158,11,.15)', color: '#FCD34D', label: cat };
+            if (c.includes('rojo')) return { bg: 'rgba(239,68,68,.15)', color: '#FCA5A5', label: cat };
+            if (c.includes('gris')) return { bg: 'rgba(148,163,184,.15)', color: '#CBD5E1', label: cat };
+            if (c.includes('rosa')) return { bg: 'rgba(244,114,182,.15)', color: '#F9A8D4', label: cat };
+            if (c.includes('azul')) return { bg: 'rgba(59,130,246,.15)', color: '#93C5FD', label: cat };
+            return { bg: 'rgba(100,116,139,.15)', color: '#94A3B8', label: cat || '—' };
+        }
+
+        function rowBg(cat) {
+            const c = (cat || '').toLowerCase();
+            if (c.includes('verde')) return 'rgba(16,185,129,.18)';
+            if (c.includes('amarillo')) return 'rgba(245,158,11,.18)';
+            if (c.includes('rojo')) return 'rgba(239,68,68,.18)';
+            if (c.includes('gris')) return 'rgba(148,163,184,.14)';
+            if (c.includes('rosa')) return 'rgba(244,114,182,.18)';
+            if (c.includes('azul')) return 'rgba(59,130,246,.18)';
+            return '';
+        }
+
+        function renderizar() {
+            const tbody = document.getElementById('tabla');
+            tbody.innerHTML = '';
+            if (!datosActuales.length) {
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
+                return;
+            }
+            const esAdmin = rolActual === "ADMIN";
+            datosActuales.forEach(row => {
+                const pill = colorPill(row.categoria_color);
+                const bg = rowBg(row.categoria_color);
+                const tdStyle = bg ? `style="background:${bg}"` : '';
+                tbody.innerHTML += `
+                            <tr>
+                              <td class="mono" ${tdStyle}>${row.id}</td>
+                              <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
+                              <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
+                              <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
+                              <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
+                              <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
+                              <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
+                              <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
+                              <td ${tdStyle}>
+                                ${row.tiene_pdf
+                        ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.id})">📄 Ver</button>
+                                     <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
+                        : `<input type="file" onchange="subirPDF(${row.id},this)"
+                                       style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
+                              </td>
+                              <td ${tdStyle} style="text-align:center;">
+                                <img src="/QR_EQUIPO/${row.id}"
+                                     style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
+                                     title="QR: ${row.id_equipo ?? row.id}"
+                                     onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
+                                     loading="lazy">
+                              </td>
+                              <td ${tdStyle} style="white-space:nowrap;">
+                                ${esAdmin ? `
+                                <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
+                                <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
+                                ` : ''}
+                                <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
+                              </td>
+                            </tr>`;
+            });
+            document.getElementById('paginaInfo').textContent =
+                `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite)} | Total: ${totalRegistros}`;
+        }
+
+        // filtrar() definida arriba con debounce
+        function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
+        function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
+
+        // ═══ GUARDAR NUEVO ═══
+        function guardar() {
+            const data = {
+                ID_EQUIPO: document.getElementById('ID_EQUIPO').value || null,
+                UBICACION: document.getElementById('UBICACION').value || null,
+                nombre_dispositivo: document.getElementById('nombre_dispositivo').value || null,
+                PLANTA: document.getElementById('PLANTA').value || null,
+                CATEGORIA_COLOR: document.getElementById('CATEGORIA_COLOR').value || null,
+                OBSERVACIONES: document.getElementById('OBSERVACIONES').value || null,
+                ANIO_CREACION: document.getElementById('ANIO_CREACION').value ? parseInt(document.getElementById('ANIO_CREACION').value) : null,
+                PLAZO: null, REALIZADO_POR: null, FECHA_REALIZACION: null
+            };
+            fetch('/PREVENTIVO', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+                .then(r => r.json()).then(d => {
+                    if (d.error) { alert('Error: ' + d.error); return; }
+                    document.querySelectorAll('.form-grid input').forEach(i => i.value = '');
+                    document.querySelectorAll('.form-grid select').forEach(s => s.selectedIndex = 0);
+                    cargar();
                 });
-            }
+        }
 
-            function colorPill(cat) {
-                const c = (cat || '').toLowerCase();
-                if (c.includes('verde')) return { bg: 'rgba(16,185,129,.15)', color: '#6EE7B7', label: cat };
-                if (c.includes('amarillo')) return { bg: 'rgba(245,158,11,.15)', color: '#FCD34D', label: cat };
-                if (c.includes('rojo')) return { bg: 'rgba(239,68,68,.15)', color: '#FCA5A5', label: cat };
-                if (c.includes('gris')) return { bg: 'rgba(148,163,184,.15)', color: '#CBD5E1', label: cat };
-                if (c.includes('rosa')) return { bg: 'rgba(244,114,182,.15)', color: '#F9A8D4', label: cat };
-                if (c.includes('azul')) return { bg: 'rgba(59,130,246,.15)', color: '#93C5FD', label: cat };
-                return { bg: 'rgba(100,116,139,.15)', color: '#94A3B8', label: cat || '—' };
-            }
+        // ═══ ELIMINAR / PDF ═══
+        function eliminar(id) {
+            if (!confirm('¿Eliminar este registro?')) return;
+            fetch(`/PREVENTIVO/${id}`, { method: 'DELETE' }).then(() => cargar());
+        }
+        function subirPDF(id, input) {
+            const fd = new FormData(); fd.append('file', input.files[0]);
+            fetch(`/PREVENTIVO/PDF/${id}`, { method: 'POST', body: fd }).then(() => cargar());
+        }
+        function verPDF(id) { window.open(`/PREVENTIVO/PDF/${id}`, '_blank'); }
+        function eliminarPDF(id) {
+            if (!confirm('¿Eliminar el PDF?')) return;
+            fetch(`/PREVENTIVO/PDF/${id}`, { method: 'DELETE' }).then(() => cargar());
+        }
 
-            function rowBg(cat) {
-                const c = (cat || '').toLowerCase();
-                if (c.includes('verde')) return 'rgba(16,185,129,.18)';
-                if (c.includes('amarillo')) return 'rgba(245,158,11,.18)';
-                if (c.includes('rojo')) return 'rgba(239,68,68,.18)';
-                if (c.includes('gris')) return 'rgba(148,163,184,.14)';
-                if (c.includes('rosa')) return 'rgba(244,114,182,.18)';
-                if (c.includes('azul')) return 'rgba(59,130,246,.18)';
-                return '';
-            }
+        // ═══ EXPORTAR ═══
+        function exportarFiltrado() { window.open(`/PREVENTIVOS/EXPORTAR_FILTRADO?${obtenerParametros()}`); }
+        function exportarTodo() { window.open('/PREVENTIVOS/EXPORTAR_TODO'); }
+        function exportarPorAnio() {
+            const a = document.getElementById('anioExportar').value;
+            if (!a) { alert('Ingresa un año'); return; }
+            window.open(`/PREVENTIVOS/EXPORTAR_ANIO?anio=${a}`);
+        }
 
-            function renderizar() {
-                const tbody = document.getElementById('tabla');
-                tbody.innerHTML = '';
-                if (!datosActuales.length) {
-                    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
-                    return;
-                }
-                const esAdmin = rolActual === "ADMIN";
-                datosActuales.forEach(row => {
-                    const pill = colorPill(row.categoria_color);
-                    const bg = rowBg(row.categoria_color);
-                    const tdStyle = bg ? `style="background:${bg}"` : '';
-                    tbody.innerHTML += `
-                                                    <tr>
-                                                      <td class="mono" ${tdStyle}>${row.id}</td>
-                                                      <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
-                                                      <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
-                                                      <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
-                                                      <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
-                                                      <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
-                                                      <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
-                                                      <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
-                                                      <td ${tdStyle}>
-                                                        ${row.tiene_pdf
-                            ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.id})">📄 Ver</button>
-                                                             <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
-                            : `<input type="file" onchange="subirPDF(${row.id},this)"
-                                                               style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
-                                                      </td>
-                                                      <td ${tdStyle} style="text-align:center;">
-                                                        <img src="/QR_EQUIPO/${row.id}"
-                                                             style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
-                                                             title="QR: ${row.id_equipo ?? row.id}"
-                                                             onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
-                                                             loading="lazy">
-                                                      </td>
-                                                      <td ${tdStyle} style="white-space:nowrap;">
-                                                        ${esAdmin ? `
-                                                        <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
-                                                        <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
-                                                        ` : ''}
-                                                        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
-                                                      </td>
-                                                    </tr>`;
-                });
-                document.getElementById('paginaInfo').textContent =
-                    `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite)} | Total: ${totalRegistros}`;
-            }
-
-            // filtrar() definida arriba con debounce
-            function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
-            function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
-
-            // ═══ GUARDAR NUEVO ═══
-            function guardar() {
-                const data = {
-                    ID_EQUIPO: document.getElementById('ID_EQUIPO').value || null,
-                    UBICACION: document.getElementById('UBICACION').value || null,
-                    nombre_dispositivo: document.getElementById('nombre_dispositivo').value || null,
-                    PLANTA: document.getElementById('PLANTA').value || null,
-                    CATEGORIA_COLOR: document.getElementById('CATEGORIA_COLOR').value || null,
-                    OBSERVACIONES: document.getElementById('OBSERVACIONES').value || null,
-                    ANIO_CREACION: document.getElementById('ANIO_CREACION').value ? parseInt(document.getElementById('ANIO_CREACION').value) : null,
-                    PLAZO: null, REALIZADO_POR: null, FECHA_REALIZACION: null
-                };
-                fetch('/PREVENTIVO', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-                    .then(r => r.json()).then(d => {
-                        if (d.error) { alert('Error: ' + d.error); return; }
-                        document.querySelectorAll('.form-grid input').forEach(i => i.value = '');
-                        document.querySelectorAll('.form-grid select').forEach(s => s.selectedIndex = 0);
-                        cargar();
-                    });
-            }
-
-            // ═══ ELIMINAR / PDF ═══
-            function eliminar(id) {
-                if (!confirm('¿Eliminar este registro?')) return;
-                fetch(`/PREVENTIVO/${id}`, { method: 'DELETE' }).then(() => cargar());
-            }
-            function subirPDF(id, input) {
-                const fd = new FormData(); fd.append('file', input.files[0]);
-                fetch(`/PREVENTIVO/PDF/${id}`, { method: 'POST', body: fd }).then(() => cargar());
-            }
-            function verPDF(id) { window.open(`/PREVENTIVO/PDF/${id}`, '_blank'); }
-            function eliminarPDF(id) {
-                if (!confirm('¿Eliminar el PDF?')) return;
-                fetch(`/PREVENTIVO/PDF/${id}`, { method: 'DELETE' }).then(() => cargar());
-            }
-
-            // ═══ EXPORTAR ═══
-            function exportarFiltrado() { window.open(`/PREVENTIVOS/EXPORTAR_FILTRADO?${obtenerParametros()}`); }
-            function exportarTodo() { window.open('/PREVENTIVOS/EXPORTAR_TODO'); }
-            function exportarPorAnio() {
-                const a = document.getElementById('anioExportar').value;
-                if (!a) { alert('Ingresa un año'); return; }
-                window.open(`/PREVENTIVOS/EXPORTAR_ANIO?anio=${a}`);
-            }
-
-            // ═══ MODAL EDITAR ═══
-            function abrirEditar(id) {
-                editandoID = id;
-                document.getElementById('editarIdLabel').textContent = id;
-                const row = datosActuales.find(r => r.id === id);
-                if (row) {
-                    CAMPOS.forEach(({ key }) => {
-                        const el = document.getElementById('e_' + key);
-                        const apiKey = KEY_MAP[key] || key;
-                        if (el) el.value = row[apiKey] ?? '';
-                    });
-                }
-                document.getElementById('modalEditar').classList.add('show');
-                document.querySelector('#modalEditar .modal-box').scrollTop = 0;
-            }
-            function cerrarEditar() {
-                document.getElementById('modalEditar').classList.remove('show');
-                editandoID = null;
-            }
-            async function guardarCambios() {
-                const datos = {};
+        // ═══ MODAL EDITAR ═══
+        function abrirEditar(id) {
+            editandoID = id;
+            document.getElementById('editarIdLabel').textContent = id;
+            const row = datosActuales.find(r => r.id === id);
+            if (row) {
                 CAMPOS.forEach(({ key }) => {
                     const el = document.getElementById('e_' + key);
-                    datos[key] = el ? (el.value || null) : null;
-                });
-                try {
-                    const res = await fetch(
-                        `/PREVENTIVO/${editandoID}?usuario=${encodeURIComponent(usuarioActual)}`,
-                        { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual }, body: JSON.stringify(datos) }
-                    );
-                    const result = await res.json();
-                    if (res.ok && !result.error) { cerrarEditar(); cargar(); }
-                    else alert('Error: ' + (result.error || 'No se pudo guardar'));
-                } catch (e) { alert('Error: ' + e.message); }
-            }
-
-            // ═══ MODAL HISTORIAL ═══
-            function esc(v) {
-                if (v == null) return '';
-                return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-            }
-            function norm(v) { return (v == null) ? '' : String(v).trim(); }
-            function formatFecha(f) {
-                try { const d = new Date(f); if (!isNaN(d)) return d.toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch (e) { }
-                return f ?? '';
-            }
-
-            function renderEvento(ev) {
-                let antes = ev.registro_anterior;
-                let despues = ev.registro_nuevo;
-                try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (e) { }
-                try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (e) { }
-                const cambiados = new Set();
-                CAMPOS.forEach(({ key }) => {
                     const apiKey = KEY_MAP[key] || key;
-                    if (norm(antes?.[apiKey]) !== norm(despues?.[apiKey])) cambiados.add(key);
+                    if (el) el.value = row[apiKey] ?? '';
                 });
-                let filas = '';
-                CAMPOS.forEach(({ key, label }) => {
-                    const apiKey = KEY_MAP[key] || key;
-                    const va = esc(antes?.[apiKey] ?? '');
-                    const vd = esc(despues?.[apiKey] ?? '');
-                    const chg = cambiados.has(key);
-                    filas += `
-                                                    <tr class="${chg ? 'row-changed' : ''}">
-                                                      <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                                                      <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                                                      <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                                                    </tr>`;
-                });
-                const n = cambiados.size;
-                return `
-                                                  <div class="ev-wrap">
-                                                    <div class="ev-header">
-                                                      <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                                      <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                                                      <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                                        ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                                                      </span>
-                                                    </div>
-                                                    <table class="ev-table">
-                                                      <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                                                      <tbody>${filas}</tbody>
-                                                    </table>
-                                                  </div>`;
             }
+            document.getElementById('modalEditar').classList.add('show');
+            document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+        }
+        function cerrarEditar() {
+            document.getElementById('modalEditar').classList.remove('show');
+            editandoID = null;
+        }
+        async function guardarCambios() {
+            const datos = {};
+            CAMPOS.forEach(({ key }) => {
+                const el = document.getElementById('e_' + key);
+                datos[key] = el ? (el.value || null) : null;
+            });
+            try {
+                const res = await fetch(
+                    `/PREVENTIVO/${editandoID}?usuario=${encodeURIComponent(usuarioActual)}`,
+                    { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual }, body: JSON.stringify(datos) }
+                );
+                const result = await res.json();
+                if (res.ok && !result.error) { cerrarEditar(); cargar(); }
+                else alert('Error: ' + (result.error || 'No se pudo guardar'));
+            } catch (e) { alert('Error: ' + e.message); }
+        }
 
-            function verHistorial(id) {
-                document.getElementById('histIdLabel').textContent = id;
-                document.getElementById('contenidoHistorial').innerHTML =
-                    '<p style="text-align:center;padding:40px;color:var(--muted)">Cargando...</p>';
-                document.getElementById('modalHistorial').classList.add('show');
-                document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
-                fetch(`/PREVENTIVOS/${id}/HISTORIAL`).then(r => r.json()).then(data => {
-                    const lista = (data.historial || []).sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
-                    if (!lista.length) {
-                        document.getElementById('contenidoHistorial').innerHTML =
-                            '<p class="sin-hist">📭 Sin ediciones registradas</p>';
-                    } else {
-                        document.getElementById('contenidoHistorial').innerHTML =
-                            `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                                          ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                                        </p>`+ lista.map(ev => renderEvento(ev)).join('');
-                    }
-                }).catch(() => {
+        // ═══ MODAL HISTORIAL ═══
+        function esc(v) {
+            if (v == null) return '';
+            return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function norm(v) { return (v == null) ? '' : String(v).trim(); }
+        function formatFecha(f) {
+            try { const d = new Date(f); if (!isNaN(d)) return d.toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch (e) { }
+            return f ?? '';
+        }
+
+        function renderEvento(ev) {
+            let antes = ev.registro_anterior;
+            let despues = ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (e) { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (e) { }
+            const cambiados = new Set();
+            CAMPOS.forEach(({ key }) => {
+                const apiKey = KEY_MAP[key] || key;
+                if (norm(antes?.[apiKey]) !== norm(despues?.[apiKey])) cambiados.add(key);
+            });
+            let filas = '';
+            CAMPOS.forEach(({ key, label }) => {
+                const apiKey = KEY_MAP[key] || key;
+                const va = esc(antes?.[apiKey] ?? '');
+                const vd = esc(despues?.[apiKey] ?? '');
+                const chg = cambiados.has(key);
+                filas += `
+                            <tr class="${chg ? 'row-changed' : ''}">
+                              <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                              <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                              <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                            </tr>`;
+            });
+            const n = cambiados.size;
+            return `
+                          <div class="ev-wrap">
+                            <div class="ev-header">
+                              <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                              <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                              <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                              </span>
+                            </div>
+                            <table class="ev-table">
+                              <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                              <tbody>${filas}</tbody>
+                            </table>
+                          </div>`;
+        }
+
+        function verHistorial(id) {
+            document.getElementById('histIdLabel').textContent = id;
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="text-align:center;padding:40px;color:var(--muted)">Cargando...</p>';
+            document.getElementById('modalHistorial').classList.add('show');
+            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+            fetch(`/PREVENTIVOS/${id}/HISTORIAL`).then(r => r.json()).then(data => {
+                const lista = (data.historial || []).sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+                if (!lista.length) {
                     document.getElementById('contenidoHistorial').innerHTML =
-                        '<p style="color:var(--red);text-align:center;padding:30px">Error al cargar historial</p>';
-                });
-            }
-            function toggleDropdown() {
-                document.getElementById('userChipMain').classList.toggle('open');
-            }
-            document.addEventListener('click', e => {
-                const chip = document.getElementById('userChipMain');
-                if (chip && !chip.contains(e.target)) chip.classList.remove('open');
-            });
-            function cerrarSesion() {
-                fetch('/LOGOUT', { method: 'POST', credentials: 'include' })
-                    .finally(() => { window.location.href = '/static/login.html'; });
-            }
-            function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
-
-            document.addEventListener('keydown', e => {
-                if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
-            });
-
-            // ═══ QR ═══
-            function generarTodosQR() {
-                window.location.href = "/QR_GENERAR_TODOS"
-            }
-            function generarQR() {
-                let ubicacion = prompt("Ingresa la ubicación")
-                if (!ubicacion) return
-
-                let url = `/QR_MESA_GENERAR/${encodeURIComponent(ubicacion.trim())}`
-
-                // Validar primero antes de abrir
-                fetch(url).then(res => {
-                    if (res.ok) {
-                        window.open(url, '_blank')
-                    } else {
-                        res.json().then(d => {
-                            alert('❌ ' + (d.error || 'Ubicación no encontrada en la base de datos'))
-                        }).catch(() => {
-                            alert('❌ La ubicación no existe en la base de datos')
-                        })
-                    }
-                }).catch(() => alert('❌ Error al verificar la ubicación'))
-            }
-
-
-            // ══════════════════════════════════════════
-            // TABS
-            // ══════════════════════════════════════════
-            function switchTab(tab) {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                document.getElementById('tab-' + tab).classList.add('active');
-                document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
-                if (tab === 'dashboard') cargarDashboard();
-                if (tab === 'calendario') calInit();
-            }
-
-            // ══════════════════════════════════════════
-            // DASHBOARD
-            // ══════════════════════════════════════════
-            // ── Variables para destruir charts al recargar ──
-            let dashCargado = false;
-            let _charts = {};
-            function crearChart(id, config) {
-                if (_charts[id]) _charts[id].destroy();
-                _charts[id] = new Chart(document.getElementById(id), config);
-            }
-
-            async function cargarDashboard() {
-                if (dashCargado) return;
-                document.getElementById('db-kpis').innerHTML = '<p style="color:var(--muted);padding:20px">Cargando...</p>';
-                const res = await fetch('/DASHBOARD');
-                const data = await res.json();
-                dashCargado = true;
-
-                renderKpis(data.kpis);
-
-                // ── Dona: categoría de color ──
-                const colores = data.por_color;
-                crearChart('chart-colores', {
-                    type: 'doughnut',
-                    data: {
-                        labels: colores.map(d => d.categoria),
-                        datasets: [{
-                            data: colores.map(d => d.total),
-                            backgroundColor: colores.map(d => colorFromCat(d.categoria)),
-                            borderWidth: 2,
-                            borderColor: '#111827'
-                        }]
-                    },
-                    options: {
-                        plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 11 }, boxWidth: 12 } } },
-                        cutout: '65%'
-                    }
-                });
-
-                // ── Barras: PM por planta ──
-                const plantas = data.por_planta;
-                crearChart('chart-plantas', {
-                    type: 'bar',
-                    data: {
-                        labels: plantas.map(d => d.planta),
-                        datasets: [{
-                            label: 'Equipos',
-                            data: plantas.map(d => d.total),
-                            backgroundColor: 'rgba(59,130,246,.7)',
-                            borderRadius: 6
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: { ticks: { color: '#64748B' }, grid: { color: 'rgba(255,255,255,.05)' } },
-                            y: { ticks: { color: '#94A3B8' }, grid: { display: false } }
-                        }
-                    }
-                });
-
-                // ── Dona: PM digital vs sin PM ──
-                const dig = data.pm_digital;
-                crearChart('chart-digital', {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Con PM Digital', 'Sin PM Digital'],
-                        datasets: [{
-                            data: [dig.con_digital_p1, dig.sin_digital_p1],
-                            backgroundColor: ['rgba(16,185,129,.8)', 'rgba(239,68,68,.8)'],
-                            borderWidth: 2,
-                            borderColor: '#111827'
-                        }]
-                    },
-                    options: {
-                        plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 11 }, boxWidth: 12 } } },
-                        cutout: '65%'
-                    }
-                });
-
-                // ── Línea: PM por mes ──
-                const meses = data.pm_por_mes;
-                crearChart('chart-meses', {
-                    type: 'line',
-                    data: {
-                        labels: meses.map(d => d.mes),
-                        datasets: [{
-                            label: 'PM realizados',
-                            data: meses.map(d => d.total),
-                            borderColor: '#8B5CF6',
-                            backgroundColor: 'rgba(139,92,246,.15)',
-                            borderWidth: 2,
-                            pointBackgroundColor: '#8B5CF6',
-                            pointRadius: 4,
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } },
-                            y: { ticks: { color: '#64748B' }, grid: { color: 'rgba(255,255,255,.04)' }, beginAtZero: true }
-                        }
-                    }
-                });
-
-                // ── Salud del parque ──
-                renderSaludParque(data.salud_parque);
-
-                renderTabla('db-semana', data.esta_semana,
-                    ['Equipo', 'Dispositivo', 'Ubicación', 'Fecha', 'Técnico'],
-                    r => [r.id_equipo, r.dispositivo, r.ubicacion, r.fecha, r.realizado_por || '—']);
-                renderProximaSemana('db-proxima-semana', data.proxima_semana);
-                renderProximos('db-proximos', data.proximos_mes);
-                renderVencidos('db-vencidos', data.vencidos);
-                renderTabla('db-ultimos', data.ultimos,
-                    ['Equipo', 'Dispositivo', 'Ubicación', 'Planta', 'Fecha', 'Técnico'],
-                    r => [r.id_equipo, r.dispositivo, r.ubicacion, r.planta, r.fecha, r.realizado_por || '—']);
-            }
-
-            function renderSaludParque(s) {
-                const el = document.getElementById('db-salud-parque');
-                if (!s) { el.innerHTML = '<p class="db-empty">Sin datos</p>'; return; }
-
-                const saludables = s.al_corriente || 0;
-                const proximosMes = s.por_vencer_mes || 0;
-                const vencidos = s.vencidos || 0;
-                const pSano = s.pct_al_corriente || 0;
-                const pProx = s.pct_por_vencer || 0;
-                const pVenc = s.pct_vencidos || 0;
-                const score = s.indice_salud || 0;
-                const emoji = s.emoji || '😊';
-                const scoreColor = score >= 90 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
-
-                el.innerHTML = `
-                                                <div class="salud-wrap">
-                                                    <div class="salud-item">
-                                                        <div class="salud-label-row">
-                                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
-                                                            <span class="salud-pct" style="color:#10B981">${pSano}%</span>
-                                                        </div>
-                                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
-                                                        <span class="salud-count">${saludables} equipos</span>
-                                                    </div>
-                                                    <div class="salud-item">
-                                                        <div class="salud-label-row">
-                                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
-                                                            <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
-                                                        </div>
-                                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
-                                                        <span class="salud-count">${proximosMes} equipos</span>
-                                                    </div>
-                                                    <div class="salud-item">
-                                                        <div class="salud-label-row">
-                                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
-                                                            <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
-                                                        </div>
-                                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
-                                                        <span class="salud-count">${vencidos} equipos</span>
-                                                    </div>
-                                                    <div class="salud-score">
-                                                        <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
-                                                        <div class="salud-score-label">Índice de salud</div>
-                                                        <div class="salud-score-emoji">${emoji}</div>
-                                                    </div>
-                                                </div>`;
-            }
-
-            function renderKpis(k) {
-                document.getElementById('db-kpis').innerHTML = `
-                                                    <div class="kpi-card kpi-verde">
-                                                      <div class="kpi-label">Total Equipos</div>
-                                                      <div class="kpi-value">${k.total_equipos}</div>
-                                                      <div class="kpi-sub">registrados en el sistema</div>
-                                                    </div>
-                                                    <div class="kpi-card kpi-azul">
-                                                      <div class="kpi-label">Con PM Digital</div>
-                                                      <div class="kpi-value">${k.total_pms_realizados}</div>
-                                                      <div class="kpi-sub">${Math.round(k.total_pms_realizados / k.total_equipos * 100) || 0}% del total</div>
-                                                    </div>
-                                                    <div class="kpi-card kpi-amber">
-                                                      <div class="kpi-label">Sin PM Digital</div>
-                                                      <div class="kpi-value">${k.sin_pm_p1}</div>
-                                                      <div class="kpi-sub">pendientes de atender</div>
-                                                    </div>
-                                                    <div class="kpi-card kpi-rojo">
-                                                      <div class="kpi-label">Vencidos</div>
-                                                      <div class="kpi-value">${k.total_vencidos}</div>
-                                                      <div class="kpi-sub">plazo ya pasó</div>
-                                                    </div>
-                                                    <div class="kpi-card kpi-purple">
-                                                      <div class="kpi-label">Esta Semana</div>
-                                                      <div class="kpi-value">${k.semana_total}</div>
-                                                      <div class="kpi-sub">mantenimientos realizados</div>
-                                                    </div>
-                                                  `;
-            }
-
-            function colorFromCat(cat) {
-                const c = (cat || '').toLowerCase();
-                if (c.includes('verde')) return '#10B981';
-                if (c.includes('amarillo')) return '#F59E0B';
-                if (c.includes('rojo')) return '#EF4444';
-                if (c.includes('gris')) return '#94A3B8';
-                if (c.includes('rosa')) return '#F472B6';
-                if (c.includes('azul')) return '#3B82F6';
-                return '#64748B';
-            }
-
-            function renderBarras(elId, data, labelFn, valFn, colorFn) {
-                if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">Sin datos</p>'; return; }
-                const max = Math.max(...data.map(valFn));
-                document.getElementById(elId).innerHTML = data.map(d => `
-                                                    <div class="bar-wrap">
-                                                      <span class="bar-label">${labelFn(d)}</span>
-                                                      <div class="bar-track">
-                                                        <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
-                                                      </div>
-                                                      <span class="bar-count">${valFn(d)}</span>
-                                                    </div>`).join('');
-            }
-
-            function renderTabla(elId, data, headers, rowFn) {
-                if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">Sin registros</p>'; return; }
-                const ths = headers.map(h => `<th>${h}</th>`).join('');
-                const trs = data.map(r => `<tr>${rowFn(r).map(v => `<td>${v || '—'}</td>`).join('')}</tr>`).join('');
-                document.getElementById(elId).innerHTML =
-                    `<div style="overflow-x:auto"><table class="db-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
-            }
-
-            function renderProximaSemana(elId, data) {
-                if (!data || !data.length) {
-                    document.getElementById(elId).innerHTML = '<p class="db-empty">✅ Sin PM programados la próxima semana</p>';
-                    return;
-                }
-                const trs = data.map(r => {
-                    const diasRestantes = Math.ceil((new Date(r.plazo) - new Date()) / 86400000);
-                    const badge = `<span class="db-badge proximo-badge">En ${diasRestantes}d</span>`;
-                    return `<tr>
-                                                      <td>${r.id_equipo || '—'}</td>
-                                                      <td>${r.dispositivo || '—'}</td>
-                                                      <td><b>${r.ubicacion || '—'}</b></td>
-                                                      <td>${r.planta || '—'}</td>
-                                                      <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
-                                                      <td>${r.ultimo_pm || 'Nunca'}</td>
-                                                      <td>${badge}</td>
-                                                    </tr>`;
-                }).join('');
-                document.getElementById(elId).innerHTML =
-                    `<div style="overflow-x:auto"><table class="db-table">
-                                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                                                      <tbody>${trs}</tbody>
-                                                    </table></div>`;
-            }
-
-            function renderProximos(elId, data) {
-                if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">✅ Sin PM programados este mes</p>'; return; }
-                const trs = data.map(r => {
-                    const dias = Math.ceil((new Date(r.plazo) - new Date()) / 86400000);
-                    const badge = dias < 0
-                        ? `<span class="db-badge vencido-badge">Vencido</span>`
-                        : dias === 0
-                            ? `<span class="db-badge proximo-badge">Hoy</span>`
-                            : `<span class="db-badge proximo-badge">En ${dias}d</span>`;
-                    return `<tr>
-                                                      <td>${r.id_equipo || '—'}</td>
-                                                      <td>${r.dispositivo || '—'}</td>
-                                                      <td><b>${r.ubicacion || '—'}</b></td>
-                                                      <td>${r.planta || '—'}</td>
-                                                      <td>${r.plazo}</td>
-                                                      <td>${badge}</td>
-                                                    </tr>`;
-                }).join('');
-                document.getElementById(elId).innerHTML =
-                    `<div style="overflow-x:auto"><table class="db-table">
-                                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
-                                                      <tbody>${trs}</tbody>
-                                                    </table></div>`;
-            }
-
-            function renderVencidos(elId, data) {
-                if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">✅ No hay mantenimientos vencidos</p>'; return; }
-                const trs = data.map(r => {
-                    const dias = Math.abs(Math.ceil((new Date(r.plazo) - new Date()) / 86400000));
-                    return `<tr>
-                                                      <td>${r.id_equipo || '—'}</td>
-                                                      <td>${r.dispositivo || '—'}</td>
-                                                      <td><b>${r.ubicacion || '—'}</b></td>
-                                                      <td>${r.planta || '—'}</td>
-                                                      <td style="color:var(--red)">${r.plazo}</td>
-                                                      <td>${r.ultimo_pm || 'Nunca'}</td>
-                                                      <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
-                                                    </tr>`;
-                }).join('');
-                document.getElementById(elId).innerHTML =
-                    `<div style="overflow-x:auto"><table class="db-table">
-                                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                                                      <tbody>${trs}</tbody>
-                                                    </table></div>`;
-            }
-
-            // ══════════════════════════════════════════
-            // CALENDARIO — Laptops / Equipos de Cómputo
-            //              Plantas ordenadas mayor→menor
-            //              4 períodos independientes (solo ADMIN)
-            // ══════════════════════════════════════════
-            let calDatos = null;   // respuesta completa de la API
-            let calPlanta = null;
-            let calTipo = 'laptops'; // 'laptops' | 'computo'
-            let calPeriodo = 1;      // 1 | 2 | 0 = ambos
-            let calIniciado = false;
-            let calConfig = { laptops: {}, computo: {} };
-
-            // Poblar selector de año
-            (function () {
-                const sel = document.getElementById('cal-selAnio');
-                const hoy = new Date().getFullYear();
-                for (let y = hoy - 1; y <= hoy + 2; y++) {
-                    const o = document.createElement('option');
-                    o.value = y; o.textContent = y;
-                    if (y === hoy) o.selected = true;
-                    sel.appendChild(o);
-                }
-            })();
-
-            function calInit() {
-                if (calIniciado) return;
-                calIniciado = true;
-                calCargarConfig().then(() => calCargar());
-            }
-
-            // ── Cargar config desde el servidor ──────────────────────────
-            async function calCargarConfig() {
-                try {
-                    const res = await fetch('/CALENDARIO/CONFIG');
-                    if (!res.ok) return;
-                    calConfig = await res.json();
-                } catch (e) { /* sin red */ }
-                calActualizarPanelConfig();
-            }
-
-            // ── Mostrar/ocultar panel admin según rol ─────────────────────
-            function calActualizarPanelConfig() {
-                const esAdmin = rolActual === 'ADMIN' || rolActual === 'admin';
-                document.getElementById('cal-panel-config').style.display = esAdmin ? 'block' : 'none';
-                if (!esAdmin) return;
-
-                // Actualizar las 4 tarjetas de configuración
-                const pares = [
-                    { tipo: 'laptops', periodo: 1, colOk: '#c4b5fd', colBorder: 'rgba(139,92,246,.3)' },
-                    { tipo: 'laptops', periodo: 2, colOk: '#67e8f9', colBorder: 'rgba(6,182,212,.3)' },
-                    { tipo: 'computo', periodo: 1, colOk: '#6ee7b7', colBorder: 'rgba(16,185,129,.3)' },
-                    { tipo: 'computo', periodo: 2, colOk: '#fcd34d', colBorder: 'rgba(245,158,11,.3)' },
-                ];
-
-                pares.forEach(({ tipo, periodo, colOk, colBorder }) => {
-                    const cfg = calConfig[tipo] || {};
-                    const clave = `p${periodo}`;
-                    const activo = cfg[`p${periodo}_activo`];
-                    const fecha = cfg[`inicio_p${periodo}`];
-                    const semana = cfg[`semana_inicio_p${periodo}`];
-
-                    const statusEl = document.getElementById(`cfg-${tipo}-p${periodo}-status`);
-                    const infoEl = document.getElementById(`cfg-${tipo}-p${periodo}-info`);
-                    const resetEl = document.getElementById(`cfg-${tipo}-p${periodo}-reset`);
-                    const fechaEl = document.getElementById(`cfg-${tipo}-p${periodo}-fecha`);
-
-                    if (activo && fecha) {
-                        const d = new Date(fecha + 'T00:00:00');
-                        const fmtd = d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
-                        statusEl.textContent = '✅ Activo';
-                        statusEl.style.cssText = `margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;`;
-                        infoEl.innerHTML = `<span style="color:${colOk};font-weight:600;">Desde ${fmtd} · <strong>Plazo ${semana}</strong></span>`;
-                        fechaEl.value = fecha;
-                        resetEl.style.display = 'inline-flex';
-                    } else {
-                        statusEl.textContent = 'Sin iniciar';
-                        statusEl.style.cssText = `margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);`;
-                        infoEl.innerHTML = '<span style="color:var(--muted);">Sin configurar</span>';
-                        resetEl.style.display = 'none';
-                    }
-                });
-            }
-
-            // ── Confirmar inicio de período ───────────────────────────────
-
-            async function calConfirmarPeriodo(periodo) {
-
-                const fechaEl = document.getElementById(`cal-p${periodo}-fecha`);
-
-                if (!fechaEl) {
-                    alert("❌ No se encontró el selector de fecha.");
-                    return;
-                }
-
-                const fecha = fechaEl.value;
-
-                if (!fecha) {
-                    alert(`⚠ Debes seleccionar una fecha para el Período ${periodo}.`);
-                    return;
-                }
-
-                // tipo requerido por la API
-                const tipo = "computo"; // o "laptops" según el calendario que estés usando
-
-                const d = new Date(fecha + 'T00:00:00');
-                const fmtd = d.toLocaleDateString('es-MX', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-
-                const semNum = calIsoWeekFromStr(fecha);
-
-                const confirmado = confirm(
-                    `¿Seguro que quieres iniciar el Período ${periodo} en esta fecha?\n\n` +
-                    `📅 Fecha: ${fmtd}\n` +
-                    `📌 Plazo de inicio: Plazo ${semNum}\n\n` +
-                    `Todos los equipos se distribuirán semana a semana (24–30 por semana).`
-                );
-
-                if (!confirmado) return;
-
-                try {
-
-                    const res = await fetch('/CALENDARIO/PERIODO', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            tipo: tipo,
-                            periodo: periodo,
-                            fecha: fecha
-                        })
-                    });
-
-                    if (!res.ok) {
-                        const err = await res.json().catch(() => ({}));
-                        alert('❌ ' + (err.error || `Error al guardar Período ${periodo}`));
-                        return;
-                    }
-
-                    const data = await res.json();
-
-                    if (periodo === 1) {
-                        calConfigActual.p1_activo = true;
-                        calConfigActual.inicio_p1 = fecha;
-                        calConfigActual.semana_inicio_p1 = semNum;
-                    } else {
-                        calConfigActual.p2_activo = true;
-                        calConfigActual.inicio_p2 = fecha;
-                        calConfigActual.semana_inicio_p2 = semNum;
-                    }
-
-                    alert(`✅ Período ${periodo} iniciado correctamente`);
-
-                } catch (err) {
-                    console.error(err);
-                    alert("❌ Error al conectar con el servidor.");
-                }
-            }
-
-            // ── Resetear período ──────────────────────────────────────────
-            async function calResetear(tipo, periodo) {
-                if (!confirm(`¿Reiniciar ${tipo} P${periodo}? Esto desactivará ese calendario.`)) return;
-                try {
-                    await fetch(`/CALENDARIO/PERIODO/${tipo}/${periodo}`, { method: 'DELETE' });
-                    if (!calConfig[tipo]) calConfig[tipo] = {};
-                    calConfig[tipo][`p${periodo}_activo`] = false;
-                    calConfig[tipo][`inicio_p${periodo}`] = null;
-                    calConfig[tipo][`semana_inicio_p${periodo}`] = null;
-                    calActualizarPanelConfig();
-                    await calCargar();
-                } catch (e) { alert('❌ Error al reiniciar.'); }
-            }
-
-            // ── Confirmar inicio de período (llamada desde botones HTML) ───
-            async function calConfirmar(tipo, periodo) {
-                const fechaEl = document.getElementById(`cfg-${tipo}-p${periodo}-fecha`);
-                if (!fechaEl) { alert('❌ No se encontró el selector de fecha.'); return; }
-
-                const fecha = fechaEl.value;
-                if (!fecha) { alert(`⚠ Debes seleccionar una fecha para ${tipo} Período ${periodo}.`); return; }
-
-                const d = new Date(fecha + 'T00:00:00');
-                const fmtd = d.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                const semNum = calIsoWeekFromStr(fecha);
-
-                const confirmado = confirm(
-                    `¿Seguro que quieres iniciar ${tipo === 'laptops' ? 'Laptops' : 'Equipos de Cómputo'} Período ${periodo}?\n\n` +
-                    `📅 Fecha: ${fmtd}\n📌 Semana ISO: ${semNum}\n\n` +
-                    `Todos los equipos se distribuirán semana a semana.`
-                );
-                if (!confirmado) return;
-
-                try {
-                    const res = await fetch('/CALENDARIO/PERIODO', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ tipo, periodo, fecha })
-                    });
-
-                    const data = await res.json().catch(() => ({}));
-                    if (!res.ok) { alert('❌ ' + (data.error || `Error al guardar ${tipo} P${periodo}`)); return; }
-
-                    if (!calConfig[tipo]) calConfig[tipo] = {};
-                    calConfig[tipo][`p${periodo}_activo`] = true;
-                    calConfig[tipo][`inicio_p${periodo}`] = fecha;
-                    calConfig[tipo][`semana_inicio_p${periodo}`] = semNum;
-
-                    calActualizarPanelConfig();
-                    await calCargar();
-                    alert(`✅ ${tipo === 'laptops' ? 'Laptops' : 'Equipos de Cómputo'} Período ${periodo} iniciado correctamente`);
-                } catch (err) {
-                    console.error(err);
-                    alert('❌ Error al conectar con el servidor.');
-                }
-            }
-
-
-            function calSetTipo(tipo) {
-                calTipo = tipo;
-                const btnL = document.getElementById('cal-btnLaptops');
-                const btnC = document.getElementById('cal-btnComputo');
-                if (tipo === 'laptops') {
-                    btnL.style.background = '#8B5CF6'; btnL.style.color = 'white';
-                    btnC.style.background = 'transparent'; btnC.style.color = 'var(--muted2)';
+                        '<p class="sin-hist">📭 Sin ediciones registradas</p>';
                 } else {
-                    btnC.style.background = '#10B981'; btnC.style.color = 'white';
-                    btnL.style.background = 'transparent'; btnL.style.color = 'var(--muted2)';
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
+                                  ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                </p>`+ lista.map(ev => renderEvento(ev)).join('');
                 }
-                calPlanta = null; // reset planta al cambiar tipo
-                calRenderNav();
-                calRender();
-            }
+            }).catch(() => {
+                document.getElementById('contenidoHistorial').innerHTML =
+                    '<p style="color:var(--red);text-align:center;padding:30px">Error al cargar historial</p>';
+            });
+        }
+        function toggleDropdown() {
+            document.getElementById('userChipMain').classList.toggle('open');
+        }
+        document.addEventListener('click', e => {
+            const chip = document.getElementById('userChipMain');
+            if (chip && !chip.contains(e.target)) chip.classList.remove('open');
+        });
+        function cerrarSesion() {
+            fetch('/LOGOUT', { method: 'POST', credentials: 'include' })
+                .finally(() => { window.location.href = '/static/login.html'; });
+        }
+        function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
 
-            // ── Cambiar período ───────────────────────────────────────────
-            function calSetPeriodo(p) {
-                // Si P2 no está activo para el tipo actual, avisar
-                if (p === 2) {
-                    const cfg = calConfig[calTipo] || {};
-                    if (!cfg.p2_activo) {
-                        alert(`⚠ El Período 2 de ${calTipo === 'laptops' ? 'Laptops' : 'Equipos de Cómputo'} aún no ha sido configurado por el administrador.`);
-                        return;
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
+        });
+
+        // ═══ QR ═══
+        function generarTodosQR() {
+            window.location.href = "/QR_GENERAR_TODOS"
+        }
+        function generarQR() {
+            let ubicacion = prompt("Ingresa la ubicación")
+            if (!ubicacion) return
+
+            let url = `/QR_MESA_GENERAR/${encodeURIComponent(ubicacion.trim())}`
+
+            // Validar primero antes de abrir
+            fetch(url).then(res => {
+                if (res.ok) {
+                    window.open(url, '_blank')
+                } else {
+                    res.json().then(d => {
+                        alert('❌ ' + (d.error || 'Ubicación no encontrada en la base de datos'))
+                    }).catch(() => {
+                        alert('❌ La ubicación no existe en la base de datos')
+                    })
+                }
+            }).catch(() => alert('❌ Error al verificar la ubicación'))
+        }
+
+
+        // ══════════════════════════════════════════
+        // TABS
+        // ══════════════════════════════════════════
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+            if (tab === 'dashboard') cargarDashboard();
+        }
+
+        // ══════════════════════════════════════════
+        // DASHBOARD
+        // ══════════════════════════════════════════
+        // ── Variables para destruir charts al recargar ──
+        let dashCargado = false;
+        let _charts = {};
+        function crearChart(id, config) {
+            if (_charts[id]) _charts[id].destroy();
+            _charts[id] = new Chart(document.getElementById(id), config);
+        }
+
+        async function cargarDashboard() {
+            if (dashCargado) return;
+            document.getElementById('db-kpis').innerHTML = '<p style="color:var(--muted);padding:20px">Cargando...</p>';
+            const res = await fetch('/DASHBOARD');
+            const data = await res.json();
+            dashCargado = true;
+
+            renderKpis(data.kpis);
+
+            // ── Dona: categoría de color ──
+            const colores = data.por_color;
+            crearChart('chart-colores', {
+                type: 'doughnut',
+                data: {
+                    labels: colores.map(d => d.categoria),
+                    datasets: [{
+                        data: colores.map(d => d.total),
+                        backgroundColor: colores.map(d => colorFromCat(d.categoria)),
+                        borderWidth: 2,
+                        borderColor: '#111827'
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 11 }, boxWidth: 12 } } },
+                    cutout: '65%'
+                }
+            });
+
+            // ── Barras: PM por planta ──
+            const plantas = data.por_planta;
+            crearChart('chart-plantas', {
+                type: 'bar',
+                data: {
+                    labels: plantas.map(d => d.planta),
+                    datasets: [{
+                        label: 'Equipos',
+                        data: plantas.map(d => d.total),
+                        backgroundColor: 'rgba(59,130,246,.7)',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#64748B' }, grid: { color: 'rgba(255,255,255,.05)' } },
+                        y: { ticks: { color: '#94A3B8' }, grid: { display: false } }
                     }
                 }
-                calPeriodo = p;
-                ['cal-btnP1', 'cal-btnP2', 'cal-btnAmbos'].forEach(id => {
-                    const el = document.getElementById(id);
-                    el.style.background = 'transparent'; el.style.color = 'var(--muted2)';
-                });
-                const actId = p === 1 ? 'cal-btnP1' : p === 2 ? 'cal-btnP2' : 'cal-btnAmbos';
-                document.getElementById(actId).style.background = 'var(--accent)';
-                document.getElementById(actId).style.color = 'white';
-                calRender();
-            }
+            });
 
-            // ── Cargar datos desde la API ─────────────────────────────────
-            async function calCargar() {
-                const cfg = calConfig[calTipo] || {};
-
-                // Si P1 no activo → bloquear
-                if (!cfg.p1_activo) {
-                    document.getElementById('cal-wrap').style.display = 'none';
-                    document.getElementById('cal-plantNav').style.display = 'none';
-                    document.getElementById('cal-bloqueado-msg').style.display = 'block';
-                    const tipoLabel = calTipo === 'laptops' ? 'Laptops' : 'Equipos de Cómputo';
-                    document.getElementById('cal-bloqueado-detalle').textContent =
-                        `Un administrador debe configurar la fecha de inicio del Período 1 para ${tipoLabel}.`;
-                    return;
+            // ── Dona: PM digital vs sin PM ──
+            const dig = data.pm_digital;
+            crearChart('chart-digital', {
+                type: 'doughnut',
+                data: {
+                    labels: ['Con PM Digital', 'Sin PM Digital'],
+                    datasets: [{
+                        data: [dig.con_digital_p1, dig.sin_digital_p1],
+                        backgroundColor: ['rgba(16,185,129,.8)', 'rgba(239,68,68,.8)'],
+                        borderWidth: 2,
+                        borderColor: '#111827'
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 11 }, boxWidth: 12 } } },
+                    cutout: '65%'
                 }
+            });
 
-                document.getElementById('cal-bloqueado-msg').style.display = 'none';
-                document.getElementById('cal-wrap').style.display = 'block';
-                document.getElementById('cal-plantNav').style.display = '';
-                document.getElementById('cal-container').innerHTML =
-                    '<div style="color:var(--muted2);text-align:center;padding:40px;">Cargando...</div>';
-
-                const anio = document.getElementById('cal-selAnio').value;
-                try {
-                    const res = await fetch('/CALENDARIO/API?anio=' + anio);
-                    calDatos = await res.json();
-                    if (calDatos.config) calConfig = { ...calConfig, ...calDatos.config };
-                    calActualizarPanelConfig();
-                    calRenderNav();
-                    calRender();
-                    // Ir al plazo de inicio
-                    const cfgActual = calConfig[calTipo] || {};
-                    const semI = cfgActual.semana_inicio_p1 || calIsoWeek(new Date());
-                    document.getElementById('cal-jumpSemana').value = semI;
-                    setTimeout(() => calIrASemana(semI), 350);
-                } catch (e) {
-                    document.getElementById('cal-container').innerHTML =
-                        '<div style="color:#fca5a5;text-align:center;padding:40px;">Error al cargar el calendario</div>';
+            // ── Línea: PM por mes ──
+            const meses = data.pm_por_mes;
+            crearChart('chart-meses', {
+                type: 'line',
+                data: {
+                    labels: meses.map(d => d.mes),
+                    datasets: [{
+                        label: 'PM realizados',
+                        data: meses.map(d => d.total),
+                        borderColor: '#8B5CF6',
+                        backgroundColor: 'rgba(139,92,246,.15)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#8B5CF6',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+                        y: { ticks: { color: '#64748B' }, grid: { color: 'rgba(255,255,255,.04)' }, beginAtZero: true }
+                    }
                 }
+            });
+
+            // ── Salud del parque ──
+            renderSaludParque(data.salud_parque);
+
+            renderTabla('db-semana', data.esta_semana,
+                ['Equipo', 'Dispositivo', 'Ubicación', 'Fecha', 'Técnico'],
+                r => [r.id_equipo, r.dispositivo, r.ubicacion, r.fecha, r.realizado_por || '—']);
+            renderProximaSemana('db-proxima-semana', data.proxima_semana);
+            renderProximos('db-proximos', data.proximos_mes);
+            renderVencidos('db-vencidos', data.vencidos);
+            renderTabla('db-ultimos', data.ultimos,
+                ['Equipo', 'Dispositivo', 'Ubicación', 'Planta', 'Fecha', 'Técnico'],
+                r => [r.id_equipo, r.dispositivo, r.ubicacion, r.planta, r.fecha, r.realizado_por || '—']);
+        }
+
+        function renderSaludParque(s) {
+            const el = document.getElementById('db-salud-parque');
+            if (!s) { el.innerHTML = '<p class="db-empty">Sin datos</p>'; return; }
+
+            const saludables = s.al_corriente || 0;
+            const proximosMes = s.por_vencer_mes || 0;
+            const vencidos = s.vencidos || 0;
+            const pSano = s.pct_al_corriente || 0;
+            const pProx = s.pct_por_vencer || 0;
+            const pVenc = s.pct_vencidos || 0;
+            const score = s.indice_salud || 0;
+            const emoji = s.emoji || '😊';
+            const scoreColor = score >= 90 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
+
+            el.innerHTML = `
+                        <div class="salud-wrap">
+                            <div class="salud-item">
+                                <div class="salud-label-row">
+                                    <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
+                                    <span class="salud-pct" style="color:#10B981">${pSano}%</span>
+                                </div>
+                                <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
+                                <span class="salud-count">${saludables} equipos</span>
+                            </div>
+                            <div class="salud-item">
+                                <div class="salud-label-row">
+                                    <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
+                                    <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
+                                </div>
+                                <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
+                                <span class="salud-count">${proximosMes} equipos</span>
+                            </div>
+                            <div class="salud-item">
+                                <div class="salud-label-row">
+                                    <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
+                                    <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
+                                </div>
+                                <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
+                                <span class="salud-count">${vencidos} equipos</span>
+                            </div>
+                            <div class="salud-score">
+                                <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
+                                <div class="salud-score-label">Índice de salud</div>
+                                <div class="salud-score-emoji">${emoji}</div>
+                            </div>
+                        </div>`;
+        }
+
+        function renderKpis(k) {
+            document.getElementById('db-kpis').innerHTML = `
+                            <div class="kpi-card kpi-verde">
+                              <div class="kpi-label">Total Equipos</div>
+                              <div class="kpi-value">${k.total_equipos}</div>
+                              <div class="kpi-sub">registrados en el sistema</div>
+                            </div>
+                            <div class="kpi-card kpi-azul">
+                              <div class="kpi-label">Con PM Digital</div>
+                              <div class="kpi-value">${k.total_pms_realizados}</div>
+                              <div class="kpi-sub">${Math.round(k.total_pms_realizados / k.total_equipos * 100) || 0}% del total</div>
+                            </div>
+                            <div class="kpi-card kpi-amber">
+                              <div class="kpi-label">Sin PM Digital</div>
+                              <div class="kpi-value">${k.sin_pm_p1}</div>
+                              <div class="kpi-sub">pendientes de atender</div>
+                            </div>
+                            <div class="kpi-card kpi-rojo">
+                              <div class="kpi-label">Vencidos</div>
+                              <div class="kpi-value">${k.total_vencidos}</div>
+                              <div class="kpi-sub">plazo ya pasó</div>
+                            </div>
+                            <div class="kpi-card kpi-purple">
+                              <div class="kpi-label">Esta Semana</div>
+                              <div class="kpi-value">${k.semana_total}</div>
+                              <div class="kpi-sub">mantenimientos realizados</div>
+                            </div>
+                          `;
+        }
+
+        function colorFromCat(cat) {
+            const c = (cat || '').toLowerCase();
+            if (c.includes('verde')) return '#10B981';
+            if (c.includes('amarillo')) return '#F59E0B';
+            if (c.includes('rojo')) return '#EF4444';
+            if (c.includes('gris')) return '#94A3B8';
+            if (c.includes('rosa')) return '#F472B6';
+            if (c.includes('azul')) return '#3B82F6';
+            return '#64748B';
+        }
+
+        function renderBarras(elId, data, labelFn, valFn, colorFn) {
+            if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">Sin datos</p>'; return; }
+            const max = Math.max(...data.map(valFn));
+            document.getElementById(elId).innerHTML = data.map(d => `
+                            <div class="bar-wrap">
+                              <span class="bar-label">${labelFn(d)}</span>
+                              <div class="bar-track">
+                                <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
+                              </div>
+                              <span class="bar-count">${valFn(d)}</span>
+                            </div>`).join('');
+        }
+
+        function renderTabla(elId, data, headers, rowFn) {
+            if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">Sin registros</p>'; return; }
+            const ths = headers.map(h => `<th>${h}</th>`).join('');
+            const trs = data.map(r => `<tr>${rowFn(r).map(v => `<td>${v || '—'}</td>`).join('')}</tr>`).join('');
+            document.getElementById(elId).innerHTML =
+                `<div style="overflow-x:auto"><table class="db-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
+        }
+
+        function renderProximaSemana(elId, data) {
+            if (!data || !data.length) {
+                document.getElementById(elId).innerHTML = '<p class="db-empty">✅ Sin PM programados la próxima semana</p>';
+                return;
             }
+            const trs = data.map(r => {
+                const diasRestantes = Math.ceil((new Date(r.plazo) - new Date()) / 86400000);
+                const badge = `<span class="db-badge proximo-badge">En ${diasRestantes}d</span>`;
+                return `<tr>
+                              <td>${r.id_equipo || '—'}</td>
+                              <td>${r.dispositivo || '—'}</td>
+                              <td><b>${r.ubicacion || '—'}</b></td>
+                              <td>${r.planta || '—'}</td>
+                              <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
+                              <td>${r.ultimo_pm || 'Nunca'}</td>
+                              <td>${badge}</td>
+                            </tr>`;
+            }).join('');
+            document.getElementById(elId).innerHTML =
+                `<div style="overflow-x:auto"><table class="db-table">
+                              <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                              <tbody>${trs}</tbody>
+                            </table></div>`;
+        }
 
-            // ── Construir nav de plantas ──────────────────────────────────
-            function calRenderNav() {
-                if (!calDatos) return;
-                const datos = calTipo === 'laptops' ? calDatos.laptops : calDatos.computo;
-                if (!datos) return;
+        function renderProximos(elId, data) {
+            if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">✅ Sin PM programados este mes</p>'; return; }
+            const trs = data.map(r => {
+                const dias = Math.ceil((new Date(r.plazo) - new Date()) / 86400000);
+                const badge = dias < 0
+                    ? `<span class="db-badge vencido-badge">Vencido</span>`
+                    : dias === 0
+                        ? `<span class="db-badge proximo-badge">Hoy</span>`
+                        : `<span class="db-badge proximo-badge">En ${dias}d</span>`;
+                return `<tr>
+                              <td>${r.id_equipo || '—'}</td>
+                              <td>${r.dispositivo || '—'}</td>
+                              <td><b>${r.ubicacion || '—'}</b></td>
+                              <td>${r.planta || '—'}</td>
+                              <td>${r.plazo}</td>
+                              <td>${badge}</td>
+                            </tr>`;
+            }).join('');
+            document.getElementById(elId).innerHTML =
+                `<div style="overflow-x:auto"><table class="db-table">
+                              <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
+                              <tbody>${trs}</tbody>
+                            </table></div>`;
+        }
 
-                const plantasOrden = datos.plantas_orden || [];
-                const nav = document.getElementById('cal-plantNav');
-                nav.innerHTML = '';
+        function renderVencidos(elId, data) {
+            if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">✅ No hay mantenimientos vencidos</p>'; return; }
+            const trs = data.map(r => {
+                const dias = Math.abs(Math.ceil((new Date(r.plazo) - new Date()) / 86400000));
+                return `<tr>
+                              <td>${r.id_equipo || '—'}</td>
+                              <td>${r.dispositivo || '—'}</td>
+                              <td><b>${r.ubicacion || '—'}</b></td>
+                              <td>${r.planta || '—'}</td>
+                              <td style="color:var(--red)">${r.plazo}</td>
+                              <td>${r.ultimo_pm || 'Nunca'}</td>
+                              <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
+                            </tr>`;
+            }).join('');
+            document.getElementById(elId).innerHTML =
+                `<div style="overflow-x:auto"><table class="db-table">
+                              <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                              <tbody>${trs}</tbody>
+                            </table></div>`;
+        }
 
-                // Etiqueta de tipo
-                const tipoLabel = calTipo === 'laptops'
-                    ? '💻 Laptops — plantas ordenadas de mayor a menor'
-                    : '🖥️ Equipos de Cómputo — plantas ordenadas de mayor a menor';
-                document.getElementById('cal-tipo-label').textContent = tipoLabel;
-
-                // Si no tenemos planta activa, elegir la primera
-                if (!calPlanta || !plantasOrden.includes(calPlanta))
-                    calPlanta = plantasOrden[0] || null;
-
-                plantasOrden.forEach((p, idx) => {
-                    const t = document.createElement('button');
-                    const calDatosPlanta = datos.calendario[p] || {};
-                    const totalEqs = Object.values(calDatosPlanta)
-                        .reduce((acc, s) => acc + (s.p1 || []).length + (s.p2 || []).length, 0);
-
-                    const isActive = p === calPlanta;
-                    t.style.cssText = `padding:7px 16px;border-radius:8px 8px 0 0;font-size:12px;font-weight:600;cursor:pointer;border:1px solid ${isActive ? 'var(--border2)' : 'transparent'};border-bottom:none;color:${isActive ? 'var(--text)' : 'var(--muted2)'};background:${isActive ? 'var(--surface2)' : 'transparent'};transition:all .15s;white-space:nowrap;font-family:'DM Sans',sans-serif;`;
-                    t.innerHTML = `${p} <span style="font-size:10px;color:var(--muted);margin-left:3px;">(${totalEqs})</span>`;
-                    t.onclick = () => {
-                        calPlanta = p;
-                        nav.querySelectorAll('button').forEach(b => {
-                            b.style.color = 'var(--muted2)';
-                            b.style.background = 'transparent';
-                            b.style.borderColor = 'transparent';
-                        });
-                        t.style.color = 'var(--text)';
-                        t.style.background = 'var(--surface2)';
-                        t.style.borderColor = 'var(--border2)';
-                        calRender();
-                    };
-                    nav.appendChild(t);
-                });
-            }
-
-            // ── Renderizar el calendario de la planta activa ──────────────
-            function calRender() {
-                if (!calDatos) return;
-                const datos = calTipo === 'laptops' ? calDatos.laptops : calDatos.computo;
-                if (!datos || !calPlanta) {
-                    document.getElementById('cal-container').innerHTML =
-                        '<div style="color:var(--muted);text-align:center;padding:40px;">Sin datos para mostrar</div>';
-                    return;
-                }
-
-                const calPlantaDatos = datos.calendario[calPlanta] || {};
-                const anio = parseInt(document.getElementById('cal-selAnio').value);
-                const hoy = new Date();
-                const semActual = calIsoWeek(hoy);
-
-                // Semanas que tienen equipos del período seleccionado
-                const semanasAMostrar = [];
-                Object.keys(calPlantaDatos).forEach(s => {
-                    const sn = parseInt(s);
-                    const sem = calPlantaDatos[sn] || {};
-                    let tiene = false;
-                    if (calPeriodo === 1 && (sem.p1 || []).length > 0) tiene = true;
-                    else if (calPeriodo === 2 && (sem.p2 || []).length > 0) tiene = true;
-                    else if (calPeriodo === 0 && ((sem.p1 || []).length + (sem.p2 || []).length) > 0) tiene = true;
-                    if (tiene) semanasAMostrar.push(sn);
-                });
-                // Siempre mostrar la semana actual si está en el año correcto
-                if (anio === hoy.getFullYear() && !semanasAMostrar.includes(semActual))
-                    semanasAMostrar.push(semActual);
-                semanasAMostrar.sort((a, b) => a - b);
-
-                let html = '<div style="display:flex;flex-direction:column;gap:8px;min-width:860px;">';
-
-                if (semanasAMostrar.length === 0) {
-                    html += '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">No hay equipos distribuidos para la selección actual.</div>';
-                } else {
-                    semanasAMostrar.forEach(s => {
-                        const sem = calPlantaDatos[s] || { p1: [], p2: [] };
-                        let equipos = [];
-                        if (calPeriodo === 1) equipos = (sem.p1 || []).map(e => ({ ...e, _p: 1 }));
-                        else if (calPeriodo === 2) equipos = (sem.p2 || []).map(e => ({ ...e, _p: 2 }));
-                        else equipos = [...(sem.p1 || []).map(e => ({ ...e, _p: 1 })), ...(sem.p2 || []).map(e => ({ ...e, _p: 2 }))];
-
-                        const tieneEq = equipos.length > 0;
-                        const esActual = s === semActual && anio === hoy.getFullYear();
-                        const { lunes, domingo } = calRangoSemana(anio, s);
-                        let borderColor = tieneEq ? 'rgba(59,130,246,.25)' : 'rgba(255,255,255,0.07)';
-                        if (esActual) borderColor = 'rgba(16,185,129,.4)';
-
-                        html += `<div style="background:var(--surface);border:1px solid ${borderColor};border-radius:12px;overflow:hidden;${esActual ? 'box-shadow:0 0 0 1px rgba(16,185,129,.15)' : ''}" id="cal-semana-${s}">`;
-
-                        // ── Header ──
-                        html += `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;background:var(--surface2);" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">`;
-                        html += `<span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:800;color:var(--accent);min-width:72px;">Plazo ${s}</span>`;
-                        html += `<span style="font-size:11px;color:var(--muted2);flex:1;">${calFmtFecha(lunes)} — ${calFmtFecha(domingo)}`;
-                        if (esActual) html += `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;font-size:10px;font-weight:700;margin-left:8px;">● Esta semana</span>`;
-                        html += `</span>`;
-                        if (tieneEq) {
-                            const ok = equipos.filter(e => e.realizado).length;
-                            const pend = equipos.filter(e => !e.realizado).length;
-                            html += `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:#93c5fd;">${equipos.length} equipo${equipos.length !== 1 ? 's' : ''}</span>`;
-                            if (ok > 0) html += `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;">✓ ${ok}</span>`;
-                            if (pend > 0) html += `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#fcd34d;">⏳ ${pend}</span>`;
-                        }
-                        html += `<span style="font-size:10px;color:var(--muted);">▼</span>`;
-                        html += `</div>`;
-
-                        // ── Body ──
-                        html += `<div style="display:${esActual ? 'block' : 'none'};padding:10px 14px;border-top:1px solid var(--border);">`;
-                        if (!tieneEq) {
-                            html += `<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px;">Sin equipos en este plazo</div>`;
-                        } else {
-                            html += `<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>`;
-                            ['#', 'Per.', 'ID Equipo', 'Dispositivo', 'Ubicación', 'Color', 'Plazo', 'Técnico', 'PM Digital'].forEach(th => {
-                                html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">${th}</th>`;
-                            });
-                            html += `</tr></thead><tbody>`;
-                            equipos.forEach((e, idx) => {
-                                const pColor = e._p === 1 ? 'rgba(139,92,246,.15)' : 'rgba(6,182,212,.15)';
-                                const pText = e._p === 1 ? '#c4b5fd' : '#67e8f9';
-                                const pBorder = e._p === 1 ? 'rgba(139,92,246,.3)' : 'rgba(6,182,212,.3)';
-                                const pmEst = e.realizado
-                                    ? '<span style="color:#6ee7b7;font-size:11px;">✓ Realizado</span>'
-                                    : '<span style="color:#fcd34d;font-size:11px;">⏳ Pendiente</span>';
-                                html += `<tr>`;
-                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;font-family:monospace;">${idx + 1}</td>`;
-                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:${pColor};color:${pText};border:1px solid ${pBorder};">P${e._p}</span></td>`;
-                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;">${calEsc(e.id_equipo)}</td>`;
-                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calEsc(e.dispositivo)}</td>`;
-                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calEsc(e.ubicacion)}</td>`;
-                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calColorTag(e.color)}</td>`;
-                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;color:var(--accent);font-weight:700;">${calEsc(e.plazo) || 'Plazo ' + s}</td>`;
-                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calEsc(e.tecnico || '—')}</td>`;
-                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${pmEst}</td>`;
-                                html += `</tr>`;
-                            });
-                            html += `</tbody></table>`;
-                        }
-                        html += `</div></div>`;
-                    });
-                }
-                html += '</div>';
-                document.getElementById('cal-container').innerHTML = html;
-            }
-
-            // ── Ir a un plazo específico ──────────────────────────────────
-            function calIrASemana(s) {
-                if (!s) return;
-                const el = document.getElementById('cal-semana-' + s);
-                if (!el) return;
-                const body = el.querySelector('div:last-child');
-                if (body) body.style.display = 'block';
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-
-            function calFiltrarEquipo(val) {
-                const v = (val || '').toLowerCase().trim();
-                document.querySelectorAll('#cal-container tbody tr').forEach(tr => {
-                    tr.style.display = !v || tr.textContent.toLowerCase().includes(v) ? '' : 'none';
-                });
-            }
-
-            // ── Helpers ISO ───────────────────────────────────────────────
-            function calIsoWeek(d) {
-                const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-                const day = date.getUTCDay() || 7;
-                date.setUTCDate(date.getUTCDate() + 4 - day);
-                const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-                return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
-            }
-            function calIsoWeekFromStr(str) { return calIsoWeek(new Date(str + 'T00:00:00')); }
-            function calSemanasEnAnio(y) {
-                const d28 = new Date(y, 11, 28);
-                return calIsoWeek(d28) === 1 ? 52 : calIsoWeek(d28);
-            }
-            function calRangoSemana(anio, semana) {
-                const simple = new Date(anio, 0, 1 + (semana - 1) * 7);
-                const day = simple.getDay() || 7;
-                const lunes = new Date(simple); lunes.setDate(simple.getDate() - day + 1);
-                const domingo = new Date(lunes); domingo.setDate(lunes.getDate() + 6);
-                return { lunes, domingo };
-            }
-            function calFmtFecha(d) {
-                if (!d) return '—';
-                return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
-            }
-            function calEsc(s) {
-                return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            }
-            function calColorTag(c) {
-                const v = (c || '').toLowerCase();
-                const map = {
-                    verde: ['#052e16', '#6ee7b7', 'rgba(16,185,129,.3)'],
-                    rojo: ['#1f0000', '#fca5a5', 'rgba(239,68,68,.3)'],
-                    azul: ['#001233', '#93c5fd', 'rgba(59,130,246,.3)'],
-                    amarillo: ['#1c1400', '#fcd34d', 'rgba(245,158,11,.3)'],
-                    gris: ['#0f172a', '#94a3b8', 'rgba(148,163,184,.2)'],
-                    rosa: ['#1f0011', '#f9a8d4', 'rgba(244,114,182,.3)'],
-                };
-                for (const [key, [bg, color, border]] of Object.entries(map)) {
-                    if (v.includes(key)) return `<span style="padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;background:${bg};color:${color};border:1px solid ${border};">${c}</span>`;
-                }
-                return `<span style="padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;background:var(--surface2);color:var(--muted2);border:1px solid var(--border2);">${c || '—'}</span>`;
-            }
-        </script>
+    </script>
 </body>
 </html>
