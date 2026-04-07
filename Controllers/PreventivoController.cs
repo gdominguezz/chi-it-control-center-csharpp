@@ -634,7 +634,14 @@ public class PreventivoController : ControllerBase
         {
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET preventivo_digital=NULL WHERE id=@id";
+            cmd.CommandText = """
+            UPDATE public.mantenimientos_preventivos
+            SET preventivo_digital = NULL,
+                fecha_realizacion  = NULL,
+                realizado_por      = NULL,
+                plazo              = NULL
+            WHERE id = @id
+            """;
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
             return Ok(new { ok = true });
