@@ -571,6 +571,8 @@ public class QrPageController : ControllerBase
         sb.AppendLine("    if(equipo) tarjetas.push({equipo,disp});");
         sb.AppendLine("  });");
         sb.AppendLine("  if(!tarjetas.length){alert('No hay dispositivos para imprimir.');return;}");
+        // Capturar la URL de la página padre ANTES de abrir la ventana nueva
+        sb.AppendLine("  const urlGeneral=window.location.href;");
         sb.AppendLine("  const w=window.open('','_blank','width=420,height=680');");
         sb.AppendLine("  let html='<!DOCTYPE html><html><head><meta charset=\"UTF-8\">';");
         sb.AppendLine("  html+='<title>Imprimir QR — Etiquetadora</title>';");
@@ -610,7 +612,6 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  html+='<div class=\"etiqueta\">';");
         sb.AppendLine("  html+='<div class=\"eti-titulo\">📋 Dispositivos — '+ubicacion+'</div>';");
         // ── QR General del área ──
-        sb.AppendLine("  const urlGeneral=window.location.href;");
         sb.AppendLine("  html+='<div class=\"eti-qr-general-wrap\">';");
         sb.AppendLine("  html+='<div class=\"eti-qr-general-label\">🌐 Acceso General al Área</div>';");
         sb.AppendLine("  html+='<div class=\"eti-qr-general-box\" id=\"qr_general\"></div>';");
@@ -632,8 +633,8 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  html+='<div class=\"eti-ubicacion\">'+ubicacion+'</div>';");
         sb.AppendLine("  html+='</div>';");  // cierra etiqueta
         sb.AppendLine("  html+='<script>';");
-        // QR general grande (140px ~37mm) centrado — apunta a la URL de la página actual
-        sb.AppendLine("  html+='new QRCode(document.getElementById(\"qr_general\"),{text:\"'+window.location.href+'\",width:140,height:140,correctLevel:QRCode.CorrectLevel.M});';");
+        // QR general grande (140px ~37mm) — urlGeneral fue capturada en la ventana padre antes de abrir la nueva
+        sb.AppendLine("  html+='new QRCode(document.getElementById(\"qr_general\"),{text:\"'+urlGeneral+'\",width:140,height:140,correctLevel:QRCode.CorrectLevel.M});';");
         // QR de 26mm (~98px a 96dpi) para que quepan 3 en 10cm de ancho
         sb.AppendLine("  tarjetas.forEach(function(t,i){");
         sb.AppendLine("    html+='new QRCode(document.getElementById(\"qr'+i+'\"),{text:\"'+t.equipo+'\",width:98,height:98,correctLevel:QRCode.CorrectLevel.M});';");
