@@ -1489,8 +1489,66 @@
         <!-- ═══ CALENDARIO TAB ═══ -->
         <div id="tab-calendario" class="tab-content">
 
+            <!-- ── PANEL: Configuración de Períodos ── -->
+            <div id="cal-panel-config" style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:18px 22px;margin-bottom:14px;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                    <span style="display:inline-block;width:3px;height:14px;background:var(--accent);border-radius:2px;"></span>
+                    Configuración de Períodos de Mantenimiento
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="cal-config-grid">
+
+                    <!-- P1 -->
+                    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;" id="cal-card-p1">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                            <span style="width:10px;height:10px;border-radius:50%;background:#8B5CF6;display:inline-block;flex-shrink:0;"></span>
+                            <span style="font-size:13px;font-weight:700;color:var(--text);">Período 1</span>
+                            <span id="cal-p1-status" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);">Sin iniciar</span>
+                        </div>
+                        <div id="cal-p1-info" style="font-size:12px;color:var(--muted2);margin-bottom:12px;min-height:36px;"></div>
+                        <div style="display:flex;flex-direction:column;gap:8px;" id="cal-p1-form">
+                            <label style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Fecha de inicio del Período 1</label>
+                            <input type="date" id="cal-p1-fecha" style="background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:8px 11px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;width:100%;">
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <button onclick="calConfirmarPeriodo(1)" style="flex:1;padding:9px 14px;background:#8B5CF6;border:none;border-radius:8px;color:white;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;">
+                                    ✅ Aceptar e Iniciar P1
+                                </button>
+                                <button onclick="calResetearPeriodo(1)" id="cal-p1-reset" style="display:none;padding:9px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;color:var(--muted2);font-size:12px;font-weight:600;cursor:pointer;">
+                                    🗑 Reiniciar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- P2 (solo ADMIN) -->
+                    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;" id="cal-card-p2">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                            <span style="width:10px;height:10px;border-radius:50%;background:#06B6D4;display:inline-block;flex-shrink:0;"></span>
+                            <span style="font-size:13px;font-weight:700;color:var(--text);">Período 2</span>
+                            <span id="cal-p2-status" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:var(--muted2);">Sin iniciar</span>
+                        </div>
+                        <div id="cal-p2-info" style="font-size:12px;color:var(--muted2);margin-bottom:12px;min-height:36px;"></div>
+                        <!-- Solo visible para ADMIN -->
+                        <div id="cal-p2-form" style="display:none;flex-direction:column;gap:8px;">
+                            <label style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Fecha de inicio del Período 2 <span style="color:#06B6D4;">(Solo Admin)</span></label>
+                            <input type="date" id="cal-p2-fecha" style="background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:8px 11px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;width:100%;">
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <button onclick="calConfirmarPeriodo(2)" style="flex:1;padding:9px 14px;background:#06B6D4;border:none;border-radius:8px;color:#001a1f;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;">
+                                    ✅ Aceptar e Iniciar P2
+                                </button>
+                                <button onclick="calResetearPeriodo(2)" id="cal-p2-reset" style="display:none;padding:9px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;color:var(--muted2);font-size:12px;font-weight:600;cursor:pointer;">
+                                    🗑 Reiniciar
+                                </button>
+                            </div>
+                        </div>
+                        <div id="cal-p2-noadmin" style="font-size:12px;color:var(--muted);padding:8px 0;">
+                            🔒 Solo los administradores pueden configurar el Período 2.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Toolbar calendario -->
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 0 14px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0 14px;margin-bottom:12px;">
                 <!-- Período toggle -->
                 <div style="display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:3px;">
                     <button class="tab-btn cal-periodo-btn active" id="cal-btnP1" onclick="calSetPeriodo(1)" style="padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:var(--accent);color:white;">Período 1</button>
@@ -1501,20 +1559,25 @@
                 <label style="font-size:11px;color:var(--muted2);">Año</label>
                 <select id="cal-selAnio" onchange="calCargar()" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 11px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;"></select>
                 <!-- Filtros -->
-                <label style="font-size:11px;color:var(--muted2);">Filtrar semana</label>
-                <input type="text" id="cal-filtroSemana" placeholder="Ej: 12" style="width:70px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);" oninput="calFiltrarSemana(this.value)">
                 <label style="font-size:11px;color:var(--muted2);">Buscar equipo</label>
                 <input type="text" id="cal-filtroEquipo" placeholder="Dispositivo o ID..." style="min-width:180px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);" oninput="calFiltrarEquipo(this.value)">
-                <label style="font-size:11px;color:var(--muted2);">Ir a semana</label>
-                <input type="number" id="cal-jumpSemana" min="1" max="53" placeholder="—" style="width:65px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);text-align:center;" onchange="calIrASemana(this.value)">
+                <label style="font-size:11px;color:var(--muted2);">Ir a plazo</label>
+                <input type="number" id="cal-jumpSemana" min="1" max="53" placeholder="—" style="width:75px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);text-align:center;" onchange="calIrASemana(this.value)">
                 <button onclick="calCargar()" style="display:flex;align-items:center;gap:5px;padding:7px 13px;background:var(--accent);border:none;border-radius:7px;color:white;font-size:12px;font-weight:600;cursor:pointer;">🔄 Actualizar</button>
             </div>
 
             <!-- Nav plantas -->
             <div id="cal-plantNav" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0;border-bottom:1px solid var(--border);padding-bottom:0;"></div>
 
+            <!-- Estado del calendario: bloqueado si no hay período configurado -->
+            <div id="cal-bloqueado-msg" style="display:none;background:var(--surface);border:1px dashed var(--border2);border-radius:12px;padding:36px;text-align:center;margin-top:12px;">
+                <div style="font-size:32px;margin-bottom:12px;">📅</div>
+                <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">Calendario no iniciado</div>
+                <div style="font-size:12px;color:var(--muted2);">Selecciona una fecha de inicio para el Período 1 en el panel de arriba para activar el calendario.</div>
+            </div>
+
             <!-- Calendario container -->
-            <div style="padding:16px 0;overflow-x:auto;">
+            <div style="padding:16px 0;overflow-x:auto;" id="cal-wrap">
                 <div id="cal-container" style="color:var(--muted);text-align:center;padding:40px;font-size:13px;">Cargando calendario...</div>
             </div>
 
@@ -1662,37 +1725,37 @@
                     const bg = rowBg(row.categoria_color);
                     const tdStyle = bg ? `style="background:${bg}"` : '';
                     tbody.innerHTML += `
-                                    <tr>
-                                      <td class="mono" ${tdStyle}>${row.id}</td>
-                                      <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
-                                      <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
-                                      <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
-                                      <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
-                                      <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
-                                      <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
-                                      <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
-                                      <td ${tdStyle}>
-                                        ${row.tiene_pdf
+                                            <tr>
+                                              <td class="mono" ${tdStyle}>${row.id}</td>
+                                              <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
+                                              <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
+                                              <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
+                                              <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
+                                              <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
+                                              <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
+                                              <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
+                                              <td ${tdStyle}>
+                                                ${row.tiene_pdf
                             ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.id})">📄 Ver</button>
-                                             <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
+                                                     <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
                             : `<input type="file" onchange="subirPDF(${row.id},this)"
-                                               style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
-                                      </td>
-                                      <td ${tdStyle} style="text-align:center;">
-                                        <img src="/QR_EQUIPO/${row.id}"
-                                             style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
-                                             title="QR: ${row.id_equipo ?? row.id}"
-                                             onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
-                                             loading="lazy">
-                                      </td>
-                                      <td ${tdStyle} style="white-space:nowrap;">
-                                        ${esAdmin ? `
-                                        <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
-                                        <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
-                                        ` : ''}
-                                        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
-                                      </td>
-                                    </tr>`;
+                                                       style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
+                                              </td>
+                                              <td ${tdStyle} style="text-align:center;">
+                                                <img src="/QR_EQUIPO/${row.id}"
+                                                     style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
+                                                     title="QR: ${row.id_equipo ?? row.id}"
+                                                     onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
+                                                     loading="lazy">
+                                              </td>
+                                              <td ${tdStyle} style="white-space:nowrap;">
+                                                ${esAdmin ? `
+                                                <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
+                                                <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
+                                                ` : ''}
+                                                <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
+                                              </td>
+                                            </tr>`;
                 });
                 document.getElementById('paginaInfo').textContent =
                     `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite)} | Total: ${totalRegistros}`;
@@ -1811,27 +1874,27 @@
                     const vd = esc(despues?.[apiKey] ?? '');
                     const chg = cambiados.has(key);
                     filas += `
-                                    <tr class="${chg ? 'row-changed' : ''}">
-                                      <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                                      <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                                      <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                                    </tr>`;
+                                            <tr class="${chg ? 'row-changed' : ''}">
+                                              <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                              <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                              <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                                            </tr>`;
                 });
                 const n = cambiados.size;
                 return `
-                                  <div class="ev-wrap">
-                                    <div class="ev-header">
-                                      <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                      <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                                      <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                        ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                                      </span>
-                                    </div>
-                                    <table class="ev-table">
-                                      <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                                      <tbody>${filas}</tbody>
-                                    </table>
-                                  </div>`;
+                                          <div class="ev-wrap">
+                                            <div class="ev-header">
+                                              <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                              <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                                              <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                                ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                              </span>
+                                            </div>
+                                            <table class="ev-table">
+                                              <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                              <tbody>${filas}</tbody>
+                                            </table>
+                                          </div>`;
             }
 
             function verHistorial(id) {
@@ -1848,8 +1911,8 @@
                     } else {
                         document.getElementById('contenidoHistorial').innerHTML =
                             `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                          ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                        </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                                                  ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                                </p>`+ lista.map(ev => renderEvento(ev)).join('');
                     }
                 }).catch(() => {
                     document.getElementById('contenidoHistorial').innerHTML =
@@ -2047,67 +2110,67 @@
                 const scoreColor = score >= 90 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
 
                 el.innerHTML = `
-                                <div class="salud-wrap">
-                                    <div class="salud-item">
-                                        <div class="salud-label-row">
-                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
-                                            <span class="salud-pct" style="color:#10B981">${pSano}%</span>
-                                        </div>
-                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
-                                        <span class="salud-count">${saludables} equipos</span>
-                                    </div>
-                                    <div class="salud-item">
-                                        <div class="salud-label-row">
-                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
-                                            <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
-                                        </div>
-                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
-                                        <span class="salud-count">${proximosMes} equipos</span>
-                                    </div>
-                                    <div class="salud-item">
-                                        <div class="salud-label-row">
-                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
-                                            <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
-                                        </div>
-                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
-                                        <span class="salud-count">${vencidos} equipos</span>
-                                    </div>
-                                    <div class="salud-score">
-                                        <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
-                                        <div class="salud-score-label">Índice de salud</div>
-                                        <div class="salud-score-emoji">${emoji}</div>
-                                    </div>
-                                </div>`;
+                                        <div class="salud-wrap">
+                                            <div class="salud-item">
+                                                <div class="salud-label-row">
+                                                    <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
+                                                    <span class="salud-pct" style="color:#10B981">${pSano}%</span>
+                                                </div>
+                                                <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
+                                                <span class="salud-count">${saludables} equipos</span>
+                                            </div>
+                                            <div class="salud-item">
+                                                <div class="salud-label-row">
+                                                    <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
+                                                    <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
+                                                </div>
+                                                <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
+                                                <span class="salud-count">${proximosMes} equipos</span>
+                                            </div>
+                                            <div class="salud-item">
+                                                <div class="salud-label-row">
+                                                    <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
+                                                    <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
+                                                </div>
+                                                <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
+                                                <span class="salud-count">${vencidos} equipos</span>
+                                            </div>
+                                            <div class="salud-score">
+                                                <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
+                                                <div class="salud-score-label">Índice de salud</div>
+                                                <div class="salud-score-emoji">${emoji}</div>
+                                            </div>
+                                        </div>`;
             }
 
             function renderKpis(k) {
                 document.getElementById('db-kpis').innerHTML = `
-                                    <div class="kpi-card kpi-verde">
-                                      <div class="kpi-label">Total Equipos</div>
-                                      <div class="kpi-value">${k.total_equipos}</div>
-                                      <div class="kpi-sub">registrados en el sistema</div>
-                                    </div>
-                                    <div class="kpi-card kpi-azul">
-                                      <div class="kpi-label">Con PM Digital</div>
-                                      <div class="kpi-value">${k.total_pms_realizados}</div>
-                                      <div class="kpi-sub">${Math.round(k.total_pms_realizados / k.total_equipos * 100) || 0}% del total</div>
-                                    </div>
-                                    <div class="kpi-card kpi-amber">
-                                      <div class="kpi-label">Sin PM Digital</div>
-                                      <div class="kpi-value">${k.sin_pm_p1}</div>
-                                      <div class="kpi-sub">pendientes de atender</div>
-                                    </div>
-                                    <div class="kpi-card kpi-rojo">
-                                      <div class="kpi-label">Vencidos</div>
-                                      <div class="kpi-value">${k.total_vencidos}</div>
-                                      <div class="kpi-sub">plazo ya pasó</div>
-                                    </div>
-                                    <div class="kpi-card kpi-purple">
-                                      <div class="kpi-label">Esta Semana</div>
-                                      <div class="kpi-value">${k.semana_total}</div>
-                                      <div class="kpi-sub">mantenimientos realizados</div>
-                                    </div>
-                                  `;
+                                            <div class="kpi-card kpi-verde">
+                                              <div class="kpi-label">Total Equipos</div>
+                                              <div class="kpi-value">${k.total_equipos}</div>
+                                              <div class="kpi-sub">registrados en el sistema</div>
+                                            </div>
+                                            <div class="kpi-card kpi-azul">
+                                              <div class="kpi-label">Con PM Digital</div>
+                                              <div class="kpi-value">${k.total_pms_realizados}</div>
+                                              <div class="kpi-sub">${Math.round(k.total_pms_realizados / k.total_equipos * 100) || 0}% del total</div>
+                                            </div>
+                                            <div class="kpi-card kpi-amber">
+                                              <div class="kpi-label">Sin PM Digital</div>
+                                              <div class="kpi-value">${k.sin_pm_p1}</div>
+                                              <div class="kpi-sub">pendientes de atender</div>
+                                            </div>
+                                            <div class="kpi-card kpi-rojo">
+                                              <div class="kpi-label">Vencidos</div>
+                                              <div class="kpi-value">${k.total_vencidos}</div>
+                                              <div class="kpi-sub">plazo ya pasó</div>
+                                            </div>
+                                            <div class="kpi-card kpi-purple">
+                                              <div class="kpi-label">Esta Semana</div>
+                                              <div class="kpi-value">${k.semana_total}</div>
+                                              <div class="kpi-sub">mantenimientos realizados</div>
+                                            </div>
+                                          `;
             }
 
             function colorFromCat(cat) {
@@ -2125,13 +2188,13 @@
                 if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">Sin datos</p>'; return; }
                 const max = Math.max(...data.map(valFn));
                 document.getElementById(elId).innerHTML = data.map(d => `
-                                    <div class="bar-wrap">
-                                      <span class="bar-label">${labelFn(d)}</span>
-                                      <div class="bar-track">
-                                        <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
-                                      </div>
-                                      <span class="bar-count">${valFn(d)}</span>
-                                    </div>`).join('');
+                                            <div class="bar-wrap">
+                                              <span class="bar-label">${labelFn(d)}</span>
+                                              <div class="bar-track">
+                                                <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
+                                              </div>
+                                              <span class="bar-count">${valFn(d)}</span>
+                                            </div>`).join('');
             }
 
             function renderTabla(elId, data, headers, rowFn) {
@@ -2151,20 +2214,20 @@
                     const diasRestantes = Math.ceil((new Date(r.plazo) - new Date()) / 86400000);
                     const badge = `<span class="db-badge proximo-badge">En ${diasRestantes}d</span>`;
                     return `<tr>
-                                      <td>${r.id_equipo || '—'}</td>
-                                      <td>${r.dispositivo || '—'}</td>
-                                      <td><b>${r.ubicacion || '—'}</b></td>
-                                      <td>${r.planta || '—'}</td>
-                                      <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
-                                      <td>${r.ultimo_pm || 'Nunca'}</td>
-                                      <td>${badge}</td>
-                                    </tr>`;
+                                              <td>${r.id_equipo || '—'}</td>
+                                              <td>${r.dispositivo || '—'}</td>
+                                              <td><b>${r.ubicacion || '—'}</b></td>
+                                              <td>${r.planta || '—'}</td>
+                                              <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
+                                              <td>${r.ultimo_pm || 'Nunca'}</td>
+                                              <td>${badge}</td>
+                                            </tr>`;
                 }).join('');
                 document.getElementById(elId).innerHTML =
                     `<div style="overflow-x:auto"><table class="db-table">
-                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                                      <tbody>${trs}</tbody>
-                                    </table></div>`;
+                                              <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                                              <tbody>${trs}</tbody>
+                                            </table></div>`;
             }
 
             function renderProximos(elId, data) {
@@ -2177,19 +2240,19 @@
                             ? `<span class="db-badge proximo-badge">Hoy</span>`
                             : `<span class="db-badge proximo-badge">En ${dias}d</span>`;
                     return `<tr>
-                                      <td>${r.id_equipo || '—'}</td>
-                                      <td>${r.dispositivo || '—'}</td>
-                                      <td><b>${r.ubicacion || '—'}</b></td>
-                                      <td>${r.planta || '—'}</td>
-                                      <td>${r.plazo}</td>
-                                      <td>${badge}</td>
-                                    </tr>`;
+                                              <td>${r.id_equipo || '—'}</td>
+                                              <td>${r.dispositivo || '—'}</td>
+                                              <td><b>${r.ubicacion || '—'}</b></td>
+                                              <td>${r.planta || '—'}</td>
+                                              <td>${r.plazo}</td>
+                                              <td>${badge}</td>
+                                            </tr>`;
                 }).join('');
                 document.getElementById(elId).innerHTML =
                     `<div style="overflow-x:auto"><table class="db-table">
-                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
-                                      <tbody>${trs}</tbody>
-                                    </table></div>`;
+                                              <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
+                                              <tbody>${trs}</tbody>
+                                            </table></div>`;
             }
 
             function renderVencidos(elId, data) {
@@ -2197,26 +2260,27 @@
                 const trs = data.map(r => {
                     const dias = Math.abs(Math.ceil((new Date(r.plazo) - new Date()) / 86400000));
                     return `<tr>
-                                      <td>${r.id_equipo || '—'}</td>
-                                      <td>${r.dispositivo || '—'}</td>
-                                      <td><b>${r.ubicacion || '—'}</b></td>
-                                      <td>${r.planta || '—'}</td>
-                                      <td style="color:var(--red)">${r.plazo}</td>
-                                      <td>${r.ultimo_pm || 'Nunca'}</td>
-                                      <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
-                                    </tr>`;
+                                              <td>${r.id_equipo || '—'}</td>
+                                              <td>${r.dispositivo || '—'}</td>
+                                              <td><b>${r.ubicacion || '—'}</b></td>
+                                              <td>${r.planta || '—'}</td>
+                                              <td style="color:var(--red)">${r.plazo}</td>
+                                              <td>${r.ultimo_pm || 'Nunca'}</td>
+                                              <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
+                                            </tr>`;
                 }).join('');
                 document.getElementById(elId).innerHTML =
                     `<div style="overflow-x:auto"><table class="db-table">
-                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                                      <tbody>${trs}</tbody>
-                                    </table></div>`;
+                                              <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                                              <tbody>${trs}</tbody>
+                                            </table></div>`;
             }
 
             // ══════════════════════════════════════════
-            // CALENDARIO
+            // CALENDARIO — Sistema de Períodos con distribución automática
             // ══════════════════════════════════════════
             let calDatos = null, calPlanta = null, calPeriodo = 1, calIniciado = false;
+            let calConfigActual = { p1_activo: false, p2_activo: false, inicio_p1: null, inicio_p2: null, semana_inicio_p1: null, semana_inicio_p2: null };
 
             // Poblar selector de año del calendario
             (function () {
@@ -2233,22 +2297,184 @@
             function calInit() {
                 if (calIniciado) return;
                 calIniciado = true;
-                calCargar();
+                calCargarConfig().then(() => calCargar());
+            }
+
+            // ── Cargar config de períodos desde el servidor ──
+            async function calCargarConfig() {
+                try {
+                    const res = await fetch('/CALENDARIO/CONFIG');
+                    if (!res.ok) return;
+                    calConfigActual = await res.json();
+                } catch (e) { /* sin conexión, usar valores vacíos */ }
+                calActualizarPanelConfig();
+            }
+
+            // ── Actualizar UI del panel de configuración según estado ──
+            function calActualizarPanelConfig() {
+                const cfg = calConfigActual;
+                const esAdmin = rolActual === 'ADMIN' || rolActual === 'admin';
+
+                // ── P1 ──
+                const p1Status = document.getElementById('cal-p1-status');
+                const p1Info = document.getElementById('cal-p1-info');
+                const p1Reset = document.getElementById('cal-p1-reset');
+                if (cfg.p1_activo && cfg.inicio_p1) {
+                    const d = new Date(cfg.inicio_p1 + 'T00:00:00');
+                    const fmtd = d.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    p1Status.textContent = '✅ Activo';
+                    p1Status.style.background = 'rgba(16,185,129,.15)';
+                    p1Status.style.borderColor = 'rgba(16,185,129,.3)';
+                    p1Status.style.color = '#6ee7b7';
+                    p1Info.innerHTML = `<span style="color:#6ee7b7;font-weight:600;">Iniciado el ${fmtd}</span><br><span style="color:var(--muted2);">Equipos distribuidos desde <strong style="color:#c4b5fd;">Plazo ${cfg.semana_inicio_p1}</strong> en adelante · 24–30 equipos/semana</span>`;
+                    p1Reset.style.display = 'inline-flex';
+                    document.getElementById('cal-p1-fecha').value = cfg.inicio_p1;
+                } else {
+                    p1Status.textContent = 'Sin iniciar';
+                    p1Status.style.background = 'rgba(100,116,139,.15)';
+                    p1Status.style.borderColor = 'rgba(100,116,139,.3)';
+                    p1Status.style.color = 'var(--muted2)';
+                    p1Info.innerHTML = '<span style="color:var(--muted2);">Elige una fecha de inicio para distribuir todos los equipos semana a semana.</span>';
+                    p1Reset.style.display = 'none';
+                }
+
+                // ── P2 ──
+                const p2Status = document.getElementById('cal-p2-status');
+                const p2Info = document.getElementById('cal-p2-info');
+                const p2Form = document.getElementById('cal-p2-form');
+                const p2NoAdmin = document.getElementById('cal-p2-noadmin');
+                const p2Reset = document.getElementById('cal-p2-reset');
+
+                if (cfg.p2_activo && cfg.inicio_p2) {
+                    const d = new Date(cfg.inicio_p2 + 'T00:00:00');
+                    const fmtd = d.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    p2Status.textContent = '✅ Activo';
+                    p2Status.style.background = 'rgba(6,182,212,.15)';
+                    p2Status.style.borderColor = 'rgba(6,182,212,.3)';
+                    p2Status.style.color = '#67e8f9';
+                    p2Info.innerHTML = `<span style="color:#67e8f9;font-weight:600;">Iniciado el ${fmtd}</span><br><span style="color:var(--muted2);">Equipos distribuidos desde <strong style="color:#67e8f9;">Plazo ${cfg.semana_inicio_p2}</strong> en adelante · 24–30 equipos/semana</span>`;
+                    if (esAdmin) { p2Reset.style.display = 'inline-flex'; }
+                    if (esAdmin) { document.getElementById('cal-p2-fecha').value = cfg.inicio_p2; }
+                } else {
+                    p2Status.textContent = 'Sin iniciar';
+                    p2Status.style.background = 'rgba(100,116,139,.15)';
+                    p2Status.style.borderColor = 'rgba(100,116,139,.3)';
+                    p2Status.style.color = 'var(--muted2)';
+                    p2Info.innerHTML = '<span style="color:var(--muted2);">El Período 2 aún no ha sido iniciado por un administrador.</span>';
+                    if (esAdmin) p2Reset.style.display = 'none';
+                }
+
+                // Mostrar u ocultar formulario P2 según rol
+                if (esAdmin) {
+                    p2Form.style.display = 'flex';
+                    p2NoAdmin.style.display = 'none';
+                } else {
+                    p2Form.style.display = 'none';
+                    p2NoAdmin.style.display = 'block';
+                }
+            }
+
+            // ── Confirmar inicio de período ──
+            async function calConfirmarPeriodo(periodo) {
+                const fechaEl = document.getElementById(`cal-p${periodo}-fecha`);
+                const fecha = fechaEl.value;
+                if (!fecha) {
+                    alert(`⚠ Debes seleccionar una fecha para el Período ${periodo}.`);
+                    return;
+                }
+
+                const d = new Date(fecha + 'T00:00:00');
+                const fmtd = d.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                const semNum = calIsoWeekFromStr(fecha);
+
+                const confirmado = confirm(
+                    `¿Seguro que quieres iniciar el Período ${periodo} en esta fecha?\n\n` +
+                    `📅 Fecha: ${fmtd}\n` +
+                    `📌 Plazo de inicio: Plazo ${semNum}\n\n` +
+                    `Todos los equipos de cada planta se distribuirán semana a semana (24–30 por semana) ` +
+                    `en orden alfabético a partir de este plazo.`
+                );
+                if (!confirmado) return;
+
+                try {
+                    const res = await fetch('/CALENDARIO/PERIODO', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ periodo, fecha })
+                    });
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        alert('❌ ' + (err.error || `Error al guardar Período ${periodo}`));
+                        return;
+                    }
+                    const data = await res.json();
+                    // Actualizar config local
+                    if (periodo === 1) {
+                        calConfigActual.p1_activo = true;
+                        calConfigActual.inicio_p1 = fecha;
+                        calConfigActual.semana_inicio_p1 = semNum;
+                    } else {
+                        calConfigActual.p2_activo = true;
+                        calConfigActual.inicio_p2 = fecha;
+                        calConfigActual.semana_inicio_p2 = semNum;
+                    }
+                    calActualizarPanelConfig();
+                    await calCargar();
+                    // Ir al plazo de inicio
+                    setTimeout(() => calIrASemana(semNum), 400);
+                } catch (e) {
+                    alert('❌ Error de conexión al guardar el período.');
+                }
+            }
+
+            // ── Resetear período ──
+            async function calResetearPeriodo(periodo) {
+                if (!confirm(`¿Deseas reiniciar la configuración del Período ${periodo}?\nEsto desactivará el calendario de ese período.`)) return;
+                try {
+                    await fetch(`/CALENDARIO/PERIODO/${periodo}`, { method: 'DELETE' });
+                    if (periodo === 1) { calConfigActual.p1_activo = false; calConfigActual.inicio_p1 = null; calConfigActual.semana_inicio_p1 = null; }
+                    else { calConfigActual.p2_activo = false; calConfigActual.inicio_p2 = null; calConfigActual.semana_inicio_p2 = null; }
+                    calActualizarPanelConfig();
+                    await calCargar();
+                } catch (e) { alert('❌ Error al reiniciar.'); }
             }
 
             async function calCargar() {
+                const wrapEl = document.getElementById('cal-wrap');
+                const bloqEl = document.getElementById('cal-bloqueado-msg');
+                const navEl = document.getElementById('cal-plantNav');
+
+                // Si P1 no está activo, bloquear el calendario
+                if (!calConfigActual.p1_activo) {
+                    wrapEl.style.display = 'none';
+                    navEl.style.display = 'none';
+                    bloqEl.style.display = 'block';
+                    return;
+                }
+                bloqEl.style.display = 'none';
+                wrapEl.style.display = 'block';
+                navEl.style.display = '';
+
                 document.getElementById('cal-container').innerHTML = '<div style="color:var(--muted2);text-align:center;padding:40px;font-size:13px;">Cargando...</div>';
                 const anio = document.getElementById('cal-selAnio').value;
                 try {
                     const res = await fetch('/CALENDARIO/API?anio=' + anio);
                     calDatos = await res.json();
+                    // Actualizar config si viene en la respuesta
+                    if (calDatos.config) {
+                        calConfigActual = { ...calConfigActual, ...calDatos.config };
+                        calActualizarPanelConfig();
+                    }
                     calConstruirNav(calDatos.plantas);
                     if (!calPlanta || !calDatos.plantas.includes(calPlanta))
                         calPlanta = calDatos.plantas[0] || null;
                     calRender();
-                    const s = calIsoWeek(new Date());
-                    document.getElementById('cal-jumpSemana').value = s;
-                    setTimeout(() => { const el = document.getElementById('cal-semana-' + s); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
+                    // Ir a la semana de inicio del período seleccionado
+                    const semInicio = calPeriodo === 2
+                        ? (calConfigActual.semana_inicio_p2 || calIsoWeek(new Date()))
+                        : (calConfigActual.semana_inicio_p1 || calIsoWeek(new Date()));
+                    document.getElementById('cal-jumpSemana').value = semInicio;
+                    setTimeout(() => { const el = document.getElementById('cal-semana-' + semInicio); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
                 } catch (e) {
                     document.getElementById('cal-container').innerHTML = '<div style="color:#fca5a5;text-align:center;padding:40px;">Error al cargar calendario</div>';
                 }
@@ -2273,6 +2499,11 @@
             }
 
             function calSetPeriodo(p) {
+                // Si P2 no está activo, no cambiar a P2
+                if (p === 2 && !calConfigActual.p2_activo) {
+                    alert('⚠ El Período 2 aún no ha sido iniciado. Un administrador debe configurar la fecha de inicio.');
+                    return;
+                }
                 calPeriodo = p;
                 ['cal-btnP1', 'cal-btnP2', 'cal-btnAmbos'].forEach(id => {
                     const el = document.getElementById(id);
@@ -2285,79 +2516,113 @@
             }
 
             function calRender() {
-                if (!calDatos || !calPlanta) { document.getElementById('cal-container').innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px;">Sin datos</div>'; return; }
+                if (!calDatos || !calPlanta) {
+                    document.getElementById('cal-container').innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px;">Sin datos</div>';
+                    return;
+                }
                 const anio = parseInt(document.getElementById('cal-selAnio').value);
                 const calPlantaDatos = calDatos.calendario[calPlanta] || {};
                 const hoy = new Date();
                 const semanaActual = calIsoWeek(hoy);
                 const total = calSemanasEnAnio(anio);
+
+                // Recopilar todas las semanas que tienen equipos para mostrar
+                const semanasConEquipos = new Set();
+                Object.keys(calPlantaDatos).forEach(s => semanasConEquipos.add(parseInt(s)));
+
+                // Semana de inicio según período activo
+                const semInicioP1 = calConfigActual.semana_inicio_p1 || 1;
+                const semInicioP2 = calConfigActual.semana_inicio_p2 || 1;
+                const semInicio = calPeriodo === 2 ? semInicioP2 : semInicioP1;
+
                 let html = '<div style="display:flex;flex-direction:column;gap:8px;min-width:860px;">';
+
+                // Solo mostrar semanas que tienen equipos (o la actual si está en rango)
+                const semanasAMostrar = [];
                 for (let s = 1; s <= total; s++) {
-                    const sem = calPlantaDatos[s] || { p1: [], p2: [] };
-                    let equipos = [];
-                    if (calPeriodo === 1) equipos = (sem.p1 || []).map(e => ({ ...e, _p: 1 }));
-                    else if (calPeriodo === 2) equipos = (sem.p2 || []).map(e => ({ ...e, _p: 2 }));
-                    else equipos = [...(sem.p1 || []).map(e => ({ ...e, _p: 1 })), ...(sem.p2 || []).map(e => ({ ...e, _p: 2 }))];
-                    const tieneEq = equipos.length > 0;
-                    const esActual = s === semanaActual && anio === hoy.getFullYear();
-                    const { lunes, domingo } = calRangoSemana(anio, s);
-                    let borderColor = tieneEq ? 'rgba(59,130,246,.25)' : 'rgba(255,255,255,0.07)';
-                    if (esActual) borderColor = 'rgba(16,185,129,.4)';
-                    const isOpen = esActual;
-                    html += `<div style="background:var(--surface);border:1px solid ${borderColor};border-radius:12px;overflow:hidden;${esActual ? 'box-shadow:0 0 0 1px rgba(16,185,129,.15)' : ''}" id="cal-semana-${s}">`;
-                    html += `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;background:var(--surface2);" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">`;
-                    html += `<span style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--muted);min-width:58px;">Semana ${s}</span>`;
-                    html += `<span style="font-size:11px;color:var(--muted2);flex:1;">${calFmtFecha(lunes)} — ${calFmtFecha(domingo)}${esActual ? '<span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;font-size:10px;font-weight:700;margin-left:6px;">● Esta semana</span>' : ''}</span>`;
-                    if (tieneEq) {
-                        const ok = equipos.filter(e => e.realizado).length;
-                        const pend = equipos.filter(e => !e.realizado && !calEsVencido(e.plazo, hoy)).length;
-                        const venc = equipos.filter(e => !e.realizado && calEsVencido(e.plazo, hoy)).length;
-                        if (ok > 0) html += `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;">✓ ${ok} realizado${ok > 1 ? 's' : ''}</span>`;
-                        if (pend > 0) html += `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#fcd34d;">⏳ ${pend} pendiente${pend > 1 ? 's' : ''}</span>`;
-                        if (venc > 0) html += `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;">⚠ ${venc} vencido${venc > 1 ? 's' : ''}</span>`;
+                    const sem = calPlantaDatos[s];
+                    let tieneEqEnPeriodo = false;
+                    if (sem) {
+                        if (calPeriodo === 1 && (sem.p1 || []).length > 0) tieneEqEnPeriodo = true;
+                        else if (calPeriodo === 2 && (sem.p2 || []).length > 0) tieneEqEnPeriodo = true;
+                        else if (calPeriodo === 0 && ((sem.p1 || []).length > 0 || (sem.p2 || []).length > 0)) tieneEqEnPeriodo = true;
                     }
-                    html += `<span style="font-size:10px;color:var(--muted);">▼</span>`;
-                    html += `</div>`; // header
-                    html += `<div style="display:${isOpen ? 'block' : 'none'};padding:10px 14px;border-top:1px solid var(--border);">`;
-                    if (!tieneEq) {
-                        html += `<div style="text-align:center;padding:18px;color:var(--muted);font-size:12px;">Sin mantenimientos programados esta semana</div>`;
-                    } else {
-                        html += `<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>`;
-                        html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Período</th>`;
-                        html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">ID Equipo</th>`;
-                        html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Dispositivo</th>`;
-                        html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Ubicación</th>`;
-                        html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Color</th>`;
-                        html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Último PM</th>`;
-                        html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Plazo</th>`;
-                        html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Técnico</th>`;
-                        html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Estado</th>`;
-                        html += `</tr></thead><tbody>`;
-                        equipos.forEach(e => {
-                            const estado = e.realizado
-                                ? '<span style="color:#6ee7b7;font-size:11px;">✓ Realizado</span>'
-                                : !e.plazo ? '<span style="color:var(--muted);font-size:11px;">Sin plazo</span>'
-                                    : calEsVencido(e.plazo, hoy) ? '<span style="color:#fca5a5;font-size:11px;">⚠ Vencido</span>'
-                                        : '<span style="color:#fcd34d;font-size:11px;">⏳ Pendiente</span>';
-                            const pColor = e._p === 1 ? 'rgba(139,92,246,.15)' : 'rgba(6,182,212,.15)';
-                            const pText = e._p === 1 ? '#c4b5fd' : '#67e8f9';
-                            const pBorder = e._p === 1 ? 'rgba(139,92,246,.3)' : 'rgba(6,182,212,.3)';
-                            html += `<tr>`;
-                            html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:${pColor};color:${pText};border:1px solid ${pBorder};">P${e._p}</span></td>`;
-                            html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;">${calEsc(e.id_equipo)}</td>`;
-                            html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calEsc(e.dispositivo)}</td>`;
-                            html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calEsc(e.ubicacion)}</td>`;
-                            html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calColorTag(e.color)}</td>`;
-                            html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;">${e.fecha || '—'}</td>`;
-                            html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;">${e.plazo || '—'}</td>`;
-                            html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calEsc(e.tecnico || '—')}</td>`;
-                            html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${estado}</td>`;
-                            html += `</tr>`;
-                        });
-                        html += `</tbody></table>`;
+                    if (tieneEqEnPeriodo || (s === semanaActual && anio === hoy.getFullYear())) {
+                        semanasAMostrar.push(s);
                     }
-                    html += `</div>`; // body
-                    html += `</div>`; // row
+                }
+
+                if (semanasAMostrar.length === 0) {
+                    html += '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">No hay equipos distribuidos para el período seleccionado en esta planta.</div>';
+                } else {
+                    semanasAMostrar.forEach(s => {
+                        const sem = calPlantaDatos[s] || { p1: [], p2: [] };
+                        let equipos = [];
+                        if (calPeriodo === 1) equipos = (sem.p1 || []).map(e => ({ ...e, _p: 1 }));
+                        else if (calPeriodo === 2) equipos = (sem.p2 || []).map(e => ({ ...e, _p: 2 }));
+                        else equipos = [...(sem.p1 || []).map(e => ({ ...e, _p: 1 })), ...(sem.p2 || []).map(e => ({ ...e, _p: 2 }))];
+                        const tieneEq = equipos.length > 0;
+                        const esActual = s === semanaActual && anio === hoy.getFullYear();
+                        const { lunes, domingo } = calRangoSemana(anio, s);
+                        let borderColor = tieneEq ? 'rgba(59,130,246,.25)' : 'rgba(255,255,255,0.07)';
+                        if (esActual) borderColor = 'rgba(16,185,129,.4)';
+                        const isOpen = esActual;
+                        // Etiqueta del plazo = número de semana
+                        const plazoLabel = `Plazo ${s}`;
+
+                        html += `<div style="background:var(--surface);border:1px solid ${borderColor};border-radius:12px;overflow:hidden;${esActual ? 'box-shadow:0 0 0 1px rgba(16,185,129,.15)' : ''}" id="cal-semana-${s}">`;
+                        html += `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;background:var(--surface2);" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">`;
+                        // Plazo en lugar de "Semana X"
+                        html += `<span style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);min-width:72px;">${plazoLabel}</span>`;
+                        html += `<span style="font-size:11px;color:var(--muted2);flex:1;">${calFmtFecha(lunes)} — ${calFmtFecha(domingo)}${esActual ? '<span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;font-size:10px;font-weight:700;margin-left:6px;">● Esta semana</span>' : ''}</span>`;
+                        if (tieneEq) {
+                            const ok = equipos.filter(e => e.realizado).length;
+                            const pend = equipos.filter(e => !e.realizado).length;
+                            html += `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:#93c5fd;">${equipos.length} equipo${equipos.length !== 1 ? 's' : ''}</span>`;
+                            if (ok > 0) html += `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;">✓ ${ok}</span>`;
+                            if (pend > 0) html += `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#fcd34d;">⏳ ${pend}</span>`;
+                        }
+                        html += `<span style="font-size:10px;color:var(--muted);">▼</span>`;
+                        html += `</div>`; // header
+                        html += `<div style="display:${isOpen ? 'block' : 'none'};padding:10px 14px;border-top:1px solid var(--border);">`;
+                        if (!tieneEq) {
+                            html += `<div style="text-align:center;padding:18px;color:var(--muted);font-size:12px;">Sin equipos programados en este plazo</div>`;
+                        } else {
+                            html += `<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>`;
+                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">#</th>`;
+                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Período</th>`;
+                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">ID Equipo</th>`;
+                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Dispositivo</th>`;
+                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Ubicación</th>`;
+                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Color</th>`;
+                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Plazo</th>`;
+                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">Técnico</th>`;
+                            html += `<th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);">PM Digital</th>`;
+                            html += `</tr></thead><tbody>`;
+                            equipos.forEach((e, idx) => {
+                                const pmEstado = e.realizado
+                                    ? '<span style="color:#6ee7b7;font-size:11px;">✓ Realizado</span>'
+                                    : '<span style="color:#fcd34d;font-size:11px;">⏳ Pendiente</span>';
+                                const pColor = e._p === 1 ? 'rgba(139,92,246,.15)' : 'rgba(6,182,212,.15)';
+                                const pText = e._p === 1 ? '#c4b5fd' : '#67e8f9';
+                                const pBorder = e._p === 1 ? 'rgba(139,92,246,.3)' : 'rgba(6,182,212,.3)';
+                                html += `<tr>`;
+                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px;font-family:monospace;">${idx + 1}</td>`;
+                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:${pColor};color:${pText};border:1px solid ${pBorder};">P${e._p}</span></td>`;
+                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;">${calEsc(e.id_equipo)}</td>`;
+                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calEsc(e.dispositivo)}</td>`;
+                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calEsc(e.ubicacion)}</td>`;
+                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calColorTag(e.color)}</td>`;
+                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px;color:var(--accent);font-weight:700;">${calEsc(e.plazo) || plazoLabel}</td>`;
+                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${calEsc(e.tecnico || '—')}</td>`;
+                                html += `<td style="padding:7px 10px;border-bottom:1px solid var(--border);">${pmEstado}</td>`;
+                                html += `</tr>`;
+                            });
+                            html += `</tbody></table>`;
+                        }
+                        html += `</div>`; // body
+                        html += `</div>`; // row
+                    });
                 }
                 html += '</div>';
                 document.getElementById('cal-container').innerHTML = html;
@@ -2367,16 +2632,10 @@
                 if (!s) return;
                 const el = document.getElementById('cal-semana-' + s);
                 if (!el) return;
-                el.querySelector('div > div:last-child').style.display = 'block';
+                // Abrir el body
+                const body = el.querySelector('div:last-child');
+                if (body) body.style.display = 'block';
                 el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-
-            function calFiltrarSemana(val) {
-                document.querySelectorAll('[id^="cal-semana-"]').forEach(row => {
-                    if (!val) { row.style.display = ''; return; }
-                    const num = row.id.replace('cal-semana-', '');
-                    row.style.display = num.includes(val.trim()) ? '' : 'none';
-                });
             }
 
             function calFiltrarEquipo(val) {
@@ -2386,13 +2645,17 @@
                 });
             }
 
-            // Helpers ISO
+            // ── Helpers ISO ──
             function calIsoWeek(d) {
                 const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
                 const day = date.getUTCDay() || 7;
                 date.setUTCDate(date.getUTCDate() + 4 - day);
                 const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
                 return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+            }
+            function calIsoWeekFromStr(str) {
+                const d = new Date(str + 'T00:00:00');
+                return calIsoWeek(d);
             }
             function calSemanasEnAnio(y) {
                 const d28 = new Date(y, 11, 28);
@@ -2409,7 +2672,6 @@
                 if (!d) return '—';
                 return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
             }
-            function calEsVencido(plazo, hoy) { return plazo ? new Date(plazo) < hoy : false; }
             function calEsc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
             function calColorTag(c) {
                 const v = (c || '').toLowerCase();
