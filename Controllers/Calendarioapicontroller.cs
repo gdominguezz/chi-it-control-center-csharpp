@@ -10,161 +10,271 @@ public class CalendarioApiController : ControllerBase
     private readonly DbConnectionPool _db;
     public CalendarioApiController(DbConnectionPool db) => _db = db;
 
-    // ── GET /CALENDARIO/API?anio=2025 ─────────────────────────────────────
-    // Devuelve para cada planta los equipos distribuidos semana a semana
-    // según las fechas de inicio de P1 y P2 configuradas.
-    // Distribución: orden alfabético, 24-30 equipos por semana obligatorio.
+    // ── Clasificación de dispositivos ────────────────────────────────────
+    // LAPTOPS          → LAPTOP
+    // EQUIPOS DE CÓMPUTO → COMPUTADORA DE ESCRITORIO | UPS | IMPRESORA TERMICA
+    private static string ClasificarTipo(string dispositivo)
+    {
+        var d = (dispositivo ?? "").Trim().ToUpperInvariant();
+        if (d == "LAPTOP") return "laptops";
+        if (d == "COMPUTADORA DE ESCRITORIO" || d == "UPS" || d == "IMPRESORA TERMICA")
+            return "computo";
+        return "otros";
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    // GET /CALENDARIO/API?anio=2025
+    // Respuesta:
+    //   {
+    //     anio,
+    //     config: { laptops: { p1_activo, p2_activo, ... }, computo: { ... } },
+    //     laptops: { plantas_orden: [], calendario: { planta: { semana: {p1:[],p2:[]} } } },
+    //     computo:  { plantas_orden: [], calendario: { ... } }
+    //   }
+    // ═════════════════════════════════════════════════════════════════════
     [HttpGet("CALENDARIO/API")]
     public IActionResult ObtenerCalendario([FromQuery] int? anio)
     {
         int year = anio ?? DateTime.Now.Year;
 
         using var conn = _db.Open();
+        var config = LeerConfig(conn);
 
-        // ── Leer configuración de períodos ──
-        var config = LeerConfigPeriodos(conn);
-
-        // ── Leer todos los equipos ──
+        // ── Leer todos los equipos y agrupar por planta+tipo ──
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT
-                COALESCE(planta, 'Sin planta')      AS planta,
+                COALESCE(planta, 'Sin planta') AS planta,
                 id,
                 id_equipo,
                 nombre_dispositivo,
                 ubicacion,
                 categoria_color,
-                fecha_realizacion                   AS fecha_p1,
-                realizado_por                       AS tecnico_p1,
-                fecha_realizacion_p2                AS fecha_p2,
-                realizado_por_p2                    AS tecnico_p2
+                fecha_realizacion              AS fecha_p1,
+                realizado_por                  AS tecnico_p1,
+                fecha_realizacion_p2           AS fecha_p2,
+                realizado_por_p2               AS tecnico_p2
             FROM public.mantenimientos_preventivos
             ORDER BY planta, nombre_dispositivo, id_equipo
             """;
 
-        var plantasDict = new Dictionary<string, List<EquipoCalendario>>();
+        // planta → tipo → lista
+        var datos = new Dictionary<string, Dictionary<string, List<EquipoCalendario>>>();
 
         using var r = cmd.ExecuteReader();
         while (r.Read())
         {
             var planta = r.GetString(0);
-            var eq = new EquipoCalendario
+            var disp = r.IsDBNull(3) ? "" : r.GetString(3);
+            var tipo = ClasificarTipo(disp);
+            if (tipo == "otros") continue;
+
+            if (!datos.ContainsKey(planta))
+                datos[planta] = new Dictionary<string, List<EquipoCalendario>>
+                { ["laptops"] = new(), ["computo"] = new() };
+
+            datos[planta][tipo].Add(new EquipoCalendario
             {
                 Id = r.GetInt64(1),
                 IdEquipo = r.IsDBNull(2) ? "" : r.GetString(2),
-                Dispositivo = r.IsDBNull(3) ? "" : r.GetString(3),
+                Dispositivo = disp,
                 Ubicacion = r.IsDBNull(4) ? "" : r.GetString(4),
                 Color = r.IsDBNull(5) ? "" : r.GetString(5),
-                FechaP1 = r.IsDBNull(6) ? (DateTime?)null : r.GetDateTime(6),
+                FechaP1 = r.IsDBNull(6) ? null : r.GetDateTime(6),
                 TecnicoP1 = r.IsDBNull(7) ? "" : r.GetString(7),
-                FechaP2 = r.IsDBNull(8) ? (DateTime?)null : r.GetDateTime(8),
+                FechaP2 = r.IsDBNull(8) ? null : r.GetDateTime(8),
                 TecnicoP2 = r.IsDBNull(9) ? "" : r.GetString(9),
-            };
-
-            if (!plantasDict.ContainsKey(planta))
-                plantasDict[planta] = new List<EquipoCalendario>();
-            plantasDict[planta].Add(eq);
+            });
         }
         r.Close();
 
-        // ── Distribuir equipos por semana (24-30 por semana, orden alfabético) ──
-        var result = new Dictionary<string, object>();
+        // ── Ordenar plantas: mayor cantidad de equipos primero ──
+        var plantasOrdenLaptops = datos.Keys
+            .OrderByDescending(p => datos[p]["laptops"].Count)
+            .ThenBy(p => p)
+            .ToList();
 
-        foreach (var (planta, equipos) in plantasDict)
-        {
-            // Ordenar alfabéticamente por nombre_dispositivo luego id_equipo
-            var equiposOrdenados = equipos
-                .OrderBy(e => e.Dispositivo, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(e => e.IdEquipo, StringComparer.OrdinalIgnoreCase)
-                .ToList();
+        var plantasOrdenComputo = datos.Keys
+            .OrderByDescending(p => datos[p]["computo"].Count)
+            .ThenBy(p => p)
+            .ToList();
 
-            var semanas = new Dictionary<int, object>();
-
-            // ── Distribución P1 ──
-            if (config.InicioP1 != null)
-            {
-                var inicio1 = config.InicioP1.Value;
-                DistribuirEnSemanas(equiposOrdenados, inicio1, year, 1, semanas, config);
-            }
-
-            // ── Distribución P2 ──
-            if (config.InicioP2 != null)
-            {
-                var inicio2 = config.InicioP2.Value;
-                DistribuirEnSemanas(equiposOrdenados, inicio2, year, 2, semanas, config);
-            }
-
-            result[planta] = semanas;
-        }
-
-        var plantas = plantasDict.Keys.OrderBy(p => p).ToList();
+        // ── Construir calendarios ──
+        var calLaptops = ConstruirCalendario(datos, "laptops", config, plantasOrdenLaptops);
+        var calComputo = ConstruirCalendario(datos, "computo", config, plantasOrdenComputo);
 
         return Ok(new
         {
             anio = year,
-            plantas,
-            calendario = result,
-            config = new
-            {
-                p1_activo = config.InicioP1 != null,
-                p2_activo = config.InicioP2 != null,
-                inicio_p1 = config.InicioP1?.ToString("yyyy-MM-dd"),
-                inicio_p2 = config.InicioP2?.ToString("yyyy-MM-dd"),
-                semana_inicio_p1 = config.InicioP1 != null ? SemanaISO(config.InicioP1.Value) : (int?)null,
-                semana_inicio_p2 = config.InicioP2 != null ? SemanaISO(config.InicioP2.Value) : (int?)null,
-            }
+            config = SerializarConfig(config),
+            laptops = new { plantas_orden = plantasOrdenLaptops, calendario = calLaptops },
+            computo = new { plantas_orden = plantasOrdenComputo, calendario = calComputo },
         });
     }
 
-    // ── POST /CALENDARIO/PERIODO ──────────────────────────────────────────
-    // Body: { "periodo": 1, "fecha": "2025-02-03" }
-    // Solo ADMIN puede configurar P2.
+    // ── Construir el calendario completo de un tipo ───────────────────────
+    // Las plantas se distribuyen en orden (más equipos primero).
+    // La distribución de semanas es CONTINUA entre plantas:
+    //   B1 ocupa Plazo 8,9,10 → B2 arranca en Plazo 11 → Bodega en Plazo 14 …
+    private static Dictionary<string, Dictionary<int, SemanaData>> ConstruirCalendario(
+        Dictionary<string, Dictionary<string, List<EquipoCalendario>>> datos,
+        string tipo,
+        ConfigPeriodos config,
+        List<string> plantasOrden)
+    {
+        var resultado = new Dictionary<string, Dictionary<int, SemanaData>>();
+
+        DateTime? inicioP1 = tipo == "laptops" ? config.LaptopsP1 : config.ComputoP1;
+        DateTime? inicioP2 = tipo == "laptops" ? config.LaptopsP2 : config.ComputoP2;
+
+        int offsetP1 = 0; // semanas acumuladas entre plantas (P1)
+        int offsetP2 = 0; // semanas acumuladas entre plantas (P2)
+
+        foreach (var planta in plantasOrden)
+        {
+            if (!datos.ContainsKey(planta)) continue;
+
+            var equipos = datos[planta].GetValueOrDefault(tipo) ?? new();
+            var ordenados = equipos
+                .OrderBy(e => e.Dispositivo, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(e => e.IdEquipo, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var semanas = new Dictionary<int, SemanaData>();
+
+            if (inicioP1 != null && ordenados.Count > 0)
+                offsetP1 = DistribuirEnSemanas(ordenados, inicioP1.Value, 1, semanas, offsetP1);
+
+            if (inicioP2 != null && ordenados.Count > 0)
+                offsetP2 = DistribuirEnSemanas(ordenados, inicioP2.Value, 2, semanas, offsetP2);
+
+            resultado[planta] = semanas;
+        }
+
+        return resultado;
+    }
+
+    // ── Distribuir equipos de UNA planta en semanas ───────────────────────
+    // Devuelve el offset acumulado para que la siguiente planta continúe.
+    private static int DistribuirEnSemanas(
+        List<EquipoCalendario> equipos,
+        DateTime fechaInicio,
+        int periodo,
+        Dictionary<int, SemanaData> semanas,
+        int offsetInicial)
+    {
+        const int MIN = 24, MAX = 30;
+        int total = equipos.Count;
+        if (total == 0) return offsetInicial;
+
+        // Calcular tamaño de lote (24-30 por semana)
+        int semanasNec = (int)Math.Ceiling((double)total / MAX);
+        int porSemana = (int)Math.Ceiling((double)total / semanasNec);
+        porSemana = Math.Max(MIN, Math.Min(MAX, porSemana));
+
+        int semanaBase = SemanaISO(fechaInicio);
+        int totalSemsAnio = SemanasEnAnio(fechaInicio.Year);
+
+        int idx = 0, offset = offsetInicial;
+
+        while (idx < total)
+        {
+            int semRaw = semanaBase + offset;
+            // Wraparound anual
+            int semNum = ((semRaw - 1) % totalSemsAnio) + 1;
+
+            int restantes = total - idx;
+            int cant = Math.Min(porSemana, restantes);
+
+            // Si la última tanda es < 24, la dejamos igual (excepción permitida al final)
+            if (cant < MIN && restantes <= cant)
+                cant = restantes;
+
+            string plazoLabel = $"Plazo {semNum}";
+
+            if (!semanas.ContainsKey(semNum))
+                semanas[semNum] = new SemanaData();
+
+            var lista = periodo == 1
+                ? semanas[semNum].P1
+                : semanas[semNum].P2;
+
+            for (int i = 0; i < cant && idx < total; i++, idx++)
+            {
+                var eq = equipos[idx];
+                var fechaReal = periodo == 1 ? eq.FechaP1 : eq.FechaP2;
+                var tecnico = (periodo == 1 ? eq.TecnicoP1 : eq.TecnicoP2) ?? "";
+
+                lista.Add(new EquipoSemana
+                {
+                    Id = eq.Id,
+                    IdEquipo = eq.IdEquipo,
+                    Dispositivo = eq.Dispositivo,
+                    Ubicacion = eq.Ubicacion,
+                    Color = eq.Color,
+                    Fecha = fechaReal?.ToString("yyyy-MM-dd"),
+                    Plazo = plazoLabel,
+                    Tecnico = tecnico,
+                    Realizado = fechaReal != null,
+                });
+            }
+
+            offset++;
+        }
+
+        return offset;
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    // POST /CALENDARIO/PERIODO
+    // Body: { "tipo": "laptops"|"computo", "periodo": 1|2, "fecha": "2025-02-03" }
+    // Solo ADMIN
+    // ═════════════════════════════════════════════════════════════════════
     [HttpPost("CALENDARIO/PERIODO")]
     public IActionResult ConfigurarPeriodo([FromBody] JsonElement body)
     {
-        if (!body.TryGetProperty("periodo", out var periodoEl) ||
-            !body.TryGetProperty("fecha", out var fechaEl))
-            return BadRequest(new { error = "Se requieren campos 'periodo' y 'fecha'" });
+        var usuario = ObtenerUsuarioActual();
+        if (usuario == null || !usuario.EsAdmin)
+            return Forbid();
 
+        if (!body.TryGetProperty("tipo", out var tipoEl) ||
+            !body.TryGetProperty("periodo", out var periodoEl) ||
+            !body.TryGetProperty("fecha", out var fechaEl))
+            return BadRequest(new { error = "Se requieren 'tipo', 'periodo' y 'fecha'" });
+
+        string tipo = tipoEl.GetString() ?? "";
         int periodo = periodoEl.GetInt32();
+        if (tipo != "laptops" && tipo != "computo")
+            return BadRequest(new { error = "Tipo inválido" });
         if (!DateTime.TryParse(fechaEl.GetString(), out var fecha))
             return BadRequest(new { error = "Fecha inválida" });
 
-        // Para P2, verificar que el usuario sea ADMIN
-        if (periodo == 2)
-        {
-            // Obtener usuario de la sesión (cookie/header)
-            var usuario = ObtenerUsuarioActual();
-            if (usuario == null || !usuario.EsAdmin)
-                return Forbid();
-        }
-
         using var conn = _db.Open();
-        GuardarConfigPeriodo(conn, periodo, fecha);
+        GuardarConfig(conn, tipo, periodo, fecha);
 
-        var semanaNum = SemanaISO(fecha);
-        return Ok(new
-        {
-            ok = true,
-            periodo,
-            fecha = fecha.ToString("yyyy-MM-dd"),
-            semana = semanaNum,
-            mensaje = $"Período {periodo} iniciará en la semana {semanaNum} ({fecha:dd/MM/yyyy})"
-        });
+        int semana = SemanaISO(fecha);
+        return Ok(new { ok = true, tipo, periodo, fecha = fecha.ToString("yyyy-MM-dd"), semana });
     }
 
-    // ── DELETE /CALENDARIO/PERIODO/{n} ────────────────────────────────────
-    [HttpDelete("CALENDARIO/PERIODO/{periodo}")]
-    public IActionResult ResetearPeriodo(int periodo)
+    // ── DELETE /CALENDARIO/PERIODO/{tipo}/{periodo} ───────────────────────
+    [HttpDelete("CALENDARIO/PERIODO/{tipo}/{periodo}")]
+    public IActionResult ResetearPeriodo(string tipo, int periodo)
     {
-        if (periodo == 2)
-        {
-            var usuario = ObtenerUsuarioActual();
-            if (usuario == null || !usuario.EsAdmin) return Forbid();
-        }
+        var usuario = ObtenerUsuarioActual();
+        if (usuario == null || !usuario.EsAdmin) return Forbid();
+        if (tipo != "laptops" && tipo != "computo") return BadRequest();
+
         using var conn = _db.Open();
-        EliminarConfigPeriodo(conn, periodo);
+        EliminarConfig(conn, tipo, periodo);
         return Ok(new { ok = true });
+    }
+
+    // ── GET /CALENDARIO/CONFIG ────────────────────────────────────────────
+    [HttpGet("CALENDARIO/CONFIG")]
+    public IActionResult ObtenerConfig()
+    {
+        using var conn = _db.Open();
+        return Ok(SerializarConfig(LeerConfig(conn)));
     }
 
     // ── GET /CALENDARIO/PLANTAS ───────────────────────────────────────────
@@ -175,8 +285,7 @@ public class CalendarioApiController : ControllerBase
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT DISTINCT COALESCE(planta,'Sin planta') AS planta
-            FROM public.mantenimientos_preventivos
-            ORDER BY planta
+            FROM public.mantenimientos_preventivos ORDER BY planta
             """;
         var lista = new List<string>();
         using var r = cmd.ExecuteReader();
@@ -184,183 +293,94 @@ public class CalendarioApiController : ControllerBase
         return Ok(new { plantas = lista });
     }
 
-    // ── GET /CALENDARIO/CONFIG ────────────────────────────────────────────
-    [HttpGet("CALENDARIO/CONFIG")]
-    public IActionResult ObtenerConfig()
+    // ── Serializar config para el frontend ───────────────────────────────
+    private static object SerializarConfig(ConfigPeriodos cfg) => new
     {
-        using var conn = _db.Open();
-        var cfg = LeerConfigPeriodos(conn);
-        var semanaP1 = cfg.InicioP1 != null ? SemanaISO(cfg.InicioP1.Value) : (int?)null;
-        var semanaP2 = cfg.InicioP2 != null ? SemanaISO(cfg.InicioP2.Value) : (int?)null;
-        return Ok(new
+        laptops = new
         {
-            p1_activo = cfg.InicioP1 != null,
-            p2_activo = cfg.InicioP2 != null,
-            inicio_p1 = cfg.InicioP1?.ToString("yyyy-MM-dd"),
-            inicio_p2 = cfg.InicioP2?.ToString("yyyy-MM-dd"),
-            semana_inicio_p1 = semanaP1,
-            semana_inicio_p2 = semanaP2,
-        });
-    }
-
-    // ── Distribución de equipos en semanas ───────────────────────────────
-    private static void DistribuirEnSemanas(
-        List<EquipoCalendario> equipos,
-        DateTime fechaInicio,
-        int year,
-        int periodo,
-        Dictionary<int, object> semanas,
-        ConfigPeriodos config)
-    {
-        int semanaInicio = SemanaISO(fechaInicio);
-        int totalEquipos = equipos.Count;
-        if (totalEquipos == 0) return;
-
-        // Calcular cuántas semanas necesitamos y cuántos equipos por semana
-        // Regla: 24-30 equipos por semana obligatorio
-        const int MIN_POR_SEMANA = 24;
-        const int MAX_POR_SEMANA = 30;
-
-        // Número óptimo de semanas
-        int semanasNecesarias = (int)Math.Ceiling((double)totalEquipos / MAX_POR_SEMANA);
-        int porSemana = (int)Math.Ceiling((double)totalEquipos / semanasNecesarias);
-
-        // Ajustar para que quede entre 24 y 30
-        if (porSemana < MIN_POR_SEMANA) porSemana = MIN_POR_SEMANA;
-        if (porSemana > MAX_POR_SEMANA) porSemana = MAX_POR_SEMANA;
-
-        int idx = 0;
-        int semanaOffset = 0;
-
-        while (idx < totalEquipos)
+            p1_activo = cfg.LaptopsP1 != null,
+            p2_activo = cfg.LaptopsP2 != null,
+            inicio_p1 = cfg.LaptopsP1?.ToString("yyyy-MM-dd"),
+            inicio_p2 = cfg.LaptopsP2?.ToString("yyyy-MM-dd"),
+            semana_inicio_p1 = cfg.LaptopsP1 != null ? SemanaISO(cfg.LaptopsP1.Value) : (int?)null,
+            semana_inicio_p2 = cfg.LaptopsP2 != null ? SemanaISO(cfg.LaptopsP2.Value) : (int?)null,
+        },
+        computo = new
         {
-            int semanaNum = semanaInicio + semanaOffset;
-            // Wrap si pasa de 52/53
-            int totalSemanasAnio = SemanasEnAnio(fechaInicio.Year);
-            if (semanaNum > totalSemanasAnio)
-            {
-                semanaNum = semanaNum - totalSemanasAnio;
-            }
-
-            // Calcular equipos para esta semana (últimas semanas pueden tener menos)
-            int restantes = totalEquipos - idx;
-            int cantEsta = Math.Min(porSemana, restantes);
-
-            // Si quedan pocos en la última semana, los unimos a la anterior si son < 24
-            // Pero solo si ya hay equipos asignados en la semana anterior
-            if (cantEsta < MIN_POR_SEMANA && semanaOffset > 0 && restantes < MIN_POR_SEMANA)
-            {
-                // Distribuir los restantes entre las semanas anteriores no supera el máximo
-                // Si no es posible, los ponemos igual (excepción: última semana puede tener menos)
-                cantEsta = restantes;
-            }
-
-            // Número de plazo = número de semana ISO
-            string plazo = $"Plazo {semanaNum}";
-
-            // Crear entradas para esta semana en el diccionario
-            if (!semanas.ContainsKey(semanaNum))
-            {
-                semanas[semanaNum] = new SemanaData();
-            }
-
-            var semObj = (SemanaData)semanas[semanaNum];
-            var lista = periodo == 1 ? semObj.P1 : semObj.P2;
-
-            for (int i = 0; i < cantEsta && idx < totalEquipos; i++, idx++)
-            {
-                var eq = equipos[idx];
-                DateTime? fechaReal = periodo == 1 ? eq.FechaP1 : eq.FechaP2;
-                string? tecnico = periodo == 1 ? eq.TecnicoP1 : eq.TecnicoP2;
-
-                lista.Add(new EquipoSemana
-                {
-                    Id = eq.Id,
-                    IdEquipo = eq.IdEquipo,
-                    Dispositivo = eq.Dispositivo,
-                    Ubicacion = eq.Ubicacion,
-                    Color = eq.Color,
-                    Fecha = fechaReal?.ToString("yyyy-MM-dd"),
-                    Plazo = plazo,
-                    Tecnico = tecnico ?? "",
-                    Realizado = fechaReal != null,
-                });
-            }
-
-            semanaOffset++;
+            p1_activo = cfg.ComputoP1 != null,
+            p2_activo = cfg.ComputoP2 != null,
+            inicio_p1 = cfg.ComputoP1?.ToString("yyyy-MM-dd"),
+            inicio_p2 = cfg.ComputoP2?.ToString("yyyy-MM-dd"),
+            semana_inicio_p1 = cfg.ComputoP1 != null ? SemanaISO(cfg.ComputoP1.Value) : (int?)null,
+            semana_inicio_p2 = cfg.ComputoP2 != null ? SemanaISO(cfg.ComputoP2.Value) : (int?)null,
         }
+    };
+
+    // ── BD helpers ────────────────────────────────────────────────────────
+    private static void AsegurarTabla(Npgsql.NpgsqlConnection conn)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            CREATE TABLE IF NOT EXISTS public.calendario_config (
+                clave          VARCHAR(50) PRIMARY KEY,
+                valor          TEXT        NOT NULL,
+                actualizado_en TIMESTAMPTZ DEFAULT NOW()
+            )
+            """;
+        cmd.ExecuteNonQuery();
     }
 
-    // ── Config BD helpers ─────────────────────────────────────────────────
-    private static ConfigPeriodos LeerConfigPeriodos(Npgsql.NpgsqlConnection conn)
+    private static ConfigPeriodos LeerConfig(Npgsql.NpgsqlConnection conn)
     {
         var cfg = new ConfigPeriodos();
         try
         {
-            // Crear tabla si no existe
-            using var create = conn.CreateCommand();
-            create.CommandText = """
-                CREATE TABLE IF NOT EXISTS public.calendario_config (
-                    clave VARCHAR(50) PRIMARY KEY,
-                    valor TEXT NOT NULL,
-                    actualizado_en TIMESTAMPTZ DEFAULT NOW()
-                )
-                """;
-            create.ExecuteNonQuery();
-
+            AsegurarTabla(conn);
             using var sel = conn.CreateCommand();
-            sel.CommandText = "SELECT clave, valor FROM public.calendario_config WHERE clave IN ('inicio_p1','inicio_p2')";
+            sel.CommandText = """
+                SELECT clave, valor FROM public.calendario_config
+                WHERE clave IN ('laptops_p1','laptops_p2','computo_p1','computo_p2')
+                """;
             using var r = sel.ExecuteReader();
             while (r.Read())
             {
-                var clave = r.GetString(0);
-                var valor = r.GetString(1);
-                if (DateTime.TryParse(valor, out var fecha))
+                if (!DateTime.TryParse(r.GetString(1), out var d)) continue;
+                switch (r.GetString(0))
                 {
-                    if (clave == "inicio_p1") cfg.InicioP1 = fecha;
-                    else if (clave == "inicio_p2") cfg.InicioP2 = fecha;
+                    case "laptops_p1": cfg.LaptopsP1 = d; break;
+                    case "laptops_p2": cfg.LaptopsP2 = d; break;
+                    case "computo_p1": cfg.ComputoP1 = d; break;
+                    case "computo_p2": cfg.ComputoP2 = d; break;
                 }
             }
         }
-        catch { /* Si falla, períodos no configurados */ }
+        catch { /* tabla aún no existe o sin datos */ }
         return cfg;
     }
 
-    private static void GuardarConfigPeriodo(Npgsql.NpgsqlConnection conn, int periodo, DateTime fecha)
+    private static void GuardarConfig(Npgsql.NpgsqlConnection conn, string tipo, int periodo, DateTime fecha)
     {
-        // Asegurar que la tabla existe
-        using var create = conn.CreateCommand();
-        create.CommandText = """
-            CREATE TABLE IF NOT EXISTS public.calendario_config (
-                clave VARCHAR(50) PRIMARY KEY,
-                valor TEXT NOT NULL,
-                actualizado_en TIMESTAMPTZ DEFAULT NOW()
-            )
-            """;
-        create.ExecuteNonQuery();
-
-        string clave = periodo == 1 ? "inicio_p1" : "inicio_p2";
+        AsegurarTabla(conn);
         using var upsert = conn.CreateCommand();
         upsert.CommandText = """
             INSERT INTO public.calendario_config (clave, valor, actualizado_en)
             VALUES (@c, @v, NOW())
             ON CONFLICT (clave) DO UPDATE SET valor = EXCLUDED.valor, actualizado_en = NOW()
             """;
-        upsert.Parameters.AddWithValue("@c", clave);
+        upsert.Parameters.AddWithValue("@c", $"{tipo}_p{periodo}");
         upsert.Parameters.AddWithValue("@v", fecha.ToString("yyyy-MM-dd"));
         upsert.ExecuteNonQuery();
     }
 
-    private static void EliminarConfigPeriodo(Npgsql.NpgsqlConnection conn, int periodo)
+    private static void EliminarConfig(Npgsql.NpgsqlConnection conn, string tipo, int periodo)
     {
-        string clave = periodo == 1 ? "inicio_p1" : "inicio_p2";
         using var del = conn.CreateCommand();
         del.CommandText = "DELETE FROM public.calendario_config WHERE clave = @c";
-        del.Parameters.AddWithValue("@c", clave);
+        del.Parameters.AddWithValue("@c", $"{tipo}_p{periodo}");
         del.ExecuteNonQuery();
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────
+    // ── Semana ISO ────────────────────────────────────────────────────────
     private static int SemanaISO(DateTime fecha)
     {
         var cal = System.Globalization.CultureInfo.InvariantCulture.Calendar;
@@ -375,26 +395,24 @@ public class CalendarioApiController : ControllerBase
         return SemanaISO(d28) == 1 ? 52 : SemanaISO(d28);
     }
 
-    // Stub: reemplazar con la lógica real de sesión del proyecto
+    // ── Sesión ────────────────────────────────────────────────────────────
     private UsuarioSesion? ObtenerUsuarioActual()
     {
-        // Ejemplo: leer el claim de rol del JWT/cookie de sesión
-        // Adaptar según cómo maneja ChiIT la autenticación
-        var rolHeader = HttpContext.Request.Headers["X-User-Rol"].FirstOrDefault()
-                        ?? HttpContext.Request.Cookies["user_rol"];
+        var rol = HttpContext.Request.Headers["X-User-Rol"].FirstOrDefault()
+               ?? HttpContext.Request.Cookies["user_rol"];
         var nombre = HttpContext.Request.Headers["X-User-Name"].FirstOrDefault()
-                     ?? HttpContext.Request.Cookies["user_name"]
-                     ?? "SISTEMA";
-        if (string.IsNullOrEmpty(rolHeader)) return null;
+                  ?? HttpContext.Request.Cookies["user_name"]
+                  ?? "SISTEMA";
+        if (string.IsNullOrEmpty(rol)) return null;
         return new UsuarioSesion
         {
             Nombre = nombre,
-            EsAdmin = rolHeader.Equals("ADMIN", StringComparison.OrdinalIgnoreCase)
+            EsAdmin = rol.Equals("ADMIN", StringComparison.OrdinalIgnoreCase)
         };
     }
 }
 
-// ── Modelos internos ──────────────────────────────────────────────────────
+// ── Modelos ───────────────────────────────────────────────────────────────
 internal class EquipoCalendario
 {
     public long Id { get; set; }
@@ -429,8 +447,10 @@ internal class SemanaData
 
 internal class ConfigPeriodos
 {
-    public DateTime? InicioP1 { get; set; }
-    public DateTime? InicioP2 { get; set; }
+    public DateTime? LaptopsP1 { get; set; }
+    public DateTime? LaptopsP2 { get; set; }
+    public DateTime? ComputoP1 { get; set; }
+    public DateTime? ComputoP2 { get; set; }
 }
 
 internal class UsuarioSesion
