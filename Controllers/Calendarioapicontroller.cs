@@ -398,12 +398,19 @@ public class CalendarioApiController : ControllerBase
     // ── Sesión ────────────────────────────────────────────────────────────
     private UsuarioSesion? ObtenerUsuarioActual()
     {
-        var rol = HttpContext.Request.Headers["X-User-Rol"].FirstOrDefault()
-               ?? HttpContext.Request.Cookies["user_rol"];
-        var nombre = HttpContext.Request.Headers["X-User-Name"].FirstOrDefault()
-                  ?? HttpContext.Request.Cookies["user_name"]
+        // LoginController setea: cookie "usuario" (HTTP-only) y cookie "rol" (legible por JS)
+        // También aceptamos los headers X-Usuario y X-Rol que usan otros controllers
+        var rol = Request.Cookies["rol"]
+               ?? Request.Headers["X-Rol"].FirstOrDefault()
+               ?? Request.Headers["X-User-Rol"].FirstOrDefault();
+
+        var nombre = Request.Cookies["usuario"]
+                  ?? Request.Headers["X-Usuario"].FirstOrDefault()
+                  ?? Request.Headers["X-User-Name"].FirstOrDefault()
                   ?? "SISTEMA";
+
         if (string.IsNullOrEmpty(rol)) return null;
+
         return new UsuarioSesion
         {
             Nombre = nombre,
