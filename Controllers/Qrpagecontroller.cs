@@ -163,6 +163,7 @@ public class QrPageController : ControllerBase
             cards.Append("        <span>⏭ <b id=\"ver_proximo1_" + row.id + "\"></b></span>\n");
             cards.Append("      </div>\n");
             cards.Append("      <div style=\"margin-top:6px;font-size:11px;color:var(--muted2)\" id=\"ver_obs1_" + row.id + "\"></div>\n");
+            cards.Append("      <div id=\"ver_correctivo1_" + row.id + "\" style=\"display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);font-size:12px;font-weight:700;color:#fca5a5;\">⚠️ Requiere Correctivo</div>\n");
             cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
             cards.Append("      </div>\n    </div>\n");
             cards.Append("    <div class=\"mini-form\" id=\"edit_pm1_" + row.id + "\" style=\"display:none\">\n");
@@ -196,6 +197,7 @@ public class QrPageController : ControllerBase
             cards.Append("        <span>⏭ <b id=\"ver_proximo2_" + row.id + "\"></b></span>\n");
             cards.Append("      </div>\n");
             cards.Append("      <div style=\"margin-top:6px;font-size:11px;color:var(--muted2)\" id=\"ver_obs2_" + row.id + "\"></div>\n");
+            cards.Append("      <div id=\"ver_correctivo2_" + row.id + "\" style=\"display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);font-size:12px;font-weight:700;color:#fca5a5;\">⚠️ Requiere Correctivo</div>\n");
             cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
             cards.Append("      </div>\n    </div>\n");
             cards.Append("    <div class=\"mini-form\" id=\"edit_pm2_" + row.id + "\" style=\"display:none\">\n");
@@ -456,6 +458,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  document.getElementById('ver_fecha'+p+'_'+id).textContent=pm.fecha||'—';");
         sb.AppendLine("  document.getElementById('ver_proximo'+p+'_'+id).textContent=pm.proximo_pm||'—';");
         sb.AppendLine("  const o=document.getElementById('ver_obs'+p+'_'+id);if(o)o.textContent=pm.observaciones?'📝 '+pm.observaciones:'';");
+        sb.AppendLine("  const rc=document.getElementById('ver_correctivo'+p+'_'+id);if(rc){rc.style.display=pm.requiere_correctivo?'block':'none';}");
         sb.AppendLine("  document.getElementById('ver'+p+'_'+id).style.display='block';");
         sb.AppendLine("}");
         sb.AppendLine("function cerrarVer(id,p){document.getElementById('ver'+p+'_'+id).style.display='none';}");
