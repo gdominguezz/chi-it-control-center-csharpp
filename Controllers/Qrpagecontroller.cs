@@ -422,7 +422,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("async function guardarPreventivo(id,p){");
         sb.AppendLine("  const fecha=document.getElementById('fecha'+p+'_'+id).value;");
         sb.AppendLine("  if(!fecha){toast('Selecciona la fecha',false);return;}");
-        sb.AppendLine("  const cbs=document.querySelectorAll('#form'+p+'_'+id+' input[type=checkbox]');");
+        sb.AppendLine("  const cbs=document.querySelectorAll('#form'+p+'_'+id+' .acts-list input[type=checkbox]');");
         sb.AppendLine("  const checks=[];cbs.forEach((cb,i)=>{if(cb.checked)checks.push(i);});");
         sb.AppendLine("  if(!checks.length){toast('Marca al menos una actividad',false);return;}");
         sb.AppendLine("  const obs=document.getElementById('obs_pm'+p+'_'+id)?.value||'';");
