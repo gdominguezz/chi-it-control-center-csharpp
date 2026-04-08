@@ -706,7 +706,8 @@ public class PreventivoController : ControllerBase
                 fecha = data.Fecha,
                 proximo_pm = proxStr,
                 checks = data.Checks,
-                observaciones = data.Observaciones
+                observaciones = data.Observaciones,
+                requiere_correctivo = data.RequiereCorrectivo
             });
 
             using var conn = _db.Open();
@@ -783,7 +784,8 @@ public class PreventivoController : ControllerBase
                 fecha = data.Fecha,
                 proximo_pm = proxStr,
                 checks = data.Checks,
-                observaciones = data.Observaciones
+                observaciones = data.Observaciones,
+                requiere_correctivo = data.RequiereCorrectivo
             });
 
             using var conn = _db.Open();
