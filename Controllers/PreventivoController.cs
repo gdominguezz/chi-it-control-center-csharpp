@@ -376,6 +376,43 @@ public class PreventivoController : ControllerBase
         catch (Exception ex) { return Ok(new { error = ex.Message }); }
     }
 
+    // ── GET /PREVENTIVOS/EQUIPOS_POR_PLANTA ──────────────
+    [HttpGet("PREVENTIVOS/EQUIPOS_POR_PLANTA")]
+    public IActionResult EquiposPorPlanta([FromQuery] string planta, [FromQuery] string tipo)
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+
+        var filtroTipo = tipo?.ToUpper() switch
+        {
+            "LAPTOP" => "AND (UPPER(nombre_dispositivo) LIKE '%LAPTOP%' OR UPPER(nombre_dispositivo) LIKE '%PORTATIL%')",
+            _ => "AND (UPPER(nombre_dispositivo) LIKE '%COMPUTADORA%' OR UPPER(nombre_dispositivo) LIKE '%CPU%')"
+        };
+
+        cmd.CommandText = $"""
+            SELECT id, id_equipo, nombre_dispositivo, ubicacion, categoria_color
+            FROM public.mantenimientos_preventivos
+            WHERE UPPER(TRIM(planta)) = UPPER(TRIM(@planta))
+            {filtroTipo}
+            ORDER BY ubicacion, id_equipo
+            """;
+        cmd.Parameters.AddWithValue("planta", planta ?? "");
+
+        var lista = new List<Dictionary<string, object?>>();
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+            lista.Add(new Dictionary<string, object?>
+            {
+                ["id"] = r.GetInt64(0),
+                ["id_equipo"] = r.IsDBNull(1) ? null : r.GetString(1),
+                ["dispositivo"] = r.IsDBNull(2) ? null : r.GetString(2),
+                ["ubicacion"] = r.IsDBNull(3) ? null : r.GetString(3),
+                ["color"] = r.IsDBNull(4) ? null : r.GetString(4),
+            });
+
+        return Ok(new { equipos = lista, total = lista.Count });
+    }
+
     // ── PDF ───────────────────────────────────────────────
     [HttpPost("PREVENTIVO/PDF/{id:int}")]
     public async Task<IActionResult> SubirPdf(int id, IFormFile file)
