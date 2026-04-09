@@ -385,7 +385,10 @@ public class PreventivoController : ControllerBase
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT planta, ubicacion, id, id_equipo, nombre_dispositivo, categoria_color
+            SELECT planta, ubicacion, id, id_equipo, nombre_dispositivo, categoria_color,
+                   CASE WHEN preventivo_digital IS NOT NULL THEN true ELSE false END AS tiene_pm_p1,
+                   CASE WHEN preventivo_digital_p2 IS NOT NULL THEN true ELSE false END AS tiene_pm_p2,
+                   fecha_realizacion, fecha_realizacion_p2
             FROM public.mantenimientos_preventivos
             WHERE nombre_dispositivo IN (
                 'COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA'
@@ -419,6 +422,10 @@ public class PreventivoController : ControllerBase
                 id_equipo = r.IsDBNull(3) ? null : r.GetString(3),
                 nombre_dispositivo = r.IsDBNull(4) ? null : r.GetString(4),
                 categoria_color = r.IsDBNull(5) ? null : r.GetString(5),
+                tiene_pm_p1 = !r.IsDBNull(6) && r.GetBoolean(6),
+                tiene_pm_p2 = !r.IsDBNull(7) && r.GetBoolean(7),
+                fecha_pm_p1 = r.IsDBNull(8) ? null : r.GetDateTime(8).ToString("yyyy-MM-dd"),
+                fecha_pm_p2 = r.IsDBNull(9) ? null : r.GetDateTime(9).ToString("yyyy-MM-dd"),
             };
 
             if (!grupoMap.TryGetValue(key, out int idx))
@@ -867,6 +874,140 @@ public class PreventivoController : ControllerBase
         catch (Exception ex) { return Ok(new { error = ex.Message }); }
     }
 
+    // ── RECALENDARIZACIÓN ─────────────────────────────────
+    // POST /PREVENTIVO/RECALENDARIZAR
+    // Mueve un dispositivo a una nueva ubicación.
+    // Si la nueva ubicación está ocupada, también mueve ese dispositivo a una tercera ubicación.
+    [HttpPost("PREVENTIVO/RECALENDARIZAR")]
+    public IActionResult Recalendarizar([FromBody] RecalendarizarRequest data)
+    {
+        try
+        {
+            var usuario = Request.Cookies["usuario"]
+                       ?? Request.Headers["X-Usuario"].FirstOrDefault()
+                       ?? data.Usuario ?? "SISTEMA";
+
+            if (data.IdDispositivo <= 0)
+                return Ok(new { ok = false, error = "ID de dispositivo requerido" });
+            if (string.IsNullOrWhiteSpace(data.NuevaUbicacion))
+                return Ok(new { ok = false, error = "Nueva ubicación requerida" });
+
+            using var conn = _db.Open();
+
+            // 1. Obtener datos del dispositivo a mover
+            using var sel1 = conn.CreateCommand();
+            sel1.CommandText = "SELECT id, ubicacion, id_equipo, nombre_dispositivo FROM public.mantenimientos_preventivos WHERE id=@id";
+            sel1.Parameters.AddWithValue("id", data.IdDispositivo);
+            string ubicacionAnterior = "", idEquipo1 = "", nomDisp1 = "";
+            using (var r = sel1.ExecuteReader())
+            {
+                if (!r.Read()) return Ok(new { ok = false, error = "Dispositivo no encontrado" });
+                ubicacionAnterior = r.IsDBNull(1) ? "" : r.GetString(1);
+                idEquipo1 = r.IsDBNull(2) ? "" : r.GetString(2);
+                nomDisp1 = r.IsDBNull(3) ? "" : r.GetString(3);
+            }
+
+            var nuevaUbicacion = data.NuevaUbicacion.Trim();
+
+            // No mover a la misma ubicación
+            if (string.Equals(ubicacionAnterior, nuevaUbicacion, StringComparison.OrdinalIgnoreCase))
+                return Ok(new { ok = false, error = "El dispositivo ya está en esa ubicación" });
+
+            // 2. Verificar si la nueva ubicación está ocupada (buscar cualquier dispositivo allí)
+            using var chk = conn.CreateCommand();
+            chk.CommandText = "SELECT id, ubicacion, id_equipo, nombre_dispositivo FROM public.mantenimientos_preventivos WHERE TRIM(LOWER(ubicacion))=TRIM(LOWER(@u)) LIMIT 1";
+            chk.Parameters.AddWithValue("u", nuevaUbicacion);
+            int idOcupante = 0; string ubicacionOcupanteAnterior = "", idEquipo2 = "", nomDisp2 = "";
+            using (var r = chk.ExecuteReader())
+            {
+                if (r.Read())
+                {
+                    idOcupante = (int)r.GetInt64(0);
+                    ubicacionOcupanteAnterior = r.IsDBNull(1) ? "" : r.GetString(1);
+                    idEquipo2 = r.IsDBNull(2) ? "" : r.GetString(2);
+                    nomDisp2 = r.IsDBNull(3) ? "" : r.GetString(3);
+                }
+            }
+
+            // Si hay ocupante, necesitamos saber a dónde va
+            if (idOcupante > 0)
+            {
+                if (string.IsNullOrWhiteSpace(data.UbicacionOcupante))
+                    return Ok(new
+                    {
+                        ok = false,
+                        ocupada = true,
+                        id_ocupante = idOcupante,
+                        equipo_ocupante = idEquipo2,
+                        dispositivo_ocupante = nomDisp2,
+                        error = "La ubicación está ocupada. Indica dónde mover el dispositivo existente."
+                    });
+
+                var ubOcupante = data.UbicacionOcupante.Trim();
+
+                // No se puede mover el ocupante a la ubicación original del dispositivo 1 si es distinta
+                // (está permitido: el swap natural)
+
+                // Mover el ocupante a su nueva ubicación
+                using var mov2 = conn.CreateCommand();
+                mov2.CommandText = "UPDATE public.mantenimientos_preventivos SET ubicacion=@u WHERE id=@id";
+                mov2.Parameters.AddWithValue("u", ubOcupante);
+                mov2.Parameters.AddWithValue("id", idOcupante);
+                mov2.ExecuteNonQuery();
+
+                // Registrar historial del ocupante
+                RegistrarHistorialRecalendarizacion(conn, idOcupante, idEquipo2, nomDisp2,
+                    ubicacionOcupanteAnterior, ubOcupante, usuario);
+            }
+
+            // 3. Mover el dispositivo principal
+            using var mov1 = conn.CreateCommand();
+            mov1.CommandText = "UPDATE public.mantenimientos_preventivos SET ubicacion=@u WHERE id=@id";
+            mov1.Parameters.AddWithValue("u", nuevaUbicacion);
+            mov1.Parameters.AddWithValue("id", data.IdDispositivo);
+            mov1.ExecuteNonQuery();
+
+            // Registrar historial del dispositivo principal
+            RegistrarHistorialRecalendarizacion(conn, data.IdDispositivo, idEquipo1, nomDisp1,
+                ubicacionAnterior, nuevaUbicacion, usuario);
+
+            return Ok(new { ok = true, mensaje = "Recalendarización completada" });
+        }
+        catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+    }
+
+    private void RegistrarHistorialRecalendarizacion(Npgsql.NpgsqlConnection conn,
+        int idDispositivo, string idEquipo, string nomDisp,
+        string ubAnterior, string ubNueva, string usuario)
+    {
+        try
+        {
+            var anterior = new { id_equipo = idEquipo, nombre_dispositivo = nomDisp, ubicacion = ubAnterior };
+            var nuevo = new { id_equipo = idEquipo, nombre_dispositivo = nomDisp, ubicacion = ubNueva, tipo_cambio = "Recalendarización" };
+            _auditoria.Registrar(idDispositivo, usuario, anterior, nuevo);
+        }
+        catch (Exception ex) { Console.WriteLine($"[Recalendarización historial] {ex.Message}"); }
+    }
+
+    // GET /PREVENTIVO/UBICACIONES_LIBRES — para el selector del modal de recalendarización
+    [HttpGet("PREVENTIVO/UBICACIONES_TODAS")]
+    public IActionResult ObtenerTodasUbicaciones()
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT TRIM(ubicacion) AS ubicacion
+            FROM public.mantenimientos_preventivos
+            WHERE ubicacion IS NOT NULL AND TRIM(ubicacion)<>''
+            GROUP BY TRIM(ubicacion)
+            ORDER BY TRIM(ubicacion)
+            """;
+        var lista = new List<string>();
+        using var r = cmd.ExecuteReader();
+        while (r.Read()) lista.Add(r.GetString(0));
+        return Ok(new { ubicaciones = lista });
+    }
+
     // ── GUARDAR PM INDIVIDUAL ─────────────────────────────
     [HttpPost("PREVENTIVO/GUARDAR_PM/{id:int}")]
     public IActionResult GuardarPmIndividual(int id, [FromBody] GuardarPmRequest data)
@@ -910,4 +1051,13 @@ public class PreventivoController : ControllerBase
         }
         catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
     }
+}
+
+// ── Modelo recalendarización ──────────────────────────────────────────────
+public class RecalendarizarRequest
+{
+    public int IdDispositivo { get; set; }
+    public string? NuevaUbicacion { get; set; }
+    public string? UbicacionOcupante { get; set; }  // dónde va el que ya estaba allí
+    public string? Usuario { get; set; }
 }

@@ -1833,6 +1833,17 @@
                         Semanas 7–20 → B1 y B2 alternando (impares → B1, pares → B2) &nbsp;|&nbsp;
                         Semanas 21–27 → Satélite, Mixing, Bodega + complemento B1/B2
                     </div>
+                    <!-- Botón solo ADMIN -->
+                    <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">
+                        <button id="btn-eliminar-plazo" onclick="eliminarPlazoCalendario()"
+                                style="display:none;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);
+                                   color:#fca5a5;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;
+                                   cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s;"
+                                onmouseover="this.style.background='rgba(239,68,68,.22)'"
+                                onmouseout="this.style.background='rgba(239,68,68,.12)'">
+                            🗑 Eliminar plazo del calendario
+                        </button>
+                    </div>
                 </div>
                 <div class="cal-plantas-nav" id="cal-plantas-nav">
                     <button class="cal-planta-btn active" onclick="switchPlantaCal('B1')">🏭 B1</button>
@@ -1915,8 +1926,23 @@
             'ANIO_CREACION': 'anio_creacion',
         };
 
+        // ═══ INACTIVIDAD — 30 minutos ═══
+        let _inacTimer = null;
+        function resetInactividad() {
+            clearTimeout(_inacTimer);
+            _inacTimer = setTimeout(async () => {
+                try { await fetch('/LOGOUT', { method: 'POST', credentials: 'include' }); } catch (e) { }
+                window.location.href = '/static/login.html?inactivo=1';
+            }, 30 * 60 * 1000); // 30 minutos
+        }
+        ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(ev =>
+            document.addEventListener(ev, resetInactividad, { passive: true })
+        );
+
         // ═══ INIT ═══
         window.addEventListener('DOMContentLoaded', () => {
+            resetInactividad(); // arrancar timer de inactividad
+
             // Verificar sesión — si no hay, redirigir al login
             fetch('/obtener-usuario', { credentials: 'include' })
                 .then(r => {
@@ -1931,6 +1957,15 @@
                     document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
                     document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
                     document.getElementById('dropdownRol').textContent = rolActual;
+
+                    // ── Mostrar botón "Eliminar Plazo" solo a ADMIN ──
+                    if (rolActual === 'ADMIN') {
+                        const btnElim = document.getElementById('btn-eliminar-plazo');
+                        if (btnElim) btnElim.style.display = 'inline-flex';
+                    }
+
+                    // ── Restaurar calendario desde localStorage ──
+                    restaurarCalendario();
                 })
                 .catch(() => {
                     window.location.href = '/static/login.html';
@@ -1942,6 +1977,136 @@
             cargarUbicaciones();
             cargar();
         });
+
+        // ═══ PERSISTENCIA CALENDARIO ═══
+        function guardarCalendarioEnStorage() {
+            const p1Sem = document.getElementById('cal-semana-inicio-p1')?.value;
+            const p1Anio = document.getElementById('cal-anio-p1')?.value;
+            const p2Sem = document.getElementById('cal-semana-inicio-p2')?.value;
+            const p2Anio = document.getElementById('cal-anio-p2')?.value;
+            try {
+                localStorage.setItem('cal_p1_sem', p1Sem || '');
+                localStorage.setItem('cal_p1_anio', p1Anio || '');
+                localStorage.setItem('cal_p1_terminado', p1Terminado ? '1' : '0');
+                localStorage.setItem('cal_p2_sem', p2Sem || '');
+                localStorage.setItem('cal_p2_anio', p2Anio || '');
+                localStorage.setItem('cal_p2_terminado', p2Terminado ? '1' : '0');
+                localStorage.setItem('cal_p2_generado', calDatosP2 ? '1' : '0');
+            } catch (e) { }
+        }
+
+        function restaurarCalendario() {
+            try {
+                const p1Sem = localStorage.getItem('cal_p1_sem');
+                const p1Anio = localStorage.getItem('cal_p1_anio');
+                const p1Term = localStorage.getItem('cal_p1_terminado') === '1';
+                const p2Sem = localStorage.getItem('cal_p2_sem');
+                const p2Anio = localStorage.getItem('cal_p2_anio');
+                const p2Term = localStorage.getItem('cal_p2_terminado') === '1';
+                const p2Gen = localStorage.getItem('cal_p2_generado') === '1';
+
+                if (!p1Sem) return; // nada guardado
+
+                // Restaurar P1
+                const inP1 = document.getElementById('cal-semana-inicio-p1');
+                const selP1 = document.getElementById('cal-anio-p1');
+                if (inP1) inP1.value = p1Sem;
+                if (selP1 && p1Anio) { for (let o of selP1.options) if (o.value === p1Anio) { o.selected = true; break; } }
+                generarCalendarioP1SinGuardar(); // recalcular sin sobreescribir storage
+
+                if (p1Term) {
+                    terminarP1SinConfirm();
+                    // Restaurar P2 si se había generado
+                    const inP2 = document.getElementById('cal-semana-inicio-p2');
+                    const selP2 = document.getElementById('cal-anio-p2');
+                    if (inP2 && p2Sem) inP2.value = p2Sem;
+                    if (selP2 && p2Anio) { for (let o of selP2.options) if (o.value === p2Anio) { o.selected = true; break; } }
+                    if (p2Gen) {
+                        generarCalendarioP2SinGuardar();
+                        if (p2Term) terminarP2SinConfirm();
+                    }
+                }
+            } catch (e) { }
+        }
+
+        // ── Versiones internas sin confirm/guardar ──
+        function generarCalendarioP1SinGuardar() {
+            const sem = parseInt(document.getElementById('cal-semana-inicio-p1').value);
+            const anio = parseInt(document.getElementById('cal-anio-p1').value);
+            if (!sem || sem < 1 || sem > 52) return;
+            calDatosP1 = calcularDistribucion(anio, sem, 1);
+            periodoVistaActivo = 1;
+            document.getElementById('btn-terminar-p1').style.display = 'inline-flex';
+            document.getElementById('cal-periodo-nav').style.display = 'block';
+            document.getElementById('btn-ver-p1').style.display = 'inline-flex';
+            actualizarInfoP1();
+            renderCalendarioActual();
+        }
+        function generarCalendarioP2SinGuardar() {
+            const sem = parseInt(document.getElementById('cal-semana-inicio-p2').value);
+            const anio = parseInt(document.getElementById('cal-anio-p2').value);
+            if (!sem || sem < 1 || sem > 52) return;
+            calDatosP2 = calcularDistribucion(anio, sem, 2);
+            periodoVistaActivo = 2;
+            document.getElementById('btn-terminar-p2').style.display = 'inline-flex';
+            document.getElementById('btn-ver-p2').style.display = 'inline-flex';
+            actualizarInfoP2();
+            renderCalendarioActual();
+        }
+        function terminarP1SinConfirm() {
+            if (!calDatosP1) return;
+            p1Terminado = true;
+            document.getElementById('p1-estado-badge').style.display = 'inline-block';
+            document.getElementById('btn-terminar-p1').style.display = 'none';
+            document.getElementById('btn-generar-p1').disabled = true;
+            document.getElementById('cal-semana-inicio-p1').disabled = true;
+            document.getElementById('cal-anio-p1').disabled = true;
+            document.getElementById('cal-semana-inicio-p2').disabled = false;
+            document.getElementById('cal-anio-p2').disabled = false;
+            document.getElementById('btn-generar-p2').disabled = false;
+            document.getElementById('bloque-p2-bloqueado').style.display = 'none';
+        }
+        function terminarP2SinConfirm() {
+            if (!calDatosP2) return;
+            p2Terminado = true;
+            document.getElementById('p2-estado-badge').style.display = 'inline-block';
+            document.getElementById('btn-terminar-p2').style.display = 'none';
+            document.getElementById('btn-generar-p2').disabled = true;
+            document.getElementById('cal-semana-inicio-p2').disabled = true;
+            document.getElementById('cal-anio-p2').disabled = true;
+        }
+
+        // ── Eliminar plazo (solo ADMIN) ──
+        function eliminarPlazoCalendario() {
+            if (!confirm('¿Eliminar el plazo del calendario? Se pedirá volver a especificar la semana de inicio.')) return;
+            try {
+                ['cal_p1_sem', 'cal_p1_anio', 'cal_p1_terminado', 'cal_p2_sem', 'cal_p2_anio', 'cal_p2_terminado', 'cal_p2_generado'].forEach(k => localStorage.removeItem(k));
+            } catch (e) { }
+            // Resetear estado
+            calDatosP1 = null; calDatosP2 = null;
+            p1Terminado = false; p2Terminado = false;
+            periodoVistaActivo = 1;
+            // Resetear UI P1
+            document.getElementById('cal-semana-inicio-p1').value = '';
+            document.getElementById('cal-semana-inicio-p1').disabled = false;
+            document.getElementById('cal-anio-p1').disabled = false;
+            document.getElementById('btn-generar-p1').disabled = false;
+            document.getElementById('btn-terminar-p1').style.display = 'none';
+            document.getElementById('p1-estado-badge').style.display = 'none';
+            document.getElementById('cal-info-p1').style.display = 'none';
+            // Resetear UI P2
+            document.getElementById('cal-semana-inicio-p2').value = '';
+            document.getElementById('cal-semana-inicio-p2').disabled = true;
+            document.getElementById('cal-anio-p2').disabled = true;
+            document.getElementById('btn-generar-p2').disabled = true;
+            document.getElementById('btn-terminar-p2').style.display = 'none';
+            document.getElementById('p2-estado-badge').style.display = 'none';
+            document.getElementById('cal-info-p2').style.display = 'none';
+            document.getElementById('bloque-p2-bloqueado').style.display = 'block';
+            document.getElementById('cal-periodo-nav').style.display = 'none';
+            document.getElementById('cal-container').innerHTML = '<div class="cal-empty">🗓️ Ingresa el año y semana de inicio del Período 1, luego presiona "Generar P1"</div>';
+            renderSummary([], 1);
+        }
 
         // ═══ UBICACIONES AUTOCOMPLETADO ═══
         async function cargarUbicaciones() {
@@ -2026,37 +2191,37 @@
                 const bg = rowBg(row.categoria_color);
                 const tdStyle = bg ? `style="background:${bg}"` : '';
                 tbody.innerHTML += `
-                                        <tr>
-                                          <td class="mono" ${tdStyle}>${row.id}</td>
-                                          <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
-                                          <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
-                                          <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
-                                          <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
-                                          <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
-                                          <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
-                                          <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
-                                          <td ${tdStyle}>
-                                            ${row.tiene_pdf
+                                            <tr>
+                                              <td class="mono" ${tdStyle}>${row.id}</td>
+                                              <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
+                                              <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
+                                              <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
+                                              <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
+                                              <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
+                                              <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
+                                              <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
+                                              <td ${tdStyle}>
+                                                ${row.tiene_pdf
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.id})">📄 Ver</button>
-                                                 <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
+                                                     <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
                         : `<input type="file" onchange="subirPDF(${row.id},this)"
-                                                   style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
-                                          </td>
-                                          <td ${tdStyle} style="text-align:center;">
-                                            <img src="/QR_EQUIPO/${row.id}"
-                                                 style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
-                                                 title="QR: ${row.id_equipo ?? row.id}"
-                                                 onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
-                                                 loading="lazy">
-                                          </td>
-                                          <td ${tdStyle} style="white-space:nowrap;">
-                                            ${esAdmin ? `
-                                            <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
-                                            <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
-                                            ` : ''}
-                                            <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
-                                          </td>
-                                        </tr>`;
+                                                       style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
+                                              </td>
+                                              <td ${tdStyle} style="text-align:center;">
+                                                <img src="/QR_EQUIPO/${row.id}"
+                                                     style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
+                                                     title="QR: ${row.id_equipo ?? row.id}"
+                                                     onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
+                                                     loading="lazy">
+                                              </td>
+                                              <td ${tdStyle} style="white-space:nowrap;">
+                                                ${esAdmin ? `
+                                                <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
+                                                <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
+                                                ` : ''}
+                                                <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
+                                              </td>
+                                            </tr>`;
             });
             document.getElementById('paginaInfo').textContent =
                 `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite)} | Total: ${totalRegistros}`;
@@ -2175,27 +2340,27 @@
                 const vd = esc(despues?.[apiKey] ?? '');
                 const chg = cambiados.has(key);
                 filas += `
-                                        <tr class="${chg ? 'row-changed' : ''}">
-                                          <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                                          <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                                          <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                                        </tr>`;
+                                            <tr class="${chg ? 'row-changed' : ''}">
+                                              <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                              <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                              <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                                            </tr>`;
             });
             const n = cambiados.size;
             return `
-                                      <div class="ev-wrap">
-                                        <div class="ev-header">
-                                          <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                          <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                                          <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                            ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                                          </span>
-                                        </div>
-                                        <table class="ev-table">
-                                          <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                                          <tbody>${filas}</tbody>
-                                        </table>
-                                      </div>`;
+                                          <div class="ev-wrap">
+                                            <div class="ev-header">
+                                              <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                              <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                                              <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                                ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                              </span>
+                                            </div>
+                                            <table class="ev-table">
+                                              <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                              <tbody>${filas}</tbody>
+                                            </table>
+                                          </div>`;
         }
 
         function verHistorial(id) {
@@ -2212,8 +2377,8 @@
                 } else {
                     document.getElementById('contenidoHistorial').innerHTML =
                         `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                              ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                            </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                                                  ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                                </p>`+ lista.map(ev => renderEvento(ev)).join('');
                 }
             }).catch(() => {
                 document.getElementById('contenidoHistorial').innerHTML =
@@ -2399,67 +2564,67 @@
             const scoreColor = score >= 90 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
 
             el.innerHTML = `
-                                    <div class="salud-wrap">
-                                        <div class="salud-item">
-                                            <div class="salud-label-row">
-                                                <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
-                                                <span class="salud-pct" style="color:#10B981">${pSano}%</span>
+                                        <div class="salud-wrap">
+                                            <div class="salud-item">
+                                                <div class="salud-label-row">
+                                                    <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
+                                                    <span class="salud-pct" style="color:#10B981">${pSano}%</span>
+                                                </div>
+                                                <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
+                                                <span class="salud-count">${saludables} equipos</span>
                                             </div>
-                                            <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
-                                            <span class="salud-count">${saludables} equipos</span>
-                                        </div>
-                                        <div class="salud-item">
-                                            <div class="salud-label-row">
-                                                <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
-                                                <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
+                                            <div class="salud-item">
+                                                <div class="salud-label-row">
+                                                    <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
+                                                    <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
+                                                </div>
+                                                <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
+                                                <span class="salud-count">${proximosMes} equipos</span>
                                             </div>
-                                            <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
-                                            <span class="salud-count">${proximosMes} equipos</span>
-                                        </div>
-                                        <div class="salud-item">
-                                            <div class="salud-label-row">
-                                                <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
-                                                <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
+                                            <div class="salud-item">
+                                                <div class="salud-label-row">
+                                                    <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
+                                                    <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
+                                                </div>
+                                                <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
+                                                <span class="salud-count">${vencidos} equipos</span>
                                             </div>
-                                            <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
-                                            <span class="salud-count">${vencidos} equipos</span>
-                                        </div>
-                                        <div class="salud-score">
-                                            <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
-                                            <div class="salud-score-label">Índice de salud</div>
-                                            <div class="salud-score-emoji">${emoji}</div>
-                                        </div>
-                                    </div>`;
+                                            <div class="salud-score">
+                                                <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
+                                                <div class="salud-score-label">Índice de salud</div>
+                                                <div class="salud-score-emoji">${emoji}</div>
+                                            </div>
+                                        </div>`;
         }
 
         function renderKpis(k) {
             document.getElementById('db-kpis').innerHTML = `
-                                        <div class="kpi-card kpi-verde">
-                                          <div class="kpi-label">Total Equipos</div>
-                                          <div class="kpi-value">${k.total_equipos}</div>
-                                          <div class="kpi-sub">registrados en el sistema</div>
-                                        </div>
-                                        <div class="kpi-card kpi-azul">
-                                          <div class="kpi-label">Con PM Digital</div>
-                                          <div class="kpi-value">${k.total_pms_realizados}</div>
-                                          <div class="kpi-sub">${Math.round(k.total_pms_realizados / k.total_equipos * 100) || 0}% del total</div>
-                                        </div>
-                                        <div class="kpi-card kpi-amber">
-                                          <div class="kpi-label">Sin PM Digital</div>
-                                          <div class="kpi-value">${k.sin_pm_p1}</div>
-                                          <div class="kpi-sub">pendientes de atender</div>
-                                        </div>
-                                        <div class="kpi-card kpi-rojo">
-                                          <div class="kpi-label">Vencidos</div>
-                                          <div class="kpi-value">${k.total_vencidos}</div>
-                                          <div class="kpi-sub">plazo ya pasó</div>
-                                        </div>
-                                        <div class="kpi-card kpi-purple">
-                                          <div class="kpi-label">Esta Semana</div>
-                                          <div class="kpi-value">${k.semana_total}</div>
-                                          <div class="kpi-sub">mantenimientos realizados</div>
-                                        </div>
-                                      `;
+                                            <div class="kpi-card kpi-verde">
+                                              <div class="kpi-label">Total Equipos</div>
+                                              <div class="kpi-value">${k.total_equipos}</div>
+                                              <div class="kpi-sub">registrados en el sistema</div>
+                                            </div>
+                                            <div class="kpi-card kpi-azul">
+                                              <div class="kpi-label">Con PM Digital</div>
+                                              <div class="kpi-value">${k.total_pms_realizados}</div>
+                                              <div class="kpi-sub">${Math.round(k.total_pms_realizados / k.total_equipos * 100) || 0}% del total</div>
+                                            </div>
+                                            <div class="kpi-card kpi-amber">
+                                              <div class="kpi-label">Sin PM Digital</div>
+                                              <div class="kpi-value">${k.sin_pm_p1}</div>
+                                              <div class="kpi-sub">pendientes de atender</div>
+                                            </div>
+                                            <div class="kpi-card kpi-rojo">
+                                              <div class="kpi-label">Vencidos</div>
+                                              <div class="kpi-value">${k.total_vencidos}</div>
+                                              <div class="kpi-sub">plazo ya pasó</div>
+                                            </div>
+                                            <div class="kpi-card kpi-purple">
+                                              <div class="kpi-label">Esta Semana</div>
+                                              <div class="kpi-value">${k.semana_total}</div>
+                                              <div class="kpi-sub">mantenimientos realizados</div>
+                                            </div>
+                                          `;
         }
 
         function colorFromCat(cat) {
@@ -2477,13 +2642,13 @@
             if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">Sin datos</p>'; return; }
             const max = Math.max(...data.map(valFn));
             document.getElementById(elId).innerHTML = data.map(d => `
-                                        <div class="bar-wrap">
-                                          <span class="bar-label">${labelFn(d)}</span>
-                                          <div class="bar-track">
-                                            <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
-                                          </div>
-                                          <span class="bar-count">${valFn(d)}</span>
-                                        </div>`).join('');
+                                            <div class="bar-wrap">
+                                              <span class="bar-label">${labelFn(d)}</span>
+                                              <div class="bar-track">
+                                                <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
+                                              </div>
+                                              <span class="bar-count">${valFn(d)}</span>
+                                            </div>`).join('');
         }
 
         function renderTabla(elId, data, headers, rowFn) {
@@ -2503,20 +2668,20 @@
                 const diasRestantes = Math.ceil((new Date(r.plazo) - new Date()) / 86400000);
                 const badge = `<span class="db-badge proximo-badge">En ${diasRestantes}d</span>`;
                 return `<tr>
-                                          <td>${r.id_equipo || '—'}</td>
-                                          <td>${r.dispositivo || '—'}</td>
-                                          <td><b>${r.ubicacion || '—'}</b></td>
-                                          <td>${r.planta || '—'}</td>
-                                          <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
-                                          <td>${r.ultimo_pm || 'Nunca'}</td>
-                                          <td>${badge}</td>
-                                        </tr>`;
+                                              <td>${r.id_equipo || '—'}</td>
+                                              <td>${r.dispositivo || '—'}</td>
+                                              <td><b>${r.ubicacion || '—'}</b></td>
+                                              <td>${r.planta || '—'}</td>
+                                              <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
+                                              <td>${r.ultimo_pm || 'Nunca'}</td>
+                                              <td>${badge}</td>
+                                            </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                                          <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                                          <tbody>${trs}</tbody>
-                                        </table></div>`;
+                                              <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                                              <tbody>${trs}</tbody>
+                                            </table></div>`;
         }
 
         function renderProximos(elId, data) {
@@ -2529,19 +2694,19 @@
                         ? `<span class="db-badge proximo-badge">Hoy</span>`
                         : `<span class="db-badge proximo-badge">En ${dias}d</span>`;
                 return `<tr>
-                                          <td>${r.id_equipo || '—'}</td>
-                                          <td>${r.dispositivo || '—'}</td>
-                                          <td><b>${r.ubicacion || '—'}</b></td>
-                                          <td>${r.planta || '—'}</td>
-                                          <td>${r.plazo}</td>
-                                          <td>${badge}</td>
-                                        </tr>`;
+                                              <td>${r.id_equipo || '—'}</td>
+                                              <td>${r.dispositivo || '—'}</td>
+                                              <td><b>${r.ubicacion || '—'}</b></td>
+                                              <td>${r.planta || '—'}</td>
+                                              <td>${r.plazo}</td>
+                                              <td>${badge}</td>
+                                            </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                                          <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
-                                          <tbody>${trs}</tbody>
-                                        </table></div>`;
+                                              <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
+                                              <tbody>${trs}</tbody>
+                                            </table></div>`;
         }
 
 
@@ -2664,6 +2829,7 @@
             document.getElementById('btn-terminar-p1').style.display = 'inline-flex';
             document.getElementById('cal-periodo-nav').style.display = 'block';
             document.getElementById('btn-ver-p1').style.display = 'inline-flex';
+            guardarCalendarioEnStorage();
             renderCalendarioActual();
         }
 
@@ -2671,17 +2837,7 @@
         function terminarP1() {
             if (!calDatosP1) return;
             if (!confirm('¿Marcar el Período 1 como terminado? Se habilitará el Período 2.')) return;
-            p1Terminado = true;
-            document.getElementById('p1-estado-badge').style.display = 'inline-block';
-            document.getElementById('btn-terminar-p1').style.display = 'none';
-            document.getElementById('btn-generar-p1').disabled = true;
-            document.getElementById('cal-semana-inicio-p1').disabled = true;
-            document.getElementById('cal-anio-p1').disabled = true;
-            // Habilitar P2
-            document.getElementById('cal-semana-inicio-p2').disabled = false;
-            document.getElementById('cal-anio-p2').disabled = false;
-            document.getElementById('btn-generar-p2').disabled = false;
-            document.getElementById('bloque-p2-bloqueado').style.display = 'none';
+            terminarP1SinConfirm();
             // Sugerir semana de inicio P2 automáticamente (semana siguiente a fin de P1)
             const semP1 = parseInt(document.getElementById('cal-semana-inicio-p1').value);
             const anioP1 = parseInt(document.getElementById('cal-anio-p1').value);
@@ -2692,6 +2848,7 @@
             const sel = document.getElementById('cal-anio-p2');
             for (let o of sel.options) if (parseInt(o.value) === anioP2sug) { o.selected = true; break; }
             actualizarInfoP2();
+            guardarCalendarioEnStorage();
         }
 
         // ── Generar P2 ──────────────────────────────────────────
@@ -2704,18 +2861,15 @@
             periodoVistaActivo = 2;
             document.getElementById('btn-terminar-p2').style.display = 'inline-flex';
             document.getElementById('btn-ver-p2').style.display = 'inline-flex';
+            guardarCalendarioEnStorage();
             renderCalendarioActual();
         }
 
         // ── Terminar P2 ─────────────────────────────────────────
         function terminarP2() {
             if (!confirm('¿Marcar el Período 2 como terminado?')) return;
-            p2Terminado = true;
-            document.getElementById('p2-estado-badge').style.display = 'inline-block';
-            document.getElementById('btn-terminar-p2').style.display = 'none';
-            document.getElementById('btn-generar-p2').disabled = true;
-            document.getElementById('cal-semana-inicio-p2').disabled = true;
-            document.getElementById('cal-anio-p2').disabled = true;
+            terminarP2SinConfirm();
+            guardarCalendarioEnStorage();
         }
 
         // ── Navegación planta / tipo / período ──────────────────
@@ -2783,14 +2937,14 @@
             semanasPlanta.forEach(s => { lunesMap[fmtISO(s.lunes)] = s; });
 
             let html = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-                        <span style="font-size:13px;font-weight:700;color:${acColor}">
-                            📅 Período ${periodoVistaActivo} — ${CAL_PLANTAS_LABEL[calPlantaActiva]}
-                        </span>
-                        <span style="font-size:11px;color:var(--muted)">${semanasPlanta.length} semana(s) asignada(s)</span>
-                        <span style="font-size:11px;color:var(--muted2);margin-left:auto;">
-                            🖥️ ${calTipoActivo === 'computo' ? 'Equipos de cómputo' : 'Laptops'} seleccionados
-                        </span>
-                    </div>`;
+                            <span style="font-size:13px;font-weight:700;color:${acColor}">
+                                📅 Período ${periodoVistaActivo} — ${CAL_PLANTAS_LABEL[calPlantaActiva]}
+                            </span>
+                            <span style="font-size:11px;color:var(--muted)">${semanasPlanta.length} semana(s) asignada(s)</span>
+                            <span style="font-size:11px;color:var(--muted2);margin-left:auto;">
+                                🖥️ ${calTipoActivo === 'computo' ? 'Equipos de cómputo' : 'Laptops'} seleccionados
+                            </span>
+                        </div>`;
 
             Object.entries(mesesMap).forEach(([mk, semanas]) => {
                 const primerLunes = semanas[0].lunes;
@@ -2802,17 +2956,17 @@
                 const mesNombreCap = mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1);
 
                 html += `<div style="margin-bottom:28px;">
-                            <div style="font-size:12px;font-weight:700;color:var(--text);padding:8px 0 10px;
-                                border-bottom:2px solid ${acBorder};margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-                                <span style="width:4px;height:16px;background:${acColor};border-radius:2px;display:inline-block;"></span>
-                                ${mesNombreCap}
-                            </div>`;
+                                <div style="font-size:12px;font-weight:700;color:var(--text);padding:8px 0 10px;
+                                    border-bottom:2px solid ${acBorder};margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                                    <span style="width:4px;height:16px;background:${acColor};border-radius:2px;display:inline-block;"></span>
+                                    ${mesNombreCap}
+                                </div>`;
 
                 // Encabezados días
                 html += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px;">`;
                 ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].forEach(d => {
                     html += `<div style="text-align:center;font-size:10px;font-weight:700;
-                                color:var(--muted);padding:4px 2px;">${d}</div>`;
+                                    color:var(--muted);padding:4px 2px;">${d}</div>`;
                 });
                 html += `</div>`;
 
@@ -2840,72 +2994,72 @@
                     else if (esFinde) { bg = 'rgba(0,0,0,.12)'; }
 
                     let inner = `<div style="font-size:11px;font-weight:${esHoy ? '700' : '500'};
-                                color:${esHoy ? 'var(--accent)' : esFinde ? 'var(--muted)' : 'var(--muted2)'};">${nd}</div>`;
+                                    color:${esHoy ? 'var(--accent)' : esFinde ? 'var(--muted)' : 'var(--muted2)'};">${nd}</div>`;
 
                     // En el lunes de una semana asignada: mostrar info
                     if (enSem && dow === 1) {
                         const cant = calTipoActivo === 'computo' ? semDatos.cpu : semDatos.laptops;
                         const icon = calTipoActivo === 'computo' ? '🖥️' : '💻';
                         inner += `<div style="margin-top:3px;cursor:pointer;" onclick="verEquiposSemana(${semDatos.rel},'${fmtISO(semDatos.lunes)}','${fmtISO(semDatos.viernes)}')">
-                                    <span style="display:block;font-size:9px;font-weight:700;padding:2px 4px;border-radius:3px;
-                                        background:${acColorH};color:${periodoVistaActivo === 1 ? '#93C5FD' : '#C4B5FD'};
-                                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📋 Ver equipos sem. ${semDatos.rel}</span>
-                                    <span style="display:block;font-size:8px;font-weight:700;margin-top:2px;padding:1px 4px;
-                                        border-radius:3px;background:rgba(245,158,11,.2);color:#FCD34D;white-space:nowrap;">
-                                        ${semDatos.plazoLabel}</span>
-                                    ${semDatos.prioridad === 2 ? '<span style="font-size:7px;color:var(--amber);display:block;margin-top:1px;">Complemento</span>' : ''}
-                                </div>`;
+                                        <span style="display:block;font-size:9px;font-weight:700;padding:2px 4px;border-radius:3px;
+                                            background:${acColorH};color:${periodoVistaActivo === 1 ? '#93C5FD' : '#C4B5FD'};
+                                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📋 Ver equipos sem. ${semDatos.rel}</span>
+                                        <span style="display:block;font-size:8px;font-weight:700;margin-top:2px;padding:1px 4px;
+                                            border-radius:3px;background:rgba(245,158,11,.2);color:#FCD34D;white-space:nowrap;">
+                                            ${semDatos.plazoLabel}</span>
+                                        ${semDatos.prioridad === 2 ? '<span style="font-size:7px;color:var(--amber);display:block;margin-top:1px;">Complemento</span>' : ''}
+                                    </div>`;
                     }
 
                     html += `<div style="min-height:64px;border-radius:6px;background:${bg};
-                                border:${border};padding:4px 5px;position:relative;
-                                ${esFinde ? 'opacity:.5;' : ''}transition:background .15s;">
-                                ${inner}
-                                ${esHoy ? '<div style="position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--accent);"></div>' : ''}
-                            </div>`;
+                                    border:${border};padding:4px 5px;position:relative;
+                                    ${esFinde ? 'opacity:.5;' : ''}transition:background .15s;">
+                                    ${inner}
+                                    ${esHoy ? '<div style="position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--accent);"></div>' : ''}
+                                </div>`;
                 }
                 html += `</div></div>`;
             });
 
             // Tabla detalle
             html += `<div style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-                        <div style="padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border);
-                            font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">
-                            📋 Detalle de semanas asignadas — ${CAL_PLANTAS_LABEL[calPlantaActiva]} / Período ${periodoVistaActivo}
-                        </div>
-                        <div style="overflow-x:auto;">
-                        <table class="db-table" style="min-width:620px;">
-                            <thead><tr>
-                                <th>Sem. relativa</th>
-                                <th>Sem. ISO</th>
-                                <th>Inicio (Lun)</th>
-                                <th>Fin (Vie)</th>
-                                <th>Plazo</th>
-                                <th>Cómputo</th>
-                                <th>Laptops</th>
-                                <th>Total</th>
-                                <th>Tipo</th>
-                            </tr></thead><tbody>`;
+                            <div style="padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border);
+                                font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">
+                                📋 Detalle de semanas asignadas — ${CAL_PLANTAS_LABEL[calPlantaActiva]} / Período ${periodoVistaActivo}
+                            </div>
+                            <div style="overflow-x:auto;">
+                            <table class="db-table" style="min-width:620px;">
+                                <thead><tr>
+                                    <th>Sem. relativa</th>
+                                    <th>Sem. ISO</th>
+                                    <th>Inicio (Lun)</th>
+                                    <th>Fin (Vie)</th>
+                                    <th>Plazo</th>
+                                    <th>Cómputo</th>
+                                    <th>Laptops</th>
+                                    <th>Total</th>
+                                    <th>Tipo</th>
+                                </tr></thead><tbody>`;
 
             semanasPlanta.forEach(s => {
                 const esActiva = hoyISO >= fmtISO(s.lunes) && hoyISO <= fmtISO(s.viernes);
                 const esPasada = hoyISO > fmtISO(s.viernes);
                 const rowStyle = esActiva ? 'background:rgba(16,185,129,.08);' : esPasada ? 'opacity:.55;' : '';
                 html += `<tr style="${rowStyle}">
-                            <td class="mono"><b style="color:${acColor};">${s.rel}</b></td>
-                            <td class="mono">${s.semReal}/${s.anioReal}</td>
-                            <td class="mono">${fmtCorto(s.lunes)}</td>
-                            <td class="mono">${fmtCorto(s.viernes)}</td>
-                            <td><span style="background:rgba(245,158,11,.18);color:#FCD34D;
-                                padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;">${s.plazoLabel}</span></td>
-                            <td class="mono">${s.cpu}</td>
-                            <td class="mono">${s.laptops}</td>
-                            <td class="mono"><b>${s.cpu + s.laptops}</b></td>
-                            <td>${s.prioridad === 1
+                                <td class="mono"><b style="color:${acColor};">${s.rel}</b></td>
+                                <td class="mono">${s.semReal}/${s.anioReal}</td>
+                                <td class="mono">${fmtCorto(s.lunes)}</td>
+                                <td class="mono">${fmtCorto(s.viernes)}</td>
+                                <td><span style="background:rgba(245,158,11,.18);color:#FCD34D;
+                                    padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;">${s.plazoLabel}</span></td>
+                                <td class="mono">${s.cpu}</td>
+                                <td class="mono">${s.laptops}</td>
+                                <td class="mono"><b>${s.cpu + s.laptops}</b></td>
+                                <td>${s.prioridad === 1
                         ? `<span style="background:rgba(16,185,129,.15);color:#6EE7B7;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;">Principal</span>`
                         : `<span style="background:rgba(245,158,11,.12);color:#FCD34D;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;">Complemento</span>`
                     }</td>
-                        </tr>`;
+                            </tr>`;
             });
             html += `</tbody></table></div></div>`;
 
@@ -2960,38 +3114,47 @@
                 }[p] || '#64748B');
 
                 let html = `<div style="margin-bottom:12px;font-size:11px;color:var(--muted)">
-                        <b style="color:var(--text)">${data.ubicaciones.length}</b> ubicaciones &nbsp;·&nbsp;
-                        <b style="color:var(--text)">${data.total_equipos}</b> equipos en esta semana
-                    </div>`;
+                            <b style="color:var(--text)">${data.ubicaciones.length}</b> ubicaciones &nbsp;·&nbsp;
+                            <b style="color:var(--text)">${data.total_equipos}</b> equipos en esta semana
+                        </div>`;
 
                 data.ubicaciones.forEach(ubic => {
                     html += `<div style="margin-bottom:8px;background:var(--surface2);border:1px solid var(--border);
-                                    border-radius:10px;overflow:hidden;">
-                            <div style="padding:7px 12px;display:flex;align-items:center;gap:8px;
-                                        border-bottom:1px solid var(--border);background:rgba(255,255,255,.03);">
-                                <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;
-                                    background:rgba(255,255,255,.06);color:${plantaColor(ubic.planta)};">${ubic.planta}</span>
-                                <span style="font-size:12px;font-weight:600;color:var(--text);flex:1">${ubic.ubicacion}</span>
-                                <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;">
-                                    ${ubic.total} equipo${ubic.total !== 1 ? 's' : ''}</span>
-                            </div>
-                            <div style="padding:6px 8px;display:flex;flex-wrap:wrap;gap:4px;">`;
+                                        border-radius:10px;overflow:hidden;">
+                                <div style="padding:7px 12px;display:flex;align-items:center;gap:8px;
+                                            border-bottom:1px solid var(--border);background:rgba(255,255,255,.03);">
+                                    <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;
+                                        background:rgba(255,255,255,.06);color:${plantaColor(ubic.planta)};">${ubic.planta}</span>
+                                    <span style="font-size:12px;font-weight:600;color:var(--text);flex:1">${ubic.ubicacion}</span>
+                                    <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;">
+                                        ${ubic.total} equipo${ubic.total !== 1 ? 's' : ''}</span>
+                                </div>
+                                <div style="padding:6px 8px;display:flex;flex-wrap:wrap;gap:4px;">`;
 
                     ubic.equipos.forEach(e => {
                         const col = colorMap[(e.categoria_color || '').toLowerCase()] || { bg: 'rgba(100,116,139,.12)', text: '#94A3B8' };
-                        html += `<div style="display:flex;align-items:center;gap:6px;padding:5px 10px;
-                                        border-radius:7px;background:var(--surface3);flex:1;min-width:200px;max-width:340px;">
-                                <span style="font-size:14px">${iconDisp(e.nombre_dispositivo)}</span>
-                                <div style="flex:1;min-width:0;">
-                                    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);
-                                        font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                        ${e.id_equipo || '—'}</div>
-                                    <div style="font-size:10px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                        ${e.nombre_dispositivo || '—'}</div>
-                                </div>
-                                <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px;
-                                    background:${col.bg};color:${col.text};flex-shrink:0;">${e.categoria_color || '—'}</span>
-                            </div>`;
+                        const pmP1 = e.tiene_pm_p1;
+                        const pmP2 = e.tiene_pm_p2;
+                        const pmBadge = (ok, label, fecha) => ok
+                            ? `<span title="Realizado: ${fecha || ''}" style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:999px;background:rgba(16,185,129,.18);color:#6ee7b7;border:1px solid rgba(16,185,129,.35);">✅ ${label}</span>`
+                            : `<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:999px;background:rgba(245,158,11,.12);color:#fcd34d;border:1px solid rgba(245,158,11,.3);">⏳ ${label}</span>`;
+                        html += `<div style="display:flex;align-items:flex-start;gap:6px;padding:5px 10px;
+                                            border-radius:7px;background:var(--surface3);flex:1;min-width:200px;max-width:340px;">
+                                    <span style="font-size:14px;margin-top:2px">${iconDisp(e.nombre_dispositivo)}</span>
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);
+                                            font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                            ${e.id_equipo || '—'}</div>
+                                        <div style="font-size:10px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;">
+                                            ${e.nombre_dispositivo || '—'}</div>
+                                        <div style="display:flex;gap:3px;flex-wrap:wrap;">
+                                            ${pmBadge(pmP1, 'P1', e.fecha_pm_p1)}
+                                            ${pmBadge(pmP2, 'P2', e.fecha_pm_p2)}
+                                        </div>
+                                    </div>
+                                    <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px;
+                                        background:${col.bg};color:${col.text};flex-shrink:0;align-self:flex-start;">${e.categoria_color || '—'}</span>
+                                </div>`;
                     });
 
                     html += `</div></div>`;
@@ -3011,22 +3174,22 @@
             const color = (periodo === 1) ? 'var(--accent)' : 'var(--purple)';
             const colVal = (periodo === 1) ? '#93C5FD' : '#C4B5FD';
             document.getElementById('cal-summary').innerHTML = totalSem === 0 ? '' : `
-                        <div class="cal-summary-card" style="border-left:3px solid ${color}">
-                            <div class="cs-label">Semanas programadas</div>
-                            <div class="cs-val" style="color:${color}">${totalSem}</div>
-                        </div>
-                        <div class="cal-summary-card" style="border-left:3px solid ${colVal}">
-                            <div class="cs-label">Equipos cómputo total</div>
-                            <div class="cs-val" style="color:${colVal}">${totalCpu}</div>
-                        </div>
-                        <div class="cal-summary-card" style="border-left:3px solid #C4B5FD">
-                            <div class="cs-label">Laptops total</div>
-                            <div class="cs-val" style="color:#C4B5FD">${totalLap}</div>
-                        </div>
-                        <div class="cal-summary-card" style="border-left:3px solid var(--green)">
-                            <div class="cs-label">Equipos por semana</div>
-                            <div class="cs-val" style="color:var(--green)">40</div>
-                        </div>`;
+                            <div class="cal-summary-card" style="border-left:3px solid ${color}">
+                                <div class="cs-label">Semanas programadas</div>
+                                <div class="cs-val" style="color:${color}">${totalSem}</div>
+                            </div>
+                            <div class="cal-summary-card" style="border-left:3px solid ${colVal}">
+                                <div class="cs-label">Equipos cómputo total</div>
+                                <div class="cs-val" style="color:${colVal}">${totalCpu}</div>
+                            </div>
+                            <div class="cal-summary-card" style="border-left:3px solid #C4B5FD">
+                                <div class="cs-label">Laptops total</div>
+                                <div class="cs-val" style="color:#C4B5FD">${totalLap}</div>
+                            </div>
+                            <div class="cal-summary-card" style="border-left:3px solid var(--green)">
+                                <div class="cs-label">Equipos por semana</div>
+                                <div class="cs-val" style="color:var(--green)">40</div>
+                            </div>`;
         }
 
         function renderVencidos(elId, data) {
@@ -3034,20 +3197,20 @@
             const trs = data.map(r => {
                 const dias = Math.abs(Math.ceil((new Date(r.plazo) - new Date()) / 86400000));
                 return `<tr>
-                                          <td>${r.id_equipo || '—'}</td>
-                                          <td>${r.dispositivo || '—'}</td>
-                                          <td><b>${r.ubicacion || '—'}</b></td>
-                                          <td>${r.planta || '—'}</td>
-                                          <td style="color:var(--red)">${r.plazo}</td>
-                                          <td>${r.ultimo_pm || 'Nunca'}</td>
-                                          <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
-                                        </tr>`;
+                                              <td>${r.id_equipo || '—'}</td>
+                                              <td>${r.dispositivo || '—'}</td>
+                                              <td><b>${r.ubicacion || '—'}</b></td>
+                                              <td>${r.planta || '—'}</td>
+                                              <td style="color:var(--red)">${r.plazo}</td>
+                                              <td>${r.ultimo_pm || 'Nunca'}</td>
+                                              <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
+                                            </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                                          <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                                          <tbody>${trs}</tbody>
-                                        </table></div>`;
+                                              <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                                              <tbody>${trs}</tbody>
+                                            </table></div>`;
         }
 
     </script>
