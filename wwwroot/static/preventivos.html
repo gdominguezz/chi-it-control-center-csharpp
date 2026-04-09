@@ -1943,6 +1943,9 @@
         window.addEventListener('DOMContentLoaded', () => {
             resetInactividad(); // arrancar timer de inactividad
 
+            // ── Restaurar calendario INMEDIATAMENTE (no necesita sesión) ──
+            restaurarCalendario();
+
             // Verificar sesión — si no hay, redirigir al login
             fetch('/obtener-usuario', { credentials: 'include' })
                 .then(r => {
@@ -1963,9 +1966,6 @@
                         const btnElim = document.getElementById('btn-eliminar-plazo');
                         if (btnElim) btnElim.style.display = 'inline-flex';
                     }
-
-                    // ── Restaurar calendario desde localStorage ──
-                    restaurarCalendario();
                 })
                 .catch(() => {
                     window.location.href = '/static/login.html';
@@ -1980,19 +1980,20 @@
 
         // ═══ PERSISTENCIA CALENDARIO ═══
         function guardarCalendarioEnStorage() {
-            const p1Sem = document.getElementById('cal-semana-inicio-p1')?.value;
-            const p1Anio = document.getElementById('cal-anio-p1')?.value;
-            const p2Sem = document.getElementById('cal-semana-inicio-p2')?.value;
-            const p2Anio = document.getElementById('cal-anio-p2')?.value;
+            // Leer valores reales del DOM (funciona aunque el input esté disabled)
+            const p1Sem = document.getElementById('cal-semana-inicio-p1')?.value || '';
+            const p1Anio = document.getElementById('cal-anio-p1')?.value || '';
+            const p2Sem = document.getElementById('cal-semana-inicio-p2')?.value || '';
+            const p2Anio = document.getElementById('cal-anio-p2')?.value || '';
             try {
-                localStorage.setItem('cal_p1_sem', p1Sem || '');
-                localStorage.setItem('cal_p1_anio', p1Anio || '');
+                if (p1Sem) localStorage.setItem('cal_p1_sem', p1Sem);
+                if (p1Anio) localStorage.setItem('cal_p1_anio', p1Anio);
                 localStorage.setItem('cal_p1_terminado', p1Terminado ? '1' : '0');
-                localStorage.setItem('cal_p2_sem', p2Sem || '');
-                localStorage.setItem('cal_p2_anio', p2Anio || '');
+                if (p2Sem) localStorage.setItem('cal_p2_sem', p2Sem);
+                if (p2Anio) localStorage.setItem('cal_p2_anio', p2Anio);
                 localStorage.setItem('cal_p2_terminado', p2Terminado ? '1' : '0');
                 localStorage.setItem('cal_p2_generado', calDatosP2 ? '1' : '0');
-            } catch (e) { }
+            } catch (e) { console.warn('localStorage error', e); }
         }
 
         function restaurarCalendario() {
@@ -2005,28 +2006,34 @@
                 const p2Term = localStorage.getItem('cal_p2_terminado') === '1';
                 const p2Gen = localStorage.getItem('cal_p2_generado') === '1';
 
-                if (!p1Sem) return; // nada guardado
+                if (!p1Sem || !parseInt(p1Sem)) return; // nada guardado
 
-                // Restaurar P1
+                // ── Restaurar P1 ──
                 const inP1 = document.getElementById('cal-semana-inicio-p1');
                 const selP1 = document.getElementById('cal-anio-p1');
                 if (inP1) inP1.value = p1Sem;
-                if (selP1 && p1Anio) { for (let o of selP1.options) if (o.value === p1Anio) { o.selected = true; break; } }
-                generarCalendarioP1SinGuardar(); // recalcular sin sobreescribir storage
+                if (selP1 && p1Anio) {
+                    for (let o of selP1.options) { if (o.value === p1Anio) { o.selected = true; break; } }
+                }
+                generarCalendarioP1SinGuardar();
 
                 if (p1Term) {
                     terminarP1SinConfirm();
-                    // Restaurar P2 si se había generado
+
+                    // ── Restaurar P2 si se había generado ──
                     const inP2 = document.getElementById('cal-semana-inicio-p2');
                     const selP2 = document.getElementById('cal-anio-p2');
                     if (inP2 && p2Sem) inP2.value = p2Sem;
-                    if (selP2 && p2Anio) { for (let o of selP2.options) if (o.value === p2Anio) { o.selected = true; break; } }
-                    if (p2Gen) {
+                    if (selP2 && p2Anio) {
+                        for (let o of selP2.options) { if (o.value === p2Anio) { o.selected = true; break; } }
+                    }
+                    if (p2Gen && p2Sem && parseInt(p2Sem)) {
                         generarCalendarioP2SinGuardar();
                         if (p2Term) terminarP2SinConfirm();
                     }
                 }
-            } catch (e) { }
+                console.log('[Calendario] Restaurado desde localStorage: P1 sem=' + p1Sem + ' anio=' + p1Anio);
+            } catch (e) { console.warn('[Calendario] Error al restaurar:', e); }
         }
 
         // ── Versiones internas sin confirm/guardar ──
