@@ -1866,6 +1866,19 @@
                     <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(245,158,11,.4)"></div>Plazo de mantenimiento</div>
                 </div>
             </div>
+            <div id="cal-detalle-panel" style="display:none;margin-top:16px;background:var(--surface);
+                     border:1px solid var(--border2);border-radius:12px;padding:16px 20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                    <span id="cal-detalle-titulo" style="font-size:12px;font-weight:700;color:var(--text);font-family:'DM Mono',monospace;"></span>
+                    <button onclick="document.getElementById('cal-detalle-panel').style.display='none'"
+                            style="background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);
+                                   cursor:pointer;font-size:13px;border-radius:6px;padding:4px 10px;line-height:1;">
+                        ✕ Cerrar
+                    </button>
+                </div>
+                <div id="cal-detalle-body"></div>
+            </div>
+
         </div><!-- /tab-calendario -->
 
     </div><!-- /main -->
@@ -2012,37 +2025,37 @@
                 const bg = rowBg(row.categoria_color);
                 const tdStyle = bg ? `style="background:${bg}"` : '';
                 tbody.innerHTML += `
-                                    <tr>
-                                      <td class="mono" ${tdStyle}>${row.id}</td>
-                                      <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
-                                      <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
-                                      <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
-                                      <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
-                                      <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
-                                      <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
-                                      <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
-                                      <td ${tdStyle}>
-                                        ${row.tiene_pdf
+                                        <tr>
+                                          <td class="mono" ${tdStyle}>${row.id}</td>
+                                          <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
+                                          <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
+                                          <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
+                                          <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
+                                          <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
+                                          <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
+                                          <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
+                                          <td ${tdStyle}>
+                                            ${row.tiene_pdf
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.id})">📄 Ver</button>
-                                             <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
+                                                 <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
                         : `<input type="file" onchange="subirPDF(${row.id},this)"
-                                               style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
-                                      </td>
-                                      <td ${tdStyle} style="text-align:center;">
-                                        <img src="/QR_EQUIPO/${row.id}"
-                                             style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
-                                             title="QR: ${row.id_equipo ?? row.id}"
-                                             onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
-                                             loading="lazy">
-                                      </td>
-                                      <td ${tdStyle} style="white-space:nowrap;">
-                                        ${esAdmin ? `
-                                        <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
-                                        <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
-                                        ` : ''}
-                                        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
-                                      </td>
-                                    </tr>`;
+                                                   style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
+                                          </td>
+                                          <td ${tdStyle} style="text-align:center;">
+                                            <img src="/QR_EQUIPO/${row.id}"
+                                                 style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
+                                                 title="QR: ${row.id_equipo ?? row.id}"
+                                                 onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
+                                                 loading="lazy">
+                                          </td>
+                                          <td ${tdStyle} style="white-space:nowrap;">
+                                            ${esAdmin ? `
+                                            <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
+                                            <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
+                                            ` : ''}
+                                            <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
+                                          </td>
+                                        </tr>`;
             });
             document.getElementById('paginaInfo').textContent =
                 `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite)} | Total: ${totalRegistros}`;
@@ -2161,27 +2174,27 @@
                 const vd = esc(despues?.[apiKey] ?? '');
                 const chg = cambiados.has(key);
                 filas += `
-                                    <tr class="${chg ? 'row-changed' : ''}">
-                                      <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                                      <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                                      <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                                    </tr>`;
+                                        <tr class="${chg ? 'row-changed' : ''}">
+                                          <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                          <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                          <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                                        </tr>`;
             });
             const n = cambiados.size;
             return `
-                                  <div class="ev-wrap">
-                                    <div class="ev-header">
-                                      <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                      <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                                      <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                        ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                                      </span>
-                                    </div>
-                                    <table class="ev-table">
-                                      <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                                      <tbody>${filas}</tbody>
-                                    </table>
-                                  </div>`;
+                                      <div class="ev-wrap">
+                                        <div class="ev-header">
+                                          <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                          <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                                          <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                            ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                          </span>
+                                        </div>
+                                        <table class="ev-table">
+                                          <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                          <tbody>${filas}</tbody>
+                                        </table>
+                                      </div>`;
         }
 
         function verHistorial(id) {
@@ -2198,8 +2211,8 @@
                 } else {
                     document.getElementById('contenidoHistorial').innerHTML =
                         `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                          ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                        </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                                              ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                            </p>`+ lista.map(ev => renderEvento(ev)).join('');
                 }
             }).catch(() => {
                 document.getElementById('contenidoHistorial').innerHTML =
@@ -2385,67 +2398,67 @@
             const scoreColor = score >= 90 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
 
             el.innerHTML = `
-                                <div class="salud-wrap">
-                                    <div class="salud-item">
-                                        <div class="salud-label-row">
-                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
-                                            <span class="salud-pct" style="color:#10B981">${pSano}%</span>
+                                    <div class="salud-wrap">
+                                        <div class="salud-item">
+                                            <div class="salud-label-row">
+                                                <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
+                                                <span class="salud-pct" style="color:#10B981">${pSano}%</span>
+                                            </div>
+                                            <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
+                                            <span class="salud-count">${saludables} equipos</span>
                                         </div>
-                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
-                                        <span class="salud-count">${saludables} equipos</span>
-                                    </div>
-                                    <div class="salud-item">
-                                        <div class="salud-label-row">
-                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
-                                            <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
+                                        <div class="salud-item">
+                                            <div class="salud-label-row">
+                                                <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
+                                                <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
+                                            </div>
+                                            <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
+                                            <span class="salud-count">${proximosMes} equipos</span>
                                         </div>
-                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
-                                        <span class="salud-count">${proximosMes} equipos</span>
-                                    </div>
-                                    <div class="salud-item">
-                                        <div class="salud-label-row">
-                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
-                                            <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
+                                        <div class="salud-item">
+                                            <div class="salud-label-row">
+                                                <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
+                                                <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
+                                            </div>
+                                            <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
+                                            <span class="salud-count">${vencidos} equipos</span>
                                         </div>
-                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
-                                        <span class="salud-count">${vencidos} equipos</span>
-                                    </div>
-                                    <div class="salud-score">
-                                        <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
-                                        <div class="salud-score-label">Índice de salud</div>
-                                        <div class="salud-score-emoji">${emoji}</div>
-                                    </div>
-                                </div>`;
+                                        <div class="salud-score">
+                                            <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
+                                            <div class="salud-score-label">Índice de salud</div>
+                                            <div class="salud-score-emoji">${emoji}</div>
+                                        </div>
+                                    </div>`;
         }
 
         function renderKpis(k) {
             document.getElementById('db-kpis').innerHTML = `
-                                    <div class="kpi-card kpi-verde">
-                                      <div class="kpi-label">Total Equipos</div>
-                                      <div class="kpi-value">${k.total_equipos}</div>
-                                      <div class="kpi-sub">registrados en el sistema</div>
-                                    </div>
-                                    <div class="kpi-card kpi-azul">
-                                      <div class="kpi-label">Con PM Digital</div>
-                                      <div class="kpi-value">${k.total_pms_realizados}</div>
-                                      <div class="kpi-sub">${Math.round(k.total_pms_realizados / k.total_equipos * 100) || 0}% del total</div>
-                                    </div>
-                                    <div class="kpi-card kpi-amber">
-                                      <div class="kpi-label">Sin PM Digital</div>
-                                      <div class="kpi-value">${k.sin_pm_p1}</div>
-                                      <div class="kpi-sub">pendientes de atender</div>
-                                    </div>
-                                    <div class="kpi-card kpi-rojo">
-                                      <div class="kpi-label">Vencidos</div>
-                                      <div class="kpi-value">${k.total_vencidos}</div>
-                                      <div class="kpi-sub">plazo ya pasó</div>
-                                    </div>
-                                    <div class="kpi-card kpi-purple">
-                                      <div class="kpi-label">Esta Semana</div>
-                                      <div class="kpi-value">${k.semana_total}</div>
-                                      <div class="kpi-sub">mantenimientos realizados</div>
-                                    </div>
-                                  `;
+                                        <div class="kpi-card kpi-verde">
+                                          <div class="kpi-label">Total Equipos</div>
+                                          <div class="kpi-value">${k.total_equipos}</div>
+                                          <div class="kpi-sub">registrados en el sistema</div>
+                                        </div>
+                                        <div class="kpi-card kpi-azul">
+                                          <div class="kpi-label">Con PM Digital</div>
+                                          <div class="kpi-value">${k.total_pms_realizados}</div>
+                                          <div class="kpi-sub">${Math.round(k.total_pms_realizados / k.total_equipos * 100) || 0}% del total</div>
+                                        </div>
+                                        <div class="kpi-card kpi-amber">
+                                          <div class="kpi-label">Sin PM Digital</div>
+                                          <div class="kpi-value">${k.sin_pm_p1}</div>
+                                          <div class="kpi-sub">pendientes de atender</div>
+                                        </div>
+                                        <div class="kpi-card kpi-rojo">
+                                          <div class="kpi-label">Vencidos</div>
+                                          <div class="kpi-value">${k.total_vencidos}</div>
+                                          <div class="kpi-sub">plazo ya pasó</div>
+                                        </div>
+                                        <div class="kpi-card kpi-purple">
+                                          <div class="kpi-label">Esta Semana</div>
+                                          <div class="kpi-value">${k.semana_total}</div>
+                                          <div class="kpi-sub">mantenimientos realizados</div>
+                                        </div>
+                                      `;
         }
 
         function colorFromCat(cat) {
@@ -2463,13 +2476,13 @@
             if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">Sin datos</p>'; return; }
             const max = Math.max(...data.map(valFn));
             document.getElementById(elId).innerHTML = data.map(d => `
-                                    <div class="bar-wrap">
-                                      <span class="bar-label">${labelFn(d)}</span>
-                                      <div class="bar-track">
-                                        <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
-                                      </div>
-                                      <span class="bar-count">${valFn(d)}</span>
-                                    </div>`).join('');
+                                        <div class="bar-wrap">
+                                          <span class="bar-label">${labelFn(d)}</span>
+                                          <div class="bar-track">
+                                            <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
+                                          </div>
+                                          <span class="bar-count">${valFn(d)}</span>
+                                        </div>`).join('');
         }
 
         function renderTabla(elId, data, headers, rowFn) {
@@ -2489,20 +2502,20 @@
                 const diasRestantes = Math.ceil((new Date(r.plazo) - new Date()) / 86400000);
                 const badge = `<span class="db-badge proximo-badge">En ${diasRestantes}d</span>`;
                 return `<tr>
-                                      <td>${r.id_equipo || '—'}</td>
-                                      <td>${r.dispositivo || '—'}</td>
-                                      <td><b>${r.ubicacion || '—'}</b></td>
-                                      <td>${r.planta || '—'}</td>
-                                      <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
-                                      <td>${r.ultimo_pm || 'Nunca'}</td>
-                                      <td>${badge}</td>
-                                    </tr>`;
+                                          <td>${r.id_equipo || '—'}</td>
+                                          <td>${r.dispositivo || '—'}</td>
+                                          <td><b>${r.ubicacion || '—'}</b></td>
+                                          <td>${r.planta || '—'}</td>
+                                          <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
+                                          <td>${r.ultimo_pm || 'Nunca'}</td>
+                                          <td>${badge}</td>
+                                        </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                                      <tbody>${trs}</tbody>
-                                    </table></div>`;
+                                          <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                                          <tbody>${trs}</tbody>
+                                        </table></div>`;
         }
 
         function renderProximos(elId, data) {
@@ -2515,19 +2528,19 @@
                         ? `<span class="db-badge proximo-badge">Hoy</span>`
                         : `<span class="db-badge proximo-badge">En ${dias}d</span>`;
                 return `<tr>
-                                      <td>${r.id_equipo || '—'}</td>
-                                      <td>${r.dispositivo || '—'}</td>
-                                      <td><b>${r.ubicacion || '—'}</b></td>
-                                      <td>${r.planta || '—'}</td>
-                                      <td>${r.plazo}</td>
-                                      <td>${badge}</td>
-                                    </tr>`;
+                                          <td>${r.id_equipo || '—'}</td>
+                                          <td>${r.dispositivo || '—'}</td>
+                                          <td><b>${r.ubicacion || '—'}</b></td>
+                                          <td>${r.planta || '—'}</td>
+                                          <td>${r.plazo}</td>
+                                          <td>${badge}</td>
+                                        </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
-                                      <tbody>${trs}</tbody>
-                                    </table></div>`;
+                                          <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
+                                          <tbody>${trs}</tbody>
+                                        </table></div>`;
         }
 
 
@@ -2769,14 +2782,14 @@
             semanasPlanta.forEach(s => { lunesMap[fmtISO(s.lunes)] = s; });
 
             let html = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-                    <span style="font-size:13px;font-weight:700;color:${acColor}">
-                        📅 Período ${periodoVistaActivo} — ${CAL_PLANTAS_LABEL[calPlantaActiva]}
-                    </span>
-                    <span style="font-size:11px;color:var(--muted)">${semanasPlanta.length} semana(s) asignada(s)</span>
-                    <span style="font-size:11px;color:var(--muted2);margin-left:auto;">
-                        🖥️ ${calTipoActivo === 'computo' ? 'Equipos de cómputo' : 'Laptops'} seleccionados
-                    </span>
-                </div>`;
+                        <span style="font-size:13px;font-weight:700;color:${acColor}">
+                            📅 Período ${periodoVistaActivo} — ${CAL_PLANTAS_LABEL[calPlantaActiva]}
+                        </span>
+                        <span style="font-size:11px;color:var(--muted)">${semanasPlanta.length} semana(s) asignada(s)</span>
+                        <span style="font-size:11px;color:var(--muted2);margin-left:auto;">
+                            🖥️ ${calTipoActivo === 'computo' ? 'Equipos de cómputo' : 'Laptops'} seleccionados
+                        </span>
+                    </div>`;
 
             Object.entries(mesesMap).forEach(([mk, semanas]) => {
                 const primerLunes = semanas[0].lunes;
@@ -2788,17 +2801,17 @@
                 const mesNombreCap = mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1);
 
                 html += `<div style="margin-bottom:28px;">
-                        <div style="font-size:12px;font-weight:700;color:var(--text);padding:8px 0 10px;
-                            border-bottom:2px solid ${acBorder};margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-                            <span style="width:4px;height:16px;background:${acColor};border-radius:2px;display:inline-block;"></span>
-                            ${mesNombreCap}
-                        </div>`;
+                            <div style="font-size:12px;font-weight:700;color:var(--text);padding:8px 0 10px;
+                                border-bottom:2px solid ${acBorder};margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                                <span style="width:4px;height:16px;background:${acColor};border-radius:2px;display:inline-block;"></span>
+                                ${mesNombreCap}
+                            </div>`;
 
                 // Encabezados días
                 html += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px;">`;
                 ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].forEach(d => {
                     html += `<div style="text-align:center;font-size:10px;font-weight:700;
-                            color:var(--muted);padding:4px 2px;">${d}</div>`;
+                                color:var(--muted);padding:4px 2px;">${d}</div>`;
                 });
                 html += `</div>`;
 
@@ -2826,77 +2839,146 @@
                     else if (esFinde) { bg = 'rgba(0,0,0,.12)'; }
 
                     let inner = `<div style="font-size:11px;font-weight:${esHoy ? '700' : '500'};
-                            color:${esHoy ? 'var(--accent)' : esFinde ? 'var(--muted)' : 'var(--muted2)'};">${nd}</div>`;
+                                color:${esHoy ? 'var(--accent)' : esFinde ? 'var(--muted)' : 'var(--muted2)'};">${nd}</div>`;
 
                     // En el lunes de una semana asignada: mostrar info
                     if (enSem && dow === 1) {
                         const cant = calTipoActivo === 'computo' ? semDatos.cpu : semDatos.laptops;
                         const icon = calTipoActivo === 'computo' ? '🖥️' : '💻';
-                        inner += `<div style="margin-top:3px;">
-                                <span style="display:block;font-size:9px;font-weight:700;padding:2px 4px;border-radius:3px;
-                                    background:${acColorH};color:${periodoVistaActivo === 1 ? '#93C5FD' : '#C4B5FD'};
-                                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${icon} ${cant} eq.</span>
-                                <span style="display:block;font-size:8px;font-weight:700;margin-top:2px;padding:1px 4px;
-                                    border-radius:3px;background:rgba(245,158,11,.2);color:#FCD34D;white-space:nowrap;">
-                                    ${semDatos.plazoLabel}</span>
-                                ${semDatos.prioridad === 2 ? '<span style="font-size:7px;color:var(--amber);display:block;margin-top:1px;">Complemento</span>' : ''}
-                            </div>`;
+                        inner += `<div style="margin-top:3px;cursor:pointer;" onclick="verEquiposSemana('${fmtISO(semDatos.lunes)}','${fmtISO(semDatos.viernes)}',${semDatos.rel},${semDatos.cpu},${semDatos.laptops})">
+                                    <span style="display:block;font-size:9px;font-weight:700;padding:2px 4px;border-radius:3px;
+                                        background:${acColorH};color:${periodoVistaActivo === 1 ? '#93C5FD' : '#C4B5FD'};
+                                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${icon} ${cant} eq. 👆</span>
+                                    <span style="display:block;font-size:8px;font-weight:700;margin-top:2px;padding:1px 4px;
+                                        border-radius:3px;background:rgba(245,158,11,.2);color:#FCD34D;white-space:nowrap;">
+                                        ${semDatos.plazoLabel}</span>
+                                    ${semDatos.prioridad === 2 ? '<span style="font-size:7px;color:var(--amber);display:block;margin-top:1px;">Complemento</span>' : ''}
+                                </div>`;
                     }
 
                     html += `<div style="min-height:64px;border-radius:6px;background:${bg};
-                            border:${border};padding:4px 5px;position:relative;
-                            ${esFinde ? 'opacity:.5;' : ''}transition:background .15s;">
-                            ${inner}
-                            ${esHoy ? '<div style="position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--accent);"></div>' : ''}
-                        </div>`;
+                                border:${border};padding:4px 5px;position:relative;
+                                ${esFinde ? 'opacity:.5;' : ''}transition:background .15s;">
+                                ${inner}
+                                ${esHoy ? '<div style="position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--accent);"></div>' : ''}
+                            </div>`;
                 }
                 html += `</div></div>`;
             });
 
             // Tabla detalle
             html += `<div style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-                    <div style="padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border);
-                        font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">
-                        📋 Detalle de semanas asignadas — ${CAL_PLANTAS_LABEL[calPlantaActiva]} / Período ${periodoVistaActivo}
-                    </div>
-                    <div style="overflow-x:auto;">
-                    <table class="db-table" style="min-width:620px;">
-                        <thead><tr>
-                            <th>Sem. relativa</th>
-                            <th>Sem. ISO</th>
-                            <th>Inicio (Lun)</th>
-                            <th>Fin (Vie)</th>
-                            <th>Plazo</th>
-                            <th>Cómputo</th>
-                            <th>Laptops</th>
-                            <th>Total</th>
-                            <th>Tipo</th>
-                        </tr></thead><tbody>`;
+                        <div style="padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border);
+                            font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">
+                            📋 Detalle de semanas asignadas — ${CAL_PLANTAS_LABEL[calPlantaActiva]} / Período ${periodoVistaActivo}
+                        </div>
+                        <div style="overflow-x:auto;">
+                        <table class="db-table" style="min-width:620px;">
+                            <thead><tr>
+                                <th>Sem. relativa</th>
+                                <th>Sem. ISO</th>
+                                <th>Inicio (Lun)</th>
+                                <th>Fin (Vie)</th>
+                                <th>Plazo</th>
+                                <th>Cómputo</th>
+                                <th>Laptops</th>
+                                <th>Total</th>
+                                <th>Tipo</th>
+                            </tr></thead><tbody>`;
 
             semanasPlanta.forEach(s => {
                 const esActiva = hoyISO >= fmtISO(s.lunes) && hoyISO <= fmtISO(s.viernes);
                 const esPasada = hoyISO > fmtISO(s.viernes);
                 const rowStyle = esActiva ? 'background:rgba(16,185,129,.08);' : esPasada ? 'opacity:.55;' : '';
                 html += `<tr style="${rowStyle}">
-                        <td class="mono"><b style="color:${acColor};">${s.rel}</b></td>
-                        <td class="mono">${s.semReal}/${s.anioReal}</td>
-                        <td class="mono">${fmtCorto(s.lunes)}</td>
-                        <td class="mono">${fmtCorto(s.viernes)}</td>
-                        <td><span style="background:rgba(245,158,11,.18);color:#FCD34D;
-                            padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;">${s.plazoLabel}</span></td>
-                        <td class="mono">${s.cpu}</td>
-                        <td class="mono">${s.laptops}</td>
-                        <td class="mono"><b>${s.cpu + s.laptops}</b></td>
-                        <td>${s.prioridad === 1
+                            <td class="mono"><b style="color:${acColor};">${s.rel}</b></td>
+                            <td class="mono">${s.semReal}/${s.anioReal}</td>
+                            <td class="mono">${fmtCorto(s.lunes)}</td>
+                            <td class="mono">${fmtCorto(s.viernes)}</td>
+                            <td><span style="background:rgba(245,158,11,.18);color:#FCD34D;
+                                padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;">${s.plazoLabel}</span></td>
+                            <td class="mono">${s.cpu}</td>
+                            <td class="mono">${s.laptops}</td>
+                            <td class="mono"><b>${s.cpu + s.laptops}</b></td>
+                            <td>${s.prioridad === 1
                         ? `<span style="background:rgba(16,185,129,.15);color:#6EE7B7;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;">Principal</span>`
                         : `<span style="background:rgba(245,158,11,.12);color:#FCD34D;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;">Complemento</span>`
                     }</td>
-                    </tr>`;
+                        </tr>`;
             });
             html += `</tbody></table></div></div>`;
 
             container.innerHTML = html;
             renderSummary(semanasPlanta, periodoVistaActivo);
+        }
+
+        // ── Ver equipos de una semana ────────────────────────
+        async function verEquiposSemana(lunesISO, viernesISO, semRel, cpuTotal, laptopsTotal) {
+            const tipo = calTipoActivo === 'computo' ? 'COMPUTO' : 'LAPTOP';
+            const cantEsta = calTipoActivo === 'computo' ? cpuTotal : laptopsTotal;
+            const panel = document.getElementById('cal-detalle-panel');
+            const body = document.getElementById('cal-detalle-body');
+            const titulo = document.getElementById('cal-detalle-titulo');
+
+            titulo.textContent = `Semana ${semRel}  ·  ${lunesISO} → ${viernesISO}  ·  ${cantEsta} equipos  ·  ${CAL_PLANTAS_LABEL[calPlantaActiva]}`;
+            body.innerHTML = '<p style="color:var(--muted);font-size:12px">Cargando equipos…</p>';
+            panel.style.display = 'block';
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            try {
+                const res = await fetch(`/PREVENTIVOS/EQUIPOS_POR_PLANTA?planta=${encodeURIComponent(calPlantaActiva)}&tipo=${tipo}`);
+                const data = await res.json();
+
+                if (!data.equipos || data.equipos.length === 0) {
+                    body.innerHTML = '<p style="color:var(--muted);font-size:12px;padding:8px 0">⚠️ Sin equipos registrados para esta planta/tipo.</p>';
+                    return;
+                }
+
+                const colorMap = {
+                    verde: { bg: 'rgba(16,185,129,.15)', text: '#6EE7B7' },
+                    amarillo: { bg: 'rgba(245,158,11,.15)', text: '#FCD34D' },
+                    rojo: { bg: 'rgba(239,68,68,.15)', text: '#FCA5A5' },
+                    gris: { bg: 'rgba(148,163,184,.12)', text: '#94A3B8' },
+                    rosa: { bg: 'rgba(244,114,182,.15)', text: '#F9A8D4' },
+                    azul: { bg: 'rgba(59,130,246,.15)', text: '#93C5FD' },
+                };
+
+                const equipos = data.equipos.slice(0, cantEsta);
+                const total = data.equipos.length;
+
+                let html = `<div style="margin-bottom:10px;font-size:11px;color:var(--muted)">
+                        Mostrando <b style="color:var(--text)">${equipos.length}</b> de <b style="color:var(--text)">${total}</b> equipos registrados en la planta para este período.
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:6px;">`;
+
+                equipos.forEach((e, i) => {
+                    const col = colorMap[(e.color || '').toLowerCase()] || { bg: 'rgba(100,116,139,.12)', text: '#94A3B8' };
+                    html += `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;
+                                    border-radius:8px;background:var(--surface2);border:1px solid var(--border);">
+                            <span style="font-size:11px;font-weight:700;color:var(--muted);min-width:20px;text-align:right">${i + 1}</span>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);font-weight:600;
+                                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.id_equipo || '—'}</div>
+                                <div style="font-size:11px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.dispositivo || '—'}</div>
+                            </div>
+                            <div style="text-align:right;flex-shrink:0;">
+                                <div style="font-size:10px;color:var(--muted);margin-bottom:3px;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.ubicacion || '—'}</div>
+                                <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:999px;
+                                    background:${col.bg};color:${col.text};">${e.color || '—'}</span>
+                            </div>
+                        </div>`;
+                });
+
+                html += '</div>';
+                if (total > cantEsta) {
+                    html += `<p style="margin-top:10px;font-size:11px;color:var(--muted)">
+                            ℹ️ Hay ${total - cantEsta} equipo(s) adicionales en la planta que no entran en esta semana (capacidad: ${cantEsta}).
+                        </p>`;
+                }
+                body.innerHTML = html;
+            } catch (err) {
+                body.innerHTML = `<p style="color:var(--red);font-size:12px">Error al cargar equipos: ${err.message}</p>`;
+            }
         }
 
         function renderSummary(semanas, periodo) {
@@ -2906,22 +2988,22 @@
             const color = (periodo === 1) ? 'var(--accent)' : 'var(--purple)';
             const colVal = (periodo === 1) ? '#93C5FD' : '#C4B5FD';
             document.getElementById('cal-summary').innerHTML = totalSem === 0 ? '' : `
-                    <div class="cal-summary-card" style="border-left:3px solid ${color}">
-                        <div class="cs-label">Semanas programadas</div>
-                        <div class="cs-val" style="color:${color}">${totalSem}</div>
-                    </div>
-                    <div class="cal-summary-card" style="border-left:3px solid ${colVal}">
-                        <div class="cs-label">Equipos cómputo total</div>
-                        <div class="cs-val" style="color:${colVal}">${totalCpu}</div>
-                    </div>
-                    <div class="cal-summary-card" style="border-left:3px solid #C4B5FD">
-                        <div class="cs-label">Laptops total</div>
-                        <div class="cs-val" style="color:#C4B5FD">${totalLap}</div>
-                    </div>
-                    <div class="cal-summary-card" style="border-left:3px solid var(--green)">
-                        <div class="cs-label">Equipos por semana</div>
-                        <div class="cs-val" style="color:var(--green)">40</div>
-                    </div>`;
+                        <div class="cal-summary-card" style="border-left:3px solid ${color}">
+                            <div class="cs-label">Semanas programadas</div>
+                            <div class="cs-val" style="color:${color}">${totalSem}</div>
+                        </div>
+                        <div class="cal-summary-card" style="border-left:3px solid ${colVal}">
+                            <div class="cs-label">Equipos cómputo total</div>
+                            <div class="cs-val" style="color:${colVal}">${totalCpu}</div>
+                        </div>
+                        <div class="cal-summary-card" style="border-left:3px solid #C4B5FD">
+                            <div class="cs-label">Laptops total</div>
+                            <div class="cs-val" style="color:#C4B5FD">${totalLap}</div>
+                        </div>
+                        <div class="cal-summary-card" style="border-left:3px solid var(--green)">
+                            <div class="cs-label">Equipos por semana</div>
+                            <div class="cs-val" style="color:var(--green)">40</div>
+                        </div>`;
         }
 
         function renderVencidos(elId, data) {
@@ -2929,20 +3011,20 @@
             const trs = data.map(r => {
                 const dias = Math.abs(Math.ceil((new Date(r.plazo) - new Date()) / 86400000));
                 return `<tr>
-                                      <td>${r.id_equipo || '—'}</td>
-                                      <td>${r.dispositivo || '—'}</td>
-                                      <td><b>${r.ubicacion || '—'}</b></td>
-                                      <td>${r.planta || '—'}</td>
-                                      <td style="color:var(--red)">${r.plazo}</td>
-                                      <td>${r.ultimo_pm || 'Nunca'}</td>
-                                      <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
-                                    </tr>`;
+                                          <td>${r.id_equipo || '—'}</td>
+                                          <td>${r.dispositivo || '—'}</td>
+                                          <td><b>${r.ubicacion || '—'}</b></td>
+                                          <td>${r.planta || '—'}</td>
+                                          <td style="color:var(--red)">${r.plazo}</td>
+                                          <td>${r.ultimo_pm || 'Nunca'}</td>
+                                          <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
+                                        </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                                      <tbody>${trs}</tbody>
-                                    </table></div>`;
+                                          <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                                          <tbody>${trs}</tbody>
+                                        </table></div>`;
         }
 
     </script>
