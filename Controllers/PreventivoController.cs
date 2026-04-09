@@ -376,41 +376,106 @@ public class PreventivoController : ControllerBase
         catch (Exception ex) { return Ok(new { error = ex.Message }); }
     }
 
-    // ── GET /PREVENTIVOS/EQUIPOS_POR_PLANTA ──────────────
-    [HttpGet("PREVENTIVOS/EQUIPOS_POR_PLANTA")]
-    public IActionResult EquiposPorPlanta([FromQuery] string planta, [FromQuery] string tipo)
+    // ── GET /PREVENTIVOS/DISTRIBUCION_SEMANAL ────────────
+    [HttpGet("PREVENTIVOS/DISTRIBUCION_SEMANAL")]
+    public IActionResult DistribucionSemanal([FromQuery] int semana)
     {
+        if (semana < 1) return Ok(new { error = "Semana debe ser >= 1" });
+
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
-
-        var filtroTipo = tipo?.ToUpper() switch
-        {
-            "LAPTOP" => "AND (UPPER(nombre_dispositivo) LIKE '%LAPTOP%' OR UPPER(nombre_dispositivo) LIKE '%PORTATIL%')",
-            _ => "AND (UPPER(nombre_dispositivo) LIKE '%COMPUTADORA%' OR UPPER(nombre_dispositivo) LIKE '%CPU%')"
-        };
-
-        cmd.CommandText = $"""
-            SELECT id, id_equipo, nombre_dispositivo, ubicacion, categoria_color
+        cmd.CommandText = """
+            SELECT planta, ubicacion, id, id_equipo, nombre_dispositivo, categoria_color
             FROM public.mantenimientos_preventivos
-            WHERE UPPER(TRIM(planta)) = UPPER(TRIM(@planta))
-            {filtroTipo}
-            ORDER BY ubicacion, id_equipo
+            WHERE nombre_dispositivo IN (
+                'COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA'
+            )
+            ORDER BY
+              CASE planta
+                WHEN 'B1'             THEN 1
+                WHEN 'B2'             THEN 2
+                WHEN 'PLANTA SATELITE' THEN 3
+                WHEN 'PLANTA MIXING'  THEN 4
+                WHEN 'BODEGA'         THEN 5
+                ELSE 6
+              END,
+              ubicacion
             """;
-        cmd.Parameters.AddWithValue("planta", planta ?? "");
 
-        var lista = new List<Dictionary<string, object?>>();
+        // Agrupar por planta+ubicacion respetando el orden del query
+        var grupos = new List<(string planta, string ubicacion, List<object> equipos)>();
+        var grupoMap = new Dictionary<string, int>(); // "planta|ubicacion" → índice
+
         using var r = cmd.ExecuteReader();
         while (r.Read())
-            lista.Add(new Dictionary<string, object?>
+        {
+            var planta = r.IsDBNull(0) ? "" : r.GetString(0);
+            var ubicacion = r.IsDBNull(1) ? "" : r.GetString(1);
+            var key = planta + "|" + ubicacion;
+
+            var equipo = new
             {
-                ["id"] = r.GetInt64(0),
-                ["id_equipo"] = r.IsDBNull(1) ? null : r.GetString(1),
-                ["dispositivo"] = r.IsDBNull(2) ? null : r.GetString(2),
-                ["ubicacion"] = r.IsDBNull(3) ? null : r.GetString(3),
-                ["color"] = r.IsDBNull(4) ? null : r.GetString(4),
+                id = r.GetInt64(2),
+                id_equipo = r.IsDBNull(3) ? null : r.GetString(3),
+                nombre_dispositivo = r.IsDBNull(4) ? null : r.GetString(4),
+                categoria_color = r.IsDBNull(5) ? null : r.GetString(5),
+            };
+
+            if (!grupoMap.TryGetValue(key, out int idx))
+            {
+                idx = grupos.Count;
+                grupoMap[key] = idx;
+                grupos.Add((planta, ubicacion, new List<object>()));
+            }
+            grupos[idx].equipos.Add(equipo);
+        }
+        r.Close();
+
+        // Distribuir en semanas de máximo 40 equipos (ubicaciones completas)
+        var semanas = new List<List<(string planta, string ubicacion, List<object> equipos)>>();
+        var semActual = new List<(string planta, string ubicacion, List<object> equipos)>();
+        int countActual = 0;
+
+        foreach (var g in grupos)
+        {
+            if (countActual + g.equipos.Count > 40 && semActual.Count > 0)
+            {
+                semanas.Add(semActual);
+                semActual = new List<(string, string, List<object>)>();
+                countActual = 0;
+            }
+            semActual.Add(g);
+            countActual += g.equipos.Count;
+        }
+        if (semActual.Count > 0) semanas.Add(semActual);
+
+        // Validar semana pedida
+        if (semana > semanas.Count)
+            return Ok(new
+            {
+                semana,
+                total_semanas = semanas.Count,
+                total_equipos = 0,
+                ubicaciones = new List<object>(),
+                error = $"Solo hay {semanas.Count} semanas en el período"
             });
 
-        return Ok(new { equipos = lista, total = lista.Count });
+        var semDatos = semanas[semana - 1];
+        var resultado = semDatos.Select(g => new
+        {
+            planta = g.planta,
+            ubicacion = g.ubicacion,
+            total = g.equipos.Count,
+            equipos = g.equipos
+        }).ToList();
+
+        return Ok(new
+        {
+            semana,
+            total_semanas = semanas.Count,
+            total_equipos = semDatos.Sum(g => g.equipos.Count),
+            ubicaciones = resultado
+        });
     }
 
     // ── PDF ───────────────────────────────────────────────

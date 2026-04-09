@@ -1866,13 +1866,14 @@
                     <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(245,158,11,.4)"></div>Plazo de mantenimiento</div>
                 </div>
             </div>
+            <!-- Panel detalle equipos semana -->
             <div id="cal-detalle-panel" style="display:none;margin-top:16px;background:var(--surface);
-                     border:1px solid var(--border2);border-radius:12px;padding:16px 20px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                     border:1px solid var(--border2);border-radius:12px;padding:16px 20px;max-height:60vh;overflow-y:auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;position:sticky;top:0;background:var(--surface);padding-bottom:8px;border-bottom:1px solid var(--border);">
                     <span id="cal-detalle-titulo" style="font-size:12px;font-weight:700;color:var(--text);font-family:'DM Mono',monospace;"></span>
                     <button onclick="document.getElementById('cal-detalle-panel').style.display='none'"
                             style="background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);
-                                   cursor:pointer;font-size:13px;border-radius:6px;padding:4px 10px;line-height:1;">
+                                   cursor:pointer;font-size:12px;border-radius:6px;padding:5px 12px;font-family:'DM Sans',sans-serif;">
                         ✕ Cerrar
                     </button>
                 </div>
@@ -2845,10 +2846,10 @@
                     if (enSem && dow === 1) {
                         const cant = calTipoActivo === 'computo' ? semDatos.cpu : semDatos.laptops;
                         const icon = calTipoActivo === 'computo' ? '🖥️' : '💻';
-                        inner += `<div style="margin-top:3px;cursor:pointer;" onclick="verEquiposSemana('${fmtISO(semDatos.lunes)}','${fmtISO(semDatos.viernes)}',${semDatos.rel},${semDatos.cpu},${semDatos.laptops})">
+                        inner += `<div style="margin-top:3px;cursor:pointer;" onclick="verEquiposSemana(${semDatos.rel},'${fmtISO(semDatos.lunes)}','${fmtISO(semDatos.viernes)}')">
                                     <span style="display:block;font-size:9px;font-weight:700;padding:2px 4px;border-radius:3px;
                                         background:${acColorH};color:${periodoVistaActivo === 1 ? '#93C5FD' : '#C4B5FD'};
-                                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${icon} ${cant} eq. 👆</span>
+                                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📋 Ver equipos sem. ${semDatos.rel}</span>
                                     <span style="display:block;font-size:8px;font-weight:700;margin-top:2px;padding:1px 4px;
                                         border-radius:3px;background:rgba(245,158,11,.2);color:#FCD34D;white-space:nowrap;">
                                         ${semDatos.plazoLabel}</span>
@@ -2913,26 +2914,26 @@
         }
 
         // ── Ver equipos de una semana ────────────────────────
-        async function verEquiposSemana(lunesISO, viernesISO, semRel, cpuTotal, laptopsTotal) {
-            const tipo = calTipoActivo === 'computo' ? 'COMPUTO' : 'LAPTOP';
-            const cantEsta = calTipoActivo === 'computo' ? cpuTotal : laptopsTotal;
+        async function verEquiposSemana(semRel, lunesISO, viernesISO) {
             const panel = document.getElementById('cal-detalle-panel');
             const body = document.getElementById('cal-detalle-body');
             const titulo = document.getElementById('cal-detalle-titulo');
 
-            titulo.textContent = `Semana ${semRel}  ·  ${lunesISO} → ${viernesISO}  ·  ${cantEsta} equipos  ·  ${CAL_PLANTAS_LABEL[calPlantaActiva]}`;
-            body.innerHTML = '<p style="color:var(--muted);font-size:12px">Cargando equipos…</p>';
+            titulo.textContent = `Cargando semana ${semRel}…`;
+            body.innerHTML = '<p style="color:var(--muted);font-size:12px;padding:8px 0">Consultando equipos…</p>';
             panel.style.display = 'block';
             panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
             try {
-                const res = await fetch(`/PREVENTIVOS/EQUIPOS_POR_PLANTA?planta=${encodeURIComponent(calPlantaActiva)}&tipo=${tipo}`);
+                const res = await fetch(`/PREVENTIVOS/DISTRIBUCION_SEMANAL?semana=${semRel}`);
                 const data = await res.json();
 
-                if (!data.equipos || data.equipos.length === 0) {
-                    body.innerHTML = '<p style="color:var(--muted);font-size:12px;padding:8px 0">⚠️ Sin equipos registrados para esta planta/tipo.</p>';
+                if (data.error) {
+                    body.innerHTML = `<p style="color:var(--red);font-size:12px">${data.error}</p>`;
                     return;
                 }
+
+                titulo.textContent = `Semana ${semRel}  ·  ${lunesISO} → ${viernesISO}  ·  ${data.total_equipos} equipos  ·  (${data.total_semanas} semanas totales en el período)`;
 
                 const colorMap = {
                     verde: { bg: 'rgba(16,185,129,.15)', text: '#6EE7B7' },
@@ -2943,41 +2944,63 @@
                     azul: { bg: 'rgba(59,130,246,.15)', text: '#93C5FD' },
                 };
 
-                const equipos = data.equipos.slice(0, cantEsta);
-                const total = data.equipos.length;
+                const iconDisp = d => {
+                    if (!d) return '🔧';
+                    const u = d.toUpperCase();
+                    if (u.includes('COMPUTADORA') || u.includes('CPU')) return '🖥️';
+                    if (u.includes('LAPTOP')) return '💻';
+                    if (u.includes('IMPRESORA')) return '🖨️';
+                    if (u.includes('UPS')) return '🔋';
+                    return '🔧';
+                };
 
-                let html = `<div style="margin-bottom:10px;font-size:11px;color:var(--muted)">
-                        Mostrando <b style="color:var(--text)">${equipos.length}</b> de <b style="color:var(--text)">${total}</b> equipos registrados en la planta para este período.
-                    </div>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:6px;">`;
+                const plantaColor = p => ({
+                    'B1': '#3B82F6', 'B2': '#8B5CF6',
+                    'PLANTA SATELITE': '#10B981', 'PLANTA MIXING': '#F59E0B', 'BODEGA': '#94A3B8'
+                }[p] || '#64748B');
 
-                equipos.forEach((e, i) => {
-                    const col = colorMap[(e.color || '').toLowerCase()] || { bg: 'rgba(100,116,139,.12)', text: '#94A3B8' };
-                    html += `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;
-                                    border-radius:8px;background:var(--surface2);border:1px solid var(--border);">
-                            <span style="font-size:11px;font-weight:700;color:var(--muted);min-width:20px;text-align:right">${i + 1}</span>
-                            <div style="flex:1;min-width:0;">
-                                <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);font-weight:600;
-                                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.id_equipo || '—'}</div>
-                                <div style="font-size:11px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.dispositivo || '—'}</div>
+                let html = `<div style="margin-bottom:12px;font-size:11px;color:var(--muted)">
+                        <b style="color:var(--text)">${data.ubicaciones.length}</b> ubicaciones &nbsp;·&nbsp;
+                        <b style="color:var(--text)">${data.total_equipos}</b> equipos en esta semana
+                    </div>`;
+
+                data.ubicaciones.forEach(ubic => {
+                    html += `<div style="margin-bottom:8px;background:var(--surface2);border:1px solid var(--border);
+                                    border-radius:10px;overflow:hidden;">
+                            <div style="padding:7px 12px;display:flex;align-items:center;gap:8px;
+                                        border-bottom:1px solid var(--border);background:rgba(255,255,255,.03);">
+                                <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;
+                                    background:rgba(255,255,255,.06);color:${plantaColor(ubic.planta)};">${ubic.planta}</span>
+                                <span style="font-size:12px;font-weight:600;color:var(--text);flex:1">${ubic.ubicacion}</span>
+                                <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;">
+                                    ${ubic.total} equipo${ubic.total !== 1 ? 's' : ''}</span>
                             </div>
-                            <div style="text-align:right;flex-shrink:0;">
-                                <div style="font-size:10px;color:var(--muted);margin-bottom:3px;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.ubicacion || '—'}</div>
-                                <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:999px;
-                                    background:${col.bg};color:${col.text};">${e.color || '—'}</span>
-                            </div>
-                        </div>`;
+                            <div style="padding:6px 8px;display:flex;flex-wrap:wrap;gap:4px;">`;
+
+                    ubic.equipos.forEach(e => {
+                        const col = colorMap[(e.categoria_color || '').toLowerCase()] || { bg: 'rgba(100,116,139,.12)', text: '#94A3B8' };
+                        html += `<div style="display:flex;align-items:center;gap:6px;padding:5px 10px;
+                                        border-radius:7px;background:var(--surface3);flex:1;min-width:200px;max-width:340px;">
+                                <span style="font-size:14px">${iconDisp(e.nombre_dispositivo)}</span>
+                                <div style="flex:1;min-width:0;">
+                                    <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);
+                                        font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                        ${e.id_equipo || '—'}</div>
+                                    <div style="font-size:10px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                        ${e.nombre_dispositivo || '—'}</div>
+                                </div>
+                                <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px;
+                                    background:${col.bg};color:${col.text};flex-shrink:0;">${e.categoria_color || '—'}</span>
+                            </div>`;
+                    });
+
+                    html += `</div></div>`;
                 });
 
-                html += '</div>';
-                if (total > cantEsta) {
-                    html += `<p style="margin-top:10px;font-size:11px;color:var(--muted)">
-                            ℹ️ Hay ${total - cantEsta} equipo(s) adicionales en la planta que no entran en esta semana (capacidad: ${cantEsta}).
-                        </p>`;
-                }
                 body.innerHTML = html;
+
             } catch (err) {
-                body.innerHTML = `<p style="color:var(--red);font-size:12px">Error al cargar equipos: ${err.message}</p>`;
+                body.innerHTML = `<p style="color:var(--red);font-size:12px">Error: ${err.message}</p>`;
             }
         }
 
