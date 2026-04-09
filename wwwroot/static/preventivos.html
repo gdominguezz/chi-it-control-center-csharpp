@@ -1188,6 +1188,277 @@
             font-size: 22px;
             margin-top: 2px;
         }
+
+        /* ── CALENDARIO PM ── */
+        .cal-wrap {
+            max-width: 1200px;
+        }
+
+        .cal-config-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 18px;
+        }
+
+        .cal-config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 14px;
+            align-items: end;
+        }
+
+            .cal-config-grid .field label {
+                font-size: 9px;
+            }
+
+        .cal-plantas-nav {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .cal-planta-btn {
+            padding: 8px 18px;
+            border-radius: 8px 8px 0 0;
+            border: 1px solid var(--border2);
+            border-bottom: none;
+            background: var(--surface);
+            color: var(--muted2);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+            .cal-planta-btn.active {
+                background: var(--surface3);
+                color: var(--text);
+                border-color: var(--accent);
+            }
+
+            .cal-planta-btn:hover:not(.active) {
+                color: var(--text);
+                background: var(--surface2);
+            }
+
+        .cal-tipo-nav {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .cal-tipo-btn {
+            padding: 6px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--border2);
+            background: var(--surface2);
+            color: var(--muted2);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+            .cal-tipo-btn.active {
+                background: var(--accent);
+                color: white;
+                border-color: var(--accent);
+            }
+
+        .cal-grid-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .cal-grid-header {
+            display: grid;
+            grid-template-columns: 90px repeat(7, 1fr);
+            background: var(--surface3);
+            border-bottom: 1px solid var(--border2);
+        }
+
+            .cal-grid-header div {
+                padding: 9px 8px;
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                color: var(--muted2);
+                text-align: center;
+                border-right: 1px solid var(--border);
+            }
+
+                .cal-grid-header div:first-child {
+                    text-align: left;
+                    color: var(--muted);
+                }
+
+        .cal-row {
+            display: grid;
+            grid-template-columns: 90px repeat(7, 1fr);
+            border-bottom: 1px solid var(--border);
+        }
+
+            .cal-row:last-child {
+                border-bottom: none;
+            }
+
+        .cal-row-label {
+            padding: 10px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted2);
+            font-family: 'DM Mono', monospace;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+            .cal-row-label .plazo-badge {
+                font-size: 9px;
+                background: rgba(59,130,246,.15);
+                color: #93C5FD;
+                border-radius: 4px;
+                padding: 1px 5px;
+                font-weight: 700;
+                display: inline-block;
+                margin-top: 2px;
+                width: fit-content;
+            }
+
+        .cal-cell {
+            padding: 6px 8px;
+            border-right: 1px solid var(--border));
+            min-height: 64px;
+            position: relative;
+            border-right: 1px solid var(--border);
+        }
+
+            .cal-cell:last-child {
+                border-right: none;
+            }
+
+        .cal-date-num {
+            font-size: 10px;
+            font-family: 'DM Mono', monospace;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .cal-chip {
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 5px;
+            padding: 3px 7px;
+            margin-bottom: 3px;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cal-chip-cpu {
+            background: rgba(59,130,246,.18);
+            color: #93C5FD;
+        }
+
+        .cal-chip-laptop {
+            background: rgba(139,92,246,.18);
+            color: #C4B5FD;
+        }
+
+        .cal-chip-mant {
+            background: rgba(16,185,129,.18);
+            color: #6EE7B7;
+        }
+
+        .cal-chip-plazo {
+            background: rgba(245,158,11,.18);
+            color: #FCD34D;
+        }
+
+        .cal-today {
+            background: rgba(59,130,246,.04);
+        }
+
+        .cal-week-active {
+            background: rgba(16,185,129,.05);
+            border-left: 2px solid var(--green);
+        }
+
+        .cal-legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .cal-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--muted2);
+        }
+
+        .cal-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+        }
+
+        .cal-summary-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .cal-summary-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            flex: 1;
+            min-width: 160px;
+        }
+
+            .cal-summary-card .cs-label {
+                font-size: 9px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                color: var(--muted);
+                margin-bottom: 4px;
+            }
+
+            .cal-summary-card .cs-val {
+                font-size: 22px;
+                font-weight: 700;
+                font-family: 'DM Mono', monospace;
+            }
+
+        .cal-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .cal-planta-section {
+            display: none;
+        }
+
+            .cal-planta-section.active {
+                display: block;
+            }
     </style>
 </head>
 <body>
@@ -1221,6 +1492,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('tabla')">📋 Registros</button>
             <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('calendario')">📅 Calendario PM</button>
         </div>
 
         <!-- CONTENIDO TABLA -->
@@ -1485,6 +1757,116 @@
                 </div>
             </div>
         </div><!-- /tab-dashboard -->
+        <!-- ═══ TAB CALENDARIO PM ═══ -->
+        <div id="tab-calendario" class="tab-content">
+            <div class="cal-wrap">
+                <div class="cal-config-panel">
+                    <div class="panel-title">Calendario de Mantenimiento Preventivo — Control de Períodos</div>
+
+                    <!-- PERIODO 1 -->
+                    <div id="bloque-p1" style="margin-bottom:16px;">
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+                            <span style="background:var(--accent);color:white;border-radius:999px;padding:2px 10px;font-size:10px;">P1</span>
+                            Período 1
+                            <span id="p1-estado-badge" style="display:none;background:rgba(16,185,129,.18);color:#6EE7B7;border:1px solid rgba(16,185,129,.35);border-radius:999px;padding:2px 10px;font-size:10px;">✅ Terminado</span>
+                        </div>
+                        <div class="cal-config-grid">
+                            <div class="field">
+                                <label>📅 Año</label>
+                                <select id="cal-anio-p1">
+                                    <option value="2025">2025</option>
+                                    <option value="2026" selected>2026</option>
+                                    <option value="2027">2027</option>
+                                    <option value="2028">2028</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>🗓️ Semana de inicio P1 (1–52)</label>
+                                <input type="number" id="cal-semana-inicio-p1" min="1" max="52" placeholder="Ej: 7" oninput="actualizarInfoP1()">
+                            </div>
+                            <div class="field" style="display:flex;align-items:flex-end;gap:8px;">
+                                <button class="btn btn-primary" id="btn-generar-p1" onclick="generarCalendarioP1()" style="flex:1">🔄 Generar P1</button>
+                                <button class="btn btn-success" id="btn-terminar-p1" onclick="terminarP1()" style="flex:1;display:none">✅ Terminar P1</button>
+                            </div>
+                        </div>
+                        <div id="cal-info-p1" style="display:none;margin-top:10px;padding:8px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);font-size:11px;color:var(--muted2);line-height:1.8;"></div>
+                    </div>
+
+                    <!-- SEPARADOR -->
+                    <div style="height:1px;background:var(--border2);margin-bottom:16px;"></div>
+
+                    <!-- PERIODO 2 -->
+                    <div id="bloque-p2">
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--purple);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+                            <span style="background:var(--purple);color:white;border-radius:999px;padding:2px 10px;font-size:10px;">P2</span>
+                            Período 2
+                            <span id="p2-estado-badge" style="display:none;background:rgba(139,92,246,.18);color:#C4B5FD;border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:2px 10px;font-size:10px;">✅ Terminado</span>
+                        </div>
+                        <div class="cal-config-grid">
+                            <div class="field">
+                                <label>📅 Año</label>
+                                <select id="cal-anio-p2" disabled>
+                                    <option value="2025">2025</option>
+                                    <option value="2026" selected>2026</option>
+                                    <option value="2027">2027</option>
+                                    <option value="2028">2028</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>🗓️ Semana de inicio P2 (1–52)</label>
+                                <input type="number" id="cal-semana-inicio-p2" min="1" max="52" placeholder="Termina P1 primero" disabled oninput="actualizarInfoP2()">
+                            </div>
+                            <div class="field" style="display:flex;align-items:flex-end;gap:8px;">
+                                <button class="btn btn-purple" id="btn-generar-p2" onclick="generarCalendarioP2()" style="flex:1" disabled>🔄 Generar P2</button>
+                                <button class="btn btn-success" id="btn-terminar-p2" onclick="terminarP2()" style="flex:1;display:none">✅ Terminar P2</button>
+                            </div>
+                        </div>
+                        <div id="cal-info-p2" style="display:none;margin-top:10px;padding:8px 14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);font-size:11px;color:var(--muted2);line-height:1.8;"></div>
+                        <div id="bloque-p2-bloqueado" style="margin-top:8px;font-size:11px;color:var(--muted);font-style:italic;">
+                            🔒 Termina el Período 1 para habilitar el Período 2
+                        </div>
+                    </div>
+
+                    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);line-height:1.7;">
+                        <b style="color:var(--accent)">Regla de distribución:</b>
+                        40 equipos/semana (32 cómputo + 8 laptops) &nbsp;|&nbsp;
+                        Semanas 7–20 → B1 y B2 alternando (impares → B1, pares → B2) &nbsp;|&nbsp;
+                        Semanas 21–27 → Satélite, Mixing, Bodega + complemento B1/B2
+                    </div>
+                </div>
+                <div class="cal-plantas-nav" id="cal-plantas-nav">
+                    <button class="cal-planta-btn active" onclick="switchPlantaCal('B1')">🏭 B1</button>
+                    <button class="cal-planta-btn" onclick="switchPlantaCal('B2')">🏭 B2</button>
+                    <button class="cal-planta-btn" onclick="switchPlantaCal('SATELITE')">🛰️ Planta Satelite</button>
+                    <button class="cal-planta-btn" onclick="switchPlantaCal('MIXING')">⚗️ Planta Mixing</button>
+                    <button class="cal-planta-btn" onclick="switchPlantaCal('BODEGA')">📦 Bodega</button>
+                </div>
+                <div class="cal-tipo-nav">
+                    <button class="cal-tipo-btn active" onclick="switchTipoCal('computo')">🖥️ Equipos de Computo</button>
+                    <button class="cal-tipo-btn" onclick="switchTipoCal('laptop')">💻 Laptops</button>
+                </div>
+                <div class="cal-summary-row" id="cal-summary"></div>
+
+                <!-- SELECTOR DE PERIODO ACTIVO EN LA VISTA -->
+                <div id="cal-periodo-nav" style="display:none;margin-bottom:12px;display:none;">
+                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;">Ver período:</div>
+                    <div style="display:flex;gap:8px;">
+                        <button class="cal-tipo-btn active" id="btn-ver-p1" onclick="switchPeriodoVista(1)">📋 Período 1</button>
+                        <button class="cal-tipo-btn" id="btn-ver-p2" onclick="switchPeriodoVista(2)" style="display:none">📋 Período 2</button>
+                    </div>
+                </div>
+
+                <div id="cal-container">
+                    <div class="cal-empty">🗓️ Ingresa el año y semana de inicio del Período 1, luego presiona "Generar P1"</div>
+                </div>
+                <div class="cal-legend" style="margin-top:14px">
+                    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(59,130,246,.5)"></div>Semana programada computo</div>
+                    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(139,92,246,.5)"></div>Semana programada laptops</div>
+                    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(16,185,129,.3)"></div>Semana activa (hoy)</div>
+                    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(245,158,11,.4)"></div>Plazo de mantenimiento</div>
+                </div>
+            </div>
+        </div><!-- /tab-calendario -->
 
     </div><!-- /main -->
 
@@ -1630,37 +2012,37 @@
                 const bg = rowBg(row.categoria_color);
                 const tdStyle = bg ? `style="background:${bg}"` : '';
                 tbody.innerHTML += `
-                                <tr>
-                                  <td class="mono" ${tdStyle}>${row.id}</td>
-                                  <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
-                                  <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
-                                  <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
-                                  <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
-                                  <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
-                                  <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
-                                  <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
-                                  <td ${tdStyle}>
-                                    ${row.tiene_pdf
+                                    <tr>
+                                      <td class="mono" ${tdStyle}>${row.id}</td>
+                                      <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
+                                      <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
+                                      <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
+                                      <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
+                                      <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
+                                      <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
+                                      <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
+                                      <td ${tdStyle}>
+                                        ${row.tiene_pdf
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.id})">📄 Ver</button>
-                                         <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
+                                             <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
                         : `<input type="file" onchange="subirPDF(${row.id},this)"
-                                           style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
-                                  </td>
-                                  <td ${tdStyle} style="text-align:center;">
-                                    <img src="/QR_EQUIPO/${row.id}"
-                                         style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
-                                         title="QR: ${row.id_equipo ?? row.id}"
-                                         onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
-                                         loading="lazy">
-                                  </td>
-                                  <td ${tdStyle} style="white-space:nowrap;">
-                                    ${esAdmin ? `
-                                    <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
-                                    <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
-                                    ` : ''}
-                                    <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
-                                  </td>
-                                </tr>`;
+                                               style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
+                                      </td>
+                                      <td ${tdStyle} style="text-align:center;">
+                                        <img src="/QR_EQUIPO/${row.id}"
+                                             style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
+                                             title="QR: ${row.id_equipo ?? row.id}"
+                                             onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
+                                             loading="lazy">
+                                      </td>
+                                      <td ${tdStyle} style="white-space:nowrap;">
+                                        ${esAdmin ? `
+                                        <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
+                                        <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
+                                        ` : ''}
+                                        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
+                                      </td>
+                                    </tr>`;
             });
             document.getElementById('paginaInfo').textContent =
                 `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite)} | Total: ${totalRegistros}`;
@@ -1779,27 +2161,27 @@
                 const vd = esc(despues?.[apiKey] ?? '');
                 const chg = cambiados.has(key);
                 filas += `
-                                <tr class="${chg ? 'row-changed' : ''}">
-                                  <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                                  <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                                  <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                                </tr>`;
+                                    <tr class="${chg ? 'row-changed' : ''}">
+                                      <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                      <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                      <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                                    </tr>`;
             });
             const n = cambiados.size;
             return `
-                              <div class="ev-wrap">
-                                <div class="ev-header">
-                                  <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                  <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                                  <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                    ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                                  </span>
-                                </div>
-                                <table class="ev-table">
-                                  <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                                  <tbody>${filas}</tbody>
-                                </table>
-                              </div>`;
+                                  <div class="ev-wrap">
+                                    <div class="ev-header">
+                                      <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                      <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                                      <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                        ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                      </span>
+                                    </div>
+                                    <table class="ev-table">
+                                      <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                      <tbody>${filas}</tbody>
+                                    </table>
+                                  </div>`;
         }
 
         function verHistorial(id) {
@@ -1816,8 +2198,8 @@
                 } else {
                     document.getElementById('contenidoHistorial').innerHTML =
                         `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                      ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                    </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                                          ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                        </p>`+ lista.map(ev => renderEvento(ev)).join('');
                 }
             }).catch(() => {
                 document.getElementById('contenidoHistorial').innerHTML =
@@ -1865,17 +2247,6 @@
             }).catch(() => alert('❌ Error al verificar la ubicación'))
         }
 
-
-        // ══════════════════════════════════════════
-        // TABS
-        // ══════════════════════════════════════════
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById('tab-' + tab).classList.add('active');
-            document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
-            if (tab === 'dashboard') cargarDashboard();
-        }
 
         // ══════════════════════════════════════════
         // DASHBOARD
@@ -2014,67 +2385,67 @@
             const scoreColor = score >= 90 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
 
             el.innerHTML = `
-                            <div class="salud-wrap">
-                                <div class="salud-item">
-                                    <div class="salud-label-row">
-                                        <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
-                                        <span class="salud-pct" style="color:#10B981">${pSano}%</span>
+                                <div class="salud-wrap">
+                                    <div class="salud-item">
+                                        <div class="salud-label-row">
+                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
+                                            <span class="salud-pct" style="color:#10B981">${pSano}%</span>
+                                        </div>
+                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
+                                        <span class="salud-count">${saludables} equipos</span>
                                     </div>
-                                    <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
-                                    <span class="salud-count">${saludables} equipos</span>
-                                </div>
-                                <div class="salud-item">
-                                    <div class="salud-label-row">
-                                        <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
-                                        <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
+                                    <div class="salud-item">
+                                        <div class="salud-label-row">
+                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
+                                            <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
+                                        </div>
+                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
+                                        <span class="salud-count">${proximosMes} equipos</span>
                                     </div>
-                                    <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
-                                    <span class="salud-count">${proximosMes} equipos</span>
-                                </div>
-                                <div class="salud-item">
-                                    <div class="salud-label-row">
-                                        <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
-                                        <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
+                                    <div class="salud-item">
+                                        <div class="salud-label-row">
+                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
+                                            <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
+                                        </div>
+                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
+                                        <span class="salud-count">${vencidos} equipos</span>
                                     </div>
-                                    <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
-                                    <span class="salud-count">${vencidos} equipos</span>
-                                </div>
-                                <div class="salud-score">
-                                    <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
-                                    <div class="salud-score-label">Índice de salud</div>
-                                    <div class="salud-score-emoji">${emoji}</div>
-                                </div>
-                            </div>`;
+                                    <div class="salud-score">
+                                        <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
+                                        <div class="salud-score-label">Índice de salud</div>
+                                        <div class="salud-score-emoji">${emoji}</div>
+                                    </div>
+                                </div>`;
         }
 
         function renderKpis(k) {
             document.getElementById('db-kpis').innerHTML = `
-                                <div class="kpi-card kpi-verde">
-                                  <div class="kpi-label">Total Equipos</div>
-                                  <div class="kpi-value">${k.total_equipos}</div>
-                                  <div class="kpi-sub">registrados en el sistema</div>
-                                </div>
-                                <div class="kpi-card kpi-azul">
-                                  <div class="kpi-label">Con PM Digital</div>
-                                  <div class="kpi-value">${k.total_pms_realizados}</div>
-                                  <div class="kpi-sub">${Math.round(k.total_pms_realizados / k.total_equipos * 100) || 0}% del total</div>
-                                </div>
-                                <div class="kpi-card kpi-amber">
-                                  <div class="kpi-label">Sin PM Digital</div>
-                                  <div class="kpi-value">${k.sin_pm_p1}</div>
-                                  <div class="kpi-sub">pendientes de atender</div>
-                                </div>
-                                <div class="kpi-card kpi-rojo">
-                                  <div class="kpi-label">Vencidos</div>
-                                  <div class="kpi-value">${k.total_vencidos}</div>
-                                  <div class="kpi-sub">plazo ya pasó</div>
-                                </div>
-                                <div class="kpi-card kpi-purple">
-                                  <div class="kpi-label">Esta Semana</div>
-                                  <div class="kpi-value">${k.semana_total}</div>
-                                  <div class="kpi-sub">mantenimientos realizados</div>
-                                </div>
-                              `;
+                                    <div class="kpi-card kpi-verde">
+                                      <div class="kpi-label">Total Equipos</div>
+                                      <div class="kpi-value">${k.total_equipos}</div>
+                                      <div class="kpi-sub">registrados en el sistema</div>
+                                    </div>
+                                    <div class="kpi-card kpi-azul">
+                                      <div class="kpi-label">Con PM Digital</div>
+                                      <div class="kpi-value">${k.total_pms_realizados}</div>
+                                      <div class="kpi-sub">${Math.round(k.total_pms_realizados / k.total_equipos * 100) || 0}% del total</div>
+                                    </div>
+                                    <div class="kpi-card kpi-amber">
+                                      <div class="kpi-label">Sin PM Digital</div>
+                                      <div class="kpi-value">${k.sin_pm_p1}</div>
+                                      <div class="kpi-sub">pendientes de atender</div>
+                                    </div>
+                                    <div class="kpi-card kpi-rojo">
+                                      <div class="kpi-label">Vencidos</div>
+                                      <div class="kpi-value">${k.total_vencidos}</div>
+                                      <div class="kpi-sub">plazo ya pasó</div>
+                                    </div>
+                                    <div class="kpi-card kpi-purple">
+                                      <div class="kpi-label">Esta Semana</div>
+                                      <div class="kpi-value">${k.semana_total}</div>
+                                      <div class="kpi-sub">mantenimientos realizados</div>
+                                    </div>
+                                  `;
         }
 
         function colorFromCat(cat) {
@@ -2092,13 +2463,13 @@
             if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">Sin datos</p>'; return; }
             const max = Math.max(...data.map(valFn));
             document.getElementById(elId).innerHTML = data.map(d => `
-                                <div class="bar-wrap">
-                                  <span class="bar-label">${labelFn(d)}</span>
-                                  <div class="bar-track">
-                                    <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
-                                  </div>
-                                  <span class="bar-count">${valFn(d)}</span>
-                                </div>`).join('');
+                                    <div class="bar-wrap">
+                                      <span class="bar-label">${labelFn(d)}</span>
+                                      <div class="bar-track">
+                                        <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
+                                      </div>
+                                      <span class="bar-count">${valFn(d)}</span>
+                                    </div>`).join('');
         }
 
         function renderTabla(elId, data, headers, rowFn) {
@@ -2118,20 +2489,20 @@
                 const diasRestantes = Math.ceil((new Date(r.plazo) - new Date()) / 86400000);
                 const badge = `<span class="db-badge proximo-badge">En ${diasRestantes}d</span>`;
                 return `<tr>
-                                  <td>${r.id_equipo || '—'}</td>
-                                  <td>${r.dispositivo || '—'}</td>
-                                  <td><b>${r.ubicacion || '—'}</b></td>
-                                  <td>${r.planta || '—'}</td>
-                                  <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
-                                  <td>${r.ultimo_pm || 'Nunca'}</td>
-                                  <td>${badge}</td>
-                                </tr>`;
+                                      <td>${r.id_equipo || '—'}</td>
+                                      <td>${r.dispositivo || '—'}</td>
+                                      <td><b>${r.ubicacion || '—'}</b></td>
+                                      <td>${r.planta || '—'}</td>
+                                      <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
+                                      <td>${r.ultimo_pm || 'Nunca'}</td>
+                                      <td>${badge}</td>
+                                    </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                                  <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                                  <tbody>${trs}</tbody>
-                                </table></div>`;
+                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                                      <tbody>${trs}</tbody>
+                                    </table></div>`;
         }
 
         function renderProximos(elId, data) {
@@ -2144,19 +2515,413 @@
                         ? `<span class="db-badge proximo-badge">Hoy</span>`
                         : `<span class="db-badge proximo-badge">En ${dias}d</span>`;
                 return `<tr>
-                                  <td>${r.id_equipo || '—'}</td>
-                                  <td>${r.dispositivo || '—'}</td>
-                                  <td><b>${r.ubicacion || '—'}</b></td>
-                                  <td>${r.planta || '—'}</td>
-                                  <td>${r.plazo}</td>
-                                  <td>${badge}</td>
-                                </tr>`;
+                                      <td>${r.id_equipo || '—'}</td>
+                                      <td>${r.dispositivo || '—'}</td>
+                                      <td><b>${r.ubicacion || '—'}</b></td>
+                                      <td>${r.planta || '—'}</td>
+                                      <td>${r.plazo}</td>
+                                      <td>${badge}</td>
+                                    </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                                  <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
-                                  <tbody>${trs}</tbody>
-                                </table></div>`;
+                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
+                                      <tbody>${trs}</tbody>
+                                    </table></div>`;
+        }
+
+
+        // ══════════════════════════════════════════
+        // CALENDARIO PM — PERÍODOS 1 Y 2
+        // ══════════════════════════════════════════
+        let calPlantaActiva = 'B1';
+        let calTipoActivo = 'computo';
+        let calDatosP1 = null;
+        let calDatosP2 = null;
+        let p1Terminado = false;
+        let p2Terminado = false;
+        let periodoVistaActivo = 1;
+
+        const CAL_PLANTAS_LABEL = {
+            'B1': 'B1', 'B2': 'B2',
+            'SATELITE': 'Planta Satélite',
+            'MIXING': 'Planta Mixing',
+            'BODEGA': 'Bodega'
+        };
+
+        // ── Helpers de fecha ────────────────────────────────────
+        function lunesDeSemanaISO(anio, semana) {
+            // Lunes de la semana ISO dada (semana 1 = primera semana con jueves de enero)
+            const simple = new Date(anio, 0, 1 + (semana - 1) * 7);
+            const dow = simple.getDay();
+            const lunesOffset = (dow <= 4) ? (1 - dow) : (8 - dow);
+            const lunes = new Date(simple);
+            lunes.setDate(simple.getDate() + lunesOffset);
+            lunes.setHours(0, 0, 0, 0);
+            return lunes;
+        }
+
+        function addDias(date, n) {
+            const d = new Date(date); d.setDate(d.getDate() + n); return d;
+        }
+        function fmtISO(d) { return d.toISOString().split('T')[0]; }
+        function fmtCorto(d) {
+            return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+        }
+
+        // ── Distribución por regla ──────────────────────────────
+        // semIni: semana ISO donde arranca el período (1-52)
+        // anio: año de inicio
+        // periodo: 1 o 2 (solo para metadata)
+        function calcularDistribucion(anio, semIni, periodo) {
+            const result = { B1: [], B2: [], SATELITE: [], MIXING: [], BODEGA: [] };
+
+            for (let rel = 1; rel <= 27; rel++) {
+                // Calcular semana real del año (puede pasar al año siguiente)
+                const totalOffset = semIni - 1 + (rel - 1);
+                const anioReal = anio + Math.floor(totalOffset / 52);
+                const semReal = (totalOffset % 52) + 1;
+                const lunes = lunesDeSemanaISO(anioReal, semReal);
+                const viernes = addDias(lunes, 4);
+                const plazoLabel = 'Plazo (' + rel + ')';
+
+                if (rel >= 7 && rel <= 20) {
+                    // Semanas impares → B1, pares → B2
+                    const planta = (rel % 2 !== 0) ? 'B1' : 'B2';
+                    result[planta].push({ rel, semReal, anioReal, lunes, viernes, cpu: 32, laptops: 8, plazoLabel, prioridad: 1, periodo });
+                } else if (rel >= 21 && rel <= 27) {
+                    const rotar = ['SATELITE', 'MIXING', 'BODEGA'];
+                    const plantaMain = rotar[(rel - 21) % 3];
+                    result[plantaMain].push({ rel, semReal, anioReal, lunes, viernes, cpu: 32, laptops: 8, plazoLabel, prioridad: 1, periodo });
+                    // Complemento en B1 o B2
+                    const plantaComp = ((rel - 21) % 2 === 0) ? 'B1' : 'B2';
+                    result[plantaComp].push({ rel, semReal, anioReal, lunes, viernes, cpu: 16, laptops: 4, plazoLabel, prioridad: 2, periodo });
+                }
+                // Semanas 1-6: sin asignación
+            }
+            return result;
+        }
+
+        // ── Info dinámica al escribir semana ────────────────────
+        function actualizarInfoP1() {
+            const sem = parseInt(document.getElementById('cal-semana-inicio-p1').value);
+            const anio = parseInt(document.getElementById('cal-anio-p1').value);
+            const info = document.getElementById('cal-info-p1');
+            if (!sem || sem < 1 || sem > 52) { info.style.display = 'none'; return; }
+            const lunes = lunesDeSemanaISO(anio, sem);
+            const totalOffset27 = sem - 1 + 26;
+            const anioFin = anio + Math.floor(totalOffset27 / 52);
+            const semFin = (totalOffset27 % 52) + 1;
+            const finViernes = addDias(lunesDeSemanaISO(anioFin, semFin), 4);
+            info.style.display = 'block';
+            info.innerHTML =
+                `📌 Semana <b style="color:var(--accent)">${sem}</b> del <b>${anio}</b> &nbsp;|&nbsp; ` +
+                `Inicia: <b>${fmtCorto(lunes)}</b> &nbsp;|&nbsp; ` +
+                `Cubre semanas relativas 1–27 &nbsp;|&nbsp; ` +
+                `Fin estimado Período 1: <b>${fmtCorto(finViernes)}</b><br>` +
+                `B1/B2 activos en semanas relativas 7–20 &nbsp;|&nbsp; ` +
+                `Satélite, Mixing, Bodega en semanas 21–27`;
+        }
+
+        function actualizarInfoP2() {
+            const sem = parseInt(document.getElementById('cal-semana-inicio-p2').value);
+            const anio = parseInt(document.getElementById('cal-anio-p2').value);
+            const info = document.getElementById('cal-info-p2');
+            if (!sem || sem < 1 || sem > 52) { info.style.display = 'none'; return; }
+            const lunes = lunesDeSemanaISO(anio, sem);
+            const totalOffset27 = sem - 1 + 26;
+            const anioFin = anio + Math.floor(totalOffset27 / 52);
+            const semFin = (totalOffset27 % 52) + 1;
+            const finViernes = addDias(lunesDeSemanaISO(anioFin, semFin), 4);
+            info.style.display = 'block';
+            info.innerHTML =
+                `📌 Semana <b style="color:var(--purple)">${sem}</b> del <b>${anio}</b> &nbsp;|&nbsp; ` +
+                `Inicia: <b>${fmtCorto(lunes)}</b> &nbsp;|&nbsp; ` +
+                `Fin estimado Período 2: <b>${fmtCorto(finViernes)}</b>`;
+        }
+
+        // ── Generar P1 ──────────────────────────────────────────
+        function generarCalendarioP1() {
+            const sem = parseInt(document.getElementById('cal-semana-inicio-p1').value);
+            const anio = parseInt(document.getElementById('cal-anio-p1').value);
+            if (!sem || sem < 1 || sem > 52) { alert('Ingresa una semana válida (1–52)'); return; }
+            calDatosP1 = calcularDistribucion(anio, sem, 1);
+            periodoVistaActivo = 1;
+            document.getElementById('btn-terminar-p1').style.display = 'inline-flex';
+            document.getElementById('cal-periodo-nav').style.display = 'block';
+            document.getElementById('btn-ver-p1').style.display = 'inline-flex';
+            renderCalendarioActual();
+        }
+
+        // ── Terminar P1 → habilita P2 ───────────────────────────
+        function terminarP1() {
+            if (!calDatosP1) return;
+            if (!confirm('¿Marcar el Período 1 como terminado? Se habilitará el Período 2.')) return;
+            p1Terminado = true;
+            document.getElementById('p1-estado-badge').style.display = 'inline-block';
+            document.getElementById('btn-terminar-p1').style.display = 'none';
+            document.getElementById('btn-generar-p1').disabled = true;
+            document.getElementById('cal-semana-inicio-p1').disabled = true;
+            document.getElementById('cal-anio-p1').disabled = true;
+            // Habilitar P2
+            document.getElementById('cal-semana-inicio-p2').disabled = false;
+            document.getElementById('cal-anio-p2').disabled = false;
+            document.getElementById('btn-generar-p2').disabled = false;
+            document.getElementById('bloque-p2-bloqueado').style.display = 'none';
+            // Sugerir semana de inicio P2 automáticamente (semana siguiente a fin de P1)
+            const semP1 = parseInt(document.getElementById('cal-semana-inicio-p1').value);
+            const anioP1 = parseInt(document.getElementById('cal-anio-p1').value);
+            const totalOffset = semP1 - 1 + 27; // semana relativa 28 = inicio sugerido P2
+            const anioP2sug = anioP1 + Math.floor(totalOffset / 52);
+            const semP2sug = (totalOffset % 52) + 1;
+            document.getElementById('cal-semana-inicio-p2').value = semP2sug;
+            const sel = document.getElementById('cal-anio-p2');
+            for (let o of sel.options) if (parseInt(o.value) === anioP2sug) { o.selected = true; break; }
+            actualizarInfoP2();
+        }
+
+        // ── Generar P2 ──────────────────────────────────────────
+        function generarCalendarioP2() {
+            if (!p1Terminado) { alert('Termina el Período 1 primero'); return; }
+            const sem = parseInt(document.getElementById('cal-semana-inicio-p2').value);
+            const anio = parseInt(document.getElementById('cal-anio-p2').value);
+            if (!sem || sem < 1 || sem > 52) { alert('Ingresa una semana válida (1–52)'); return; }
+            calDatosP2 = calcularDistribucion(anio, sem, 2);
+            periodoVistaActivo = 2;
+            document.getElementById('btn-terminar-p2').style.display = 'inline-flex';
+            document.getElementById('btn-ver-p2').style.display = 'inline-flex';
+            renderCalendarioActual();
+        }
+
+        // ── Terminar P2 ─────────────────────────────────────────
+        function terminarP2() {
+            if (!confirm('¿Marcar el Período 2 como terminado?')) return;
+            p2Terminado = true;
+            document.getElementById('p2-estado-badge').style.display = 'inline-block';
+            document.getElementById('btn-terminar-p2').style.display = 'none';
+            document.getElementById('btn-generar-p2').disabled = true;
+            document.getElementById('cal-semana-inicio-p2').disabled = true;
+            document.getElementById('cal-anio-p2').disabled = true;
+        }
+
+        // ── Navegación planta / tipo / período ──────────────────
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+            if (tab === 'dashboard') cargarDashboard();
+        }
+
+        function switchPlantaCal(planta) {
+            calPlantaActiva = planta;
+            document.querySelectorAll('.cal-planta-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderCalendarioActual();
+        }
+
+        function switchTipoCal(tipo) {
+            calTipoActivo = tipo;
+            document.querySelectorAll('.cal-tipo-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderCalendarioActual();
+        }
+
+        function switchPeriodoVista(p) {
+            periodoVistaActivo = p;
+            document.getElementById('btn-ver-p1').classList.toggle('active', p === 1);
+            document.getElementById('btn-ver-p2').classList.toggle('active', p === 2);
+            renderCalendarioActual();
+        }
+
+        // ── Render principal ─────────────────────────────────────
+        function renderCalendarioActual() {
+            const datos = periodoVistaActivo === 1 ? calDatosP1 : calDatosP2;
+            const container = document.getElementById('cal-container');
+            if (!datos) {
+                container.innerHTML = '<div class="cal-empty">🗓️ Genera el Período ' + periodoVistaActivo + ' primero.</div>';
+                renderSummary([], periodoVistaActivo);
+                return;
+            }
+            const semanasPlanta = (datos[calPlantaActiva] || []).slice().sort((a, b) => a.rel - b.rel);
+            if (!semanasPlanta.length) {
+                container.innerHTML = '<div class="cal-empty">⚠️ Esta planta no tiene semanas asignadas en el Período ' + periodoVistaActivo + '.<br><small style="color:var(--muted)">Las semanas 1–6 no tienen asignación. B1/B2 en 7–20; Satélite/Mixing/Bodega en 21–27.</small></div>';
+                renderSummary([], periodoVistaActivo);
+                return;
+            }
+
+            const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+            const hoyISO = fmtISO(hoy);
+            const acColor = periodoVistaActivo === 1 ? 'var(--accent)' : 'var(--purple)';
+            const acColorH = periodoVistaActivo === 1 ? 'rgba(59,130,246,.22)' : 'rgba(139,92,246,.22)';
+            const acBorder = periodoVistaActivo === 1 ? 'rgba(59,130,246,.4)' : 'rgba(139,92,246,.4)';
+
+            // Agrupar por mes
+            const mesesMap = {};
+            semanasPlanta.forEach(s => {
+                const mk = s.anioReal + '-' + String(s.lunes.getMonth()).padStart(2, '0');
+                if (!mesesMap[mk]) mesesMap[mk] = [];
+                mesesMap[mk].push(s);
+            });
+
+            // Map lunes ISO → datos de semana (para pintar días del mes)
+            const lunesMap = {};
+            semanasPlanta.forEach(s => { lunesMap[fmtISO(s.lunes)] = s; });
+
+            let html = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+                    <span style="font-size:13px;font-weight:700;color:${acColor}">
+                        📅 Período ${periodoVistaActivo} — ${CAL_PLANTAS_LABEL[calPlantaActiva]}
+                    </span>
+                    <span style="font-size:11px;color:var(--muted)">${semanasPlanta.length} semana(s) asignada(s)</span>
+                    <span style="font-size:11px;color:var(--muted2);margin-left:auto;">
+                        🖥️ ${calTipoActivo === 'computo' ? 'Equipos de cómputo' : 'Laptops'} seleccionados
+                    </span>
+                </div>`;
+
+            Object.entries(mesesMap).forEach(([mk, semanas]) => {
+                const primerLunes = semanas[0].lunes;
+                const anioMes = primerLunes.getFullYear();
+                const mes = primerLunes.getMonth();
+                const primerDia = new Date(anioMes, mes, 1);
+                const ultimoDia = new Date(anioMes, mes + 1, 0);
+                const mesNombre = primerLunes.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
+                const mesNombreCap = mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1);
+
+                html += `<div style="margin-bottom:28px;">
+                        <div style="font-size:12px;font-weight:700;color:var(--text);padding:8px 0 10px;
+                            border-bottom:2px solid ${acBorder};margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                            <span style="width:4px;height:16px;background:${acColor};border-radius:2px;display:inline-block;"></span>
+                            ${mesNombreCap}
+                        </div>`;
+
+                // Encabezados días
+                html += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px;">`;
+                ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].forEach(d => {
+                    html += `<div style="text-align:center;font-size:10px;font-weight:700;
+                            color:var(--muted);padding:4px 2px;">${d}</div>`;
+                });
+                html += `</div>`;
+
+                // Celdas del mes
+                html += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;">`;
+                let offsetDia = primerDia.getDay();
+                offsetDia = offsetDia === 0 ? 6 : offsetDia - 1; // lun=0
+                for (let off = 0; off < offsetDia; off++) html += `<div></div>`;
+
+                for (let nd = 1; nd <= ultimoDia.getDate(); nd++) {
+                    const fecha = new Date(anioMes, mes, nd);
+                    const fechaISO = fmtISO(fecha);
+                    const esHoy = fechaISO === hoyISO;
+                    const dow = fecha.getDay();
+                    const esFinde = dow === 0 || dow === 6;
+                    // lunes de esta semana
+                    const diffLun = dow === 0 ? -6 : 1 - dow;
+                    const lunesDia = new Date(fecha); lunesDia.setDate(fecha.getDate() + diffLun);
+                    const semDatos = lunesMap[fmtISO(lunesDia)];
+                    const enSem = !!semDatos;
+
+                    let bg = 'var(--surface2)', border = '1px solid var(--border)';
+                    if (esHoy) { bg = 'rgba(59,130,246,.22)'; border = '1.5px solid var(--accent)'; }
+                    else if (enSem && !esFinde) { bg = acColorH; border = '1px solid ' + acBorder; }
+                    else if (esFinde) { bg = 'rgba(0,0,0,.12)'; }
+
+                    let inner = `<div style="font-size:11px;font-weight:${esHoy ? '700' : '500'};
+                            color:${esHoy ? 'var(--accent)' : esFinde ? 'var(--muted)' : 'var(--muted2)'};">${nd}</div>`;
+
+                    // En el lunes de una semana asignada: mostrar info
+                    if (enSem && dow === 1) {
+                        const cant = calTipoActivo === 'computo' ? semDatos.cpu : semDatos.laptops;
+                        const icon = calTipoActivo === 'computo' ? '🖥️' : '💻';
+                        inner += `<div style="margin-top:3px;">
+                                <span style="display:block;font-size:9px;font-weight:700;padding:2px 4px;border-radius:3px;
+                                    background:${acColorH};color:${periodoVistaActivo === 1 ? '#93C5FD' : '#C4B5FD'};
+                                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${icon} ${cant} eq.</span>
+                                <span style="display:block;font-size:8px;font-weight:700;margin-top:2px;padding:1px 4px;
+                                    border-radius:3px;background:rgba(245,158,11,.2);color:#FCD34D;white-space:nowrap;">
+                                    ${semDatos.plazoLabel}</span>
+                                ${semDatos.prioridad === 2 ? '<span style="font-size:7px;color:var(--amber);display:block;margin-top:1px;">Complemento</span>' : ''}
+                            </div>`;
+                    }
+
+                    html += `<div style="min-height:64px;border-radius:6px;background:${bg};
+                            border:${border};padding:4px 5px;position:relative;
+                            ${esFinde ? 'opacity:.5;' : ''}transition:background .15s;">
+                            ${inner}
+                            ${esHoy ? '<div style="position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--accent);"></div>' : ''}
+                        </div>`;
+                }
+                html += `</div></div>`;
+            });
+
+            // Tabla detalle
+            html += `<div style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+                    <div style="padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border);
+                        font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">
+                        📋 Detalle de semanas asignadas — ${CAL_PLANTAS_LABEL[calPlantaActiva]} / Período ${periodoVistaActivo}
+                    </div>
+                    <div style="overflow-x:auto;">
+                    <table class="db-table" style="min-width:620px;">
+                        <thead><tr>
+                            <th>Sem. relativa</th>
+                            <th>Sem. ISO</th>
+                            <th>Inicio (Lun)</th>
+                            <th>Fin (Vie)</th>
+                            <th>Plazo</th>
+                            <th>Cómputo</th>
+                            <th>Laptops</th>
+                            <th>Total</th>
+                            <th>Tipo</th>
+                        </tr></thead><tbody>`;
+
+            semanasPlanta.forEach(s => {
+                const esActiva = hoyISO >= fmtISO(s.lunes) && hoyISO <= fmtISO(s.viernes);
+                const esPasada = hoyISO > fmtISO(s.viernes);
+                const rowStyle = esActiva ? 'background:rgba(16,185,129,.08);' : esPasada ? 'opacity:.55;' : '';
+                html += `<tr style="${rowStyle}">
+                        <td class="mono"><b style="color:${acColor};">${s.rel}</b></td>
+                        <td class="mono">${s.semReal}/${s.anioReal}</td>
+                        <td class="mono">${fmtCorto(s.lunes)}</td>
+                        <td class="mono">${fmtCorto(s.viernes)}</td>
+                        <td><span style="background:rgba(245,158,11,.18);color:#FCD34D;
+                            padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;">${s.plazoLabel}</span></td>
+                        <td class="mono">${s.cpu}</td>
+                        <td class="mono">${s.laptops}</td>
+                        <td class="mono"><b>${s.cpu + s.laptops}</b></td>
+                        <td>${s.prioridad === 1
+                        ? `<span style="background:rgba(16,185,129,.15);color:#6EE7B7;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;">Principal</span>`
+                        : `<span style="background:rgba(245,158,11,.12);color:#FCD34D;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;">Complemento</span>`
+                    }</td>
+                    </tr>`;
+            });
+            html += `</tbody></table></div></div>`;
+
+            container.innerHTML = html;
+            renderSummary(semanasPlanta, periodoVistaActivo);
+        }
+
+        function renderSummary(semanas, periodo) {
+            const totalCpu = semanas.reduce((s, w) => s + w.cpu, 0);
+            const totalLap = semanas.reduce((s, w) => s + w.laptops, 0);
+            const totalSem = semanas.length;
+            const color = (periodo === 1) ? 'var(--accent)' : 'var(--purple)';
+            const colVal = (periodo === 1) ? '#93C5FD' : '#C4B5FD';
+            document.getElementById('cal-summary').innerHTML = totalSem === 0 ? '' : `
+                    <div class="cal-summary-card" style="border-left:3px solid ${color}">
+                        <div class="cs-label">Semanas programadas</div>
+                        <div class="cs-val" style="color:${color}">${totalSem}</div>
+                    </div>
+                    <div class="cal-summary-card" style="border-left:3px solid ${colVal}">
+                        <div class="cs-label">Equipos cómputo total</div>
+                        <div class="cs-val" style="color:${colVal}">${totalCpu}</div>
+                    </div>
+                    <div class="cal-summary-card" style="border-left:3px solid #C4B5FD">
+                        <div class="cs-label">Laptops total</div>
+                        <div class="cs-val" style="color:#C4B5FD">${totalLap}</div>
+                    </div>
+                    <div class="cal-summary-card" style="border-left:3px solid var(--green)">
+                        <div class="cs-label">Equipos por semana</div>
+                        <div class="cs-val" style="color:var(--green)">40</div>
+                    </div>`;
         }
 
         function renderVencidos(elId, data) {
@@ -2164,20 +2929,20 @@
             const trs = data.map(r => {
                 const dias = Math.abs(Math.ceil((new Date(r.plazo) - new Date()) / 86400000));
                 return `<tr>
-                                  <td>${r.id_equipo || '—'}</td>
-                                  <td>${r.dispositivo || '—'}</td>
-                                  <td><b>${r.ubicacion || '—'}</b></td>
-                                  <td>${r.planta || '—'}</td>
-                                  <td style="color:var(--red)">${r.plazo}</td>
-                                  <td>${r.ultimo_pm || 'Nunca'}</td>
-                                  <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
-                                </tr>`;
+                                      <td>${r.id_equipo || '—'}</td>
+                                      <td>${r.dispositivo || '—'}</td>
+                                      <td><b>${r.ubicacion || '—'}</b></td>
+                                      <td>${r.planta || '—'}</td>
+                                      <td style="color:var(--red)">${r.plazo}</td>
+                                      <td>${r.ultimo_pm || 'Nunca'}</td>
+                                      <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
+                                    </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                                  <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                                  <tbody>${trs}</tbody>
-                                </table></div>`;
+                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                                      <tbody>${trs}</tbody>
+                                    </table></div>`;
         }
 
     </script>
