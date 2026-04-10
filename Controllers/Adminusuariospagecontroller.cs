@@ -401,7 +401,7 @@ public class AdminUsuariosPageController : ControllerBase
 
         // Abrir crear
         sb.AppendLine("function abrirCrear(){");
-        sb.AppendLine("  if(soloLectura)return;
+        sb.AppendLine("  if(soloLectura)return;");
         sb.AppendLine("  document.getElementById('mId').value='';");
         sb.AppendLine("  document.getElementById('mTitulo').textContent='Nuevo Usuario';");
         sb.AppendLine("  document.getElementById('mSub').textContent='Completa los datos para registrar el usuario';");
