@@ -2046,7 +2046,7 @@
             document.querySelectorAll('.filter-row input').forEach(inp => {
                 inp.addEventListener('input', filtrar);
             });
-            cargarUbicaciones();
+            cargarUbicacionesAutocompletado();
             cargar();
         });
 
@@ -2188,7 +2188,7 @@
         }
 
         // ═══ UBICACIONES AUTOCOMPLETADO ═══
-        async function cargarUbicaciones() {
+        async function cargarUbicacionesAutocompletado() {
             try {
                 const res = await fetch('/PREVENTIVOS/UBICACIONES');
                 const data = await res.json();
@@ -2196,8 +2196,8 @@
                 ids.forEach(id => {
                     const dl = document.getElementById(id);
                     if (!dl) return;
-                    dl.innerHTML = data.ubicaciones
-                        .map(u => `<option value="${u}">`)
+                    dl.innerHTML = (data.ubicaciones || [])
+                        .map(u => `<option value="${typeof u === 'object' ? u.ubicacion : u}">`)
                         .join('');
                 });
             } catch (e) { console.warn('No se pudieron cargar ubicaciones', e); }
@@ -2270,37 +2270,37 @@
                 const bg = rowBg(row.categoria_color);
                 const tdStyle = bg ? `style="background:${bg}"` : '';
                 tbody.innerHTML += `
-                                                <tr>
-                                                  <td class="mono" ${tdStyle}>${row.id}</td>
-                                                  <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
-                                                  <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
-                                                  <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
-                                                  <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
-                                                  <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
-                                                  <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
-                                                  <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
-                                                  <td ${tdStyle}>
-                                                    ${row.tiene_pdf
+                                                    <tr>
+                                                      <td class="mono" ${tdStyle}>${row.id}</td>
+                                                      <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
+                                                      <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
+                                                      <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
+                                                      <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
+                                                      <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
+                                                      <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
+                                                      <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
+                                                      <td ${tdStyle}>
+                                                        ${row.tiene_pdf
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.id})">📄 Ver</button>
-                                                         <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
+                                                             <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
                         : `<input type="file" onchange="subirPDF(${row.id},this)"
-                                                           style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
-                                                  </td>
-                                                  <td ${tdStyle} style="text-align:center;">
-                                                    <img src="/QR_EQUIPO/${row.id}"
-                                                         style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
-                                                         title="QR: ${row.id_equipo ?? row.id}"
-                                                         onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
-                                                         loading="lazy">
-                                                  </td>
-                                                  <td ${tdStyle} style="white-space:nowrap;">
-                                                    ${esAdmin ? `
-                                                    <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
-                                                    <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
-                                                    ` : ''}
-                                                    <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
-                                                  </td>
-                                                </tr>`;
+                                                               style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
+                                                      </td>
+                                                      <td ${tdStyle} style="text-align:center;">
+                                                        <img src="/QR_EQUIPO/${row.id}"
+                                                             style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
+                                                             title="QR: ${row.id_equipo ?? row.id}"
+                                                             onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
+                                                             loading="lazy">
+                                                      </td>
+                                                      <td ${tdStyle} style="white-space:nowrap;">
+                                                        ${esAdmin ? `
+                                                        <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
+                                                        <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
+                                                        ` : ''}
+                                                        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
+                                                      </td>
+                                                    </tr>`;
             });
             document.getElementById('paginaInfo').textContent =
                 `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite)} | Total: ${totalRegistros}`;
@@ -2419,27 +2419,27 @@
                 const vd = esc(despues?.[apiKey] ?? '');
                 const chg = cambiados.has(key);
                 filas += `
-                                                <tr class="${chg ? 'row-changed' : ''}">
-                                                  <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                                                  <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                                                  <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                                                </tr>`;
+                                                    <tr class="${chg ? 'row-changed' : ''}">
+                                                      <td><strong>${esc(label)}</strong>${chg ? ` <span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                                      <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                                      <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                                                    </tr>`;
             });
             const n = cambiados.size;
             return `
-                                              <div class="ev-wrap">
-                                                <div class="ev-header">
-                                                  <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                                  <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                                                  <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                                    ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                                                  </span>
-                                                </div>
-                                                <table class="ev-table">
-                                                  <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                                                  <tbody>${filas}</tbody>
-                                                </table>
-                                              </div>`;
+                                                  <div class="ev-wrap">
+                                                    <div class="ev-header">
+                                                      <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                                      <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                                                      <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                                        ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                                      </span>
+                                                    </div>
+                                                    <table class="ev-table">
+                                                      <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                                      <tbody>${filas}</tbody>
+                                                    </table>
+                                                  </div>`;
         }
 
         function verHistorial(id) {
@@ -2456,8 +2456,8 @@
                 } else {
                     document.getElementById('contenidoHistorial').innerHTML =
                         `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                                      ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                                    </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                                                          ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                                        </p>`+ lista.map(ev => renderEvento(ev)).join('');
                 }
             }).catch(() => {
                 document.getElementById('contenidoHistorial').innerHTML =
@@ -2643,67 +2643,67 @@
             const scoreColor = score >= 90 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
 
             el.innerHTML = `
-                                            <div class="salud-wrap">
-                                                <div class="salud-item">
-                                                    <div class="salud-label-row">
-                                                        <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
-                                                        <span class="salud-pct" style="color:#10B981">${pSano}%</span>
+                                                <div class="salud-wrap">
+                                                    <div class="salud-item">
+                                                        <div class="salud-label-row">
+                                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#10B981"></span>Al corriente</span>
+                                                            <span class="salud-pct" style="color:#10B981">${pSano}%</span>
+                                                        </div>
+                                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
+                                                        <span class="salud-count">${saludables} equipos</span>
                                                     </div>
-                                                    <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pSano}%;background:#10B981"></div></div>
-                                                    <span class="salud-count">${saludables} equipos</span>
-                                                </div>
-                                                <div class="salud-item">
-                                                    <div class="salud-label-row">
-                                                        <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
-                                                        <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
+                                                    <div class="salud-item">
+                                                        <div class="salud-label-row">
+                                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#F59E0B"></span>Por vencer este mes</span>
+                                                            <span class="salud-pct" style="color:#F59E0B">${pProx}%</span>
+                                                        </div>
+                                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
+                                                        <span class="salud-count">${proximosMes} equipos</span>
                                                     </div>
-                                                    <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pProx}%;background:#F59E0B"></div></div>
-                                                    <span class="salud-count">${proximosMes} equipos</span>
-                                                </div>
-                                                <div class="salud-item">
-                                                    <div class="salud-label-row">
-                                                        <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
-                                                        <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
+                                                    <div class="salud-item">
+                                                        <div class="salud-label-row">
+                                                            <span class="salud-dot-label"><span class="salud-dot" style="background:#EF4444"></span>Vencidos</span>
+                                                            <span class="salud-pct" style="color:#EF4444">${pVenc}%</span>
+                                                        </div>
+                                                        <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
+                                                        <span class="salud-count">${vencidos} equipos</span>
                                                     </div>
-                                                    <div class="salud-bar-track"><div class="salud-bar-fill" style="width:${pVenc}%;background:#EF4444"></div></div>
-                                                    <span class="salud-count">${vencidos} equipos</span>
-                                                </div>
-                                                <div class="salud-score">
-                                                    <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
-                                                    <div class="salud-score-label">Índice de salud</div>
-                                                    <div class="salud-score-emoji">${emoji}</div>
-                                                </div>
-                                            </div>`;
+                                                    <div class="salud-score">
+                                                        <div class="salud-score-num" style="color:${scoreColor}">${score}</div>
+                                                        <div class="salud-score-label">Índice de salud</div>
+                                                        <div class="salud-score-emoji">${emoji}</div>
+                                                    </div>
+                                                </div>`;
         }
 
         function renderKpis(k) {
             document.getElementById('db-kpis').innerHTML = `
-                                                <div class="kpi-card kpi-verde">
-                                                  <div class="kpi-label">Total Equipos</div>
-                                                  <div class="kpi-value">${k.total_equipos}</div>
-                                                  <div class="kpi-sub">registrados en el sistema</div>
-                                                </div>
-                                                <div class="kpi-card kpi-azul">
-                                                  <div class="kpi-label">Con PM Digital</div>
-                                                  <div class="kpi-value">${k.total_pms_realizados}</div>
-                                                  <div class="kpi-sub">${Math.round(k.total_pms_realizados / k.total_equipos * 100) || 0}% del total</div>
-                                                </div>
-                                                <div class="kpi-card kpi-amber">
-                                                  <div class="kpi-label">Sin PM Digital</div>
-                                                  <div class="kpi-value">${k.sin_pm_p1}</div>
-                                                  <div class="kpi-sub">pendientes de atender</div>
-                                                </div>
-                                                <div class="kpi-card kpi-rojo">
-                                                  <div class="kpi-label">Vencidos</div>
-                                                  <div class="kpi-value">${k.total_vencidos}</div>
-                                                  <div class="kpi-sub">plazo ya pasó</div>
-                                                </div>
-                                                <div class="kpi-card kpi-purple">
-                                                  <div class="kpi-label">Esta Semana</div>
-                                                  <div class="kpi-value">${k.semana_total}</div>
-                                                  <div class="kpi-sub">mantenimientos realizados</div>
-                                                </div>
-                                              `;
+                                                    <div class="kpi-card kpi-verde">
+                                                      <div class="kpi-label">Total Equipos</div>
+                                                      <div class="kpi-value">${k.total_equipos}</div>
+                                                      <div class="kpi-sub">registrados en el sistema</div>
+                                                    </div>
+                                                    <div class="kpi-card kpi-azul">
+                                                      <div class="kpi-label">Con PM Digital</div>
+                                                      <div class="kpi-value">${k.total_pms_realizados}</div>
+                                                      <div class="kpi-sub">${Math.round(k.total_pms_realizados / k.total_equipos * 100) || 0}% del total</div>
+                                                    </div>
+                                                    <div class="kpi-card kpi-amber">
+                                                      <div class="kpi-label">Sin PM Digital</div>
+                                                      <div class="kpi-value">${k.sin_pm_p1}</div>
+                                                      <div class="kpi-sub">pendientes de atender</div>
+                                                    </div>
+                                                    <div class="kpi-card kpi-rojo">
+                                                      <div class="kpi-label">Vencidos</div>
+                                                      <div class="kpi-value">${k.total_vencidos}</div>
+                                                      <div class="kpi-sub">plazo ya pasó</div>
+                                                    </div>
+                                                    <div class="kpi-card kpi-purple">
+                                                      <div class="kpi-label">Esta Semana</div>
+                                                      <div class="kpi-value">${k.semana_total}</div>
+                                                      <div class="kpi-sub">mantenimientos realizados</div>
+                                                    </div>
+                                                  `;
         }
 
         function colorFromCat(cat) {
@@ -2721,13 +2721,13 @@
             if (!data.length) { document.getElementById(elId).innerHTML = '<p class="db-empty">Sin datos</p>'; return; }
             const max = Math.max(...data.map(valFn));
             document.getElementById(elId).innerHTML = data.map(d => `
-                                                <div class="bar-wrap">
-                                                  <span class="bar-label">${labelFn(d)}</span>
-                                                  <div class="bar-track">
-                                                    <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
-                                                  </div>
-                                                  <span class="bar-count">${valFn(d)}</span>
-                                                </div>`).join('');
+                                                    <div class="bar-wrap">
+                                                      <span class="bar-label">${labelFn(d)}</span>
+                                                      <div class="bar-track">
+                                                        <div class="bar-fill" style="width:${Math.round(valFn(d) / max * 100)}%;background:${colorFn(labelFn(d))}"></div>
+                                                      </div>
+                                                      <span class="bar-count">${valFn(d)}</span>
+                                                    </div>`).join('');
         }
 
         function renderTabla(elId, data, headers, rowFn) {
@@ -2747,20 +2747,20 @@
                 const diasRestantes = Math.ceil((new Date(r.plazo) - new Date()) / 86400000);
                 const badge = `<span class="db-badge proximo-badge">En ${diasRestantes}d</span>`;
                 return `<tr>
-                                                  <td>${r.id_equipo || '—'}</td>
-                                                  <td>${r.dispositivo || '—'}</td>
-                                                  <td><b>${r.ubicacion || '—'}</b></td>
-                                                  <td>${r.planta || '—'}</td>
-                                                  <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
-                                                  <td>${r.ultimo_pm || 'Nunca'}</td>
-                                                  <td>${badge}</td>
-                                                </tr>`;
+                                                      <td>${r.id_equipo || '—'}</td>
+                                                      <td>${r.dispositivo || '—'}</td>
+                                                      <td><b>${r.ubicacion || '—'}</b></td>
+                                                      <td>${r.planta || '—'}</td>
+                                                      <td style="color:var(--amber);font-family:'DM Mono',monospace">${r.plazo}</td>
+                                                      <td>${r.ultimo_pm || 'Nunca'}</td>
+                                                      <td>${badge}</td>
+                                                    </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                                                  <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                                                  <tbody>${trs}</tbody>
-                                                </table></div>`;
+                                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                                                      <tbody>${trs}</tbody>
+                                                    </table></div>`;
         }
 
         function renderProximos(elId, data) {
@@ -2773,19 +2773,19 @@
                         ? `<span class="db-badge proximo-badge">Hoy</span>`
                         : `<span class="db-badge proximo-badge">En ${dias}d</span>`;
                 return `<tr>
-                                                  <td>${r.id_equipo || '—'}</td>
-                                                  <td>${r.dispositivo || '—'}</td>
-                                                  <td><b>${r.ubicacion || '—'}</b></td>
-                                                  <td>${r.planta || '—'}</td>
-                                                  <td>${r.plazo}</td>
-                                                  <td>${badge}</td>
-                                                </tr>`;
+                                                      <td>${r.id_equipo || '—'}</td>
+                                                      <td>${r.dispositivo || '—'}</td>
+                                                      <td><b>${r.ubicacion || '—'}</b></td>
+                                                      <td>${r.planta || '—'}</td>
+                                                      <td>${r.plazo}</td>
+                                                      <td>${badge}</td>
+                                                    </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                                                  <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
-                                                  <tbody>${trs}</tbody>
-                                                </table></div>`;
+                                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Estado</th></tr></thead>
+                                                      <tbody>${trs}</tbody>
+                                                    </table></div>`;
         }
 
 
@@ -2865,72 +2865,72 @@
             if (btnElimLabel) btnElimLabel.textContent = label;
 
             let html = `
-                <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:12px;">
-                  📍 ${label}
-                  ${esAuto ? `<span style="font-size:10px;color:var(--amber);margin-left:8px;font-weight:400;">
-                    ⚙️ Activación automática con Planta Satélite</span>` : ''}
-                  ${planta === 'SATELITE' ? `<span style="font-size:10px;color:var(--muted2);margin-left:8px;font-weight:400;">
-                    (mínimo semana ${SEMANA_MIN_SATELITE})</span>` : ''}
-                  ${planta === 'MIXING' ? `<span style="font-size:10px;color:var(--muted2);margin-left:8px;font-weight:400;">
-                    (mínimo semana ${SEMANA_MIN_MIXING})</span>` : ''}
-                </div>`;
+                    <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:12px;">
+                      📍 ${label}
+                      ${esAuto ? `<span style="font-size:10px;color:var(--amber);margin-left:8px;font-weight:400;">
+                        ⚙️ Activación automática con Planta Satélite</span>` : ''}
+                      ${planta === 'SATELITE' ? `<span style="font-size:10px;color:var(--muted2);margin-left:8px;font-weight:400;">
+                        (mínimo semana ${SEMANA_MIN_SATELITE})</span>` : ''}
+                      ${planta === 'MIXING' ? `<span style="font-size:10px;color:var(--muted2);margin-left:8px;font-weight:400;">
+                        (mínimo semana ${SEMANA_MIN_MIXING})</span>` : ''}
+                    </div>`;
 
             if (esAuto && !p1Gen) {
                 html += `<div style="color:var(--muted);font-size:11px;font-style:italic;padding:12px;
-                           background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
-                           🔒 Esta planta se activa automáticamente cuando generes el calendario de
-                           <b>Planta Satélite</b>. No es necesaria ninguna acción aquí.
-                         </div>`;
+                               background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                               🔒 Esta planta se activa automáticamente cuando generes el calendario de
+                               <b>Planta Satélite</b>. No es necesaria ninguna acción aquí.
+                             </div>`;
             } else {
                 // ── PERIODO 1 ──
                 html += `
-                  <div style="margin-bottom:14px;">
-                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
-                         color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
-                      <span style="background:var(--accent);color:white;border-radius:999px;padding:2px 10px;font-size:10px;">P1</span>
-                      Período 1
-                      ${p1Term ? `<span style="background:rgba(16,185,129,.18);color:#6EE7B7;border:1px solid rgba(16,185,129,.35);
-                                    border-radius:999px;padding:2px 10px;font-size:10px;">✅ Terminado</span>` : ''}
-                    </div>`;
+                      <div style="margin-bottom:14px;">
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+                             color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+                          <span style="background:var(--accent);color:white;border-radius:999px;padding:2px 10px;font-size:10px;">P1</span>
+                          Período 1
+                          ${p1Term ? `<span style="background:rgba(16,185,129,.18);color:#6EE7B7;border:1px solid rgba(16,185,129,.35);
+                                        border-radius:999px;padding:2px 10px;font-size:10px;">✅ Terminado</span>` : ''}
+                        </div>`;
 
                 if (p1Gen) {
                     html += `<div style="font-size:11px;color:var(--muted2);padding:8px 14px;background:var(--surface2);
-                               border-radius:8px;border:1px solid var(--border2);margin-bottom:10px;">
-                             📌 Inicio en semana <b style="color:var(--accent)">${estP1.semana_inicio}</b>
-                             del año <b>${estP1.anio_inicio}</b>
-                             — Generado ${new Date(estP1.creado_en).toLocaleDateString('es-MX')}
-                           </div>`;
+                                   border-radius:8px;border:1px solid var(--border2);margin-bottom:10px;">
+                                 📌 Inicio en semana <b style="color:var(--accent)">${estP1.semana_inicio}</b>
+                                 del año <b>${estP1.anio_inicio}</b>
+                                 — Generado ${new Date(estP1.creado_en).toLocaleDateString('es-MX')}
+                               </div>`;
                     if (!p1Term) {
                         html += `<button class="btn btn-success btn-sm" onclick="terminarPeriodo('${planta}',1)">
-                               ✅ Terminar P1 de ${label}
-                             </button>`;
+                                   ✅ Terminar P1 de ${label}
+                                 </button>`;
                     }
                 } else if (!esAuto) {
                     html += `
-                    <div class="cal-config-grid">
-                      <div class="field">
-                        <label>📅 Año</label>
-                        <select id="cal-anio-p1-${planta}">
-                          <option value="2025">2025</option>
-                          <option value="2026" selected>2026</option>
-                          <option value="2027">2027</option>
-                          <option value="2028">2028</option>
-                        </select>
-                      </div>
-                      <div class="field">
-                        <label>🗓️ Semana de inicio P1 (${semMin}–52)</label>
-                        <input type="number" id="cal-sem-p1-${planta}" min="${semMin}" max="52"
-                               placeholder="Ej: ${semMin}" oninput="actualizarInfoPeriodo('${planta}',1)">
-                      </div>
-                      <div class="field" style="display:flex;align-items:flex-end;">
-                        <button class="btn btn-primary" onclick="generarPeriodo('${planta}',1)" style="flex:1">
-                          🔄 Generar P1
-                        </button>
-                      </div>
-                    </div>
-                    <div id="cal-info-p1-${planta}" style="display:none;margin-top:8px;padding:8px 14px;
-                         background:var(--surface2);border-radius:8px;border:1px solid var(--border2);
-                         font-size:11px;color:var(--muted2);line-height:1.8;"></div>`;
+                        <div class="cal-config-grid">
+                          <div class="field">
+                            <label>📅 Año</label>
+                            <select id="cal-anio-p1-${planta}">
+                              <option value="2025">2025</option>
+                              <option value="2026" selected>2026</option>
+                              <option value="2027">2027</option>
+                              <option value="2028">2028</option>
+                            </select>
+                          </div>
+                          <div class="field">
+                            <label>🗓️ Semana de inicio P1 (${semMin}–52)</label>
+                            <input type="number" id="cal-sem-p1-${planta}" min="${semMin}" max="52"
+                                   placeholder="Ej: ${semMin}" oninput="actualizarInfoPeriodo('${planta}',1)">
+                          </div>
+                          <div class="field" style="display:flex;align-items:flex-end;">
+                            <button class="btn btn-primary" onclick="generarPeriodo('${planta}',1)" style="flex:1">
+                              🔄 Generar P1
+                            </button>
+                          </div>
+                        </div>
+                        <div id="cal-info-p1-${planta}" style="display:none;margin-top:8px;padding:8px 14px;
+                             background:var(--surface2);border-radius:8px;border:1px solid var(--border2);
+                             font-size:11px;color:var(--muted2);line-height:1.8;"></div>`;
                 }
 
                 html += `</div>`; // cierra P1
@@ -2938,58 +2938,58 @@
 
                 // ── PERIODO 2 ──
                 html += `
-                  <div>
-                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
-                         color:var(--purple);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
-                      <span style="background:var(--purple);color:white;border-radius:999px;padding:2px 10px;font-size:10px;">P2</span>
-                      Período 2
-                      ${p2Term ? `<span style="background:rgba(139,92,246,.18);color:#C4B5FD;border:1px solid rgba(139,92,246,.35);
-                                    border-radius:999px;padding:2px 10px;font-size:10px;">✅ Terminado</span>` : ''}
-                    </div>`;
+                      <div>
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+                             color:var(--purple);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+                          <span style="background:var(--purple);color:white;border-radius:999px;padding:2px 10px;font-size:10px;">P2</span>
+                          Período 2
+                          ${p2Term ? `<span style="background:rgba(139,92,246,.18);color:#C4B5FD;border:1px solid rgba(139,92,246,.35);
+                                        border-radius:999px;padding:2px 10px;font-size:10px;">✅ Terminado</span>` : ''}
+                        </div>`;
 
                 if (!p1Term) {
                     html += `<div style="font-size:11px;color:var(--muted);font-style:italic;">
-                             🔒 Termina el Período 1 de <b>${label}</b> para habilitar el Período 2.
-                           </div>`;
+                                 🔒 Termina el Período 1 de <b>${label}</b> para habilitar el Período 2.
+                               </div>`;
                 } else if (p2Gen) {
                     html += `<div style="font-size:11px;color:var(--muted2);padding:8px 14px;background:var(--surface2);
-                               border-radius:8px;border:1px solid var(--border2);margin-bottom:10px;">
-                             📌 Inicio en semana <b style="color:var(--purple)">${estP2.semana_inicio}</b>
-                             del año <b>${estP2.anio_inicio}</b>
-                           </div>`;
+                                   border-radius:8px;border:1px solid var(--border2);margin-bottom:10px;">
+                                 📌 Inicio en semana <b style="color:var(--purple)">${estP2.semana_inicio}</b>
+                                 del año <b>${estP2.anio_inicio}</b>
+                               </div>`;
                     if (!p2Term) {
                         html += `<button class="btn btn-success btn-sm" onclick="terminarPeriodo('${planta}',2)">
-                               ✅ Terminar P2 de ${label}
-                             </button>`;
+                                   ✅ Terminar P2 de ${label}
+                                 </button>`;
                     }
                 } else {
                     const semSugP2 = sugerirSemanaP2(planta);
                     html += `
-                    <div class="cal-config-grid">
-                      <div class="field">
-                        <label>📅 Año</label>
-                        <select id="cal-anio-p2-${planta}">
-                          <option value="2025">2025</option>
-                          <option value="2026" selected>2026</option>
-                          <option value="2027">2027</option>
-                          <option value="2028">2028</option>
-                        </select>
-                      </div>
-                      <div class="field">
-                        <label>🗓️ Semana de inicio P2 (${semMin}–52)</label>
-                        <input type="number" id="cal-sem-p2-${planta}" min="${semMin}" max="52"
-                               value="${semSugP2 || ''}" placeholder="${semSugP2 ? semSugP2 : 'Ej: ' + semMin}"
-                               oninput="actualizarInfoPeriodo('${planta}',2)">
-                      </div>
-                      <div class="field" style="display:flex;align-items:flex-end;">
-                        <button class="btn btn-purple" onclick="generarPeriodo('${planta}',2)" style="flex:1">
-                          🔄 Generar P2
-                        </button>
-                      </div>
-                    </div>
-                    <div id="cal-info-p2-${planta}" style="display:none;margin-top:8px;padding:8px 14px;
-                         background:var(--surface2);border-radius:8px;border:1px solid var(--border2);
-                         font-size:11px;color:var(--muted2);line-height:1.8;"></div>`;
+                        <div class="cal-config-grid">
+                          <div class="field">
+                            <label>📅 Año</label>
+                            <select id="cal-anio-p2-${planta}">
+                              <option value="2025">2025</option>
+                              <option value="2026" selected>2026</option>
+                              <option value="2027">2027</option>
+                              <option value="2028">2028</option>
+                            </select>
+                          </div>
+                          <div class="field">
+                            <label>🗓️ Semana de inicio P2 (${semMin}–52)</label>
+                            <input type="number" id="cal-sem-p2-${planta}" min="${semMin}" max="52"
+                                   value="${semSugP2 || ''}" placeholder="${semSugP2 ? semSugP2 : 'Ej: ' + semMin}"
+                                   oninput="actualizarInfoPeriodo('${planta}',2)">
+                          </div>
+                          <div class="field" style="display:flex;align-items:flex-end;">
+                            <button class="btn btn-purple" onclick="generarPeriodo('${planta}',2)" style="flex:1">
+                              🔄 Generar P2
+                            </button>
+                          </div>
+                        </div>
+                        <div id="cal-info-p2-${planta}" style="display:none;margin-top:8px;padding:8px 14px;
+                             background:var(--surface2);border-radius:8px;border:1px solid var(--border2);
+                             font-size:11px;color:var(--muted2);line-height:1.8;"></div>`;
                 }
 
                 html += `</div>`; // cierra P2
@@ -2997,15 +2997,15 @@
                 // ── Navegación de periodos ──
                 if (p1Gen || p2Gen) {
                     html += `
-                    <div style="height:1px;background:var(--border2);margin:14px 0 12px;"></div>
-                    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
-                         color:var(--muted);margin-bottom:8px;">Ver periodo:</div>
-                    <div style="display:flex;gap:6px;">
-                      ${p1Gen ? `<button class="btn btn-sm ${calPeriodoActivo(planta) === 1 ? 'btn-primary' : 'btn-ghost'}"
-                                   onclick="verPeriodo('${planta}',1)">📅 Ver P1</button>` : ''}
-                      ${p2Gen ? `<button class="btn btn-sm ${calPeriodoActivo(planta) === 2 ? 'btn-purple' : 'btn-ghost'}"
-                                   onclick="verPeriodo('${planta}',2)">📅 Ver P2</button>` : ''}
-                    </div>`;
+                        <div style="height:1px;background:var(--border2);margin:14px 0 12px;"></div>
+                        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+                             color:var(--muted);margin-bottom:8px;">Ver periodo:</div>
+                        <div style="display:flex;gap:6px;">
+                          ${p1Gen ? `<button class="btn btn-sm ${calPeriodoActivo(planta) === 1 ? 'btn-primary' : 'btn-ghost'}"
+                                       onclick="verPeriodo('${planta}',1)">📅 Ver P1</button>` : ''}
+                          ${p2Gen ? `<button class="btn btn-sm ${calPeriodoActivo(planta) === 2 ? 'btn-purple' : 'btn-ghost'}"
+                                       onclick="verPeriodo('${planta}',2)">📅 Ver P2</button>` : ''}
+                        </div>`;
                 }
             }
 
@@ -3195,27 +3195,27 @@
 
             let html = `<div style="overflow-x:auto"><div style="min-width:700px">`;
             html += `<div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--surface2);
-                           border:1px solid var(--border2);border-radius:12px;margin-bottom:12px;">
-                         <span style="font-size:12px;font-weight:700;color:${color};">
-                           📋 ${label} — Período ${periodo}
-                         </span>
-                         <span style="font-size:10px;color:var(--muted);margin-left:auto;">
-                           ${semanas.length} semanas · ${semanas.reduce((s, w) => s + (w.total_equipos || 0), 0)} equipos total
-                         </span>
-                       </div>`;
+                               border:1px solid var(--border2);border-radius:12px;margin-bottom:12px;">
+                             <span style="font-size:12px;font-weight:700;color:${color};">
+                               📋 ${label} — Período ${periodo}
+                             </span>
+                             <span style="font-size:10px;color:var(--muted);margin-left:auto;">
+                               ${semanas.length} semanas · ${semanas.reduce((s, w) => s + (w.total_equipos || 0), 0)} equipos total
+                             </span>
+                           </div>`;
 
             html += `<table style="border-collapse:collapse;width:100%;font-size:12px;">
-                         <thead>
-                           <tr style="background:var(--surface3);color:var(--muted2);">
-                             <th style="padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Sem. Relativa</th>
-                             <th style="padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Sem. Real / Año</th>
-                             <th style="padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Lunes → Viernes</th>
-                             <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">🖥️ Cómputo</th>
-                             <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">💻 Laptops</th>
-                             <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Total</th>
-                             <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Acción</th>
-                           </tr>
-                         </thead><tbody>`;
+                             <thead>
+                               <tr style="background:var(--surface3);color:var(--muted2);">
+                                 <th style="padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Sem. Relativa</th>
+                                 <th style="padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Sem. Real / Año</th>
+                                 <th style="padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Lunes → Viernes</th>
+                                 <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">🖥️ Cómputo</th>
+                                 <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">💻 Laptops</th>
+                                 <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Total</th>
+                                 <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Acción</th>
+                               </tr>
+                             </thead><tbody>`;
 
             semanas.forEach(s => {
                 const lunesDate = new Date(s.lunes_iso || s.lunesISO || s.lunes);
@@ -3226,32 +3226,32 @@
                 const realLabel = `S${s.semana_real || s.semanaReal} / ${s.anio_real || s.anioReal}`;
 
                 html += `<tr style="border-bottom:1px solid var(--border);">
-                           <td style="padding:10px 12px;font-family:'DM Mono',monospace;">
-                             <span style="background:rgba(255,255,255,.06);padding:2px 8px;border-radius:999px;font-size:11px;
-                               border:1px solid ${color}33;color:${color};">${relLabel}</span>
-                           </td>
-                           <td style="padding:10px 12px;color:var(--muted2);font-family:'DM Mono',monospace;">${realLabel}</td>
-                           <td style="padding:10px 12px;">${lunesStr} <span style="color:var(--muted)">→</span> ${viernesStr}</td>
-                           <td style="padding:10px 12px;text-align:center;">
-                             <span style="font-family:'DM Mono',monospace;color:#93C5FD;font-weight:600;">
-                               ${s.total_computo ?? s.totalComputo ?? '—'}
-                             </span>
-                           </td>
-                           <td style="padding:10px 12px;text-align:center;">
-                             <span style="font-family:'DM Mono',monospace;color:#C4B5FD;font-weight:600;">
-                               ${s.total_laptops ?? s.totalLaptops ?? '—'}
-                             </span>
-                           </td>
-                           <td style="padding:10px 12px;text-align:center;">
-                             <b style="color:var(--text);">${s.total_equipos || s.totalEquipos}</b>
-                           </td>
-                           <td style="padding:10px 12px;text-align:center;">
-                             <button class="btn btn-ghost btn-sm"
-                               onclick="verEquiposSemana('${planta}',${periodo},${s.semana_rel || s.semanaRelativa},'${s.lunes_iso || s.lunesISO || s.lunes}','${s.viernes_iso || s.viernesISO || s.viernes}')">
-                               🔍 Ver equipos
-                             </button>
-                           </td>
-                         </tr>`;
+                               <td style="padding:10px 12px;font-family:'DM Mono',monospace;">
+                                 <span style="background:rgba(255,255,255,.06);padding:2px 8px;border-radius:999px;font-size:11px;
+                                   border:1px solid ${color}33;color:${color};">${relLabel}</span>
+                               </td>
+                               <td style="padding:10px 12px;color:var(--muted2);font-family:'DM Mono',monospace;">${realLabel}</td>
+                               <td style="padding:10px 12px;">${lunesStr} <span style="color:var(--muted)">→</span> ${viernesStr}</td>
+                               <td style="padding:10px 12px;text-align:center;">
+                                 <span style="font-family:'DM Mono',monospace;color:#93C5FD;font-weight:600;">
+                                   ${s.total_computo ?? s.totalComputo ?? '—'}
+                                 </span>
+                               </td>
+                               <td style="padding:10px 12px;text-align:center;">
+                                 <span style="font-family:'DM Mono',monospace;color:#C4B5FD;font-weight:600;">
+                                   ${s.total_laptops ?? s.totalLaptops ?? '—'}
+                                 </span>
+                               </td>
+                               <td style="padding:10px 12px;text-align:center;">
+                                 <b style="color:var(--text);">${s.total_equipos || s.totalEquipos}</b>
+                               </td>
+                               <td style="padding:10px 12px;text-align:center;">
+                                 <button class="btn btn-ghost btn-sm"
+                                   onclick="verEquiposSemana('${planta}',${periodo},${s.semana_rel || s.semanaRelativa},'${s.lunes_iso || s.lunesISO || s.lunes}','${s.viernes_iso || s.viernesISO || s.viernes}')">
+                                   🔍 Ver equipos
+                                 </button>
+                               </td>
+                             </tr>`;
             });
 
             html += `</tbody></table></div></div>`;
@@ -3315,41 +3315,41 @@
                 });
 
                 let html = `<div style="margin-bottom:12px;font-size:11px;color:var(--muted)">
-                              <b style="color:var(--text)">${Object.keys(grupos).length}</b> ubicaciones &nbsp;·&nbsp;
-                              <b style="color:var(--text)">${data.total_equipos}</b> equipos en esta semana
-                            </div>`;
+                                  <b style="color:var(--text)">${Object.keys(grupos).length}</b> ubicaciones &nbsp;·&nbsp;
+                                  <b style="color:var(--text)">${data.total_equipos}</b> equipos en esta semana
+                                </div>`;
 
                 Object.entries(grupos).forEach(([ub, equipos]) => {
                     html += `<div style="margin-bottom:8px;background:var(--surface2);border:1px solid var(--border);
-                                       border-radius:10px;overflow:hidden;">
-                             <div style="padding:7px 12px;display:flex;align-items:center;gap:8px;
-                                         border-bottom:1px solid var(--border);background:rgba(255,255,255,.03);">
-                               <span style="font-size:12px;font-weight:600;color:var(--text);flex:1">${ub}</span>
-                               <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;">
-                                 ${equipos.length} equipo${equipos.length !== 1 ? 's' : ''}</span>
-                             </div>
-                             <div style="padding:6px 8px;display:flex;flex-wrap:wrap;gap:4px;">`;
+                                           border-radius:10px;overflow:hidden;">
+                                 <div style="padding:7px 12px;display:flex;align-items:center;gap:8px;
+                                             border-bottom:1px solid var(--border);background:rgba(255,255,255,.03);">
+                                   <span style="font-size:12px;font-weight:600;color:var(--text);flex:1">${ub}</span>
+                                   <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;">
+                                     ${equipos.length} equipo${equipos.length !== 1 ? 's' : ''}</span>
+                                 </div>
+                                 <div style="padding:6px 8px;display:flex;flex-wrap:wrap;gap:4px;">`;
 
                     equipos.forEach(e => {
                         const col = colorMap[(e.categoria_color || '').toLowerCase()] || { bg: 'rgba(100,116,139,.12)', text: '#94A3B8' };
                         html += `<div style="display:flex;align-items:flex-start;gap:6px;padding:5px 10px;
-                                         border-radius:7px;background:var(--surface3);flex:1;min-width:200px;max-width:340px;">
-                               <span style="font-size:14px;margin-top:2px">${iconDisp(e.nombre_dispositivo)}</span>
-                               <div style="flex:1;min-width:0;">
-                                 <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);
-                                     font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                     ${e.id_equipo || '—'}</div>
-                                 <div style="font-size:10px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;">
-                                     ${e.nombre_dispositivo || '—'}</div>
-                                 <div style="display:flex;gap:3px;flex-wrap:wrap;">
-                                   ${pmBadge(e.tiene_pm_p1, 'P1', e.fecha_pm_p1)}
-                                   ${pmBadge(e.tiene_pm_p2, 'P2', e.fecha_pm_p2)}
-                                 </div>
-                               </div>
-                               <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px;
-                                   background:${col.bg};color:${col.text};flex-shrink:0;align-self:flex-start;">
-                                   ${e.categoria_color || '—'}</span>
-                             </div>`;
+                                             border-radius:7px;background:var(--surface3);flex:1;min-width:200px;max-width:340px;">
+                                   <span style="font-size:14px;margin-top:2px">${iconDisp(e.nombre_dispositivo)}</span>
+                                   <div style="flex:1;min-width:0;">
+                                     <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);
+                                         font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                         ${e.id_equipo || '—'}</div>
+                                     <div style="font-size:10px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;">
+                                         ${e.nombre_dispositivo || '—'}</div>
+                                     <div style="display:flex;gap:3px;flex-wrap:wrap;">
+                                       ${pmBadge(e.tiene_pm_p1, 'P1', e.fecha_pm_p1)}
+                                       ${pmBadge(e.tiene_pm_p2, 'P2', e.fecha_pm_p2)}
+                                     </div>
+                                   </div>
+                                   <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px;
+                                       background:${col.bg};color:${col.text};flex-shrink:0;align-self:flex-start;">
+                                       ${e.categoria_color || '—'}</span>
+                                 </div>`;
                     });
 
                     html += `</div></div>`;
@@ -3370,22 +3370,22 @@
             const color = periodo === 1 ? 'var(--accent)' : 'var(--purple)';
             const colVal = periodo === 1 ? '#93C5FD' : '#C4B5FD';
             document.getElementById('cal-summary').innerHTML = totalSem === 0 ? '' : `
-                <div class="cal-summary-card" style="border-left:3px solid ${color}">
-                  <div class="cs-label">Semanas programadas</div>
-                  <div class="cs-val" style="color:${color}">${totalSem}</div>
-                </div>
-                <div class="cal-summary-card" style="border-left:3px solid #93C5FD">
-                  <div class="cs-label">🖥️ Cómputo total</div>
-                  <div class="cs-val" style="color:#93C5FD">${totalComp}</div>
-                </div>
-                <div class="cal-summary-card" style="border-left:3px solid #C4B5FD">
-                  <div class="cs-label">💻 Laptops total</div>
-                  <div class="cs-val" style="color:#C4B5FD">${totalLap}</div>
-                </div>
-                <div class="cal-summary-card" style="border-left:3px solid var(--green)">
-                  <div class="cs-label">Total equipos planta</div>
-                  <div class="cs-val" style="color:var(--green)">${totalEq}</div>
-                </div>`;
+                    <div class="cal-summary-card" style="border-left:3px solid ${color}">
+                      <div class="cs-label">Semanas programadas</div>
+                      <div class="cs-val" style="color:${color}">${totalSem}</div>
+                    </div>
+                    <div class="cal-summary-card" style="border-left:3px solid #93C5FD">
+                      <div class="cs-label">🖥️ Cómputo total</div>
+                      <div class="cs-val" style="color:#93C5FD">${totalComp}</div>
+                    </div>
+                    <div class="cal-summary-card" style="border-left:3px solid #C4B5FD">
+                      <div class="cs-label">💻 Laptops total</div>
+                      <div class="cs-val" style="color:#C4B5FD">${totalLap}</div>
+                    </div>
+                    <div class="cal-summary-card" style="border-left:3px solid var(--green)">
+                      <div class="cs-label">Total equipos planta</div>
+                      <div class="cs-val" style="color:var(--green)">${totalEq}</div>
+                    </div>`;
         }
 
         // ── Inicialización del tab calendario ────────────────────────────────────
@@ -3398,20 +3398,20 @@
             const trs = data.map(r => {
                 const dias = Math.abs(Math.ceil((new Date(r.plazo) - new Date()) / 86400000));
                 return `<tr>
-                                                  <td>${r.id_equipo || '—'}</td>
-                                                  <td>${r.dispositivo || '—'}</td>
-                                                  <td><b>${r.ubicacion || '—'}</b></td>
-                                                  <td>${r.planta || '—'}</td>
-                                                  <td style="color:var(--red)">${r.plazo}</td>
-                                                  <td>${r.ultimo_pm || 'Nunca'}</td>
-                                                  <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
-                                                </tr>`;
+                                                      <td>${r.id_equipo || '—'}</td>
+                                                      <td>${r.dispositivo || '—'}</td>
+                                                      <td><b>${r.ubicacion || '—'}</b></td>
+                                                      <td>${r.planta || '—'}</td>
+                                                      <td style="color:var(--red)">${r.plazo}</td>
+                                                      <td>${r.ultimo_pm || 'Nunca'}</td>
+                                                      <td><span class="db-badge vencido-badge">+${dias}d vencido</span></td>
+                                                    </tr>`;
             }).join('');
             document.getElementById(elId).innerHTML =
                 `<div style="overflow-x:auto"><table class="db-table">
-                                                  <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
-                                                  <tbody>${trs}</tbody>
-                                                </table></div>`;
+                                                      <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
+                                                      <tbody>${trs}</tbody>
+                                                    </table></div>`;
         }
 
         // ════════════════════════════════════════════════════════════════════════
@@ -3480,16 +3480,16 @@
                 const icon = UB_PLANTA_ICON[planta] || '📍';
 
                 html += `<div style="margin-bottom:20px;">
-                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;
-                                  padding:8px 12px;background:${col.bg};border-radius:8px;
-                                  border-left:3px solid ${col.color};">
-                        <span style="font-size:14px;">${icon}</span>
-                        <span style="font-size:12px;font-weight:700;color:${col.color};">${planta}</span>
-                        <span style="font-size:10px;color:var(--muted);margin-left:auto;font-family:'DM Mono',monospace;">
-                          ${ubs.length} ubicación${ubs.length !== 1 ? 'es' : ''}
-                        </span>
-                      </div>
-                      <div class="ub-grid">`;
+                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;
+                                      padding:8px 12px;background:${col.bg};border-radius:8px;
+                                      border-left:3px solid ${col.color};">
+                            <span style="font-size:14px;">${icon}</span>
+                            <span style="font-size:12px;font-weight:700;color:${col.color};">${planta}</span>
+                            <span style="font-size:10px;color:var(--muted);margin-left:auto;font-family:'DM Mono',monospace;">
+                              ${ubs.length} ubicación${ubs.length !== 1 ? 'es' : ''}
+                            </span>
+                          </div>
+                          <div class="ub-grid">`;
 
                 ubs.forEach(u => {
                     const total = u.total_equipos || 0;
@@ -3501,30 +3501,30 @@
                     const ubEnc = encodeURIComponent(u.ubicacion);
 
                     html += `<div class="ub-card" onclick="window.open('/preventivos/qr/${ubEnc}','_blank')">
-                          <div class="ub-card-top">
-                            <div class="ub-card-icon">📍</div>
-                            <div class="ub-card-info">
-                              <h4 title="${ubEsc(u.ubicacion)}">${ubEsc(u.ubicacion)}</h4>
-                              <div class="ub-planta">${planta}</div>
-                            </div>
-                            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;
-                              background:${col.bg};color:${col.color};flex-shrink:0;align-self:flex-start;">
-                              ${total} equipo${total !== 1 ? 's' : ''}
-                            </span>
-                          </div>
-                          <div class="ub-card-chips">
-                            ${computo > 0 ? `<span class="ub-chip" style="background:rgba(59,130,246,.15);color:#93C5FD;">🖥️ ${computo} cómputo</span>` : ''}
-                            ${laptops > 0 ? `<span class="ub-chip" style="background:rgba(139,92,246,.15);color:#C4B5FD;">💻 ${laptops} laptops</span>` : ''}
-                          </div>
-                          <div style="display:flex;align-items:center;gap:8px;">
-                            <div style="flex:1;height:4px;background:var(--surface3);border-radius:999px;overflow:hidden;">
-                              <div style="height:100%;width:${pmPct}%;background:${barColor};border-radius:999px;"></div>
-                            </div>
-                            <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;flex-shrink:0;">
-                              P1 ${pmPct}%
-                            </span>
-                          </div>
-                        </div>`;
+                              <div class="ub-card-top">
+                                <div class="ub-card-icon">📍</div>
+                                <div class="ub-card-info">
+                                  <h4 title="${ubEsc(u.ubicacion)}">${ubEsc(u.ubicacion)}</h4>
+                                  <div class="ub-planta">${planta}</div>
+                                </div>
+                                <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;
+                                  background:${col.bg};color:${col.color};flex-shrink:0;align-self:flex-start;">
+                                  ${total} equipo${total !== 1 ? 's' : ''}
+                                </span>
+                              </div>
+                              <div class="ub-card-chips">
+                                ${computo > 0 ? `<span class="ub-chip" style="background:rgba(59,130,246,.15);color:#93C5FD;">🖥️ ${computo} cómputo</span>` : ''}
+                                ${laptops > 0 ? `<span class="ub-chip" style="background:rgba(139,92,246,.15);color:#C4B5FD;">💻 ${laptops} laptops</span>` : ''}
+                              </div>
+                              <div style="display:flex;align-items:center;gap:8px;">
+                                <div style="flex:1;height:4px;background:var(--surface3);border-radius:999px;overflow:hidden;">
+                                  <div style="height:100%;width:${pmPct}%;background:${barColor};border-radius:999px;"></div>
+                                </div>
+                                <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;flex-shrink:0;">
+                                  P1 ${pmPct}%
+                                </span>
+                              </div>
+                            </div>`;
                 });
 
                 html += `</div></div>`;
@@ -3539,22 +3539,22 @@
             const totalComp = ubDatos.reduce((s, u) => s + (u.total_computo || 0), 0);
             const totalLap = ubDatos.reduce((s, u) => s + (u.total_laptops || 0), 0);
             document.getElementById('ub-stats').innerHTML = `
-                  <div class="ub-stat-card">
-                    <div class="usc-label">Ubicaciones</div>
-                    <div class="usc-val" style="color:var(--accent)">${totalUb}</div>
-                  </div>
-                  <div class="ub-stat-card">
-                    <div class="usc-label">Total equipos</div>
-                    <div class="usc-val" style="color:var(--text)">${totalEq}</div>
-                  </div>
-                  <div class="ub-stat-card">
-                    <div class="usc-label">🖥️ Cómputo</div>
-                    <div class="usc-val" style="color:#93C5FD">${totalComp}</div>
-                  </div>
-                  <div class="ub-stat-card">
-                    <div class="usc-label">💻 Laptops</div>
-                    <div class="usc-val" style="color:#C4B5FD">${totalLap}</div>
-                  </div>`;
+                      <div class="ub-stat-card">
+                        <div class="usc-label">Ubicaciones</div>
+                        <div class="usc-val" style="color:var(--accent)">${totalUb}</div>
+                      </div>
+                      <div class="ub-stat-card">
+                        <div class="usc-label">Total equipos</div>
+                        <div class="usc-val" style="color:var(--text)">${totalEq}</div>
+                      </div>
+                      <div class="ub-stat-card">
+                        <div class="usc-label">🖥️ Cómputo</div>
+                        <div class="usc-val" style="color:#93C5FD">${totalComp}</div>
+                      </div>
+                      <div class="ub-stat-card">
+                        <div class="usc-label">💻 Laptops</div>
+                        <div class="usc-val" style="color:#C4B5FD">${totalLap}</div>
+                      </div>`;
         }
 
         function ubEsc(s) {
