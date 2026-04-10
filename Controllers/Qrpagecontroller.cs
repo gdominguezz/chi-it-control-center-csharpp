@@ -45,30 +45,32 @@ public class QrPageController : ControllerBase
             var rows = new List<(long id, string idEquipo, string dispositivo, string planta,
                                  string colorCat, string? fecha, string? plazo, string obs, bool tienePm, int? anio, bool tienePm2, string? fechaP2, string? plazoP2)>();
 
-            using var r = cmd.ExecuteReader();
-            while (r.Read())
+            using (var r = cmd.ExecuteReader())
             {
-                try
+                while (r.Read())
                 {
-                    rows.Add((r.GetInt64(0),
-                              r.IsDBNull(1) ? "" : r.GetString(1),
-                              r.IsDBNull(2) ? "" : r.GetString(2),
-                              r.IsDBNull(3) ? "" : r.GetString(3),
-                              r.IsDBNull(4) ? "" : r.GetString(4),
-                              r.IsDBNull(5) ? null : r.GetDateTime(5).ToString("yyyy-MM-dd"),
-                              r.IsDBNull(6) ? null : r.GetString(6),
-                              r.IsDBNull(7) ? "" : r.GetString(7),
-                              !r.IsDBNull(8) && r.GetBoolean(8),
-                              r.IsDBNull(9) ? (int?)null : Convert.ToInt32(r.GetValue(9)),
-                              !r.IsDBNull(10) && r.GetBoolean(10),
-                              r.IsDBNull(11) ? null : r.GetDateTime(11).ToString("yyyy-MM-dd"),
-                              r.IsDBNull(12) ? null : r.GetString(12)));
+                    try
+                    {
+                        rows.Add((r.GetInt64(0),
+                                  r.IsDBNull(1) ? "" : r.GetString(1),
+                                  r.IsDBNull(2) ? "" : r.GetString(2),
+                                  r.IsDBNull(3) ? "" : r.GetString(3),
+                                  r.IsDBNull(4) ? "" : r.GetString(4),
+                                  r.IsDBNull(5) ? null : r.GetDateTime(5).ToString("yyyy-MM-dd"),
+                                  r.IsDBNull(6) ? null : r.GetString(6),
+                                  r.IsDBNull(7) ? "" : r.GetString(7),
+                                  !r.IsDBNull(8) && r.GetBoolean(8),
+                                  r.IsDBNull(9) ? (int?)null : Convert.ToInt32(r.GetValue(9)),
+                                  !r.IsDBNull(10) && r.GetBoolean(10),
+                                  r.IsDBNull(11) ? null : r.GetDateTime(11).ToString("yyyy-MM-dd"),
+                                  r.IsDBNull(12) ? null : r.GetString(12)));
+                    }
+                    catch (Exception rowEx)
+                    {
+                        Console.WriteLine("[QR] Fila con error: " + rowEx.Message);
+                    }
                 }
-                catch (Exception rowEx)
-                {
-                    Console.WriteLine($"[QR] Fila con error (id={(!r.IsDBNull(0) ? r.GetInt64(0) : -1)}): {rowEx.Message}");
-                }
-            }
+            } // reader cerrado aquí — conexión libre para siguiente query
 
             // ── Obtener plazos del calendario para las plantas presentes ──────────
             // Mapeo: planta_nombre_db → (plazoP1, plazoP2)
