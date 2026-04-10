@@ -1051,6 +1051,53 @@ public class PreventivoController : ControllerBase
         }
         catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
     }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // GET /PREVENTIVOS/UBICACIONES
+    // Devuelve todas las ubicaciones distintas con conteo de equipos,
+    // desglose computo/laptops y progreso de PM P1.
+    // ══════════════════════════════════════════════════════════════════════
+    [HttpGet("PREVENTIVOS/UBICACIONES")]
+    public IActionResult ObtenerUbicaciones()
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT
+                TRIM(ubicacion)                                          AS ubicacion,
+                planta,
+                COUNT(*)                                                 AS total_equipos,
+                COUNT(*) FILTER (WHERE nombre_dispositivo IN (
+                    'COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')) AS total_computo,
+                COUNT(*) FILTER (WHERE nombre_dispositivo = 'LAPTOP')   AS total_laptops,
+                COUNT(*) FILTER (WHERE preventivo_digital IS NOT NULL)  AS con_pm_p1,
+                COUNT(*) FILTER (WHERE preventivo_digital_p2 IS NOT NULL) AS con_pm_p2
+            FROM public.mantenimientos_preventivos
+            WHERE ubicacion IS NOT NULL AND TRIM(ubicacion) <> ''
+              AND nombre_dispositivo IN (
+                  'COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA')
+            GROUP BY TRIM(ubicacion), planta
+            ORDER BY planta, TRIM(ubicacion)
+            """;
+
+        var lista = new List<object>();
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            lista.Add(new
+            {
+                ubicacion = r.GetString(0),
+                planta = r.GetString(1),
+                total_equipos = r.GetInt64(2),
+                total_computo = r.GetInt64(3),
+                total_laptops = r.GetInt64(4),
+                con_pm_p1 = r.GetInt64(5),
+                con_pm_p2 = r.GetInt64(6),
+            });
+        }
+
+        return Ok(new { ubicaciones = lista });
+    }
 }
 
 // ── Modelo recalendarización ──────────────────────────────────────────────

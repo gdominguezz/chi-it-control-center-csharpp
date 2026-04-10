@@ -10,6 +10,16 @@ public class QrPageController : ControllerBase
     private readonly DbConnectionPool _db;
     public QrPageController(DbConnectionPool db) => _db = db;
 
+    // Mapeo nombre DB → clave del calendario_estado
+    private static readonly Dictionary<string, string> PlantaKeyMap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["B1"] = "B1",
+        ["B2"] = "B2",
+        ["PLANTA SATELITE"] = "SATELITE",
+        ["PLANTA MIXING"] = "MIXING",
+        ["BODEGA"] = "BODEGA",
+    };
+
     [HttpGet("preventivos/qr/{ubicacion}")]
     public ContentResult VerQrPreventivo(string ubicacion)
     {
@@ -49,14 +59,64 @@ public class QrPageController : ControllerBase
                       r.IsDBNull(11) ? null : r.GetDateTime(11).ToString("yyyy-MM-dd"),
                       r.IsDBNull(12) ? null : r.GetString(12)));
 
+        // ── Obtener plazos del calendario para las plantas presentes ──────────
+        // Mapeo: planta_nombre_db → (plazoP1, plazoP2)
+        // Si hay calendario generado, el plazo = viernes de la semana de inicio.
+        // Si no hay calendario → "Sin plazo asignado".
+        var plantasPresentes = rows.Select(r => r.planta).Distinct().ToList();
+        var plazosCalendario = new Dictionary<string, (string? p1, string? p2)>(StringComparer.OrdinalIgnoreCase);
+
+        if (plantasPresentes.Count > 0)
+        {
+            using var calCmd = conn.CreateCommand();
+            calCmd.CommandText = """
+                SELECT planta_key, periodo, semana_inicio, anio_inicio, generado
+                FROM public.calendario_estado
+                WHERE generado = true
+                """;
+            using var calR = calCmd.ExecuteReader();
+            var calRows = new List<(string key, int per, int sem, int anio)>();
+            while (calR.Read())
+            {
+                if (!calR.IsDBNull(2) && !calR.IsDBNull(3))
+                    calRows.Add((calR.GetString(0), calR.GetInt32(1), calR.GetInt32(2), calR.GetInt32(3)));
+            }
+
+            // Para cada planta presente, calcular el viernes de la semana de inicio
+            foreach (var plantaDB in plantasPresentes)
+            {
+                if (!PlantaKeyMap.TryGetValue(plantaDB, out var key)) continue;
+
+                string? CalcPlazo(int per)
+                {
+                    var row = calRows.FirstOrDefault(r => r.key.Equals(key, StringComparison.OrdinalIgnoreCase) && r.per == per);
+                    if (row == default) return null;
+                    var lunes = LunesDeSemanaISO(row.anio, row.sem);
+                    return lunes.AddDays(4).ToString("yyyy-MM-dd"); // viernes
+                }
+
+                plazosCalendario[plantaDB] = (CalcPlazo(1), CalcPlazo(2));
+            }
+        }
+
         var cards = new StringBuilder();
         foreach (var row in rows)
         {
             var (badgeColor, badgeBg, badgeLabel) = ColorBadge(row.colorCat);
             var icon = DispIcon(row.dispositivo);
             var fechaStr = row.fecha ?? "Sin registro";
-            var plazoStr = row.tienePm ? (row.plazo ?? "No definido") : "Sin PM";
-            var plazoP2Str = row.tienePm2 ? (row.plazoP2 ?? "No definido") : "Sin PM";
+
+            // Plazo: si tiene PM registrado → mostrar el plazo del PM,
+            // si no → usar el plazo del calendario, si tampoco → "Sin plazo asignado"
+            plazosCalendario.TryGetValue(row.planta, out var calPlazo);
+
+            var plazoStr = row.tienePm
+                ? (row.plazo ?? calPlazo.p1 ?? "Sin plazo asignado")
+                : (calPlazo.p1 ?? "Sin plazo asignado");
+
+            var plazoP2Str = row.tienePm2
+                ? (row.plazoP2 ?? calPlazo.p2 ?? "Sin plazo asignado")
+                : (calPlazo.p2 ?? "Sin plazo asignado");
             var actsHtml = ActsHtml(row.dispositivo);
 
             // Siempre generar los botones PM organizados en filas por período
@@ -772,6 +832,14 @@ public class QrPageController : ControllerBase
         sb.AppendLine("}");
         sb.AppendLine("</script></body></html>");
         return sb.ToString();
+    }
+
+    private static DateTime LunesDeSemanaISO(int anio, int semana)
+    {
+        var simple = new DateTime(anio, 1, 1).AddDays((semana - 1) * 7);
+        int dow = (int)simple.DayOfWeek; // 0=dom,1=lun,...,6=sab
+        int offset = dow == 0 ? -6 : 1 - dow;
+        return simple.AddDays(offset);
     }
 
     private static string Esc(string? s) =>

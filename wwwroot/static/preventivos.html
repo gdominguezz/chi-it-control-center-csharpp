@@ -1459,6 +1459,103 @@
             .cal-planta-section.active {
                 display: block;
             }
+
+        /* ── UBICACIONES ── */
+        .ub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .ub-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: border-color .2s, background .2s, transform .15s;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+            .ub-card:hover {
+                border-color: var(--accent);
+                background: var(--surface2);
+                transform: translateY(-2px);
+            }
+
+        .ub-card-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .ub-card-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .ub-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+            .ub-card-info h4 {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text);
+                margin-bottom: 3px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .ub-card-info .ub-planta {
+                font-size: 10px;
+                color: var(--muted2);
+                font-family: 'DM Mono', monospace;
+                text-transform: uppercase;
+                letter-spacing: .06em;
+            }
+
+        .ub-card-chips {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .ub-chip {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .ub-stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            min-width: 100px;
+        }
+
+            .ub-stat-card .usc-label {
+                font-size: 9px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                color: var(--muted);
+                margin-bottom: 4px;
+            }
+
+            .ub-stat-card .usc-val {
+                font-size: 20px;
+                font-weight: 700;
+                font-family: 'DM Mono', monospace;
+            }
     </style>
 </head>
 <body>
@@ -1493,6 +1590,7 @@
             <button class="tab-btn active" onclick="switchTab('tabla')">📋 Registros</button>
             <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard</button>
             <button class="tab-btn" onclick="switchTab('calendario')">📅 Calendario PM</button>
+            <button class="tab-btn" onclick="switchTab('ubicaciones')">📍 Ubicaciones</button>
         </div>
 
         <!-- CONTENIDO TABLA -->
@@ -1822,6 +1920,50 @@
 
             </div>
         </div><!-- /tab-calendario -->
+
+        <div id="tab-ubicaciones" class="tab-content">
+            <div style="padding:4px 0 20px;">
+
+                <!-- ── Buscador global ── -->
+                <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;margin-bottom:16px;">
+                    <div class="panel-title">📍 Ubicaciones — Acceso Rápido</div>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <div style="flex:1;min-width:220px;position:relative;">
+                            <input id="ub-buscador" type="text" placeholder="🔍 Buscar ubicación..."
+                                   oninput="filtrarUbicaciones()"
+                                   style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+                   padding:10px 14px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;
+                   transition:border-color .2s;outline:none;"
+                                   onfocus="this.style.borderColor='var(--accent)'"
+                                   onblur="this.style.borderColor='var(--border2)'">
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <select id="ub-filtro-planta" onchange="filtrarUbicaciones()"
+                                    style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+                   padding:9px 12px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;cursor:pointer;outline:none;">
+                                <option value="">Todas las plantas</option>
+                                <option value="B1">🏭 B1</option>
+                                <option value="B2">🏭 B2</option>
+                                <option value="PLANTA SATELITE">🛰️ Planta Satélite</option>
+                                <option value="PLANTA MIXING">⚗️ Planta Mixing</option>
+                                <option value="BODEGA">📦 Bodega</option>
+                            </select>
+                            <button class="btn btn-ghost btn-sm" onclick="cargarUbicaciones()">🔄 Recargar</button>
+                        </div>
+                    </div>
+                    <!-- Estadísticas rápidas -->
+                    <div id="ub-stats" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;"></div>
+                </div>
+
+                <!-- ── Grid de ubicaciones ── -->
+                <div id="ub-container">
+                    <div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">
+                        🗂️ Cargando ubicaciones...
+                    </div>
+                </div>
+
+            </div>
+        </div><!-- /tab-ubicaciones -->
 
     </div><!-- /main -->
 
@@ -3010,6 +3152,7 @@
             document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
             if (tab === 'dashboard') cargarDashboard();
             if (tab === 'calendario') onTabCalendarioActivado();
+            if (tab === 'ubicaciones') cargarUbicaciones();
         }
 
         // ── Cambiar planta activa ────────────────────────────────────────────────
@@ -3269,6 +3412,153 @@
                                                   <thead><tr><th>Equipo</th><th>Dispositivo</th><th>Ubicación</th><th>Planta</th><th>Plazo</th><th>Último PM</th><th>Estado</th></tr></thead>
                                                   <tbody>${trs}</tbody>
                                                 </table></div>`;
+        }
+
+        // ════════════════════════════════════════════════════════════════════════
+        // UBICACIONES — Tab de acceso rápido a páginas QR por ubicación
+        // ════════════════════════════════════════════════════════════════════════
+
+        let ubDatos = [];
+        let ubFiltradas = [];
+
+        const UB_PLANTA_COLOR = {
+            'B1': { color: '#93C5FD', bg: 'rgba(59,130,246,.15)' },
+            'B2': { color: '#C4B5FD', bg: 'rgba(139,92,246,.15)' },
+            'PLANTA SATELITE': { color: '#6EE7B7', bg: 'rgba(16,185,129,.15)' },
+            'PLANTA MIXING': { color: '#FCD34D', bg: 'rgba(245,158,11,.15)' },
+            'BODEGA': { color: '#94A3B8', bg: 'rgba(148,163,184,.12)' },
+        };
+        const UB_PLANTA_ICON = {
+            'B1': '🏭', 'B2': '🏭',
+            'PLANTA SATELITE': '🛰️',
+            'PLANTA MIXING': '⚗️',
+            'BODEGA': '📦',
+        };
+
+        async function cargarUbicaciones() {
+            const container = document.getElementById('ub-container');
+            container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">🔄 Cargando ubicaciones...</div>';
+            try {
+                const res = await fetch('/PREVENTIVOS/UBICACIONES');
+                const data = await res.json();
+                ubDatos = data.ubicaciones || [];
+                filtrarUbicaciones();
+                renderUbStats();
+            } catch (e) {
+                container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--red);font-size:13px;">❌ Error al cargar: ${e.message}</div>`;
+            }
+        }
+
+        function filtrarUbicaciones() {
+            const q = (document.getElementById('ub-buscador').value || '').toLowerCase().trim();
+            const planta = document.getElementById('ub-filtro-planta').value;
+            ubFiltradas = ubDatos.filter(u => {
+                const matchQ = !q || u.ubicacion.toLowerCase().includes(q) || u.planta.toLowerCase().includes(q);
+                const matchPlanta = !planta || u.planta === planta;
+                return matchQ && matchPlanta;
+            });
+            renderUbGrid();
+        }
+
+        function renderUbGrid() {
+            const container = document.getElementById('ub-container');
+            if (!ubFiltradas.length) {
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">🔍 Sin resultados para ese filtro.</div>';
+                return;
+            }
+
+            // Agrupar por planta
+            const porPlanta = {};
+            ubFiltradas.forEach(u => {
+                if (!porPlanta[u.planta]) porPlanta[u.planta] = [];
+                porPlanta[u.planta].push(u);
+            });
+
+            let html = '';
+            Object.entries(porPlanta).forEach(([planta, ubs]) => {
+                const col = UB_PLANTA_COLOR[planta] || { color: '#94A3B8', bg: 'rgba(148,163,184,.12)' };
+                const icon = UB_PLANTA_ICON[planta] || '📍';
+
+                html += `<div style="margin-bottom:20px;">
+                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;
+                                  padding:8px 12px;background:${col.bg};border-radius:8px;
+                                  border-left:3px solid ${col.color};">
+                        <span style="font-size:14px;">${icon}</span>
+                        <span style="font-size:12px;font-weight:700;color:${col.color};">${planta}</span>
+                        <span style="font-size:10px;color:var(--muted);margin-left:auto;font-family:'DM Mono',monospace;">
+                          ${ubs.length} ubicación${ubs.length !== 1 ? 'es' : ''}
+                        </span>
+                      </div>
+                      <div class="ub-grid">`;
+
+                ubs.forEach(u => {
+                    const total = u.total_equipos || 0;
+                    const computo = u.total_computo || 0;
+                    const laptops = u.total_laptops || 0;
+                    const conPm = u.con_pm_p1 || 0;
+                    const pmPct = total > 0 ? Math.round((conPm / total) * 100) : 0;
+                    const barColor = pmPct >= 80 ? 'var(--green)' : pmPct >= 40 ? 'var(--amber)' : 'var(--red)';
+                    const ubEnc = encodeURIComponent(u.ubicacion);
+
+                    html += `<div class="ub-card" onclick="window.open('/preventivos/qr/${ubEnc}','_blank')">
+                          <div class="ub-card-top">
+                            <div class="ub-card-icon">📍</div>
+                            <div class="ub-card-info">
+                              <h4 title="${ubEsc(u.ubicacion)}">${ubEsc(u.ubicacion)}</h4>
+                              <div class="ub-planta">${planta}</div>
+                            </div>
+                            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;
+                              background:${col.bg};color:${col.color};flex-shrink:0;align-self:flex-start;">
+                              ${total} equipo${total !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+                          <div class="ub-card-chips">
+                            ${computo > 0 ? `<span class="ub-chip" style="background:rgba(59,130,246,.15);color:#93C5FD;">🖥️ ${computo} cómputo</span>` : ''}
+                            ${laptops > 0 ? `<span class="ub-chip" style="background:rgba(139,92,246,.15);color:#C4B5FD;">💻 ${laptops} laptops</span>` : ''}
+                          </div>
+                          <div style="display:flex;align-items:center;gap:8px;">
+                            <div style="flex:1;height:4px;background:var(--surface3);border-radius:999px;overflow:hidden;">
+                              <div style="height:100%;width:${pmPct}%;background:${barColor};border-radius:999px;"></div>
+                            </div>
+                            <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;flex-shrink:0;">
+                              P1 ${pmPct}%
+                            </span>
+                          </div>
+                        </div>`;
+                });
+
+                html += `</div></div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderUbStats() {
+            const totalUb = ubDatos.length;
+            const totalEq = ubDatos.reduce((s, u) => s + (u.total_equipos || 0), 0);
+            const totalComp = ubDatos.reduce((s, u) => s + (u.total_computo || 0), 0);
+            const totalLap = ubDatos.reduce((s, u) => s + (u.total_laptops || 0), 0);
+            document.getElementById('ub-stats').innerHTML = `
+                  <div class="ub-stat-card">
+                    <div class="usc-label">Ubicaciones</div>
+                    <div class="usc-val" style="color:var(--accent)">${totalUb}</div>
+                  </div>
+                  <div class="ub-stat-card">
+                    <div class="usc-label">Total equipos</div>
+                    <div class="usc-val" style="color:var(--text)">${totalEq}</div>
+                  </div>
+                  <div class="ub-stat-card">
+                    <div class="usc-label">🖥️ Cómputo</div>
+                    <div class="usc-val" style="color:#93C5FD">${totalComp}</div>
+                  </div>
+                  <div class="ub-stat-card">
+                    <div class="usc-label">💻 Laptops</div>
+                    <div class="usc-val" style="color:#C4B5FD">${totalLap}</div>
+                  </div>`;
+        }
+
+        function ubEsc(s) {
+            return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
     </script>
