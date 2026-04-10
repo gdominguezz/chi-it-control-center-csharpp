@@ -1,8 +1,6 @@
 using ChiIT.Data;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ChiIT.Controllers;
 
@@ -311,13 +309,8 @@ public class QrPageController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[QR] 500 en ubicacion='{ubicacion}': {ex}");
-            var errHtml = $"""<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Error</title></head>
-                < body style = "font-family:sans-serif;padding:40px;background:#0B0F1A;color:#F1F5F9" >
-                < h2 >⚠️ Error al cargar ubicación</ h2 >
-                < pre style = "color:#FCA5A5;font-size:12px;white-space:pre-wrap" >{ ex.GetType().Name}: { ex.Message}</ pre >
-                < a href = "javascript:history.back()" style = "color:#3B82F6" >← Volver </ a >
-                </ body ></ html > """;
+            Console.WriteLine("[QR] 500 en ubicacion=" + ubicacion + ": " + ex);
+            var errHtml = "<html><body><h2>Error: " + ex.GetType().Name + "</h2><pre>" + ex.Message + "</pre></body></html>";
             return Content(errHtml, "text/html; charset=utf-8");
         }
     }
