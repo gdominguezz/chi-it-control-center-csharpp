@@ -1970,45 +1970,63 @@
             <div style="padding:4px 0 20px;">
 
                 <!-- Header -->
+                <!-- Header -->
                 <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;margin-bottom:16px;">
+
                     <div class="panel-title">🔍 Panel de Auditoría IATF 16949</div>
+
                     <p style="font-size:12px;color:var(--muted2);margin:6px 0 14px;">
                         Muestra únicamente ubicaciones con mantenimientos preventivos registrados.
                         Marca la verificación de cada equipo como auditor.
-                        Nota: equipos de extrusora no aplican como muestra para revision de equipos en la auditoria 
+                        Nota: equipos de extrusora no aplican como muestra para revisión de equipos en la auditoría.
                     </p>
-                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                        <div style="flex:1;min-width:220px;position:relative;">
-                            <input id="aud-buscador" type="text" placeholder="🔍 Buscar ubicación..."
-                                   oninput="filtrarAuditoria()"
-                                   style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+
+                    <div style="
+                        background:rgba(245,158,11,.15);
+                        border:1px solid rgba(245,158,11,.45);
+                        color:#FCD34D;
+                        padding:10px 14px;
+                        border-radius:10px;
+                        font-size:12px;
+                        margin-top:10px;
+                        font-weight:600;
+                        ">
+                         ⚠ Regla: La misma persona que realizó el mantenimiento preventivo NO puede ser el auditor.
+                    </div>
+
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:220px;position:relative;">
+                        <input id="aud-buscador" type="text" placeholder="🔍 Buscar ubicación..."
+                               oninput="filtrarAuditoria()"
+                               style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
                                    padding:10px 14px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;
                                    transition:border-color .2s;"
-                                   onfocus="this.style.borderColor='var(--accent)'"
-                                   onblur="this.style.borderColor='var(--border2)'">
-                        </div>
-                        <select id="aud-filtro-planta" onchange="filtrarAuditoria()"
-                                style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
-                                padding:9px 12px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;cursor:pointer;outline:none;">
-                            <option value="">Todas las plantas</option>
-                            <option value="B1">🏭 B1</option>
-                            <option value="B2">🏭 B2</option>
-                            <option value="PLANTA SATELITE">🛰️ Planta Satélite</option>
-                            <option value="PLANTA MIXING">⚗️ Planta Mixing</option>
-                            <option value="BODEGA">📦 Bodega</option>
-                        </select>
-                        <select id="aud-filtro-estado" onchange="filtrarAuditoria()"
-                                style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
-                                padding:9px 12px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;cursor:pointer;outline:none;">
-                            <option value="">Todos los estados</option>
-                            <option value="pendientes">⏳ Con pendientes</option>
-                            <option value="completo">✅ Completamente verificadas</option>
-                        </select>
-                        <button class="btn btn-ghost btn-sm" onclick="cargarAuditoria()">🔄 Recargar</button>
+                               onfocus="this.style.borderColor='var(--accent)'"
+                               onblur="this.style.borderColor='var(--border2)'">
                     </div>
-                    <!-- Stats -->
-                    <div id="aud-stats" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;"></div>
+                    <select id="aud-filtro-planta" onchange="filtrarAuditoria()"
+                            style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+                                padding:9px 12px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;cursor:pointer;outline:none;">
+                        <option value="">Todas las plantas</option>
+                        <option value="B1">🏭 B1</option>
+                        <option value="B2">🏭 B2</option>
+                        <option value="PLANTA SATELITE">🛰️ Planta Satélite</option>
+                        <option value="PLANTA MIXING">⚗️ Planta Mixing</option>
+                        <option value="BODEGA">📦 Bodega</option>
+                    </select>
+                    <select id="aud-filtro-estado" onchange="filtrarAuditoria()"
+                            style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+                                padding:9px 12px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;cursor:pointer;outline:none;">
+                        <option value="">Todos los estados</option>
+                        <option value="pendientes">⏳ Con pendientes</option>
+                        <option value="completo">✅ Completamente verificadas</option>
+                    </select>
+                    <button class="btn btn-ghost btn-sm" onclick="cargarAuditoria()">🔄 Recargar</button>
                 </div>
+                <!-- Stats -->
+                <div id="aud-stats" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;"></div>
+            </div>
 
                 <!-- Panel detalle equipo (oculto por default) -->
                 <div id="aud-detalle-panel" style="display:none;background:var(--surface);border:1px solid var(--accent);
