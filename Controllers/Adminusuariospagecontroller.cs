@@ -15,7 +15,7 @@ public class AdminUsuariosPageController : ControllerBase
     [HttpGet("admin/usuarios")]
     public IActionResult Panel([FromQuery] string? usuario)
     {
-        // Verificar que sea ADMIN
+        // Verificar que sea ADMIN o AUDITOR
         var usr = Request.Cookies["usuario"] ?? usuario ?? "";
         if (string.IsNullOrWhiteSpace(usr))
             return Content(HtmlAccesoDenegado(), "text/html; charset=utf-8");
@@ -25,15 +25,16 @@ public class AdminUsuariosPageController : ControllerBase
         chk.CommandText = "SELECT rol FROM public.usuarios WHERE usuario=@u AND activo=true";
         chk.Parameters.AddWithValue("u", usr.ToUpper());
         var rol = chk.ExecuteScalar()?.ToString();
-        if (rol != "ADMIN")
+        if (rol != "ADMIN" && rol != "AUDITOR")
             return Content(HtmlAccesoDenegado(), "text/html; charset=utf-8");
 
-        return Content(HtmlPage(), "text/html; charset=utf-8");
+        return Content(HtmlPage(rol), "text/html; charset=utf-8");
     }
 
     // ────────────────────────────────────────────────────────────────────────
-    private static string HtmlPage()
+    private static string HtmlPage(string rol = "ADMIN")
     {
+        bool soloLectura = rol == "AUDITOR";
         var sb = new StringBuilder();
         sb.AppendLine("<!DOCTYPE html>");
         sb.AppendLine("<html lang=\"es\">");
@@ -55,6 +56,8 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("}");
         sb.AppendLine("*{box-sizing:border-box;margin:0;padding:0;}");
         sb.AppendLine("body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}");
+
+        sb.AppendLine(".badge-auditor{background:rgba(6,182,212,.18);border:1px solid rgba(6,182,212,.4);color:#67e8f9;}");
 
         // ── Top bar ────────────────────────────────────────────────────────
         sb.AppendLine(".top-bar{background:linear-gradient(135deg,#0a1628,#080C14);border-bottom:1px solid var(--border2);padding:14px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);}");
@@ -177,19 +180,36 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("  <div class=\"top-icon\">👥</div>");
         sb.AppendLine("  <div class=\"top-title\"><h1>Gestión de Usuarios</h1><p>Panel de administración — ChiIT</p></div>");
         sb.AppendLine("  <div class=\"top-actions\">");
-        sb.AppendLine("    <button class=\"btn btn-primary\" onclick=\"abrirCrear()\">➕ Nuevo Usuario</button>");
+        if (!soloLectura)
+            sb.AppendLine("    <button class=\"btn btn-primary\" onclick=\"abrirCrear()\">➕ Nuevo Usuario</button>");
+        else
+            sb.AppendLine("    <span class=\"badge badge-auditor\" style=\"font-size:11px;padding:5px 12px;\">👁 Modo Auditor — Solo lectura</span>");
+        // User chip
+        sb.AppendLine("    <div class=\"user-chip\" id=\"userChipAdmin\" onclick=\"toggleChipAdmin()\">");
+        sb.AppendLine("      👤 <span id=\"adminNombreChip\">Cargando...</span>");
+        sb.AppendLine("      <span class=\"chip-arrow\">▼</span>");
+        sb.AppendLine("      <div class=\"user-dropdown\">");
+        sb.AppendLine("        <div class=\"dropdown-header\">");
+        sb.AppendLine("          <div class=\"d-name\" id=\"adminDropNombre\">—</div>");
+        sb.AppendLine("          <div class=\"d-role\" id=\"adminDropRol\">—</div>");
+        sb.AppendLine("        </div>");
+        sb.AppendLine("        <button class=\"dropdown-item\" onclick=\"window.location.href='/menu'\">🏠 &nbsp;Menú Principal</button>");
+        sb.AppendLine("        <div class=\"dropdown-sep\"></div>");
+        sb.AppendLine("        <button class=\"dropdown-item danger\" onclick=\"cerrarSesionAdmin()\">⏻ &nbsp;Cerrar sesión</button>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
         sb.AppendLine("  </div>");
         sb.AppendLine("</div>");
 
         // ── Main ───────────────────────────────────────────────────────────
         sb.AppendLine("<div class=\"main\">");
 
-        // Stats
         sb.AppendLine("  <div class=\"stats-row\">");
         sb.AppendLine("    <div class=\"stat-card\"><span class=\"stat-label\">Total</span><span class=\"stat-val\" id=\"statTotal\">—</span><span class=\"stat-sub\">usuarios registrados</span></div>");
         sb.AppendLine("    <div class=\"stat-card\"><span class=\"stat-label\">Activos</span><span class=\"stat-val\" style=\"color:var(--green)\" id=\"statActivos\">—</span><span class=\"stat-sub\">en servicio</span></div>");
         sb.AppendLine("    <div class=\"stat-card\"><span class=\"stat-label\">Inactivos</span><span class=\"stat-val\" style=\"color:var(--red)\" id=\"statInactivos\">—</span><span class=\"stat-sub\">deshabilitados</span></div>");
         sb.AppendLine("    <div class=\"stat-card\"><span class=\"stat-label\">Admins</span><span class=\"stat-val\" style=\"color:var(--purple)\" id=\"statAdmins\">—</span><span class=\"stat-sub\">con rol ADMIN</span></div>");
+        sb.AppendLine("    <div class=\"stat-card\"><span class=\"stat-label\">Auditores</span><span class=\"stat-val\" style=\"color:var(--cyan)\" id=\"statAuditores\">—</span><span class=\"stat-sub\">con rol AUDITOR</span></div>");
         sb.AppendLine("    <div class=\"stat-card\"><span class=\"stat-label\">Temporales</span><span class=\"stat-val\" style=\"color:var(--amber)\" id=\"statTemp\">—</span><span class=\"stat-sub\">contraseña temporal</span></div>");
         sb.AppendLine("  </div>");
 
@@ -199,6 +219,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("    <select class=\"filter-sel\" id=\"filtroRol\" onchange=\"filtrar()\">");
         sb.AppendLine("      <option value=\"\">Todos los roles</option>");
         sb.AppendLine("      <option value=\"ADMIN\">ADMIN</option>");
+        sb.AppendLine("      <option value=\"AUDITOR\">AUDITOR</option>");
         sb.AppendLine("      <option value=\"USER\">USER</option>");
         sb.AppendLine("    </select>");
         sb.AppendLine("    <select class=\"filter-sel\" id=\"filtroActivo\" onchange=\"filtrar()\">");
@@ -240,7 +261,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("      </div>");
         sb.AppendLine("      <div class=\"field-row\">");
         sb.AppendLine("        <div class=\"field\"><label>Contraseña</label><input id=\"mPassword\" type=\"password\" placeholder=\"Mínimo 6 caracteres\"><div class=\"field-hint\" id=\"pwdHint\">Dejar vacío para no cambiar</div></div>");
-        sb.AppendLine("        <div class=\"field\"><label>Rol</label><select id=\"mRol\"><option value=\"USER\">USER</option><option value=\"ADMIN\">ADMIN</option></select></div>");
+        sb.AppendLine("        <div class=\"field\"><label>Rol</label><select id=\"mRol\"><option value=\"USER\">USER</option><option value=\"AUDITOR\">AUDITOR</option><option value=\"ADMIN\">ADMIN</option></select></div>");
         sb.AppendLine("      </div>");
         sb.AppendLine("      <div class=\"field-row\">");
         sb.AppendLine("        <div class=\"field\"><label>Estado de cuenta</label>");
@@ -300,12 +321,13 @@ public class AdminUsuariosPageController : ControllerBase
 
         // ── JavaScript ──────────────────────────────────────────────────────
         sb.AppendLine("<script>");
+        sb.AppendLine($"const soloLectura={soloLectura.ToString().ToLower()};");
         sb.AppendLine("let todosUsuarios=[];let confirmCallback=null;const usuarioActual=(sessionStorage.getItem('usuario')||localStorage.getItem('usuario')||'').toUpperCase();");
 
         // cargarUsuarios
         sb.AppendLine("async function cargarUsuarios(){");
         sb.AppendLine("  try{");
-        sb.AppendLine("    const res=await fetch('/admin/usuarios/api',{headers:{'X-Usuario':usuarioActual}});");
+        sb.AppendLine("    const res=await fetch('/admin/usuarios/api',{credentials:'include',headers:{'X-Usuario':usuarioActual}});");
         sb.AppendLine("    const data=await res.json();");
         sb.AppendLine("    todosUsuarios=data.usuarios||[];");
         sb.AppendLine("    actualizarStats();");
@@ -320,7 +342,8 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("  document.getElementById('statTotal').textContent=todosUsuarios.length;");
         sb.AppendLine("  document.getElementById('statActivos').textContent=todosUsuarios.filter(u=>u.activo===true||u.activo==='true').length;");
         sb.AppendLine("  document.getElementById('statInactivos').textContent=todosUsuarios.filter(u=>u.activo!==true&&u.activo!=='true').length;");
-        sb.AppendLine("  document.getElementById('statAdmins').textContent=todosUsuarios.filter(u=>u.rol==='ADMIN'||u.rol==='Admin').length;");
+        sb.AppendLine("  document.getElementById('statAdmins').textContent=todosUsuarios.filter(u=>u.rol==='ADMIN').length;");
+        sb.AppendLine("  document.getElementById('statAuditores').textContent=todosUsuarios.filter(u=>u.rol==='AUDITOR').length;");
         sb.AppendLine("  document.getElementById('statTemp').textContent=todosUsuarios.filter(u=>u.password_temporal===true||u.password_temporal==='true').length;");
         sb.AppendLine("}");
 
@@ -347,11 +370,15 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("    const ac=u.activo===true||u.activo==='true'||u.activo===1;");
         sb.AppendLine("    const col=avatarColor(u.usuario);");
         sb.AppendLine("    const av=`<div class=\"avatar\" style=\"background:${col}22;border-color:${col}44;color:${col}\">${u.nombre.charAt(0).toUpperCase()}</div>`;");
-        sb.AppendLine("    const rolBadge=u.rol==='ADMIN'?'<span class=\"badge badge-admin\">⚡ Admin</span>':'<span class=\"badge badge-user\">👤 User</span>';");
+        sb.AppendLine("    const rolBadge=u.rol==='ADMIN'?'<span class=\"badge badge-admin\">⚡ Admin</span>':u.rol==='AUDITOR'?'<span class=\"badge badge-auditor\">🔍 Auditor</span>':'<span class=\"badge badge-user\">👤 User</span>';");
         sb.AppendLine("    const estadoBadge=ac?'<span class=\"badge badge-on\">● Activo</span>':'<span class=\"badge badge-off\">○ Inactivo</span>';");
         sb.AppendLine("    const pt=u.password_temporal===true||u.password_temporal==='true';const tmpBadge=pt?'<span class=\"badge badge-temp\">⚠ Temporal</span>':'<span class=\"badge badge-on\">✓ Fija</span>';");
         sb.AppendLine("    const acceso=u.ultimo_acceso?fmtFecha(u.ultimo_acceso):'<span style=\"color:var(--muted)\">Nunca</span>';");
-        sb.AppendLine("    const creado=u.creado_en?fmtFecha(u.creado_en):'—';");
+        sb.AppendLine("    const acciones=soloLectura");
+        sb.AppendLine("      ?'<span style=\"font-size:11px;color:var(--muted)\">Solo lectura</span>'");
+        sb.AppendLine("      :`<button class=\"btn btn-primary btn-sm\" onclick=\"abrirEditar(${u.id})\">✏️</button>`");
+        sb.AppendLine("       +`<button class=\"btn btn-amber btn-sm\" onclick=\"abrirReset(${u.id},'${u.usuario}')\">🔑</button>`");
+        sb.AppendLine("       +`<button class=\"btn btn-sm\" style=\"background:${ac?'rgba(239,68,68,.2)':'rgba(16,185,129,.2)'};color:${ac?'#fca5a5':'#6ee7b7'};border:1px solid ${ac?'rgba(239,68,68,.3)':'rgba(16,185,129,.3)'}\" onclick=\"toggleEstado(${u.id},${ac},'${u.usuario}')\">${ac?'🚫':'✅'}</button>`;");
         sb.AppendLine("    return `<div class=\"user-row\">" +
                        "<div class=\"cell\">${av}</div>" +
                        "<div class=\"cell col-login\" style=\"font-family:'DM Mono',monospace;font-size:11px;font-weight:600\">${u.usuario}</div>" +
@@ -360,11 +387,7 @@ public class AdminUsuariosPageController : ControllerBase
                        "<div class=\"cell\">${estadoBadge}</div>" +
                        "<div class=\"cell\">${tmpBadge}</div>" +
                        "<div class=\"cell cell-muted col-acceso\">${acceso}</div>" +
-                       "<div class=\"cell col-creado\"><div class=\"row-actions\">" +
-                       "<button class=\"btn btn-primary btn-sm\" onclick=\"abrirEditar(${u.id})\">✏️</button>" +
-                       "<button class=\"btn btn-amber btn-sm\" onclick=\"abrirReset(${u.id},'${u.usuario}')\">🔑</button>" +
-                       "<button class=\"btn btn-sm\" style=\"background:${ac?'rgba(239,68,68,.2)':'rgba(16,185,129,.2)'};color:${ac?'#fca5a5':'#6ee7b7'};border:1px solid ${ac?'rgba(239,68,68,.3)':'rgba(16,185,129,.3)'}\" onclick=\"toggleEstado(${u.id},${ac},'${u.usuario}')\">${ac?'🚫':'✅'}</button>" +
-                       "</div></div>" +
+                       "<div class=\"cell col-creado\"><div class=\"row-actions\">${acciones}</div></div>" +
                        "</div>`;");
         sb.AppendLine("  }).join('');");
         sb.AppendLine("}");
@@ -378,6 +401,7 @@ public class AdminUsuariosPageController : ControllerBase
 
         // Abrir crear
         sb.AppendLine("function abrirCrear(){");
+        sb.AppendLine("  if(soloLectura)return;
         sb.AppendLine("  document.getElementById('mId').value='';");
         sb.AppendLine("  document.getElementById('mTitulo').textContent='Nuevo Usuario';");
         sb.AppendLine("  document.getElementById('mSub').textContent='Completa los datos para registrar el usuario';");
@@ -399,6 +423,7 @@ public class AdminUsuariosPageController : ControllerBase
 
         // Abrir editar
         sb.AppendLine("function abrirEditar(id){");
+        sb.AppendLine("  if(soloLectura)return;");
         sb.AppendLine("  const u=todosUsuarios.find(x=>x.id===id);if(!u)return;");
         sb.AppendLine("  document.getElementById('mId').value=u.id;");
         sb.AppendLine("  document.getElementById('mTitulo').textContent='Editar Usuario';");
@@ -428,6 +453,7 @@ public class AdminUsuariosPageController : ControllerBase
 
         // guardarUsuario
         sb.AppendLine("async function guardarUsuario(){");
+        sb.AppendLine("  if(soloLectura)return;");
         sb.AppendLine("  const id=document.getElementById('mId').value;");
         sb.AppendLine("  const usuario=document.getElementById('mUsuario').value.trim().toUpperCase();");
         sb.AppendLine("  const nombre=document.getElementById('mNombre').value.trim();");
@@ -447,7 +473,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("  const url=id?`/admin/usuarios/api/${id}`:'/admin/usuarios/api';");
         sb.AppendLine("  const method=id?'PUT':'POST';");
         sb.AppendLine("  try{");
-        sb.AppendLine("    const res=await fetch(url,{method,headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(body)});");
+        sb.AppendLine("    const res=await fetch(url,{method,credentials:'include',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(body)});");
         sb.AppendLine("    const data=await res.json();");
         sb.AppendLine("    if(data.ok){cerrarModal();toast(id?'Usuario actualizado':'Usuario creado correctamente',true);cargarUsuarios();}");
         sb.AppendLine("    else{errEl.textContent=data.error||'Error desconocido';errEl.style.display='block';}");
@@ -457,6 +483,7 @@ public class AdminUsuariosPageController : ControllerBase
 
         // toggleEstado
         sb.AppendLine("function toggleEstado(id,activo,usuario){");
+        sb.AppendLine("  if(soloLectura)return;");
         sb.AppendLine("  const accion=activo?'desactivar':'activar';");
         sb.AppendLine("  abrirConfirm(");
         sb.AppendLine("    activo?'🚫':'✅',");
@@ -465,7 +492,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("    activo?'btn-danger':'btn-success',");
         sb.AppendLine("    activo?'Desactivar':'Activar',");
         sb.AppendLine("    async()=>{");
-        sb.AppendLine("      const res=await fetch(`/admin/usuarios/api/${id}/estado`,{method:'PATCH',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify({activo:!activo})});");
+        sb.AppendLine("      const res=await fetch(`/admin/usuarios/api/${id}/estado`,{method:'PATCH',credentials:'include',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify({activo:!activo})});");
         sb.AppendLine("      const data=await res.json();");
         sb.AppendLine("      if(data.ok){toast(`Usuario ${accion==='activar'?'activado':'desactivado'}`,true);document.getElementById('filtroActivo').value='';cargarUsuarios();}");
         sb.AppendLine("      else toast('Error: '+(data.error||'desconocido'),false);");
@@ -488,6 +515,7 @@ public class AdminUsuariosPageController : ControllerBase
 
         // Reset password modal
         sb.AppendLine("function abrirReset(id,usuario){");
+        sb.AppendLine("  if(soloLectura)return;");
         sb.AppendLine("  document.getElementById('resetId').value=id;");
         sb.AppendLine("  document.getElementById('resetSub').textContent='Usuario: '+usuario;");
         sb.AppendLine("  document.getElementById('resetPwd').value='';");
@@ -498,13 +526,14 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("}");
         sb.AppendLine("function cerrarReset(){document.getElementById('modalReset').classList.remove('show');}");
         sb.AppendLine("async function confirmarReset(){");
+        sb.AppendLine("  if(soloLectura)return;");
         sb.AppendLine("  const id=document.getElementById('resetId').value;");
         sb.AppendLine("  const pwd=document.getElementById('resetPwd').value;");
         sb.AppendLine("  const pwd2=document.getElementById('resetPwd2').value;");
         sb.AppendLine("  const errEl=document.getElementById('resetErr');");
         sb.AppendLine("  if(pwd.length<6){errEl.textContent='Mínimo 6 caracteres';errEl.style.display='block';return;}");
         sb.AppendLine("  if(pwd!==pwd2){errEl.textContent='Las contraseñas no coinciden';errEl.style.display='block';return;}");
-        sb.AppendLine("  const res=await fetch(`/admin/usuarios/api/${id}/reset-password`,{method:'PATCH',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify({password:pwd})});");
+        sb.AppendLine("  const res=await fetch(`/admin/usuarios/api/${id}/reset-password`,{method:'PATCH',credentials:'include',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify({password:pwd})});");
         sb.AppendLine("  const data=await res.json();");
         sb.AppendLine("  if(data.ok){cerrarReset();toast('Contraseña restablecida',true);cargarUsuarios();}");
         sb.AppendLine("  else{errEl.textContent=data.error||'Error';errEl.style.display='block';}");
@@ -532,6 +561,6 @@ public class AdminUsuariosPageController : ControllerBase
         <style>body{font-family:sans-serif;background:#080C14;color:#F1F5F9;display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px;}
         h1{font-size:22px;}p{font-size:13px;color:#64748B;}</style></head>
         <body><div style="font-size:48px">🚫</div><h1>Acceso Denegado</h1>
-        <p>Se requiere rol ADMIN para acceder a este panel.</p></body></html>
+        <p>Se requiere rol ADMIN o AUDITOR para acceder a este panel.</p></body></html>
         """;
 }

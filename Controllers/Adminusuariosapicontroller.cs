@@ -14,18 +14,21 @@ public class AdminUsuariosApiController : ControllerBase
     public AdminUsuariosApiController(DbConnectionPool db) => _db = db;
 
     // ── Helpers ───────────────────────────────────────────────────────────
-    private bool EsAdmin()
+    private string? ObtenerRol()
     {
         var usr = Request.Cookies["usuario"]
                ?? Request.Headers["X-Usuario"].FirstOrDefault()
                ?? "";
-        if (string.IsNullOrWhiteSpace(usr)) return false;
+        if (string.IsNullOrWhiteSpace(usr)) return null;
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = "SELECT rol FROM public.usuarios WHERE usuario=@u AND activo=true";
         cmd.Parameters.AddWithValue("u", usr.ToUpper());
-        return cmd.ExecuteScalar()?.ToString() == "ADMIN";
+        return cmd.ExecuteScalar()?.ToString();
     }
+
+    private bool EsAdmin() => ObtenerRol() == "ADMIN";
+    private bool EsAdminOAuditor() { var r = ObtenerRol(); return r == "ADMIN" || r == "AUDITOR"; }
 
     private static string HashPassword(string password)
     {
@@ -37,7 +40,7 @@ public class AdminUsuariosApiController : ControllerBase
     [HttpGet("admin/usuarios/api")]
     public IActionResult ObtenerTodos()
     {
-        if (!EsAdmin()) return Ok(new { error = "No autorizado" });
+        if (!EsAdminOAuditor()) return Ok(new { error = "No autorizado" });
 
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
@@ -73,7 +76,7 @@ public class AdminUsuariosApiController : ControllerBase
     [HttpGet("admin/usuarios/api/{id:int}")]
     public IActionResult ObtenerUno(int id)
     {
-        if (!EsAdmin()) return Ok(new { error = "No autorizado" });
+        if (!EsAdminOAuditor()) return Ok(new { error = "No autorizado" });
 
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
