@@ -1477,6 +1477,8 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            text-decoration: none;
+            color: inherit;
         }
 
             .ub-card:hover {
@@ -3501,7 +3503,7 @@
                     const ubLimpia = (u.ubicacion || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
                     const ubEnc = encodeURIComponent(ubLimpia);
 
-                    html += `<div class="ub-card" onclick="window.open('/preventivos/qr?u=${ubEnc}','_blank')">
+                    html += `<a class="ub-card" href="/preventivos/qr?u=${ubEnc}" target="_blank" rel="noopener">
                               <div class="ub-card-top">
                                 <div class="ub-card-icon">📍</div>
                                 <div class="ub-card-info">
@@ -3525,7 +3527,7 @@
                                   P1 ${pmPct}%
                                 </span>
                               </div>
-                            </div>`;
+                            </a>`;
                 });
 
                 html += `</div></div>`;
