@@ -1082,7 +1082,6 @@ public class PreventivoController : ControllerBase
 
         return Ok(new { ubicaciones = lista });
     }
-}
 
     // ══════════════════════════════════════════════════════════════════════
     // POST /PREVENTIVO/VERIFICAR/{id}
@@ -1256,7 +1255,9 @@ public class PreventivoController : ControllerBase
         return Ok(new { equipos = lista });
     }
 
-// ── Modelo recalendarización ──────────────────────────────────────────────
+    // ── Modelo recalendarización ──────────────────────────────────────────────
+} // fin PreventivoController
+
 public class RecalendarizarRequest
 {
     public int IdDispositivo { get; set; }
