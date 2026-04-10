@@ -3067,7 +3067,9 @@
                              <th style="padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Sem. Relativa</th>
                              <th style="padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Sem. Real / Año</th>
                              <th style="padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Lunes → Viernes</th>
-                             <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Equipos</th>
+                             <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">🖥️ Cómputo</th>
+                             <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">💻 Laptops</th>
+                             <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Total</th>
                              <th style="padding:9px 12px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Acción</th>
                            </tr>
                          </thead><tbody>`;
@@ -3087,6 +3089,16 @@
                            </td>
                            <td style="padding:10px 12px;color:var(--muted2);font-family:'DM Mono',monospace;">${realLabel}</td>
                            <td style="padding:10px 12px;">${lunesStr} <span style="color:var(--muted)">→</span> ${viernesStr}</td>
+                           <td style="padding:10px 12px;text-align:center;">
+                             <span style="font-family:'DM Mono',monospace;color:#93C5FD;font-weight:600;">
+                               ${s.total_computo ?? s.totalComputo ?? '—'}
+                             </span>
+                           </td>
+                           <td style="padding:10px 12px;text-align:center;">
+                             <span style="font-family:'DM Mono',monospace;color:#C4B5FD;font-weight:600;">
+                               ${s.total_laptops ?? s.totalLaptops ?? '—'}
+                             </span>
+                           </td>
                            <td style="padding:10px 12px;text-align:center;">
                              <b style="color:var(--text);">${s.total_equipos || s.totalEquipos}</b>
                            </td>
@@ -3209,6 +3221,8 @@
         // ── Resumen del calendario ────────────────────────────────────────────────
         function renderSummary(semanas, periodo) {
             const totalEq = semanas.reduce((s, w) => s + (w.total_equipos || w.totalEquipos || 0), 0);
+            const totalComp = semanas.reduce((s, w) => s + (w.total_computo || w.totalComputo || 0), 0);
+            const totalLap = semanas.reduce((s, w) => s + (w.total_laptops || w.totalLaptops || 0), 0);
             const totalSem = semanas.length;
             const color = periodo === 1 ? 'var(--accent)' : 'var(--purple)';
             const colVal = periodo === 1 ? '#93C5FD' : '#C4B5FD';
@@ -3217,13 +3231,17 @@
                   <div class="cs-label">Semanas programadas</div>
                   <div class="cs-val" style="color:${color}">${totalSem}</div>
                 </div>
-                <div class="cal-summary-card" style="border-left:3px solid ${colVal}">
-                  <div class="cs-label">Total equipos planta</div>
-                  <div class="cs-val" style="color:${colVal}">${totalEq}</div>
+                <div class="cal-summary-card" style="border-left:3px solid #93C5FD">
+                  <div class="cs-label">🖥️ Cómputo total</div>
+                  <div class="cs-val" style="color:#93C5FD">${totalComp}</div>
+                </div>
+                <div class="cal-summary-card" style="border-left:3px solid #C4B5FD">
+                  <div class="cs-label">💻 Laptops total</div>
+                  <div class="cs-val" style="color:#C4B5FD">${totalLap}</div>
                 </div>
                 <div class="cal-summary-card" style="border-left:3px solid var(--green)">
-                  <div class="cs-label">Equipos por semana (prom.)</div>
-                  <div class="cs-val" style="color:var(--green)">${totalSem > 0 ? Math.round(totalEq / totalSem) : 0}</div>
+                  <div class="cs-label">Total equipos planta</div>
+                  <div class="cs-val" style="color:var(--green)">${totalEq}</div>
                 </div>`;
         }
 

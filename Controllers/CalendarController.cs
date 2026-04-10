@@ -469,31 +469,39 @@ public class CalendarioController : ControllerBase
     {
         var nombreDB = PlantaNombreDB[planta];
 
-        using var cntCmd = conn.CreateCommand();
-        cntCmd.CommandText = """
+        // ── Contar laptops ────────────────────────────────────────────────
+        using var cntLap = conn.CreateCommand();
+        cntLap.CommandText = """
+            SELECT COUNT(*) FROM public.mantenimientos_preventivos
+            WHERE planta = @p AND nombre_dispositivo = 'LAPTOP'
+            """;
+        cntLap.Parameters.AddWithValue("p", nombreDB);
+        var totalLaptops = Convert.ToInt64(cntLap.ExecuteScalar()!);
+
+        // ── Contar cómputo (CPU + Impresora Térmica + UPS) ────────────────
+        using var cntComp = conn.CreateCommand();
+        cntComp.CommandText = """
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
             WHERE planta = @p
-              AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA')
+              AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
             """;
-        cntCmd.Parameters.AddWithValue("p", nombreDB);
-        var total = Convert.ToInt64(cntCmd.ExecuteScalar()!);
+        cntComp.Parameters.AddWithValue("p", nombreDB);
+        var totalComputo = Convert.ToInt64(cntComp.ExecuteScalar()!);
 
-        // PM realizados conteo por periodo
-        using var pmCmd = conn.CreateCommand();
-        pmCmd.CommandText = periodo == 1
-            ? "SELECT COUNT(*) FROM public.mantenimientos_preventivos WHERE planta=@p AND preventivo_digital IS NOT NULL"
-            : "SELECT COUNT(*) FROM public.mantenimientos_preventivos WHERE planta=@p AND preventivo_digital_p2 IS NOT NULL";
-        pmCmd.Parameters.AddWithValue("p", nombreDB);
-        var realizados = Convert.ToInt64(pmCmd.ExecuteScalar()!);
+        var total = totalLaptops + totalComputo;
 
         int equiposPorSemana = total > 0 ? (int)Math.Ceiling((double)total / SemanasDistribucion) : 0;
+        int laptopsPorSemana = totalLaptops > 0 ? (int)Math.Ceiling((double)totalLaptops / SemanasDistribucion) : 0;
+        int computoPorSemana = totalComputo > 0 ? (int)Math.Ceiling((double)totalComputo / SemanasDistribucion) : 0;
 
         var result = new List<SemanaDistribucion>();
         for (int rel = 1; rel <= SemanasDistribucion; rel++)
         {
             var (semReal, anioReal, lunes, viernes) = FechasDeSemana(anio, semIni, rel);
-            var equiposSemana = Math.Min(equiposPorSemana, (int)(total - (long)(rel - 1) * equiposPorSemana));
-            if (equiposSemana < 0) equiposSemana = 0;
+
+            int equiposSemana = (int)Math.Max(0, Math.Min(equiposPorSemana, total - (long)(rel - 1) * equiposPorSemana));
+            int laptopsSemana = (int)Math.Max(0, Math.Min(laptopsPorSemana, totalLaptops - (long)(rel - 1) * laptopsPorSemana));
+            int computoSemana = (int)Math.Max(0, Math.Min(computoPorSemana, totalComputo - (long)(rel - 1) * computoPorSemana));
 
             result.Add(new SemanaDistribucion
             {
@@ -503,6 +511,8 @@ public class CalendarioController : ControllerBase
                 LunesISO = lunes,
                 ViernesISO = viernes,
                 TotalEquipos = equiposSemana,
+                TotalComputo = computoSemana,
+                TotalLaptops = laptopsSemana,
                 Periodo = periodo,
             });
         }
@@ -519,14 +529,22 @@ public class CalendarioController : ControllerBase
     {
         var nombreDB = PlantaNombreDB[planta];
 
-        using var cntCmd = conn.CreateCommand();
-        cntCmd.CommandText = """
+        using var cntLap = conn.CreateCommand();
+        cntLap.CommandText = """
+            SELECT COUNT(*) FROM public.mantenimientos_preventivos
+            WHERE planta = @p AND nombre_dispositivo = 'LAPTOP'
+            """;
+        cntLap.Parameters.AddWithValue("p", nombreDB);
+        var totalLaptops = Convert.ToInt32(cntLap.ExecuteScalar()!);
+
+        using var cntComp = conn.CreateCommand();
+        cntComp.CommandText = """
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
             WHERE planta = @p
-              AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA')
+              AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
             """;
-        cntCmd.Parameters.AddWithValue("p", nombreDB);
-        var total = Convert.ToInt32(cntCmd.ExecuteScalar()!);
+        cntComp.Parameters.AddWithValue("p", nombreDB);
+        var totalComputo = Convert.ToInt32(cntComp.ExecuteScalar()!);
 
         var (semReal, anioReal, lunes, viernes) = FechasDeSemana(anio, semIni, 1);
 
@@ -539,7 +557,9 @@ public class CalendarioController : ControllerBase
                 AnioReal       = anioReal,
                 LunesISO       = lunes,
                 ViernesISO     = viernes,
-                TotalEquipos   = total,
+                TotalEquipos   = totalLaptops + totalComputo,
+                TotalComputo   = totalComputo,
+                TotalLaptops   = totalLaptops,
                 Periodo        = periodo,
             }
         };
@@ -605,5 +625,7 @@ public class SemanaDistribucion
     public string LunesISO { get; set; } = "";
     public string ViernesISO { get; set; } = "";
     public int TotalEquipos { get; set; }
+    public int TotalComputo { get; set; }   // CPU + Impresora Térmica + UPS
+    public int TotalLaptops { get; set; }
     public int Periodo { get; set; }
 }
