@@ -1477,8 +1477,6 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            text-decoration: none;
-            color: inherit;
         }
 
             .ub-card:hover {
@@ -1593,6 +1591,7 @@
             <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard</button>
             <button class="tab-btn" onclick="switchTab('calendario')">📅 Calendario PM</button>
             <button class="tab-btn" onclick="switchTab('ubicaciones')">📍 Ubicaciones</button>
+            <button class="tab-btn" id="tab-btn-auditoria" onclick="switchTab('auditoria')" style="display:none">🔍 Auditoría IATF</button>
         </div>
 
         <!-- CONTENIDO TABLA -->
@@ -1669,7 +1668,7 @@
 
                 <button class="btn btn-cyan" onclick="generarTodosQR()">⚡ Generar Todos los QR</button>
                 <div class="toolbar-sep"></div>
-                <button class="btn btn-ghost" onclick="window.location.href='menu.html'">← Menú</button>
+                
             </div>
 
             <!-- TABLA -->
@@ -1967,6 +1966,72 @@
             </div>
         </div><!-- /tab-ubicaciones -->
 
+        <div id="tab-auditoria" class="tab-content">
+            <div style="padding:4px 0 20px;">
+
+                <!-- Header -->
+                <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;margin-bottom:16px;">
+                    <div class="panel-title">🔍 Panel de Auditoría IATF 16949</div>
+                    <p style="font-size:12px;color:var(--muted2);margin:6px 0 14px;">
+                        Muestra únicamente ubicaciones con mantenimientos preventivos registrados.
+                        Marca la verificación de cada equipo como auditor.
+                    </p>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <div style="flex:1;min-width:220px;position:relative;">
+                            <input id="aud-buscador" type="text" placeholder="🔍 Buscar ubicación..."
+                                   oninput="filtrarAuditoria()"
+                                   style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+                                   padding:10px 14px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;
+                                   transition:border-color .2s;"
+                                   onfocus="this.style.borderColor='var(--accent)'"
+                                   onblur="this.style.borderColor='var(--border2)'">
+                        </div>
+                        <select id="aud-filtro-planta" onchange="filtrarAuditoria()"
+                                style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+                                padding:9px 12px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;cursor:pointer;outline:none;">
+                            <option value="">Todas las plantas</option>
+                            <option value="B1">🏭 B1</option>
+                            <option value="B2">🏭 B2</option>
+                            <option value="PLANTA SATELITE">🛰️ Planta Satélite</option>
+                            <option value="PLANTA MIXING">⚗️ Planta Mixing</option>
+                            <option value="BODEGA">📦 Bodega</option>
+                        </select>
+                        <select id="aud-filtro-estado" onchange="filtrarAuditoria()"
+                                style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+                                padding:9px 12px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;cursor:pointer;outline:none;">
+                            <option value="">Todos los estados</option>
+                            <option value="pendientes">⏳ Con pendientes</option>
+                            <option value="completo">✅ Completamente verificadas</option>
+                        </select>
+                        <button class="btn btn-ghost btn-sm" onclick="cargarAuditoria()">🔄 Recargar</button>
+                    </div>
+                    <!-- Stats -->
+                    <div id="aud-stats" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;"></div>
+                </div>
+
+                <!-- Panel detalle equipo (oculto por default) -->
+                <div id="aud-detalle-panel" style="display:none;background:var(--surface);border:1px solid var(--accent);
+                     border-radius:14px;padding:18px 20px;margin-bottom:16px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+                        <div>
+                            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:4px;">📍 Detalle de ubicación</div>
+                            <div id="aud-detalle-titulo" style="font-size:15px;font-weight:700;color:var(--text);"></div>
+                        </div>
+                        <button class="btn btn-ghost btn-sm" onclick="cerrarDetalleAuditoria()">✕ Cerrar</button>
+                    </div>
+                    <div id="aud-detalle-body" style="display:flex;flex-direction:column;gap:8px;"></div>
+                </div>
+
+                <!-- Grid de ubicaciones auditoría -->
+                <div id="aud-container">
+                    <div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">
+                        🔒 Solo visible para administradores. Cargando...
+                    </div>
+                </div>
+
+            </div>
+        </div><!-- /tab-auditoria -->
+
     </div><!-- /main -->
 
     <script>
@@ -2037,6 +2102,9 @@
 
                     // ── Mostrar botón "Eliminar Plazo" solo a ADMIN ──
                     if (rolActual === 'ADMIN') {
+                        // Mostrar tab de auditoría solo a ADMIN
+                        const tabBtnAuditoria = document.getElementById('tab-btn-auditoria');
+                        if (tabBtnAuditoria) tabBtnAuditoria.style.display = '';
                         const btnElim = document.getElementById('btn-eliminar-plazo');
                         if (btnElim) btnElim.style.display = 'inline-flex';
                     }
@@ -3155,6 +3223,7 @@
             if (tab === 'dashboard') cargarDashboard();
             if (tab === 'calendario') onTabCalendarioActivado();
             if (tab === 'ubicaciones') cargarUbicaciones();
+            if (tab === 'auditoria') cargarAuditoria();
         }
 
         // ── Cambiar planta activa ────────────────────────────────────────────────
@@ -3500,10 +3569,9 @@
                     const conPm = u.con_pm_p1 || 0;
                     const pmPct = total > 0 ? Math.round((conPm / total) * 100) : 0;
                     const barColor = pmPct >= 80 ? 'var(--green)' : pmPct >= 40 ? 'var(--amber)' : 'var(--red)';
-                    const ubLimpia = (u.ubicacion || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
-                    const ubEnc = encodeURIComponent(ubLimpia);
+                    const ubEnc = encodeURIComponent(u.ubicacion);
 
-                    html += `<a class="ub-card" href="/preventivos/qr?u=${ubEnc}" target="_blank" rel="noopener">
+                    html += `<div class="ub-card" onclick="window.open('/preventivos/qr/${ubEnc}','_blank')">
                               <div class="ub-card-top">
                                 <div class="ub-card-icon">📍</div>
                                 <div class="ub-card-info">
@@ -3527,7 +3595,7 @@
                                   P1 ${pmPct}%
                                 </span>
                               </div>
-                            </a>`;
+                            </div>`;
                 });
 
                 html += `</div></div>`;
@@ -3562,6 +3630,269 @@
 
         function ubEsc(s) {
             return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // AUDITORÍA IATF
+        // ═══════════════════════════════════════════════════════════════
+        let audDatos = [], audFiltradas = [];
+
+        const UB_PLANTA_COLOR_AUD = {
+            'B1': { color: '#60A5FA', bg: 'rgba(96,165,250,.12)' },
+            'B2': { color: '#34D399', bg: 'rgba(52,211,153,.12)' },
+            'PLANTA SATELITE': { color: '#A78BFA', bg: 'rgba(167,139,250,.12)' },
+            'PLANTA MIXING': { color: '#FBBF24', bg: 'rgba(251,191,36,.12)' },
+            'BODEGA': { color: '#F87171', bg: 'rgba(248,113,113,.12)' },
+        };
+        const UB_PLANTA_ICON_AUD = {
+            'B1': '🏭', 'B2': '🏭', 'PLANTA SATELITE': '🛰️',
+            'PLANTA MIXING': '⚗️', 'BODEGA': '📦',
+        };
+
+        async function cargarAuditoria() {
+            const container = document.getElementById('aud-container');
+            container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">🔄 Cargando datos de auditoría...</div>';
+            try {
+                const res = await fetch('/PREVENTIVOS/AUDITORIA');
+                const data = await res.json();
+                audDatos = data.ubicaciones || [];
+                filtrarAuditoria();
+                renderAudStats();
+            } catch (e) {
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red);font-size:13px;">❌ Error al cargar: ' + e.message + '</div>';
+            }
+        }
+
+        function filtrarAuditoria() {
+            const q = (document.getElementById('aud-buscador').value || '').toLowerCase().trim();
+            const planta = document.getElementById('aud-filtro-planta').value;
+            const estado = document.getElementById('aud-filtro-estado').value;
+            audFiltradas = audDatos.filter(u => {
+                const matchQ = !q || u.ubicacion.toLowerCase().includes(q) || u.planta.toLowerCase().includes(q);
+                const matchP = !planta || u.planta === planta;
+                const tienePendiente = (u.pendientes_p1 + u.pendientes_p2) > 0;
+                const matchE = !estado
+                    || (estado === 'pendientes' && tienePendiente)
+                    || (estado === 'completo' && !tienePendiente);
+                return matchQ && matchP && matchE;
+            });
+            renderAudGrid();
+        }
+
+        function renderAudGrid() {
+            const container = document.getElementById('aud-container');
+            if (!audFiltradas.length) {
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">🔍 Sin resultados.</div>';
+                return;
+            }
+
+            const porPlanta = {};
+            audFiltradas.forEach(u => {
+                if (!porPlanta[u.planta]) porPlanta[u.planta] = [];
+                porPlanta[u.planta].push(u);
+            });
+
+            let html = '';
+            Object.entries(porPlanta).forEach(([planta, ubs]) => {
+                const col = UB_PLANTA_COLOR_AUD[planta] || { color: '#94A3B8', bg: 'rgba(148,163,184,.12)' };
+                const icon = UB_PLANTA_ICON_AUD[planta] || '📍';
+
+                html += `<div style="margin-bottom:20px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;
+                                    padding:8px 12px;background:${col.bg};border-radius:8px;
+                                    border-left:3px solid ${col.color};">
+                            <span style="font-size:14px;">${icon}</span>
+                            <span style="font-size:12px;font-weight:700;color:${col.color};">${planta}</span>
+                            <span style="font-size:10px;color:var(--muted);margin-left:auto;font-family:'DM Mono',monospace;">
+                                ${ubs.length} ubicación${ubs.length !== 1 ? 'es' : ''}
+                            </span>
+                        </div>
+                        <div class="ub-grid">`;
+
+                ubs.forEach(u => {
+                    const pendP1 = Number(u.pendientes_p1) || 0;
+                    const pendP2 = Number(u.pendientes_p2) || 0;
+                    const verP1 = Number(u.verificados_p1) || 0;
+                    const verP2 = Number(u.verificados_p2) || 0;
+                    const totalPend = pendP1 + pendP2;
+                    const totalVer = verP1 + verP2;
+                    const total = Number(u.total_con_pm) || 0;
+                    const pctP1 = (verP1 + pendP1) > 0 ? Math.round(verP1 / (verP1 + pendP1) * 100) : 0;
+                    const pctP2 = (verP2 + pendP2) > 0 ? Math.round(verP2 / (verP2 + pendP2) * 100) : 0;
+                    const completoP1 = pendP1 === 0 && (verP1 + pendP1) > 0;
+                    const completoP2 = pendP2 === 0 && (verP2 + pendP2) > 0;
+                    const ubLimpia = (u.ubicacion || '').replace(/\u00a0/g, ' ').trim();
+                    const ubEnc = encodeURIComponent(ubLimpia);
+
+                    html += `<div class="ub-card" onclick="verDetalleAuditoria('${ubEnc.replace(/'/g, "\'")}','${ubEsc(u.ubicacion)}')"
+                                      style="cursor:pointer;${totalPend === 0 ? 'border-color:var(--green)' : ''}">
+                            <div class="ub-card-top">
+                                <div class="ub-card-icon">📍</div>
+                                <div class="ub-card-info">
+                                    <h4 title="${ubEsc(u.ubicacion)}">${ubEsc(u.ubicacion)}</h4>
+                                    <div class="ub-planta">${planta}</div>
+                                </div>
+                                <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;flex-shrink:0;
+                                    background:${totalPend === 0 ? 'rgba(16,185,129,.15)' : 'rgba(239,68,68,.12)'};
+                                    color:${totalPend === 0 ? 'var(--green)' : 'var(--red)'};">
+                                    ${totalPend === 0 ? '✅ Verificado' : '⏳ ' + totalPend + ' pendiente' + (totalPend !== 1 ? 's' : '')}
+                                </span>
+                            </div>
+                            <div class="ub-card-chips">
+                                ${(verP1 + pendP1) > 0 ? `<span class="ub-chip" style="background:${completoP1 ? 'rgba(16,185,129,.15)' : 'rgba(245,158,11,.12)'};color:${completoP1 ? 'var(--green)' : 'var(--amber)'};">
+                                    P1: ${verP1}/${verP1 + pendP1} ver.</span>` : ''}
+                                ${(verP2 + pendP2) > 0 ? `<span class="ub-chip" style="background:${completoP2 ? 'rgba(16,185,129,.15)' : 'rgba(245,158,11,.12)'};color:${completoP2 ? 'var(--green)' : 'var(--amber)'};">
+                                    P2: ${verP2}/${verP2 + pendP2} ver.</span>` : ''}
+                            </div>
+                            ${(verP1 + pendP1) > 0 ? `<div style="display:flex;align-items:center;gap:8px;">
+                                <span style="font-size:9px;color:var(--muted);min-width:18px;">P1</span>
+                                <div style="flex:1;height:4px;background:var(--surface3);border-radius:999px;overflow:hidden;">
+                                    <div style="height:100%;width:${pctP1}%;background:${completoP1 ? 'var(--green)' : 'var(--amber)'};border-radius:999px;"></div>
+                                </div>
+                                <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;flex-shrink:0;">${pctP1}%</span>
+                            </div>` : ''}
+                            ${(verP2 + pendP2) > 0 ? `<div style="display:flex;align-items:center;gap:8px;">
+                                <span style="font-size:9px;color:var(--muted);min-width:18px;">P2</span>
+                                <div style="flex:1;height:4px;background:var(--surface3);border-radius:999px;overflow:hidden;">
+                                    <div style="height:100%;width:${pctP2}%;background:${completoP2 ? 'var(--green)' : 'var(--amber)'};border-radius:999px;"></div>
+                                </div>
+                                <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;flex-shrink:0;">${pctP2}%</span>
+                            </div>` : ''}
+                        </div>`;
+                });
+
+                html += `</div></div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderAudStats() {
+            const totalUb = audDatos.length;
+            const totalEq = audDatos.reduce((s, u) => s + Number(u.total_con_pm || 0), 0);
+            const totalPend = audDatos.reduce((s, u) => s + Number(u.pendientes_p1 || 0) + Number(u.pendientes_p2 || 0), 0);
+            const totalVer = audDatos.reduce((s, u) => s + Number(u.verificados_p1 || 0) + Number(u.verificados_p2 || 0), 0);
+            document.getElementById('aud-stats').innerHTML = `
+                    <div class="ub-stat-card">
+                        <div class="usc-label">Ubicaciones</div>
+                        <div class="usc-val" style="color:var(--accent)">${totalUb}</div>
+                    </div>
+                    <div class="ub-stat-card">
+                        <div class="usc-label">PMs con registro</div>
+                        <div class="usc-val" style="color:var(--text)">${totalEq}</div>
+                    </div>
+                    <div class="ub-stat-card">
+                        <div class="usc-label">✅ Verificados</div>
+                        <div class="usc-val" style="color:var(--green)">${totalVer}</div>
+                    </div>
+                    <div class="ub-stat-card">
+                        <div class="usc-label">⏳ Pendientes</div>
+                        <div class="usc-val" style="color:${totalPend > 0 ? 'var(--red)' : 'var(--green)'}">${totalPend}</div>
+                    </div>`;
+        }
+
+        async function verDetalleAuditoria(ubEnc, ubLabel) {
+            const panel = document.getElementById('aud-detalle-panel');
+            const titulo = document.getElementById('aud-detalle-titulo');
+            const body = document.getElementById('aud-detalle-body');
+            titulo.textContent = decodeURIComponent(ubEnc);
+            body.innerHTML = '<div style="color:var(--muted);font-size:13px;">🔄 Cargando...</div>';
+            panel.style.display = 'block';
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            try {
+                const res = await fetch('/PREVENTIVOS/AUDITORIA/DETALLE?ubicacion=' + ubEnc);
+                const data = await res.json();
+                const equipos = data.equipos || [];
+
+                if (!equipos.length) {
+                    body.innerHTML = '<div style="color:var(--muted);font-size:13px;">Sin equipos con PM en esta ubicación.</div>';
+                    return;
+                }
+
+                body.innerHTML = equipos.map(eq => {
+                    const dispIcon = eq.dispositivo.includes('LAPTOP') ? '💻'
+                        : eq.dispositivo.includes('COMPUTADORA') ? '🖥️'
+                            : eq.dispositivo.includes('IMPRESORA') ? '🖨️' : '🔋';
+
+                    const periodos = [];
+                    if (eq.tiene_p1) periodos.push({ per: 1, realizado: eq.realizado_p1, fecha: eq.fecha_p1, verificado: eq.verificado_p1 });
+                    if (eq.tiene_p2) periodos.push({ per: 2, realizado: eq.realizado_p2, fecha: eq.fecha_p2, verificado: eq.verificado_p2 });
+
+                    const periodosHtml = periodos.map(p => {
+                        const esVerificado = p.verificado && p.verificado.trim() !== '';
+                        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;
+                                        background:${esVerificado ? 'rgba(16,185,129,.08)' : 'rgba(245,158,11,.08)'};
+                                        border:1px solid ${esVerificado ? 'rgba(16,185,129,.3)' : 'rgba(245,158,11,.3)'};">
+                                <span style="font-size:10px;font-weight:700;color:var(--muted);min-width:16px;">P${p.per}</span>
+                                <div style="flex:1;font-size:11px;color:var(--muted2);">
+                                    ${p.fecha || '—'} · por <b style="color:var(--text)">${p.realizado || '—'}</b>
+                                </div>
+                                ${esVerificado
+                                ? `<span style="font-size:10px;color:var(--green);">✅ ${p.verificado}</span>`
+                                : `<div style="display:flex;align-items:center;gap:6px;">
+                                        <input id="vfy_${eq.id}_${p.per}" type="text" placeholder="Tu nombre"
+                                            style="width:130px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;
+                                            padding:5px 8px;font-size:11px;color:var(--text);font-family:'DM Sans',sans-serif;"
+                                            onkeydown="if(event.key==='Enter')verificarPm(${eq.id},${p.per})">
+                                        <button class="btn btn-sm" style="background:var(--accent);color:white;font-size:11px;padding:5px 10px;"
+                                            onclick="verificarPm(${eq.id},${p.per})">Verificar</button>
+                                       </div>`
+                            }
+                            </div>`;
+                    }).join('');
+
+                    return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                <span style="font-size:16px;">${dispIcon}</span>
+                                <div>
+                                    <div style="font-size:12px;font-weight:700;color:var(--text);">${eq.dispositivo}</div>
+                                    <div style="font-size:10px;color:var(--accent);font-family:'DM Mono',monospace;">${eq.id_equipo}</div>
+                                </div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:6px;">${periodosHtml}</div>
+                        </div>`;
+                }).join('');
+
+            } catch (e) {
+                body.innerHTML = '<div style="color:var(--red);font-size:13px;">❌ Error: ' + e.message + '</div>';
+            }
+        }
+
+        async function verificarPm(id, periodo) {
+            const inp = document.getElementById('vfy_' + id + '_' + periodo);
+            const verificador = (inp?.value || '').trim();
+            if (!verificador) { inp?.focus(); return; }
+
+            const btn = inp?.nextElementSibling;
+            if (btn) { btn.disabled = true; btn.textContent = '...'; }
+
+            try {
+                const res = await fetch('/PREVENTIVO/VERIFICAR/' + id, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ periodo, verificador })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    // Recargar el detalle de la ubicación actual
+                    const titulo = document.getElementById('aud-detalle-titulo');
+                    const ubEnc = encodeURIComponent(titulo.textContent);
+                    await verDetalleAuditoria(ubEnc, titulo.textContent);
+                    // Recargar las cards para actualizar contadores
+                    cargarAuditoria();
+                } else {
+                    alert('Error: ' + (data.error || 'No se pudo verificar'));
+                    if (btn) { btn.disabled = false; btn.textContent = 'Verificar'; }
+                }
+            } catch (e) {
+                alert('Error de conexión');
+                if (btn) { btn.disabled = false; btn.textContent = 'Verificar'; }
+            }
+        }
+
+        function cerrarDetalleAuditoria() {
+            document.getElementById('aud-detalle-panel').style.display = 'none';
         }
 
     </script>

@@ -798,7 +798,8 @@ public class PreventivoController : ControllerBase
                 proximo_pm = proxStr,
                 checks = data.Checks,
                 observaciones = data.Observaciones,
-                requiere_correctivo = data.RequiereCorrectivo
+                requiere_correctivo = data.RequiereCorrectivo,
+                verificado_por = (string?)null  // se llena después desde el panel de auditoría
             });
 
             using var conn = _db.Open();
@@ -1010,7 +1011,8 @@ public class PreventivoController : ControllerBase
                 proximo_pm = proxStr,
                 checks = data.Checks,
                 observaciones = data.Observaciones,
-                requiere_correctivo = data.RequiereCorrectivo
+                requiere_correctivo = data.RequiereCorrectivo,
+                verificado_por = (string?)null  // se llena después desde el panel de auditoría
             });
 
             using var conn = _db.Open();
@@ -1082,6 +1084,178 @@ public class PreventivoController : ControllerBase
     }
 }
 
+    // ══════════════════════════════════════════════════════════════════════
+    // POST /PREVENTIVO/VERIFICAR/{id}
+    // Marca verificado_por en el JSON del PM (P1 o P2). No requiere que
+    // ya exista — si no hay PM registrado devuelve error.
+    // Body: { "periodo": 1|2, "verificador": "NOMBRE" }
+    // ══════════════════════════════════════════════════════════════════════
+    [HttpPost("PREVENTIVO/VERIFICAR/{id:int}")]
+    public IActionResult VerificarPm(int id, [FromBody] VerificarPmRequest data)
+    {
+        try
+        {
+            using var conn = _db.Open();
+
+            // Leer el JSON actual del período solicitado
+            using var sel = conn.CreateCommand();
+            sel.CommandText = data.Periodo == 2
+                ? "SELECT preventivo_digital_p2 FROM public.mantenimientos_preventivos WHERE id=@id"
+                : "SELECT preventivo_digital   FROM public.mantenimientos_preventivos WHERE id=@id";
+            sel.Parameters.AddWithValue("id", id);
+
+            using (var selR = sel.ExecuteReader())
+            {
+                if (!selR.Read() || selR.IsDBNull(0))
+                    return Ok(new { ok = false, error = "No hay PM registrado para este período" });
+            }
+
+            // Actualizar verificado_por dentro del JSONB con jsonb_set
+            using var upd = conn.CreateCommand();
+            if (data.Periodo == 2)
+            {
+                upd.CommandText = """
+                    UPDATE public.mantenimientos_preventivos
+                    SET preventivo_digital_p2 = jsonb_set(
+                        preventivo_digital_p2,
+                        '{verificado_por}',
+                        to_jsonb(@v::text)
+                    )
+                    WHERE id=@id
+                    """;
+            }
+            else
+            {
+                upd.CommandText = """
+                    UPDATE public.mantenimientos_preventivos
+                    SET preventivo_digital = jsonb_set(
+                        preventivo_digital,
+                        '{verificado_por}',
+                        to_jsonb(@v::text)
+                    )
+                    WHERE id=@id
+                    """;
+            }
+            upd.Parameters.AddWithValue("v", (data.Verificador ?? "").ToUpper().Trim());
+            upd.Parameters.AddWithValue("id", id);
+            upd.ExecuteNonQuery();
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // GET /PREVENTIVOS/AUDITORIA
+    // Devuelve ubicaciones que tienen al menos un PM registrado (P1 o P2),
+    // con conteo de equipos verificados y pendientes de verificación.
+    // ══════════════════════════════════════════════════════════════════════
+    [HttpGet("PREVENTIVOS/AUDITORIA")]
+    public IActionResult ObtenerAuditoria()
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT
+                TRIM(ubicacion)                                                          AS ubicacion,
+                planta,
+                COUNT(*) FILTER (WHERE preventivo_digital IS NOT NULL
+                              OR preventivo_digital_p2 IS NOT NULL)                      AS total_con_pm,
+                COUNT(*) FILTER (WHERE preventivo_digital IS NOT NULL
+                              AND (preventivo_digital->>'verificado_por') IS NOT NULL
+                              AND (preventivo_digital->>'verificado_por') <> '')          AS verificados_p1,
+                COUNT(*) FILTER (WHERE preventivo_digital IS NOT NULL
+                              AND ((preventivo_digital->>'verificado_por') IS NULL
+                              OR  (preventivo_digital->>'verificado_por') = ''))          AS pendientes_p1,
+                COUNT(*) FILTER (WHERE preventivo_digital_p2 IS NOT NULL
+                              AND (preventivo_digital_p2->>'verificado_por') IS NOT NULL
+                              AND (preventivo_digital_p2->>'verificado_por') <> '')       AS verificados_p2,
+                COUNT(*) FILTER (WHERE preventivo_digital_p2 IS NOT NULL
+                              AND ((preventivo_digital_p2->>'verificado_por') IS NULL
+                              OR  (preventivo_digital_p2->>'verificado_por') = ''))       AS pendientes_p2
+            FROM public.mantenimientos_preventivos
+            WHERE ubicacion IS NOT NULL AND TRIM(ubicacion) <> ''
+              AND nombre_dispositivo IN (
+                  'COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA')
+              AND (preventivo_digital IS NOT NULL OR preventivo_digital_p2 IS NOT NULL)
+            GROUP BY TRIM(ubicacion), planta
+            ORDER BY planta, TRIM(ubicacion)
+            """;
+
+        var lista = new List<object>();
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            lista.Add(new
+            {
+                ubicacion = r.GetString(0),
+                planta = r.GetString(1),
+                total_con_pm = r.GetInt64(2),
+                verificados_p1 = r.GetInt64(3),
+                pendientes_p1 = r.GetInt64(4),
+                verificados_p2 = r.GetInt64(5),
+                pendientes_p2 = r.GetInt64(6),
+            });
+        }
+
+        return Ok(new { ubicaciones = lista });
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // GET /PREVENTIVOS/AUDITORIA/DETALLE?ubicacion=X
+    // Devuelve el detalle de equipos de una ubicación con su estado de
+    // verificación por período.
+    // ══════════════════════════════════════════════════════════════════════
+    [HttpGet("PREVENTIVOS/AUDITORIA/DETALLE")]
+    public IActionResult ObtenerAuditoriaDetalle([FromQuery] string ubicacion)
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT
+                id,
+                id_equipo,
+                nombre_dispositivo,
+                preventivo_digital IS NOT NULL                                        AS tiene_p1,
+                preventivo_digital->>'usuario'                                        AS realizado_por_p1,
+                preventivo_digital->>'fecha'                                          AS fecha_p1,
+                preventivo_digital->>'verificado_por'                                 AS verificado_por_p1,
+                preventivo_digital_p2 IS NOT NULL                                     AS tiene_p2,
+                preventivo_digital_p2->>'usuario'                                     AS realizado_por_p2,
+                preventivo_digital_p2->>'fecha'                                       AS fecha_p2,
+                preventivo_digital_p2->>'verificado_por'                              AS verificado_por_p2
+            FROM public.mantenimientos_preventivos
+            WHERE TRIM(LOWER(ubicacion)) = TRIM(LOWER(@u))
+              AND nombre_dispositivo IN (
+                  'COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA')
+              AND (preventivo_digital IS NOT NULL OR preventivo_digital_p2 IS NOT NULL)
+            ORDER BY nombre_dispositivo, id_equipo
+            """;
+        cmd.Parameters.AddWithValue("u", (ubicacion ?? "").Trim());
+
+        var lista = new List<object>();
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            lista.Add(new
+            {
+                id = r.GetInt64(0),
+                id_equipo = r.IsDBNull(1) ? "" : r.GetString(1),
+                dispositivo = r.IsDBNull(2) ? "" : r.GetString(2),
+                tiene_p1 = r.GetBoolean(3),
+                realizado_p1 = r.IsDBNull(4) ? null : r.GetString(4),
+                fecha_p1 = r.IsDBNull(5) ? null : r.GetString(5),
+                verificado_p1 = r.IsDBNull(6) ? null : r.GetString(6),
+                tiene_p2 = r.GetBoolean(7),
+                realizado_p2 = r.IsDBNull(8) ? null : r.GetString(8),
+                fecha_p2 = r.IsDBNull(9) ? null : r.GetString(9),
+                verificado_p2 = r.IsDBNull(10) ? null : r.GetString(10),
+            });
+        }
+
+        return Ok(new { equipos = lista });
+    }
+
 // ── Modelo recalendarización ──────────────────────────────────────────────
 public class RecalendarizarRequest
 {
@@ -1089,4 +1263,10 @@ public class RecalendarizarRequest
     public string? NuevaUbicacion { get; set; }
     public string? UbicacionOcupante { get; set; }  // dónde va el que ya estaba allí
     public string? Usuario { get; set; }
+}
+
+public class VerificarPmRequest
+{
+    public int Periodo { get; set; }       // 1 o 2
+    public string? Verificador { get; set; } // nombre del auditor
 }
