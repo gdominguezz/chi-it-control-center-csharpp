@@ -46,19 +46,28 @@ public class QrPageController : ControllerBase
 
         using var r = cmd.ExecuteReader();
         while (r.Read())
-            rows.Add((r.GetInt64(0),
-                      r.IsDBNull(1) ? "" : r.GetString(1),
-                      r.IsDBNull(2) ? "" : r.GetString(2),
-                      r.IsDBNull(3) ? "" : r.GetString(3),
-                      r.IsDBNull(4) ? "" : r.GetString(4),
-                      r.IsDBNull(5) ? null : r.GetDateTime(5).ToString("yyyy-MM-dd"),
-                      r.IsDBNull(6) ? null : r.GetString(6),
-                      r.IsDBNull(7) ? "" : r.GetString(7),
-                      !r.IsDBNull(8) && r.GetBoolean(8),
-                      r.IsDBNull(9) ? (int?)null : r.GetInt32(9),
-                      !r.IsDBNull(10) && r.GetBoolean(10),
-                      r.IsDBNull(11) ? null : r.GetDateTime(11).ToString("yyyy-MM-dd"),
-                      r.IsDBNull(12) ? null : r.GetString(12)));
+        {
+            try
+            {
+                rows.Add((r.GetInt64(0),
+                          r.IsDBNull(1) ? "" : r.GetString(1),
+                          r.IsDBNull(2) ? "" : r.GetString(2),
+                          r.IsDBNull(3) ? "" : r.GetString(3),
+                          r.IsDBNull(4) ? "" : r.GetString(4),
+                          r.IsDBNull(5) ? null : r.GetDateTime(5).ToString("yyyy-MM-dd"),
+                          r.IsDBNull(6) ? null : r.GetString(6),
+                          r.IsDBNull(7) ? "" : r.GetString(7),
+                          !r.IsDBNull(8) && r.GetBoolean(8),
+                          r.IsDBNull(9) ? (int?)null : Convert.ToInt32(r.GetValue(9)),
+                          !r.IsDBNull(10) && r.GetBoolean(10),
+                          r.IsDBNull(11) ? null : r.GetDateTime(11).ToString("yyyy-MM-dd"),
+                          r.IsDBNull(12) ? null : r.GetString(12)));
+            }
+            catch (Exception rowEx)
+            {
+                Console.WriteLine($"[QR] Error leyendo fila id={(!r.IsDBNull(0) ? r.GetInt64(0) : -1)}: {rowEx.Message}");
+            }
+        }
 
         // ── Obtener plazos del calendario para las plantas presentes ──────────
         // Mapeo: planta_nombre_db → (plazoP1, plazoP2)
@@ -848,7 +857,7 @@ public class QrPageController : ControllerBase
 
     private static (string color, string bg, string label) ColorBadge(string cat)
     {
-        var c = cat.ToLower();
+        var c = (cat ?? "").ToLower();
         if (c.Contains("verde")) return ("#10B981", "#052e16", "Verde");
         if (c.Contains("amarillo")) return ("#F59E0B", "#1c1400", "Amarillo");
         if (c.Contains("rojo")) return ("#EF4444", "#1f0000", "Rojo");
@@ -860,7 +869,7 @@ public class QrPageController : ControllerBase
 
     private static string DispIcon(string disp)
     {
-        var d = disp.ToUpper();
+        var d = (disp ?? "").ToUpper();
         if (d.Contains("COMPUTADORA") || d.Contains("CPU")) return "🖥️";
         if (d.Contains("PORTATIL") || d.Contains("LAPTOP")) return "💻";
         if (d.Contains("IMPRESORA")) return "🖨️";
@@ -878,7 +887,7 @@ public class QrPageController : ControllerBase
 
     private static List<string> ActividadesDispositivo(string disp)
     {
-        var d = disp.ToUpper();
+        var d = (disp ?? "").ToUpper();
         if (d.Contains("COMPUTADORA") || d.Contains("CPU"))
             return new List<string> { "Sopletear el gabinete", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del gabinete", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y mouse", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza exterior del lector óptico", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente", "Verificación vida de la pila del BIOS", "Cambiar Qr del Dispositivo", "Cambiar Qr del Area" };
         if (d.Contains("PORTATIL") || d.Contains("LAPTOP"))
