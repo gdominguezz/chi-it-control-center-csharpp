@@ -3498,7 +3498,8 @@
                     const conPm = u.con_pm_p1 || 0;
                     const pmPct = total > 0 ? Math.round((conPm / total) * 100) : 0;
                     const barColor = pmPct >= 80 ? 'var(--green)' : pmPct >= 40 ? 'var(--amber)' : 'var(--red)';
-                    const ubEnc = encodeURIComponent(u.ubicacion);
+                    const ubLimpia = (u.ubicacion || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+                    const ubEnc = encodeURIComponent(ubLimpia);
 
                     html += `<div class="ub-card" onclick="window.open('/preventivos/qr?u=${ubEnc}','_blank')">
                               <div class="ub-card-top">

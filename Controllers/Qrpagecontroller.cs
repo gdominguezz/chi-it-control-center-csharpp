@@ -20,10 +20,11 @@ public class QrPageController : ControllerBase
         ["BODEGA"] = "BODEGA",
     };
 
-    [HttpGet("preventivos/qr/{ubicacion}")]
-    public ContentResult VerQrPreventivo(string ubicacion)
+    [HttpGet("preventivos/qr")]
+    public ContentResult VerQrPreventivo([FromQuery(Name = "u")] string ubicacion)
     {
-        ubicacion = Uri.UnescapeDataString(ubicacion);
+        // Limpiar espacio no-separable (NBSP U+00A0) que puede venir de la BD
+        ubicacion = (ubicacion ?? "").Replace(" ", " ").Trim();
 
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
