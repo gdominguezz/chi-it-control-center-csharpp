@@ -2046,7 +2046,7 @@
             document.querySelectorAll('.filter-row input').forEach(inp => {
                 inp.addEventListener('input', filtrar);
             });
-            cargarUbicacionesAutocompletado();
+            cargarUbicaciones();
             cargar();
         });
 
@@ -2188,7 +2188,7 @@
         }
 
         // ═══ UBICACIONES AUTOCOMPLETADO ═══
-        async function cargarUbicacionesAutocompletado() {
+        async function cargarUbicaciones() {
             try {
                 const res = await fetch('/PREVENTIVOS/UBICACIONES');
                 const data = await res.json();
@@ -2196,8 +2196,8 @@
                 ids.forEach(id => {
                     const dl = document.getElementById(id);
                     if (!dl) return;
-                    dl.innerHTML = (data.ubicaciones || [])
-                        .map(u => `<option value="${typeof u === 'object' ? u.ubicacion : u}">`)
+                    dl.innerHTML = data.ubicaciones
+                        .map(u => `<option value="${u}">`)
                         .join('');
                 });
             } catch (e) { console.warn('No se pudieron cargar ubicaciones', e); }
@@ -3500,7 +3500,7 @@
                     const barColor = pmPct >= 80 ? 'var(--green)' : pmPct >= 40 ? 'var(--amber)' : 'var(--red)';
                     const ubEnc = encodeURIComponent(u.ubicacion);
 
-                    html += `<div class="ub-card" onclick="window.open('/preventivos/qr/${ubEnc}','_blank')">
+                    html += `<div class="ub-card" onclick="window.open('/preventivos/qr?u=${ubEnc}','_blank')">
                               <div class="ub-card-top">
                                 <div class="ub-card-icon">📍</div>
                                 <div class="ub-card-info">
