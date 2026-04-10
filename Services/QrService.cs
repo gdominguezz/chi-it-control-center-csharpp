@@ -74,7 +74,7 @@ public class QrService
     {
         // Limpiar NBSP ( ) que pueda venir de la BD
         ubicacion = (ubicacion ?? "").Replace(" ", " ").Trim();
-        var url = $"{_baseUrl}/preventivos/qr?u={Uri.EscapeDataString(ubicacion)}";
+        var url = $"{_baseUrl}/preventivos/qr/{Uri.EscapeDataString(ubicacion)}";
         return GenerarImagenQr(url, ubicacion);
     }
 
