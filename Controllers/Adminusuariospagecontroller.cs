@@ -422,7 +422,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("}");
 
         // Abrir editar
-        sb.AppendLine("function abrirEditar(id){");
+        sb.AppendLine("function abrirCrear(){");
         sb.AppendLine("  if(soloLectura)return;");
         sb.AppendLine("  const u=todosUsuarios.find(x=>x.id===id);if(!u)return;");
         sb.AppendLine("  document.getElementById('mId').value=u.id;");
