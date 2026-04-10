@@ -67,12 +67,14 @@ public class QrService
 
     // ── QR por UBICACIÓN (comportamiento original) ────────────────────────
     /// <summary>
-    /// QR que apunta a /preventivos/qr/{ubicacion}.
+    /// QR que apunta a /preventivos/qr?u={ubicacion}.
     /// Etiqueta: nombre de la ubicación.
     /// </summary>
     public byte[] Generar(string ubicacion)
     {
-        var url = $"{_baseUrl}/preventivos/qr/{Uri.EscapeDataString(ubicacion)}";
+        // Limpiar NBSP ( ) que pueda venir de la BD
+        ubicacion = (ubicacion ?? "").Replace(" ", " ").Trim();
+        var url = $"{_baseUrl}/preventivos/qr?u={Uri.EscapeDataString(ubicacion)}";
         return GenerarImagenQr(url, ubicacion);
     }
 
