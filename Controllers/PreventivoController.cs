@@ -1146,54 +1146,148 @@ public class PreventivoController : ControllerBase
 
     // ══════════════════════════════════════════════════════════════════════
     // GET /PREVENTIVOS/AUDITORIA
-    // Devuelve ubicaciones que tienen al menos un PM registrado (P1 o P2),
-    // con conteo de equipos verificados y pendientes de verificación.
+    // Devuelve ubicaciones con PM registrado y muestra IATF por período.
+    // Reglas IATF: 1% sin laptops, mínimo 1 equipo por período.
     // ══════════════════════════════════════════════════════════════════════
     [HttpGet("PREVENTIVOS/AUDITORIA")]
     public IActionResult ObtenerAuditoria()
     {
         using var conn = _db.Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
+
+        // ── 1. Equipos elegibles para muestra IATF (sin laptops) ──────────
+        using var cmdEq = conn.CreateCommand();
+        cmdEq.CommandText = """
             SELECT
-                TRIM(ubicacion)                                                          AS ubicacion,
+                id,
+                TRIM(ubicacion)                                    AS ubicacion,
                 planta,
-                COUNT(*) FILTER (WHERE preventivo_digital IS NOT NULL
-                              OR preventivo_digital_p2 IS NOT NULL)                      AS total_con_pm,
-                COUNT(*) FILTER (WHERE preventivo_digital IS NOT NULL
-                              AND (preventivo_digital->>'verificado_por') IS NOT NULL
-                              AND (preventivo_digital->>'verificado_por') <> '')          AS verificados_p1,
-                COUNT(*) FILTER (WHERE preventivo_digital IS NOT NULL
-                              AND ((preventivo_digital->>'verificado_por') IS NULL
-                              OR  (preventivo_digital->>'verificado_por') = ''))          AS pendientes_p1,
-                COUNT(*) FILTER (WHERE preventivo_digital_p2 IS NOT NULL
-                              AND (preventivo_digital_p2->>'verificado_por') IS NOT NULL
-                              AND (preventivo_digital_p2->>'verificado_por') <> '')       AS verificados_p2,
-                COUNT(*) FILTER (WHERE preventivo_digital_p2 IS NOT NULL
-                              AND ((preventivo_digital_p2->>'verificado_por') IS NULL
-                              OR  (preventivo_digital_p2->>'verificado_por') = ''))       AS pendientes_p2
+                nombre_dispositivo,
+                preventivo_digital IS NOT NULL                     AS tiene_p1,
+                (preventivo_digital->>'verificado_por')            AS verificado_p1,
+                preventivo_digital_p2 IS NOT NULL                  AS tiene_p2,
+                (preventivo_digital_p2->>'verificado_por')         AS verificado_p2
             FROM public.mantenimientos_preventivos
             WHERE ubicacion IS NOT NULL AND TRIM(ubicacion) <> ''
               AND nombre_dispositivo IN (
-                  'COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA')
+                  'COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
               AND (preventivo_digital IS NOT NULL OR preventivo_digital_p2 IS NOT NULL)
-            GROUP BY TRIM(ubicacion), planta
-            ORDER BY planta, TRIM(ubicacion)
+            ORDER BY TRIM(ubicacion), id
             """;
 
-        var lista = new List<object>();
-        using var r = cmd.ExecuteReader();
-        while (r.Read())
+        var porUbicacion = new Dictionary<string,
+            (string planta, List<(long id, string disp, bool tieneP1, string? vP1, bool tieneP2, string? vP2)> equipos)>();
+
+        using (var rEq = cmdEq.ExecuteReader())
         {
+            while (rEq.Read())
+            {
+                var id = rEq.GetInt64(0);
+                var ub = rEq.GetString(1);
+                var pl = rEq.IsDBNull(2) ? "" : rEq.GetString(2);
+                var disp = rEq.IsDBNull(3) ? "" : rEq.GetString(3);
+                var tp1 = rEq.GetBoolean(4);
+                var vp1 = rEq.IsDBNull(5) ? null : rEq.GetString(5);
+                var tp2 = rEq.GetBoolean(6);
+                var vp2 = rEq.IsDBNull(7) ? null : rEq.GetString(7);
+                if (!porUbicacion.ContainsKey(ub))
+                    porUbicacion[ub] = (pl, new());
+                porUbicacion[ub].equipos.Add((id, disp, tp1, vp1, tp2, vp2));
+            }
+        }
+
+        // ── 2. Laptops: cuentan para verificación general pero NO para muestra ──
+        using var cmdLap = conn.CreateCommand();
+        cmdLap.CommandText = """
+            SELECT
+                TRIM(ubicacion)                                    AS ubicacion,
+                preventivo_digital IS NOT NULL                     AS tiene_p1,
+                (preventivo_digital->>'verificado_por')            AS verificado_p1,
+                preventivo_digital_p2 IS NOT NULL                  AS tiene_p2,
+                (preventivo_digital_p2->>'verificado_por')         AS verificado_p2
+            FROM public.mantenimientos_preventivos
+            WHERE ubicacion IS NOT NULL AND TRIM(ubicacion) <> ''
+              AND nombre_dispositivo = 'LAPTOP'
+              AND (preventivo_digital IS NOT NULL OR preventivo_digital_p2 IS NOT NULL)
+            """;
+
+        var laptopConteos = new Dictionary<string, (int verP1, int pendP1, int verP2, int pendP2)>();
+        using (var rLap = cmdLap.ExecuteReader())
+        {
+            while (rLap.Read())
+            {
+                var ub = rLap.GetString(0);
+                var tp1 = rLap.GetBoolean(1);
+                var vp1 = rLap.IsDBNull(2) ? null : rLap.GetString(2);
+                var tp2 = rLap.GetBoolean(3);
+                var vp2 = rLap.IsDBNull(4) ? null : rLap.GetString(4);
+                if (!laptopConteos.ContainsKey(ub)) laptopConteos[ub] = (0, 0, 0, 0);
+                var c = laptopConteos[ub];
+                if (tp1) { if (!string.IsNullOrWhiteSpace(vp1)) c.verP1++; else c.pendP1++; }
+                if (tp2) { if (!string.IsNullOrWhiteSpace(vp2)) c.verP2++; else c.pendP2++; }
+                laptopConteos[ub] = c;
+            }
+        }
+
+        // ── 3. Calcular muestra IATF y armar respuesta ────────────────────
+        var rng = new Random();
+        var lista = new List<object>();
+
+        foreach (var (ub, (planta, equipos)) in porUbicacion
+            .OrderBy(x => x.Value.planta).ThenBy(x => x.Key))
+        {
+            // Conteos globales (sin laptops)
+            int totalConPm = equipos.Count;
+            int verP1 = equipos.Count(e => e.tieneP1 && !string.IsNullOrWhiteSpace(e.vP1));
+            int pendP1 = equipos.Count(e => e.tieneP1 && string.IsNullOrWhiteSpace(e.vP1));
+            int verP2 = equipos.Count(e => e.tieneP2 && !string.IsNullOrWhiteSpace(e.vP2));
+            int pendP2 = equipos.Count(e => e.tieneP2 && string.IsNullOrWhiteSpace(e.vP2));
+
+            // Sumar laptops al conteo global
+            if (laptopConteos.TryGetValue(ub, out var lc))
+            {
+                totalConPm += lc.verP1 + lc.pendP1 + lc.verP2 + lc.pendP2;
+                verP1 += lc.verP1; pendP1 += lc.pendP1;
+                verP2 += lc.verP2; pendP2 += lc.pendP2;
+            }
+
+            // Muestra IATF P1: 1% sin laptops, mínimo 1
+            var conP1 = equipos.Where(e => e.tieneP1).ToList();
+            long[] muestraP1Ids = Array.Empty<long>();
+            if (conP1.Count > 0)
+            {
+                int tam = Math.Max(1, (int)Math.Ceiling(conP1.Count * 0.01));
+                muestraP1Ids = conP1.OrderBy(_ => rng.Next()).Take(tam).Select(e => e.id).ToArray();
+            }
+
+            // Muestra IATF P2: 1% sin laptops, mínimo 1
+            var conP2 = equipos.Where(e => e.tieneP2).ToList();
+            long[] muestraP2Ids = Array.Empty<long>();
+            if (conP2.Count > 0)
+            {
+                int tam = Math.Max(1, (int)Math.Ceiling(conP2.Count * 0.01));
+                muestraP2Ids = conP2.OrderBy(_ => rng.Next()).Take(tam).Select(e => e.id).ToArray();
+            }
+
+            int muestraP1Verificados = equipos.Count(e =>
+                muestraP1Ids.Contains(e.id) && !string.IsNullOrWhiteSpace(e.vP1));
+            int muestraP2Verificados = equipos.Count(e =>
+                muestraP2Ids.Contains(e.id) && !string.IsNullOrWhiteSpace(e.vP2));
+
             lista.Add(new
             {
-                ubicacion = r.GetString(0),
-                planta = r.GetString(1),
-                total_con_pm = r.GetInt64(2),
-                verificados_p1 = r.GetInt64(3),
-                pendientes_p1 = r.GetInt64(4),
-                verificados_p2 = r.GetInt64(5),
-                pendientes_p2 = r.GetInt64(6),
+                ubicacion = ub,
+                planta,
+                total_con_pm = totalConPm,
+                verificados_p1 = verP1,
+                pendientes_p1 = pendP1,
+                verificados_p2 = verP2,
+                pendientes_p2 = pendP2,
+                muestra_p1_ids = muestraP1Ids,
+                muestra_p1_total = muestraP1Ids.Length,
+                muestra_p1_verificados = muestraP1Verificados,
+                muestra_p2_ids = muestraP2Ids,
+                muestra_p2_total = muestraP2Ids.Length,
+                muestra_p2_verificados = muestraP2Verificados,
             });
         }
 
@@ -1201,54 +1295,84 @@ public class PreventivoController : ControllerBase
     }
 
     // ══════════════════════════════════════════════════════════════════════
-    // GET /PREVENTIVOS/AUDITORIA/DETALLE?ubicacion=X
-    // Devuelve el detalle de equipos de una ubicación con su estado de
-    // verificación por período.
+    // GET /PREVENTIVOS/AUDITORIA/DETALLE?ubicacion=X&ids_p1=1,2&ids_p2=3
+    // Devuelve solo los equipos de la muestra IATF para esa ubicación.
+    // ids_p1 / ids_p2: IDs separados por coma (calculados en ObtenerAuditoria).
     // ══════════════════════════════════════════════════════════════════════
     [HttpGet("PREVENTIVOS/AUDITORIA/DETALLE")]
-    public IActionResult ObtenerAuditoriaDetalle([FromQuery] string ubicacion)
+    public IActionResult ObtenerAuditoriaDetalle(
+        [FromQuery] string ubicacion,
+        [FromQuery(Name = "ids_p1")] string? idsP1Raw,
+        [FromQuery(Name = "ids_p2")] string? idsP2Raw)
     {
+        // Parsear los IDs de la muestra enviados por el frontend
+        static HashSet<long> ParseIds(string? raw) =>
+            (raw ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries)
+                       .Select(s => long.TryParse(s.Trim(), out var n) ? n : -1L)
+                       .Where(n => n > 0)
+                       .ToHashSet();
+
+        var setP1 = ParseIds(idsP1Raw);
+        var setP2 = ParseIds(idsP2Raw);
+        var todosIds = setP1.Union(setP2).ToList();
+
+        if (!todosIds.Any())
+            return Ok(new { equipos = Array.Empty<object>() });
+
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
+
+        // Construir cláusula IN con parámetros
+        var inParams = string.Join(",", todosIds.Select((_, i) => $"@id{i}"));
+        cmd.CommandText = $"""
             SELECT
                 id,
                 id_equipo,
                 nombre_dispositivo,
-                preventivo_digital IS NOT NULL                                        AS tiene_p1,
-                preventivo_digital->>'usuario'                                        AS realizado_por_p1,
-                preventivo_digital->>'fecha'                                          AS fecha_p1,
-                preventivo_digital->>'verificado_por'                                 AS verificado_por_p1,
-                preventivo_digital_p2 IS NOT NULL                                     AS tiene_p2,
-                preventivo_digital_p2->>'usuario'                                     AS realizado_por_p2,
-                preventivo_digital_p2->>'fecha'                                       AS fecha_p2,
-                preventivo_digital_p2->>'verificado_por'                              AS verificado_por_p2
+                preventivo_digital IS NOT NULL                AS tiene_p1,
+                preventivo_digital->>'usuario'                AS realizado_por_p1,
+                preventivo_digital->>'fecha'                  AS fecha_p1,
+                preventivo_digital->>'verificado_por'         AS verificado_por_p1,
+                preventivo_digital_p2 IS NOT NULL             AS tiene_p2,
+                preventivo_digital_p2->>'usuario'             AS realizado_por_p2,
+                preventivo_digital_p2->>'fecha'               AS fecha_p2,
+                preventivo_digital_p2->>'verificado_por'      AS verificado_por_p2
             FROM public.mantenimientos_preventivos
-            WHERE TRIM(LOWER(ubicacion)) = TRIM(LOWER(@u))
-              AND nombre_dispositivo IN (
-                  'COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA')
-              AND (preventivo_digital IS NOT NULL OR preventivo_digital_p2 IS NOT NULL)
+            WHERE id IN ({inParams})
+              AND TRIM(LOWER(ubicacion)) = TRIM(LOWER(@u))
             ORDER BY nombre_dispositivo, id_equipo
             """;
+
+        for (int i = 0; i < todosIds.Count; i++)
+            cmd.Parameters.AddWithValue($"id{i}", todosIds[i]);
         cmd.Parameters.AddWithValue("u", (ubicacion ?? "").Trim());
 
         var lista = new List<object>();
         using var r = cmd.ExecuteReader();
         while (r.Read())
         {
+            var id = r.GetInt64(0);
+            var tieneP1 = r.GetBoolean(3);
+            var tieneP2 = r.GetBoolean(7);
+
             lista.Add(new
             {
-                id = r.GetInt64(0),
+                id,
                 id_equipo = r.IsDBNull(1) ? "" : r.GetString(1),
                 dispositivo = r.IsDBNull(2) ? "" : r.GetString(2),
-                tiene_p1 = r.GetBoolean(3),
+                // P1: solo incluir si el ID está en la muestra P1
+                tiene_p1 = tieneP1 && setP1.Contains(id),
                 realizado_p1 = r.IsDBNull(4) ? null : r.GetString(4),
                 fecha_p1 = r.IsDBNull(5) ? null : r.GetString(5),
                 verificado_p1 = r.IsDBNull(6) ? null : r.GetString(6),
-                tiene_p2 = r.GetBoolean(7),
+                // P2: solo incluir si el ID está en la muestra P2
+                tiene_p2 = tieneP2 && setP2.Contains(id),
                 realizado_p2 = r.IsDBNull(8) ? null : r.GetString(8),
                 fecha_p2 = r.IsDBNull(9) ? null : r.GetString(9),
                 verificado_p2 = r.IsDBNull(10) ? null : r.GetString(10),
+                // Indicadores para el frontend
+                es_muestra_p1 = setP1.Contains(id),
+                es_muestra_p2 = setP2.Contains(id),
             });
         }
 
