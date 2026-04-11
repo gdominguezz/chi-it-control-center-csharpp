@@ -1154,25 +1154,39 @@ public class PreventivoController : ControllerBase
     {
         using var conn = _db.Open();
 
+        // ── 0. Verificar que exista al menos un calendario generado ────────
+        // Si no hay ninguna fila con generado=true en calendario_estado,
+        // no se muestra nada en auditoría aunque haya PMs activos.
+        using var cmdCal = conn.CreateCommand();
+        cmdCal.CommandText = "SELECT COUNT(*) FROM public.calendario_estado WHERE generado = true";
+        var totalCalendarios = Convert.ToInt64(cmdCal.ExecuteScalar()!);
+        if (totalCalendarios == 0)
+            return Ok(new { sin_calendario = true, ubicaciones = Array.Empty<object>() });
+
+
         // ── 1. Leer TODOS los equipos elegibles (con PM, sin laptops) ──────
         // Agrupamos por planta para calcular la muestra a nivel planta.
         using var cmdEq = conn.CreateCommand();
         cmdEq.CommandText = """
             SELECT
-                id,
-                TRIM(ubicacion)                                    AS ubicacion,
-                planta,
-                nombre_dispositivo,
-                preventivo_digital IS NOT NULL                     AS tiene_p1,
-                (preventivo_digital->>'verificado_por')            AS verificado_p1,
-                preventivo_digital_p2 IS NOT NULL                  AS tiene_p2,
-                (preventivo_digital_p2->>'verificado_por')         AS verificado_p2
-            FROM public.mantenimientos_preventivos
-            WHERE ubicacion IS NOT NULL AND TRIM(ubicacion) <> ''
-              AND nombre_dispositivo IN (
+                mp.id,
+                TRIM(mp.ubicacion)                                    AS ubicacion,
+                mp.planta,
+                mp.nombre_dispositivo,
+                mp.preventivo_digital IS NOT NULL                     AS tiene_p1,
+                (mp.preventivo_digital->>'verificado_por')            AS verificado_p1,
+                mp.preventivo_digital_p2 IS NOT NULL                  AS tiene_p2,
+                (mp.preventivo_digital_p2->>'verificado_por')         AS verificado_p2
+            FROM public.mantenimientos_preventivos mp
+            WHERE mp.ubicacion IS NOT NULL AND TRIM(mp.ubicacion) <> ''
+              AND mp.nombre_dispositivo IN (
                   'COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
-              AND (preventivo_digital IS NOT NULL OR preventivo_digital_p2 IS NOT NULL)
-            ORDER BY planta, TRIM(ubicacion), id
+              AND (mp.preventivo_digital IS NOT NULL OR mp.preventivo_digital_p2 IS NOT NULL)
+              AND EXISTS (
+                  SELECT 1 FROM public.calendario_estado ce
+                  WHERE ce.planta_key = mp.planta
+                    AND ce.generado = true)
+            ORDER BY mp.planta, TRIM(mp.ubicacion), mp.id
             """;
 
         // Registro por planta → lista de equipos elegibles
@@ -1211,15 +1225,19 @@ public class PreventivoController : ControllerBase
         using var cmdLap = conn.CreateCommand();
         cmdLap.CommandText = """
             SELECT
-                TRIM(ubicacion)                                    AS ubicacion,
-                preventivo_digital IS NOT NULL                     AS tiene_p1,
-                (preventivo_digital->>'verificado_por')            AS verificado_p1,
-                preventivo_digital_p2 IS NOT NULL                  AS tiene_p2,
-                (preventivo_digital_p2->>'verificado_por')         AS verificado_p2
-            FROM public.mantenimientos_preventivos
-            WHERE ubicacion IS NOT NULL AND TRIM(ubicacion) <> ''
-              AND nombre_dispositivo = 'LAPTOP'
-              AND (preventivo_digital IS NOT NULL OR preventivo_digital_p2 IS NOT NULL)
+                TRIM(mp.ubicacion)                                    AS ubicacion,
+                mp.preventivo_digital IS NOT NULL                     AS tiene_p1,
+                (mp.preventivo_digital->>'verificado_por')            AS verificado_p1,
+                mp.preventivo_digital_p2 IS NOT NULL                  AS tiene_p2,
+                (mp.preventivo_digital_p2->>'verificado_por')         AS verificado_p2
+            FROM public.mantenimientos_preventivos mp
+            WHERE mp.ubicacion IS NOT NULL AND TRIM(mp.ubicacion) <> ''
+              AND mp.nombre_dispositivo = 'LAPTOP'
+              AND (mp.preventivo_digital IS NOT NULL OR mp.preventivo_digital_p2 IS NOT NULL)
+              AND EXISTS (
+                  SELECT 1 FROM public.calendario_estado ce
+                  WHERE ce.planta_key = mp.planta
+                    AND ce.generado = true)
             """;
 
         var laptopConteos = new Dictionary<string, (int verP1, int pendP1, int verP2, int pendP2)>();
