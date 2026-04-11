@@ -1146,15 +1146,16 @@ public class PreventivoController : ControllerBase
 
     // ══════════════════════════════════════════════════════════════════════
     // GET /PREVENTIVOS/AUDITORIA
-    // Devuelve ubicaciones con PM registrado y muestra IATF por período.
-    // Reglas IATF: 1% sin laptops, mínimo 1 equipo por período.
+    // Regla IATF: por cada planta+período, muestra = CEILING(total_sin_laptop * 0.01).
+    // Los equipos de la muestra se eligen aleatoriamente del pool global de la planta.
     // ══════════════════════════════════════════════════════════════════════
     [HttpGet("PREVENTIVOS/AUDITORIA")]
     public IActionResult ObtenerAuditoria()
     {
         using var conn = _db.Open();
 
-        // ── 1. Equipos elegibles para muestra IATF (sin laptops) ──────────
+        // ── 1. Leer TODOS los equipos elegibles (con PM, sin laptops) ──────
+        // Agrupamos por planta para calcular la muestra a nivel planta.
         using var cmdEq = conn.CreateCommand();
         cmdEq.CommandText = """
             SELECT
@@ -1171,9 +1172,15 @@ public class PreventivoController : ControllerBase
               AND nombre_dispositivo IN (
                   'COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
               AND (preventivo_digital IS NOT NULL OR preventivo_digital_p2 IS NOT NULL)
-            ORDER BY TRIM(ubicacion), id
+            ORDER BY planta, TRIM(ubicacion), id
             """;
 
+        // Registro por planta → lista de equipos elegibles
+        var porPlanta = new Dictionary<string,
+            List<(long id, string ub, string disp, bool tieneP1, string? vP1, bool tieneP2, string? vP2)>>(
+                StringComparer.OrdinalIgnoreCase);
+
+        // También construimos índice por ubicación para conteos
         var porUbicacion = new Dictionary<string,
             (string planta, List<(long id, string disp, bool tieneP1, string? vP1, bool tieneP2, string? vP2)> equipos)>();
 
@@ -1189,13 +1196,18 @@ public class PreventivoController : ControllerBase
                 var vp1 = rEq.IsDBNull(5) ? null : rEq.GetString(5);
                 var tp2 = rEq.GetBoolean(6);
                 var vp2 = rEq.IsDBNull(7) ? null : rEq.GetString(7);
-                if (!porUbicacion.ContainsKey(ub))
-                    porUbicacion[ub] = (pl, new());
+
+                // Índice por planta (para cálculo de muestra)
+                if (!porPlanta.ContainsKey(pl)) porPlanta[pl] = new();
+                porPlanta[pl].Add((id, ub, disp, tp1, vp1, tp2, vp2));
+
+                // Índice por ubicación (para conteos de la card)
+                if (!porUbicacion.ContainsKey(ub)) porUbicacion[ub] = (pl, new());
                 porUbicacion[ub].equipos.Add((id, disp, tp1, vp1, tp2, vp2));
             }
         }
 
-        // ── 2. Laptops: cuentan para verificación general pero NO para muestra ──
+        // ── 2. Laptops: solo para conteos generales, nunca entran en muestra ─
         using var cmdLap = conn.CreateCommand();
         cmdLap.CommandText = """
             SELECT
@@ -1228,19 +1240,43 @@ public class PreventivoController : ControllerBase
             }
         }
 
-        // ── 3. Calcular muestra IATF y armar respuesta ────────────────────
+        // ── 3. Calcular muestra IATF a nivel PLANTA (no por ubicación) ─────
+        // Regla: muestra = CEILING(total_sin_laptop_con_PM_en_planta * 0.01)
+        // Si el resultado es < 1 (ej: 0 equipos), muestra = 0 (no hay PM).
+        // Con cualquier cantidad ≥ 1 equipo, CEILING garantiza mínimo 1.
         var rng = new Random();
+
+        // muestraPorPlanta: planta → (idsP1[], idsP2[])
+        var muestraPorPlanta = new Dictionary<string, (HashSet<long> p1, HashSet<long> p2)>(
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (planta, equipos) in porPlanta)
+        {
+            // Pool P1: equipos de esta planta que tienen PM en P1
+            var poolP1 = equipos.Where(e => e.tieneP1).ToList();
+            var tamP1 = poolP1.Count > 0 ? (int)Math.Ceiling(poolP1.Count * 0.01) : 0;
+            var selP1 = poolP1.OrderBy(_ => rng.Next()).Take(tamP1).Select(e => e.id).ToHashSet();
+
+            // Pool P2: equipos de esta planta que tienen PM en P2
+            var poolP2 = equipos.Where(e => e.tieneP2).ToList();
+            var tamP2 = poolP2.Count > 0 ? (int)Math.Ceiling(poolP2.Count * 0.01) : 0;
+            var selP2 = poolP2.OrderBy(_ => rng.Next()).Take(tamP2).Select(e => e.id).ToHashSet();
+
+            muestraPorPlanta[planta] = (selP1, selP2);
+        }
+
+        // ── 4. Construir respuesta por ubicación ───────────────────────────
         var lista = new List<object>();
 
         foreach (var (ub, (planta, equipos)) in porUbicacion
             .OrderBy(x => x.Value.planta).ThenBy(x => x.Key))
         {
-            // Conteos globales (sin laptops)
-            int totalConPm = equipos.Count;
+            // Conteos generales sin laptops
             int verP1 = equipos.Count(e => e.tieneP1 && !string.IsNullOrWhiteSpace(e.vP1));
             int pendP1 = equipos.Count(e => e.tieneP1 && string.IsNullOrWhiteSpace(e.vP1));
             int verP2 = equipos.Count(e => e.tieneP2 && !string.IsNullOrWhiteSpace(e.vP2));
             int pendP2 = equipos.Count(e => e.tieneP2 && string.IsNullOrWhiteSpace(e.vP2));
+            int totalConPm = equipos.Count;
 
             // Sumar laptops al conteo global
             if (laptopConteos.TryGetValue(ub, out var lc))
@@ -1250,28 +1286,15 @@ public class PreventivoController : ControllerBase
                 verP2 += lc.verP2; pendP2 += lc.pendP2;
             }
 
-            // Muestra IATF P1: 1% sin laptops, mínimo 1
-            var conP1 = equipos.Where(e => e.tieneP1).ToList();
-            long[] muestraP1Ids = Array.Empty<long>();
-            if (conP1.Count > 0)
-            {
-                int tam = Math.Max(1, (int)Math.Ceiling(conP1.Count * 0.01));
-                muestraP1Ids = conP1.OrderBy(_ => rng.Next()).Take(tam).Select(e => e.id).ToArray();
-            }
+            // IDs de la muestra de la planta que pertenecen a ESTA ubicación
+            var (muestraP1Plant, muestraP2Plant) = muestraPorPlanta.TryGetValue(planta, out var m)
+                ? m : (new HashSet<long>(), new HashSet<long>());
 
-            // Muestra IATF P2: 1% sin laptops, mínimo 1
-            var conP2 = equipos.Where(e => e.tieneP2).ToList();
-            long[] muestraP2Ids = Array.Empty<long>();
-            if (conP2.Count > 0)
-            {
-                int tam = Math.Max(1, (int)Math.Ceiling(conP2.Count * 0.01));
-                muestraP2Ids = conP2.OrderBy(_ => rng.Next()).Take(tam).Select(e => e.id).ToArray();
-            }
+            var idsP1EnUb = equipos.Where(e => muestraP1Plant.Contains(e.id)).Select(e => e.id).ToArray();
+            var idsP2EnUb = equipos.Where(e => muestraP2Plant.Contains(e.id)).Select(e => e.id).ToArray();
 
-            int muestraP1Verificados = equipos.Count(e =>
-                muestraP1Ids.Contains(e.id) && !string.IsNullOrWhiteSpace(e.vP1));
-            int muestraP2Verificados = equipos.Count(e =>
-                muestraP2Ids.Contains(e.id) && !string.IsNullOrWhiteSpace(e.vP2));
+            int mP1Ver = equipos.Count(e => muestraP1Plant.Contains(e.id) && !string.IsNullOrWhiteSpace(e.vP1));
+            int mP2Ver = equipos.Count(e => muestraP2Plant.Contains(e.id) && !string.IsNullOrWhiteSpace(e.vP2));
 
             lista.Add(new
             {
@@ -1282,12 +1305,13 @@ public class PreventivoController : ControllerBase
                 pendientes_p1 = pendP1,
                 verificados_p2 = verP2,
                 pendientes_p2 = pendP2,
-                muestra_p1_ids = muestraP1Ids,
-                muestra_p1_total = muestraP1Ids.Length,
-                muestra_p1_verificados = muestraP1Verificados,
-                muestra_p2_ids = muestraP2Ids,
-                muestra_p2_total = muestraP2Ids.Length,
-                muestra_p2_verificados = muestraP2Verificados,
+                // IDs de la muestra IATF que caen en esta ubicación
+                muestra_p1_ids = idsP1EnUb,
+                muestra_p1_total = muestraP1Plant.Count,   // total de la planta (informativo)
+                muestra_p1_verificados = mP1Ver,
+                muestra_p2_ids = idsP2EnUb,
+                muestra_p2_total = muestraP2Plant.Count,   // total de la planta (informativo)
+                muestra_p2_verificados = mP2Ver,
             });
         }
 
