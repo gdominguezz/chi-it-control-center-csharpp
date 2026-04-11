@@ -319,68 +319,119 @@ public class CalendarioController : ControllerBase
         using var conn = _db.Open();
         var nombreDB = PlantaNombreDB[planta];
 
-        // Obtener total de equipos de la planta
-        using var cntCmd = conn.CreateCommand();
-        cntCmd.CommandText = """
+        // ── Contar cómputo y laptops por separado ────────────────────────
+        // Cada tipo tiene su propio calendario independiente de 24 semanas.
+        using var cntComp = conn.CreateCommand();
+        cntComp.CommandText = """
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
             WHERE planta = @p
-              AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA')
+              AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
             """;
-        cntCmd.Parameters.AddWithValue("p", nombreDB);
-        var totalEquipos = Convert.ToInt64(cntCmd.ExecuteScalar()!);
+        cntComp.Parameters.AddWithValue("p", nombreDB);
+        var totalComputo = Convert.ToInt64(cntComp.ExecuteScalar()!);
 
-        // Para MIXING/BODEGA: una sola semana con todos los equipos
-        int equiposPorSemana;
+        using var cntLap = conn.CreateCommand();
+        cntLap.CommandText = """
+            SELECT COUNT(*) FROM public.mantenimientos_preventivos
+            WHERE planta = @p AND nombre_dispositivo = 'LAPTOP'
+            """;
+        cntLap.Parameters.AddWithValue("p", nombreDB);
+        var totalLaptops = Convert.ToInt64(cntLap.ExecuteScalar()!);
+
         int totalSemanas;
+        int computoPorSemana;
+        int laptopsPorSemana;
+
         if (planta is "MIXING" or "BODEGA")
         {
+            // Semana fija: todos los equipos en una sola semana
             totalSemanas = 1;
-            equiposPorSemana = (int)totalEquipos;
+            computoPorSemana = (int)totalComputo;
+            laptopsPorSemana = (int)totalLaptops;
         }
         else
         {
             totalSemanas = SemanasDistribucion;
-            equiposPorSemana = totalEquipos > 0 ? (int)Math.Ceiling((double)totalEquipos / totalSemanas) : 0;
+            // Cada tipo distribuye su propio total en 24 semanas independientemente
+            computoPorSemana = totalComputo > 0 ? (int)Math.Ceiling((double)totalComputo / totalSemanas) : 0;
+            laptopsPorSemana = totalLaptops > 0 ? (int)Math.Ceiling((double)totalLaptops / totalSemanas) : 0;
         }
 
         if (semana_rel < 1 || semana_rel > totalSemanas)
             return Ok(new { error = $"Semana relativa fuera de rango (1–{totalSemanas})" });
 
-        int offset = (semana_rel - 1) * equiposPorSemana;
+        int offsetComp = (semana_rel - 1) * computoPorSemana;
+        int offsetLap = (semana_rel - 1) * laptopsPorSemana;
 
-        // Obtener equipos paginados de la planta
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = $"""
+        // ── Cómputo: paginación independiente ────────────────────────────
+        using var cmdComp = conn.CreateCommand();
+        cmdComp.CommandText = $"""
             SELECT id, id_equipo, nombre_dispositivo, ubicacion, categoria_color,
-                   CASE WHEN preventivo_digital   IS NOT NULL THEN true ELSE false END AS tiene_pm_p1,
+                   CASE WHEN preventivo_digital    IS NOT NULL THEN true ELSE false END AS tiene_pm_p1,
                    CASE WHEN preventivo_digital_p2 IS NOT NULL THEN true ELSE false END AS tiene_pm_p2,
                    fecha_realizacion, fecha_realizacion_p2
             FROM public.mantenimientos_preventivos
             WHERE planta = @p
-              AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA')
+              AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
             ORDER BY ubicacion, id
             LIMIT @lim OFFSET @off
             """;
-        cmd.Parameters.AddWithValue("p", nombreDB);
-        cmd.Parameters.AddWithValue("lim", equiposPorSemana);
-        cmd.Parameters.AddWithValue("off", offset);
+        cmdComp.Parameters.AddWithValue("p", nombreDB);
+        cmdComp.Parameters.AddWithValue("lim", computoPorSemana);
+        cmdComp.Parameters.AddWithValue("off", offsetComp);
 
         var equipos = new List<object>();
-        using var r = cmd.ExecuteReader();
-        while (r.Read())
+        using (var r = cmdComp.ExecuteReader())
         {
-            equipos.Add(new
-            {
-                id = r.GetInt64(0),
-                id_equipo = r.IsDBNull(1) ? null : r.GetString(1),
-                nombre_dispositivo = r.IsDBNull(2) ? null : r.GetString(2),
-                ubicacion = r.IsDBNull(3) ? null : r.GetString(3),
-                categoria_color = r.IsDBNull(4) ? null : r.GetString(4),
-                tiene_pm_p1 = !r.IsDBNull(5) && r.GetBoolean(5),
-                tiene_pm_p2 = !r.IsDBNull(6) && r.GetBoolean(6),
-                fecha_pm_p1 = r.IsDBNull(7) ? null : r.GetDateTime(7).ToString("yyyy-MM-dd"),
-                fecha_pm_p2 = r.IsDBNull(8) ? null : r.GetDateTime(8).ToString("yyyy-MM-dd"),
-            });
+            while (r.Read())
+                equipos.Add(new
+                {
+                    id = r.GetInt64(0),
+                    id_equipo = r.IsDBNull(1) ? null : r.GetString(1),
+                    nombre_dispositivo = r.IsDBNull(2) ? null : r.GetString(2),
+                    ubicacion = r.IsDBNull(3) ? null : r.GetString(3),
+                    categoria_color = r.IsDBNull(4) ? null : r.GetString(4),
+                    tiene_pm_p1 = !r.IsDBNull(5) && r.GetBoolean(5),
+                    tiene_pm_p2 = !r.IsDBNull(6) && r.GetBoolean(6),
+                    fecha_pm_p1 = r.IsDBNull(7) ? null : r.GetDateTime(7).ToString("yyyy-MM-dd"),
+                    fecha_pm_p2 = r.IsDBNull(8) ? null : r.GetDateTime(8).ToString("yyyy-MM-dd"),
+                    tipo_calendario = "computo",
+                });
+        }
+
+        // ── Laptops: paginación independiente ────────────────────────────
+        using var cmdLap = conn.CreateCommand();
+        cmdLap.CommandText = $"""
+            SELECT id, id_equipo, nombre_dispositivo, ubicacion, categoria_color,
+                   CASE WHEN preventivo_digital    IS NOT NULL THEN true ELSE false END AS tiene_pm_p1,
+                   CASE WHEN preventivo_digital_p2 IS NOT NULL THEN true ELSE false END AS tiene_pm_p2,
+                   fecha_realizacion, fecha_realizacion_p2
+            FROM public.mantenimientos_preventivos
+            WHERE planta = @p
+              AND nombre_dispositivo = 'LAPTOP'
+            ORDER BY ubicacion, id
+            LIMIT @lim OFFSET @off
+            """;
+        cmdLap.Parameters.AddWithValue("p", nombreDB);
+        cmdLap.Parameters.AddWithValue("lim", laptopsPorSemana);
+        cmdLap.Parameters.AddWithValue("off", offsetLap);
+
+        using (var r = cmdLap.ExecuteReader())
+        {
+            while (r.Read())
+                equipos.Add(new
+                {
+                    id = r.GetInt64(0),
+                    id_equipo = r.IsDBNull(1) ? null : r.GetString(1),
+                    nombre_dispositivo = r.IsDBNull(2) ? null : r.GetString(2),
+                    ubicacion = r.IsDBNull(3) ? null : r.GetString(3),
+                    categoria_color = r.IsDBNull(4) ? null : r.GetString(4),
+                    tiene_pm_p1 = !r.IsDBNull(5) && r.GetBoolean(5),
+                    tiene_pm_p2 = !r.IsDBNull(6) && r.GetBoolean(6),
+                    fecha_pm_p1 = r.IsDBNull(7) ? null : r.GetDateTime(7).ToString("yyyy-MM-dd"),
+                    fecha_pm_p2 = r.IsDBNull(8) ? null : r.GetDateTime(8).ToString("yyyy-MM-dd"),
+                    tipo_calendario = "laptop",
+                });
         }
 
         return Ok(new
@@ -390,7 +441,8 @@ public class CalendarioController : ControllerBase
             semana_rel,
             total_semanas = totalSemanas,
             total_equipos = equipos.Count,
-            equipos_por_semana = equiposPorSemana,
+            computo_por_semana = computoPorSemana,
+            laptops_por_semana = laptopsPorSemana,
             equipos,
         });
     }
@@ -469,7 +521,7 @@ public class CalendarioController : ControllerBase
     {
         var nombreDB = PlantaNombreDB[planta];
 
-        // ── Contar laptops ────────────────────────────────────────────────
+        // ── Contar laptops (calendario independiente) ─────────────────────
         using var cntLap = conn.CreateCommand();
         cntLap.CommandText = """
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
@@ -478,7 +530,7 @@ public class CalendarioController : ControllerBase
         cntLap.Parameters.AddWithValue("p", nombreDB);
         var totalLaptops = Convert.ToInt64(cntLap.ExecuteScalar()!);
 
-        // ── Contar cómputo (CPU + Impresora Térmica + UPS) ────────────────
+        // ── Contar cómputo (calendario independiente) ─────────────────────
         using var cntComp = conn.CreateCommand();
         cntComp.CommandText = """
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
@@ -488,9 +540,9 @@ public class CalendarioController : ControllerBase
         cntComp.Parameters.AddWithValue("p", nombreDB);
         var totalComputo = Convert.ToInt64(cntComp.ExecuteScalar()!);
 
-        var total = totalLaptops + totalComputo;
-
-        int equiposPorSemana = total > 0 ? (int)Math.Ceiling((double)total / SemanasDistribucion) : 0;
+        // Laptops y cómputo tienen su propia distribución independiente en 24 semanas.
+        // TotalEquipos = suma de ambos para mostrar en la UI, pero cada tipo
+        // sigue su propio ritmo sin mezclarse.
         int laptopsPorSemana = totalLaptops > 0 ? (int)Math.Ceiling((double)totalLaptops / SemanasDistribucion) : 0;
         int computoPorSemana = totalComputo > 0 ? (int)Math.Ceiling((double)totalComputo / SemanasDistribucion) : 0;
 
@@ -499,7 +551,7 @@ public class CalendarioController : ControllerBase
         {
             var (semReal, anioReal, lunes, viernes) = FechasDeSemana(anio, semIni, rel);
 
-            int equiposSemana = (int)Math.Max(0, Math.Min(equiposPorSemana, total - (long)(rel - 1) * equiposPorSemana));
+            // Cada tipo se distribuye de forma independiente sobre sus propios 24 slots
             int laptopsSemana = (int)Math.Max(0, Math.Min(laptopsPorSemana, totalLaptops - (long)(rel - 1) * laptopsPorSemana));
             int computoSemana = (int)Math.Max(0, Math.Min(computoPorSemana, totalComputo - (long)(rel - 1) * computoPorSemana));
 
@@ -510,7 +562,7 @@ public class CalendarioController : ControllerBase
                 AnioReal = anioReal,
                 LunesISO = lunes,
                 ViernesISO = viernes,
-                TotalEquipos = equiposSemana,
+                TotalEquipos = laptopsSemana + computoSemana,
                 TotalComputo = computoSemana,
                 TotalLaptops = laptopsSemana,
                 Periodo = periodo,
@@ -529,6 +581,7 @@ public class CalendarioController : ControllerBase
     {
         var nombreDB = PlantaNombreDB[planta];
 
+        // Laptops: calendario independiente (semana fija, todos en una semana)
         using var cntLap = conn.CreateCommand();
         cntLap.CommandText = """
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
@@ -537,6 +590,7 @@ public class CalendarioController : ControllerBase
         cntLap.Parameters.AddWithValue("p", nombreDB);
         var totalLaptops = Convert.ToInt32(cntLap.ExecuteScalar()!);
 
+        // Cómputo: calendario independiente (semana fija, todos en una semana)
         using var cntComp = conn.CreateCommand();
         cntComp.CommandText = """
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
@@ -548,6 +602,7 @@ public class CalendarioController : ControllerBase
 
         var (semReal, anioReal, lunes, viernes) = FechasDeSemana(anio, semIni, 1);
 
+        // Ambos tipos caen en la misma semana fija pero son calendarios independientes
         return new List<SemanaDistribucion>
         {
             new()
@@ -558,8 +613,8 @@ public class CalendarioController : ControllerBase
                 LunesISO       = lunes,
                 ViernesISO     = viernes,
                 TotalEquipos   = totalLaptops + totalComputo,
-                TotalComputo   = totalComputo,
-                TotalLaptops   = totalLaptops,
+                TotalComputo   = totalComputo,   // calendario cómputo independiente
+                TotalLaptops   = totalLaptops,   // calendario laptops independiente
                 Periodo        = periodo,
             }
         };

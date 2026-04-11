@@ -3370,6 +3370,8 @@
                     return;
                 }
 
+                const computoTotal = data.computo_por_semana ?? 0;
+                const laptopsTotal = data.laptops_por_semana ?? 0;
                 titulo.textContent = `${CAL_PLANTAS_LABEL[planta]} — Sem. ${semRel}  ·  ${lunesISO} → ${viernesISO}  ·  ${data.total_equipos} equipos`;
 
                 const colorMap = {
@@ -3398,53 +3400,79 @@
                     return;
                 }
 
-                const grupos = {};
-                data.equipos.forEach(e => {
-                    const ub = e.ubicacion || '(Sin ubicación)';
-                    if (!grupos[ub]) grupos[ub] = [];
-                    grupos[ub].push(e);
-                });
+                // ── Separar en dos grupos independientes ──────────────────
+                const equiposComputo = data.equipos.filter(e => e.tipo_calendario === 'computo');
+                const equiposLaptops = data.equipos.filter(e => e.tipo_calendario === 'laptop');
 
-                let html = `<div style="margin-bottom:12px;font-size:11px;color:var(--muted)">
-                                              <b style="color:var(--text)">${Object.keys(grupos).length}</b> ubicaciones &nbsp;·&nbsp;
-                                              <b style="color:var(--text)">${data.total_equipos}</b> equipos en esta semana
-                                            </div>`;
-
-                Object.entries(grupos).forEach(([ub, equipos]) => {
-                    html += `<div style="margin-bottom:8px;background:var(--surface2);border:1px solid var(--border);
-                                                       border-radius:10px;overflow:hidden;">
-                                             <div style="padding:7px 12px;display:flex;align-items:center;gap:8px;
-                                                         border-bottom:1px solid var(--border);background:rgba(255,255,255,.03);">
-                                               <span style="font-size:12px;font-weight:600;color:var(--text);flex:1">${ub}</span>
-                                               <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;">
-                                                 ${equipos.length} equipo${equipos.length !== 1 ? 's' : ''}</span>
-                                             </div>
-                                             <div style="padding:6px 8px;display:flex;flex-wrap:wrap;gap:4px;">`;
-
-                    equipos.forEach(e => {
-                        const col = colorMap[(e.categoria_color || '').toLowerCase()] || { bg: 'rgba(100,116,139,.12)', text: '#94A3B8' };
-                        html += `<div style="display:flex;align-items:flex-start;gap:6px;padding:5px 10px;
-                                                         border-radius:7px;background:var(--surface3);flex:1;min-width:200px;max-width:340px;">
-                                               <span style="font-size:14px;margin-top:2px">${iconDisp(e.nombre_dispositivo)}</span>
-                                               <div style="flex:1;min-width:0;">
-                                                 <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);
-                                                     font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                                     ${e.id_equipo || '—'}</div>
-                                                 <div style="font-size:10px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;">
-                                                     ${e.nombre_dispositivo || '—'}</div>
-                                                 <div style="display:flex;gap:3px;flex-wrap:wrap;">
-                                                   ${pmBadge(e.tiene_pm_p1, 'P1', e.fecha_pm_p1)}
-                                                   ${pmBadge(e.tiene_pm_p2, 'P2', e.fecha_pm_p2)}
-                                                 </div>
-                                               </div>
-                                               <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px;
-                                                   background:${col.bg};color:${col.text};flex-shrink:0;align-self:flex-start;">
-                                                   ${e.categoria_color || '—'}</span>
-                                             </div>`;
+                // Renderiza un grupo de equipos agrupados por ubicación
+                function renderGrupoEquipos(lista) {
+                    if (!lista.length) return '<p style="color:var(--muted);font-size:11px;padding:6px 0;">Sin equipos asignados esta semana.</p>';
+                    const grupos = {};
+                    lista.forEach(e => {
+                        const ub = e.ubicacion || '(Sin ubicación)';
+                        if (!grupos[ub]) grupos[ub] = [];
+                        grupos[ub].push(e);
                     });
+                    let h = `<div style="margin-bottom:8px;font-size:11px;color:var(--muted);">
+                            <b style="color:var(--text)">${Object.keys(grupos).length}</b> ubicaciones &nbsp;·&nbsp;
+                            <b style="color:var(--text)">${lista.length}</b> equipos
+                        </div>`;
+                    Object.entries(grupos).forEach(([ub, equipos]) => {
+                        h += `<div style="margin-bottom:8px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+                                <div style="padding:7px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.03);">
+                                    <span style="font-size:12px;font-weight:600;color:var(--text);flex:1">${ub}</span>
+                                    <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;">${equipos.length} equipo${equipos.length !== 1 ? 's' : ''}</span>
+                                </div>
+                                <div style="padding:6px 8px;display:flex;flex-wrap:wrap;gap:4px;">`;
+                        equipos.forEach(e => {
+                            const col = colorMap[(e.categoria_color || '').toLowerCase()] || { bg: 'rgba(100,116,139,.12)', text: '#94A3B8' };
+                            h += `<div style="display:flex;align-items:flex-start;gap:6px;padding:5px 10px;border-radius:7px;background:var(--surface3);flex:1;min-width:200px;max-width:340px;">
+                                    <span style="font-size:14px;margin-top:2px">${iconDisp(e.nombre_dispositivo)}</span>
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.id_equipo || '—'}</div>
+                                        <div style="font-size:10px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;">${e.nombre_dispositivo || '—'}</div>
+                                        <div style="display:flex;gap:3px;flex-wrap:wrap;">
+                                            ${pmBadge(e.tiene_pm_p1, 'P1', e.fecha_pm_p1)}
+                                            ${pmBadge(e.tiene_pm_p2, 'P2', e.fecha_pm_p2)}
+                                        </div>
+                                    </div>
+                                    <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px;background:${col.bg};color:${col.text};flex-shrink:0;align-self:flex-start;">${e.categoria_color || '—'}</span>
+                                </div>`;
+                        });
+                        h += `</div></div>`;
+                    });
+                    return h;
+                }
 
-                    html += `</div></div>`;
-                });
+                // ── Sección Cómputo ───────────────────────────────────────
+                let html = `
+                        <div style="margin-bottom:16px;">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;
+                                        padding:7px 12px;background:rgba(59,130,246,.08);border-radius:8px;
+                                        border-left:3px solid var(--accent);">
+                                <span style="font-size:14px;">🖥️</span>
+                                <span style="font-size:12px;font-weight:700;color:var(--accent);">Calendario Cómputo</span>
+                                <span style="font-size:10px;color:var(--muted);margin-left:auto;font-family:'DM Mono',monospace;">
+                                    ${equiposComputo.length} equipo${equiposComputo.length !== 1 ? 's' : ''} esta semana
+                                </span>
+                            </div>
+                            ${renderGrupoEquipos(equiposComputo)}
+                        </div>
+
+                        <div style="border-top:1px solid var(--border);margin:4px 0 16px;"></div>
+
+                        <div>
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;
+                                        padding:7px 12px;background:rgba(139,92,246,.08);border-radius:8px;
+                                        border-left:3px solid var(--purple);">
+                                <span style="font-size:14px;">💻</span>
+                                <span style="font-size:12px;font-weight:700;color:var(--purple);">Calendario Laptops</span>
+                                <span style="font-size:10px;color:var(--muted);margin-left:auto;font-family:'DM Mono',monospace;">
+                                    ${equiposLaptops.length} equipo${equiposLaptops.length !== 1 ? 's' : ''} esta semana
+                                </span>
+                            </div>
+                            ${renderGrupoEquipos(equiposLaptops)}
+                        </div>`;
 
                 body.innerHTML = html;
             } catch (err) {
