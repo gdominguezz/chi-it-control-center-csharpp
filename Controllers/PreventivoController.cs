@@ -1266,11 +1266,26 @@ public class PreventivoController : ControllerBase
         }
 
         // ── 4. Construir respuesta por ubicación ───────────────────────────
+        // Si no hay ningún equipo con PM digital en ninguna planta → calendario no iniciado
+        if (!porPlanta.Any())
+            return Ok(new { sin_calendario = true, ubicaciones = Array.Empty<object>() });
+
         var lista = new List<object>();
 
         foreach (var (ub, (planta, equipos)) in porUbicacion
             .OrderBy(x => x.Value.planta).ThenBy(x => x.Key))
         {
+            // IDs de la muestra de la planta que pertenecen a ESTA ubicación
+            var (muestraP1Plant, muestraP2Plant) = muestraPorPlanta.TryGetValue(planta, out var m)
+                ? m : (new HashSet<long>(), new HashSet<long>());
+
+            var idsP1EnUb = equipos.Where(e => muestraP1Plant.Contains(e.id)).Select(e => e.id).ToArray();
+            var idsP2EnUb = equipos.Where(e => muestraP2Plant.Contains(e.id)).Select(e => e.id).ToArray();
+
+            // ★ Solo incluir ubicaciones donde cayó al menos un equipo de la muestra IATF.
+            // Ubicaciones donde la muestra no seleccionó ningún equipo no deben aparecer.
+            if (idsP1EnUb.Length == 0 && idsP2EnUb.Length == 0) continue;
+
             // Conteos generales sin laptops
             int verP1 = equipos.Count(e => e.tieneP1 && !string.IsNullOrWhiteSpace(e.vP1));
             int pendP1 = equipos.Count(e => e.tieneP1 && string.IsNullOrWhiteSpace(e.vP1));
@@ -1285,13 +1300,6 @@ public class PreventivoController : ControllerBase
                 verP1 += lc.verP1; pendP1 += lc.pendP1;
                 verP2 += lc.verP2; pendP2 += lc.pendP2;
             }
-
-            // IDs de la muestra de la planta que pertenecen a ESTA ubicación
-            var (muestraP1Plant, muestraP2Plant) = muestraPorPlanta.TryGetValue(planta, out var m)
-                ? m : (new HashSet<long>(), new HashSet<long>());
-
-            var idsP1EnUb = equipos.Where(e => muestraP1Plant.Contains(e.id)).Select(e => e.id).ToArray();
-            var idsP2EnUb = equipos.Where(e => muestraP2Plant.Contains(e.id)).Select(e => e.id).ToArray();
 
             int mP1Ver = equipos.Count(e => muestraP1Plant.Contains(e.id) && !string.IsNullOrWhiteSpace(e.vP1));
             int mP2Ver = equipos.Count(e => muestraP2Plant.Contains(e.id) && !string.IsNullOrWhiteSpace(e.vP2));
@@ -1315,7 +1323,11 @@ public class PreventivoController : ControllerBase
             });
         }
 
-        return Ok(new { ubicaciones = lista });
+        // Si la lista quedó vacía (ningún equipo con PM digital) → sin calendario
+        if (!lista.Any())
+            return Ok(new { sin_calendario = true, ubicaciones = Array.Empty<object>() });
+
+        return Ok(new { sin_calendario = false, ubicaciones = lista });
     }
 
     // ══════════════════════════════════════════════════════════════════════
