@@ -3227,6 +3227,8 @@
                 delete calDistribucion[`${planta}_P1`];
                 delete calDistribucion[`${planta}_P2`];
                 await renderPlantaPanel();
+                cargarDashboard();   // ★ Sincronizar dashboard tras eliminar plazo
+                cargarAuditoria();   // ★ Sincronizar auditoría tras eliminar plazo
             } catch (e) {
                 alert('Error de red: ' + e.message);
             }
@@ -3686,9 +3688,9 @@
                                     Sin calendario iniciado
                                 </div>
                                 <div style="font-size:12px;color:var(--muted);line-height:1.7;">
-                                    No hay ningún calendario activo en ninguna planta.<br>
+                                    No hay ningún PM digital registrado en ninguna planta.<br>
                                     Ve al tab <b style="color:var(--accent)">Calendario</b> y genera el calendario primero.<br>
-                                    La auditoría IATF solo estará disponible cuando existan Calendarios activos y PMs realizados.
+                                    La auditoría IATF solo estará disponible cuando existan PMs realizados.
                                 </div>
                             </div>`;
                     return;
