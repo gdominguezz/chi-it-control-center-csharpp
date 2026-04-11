@@ -2723,10 +2723,10 @@
             const saludables = s.al_corriente || 0;
             const proximosMes = s.por_vencer_mes || 0;
             const vencidos = s.vencidos || 0;
-            const pSano = s.pct_al_corriente || 0;
-            const pProx = s.pct_por_vencer || 0;
-            const pVenc = s.pct_vencidos || 0;
-            const score = s.indice_salud || 0;
+            const pSano = Math.min(s.pct_al_corriente || 0, 100);
+            const pProx = Math.min(s.pct_por_vencer || 0, 100);
+            const pVenc = Math.min(s.pct_vencidos || 0, 100);
+            const score = Math.min(s.indice_salud || 0, 100);
             const emoji = s.emoji || '😊';
             const scoreColor = score >= 90 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
 
