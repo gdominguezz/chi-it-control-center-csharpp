@@ -1244,7 +1244,13 @@ public class PreventivoController : ControllerBase
         // Regla: muestra = CEILING(total_sin_laptop_con_PM_en_planta * 0.01)
         // Si el resultado es < 1 (ej: 0 equipos), muestra = 0 (no hay PM).
         // Con cualquier cantidad ≥ 1 equipo, CEILING garantiza mínimo 1.
-        var rng = new Random();
+        //
+        // ★ SEMILLA DETERMINISTA: la muestra es estable durante toda la semana
+        // y cambia automáticamente cada semana. Se basa en planta + año + semana ISO,
+        // así el mismo request siempre devuelve los mismos equipos (no cambia al recargar).
+        var hoy = DateTime.Today;
+        int semanaIso = System.Globalization.ISOWeek.GetWeekOfYear(hoy);
+        int anioIso = System.Globalization.ISOWeek.GetYear(hoy);
 
         // muestraPorPlanta: planta → (idsP1[], idsP2[])
         var muestraPorPlanta = new Dictionary<string, (HashSet<long> p1, HashSet<long> p2)>(
@@ -1252,15 +1258,19 @@ public class PreventivoController : ControllerBase
 
         foreach (var (planta, equipos) in porPlanta)
         {
+            // Semilla única por planta + semana + año → misma selección en todo el período
+            int semillaP1 = HashCode.Combine(planta.ToUpperInvariant(), anioIso, semanaIso, 1);
+            int semillaP2 = HashCode.Combine(planta.ToUpperInvariant(), anioIso, semanaIso, 2);
+
             // Pool P1: equipos de esta planta que tienen PM en P1
-            var poolP1 = equipos.Where(e => e.tieneP1).ToList();
+            var poolP1 = equipos.Where(e => e.tieneP1).OrderBy(e => e.id).ToList();
             var tamP1 = poolP1.Count > 0 ? (int)Math.Ceiling(poolP1.Count * 0.01) : 0;
-            var selP1 = poolP1.OrderBy(_ => rng.Next()).Take(tamP1).Select(e => e.id).ToHashSet();
+            var selP1 = poolP1.OrderBy(e => (uint)(semillaP1 ^ (int)e.id * 2654435761)).Take(tamP1).Select(e => e.id).ToHashSet();
 
             // Pool P2: equipos de esta planta que tienen PM en P2
-            var poolP2 = equipos.Where(e => e.tieneP2).ToList();
+            var poolP2 = equipos.Where(e => e.tieneP2).OrderBy(e => e.id).ToList();
             var tamP2 = poolP2.Count > 0 ? (int)Math.Ceiling(poolP2.Count * 0.01) : 0;
-            var selP2 = poolP2.OrderBy(_ => rng.Next()).Take(tamP2).Select(e => e.id).ToHashSet();
+            var selP2 = poolP2.OrderBy(e => (uint)(semillaP2 ^ (int)e.id * 2654435761)).Take(tamP2).Select(e => e.id).ToHashSet();
 
             muestraPorPlanta[planta] = (selP1, selP2);
         }
