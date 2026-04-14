@@ -907,15 +907,15 @@
 
         /* Status rows */
         tr.s-abierto td {
-            background: rgba(245,158,11,.07);
+            background-color: #ebdb06;
         }
 
         tr.s-cerrado td {
-            background: rgba(16,185,129,.07);
+            background-color: #1dff00;
         }
 
         tr.s-cancelado td {
-            background: rgba(100,116,139,.06);
+            background-color: #161c24;
             color: var(--muted);
         }
 
@@ -1223,6 +1223,300 @@
             color: var(--muted);
             font-size: 14px;
         }
+
+        /* TIEMPOS DE RESPUESTA */
+        .sla-section {
+            margin: 18px 0 6px;
+            padding: 0 2px;
+        }
+
+        .sla-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .sla-header-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, rgba(239,68,68,.25), rgba(239,68,68,.08));
+            border: 1px solid rgba(239,68,68,.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .sla-header-text {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: var(--muted);
+        }
+
+            .sla-header-text span {
+                color: var(--red);
+            }
+
+        .sla-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+        }
+
+        .sla-card {
+            position: relative;
+            border-radius: 13px;
+            padding: 16px 18px;
+            border: 1px solid;
+            overflow: hidden;
+            transition: transform .2s, box-shadow .2s;
+            cursor: default;
+        }
+
+            .sla-card:hover {
+                transform: translateY(-2px);
+            }
+
+            .sla-card::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 13px;
+                opacity: .08;
+            }
+
+            .sla-card::after {
+                content: '';
+                position: absolute;
+                top: -30px;
+                right: -30px;
+                width: 90px;
+                height: 90px;
+                border-radius: 50%;
+                opacity: .08;
+            }
+
+        /* Variante rojo – Proveedor */
+        .sla-red {
+            background: linear-gradient(135deg, rgba(239,68,68,.13), rgba(239,68,68,.05));
+            border-color: rgba(239,68,68,.3);
+            box-shadow: 0 4px 20px rgba(239,68,68,.08);
+        }
+
+            .sla-red:hover {
+                box-shadow: 0 8px 28px rgba(239,68,68,.18);
+            }
+
+            .sla-red::after {
+                background: #EF4444;
+            }
+
+            .sla-red .sla-days {
+                color: #EF4444;
+            }
+
+            .sla-red .sla-pulse {
+                background: #EF4444;
+                box-shadow: 0 0 0 4px rgba(239,68,68,.2);
+            }
+
+        /* Variante amber – Solicitar refacción */
+        .sla-amber {
+            background: linear-gradient(135deg, rgba(245,158,11,.13), rgba(245,158,11,.05));
+            border-color: rgba(245,158,11,.3);
+            box-shadow: 0 4px 20px rgba(245,158,11,.08);
+        }
+
+            .sla-amber:hover {
+                box-shadow: 0 8px 28px rgba(245,158,11,.18);
+            }
+
+            .sla-amber::after {
+                background: #F59E0B;
+            }
+
+            .sla-amber .sla-days {
+                color: #F59E0B;
+            }
+
+            .sla-amber .sla-pulse {
+                background: #F59E0B;
+                box-shadow: 0 0 0 4px rgba(245,158,11,.2);
+            }
+
+        /* Variante green – Piezas controladas */
+        .sla-green {
+            background: linear-gradient(135deg, rgba(16,185,129,.13), rgba(16,185,129,.05));
+            border-color: rgba(16,185,129,.3);
+            box-shadow: 0 4px 20px rgba(16,185,129,.08);
+        }
+
+            .sla-green:hover {
+                box-shadow: 0 8px 28px rgba(16,185,129,.18);
+            }
+
+            .sla-green::after {
+                background: #10B981;
+            }
+
+            .sla-green .sla-days {
+                color: #10B981;
+            }
+
+            .sla-green .sla-pulse {
+                background: #10B981;
+                box-shadow: 0 0 0 4px rgba(16,185,129,.2);
+            }
+
+        /* Variante cyan – Garantía */
+        .sla-cyan {
+            background: linear-gradient(135deg, rgba(6,182,212,.13), rgba(6,182,212,.05));
+            border-color: rgba(6,182,212,.3);
+            box-shadow: 0 4px 20px rgba(6,182,212,.08);
+        }
+
+            .sla-cyan:hover {
+                box-shadow: 0 8px 28px rgba(6,182,212,.18);
+            }
+
+            .sla-cyan::after {
+                background: #06B6D4;
+            }
+
+            .sla-cyan .sla-days {
+                color: #06B6D4;
+            }
+
+            .sla-cyan .sla-pulse {
+                background: #06B6D4;
+                box-shadow: 0 0 0 4px rgba(6,182,212,.2);
+            }
+
+        .sla-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sla-icon-wrap {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .sla-pulse {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 4px;
+            animation: sla-pulse-anim 2s ease-in-out infinite;
+        }
+
+        @keyframes sla-pulse-anim {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: .5;
+                transform: scale(.75);
+            }
+        }
+
+        .sla-days {
+            font-size: 42px;
+            font-weight: 800;
+            font-family: 'DM Mono', monospace;
+            line-height: 1;
+            margin-bottom: 2px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -.02em;
+        }
+
+        .sla-days-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: var(--muted);
+            margin-bottom: 8px;
+            font-family: 'DM Mono', monospace;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sla-desc {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.45;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sla-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border2), transparent);
+            margin: 6px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sla-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            padding: 3px 8px;
+            border-radius: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sla-red .sla-tag {
+            background: rgba(239,68,68,.18);
+            color: #fca5a5;
+        }
+
+        .sla-amber .sla-tag {
+            background: rgba(245,158,11,.18);
+            color: #fde68a;
+        }
+
+        .sla-green .sla-tag {
+            background: rgba(16,185,129,.18);
+            color: #6ee7b7;
+        }
+
+        .sla-cyan .sla-tag {
+            background: rgba(6,182,212,.18);
+            color: #a5f3fc;
+        }
+
+        @media (max-width: 700px) {
+            .sla-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 440px) {
+            .sla-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1430,6 +1724,71 @@
             </div>
 
         </div>
+
+        <!-- TIEMPOS DE RESPUESTA -->
+        <div class="sla-section">
+            <div class="sla-header">
+                <div class="sla-header-icon">⏱️</div>
+                <div class="sla-header-text">Tiempos de respuesta <span>· SLA Correctivos</span></div>
+            </div>
+            <div class="sla-grid">
+
+                <!-- REPARACION CON PROVEEDOR -->
+                <div class="sla-card sla-red">
+                    <div class="sla-top">
+                        <div class="sla-icon-wrap">🔧</div>
+                        <div class="sla-pulse"></div>
+                    </div>
+                    <div class="sla-days">30</div>
+                    <div class="sla-days-label">días hábiles</div>
+                    <div class="sla-divider"></div>
+                    <div class="sla-desc">Reparación con proveedor externo</div>
+                    <div style="margin-top:8px;"><span class="sla-tag">🏭 Proveedor</span></div>
+                </div>
+
+                <!-- SOLICITAR Y RECIBIR REFACCION -->
+                <div class="sla-card sla-amber">
+                    <div class="sla-top">
+                        <div class="sla-icon-wrap">📦</div>
+                        <div class="sla-pulse"></div>
+                    </div>
+                    <div class="sla-days">30</div>
+                    <div class="sla-days-label">días hábiles</div>
+                    <div class="sla-divider"></div>
+                    <div class="sla-desc">Solicitar y recibir la refacción</div>
+                    <div style="margin-top:8px;"><span class="sla-tag">🛒 Compras</span></div>
+                </div>
+
+                <!-- REFACCIONES EN STOCK / PIEZA CONTROLADA -->
+                <div class="sla-card sla-green">
+                    <div class="sla-top">
+                        <div class="sla-icon-wrap">⚡</div>
+                        <div class="sla-pulse"></div>
+                    </div>
+                    <div class="sla-days">3</div>
+                    <div class="sla-days-label">días hábiles</div>
+                    <div class="sla-divider"></div>
+                    <div class="sla-desc">Refacciones en stock o pieza controlada</div>
+                    <div style="margin-top:8px;"><span class="sla-tag">✅ Stock / Controlada</span></div>
+                </div>
+
+                <!-- EQUIPO CON GARANTIA -->
+                <div class="sla-card sla-cyan">
+                    <div class="sla-top">
+                        <div class="sla-icon-wrap">🛡️</div>
+                        <div class="sla-pulse"></div>
+                    </div>
+                    <div class="sla-days">5</div>
+                    <div class="sla-days-label">días hábiles</div>
+                    <div class="sla-divider"></div>
+                    <div class="sla-desc">Equipo con garantía vigente</div>
+                    <div style="margin-top:8px;"><span class="sla-tag">🔒 Garantía</span></div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
     </div><!-- /tab-registros -->
     <!-- TAB: DASHBOARD -->
     <div id="tab-dashboard" class="tab-content">
@@ -1627,16 +1986,16 @@
                 });
                 tds += `<td>${row.TIENE_PDF
                     ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                                  <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
+                                      <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
                     : `<input type="file" onchange="subirPDF(${row.ID},this)"
-                                   style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
+                                       style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
                     }</td>`;
                 tds += `<td style="white-space:nowrap;">
-                                ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
-                                           <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
-                                <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
-                                <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-                            </td>`;
+                                    ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                               <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
+                                    <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
+                                    <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                                </td>`;
                 tbody.innerHTML += `<tr class="${cls}">${tds}</tr>`;
             });
             document.getElementById('paginaInfo').textContent =
@@ -1724,26 +2083,26 @@
                 const va = esc(antes?.[dk] ?? ''), vd = esc(despues?.[dk] ?? '');
                 const chg = cambiados.has(key);
                 filas += `<tr class="${chg ? 'row-changed' : ''}">
-                                <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                                <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                                <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                            </tr>`;
+                                    <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                    <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                    <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                                </tr>`;
             });
             const n = cambiados.size;
             return `<div class="ev-wrap">
-                            <div class="ev-header">
-                                <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                                <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
-                                    color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                    ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                                </span>
-                            </div>
-                            <table class="ev-table">
-                                <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                                <tbody>${filas}</tbody>
-                            </table>
-                        </div>`;
+                                <div class="ev-header">
+                                    <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                    <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                                    <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                                        color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                        ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                    </span>
+                                </div>
+                                <table class="ev-table">
+                                    <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                    <tbody>${filas}</tbody>
+                                </table>
+                            </div>`;
         }
         function verHistorial(id) {
             document.getElementById('histIdLabel').textContent = id;
@@ -1758,8 +2117,8 @@
                 } else {
                     document.getElementById('contenidoHistorial').innerHTML =
                         `<p style="color:var(--muted);font-size:12px;margin-bottom:14px;">
-                                        ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                    </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                                            ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                        </p>`+ lista.map(ev => renderEvento(ev)).join('');
                 }
             }).catch(err => {
                 document.getElementById('contenidoHistorial').innerHTML =
@@ -1893,135 +2252,135 @@
             ], total);
 
             document.getElementById('dash-body').innerHTML = `
-                    <div class="kpi-grid">
-                        <div class="kpi-card k-total">
-                            <div class="kpi-label">Total registros ${ANIO_ACTUAL}</div>
-                            <div class="kpi-value">${total}</div>
-                            <div class="kpi-sub">correctivos registrados</div>
+                        <div class="kpi-grid">
+                            <div class="kpi-card k-total">
+                                <div class="kpi-label">Total registros ${ANIO_ACTUAL}</div>
+                                <div class="kpi-value">${total}</div>
+                                <div class="kpi-sub">correctivos registrados</div>
+                            </div>
+                            <div class="kpi-card k-open">
+                                <div class="kpi-label">Abiertos</div>
+                                <div class="kpi-value">${abierto}</div>
+                                <div class="kpi-sub">${total ? ((abierto / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
+                            </div>
+                            <div class="kpi-card k-closed">
+                                <div class="kpi-label">Cerrados</div>
+                                <div class="kpi-value">${cerrado}</div>
+                                <div class="kpi-sub">${total ? ((cerrado / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
+                            </div>
+                            <div class="kpi-card k-cancel">
+                                <div class="kpi-label">Cancelados</div>
+                                <div class="kpi-value">${cancel}</div>
+                                <div class="kpi-sub">${total ? ((cancel / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
+                            </div>
+                            <div class="kpi-card k-alta">
+                                <div class="kpi-label">Nivel Alto</div>
+                                <div class="kpi-value">${alta}</div>
+                                <div class="kpi-sub">categoría crítica</div>
+                            </div>
+                            <div class="kpi-card k-baja">
+                                <div class="kpi-label">Días prom. cierre</div>
+                                <div class="kpi-value" style="font-size:26px">${promDias}</div>
+                                <div class="kpi-sub">de solicitud a reparación</div>
+                            </div>
                         </div>
-                        <div class="kpi-card k-open">
-                            <div class="kpi-label">Abiertos</div>
-                            <div class="kpi-value">${abierto}</div>
-                            <div class="kpi-sub">${total ? ((abierto / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
-                        </div>
-                        <div class="kpi-card k-closed">
-                            <div class="kpi-label">Cerrados</div>
-                            <div class="kpi-value">${cerrado}</div>
-                            <div class="kpi-sub">${total ? ((cerrado / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
-                        </div>
-                        <div class="kpi-card k-cancel">
-                            <div class="kpi-label">Cancelados</div>
-                            <div class="kpi-value">${cancel}</div>
-                            <div class="kpi-sub">${total ? ((cancel / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
-                        </div>
-                        <div class="kpi-card k-alta">
-                            <div class="kpi-label">Nivel Alto</div>
-                            <div class="kpi-value">${alta}</div>
-                            <div class="kpi-sub">categoría crítica</div>
-                        </div>
-                        <div class="kpi-card k-baja">
-                            <div class="kpi-label">Días prom. cierre</div>
-                            <div class="kpi-value" style="font-size:26px">${promDias}</div>
-                            <div class="kpi-sub">de solicitud a reparación</div>
-                        </div>
-                    </div>
 
-                    <div class="dash-row">
-                        <!-- Estatus donut -->
-                        <div class="dash-card">
-                            <div class="dash-card-title">Distribución por Status</div>
-                            <div class="donut-wrap">
-                                ${donutSVG}
-                                <div class="donut-legend">
-                                    ${[{ l: 'Abierto', v: abierto, c: '#F59E0B' }, { l: 'Cerrado', v: cerrado, c: '#10B981' }, { l: 'Cancelado', v: cancel, c: '#64748B' }]
+                        <div class="dash-row">
+                            <!-- Estatus donut -->
+                            <div class="dash-card">
+                                <div class="dash-card-title">Distribución por Status</div>
+                                <div class="donut-wrap">
+                                    ${donutSVG}
+                                    <div class="donut-legend">
+                                        ${[{ l: 'Abierto', v: abierto, c: '#F59E0B' }, { l: 'Cerrado', v: cerrado, c: '#10B981' }, { l: 'Cancelado', v: cancel, c: '#64748B' }]
                     .map(x => `<div class="legend-item">
-                                            <div class="legend-dot" style="background:${x.c}"></div>
-                                            <span class="legend-name">${x.l}</span>
-                                            <span class="legend-num">${x.v}</span>
+                                                <div class="legend-dot" style="background:${x.c}"></div>
+                                                <span class="legend-name">${x.l}</span>
+                                                <span class="legend-num">${x.v}</span>
+                                            </div>`).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Por categoría -->
+                            <div class="dash-card">
+                                <div class="dash-card-title">Por Categoría</div>
+                                <div class="bar-list">
+                                    ${cats.slice(0, 6).map(([cat, cnt]) => `
+                                        <div class="bar-item">
+                                            <div class="bar-label-row">
+                                                <span class="bar-label">${cat}</span>
+                                                <span class="bar-val">${cnt}</span>
+                                            </div>
+                                            <div class="bar-track">
+                                                <div class="bar-fill" style="width:${(cnt / maxCat * 100).toFixed(1)}%;background:${CAT_COLORS[cat] || '#3B82F6'}"></div>
+                                            </div>
                                         </div>`).join('')}
                                 </div>
                             </div>
                         </div>
-                        <!-- Por categoría -->
-                        <div class="dash-card">
-                            <div class="dash-card-title">Por Categoría</div>
-                            <div class="bar-list">
-                                ${cats.slice(0, 6).map(([cat, cnt]) => `
-                                    <div class="bar-item">
-                                        <div class="bar-label-row">
-                                            <span class="bar-label">${cat}</span>
-                                            <span class="bar-val">${cnt}</span>
-                                        </div>
-                                        <div class="bar-track">
-                                            <div class="bar-fill" style="width:${(cnt / maxCat * 100).toFixed(1)}%;background:${CAT_COLORS[cat] || '#3B82F6'}"></div>
-                                        </div>
-                                    </div>`).join('')}
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="dash-row">
-                        <!-- Por planta -->
-                        <div class="dash-card">
-                            <div class="dash-card-title">Por Planta</div>
-                            <div class="bar-list">
-                                ${plantas.map(([p, cnt], i) => `
-                                    <div class="bar-item">
-                                        <div class="bar-label-row">
-                                            <span class="bar-label">${p}</span>
-                                            <span class="bar-val">${cnt}</span>
-                                        </div>
-                                        <div class="bar-track">
-                                            <div class="bar-fill" style="width:${(cnt / maxPlanta * 100).toFixed(1)}%;background:${PLANTA_COLORS[i % PLANTA_COLORS.length]}"></div>
-                                        </div>
-                                    </div>`).join('')}
+                        <div class="dash-row">
+                            <!-- Por planta -->
+                            <div class="dash-card">
+                                <div class="dash-card-title">Por Planta</div>
+                                <div class="bar-list">
+                                    ${plantas.map(([p, cnt], i) => `
+                                        <div class="bar-item">
+                                            <div class="bar-label-row">
+                                                <span class="bar-label">${p}</span>
+                                                <span class="bar-val">${cnt}</span>
+                                            </div>
+                                            <div class="bar-track">
+                                                <div class="bar-fill" style="width:${(cnt / maxPlanta * 100).toFixed(1)}%;background:${PLANTA_COLORS[i % PLANTA_COLORS.length]}"></div>
+                                            </div>
+                                        </div>`).join('')}
+                                </div>
                             </div>
-                        </div>
-                        <!-- Por mes -->
-                        <div class="dash-card">
-                            <div class="dash-card-title">Registros por Mes — ${ANIO_ACTUAL}</div>
-                            <div style="overflow-x:auto">
-                            <table class="mes-table">
-                                <thead><tr><th>Mes</th><th>Total</th><th>Abiertos</th><th>Cerrados</th></tr></thead>
-                                <tbody>
-                                    ${mesFiltrados.map(m => `<tr>
-                                        <td>${m.label}</td>
-                                        <td class="c-total">${m.total}</td>
-                                        <td class="c-open">${m.abierto}</td>
-                                        <td class="c-closed">${m.cerrado}</td>
-                                    </tr>`).join('')}
-                                </tbody>
-                            </table>
+                            <!-- Por mes -->
+                            <div class="dash-card">
+                                <div class="dash-card-title">Registros por Mes — ${ANIO_ACTUAL}</div>
+                                <div style="overflow-x:auto">
+                                <table class="mes-table">
+                                    <thead><tr><th>Mes</th><th>Total</th><th>Abiertos</th><th>Cerrados</th></tr></thead>
+                                    <tbody>
+                                        ${mesFiltrados.map(m => `<tr>
+                                            <td>${m.label}</td>
+                                            <td class="c-total">${m.total}</td>
+                                            <td class="c-open">${m.abierto}</td>
+                                            <td class="c-closed">${m.cerrado}</td>
+                                        </tr>`).join('')}
+                                    </tbody>
+                                </table>
+                                </div>
                             </div>
-                        </div>
-                    </div>`;
+                        </div>`;
         }
 
         function buildDonut(items, total) {
             const R = 54, cx = 64, cy = 64, stroke = 18;
             const circ = 2 * Math.PI * R;
             if (!total) return `<svg width="128" height="128" viewBox="0 0 128 128">
-                    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
-                    <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="13" font-family="DM Mono,monospace">0</text></svg>`;
+                        <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
+                        <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="13" font-family="DM Mono,monospace">0</text></svg>`;
             let offset = 0;
             const segs = items.map(item => {
                 const pct = item.val / total;
                 const dash = (pct * circ).toFixed(2);
                 const gap = (circ - pct * circ).toFixed(2);
                 const seg = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none"
-                        stroke="${item.color}" stroke-width="${stroke}"
-                        stroke-dasharray="${dash} ${gap}"
-                        stroke-dashoffset="${(-offset * circ / total + circ / 4).toFixed(2)}"
-                        transform="rotate(-90 ${cx} ${cy})"/>`;
+                            stroke="${item.color}" stroke-width="${stroke}"
+                            stroke-dasharray="${dash} ${gap}"
+                            stroke-dashoffset="${(-offset * circ / total + circ / 4).toFixed(2)}"
+                            transform="rotate(-90 ${cx} ${cy})"/>`;
                 offset += item.val;
                 return seg;
             });
             return `<svg width="128" height="128" viewBox="0 0 128 128" style="flex-shrink:0">
-                    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
-                    ${segs.join('')}
-                    <text x="${cx}" y="${cy - 8}" text-anchor="middle" dominant-baseline="middle" fill="#F1F5F9" font-size="18" font-weight="700" font-family="DM Mono,monospace">${total}</text>
-                    <text x="${cx}" y="${cy + 10}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="9" font-family="DM Sans,sans-serif">TOTAL</text>
-                </svg>`;
+                        <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
+                        ${segs.join('')}
+                        <text x="${cx}" y="${cy - 8}" text-anchor="middle" dominant-baseline="middle" fill="#F1F5F9" font-size="18" font-weight="700" font-family="DM Mono,monospace">${total}</text>
+                        <text x="${cx}" y="${cy + 10}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="9" font-family="DM Sans,sans-serif">TOTAL</text>
+                    </svg>`;
         }
         document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarEditar(); cerrarDetalle(); cerrarHistorial(); } });
     </script>
