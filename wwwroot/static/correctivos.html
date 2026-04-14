@@ -1174,7 +1174,7 @@
 
         async function cargarUbicaciones() {
             try {
-                const res = await fetch('/PREVENTIVOS/UBICACIONES');
+                const res = await fetch('/CORRECTIVOS/UBICACIONES');
                 const data = await res.json();
                 const ids = ['lista-ubicaciones-nuevo', 'lista-ubicaciones-edit'];
                 ids.forEach(id => {
