@@ -35,7 +35,7 @@ public class CorrectivoController : ControllerBase
     // Parámetros de filtro (todos opcionales, ILIKE): STATUS, FOLIO, PLANTA,
     // LINEA_PERSONA, EQUIPO, MARCA, MODELO, NUMERO_SERIE, DESCRIPCION_FALLA,
     // ACCESORIO_SOLICITADO, FECHA_SOLICITUD, REPORTE_ELABORADO_POR,
-    // TIPO_OBSERVACION, TIPO_CORRECTIVO, VENCIMIENTO_DIAS, FECHA_CONTEO_ACTUAL,
+    // TIPO_OBSERVACION, VENCIMIENTO_DIAS, FECHA_CONTEO_ACTUAL,
     // FECHA_LIMITE_CIERRE, CATEGORIA_CORRECTIVO, REFACCION_ACCESORIO_COMPRA,
     // FECHA_LLEGADA_REFACCION, FECHA_REPARACION, QUIEN_REALIZO_REPARACION,
     // VALIDACION_FUNCIONAMIENTO, DESCRIPCION_REPARACION, OBSERVACIONES, OC_FACTURA
@@ -63,7 +63,6 @@ public class CorrectivoController : ControllerBase
             ("accesorio_solicitado",      f.ACCESORIO_SOLICITADO),
             ("reporte_elaborado_por",     f.REPORTE_ELABORADO_POR),
             ("tipo_observacion",          f.TIPO_OBSERVACION),
-            ("tipo_correctivo",           f.TIPO_CORRECTIVO),
             ("categoria_correctivo",      f.CATEGORIA_CORRECTIVO),
             ("refaccion_accesorio_compra",f.REFACCION_ACCESORIO_COMPRA),
             ("quien_realizo_reparacion",  f.QUIEN_REALIZO_REPARACION),
@@ -142,7 +141,6 @@ public class CorrectivoController : ControllerBase
                 fecha_solicitud           AS "FECHA_SOLICITUD",
                 reporte_elaborado_por     AS "REPORTE_ELABORADO_POR",
                 tipo_observacion          AS "TIPO_OBSERVACION",
-                tipo_correctivo           AS "TIPO_CORRECTIVO",
                 vencimiento_dias          AS "VENCIMIENTO_DIAS",
                 fecha_conteo_actual       AS "FECHA_CONTEO_ACTUAL",
                 fecha_limite_cierre       AS "FECHA_LIMITE_CIERRE",
@@ -201,7 +199,7 @@ public class CorrectivoController : ControllerBase
                     status, folio, planta, linea_persona, equipo, marca, modelo,
                     numero_serie, descripcion_falla, accesorio_solicitado,
                     fecha_solicitud, reporte_elaborado_por, tipo_observacion,
-                    tipo_correctivo, vencimiento_dias, fecha_conteo_actual,
+                    vencimiento_dias, fecha_conteo_actual,
                     fecha_limite_cierre, categoria_correctivo,
                     refaccion_accesorio_compra, fecha_llegada_refaccion,
                     fecha_reparacion, quien_realizo_reparacion,
@@ -213,7 +211,7 @@ public class CorrectivoController : ControllerBase
                     @status, @folio, @planta, @linea, @equipo, @marca, @modelo,
                     @serie, @falla, @accesorio,
                     @fsol, @reporte, @tobservacion,
-                    @tcorrectivo, @vencimiento, @fconteo,
+                    @vencimiento, @fconteo,
                     @flimite, @categoria,
                     @refaccion, @fllegada,
                     @freparacion, @quien,
@@ -266,7 +264,6 @@ public class CorrectivoController : ControllerBase
                     fecha_solicitud            = @fsol,
                     reporte_elaborado_por      = @reporte,
                     tipo_observacion           = @tobservacion,
-                    tipo_correctivo            = @tcorrectivo,
                     vencimiento_dias           = @vencimiento,
                     fecha_conteo_actual        = @fconteo,
                     fecha_limite_cierre        = @flimite,
@@ -431,7 +428,7 @@ public class CorrectivoController : ControllerBase
                 id, status, folio, planta, linea_persona, equipo, marca, modelo,
                 numero_serie, descripcion_falla, accesorio_solicitado,
                 fecha_solicitud, reporte_elaborado_por, tipo_observacion,
-                tipo_correctivo, vencimiento_dias, fecha_conteo_actual,
+                vencimiento_dias, fecha_conteo_actual,
                 fecha_limite_cierre, categoria_correctivo,
                 refaccion_accesorio_compra, fecha_llegada_refaccion,
                 fecha_reparacion, quien_realizo_reparacion,
@@ -460,7 +457,7 @@ public class CorrectivoController : ControllerBase
                 id, status, folio, planta, linea_persona, equipo, marca, modelo,
                 numero_serie, descripcion_falla, accesorio_solicitado,
                 fecha_solicitud, reporte_elaborado_por, tipo_observacion,
-                tipo_correctivo, vencimiento_dias, fecha_conteo_actual,
+                vencimiento_dias, fecha_conteo_actual,
                 fecha_limite_cierre, categoria_correctivo,
                 refaccion_accesorio_compra, fecha_llegada_refaccion,
                 fecha_reparacion, quien_realizo_reparacion,
@@ -488,7 +485,7 @@ public class CorrectivoController : ControllerBase
                 id, status, folio, planta, linea_persona, equipo, marca, modelo,
                 numero_serie, descripcion_falla, accesorio_solicitado,
                 fecha_solicitud, reporte_elaborado_por, tipo_observacion,
-                tipo_correctivo, vencimiento_dias, fecha_conteo_actual,
+                vencimiento_dias, fecha_conteo_actual,
                 fecha_limite_cierre, categoria_correctivo,
                 refaccion_accesorio_compra, fecha_llegada_refaccion,
                 fecha_reparacion, quien_realizo_reparacion,
@@ -533,7 +530,6 @@ public class CorrectivoController : ControllerBase
         cmd.Parameters.AddWithValue("fsol", NDate(d.FECHA_SOLICITUD));
         cmd.Parameters.AddWithValue("reporte", N(d.REPORTE_ELABORADO_POR));
         cmd.Parameters.AddWithValue("tobservacion", N(d.TIPO_OBSERVACION));
-        cmd.Parameters.AddWithValue("tcorrectivo", N(d.TIPO_CORRECTIVO));
         cmd.Parameters.AddWithValue("vencimiento", NInt(d.VENCIMIENTO_DIAS));   // INTEGER
         cmd.Parameters.AddWithValue("fconteo", NDate(d.FECHA_CONTEO_ACTUAL));
         cmd.Parameters.AddWithValue("flimite", NDate(d.FECHA_LIMITE_CIERRE));
@@ -560,7 +556,7 @@ public class CorrectivoController : ControllerBase
                 status, folio, planta, linea_persona, equipo, marca, modelo,
                 numero_serie, descripcion_falla, accesorio_solicitado,
                 fecha_solicitud, reporte_elaborado_por, tipo_observacion,
-                tipo_correctivo, vencimiento_dias, fecha_conteo_actual,
+                vencimiento_dias, fecha_conteo_actual,
                 fecha_limite_cierre, categoria_correctivo,
                 refaccion_accesorio_compra, fecha_llegada_refaccion,
                 fecha_reparacion, quien_realizo_reparacion,
@@ -609,7 +605,6 @@ public class CorrectivoController : ControllerBase
         Add("fecha_solicitud", f.FECHA_SOLICITUD);
         Add("reporte_elaborado_por", f.REPORTE_ELABORADO_POR);
         Add("tipo_observacion", f.TIPO_OBSERVACION);
-        Add("tipo_correctivo", f.TIPO_CORRECTIVO);
         // vencimiento_dias es INTEGER — filtro exacto, no ILIKE
         if (f.VENCIMIENTO_DIAS.HasValue)
         {
@@ -679,7 +674,6 @@ public class FiltrosCorrectivo
     public string? ACCESORIO_SOLICITADO { get; set; }
     public string? REPORTE_ELABORADO_POR { get; set; }
     public string? TIPO_OBSERVACION { get; set; }
-    public string? TIPO_CORRECTIVO { get; set; }
     public int? VENCIMIENTO_DIAS { get; set; }   // INTEGER en la BD
     public string? CATEGORIA_CORRECTIVO { get; set; }
     public string? REFACCION_ACCESORIO_COMPRA { get; set; }
@@ -715,7 +709,6 @@ public class CorrectivoRequest
     public string? FECHA_SOLICITUD { get; set; }
     public string? REPORTE_ELABORADO_POR { get; set; }
     public string? TIPO_OBSERVACION { get; set; }
-    public string? TIPO_CORRECTIVO { get; set; }
     public int? VENCIMIENTO_DIAS { get; set; }   // INTEGER en la BD
     public string? FECHA_CONTEO_ACTUAL { get; set; }
     public string? FECHA_LIMITE_CIERRE { get; set; }
