@@ -1,5 +1,5 @@
-using ChiIT.Data;
 using ChiIT.Services;
+using ChiIT.Data;
 
 // ── Zona horaria México/Chihuahua ──
 Environment.SetEnvironmentVariable("TZ", "America/Chihuahua");
@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddSingleton<DbConnectionPool>();
 builder.Services.AddScoped<AuditoriaServicepreventivos>();
+builder.Services.AddSingleton<AuditoriaServiceCorrectivos>();
 builder.Services.AddScoped<ExcelService>();
 builder.Services.AddScoped<QrService>();
 
@@ -34,6 +35,7 @@ app.MapControllers();
 // ── Crear directorios necesarios al iniciar ──
 Directory.CreateDirectory("PDF_DATABASE/PREVENTIVOS");
 Directory.CreateDirectory("QR_CODES/MESAS");
+
 
 // ── Puerto dinámico para Render ──
 var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
