@@ -10,11 +10,11 @@ namespace ChiIT.Controllers;
 public class CorrectivoController : ControllerBase
 {
     private readonly DbConnectionPool _db;
-    private readonly AuditoriaServicepreventivos _auditoria;
+    private readonly AuditoriaServiceCorrectivos _auditoria;
     private readonly ExcelService _excel;
     private readonly string _pdfDir;
 
-    public CorrectivoController(DbConnectionPool db, AuditoriaServicepreventivos auditoria,
+    public CorrectivoController(DbConnectionPool db, AuditoriaServiceCorrectivos auditoria,
                                 ExcelService excel, IConfiguration config)
     {
         _db = db;
@@ -627,30 +627,6 @@ public class CorrectivoController : ControllerBase
         Add("oc_factura", f.OC_FACTURA);
 
         return (where, parms);
-    }
-
-    // ══════════════════════════════════════════════════════════════════════
-    // GET /CORRECTIVOS/UBICACIONES
-    // Devuelve lista de ubicaciones distintas de mantenimientos_preventivos
-    // para autocompletado del campo Línea / Persona
-    // ══════════════════════════════════════════════════════════════════════
-    [HttpGet("CORRECTIVOS/UBICACIONES")]
-    public IActionResult ObtenerUbicaciones()
-    {
-        using var conn = _db.Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            SELECT DISTINCT TRIM(ubicacion)
-            FROM public.mantenimientos_preventivos
-            WHERE ubicacion IS NOT NULL AND TRIM(ubicacion) <> ''
-            ORDER BY TRIM(ubicacion)
-            """;
-
-        var lista = new List<string>();
-        using var r = cmd.ExecuteReader();
-        while (r.Read()) lista.Add(r.GetString(0));
-
-        return Ok(new { ubicaciones = lista });
     }
 }
 
