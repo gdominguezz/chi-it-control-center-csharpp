@@ -339,6 +339,13 @@ public class CorrectivoController : ControllerBase
             """;
         cmd.Parameters.AddWithValue("id", id);
 
+        static object SafeJson(string? raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return new { };
+            try { return JsonSerializer.Deserialize<object>(raw)!; }
+            catch { return new { _raw = raw }; }
+        }
+
         var historial = new List<object>();
         using var r = cmd.ExecuteReader();
         while (r.Read())
@@ -348,12 +355,8 @@ public class CorrectivoController : ControllerBase
                 id = r.GetInt32(0),
                 fecha = r.IsDBNull(1) ? null : r.GetDateTime(1).ToString("o"),
                 usuario = r.IsDBNull(2) ? null : r.GetString(2),
-                registro_anterior = r.IsDBNull(3)
-                                    ? (object)new { }
-                                    : JsonSerializer.Deserialize<object>(r.GetString(3))!,
-                registro_nuevo = r.IsDBNull(4)
-                                    ? (object)new { }
-                                    : JsonSerializer.Deserialize<object>(r.GetString(4))!,
+                registro_anterior = SafeJson(r.IsDBNull(3) ? null : r.GetString(3)),
+                registro_nuevo = SafeJson(r.IsDBNull(4) ? null : r.GetString(4)),
             });
         }
         return Ok(new { historial });
