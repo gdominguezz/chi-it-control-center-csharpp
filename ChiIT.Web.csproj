@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\static\correctivos.html" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- PostgreSQL -->
     <PackageReference Include="Npgsql" Version="8.0.3" />
     <!-- Excel -->

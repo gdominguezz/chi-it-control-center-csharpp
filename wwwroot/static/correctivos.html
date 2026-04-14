@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>MANTENIMIENTOS CORRECTIVOS</title>
+<style>
+*{box-sizing:border-box;}
+body{margin:0;font-family:Arial;background:#f1f5f9;}
+.header{background:#1e293b;color:white;padding:15px 20px;font-size:20px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;}
+.user-info{font-size:13px;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:6px;}
+.container{padding:20px;}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-bottom:14px;}
+.field{display:flex;flex-direction:column;}
+.field label{font-size:11px;font-weight:bold;color:#1e293b;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;}
+.field input{padding:7px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;background:#f8fafc;}
+.field input:focus{outline:none;border-color:#2563eb;background:white;box-shadow:0 0 0 2px rgba(37,99,235,.15);}
+button{padding:6px 11px;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:12px;margin-right:4px;}
+.save{background:#16a34a;color:white;}.cancel{background:#64748b;color:white;}.delete{background:#dc2626;color:white;}
+.edit{background:#f59e0b;color:black;}.ver{background:#06b6d4;color:white;}.pdf{background:#2563eb;color:white;}
+.export{background:#7c3aed;color:white;}.historial{background:#0ea5e9;color:white;}.back{background:#dc2626;font-style:italic;color:white;}
+.table-container{width:100%;height:500px;overflow:auto;border:1px solid #ccc;background:white;margin-top:10px;}
+table{border-collapse:collapse;min-width:3800px;font-size:11px;}
+th,td{border:1px solid #ccc;padding:6px;white-space:nowrap;text-align:center;}
+th{background:#1e293b;color:white;position:sticky;top:0;z-index:2;}
+.filter-row input{width:100%;font-size:10px;padding:3px;}
+tr.s-abierto td{background:#fef9c3;}
+tr.s-cerrado td{background:#dcfce7;}
+tr.s-cancelado td{background:#e2e8f0;color:#94a3b8;}
+.pagination{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);justify-content:center;align-items:center;z-index:9999;}
+.modal.show{display:flex;}
+.modal-box{background:white;border-radius:10px;padding:24px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.35);}
+.modal-box.form-box{width:min(680px,95vw);}
+.modal-box.hist-box{width:min(1200px,95vw);}
+.modal-box.det-box{width:min(860px,95vw);}
+.modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e2e8f0;padding-bottom:12px;margin-bottom:18px;}
+.modal-header h3{margin:0;color:#1e293b;font-size:16px;}
+.close-btn{background:#dc2626;color:white;border:none;padding:5px 12px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:bold;}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;border-top:1px solid #e2e8f0;padding-top:14px;margin-top:8px;}
+.modal-footer button{margin-right:0;}
+.form-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-field{margin-bottom:12px;display:flex;flex-direction:column;}
+.form-field label{font-size:11px;font-weight:bold;color:#1e293b;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;}
+.form-field input,.form-field textarea{padding:8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;background:#f8fafc;font-family:Arial;}
+.form-field input:focus,.form-field textarea:focus{outline:none;border-color:#2563eb;background:white;box-shadow:0 0 0 2px rgba(37,99,235,.15);}
+.form-field textarea{resize:vertical;min-height:65px;}
+.det-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
+.det-field{display:flex;flex-direction:column;}
+.det-field label{font-size:10px;font-weight:bold;color:#64748b;margin-bottom:3px;text-transform:uppercase;}
+.det-field input{padding:6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;background:#f8fafc;color:#1e293b;}
+
+/* ESTILOS PARA HISTORIAL MEJORADO */
+.ev-wrap{margin-bottom:20px;border:2px solid #e2e8f0;border-radius:8px;overflow:hidden;background:#f8fafc;}
+.ev-header{background:#1e293b;color:white;padding:12px 16px;display:flex;flex-wrap:wrap;gap:15px;align-items:center;border-bottom:2px solid #2563eb;}
+.ev-header span{font-size:12px;}
+.ev-header strong{color:#7dd3fc;}
+.badge-cambio{background:#f59e0b;color:#111;font-size:10px;padding:3px 8px;border-radius:999px;font-weight:bold;text-transform:uppercase;letter-spacing:.3px;margin-left:5px;}
+.ev-content{display:grid;grid-template-columns:1fr 1fr;gap:0;background:white;}
+.ev-section{padding:14px;}
+.ev-section h4{margin:0 0 10px 0;font-size:13px;color:#1e293b;border-bottom:2px solid #e2e8f0;padding-bottom:8px;}
+.ev-section.before{border-right:2px solid #e2e8f0;}
+.ev-section.before h4{color:#7f1d1d;background:#fee2e2;padding:6px 8px;margin:-14px -14px 10px -14px;}
+.ev-section.after h4{color:#15803d;background:#dcfce7;padding:6px 8px;margin:-14px -14px 10px -14px;}
+.ev-field{margin-bottom:10px;padding:8px;background:#f1f5f9;border-radius:4px;border-left:3px solid #cbd5e1;}
+.ev-field label{font-size:10px;font-weight:bold;color:#475569;text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:3px;}
+.ev-field .value{font-size:12px;color:#1e293b;word-break:break-word;font-family:monospace;background:white;padding:4px 6px;border-radius:3px;min-height:20px;display:flex;align-items:center;}
+.ev-field .empty{color:#94a3b8;font-style:italic;font-family:Arial;}
+.ev-section.before .ev-field{border-left-color:#ef4444;}
+.ev-section.after .ev-field{border-left-color:#22c55e;}
+.ev-field.changed{background:#fffbeb;border-left-color:#f59e0b;}
+
+.sin-hist{text-align:center;padding:40px;color:#64748b;font-size:14px;}
+.hist-info{background:#eff6ff;border-left:4px solid #0ea5e9;padding:10px 12px;margin-bottom:14px;border-radius:4px;font-size:12px;color:#0c4a6e;}
+</style>
+</head>
+<body>
+<div class="header">
+  <span>MANTENIMIENTOS CORRECTIVOS</span>
+  <div class="user-info">👤 <strong id="usuarioDisplay">Cargando...</strong></div>
+</div>
+<div class="container">
+  <div class="form-grid">
+    <div class="field"><label>STATUS</label><input id="n_STATUS"></div>
+    <div class="field"><label>FOLIO</label><input id="n_FOLIO"></div>
+    <div class="field"><label>PLANTA</label><input id="n_PLANTA"></div>
+    <div class="field"><label>LINEA / PERSONA</label><input id="n_LINEA_PERSONA"></div>
+    <div class="field"><label>EQUIPO</label><input id="n_EQUIPO"></div>
+    <div class="field"><label>MARCA</label><input id="n_MARCA"></div>
+    <div class="field"><label>MODELO</label><input id="n_MODELO"></div>
+    <div class="field"><label>NUMERO SERIE</label><input id="n_NUMERO_SERIE"></div>
+    <div class="field"><label>DESCRIPCION FALLA</label><input id="n_DESCRIPCION_FALLA"></div>
+    <div class="field"><label>ACCESORIO SOLICITADO</label><input id="n_ACCESORIO_SOLICITADO"></div>
+    <div class="field"><label>FECHA SOLICITUD</label><input id="n_FECHA_SOLICITUD" type="date"></div>
+    <div class="field"><label>REPORTE ELABORADO POR</label><input id="n_REPORTE_ELABORADO_POR"></div>
+    <div class="field"><label>TIPO OBSERVACION</label><input id="n_TIPO_OBSERVACION"></div>
+    <div class="field"><label>TIPO CORRECTIVO</label><input id="n_TIPO_CORRECTIVO"></div>
+    <div class="field"><label>VENCIMIENTO DIAS</label><input id="n_VENCIMIENTO_DIAS"></div>
+    <div class="field"><label>FECHA CONTEO ACTUAL</label><input id="n_FECHA_CONTEO_ACTUAL" type="date"></div>
+    <div class="field"><label>FECHA LIMITE CIERRE</label><input id="n_FECHA_LIMITE_CIERRE" type="date"></div>
+    <div class="field"><label>CATEGORIA CORRECTIVO</label><input id="n_CATEGORIA_CORRECTIVO"></div>
+    <div class="field"><label>REFACCION / ACCESORIO COMPRA</label><input id="n_REFACCION_ACCESORIO_COMPRA"></div>
+    <div class="field"><label>FECHA LLEGADA REFACCION</label><input id="n_FECHA_LLEGADA_REFACCION" type="date"></div>
+    <div class="field"><label>FECHA REPARACION</label><input id="n_FECHA_REPARACION" type="date"></div>
+    <div class="field"><label>QUIEN REALIZO REPARACION</label><input id="n_QUIEN_REALIZO_REPARACION"></div>
+    <div class="field"><label>VALIDACION FUNCIONAMIENTO</label><input id="n_VALIDACION_FUNCIONAMIENTO"></div>
+    <div class="field"><label>DESCRIPCION REPARACION</label><input id="n_DESCRIPCION_REPARACION"></div>
+    <div class="field"><label>OBSERVACIONES</label><input id="n_OBSERVACIONES"></div>
+    <div class="field"><label>OC / FACTURA</label><input id="n_OC_FACTURA"></div>
+  </div>
+  <div style="margin-bottom:14px;">
+    <button class="save" onclick="guardar()">GUARDAR</button>
+    <button class="cancel" onclick="limpiarForm()">CANCELAR</button>
+  </div>
+  <div style="margin-bottom:14px;">
+    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
+    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
+
+    <input id="anioExportar" type="number" placeholder="Año (ej: 2026)" style="width:130px;padding:6px;border:1px solid #ccc;border-radius:5px;font-size:12px;">
+
+    <button class="export" onclick="exportarAnio()">Exportar por Año</button>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr id="encTh"></tr>
+        <tr class="filter-row" id="encFil"></tr>
+      </thead>
+      <tbody id="tabla"></tbody>
+    </table>
+  </div>
+  <div class="pagination">
+    <button onclick="anterior()">◀ Anterior</button>
+    <span id="paginaInfo" style="font-size:13px;color:#475569;"></span>
+    <button onclick="siguiente()">Siguiente ▶</button>
+    <button class="back" onclick="window.location.href='menu.html'">REGRESAR AL MENÚ</button>
+  </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div id="modalEditar" class="modal">
+  <div class="modal-box form-box">
+    <div class="modal-header">
+      <h3>✏️ Editar Correctivo &nbsp;<span id="editarIdLabel" style="color:#2563eb;">#</span></h3>
+      <button class="close-btn" onclick="cerrarEditar()">✕</button>
+    </div>
+    <div class="form-cols">
+      <div class="form-field"><label>STATUS</label><input type="text" id="e_STATUS"></div>
+      <div class="form-field"><label>FOLIO</label><input type="text" id="e_FOLIO"></div>
+      <div class="form-field"><label>PLANTA</label><input type="text" id="e_PLANTA"></div>
+      <div class="form-field"><label>LINEA / PERSONA</label><input type="text" id="e_LINEA_PERSONA"></div>
+      <div class="form-field"><label>EQUIPO</label><input type="text" id="e_EQUIPO"></div>
+      <div class="form-field"><label>MARCA</label><input type="text" id="e_MARCA"></div>
+      <div class="form-field"><label>MODELO</label><input type="text" id="e_MODELO"></div>
+      <div class="form-field"><label>NUMERO SERIE</label><input type="text" id="e_NUMERO_SERIE"></div>
+      <div class="form-field"><label>FECHA SOLICITUD</label><input type="date" id="e_FECHA_SOLICITUD"></div>
+      <div class="form-field"><label>REPORTE ELABORADO POR</label><input type="text" id="e_REPORTE_ELABORADO_POR"></div>
+      <div class="form-field"><label>TIPO OBSERVACION</label><input type="text" id="e_TIPO_OBSERVACION"></div>
+      <div class="form-field"><label>TIPO CORRECTIVO</label><input type="text" id="e_TIPO_CORRECTIVO"></div>
+      <div class="form-field"><label>VENCIMIENTO DIAS</label><input type="text" id="e_VENCIMIENTO_DIAS"></div>
+      <div class="form-field"><label>FECHA CONTEO ACTUAL</label><input type="date" id="e_FECHA_CONTEO_ACTUAL"></div>
+      <div class="form-field"><label>FECHA LIMITE CIERRE</label><input type="date" id="e_FECHA_LIMITE_CIERRE"></div>
+      <div class="form-field"><label>CATEGORIA CORRECTIVO</label><input type="text" id="e_CATEGORIA_CORRECTIVO"></div>
+      <div class="form-field"><label>REFACCION / ACCESORIO</label><input type="text" id="e_REFACCION_ACCESORIO_COMPRA"></div>
+      <div class="form-field"><label>FECHA LLEGADA REFACCION</label><input type="date" id="e_FECHA_LLEGADA_REFACCION"></div>
+      <div class="form-field"><label>FECHA REPARACION</label><input type="date" id="e_FECHA_REPARACION"></div>
+      <div class="form-field"><label>QUIEN REALIZO REPARACION</label><input type="text" id="e_QUIEN_REALIZO_REPARACION"></div>
+      <div class="form-field"><label>VALIDACION FUNCIONAMIENTO</label><input type="text" id="e_VALIDACION_FUNCIONAMIENTO"></div>
+      <div class="form-field"><label>OC / FACTURA</label><input type="text" id="e_OC_FACTURA"></div>
+    </div>
+    <div class="form-field"><label>DESCRIPCION FALLA</label><textarea id="e_DESCRIPCION_FALLA"></textarea></div>
+    <div class="form-field"><label>ACCESORIO SOLICITADO</label><textarea id="e_ACCESORIO_SOLICITADO"></textarea></div>
+    <div class="form-field"><label>DESCRIPCION REPARACION</label><textarea id="e_DESCRIPCION_REPARACION"></textarea></div>
+    <div class="form-field"><label>OBSERVACIONES</label><textarea id="e_OBSERVACIONES"></textarea></div>
+    <div class="modal-footer">
+      <button class="delete" onclick="cerrarEditar()">Cancelar</button>
+      <button class="save" onclick="guardarCambios()">💾 Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE -->
+<div id="modalDetalle" class="modal">
+  <div class="modal-box det-box">
+    <div class="modal-header">
+      <h3>🔍 Detalle Correctivo &nbsp;<span id="detalleIdLabel" style="color:#06b6d4;">#</span></h3>
+      <button class="close-btn" onclick="cerrarDetalle()">✕</button>
+    </div>
+    <div id="contenidoDetalle" class="det-grid"></div>
+    <div class="modal-footer"><button class="delete" onclick="cerrarDetalle()">Cerrar</button></div>
+  </div>
+</div>
+
+<!-- MODAL HISTORIAL MEJORADO -->
+<div id="modalHistorial" class="modal">
+  <div class="modal-box hist-box">
+    <div class="modal-header">
+      <h3>📋 Historial de Cambios — Correctivo&nbsp;<span id="histIdLabel" style="color:#0ea5e9;">#</span></h3>
+      <button class="close-btn" onclick="cerrarHistorial()">✕</button>
+    </div>
+    <div class="hist-info">
+      ℹ️ Se muestran todos los cambios realizados al registro. Lado izquierdo: valores anteriores | Lado derecho: nuevos valores
+    </div>
+    <div id="contenidoHistorial"></div>
+    <div class="modal-footer"><button class="delete" onclick="cerrarHistorial()">Cerrar</button></div>
+  </div>
+</div>
+
+<script>
+let paginaActual=1,limite=10,totalRegistros=0,datosActuales=[],editandoID=null,usuarioActual='SISTEMA';
+
+const CAMPOS=[
+  {key:'STATUS',label:'Status'},{key:'FOLIO',label:'Folio'},{key:'PLANTA',label:'Planta'},
+  {key:'LINEA_PERSONA',label:'Línea / Persona'},{key:'EQUIPO',label:'Equipo'},{key:'MARCA',label:'Marca'},
+  {key:'MODELO',label:'Modelo'},{key:'NUMERO_SERIE',label:'Número Serie'},
+  {key:'DESCRIPCION_FALLA',label:'Descripción Falla'},{key:'ACCESORIO_SOLICITADO',label:'Accesorio Solicitado'},
+  {key:'FECHA_SOLICITUD',label:'Fecha Solicitud'},{key:'REPORTE_ELABORADO_POR',label:'Reporte Elaborado Por'},
+  {key:'TIPO_OBSERVACION',label:'Tipo Observación'},{key:'TIPO_CORRECTIVO',label:'Tipo Correctivo'},
+  {key:'VENCIMIENTO_DIAS',label:'Vencimiento Días'},{key:'FECHA_CONTEO_ACTUAL',label:'Fecha Conteo Actual'},
+  {key:'FECHA_LIMITE_CIERRE',label:'Fecha Límite Cierre'},{key:'CATEGORIA_CORRECTIVO',label:'Categoría Correctivo'},
+  {key:'REFACCION_ACCESORIO_COMPRA',label:'Refacción / Accesorio Compra'},
+  {key:'FECHA_LLEGADA_REFACCION',label:'Fecha Llegada Refacción'},{key:'FECHA_REPARACION',label:'Fecha Reparación'},
+  {key:'QUIEN_REALIZO_REPARACION',label:'Quién Realizó Reparación'},
+  {key:'VALIDACION_FUNCIONAMIENTO',label:'Validación Funcionamiento'},
+  {key:'DESCRIPCION_REPARACION',label:'Descripción Reparación'},
+  {key:'OBSERVACIONES',label:'Observaciones'},{key:'OC_FACTURA',label:'OC / Factura'},
+];
+
+window.addEventListener('DOMContentLoaded',()=>{
+  const usr=sessionStorage.getItem('usuario');
+  if(usr){usuarioActual=usr;document.getElementById('usuarioDisplay').textContent=usr;}
+  else fetch('/obtener-usuario').then(r=>r.json()).then(d=>{usuarioActual=d.usuario||'SISTEMA';document.getElementById('usuarioDisplay').textContent=usuarioActual;}).catch(()=>{document.getElementById('usuarioDisplay').textContent='Sin sesión';});
+  construirEncabezado();cargar();
+});
+
+function construirEncabezado(){
+  const ths=document.getElementById('encTh'),fils=document.getElementById('encFil');
+  ths.innerHTML='<th>ID</th>';fils.innerHTML='<th></th>';
+  CAMPOS.forEach(({key,label})=>{
+    ths.innerHTML+=`<th>${label.toUpperCase()}</th>`;
+    fils.innerHTML+=`<th><input id="f_${key}" oninput="filtrar()"></th>`;
+  });
+  ths.innerHTML+='<th>PDF</th><th>ACCIONES</th>';
+  fils.innerHTML+='<th></th><th></th>';
+}
+
+function obtenerParams(){
+  const p={page:paginaActual,limit:limite};
+  CAMPOS.forEach(({key})=>{const el=document.getElementById('f_'+key);if(el&&el.value)p[key]=el.value;});
+  return new URLSearchParams(p);
+}
+
+function cargar(){
+  fetch(`/CORRECTIVOS?${obtenerParams()}`).then(r=>r.json()).then(resp=>{
+    totalRegistros=resp.total;datosActuales=resp.data;renderizar();
+  });
+}
+
+function colorStatus(s){
+  const v=String(s??'').trim().toLowerCase();
+  if(v==='0'||v==='abierto'||v==='pendiente')return 's-abierto';
+  if(v==='1'||v==='cerrado'||v==='cerrada')return 's-cerrado';
+  if(v==='cancelado'||v==='cancelada')return 's-cancelado';
+  return '';
+}
+
+function esc(v){if(v==null)return'';return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function norm(v){return(v==null)?'':String(v).trim();}
+function formatFecha(f){try{const d=new Date(f);if(!isNaN(d))return d.toLocaleString('es-MX',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});}catch(e){}return f??'';}
+
+function renderizar(){
+  const tbody=document.getElementById('tabla');tbody.innerHTML='';
+  if(!datosActuales.length){tbody.innerHTML=`<tr><td colspan="${CAMPOS.length+3}" style="text-align:center;padding:20px">Sin registros</td></tr>`;return;}
+  datosActuales.forEach(row=>{
+    tbody.innerHTML+=`<tr class="${colorStatus(row.STATUS)}">
+      <td>${row.ID}</td>
+      ${CAMPOS.map(({key})=>`<td>${esc(row[key]??'')}</td>`).join('')}
+      <td>${row.TIENE_PDF?`<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button><button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`:`<input type="file" onchange="subirPDF(${row.ID},this)">`}</td>
+      <td style="white-space:nowrap;">
+        <button class="edit" onclick="abrirEditar(${row.ID})">✏️</button>
+        <button class="ver" onclick="verDetalle(${row.ID})">🔍</button>
+        <button class="delete" onclick="eliminar(${row.ID})">🗑️</button>
+        <button class="historial" onclick="verHistorial(${row.ID})">📋</button>
+      </td></tr>`;
+  });
+  document.getElementById('paginaInfo').innerText=`Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)} | Total: ${totalRegistros}`;
+}
+
+function filtrar(){paginaActual=1;cargar();}
+function siguiente(){if(paginaActual*limite<totalRegistros){paginaActual++;cargar();}}
+function anterior(){if(paginaActual>1){paginaActual--;cargar();}}
+
+function guardar(){
+  const data={};
+  CAMPOS.forEach(({key})=>{const el=document.getElementById('n_'+key);data[key]=el?(el.value||null):null;});
+  fetch('/CORRECTIVO',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+    .then(r=>r.json()).then(d=>{if(d.error){alert('Error: '+d.error);return;}limpiarForm();cargar();});
+}
+function limpiarForm(){CAMPOS.forEach(({key})=>{const el=document.getElementById('n_'+key);if(el)el.value='';});}
+function eliminar(id){if(!confirm('¿Eliminar este registro?'))return;fetch(`/CORRECTIVO/${id}`,{method:'DELETE'}).then(()=>cargar());}
+function subirPDF(id,input){const fd=new FormData();fd.append('file',input.files[0]);fetch(`/CORRECTIVO/PDF/${id}`,{method:'POST',body:fd}).then(()=>cargar());}
+function verPDF(id){window.open(`/CORRECTIVO/PDF/${id}`,'_blank');}
+function eliminarPDF(id){if(!confirm('¿Eliminar el PDF?'))return;fetch(`/CORRECTIVO/PDF/${id}`,{method:'DELETE'}).then(()=>cargar());}
+function exportarFiltrado(){
+
+    const params = obtenerParams()
+
+    window.open(`/CORRECTIVOS/EXPORTAR?${params.toString()}`)
+
+}
+function exportarTodo(){window.open('/CORRECTIVOS/EXPORTAR_TODO');}
+function exportarAnio(){const a=document.getElementById('anioExportar').value;if(!a){alert('Ingresa un año');return;}window.open(`/CORRECTIVOS/EXPORTAR_ANIO?anio=${a}`);}
+
+function abrirEditar(id){
+  editandoID=id;document.getElementById('editarIdLabel').textContent=id;
+  const row=datosActuales.find(r=>r.ID===id);
+  if(row)CAMPOS.forEach(({key})=>{const el=document.getElementById('e_'+key);if(el)el.value=row[key]??'';});
+  document.getElementById('modalEditar').classList.add('show');
+  document.querySelector('#modalEditar .modal-box').scrollTop=0;
+}
+function cerrarEditar(){document.getElementById('modalEditar').classList.remove('show');editandoID=null;}
+async function guardarCambios(){
+  const datos={};
+  CAMPOS.forEach(({key})=>{const el=document.getElementById('e_'+key);datos[key]=el?(el.value||null):null;});
+  try{
+    const res=await fetch(`/CORRECTIVO/${editandoID}?usuario=${encodeURIComponent(usuarioActual)}`,
+      {method:'PUT',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(datos)});
+    const result=await res.json();
+    if(res.ok&&!result.error){cerrarEditar();cargar();}
+    else alert('Error: '+(result.error||'No se pudo guardar'));
+  }catch(e){alert('Error: '+e.message);}
+}
+
+function verDetalle(id){
+  const row=datosActuales.find(r=>r.ID===id);if(!row)return;
+  document.getElementById('detalleIdLabel').textContent=id;
+  const cont=document.getElementById('contenidoDetalle');cont.innerHTML='';
+  CAMPOS.forEach(({key,label})=>{cont.innerHTML+=`<div class="det-field"><label>${label}</label><input value="${esc(row[key]??'')}" readonly></div>`;});
+  document.getElementById('modalDetalle').classList.add('show');
+  document.querySelector('#modalDetalle .modal-box').scrollTop=0;
+}
+function cerrarDetalle(){document.getElementById('modalDetalle').classList.remove('show');}
+
+function normalizarDatos(obj){
+  if(!obj)return {};
+  if(typeof obj==='string'){try{return JSON.parse(obj);}catch(e){return {};}}
+  return obj;
+}
+
+function renderEvento(ev){
+  let antes=normalizarDatos(ev.registro_anterior);
+  let despues=normalizarDatos(ev.registro_nuevo);
+  
+  const cambiados=new Set();
+  CAMPOS.forEach(({key})=>{
+    const valAnt=norm(antes[key]);
+    const valDes=norm(despues[key]);
+    if(valAnt!==valDes)cambiados.add(key);
+  });
+  
+  let contenidoAntes='',contenidoDespues='';
+  CAMPOS.forEach(({key,label})=>{
+    const valAnt=antes[key]??'',valDes=despues[key]??'';
+    const esChanged=cambiados.has(key);
+    const claseChanged=esChanged?' changed':'';
+    
+    const etiqueta=`<label>${esc(label)}</label>`;
+    const valAntEsc=norm(valAnt)===''?'<span class="empty">sin valor</span>':esc(String(valAnt));
+    const valDesEsc=norm(valDes)===''?'<span class="empty">sin valor</span>':esc(String(valDes));
+    
+    contenidoAntes+=`<div class="ev-field${claseChanged}"><label>${esc(label)}</label><div class="value">${valAntEsc}</div></div>`;
+    contenidoDespues+=`<div class="ev-field${claseChanged}"><label>${esc(label)}</label><div class="value">${valDesEsc}</div></div>`;
+  });
+  
+  const numCambios=cambiados.size;
+  return `<div class="ev-wrap">
+    <div class="ev-header">
+      <span>🕐 <strong>Fecha y hora:</strong> ${formatFecha(ev.fecha)}</span>
+      <span>👤 <strong>Editado por:</strong> <strong style="color:#fbbf24;">${esc(ev.usuario)||'Desconocido'}</strong></span>
+      <span style="margin-left:auto;"><span class="badge-cambio">📝 ${numCambios} campo${numCambios!==1?'s':''} modificado${numCambios!==1?'s':''}</span></span>
+    </div>
+    <div class="ev-content">
+      <div class="ev-section before">
+        <h4>⬅️ REGISTRO ANTERIOR</h4>
+        ${contenidoAntes}
+      </div>
+      <div class="ev-section after">
+        <h4>➡️ REGISTRO ACTUAL</h4>
+        ${contenidoDespues}
+      </div>
+    </div>
+  </div>`;
+}
+
+function verHistorial(id){
+  document.getElementById('histIdLabel').textContent=id;
+  document.getElementById('contenidoHistorial').innerHTML='<p style="text-align:center;padding:30px;color:#64748b">⏳ Cargando historial...</p>';
+  document.getElementById('modalHistorial').classList.add('show');
+  document.querySelector('#modalHistorial .modal-box').scrollTop=0;
+  
+  fetch(`/CORRECTIVOS/${id}/HISTORIAL`)
+    .then(r=>r.json())
+    .then(data=>{
+      const lista=(data.historial||[]).sort((a,b)=>new Date(b.fecha||0)-new Date(a.fecha||0));
+      if(!lista.length){
+        document.getElementById('contenidoHistorial').innerHTML='<p class="sin-hist">📭 Este registro no tiene ediciones registradas aún.</p>';
+      }else{
+        let html=`<p style="color:#64748b;font-size:13px;margin-bottom:18px;padding:10px;background:#f0f9ff;border-radius:4px;">📊 Se encontraron <strong>${lista.length}</strong> edición${lista.length!==1?'es':''} para este registro</p>`;
+        html+=lista.map(ev=>renderEvento(ev)).join('');
+        document.getElementById('contenidoHistorial').innerHTML=html;
+      }
+    })
+    .catch(err=>{
+      document.getElementById('contenidoHistorial').innerHTML=`<p style="color:#dc2626;text-align:center;padding:30px">❌ Error al cargar historial: ${err.message}</p>`;
+    });
+}
+function cerrarHistorial(){document.getElementById('modalHistorial').classList.remove('show');}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){cerrarEditar();cerrarDetalle();cerrarHistorial();}});
+</script>
+</body>
+</html>

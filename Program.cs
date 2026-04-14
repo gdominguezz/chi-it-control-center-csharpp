@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // ── Servicios ──
 builder.Services.AddControllers();
 builder.Services.AddSingleton<DbConnectionPool>();
-builder.Services.AddScoped<AuditoriaService>();
+builder.Services.AddScoped<AuditoriaServicepreventivos>();
 builder.Services.AddScoped<ExcelService>();
 builder.Services.AddScoped<QrService>();
 

@@ -4,11 +4,11 @@ using System.Text.Json;
 
 namespace ChiIT.Services;
 
-public class AuditoriaService
+public class AuditoriaServicepreventivos
 {
     private readonly DbConnectionPool _db;
 
-    public AuditoriaService(DbConnectionPool db) => _db = db;
+    public AuditoriaServicepreventivos(DbConnectionPool db) => _db = db;
 
     public void Registrar(int registroId, string usuario, object anterior, object nuevo)
     {

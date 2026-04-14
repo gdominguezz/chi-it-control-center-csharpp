@@ -11,12 +11,12 @@ namespace ChiIT.Controllers;
 public class PreventivoController : ControllerBase
 {
     private readonly DbConnectionPool _db;
-    private readonly AuditoriaService _auditoria;
+    private readonly AuditoriaServicepreventivos _auditoria;
     private readonly ExcelService _excel;
     private readonly QrService _qr;
     private readonly string _pdfDir;
 
-    public PreventivoController(DbConnectionPool db, AuditoriaService auditoria,
+    public PreventivoController(DbConnectionPool db, AuditoriaServicepreventivos auditoria,
                                 ExcelService excel, QrService qr, IConfiguration config)
     {
         _db = db;
