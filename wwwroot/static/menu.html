@@ -1,84 +1,127 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Mantenimientos Correctivos</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>SISTEMA DE GESTION DE RECURSOS</title>
+
     <style>
-        :root {
-            --bg: #0B0F1A;
-            --surface: #111827;
-            --surface2: #1a2235;
-            --surface3: #1e293b;
-            --border: rgba(255,255,255,0.07);
-            --border2: rgba(255,255,255,0.13);
-            --accent: #3B82F6;
-            --text: #F1F5F9;
-            --muted: #64748B;
-            --muted2: #94A3B8;
-            --green: #10B981;
-            --red: #EF4444;
-            --amber: #F59E0B;
-            --purple: #8B5CF6;
-            --cyan: #06B6D4;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: 'DM Sans',sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-        }
-
-        /* TOP BAR */
-        .topbar {
-            background: linear-gradient(135deg,#0f1e35,#0B0F1A);
-            border-bottom: 1px solid var(--border2);
-            padding: 14px 24px;
+            font-family: Arial;
+            margin: 0;
+            background: linear-gradient(135deg,#1e293b,#0f172a);
+            color: white;
             display: flex;
-            align-items: center;
-            gap: 16px;
-            position: sticky;
-            top: 0;
-            z-index: 200;
-        }
-
-        .topbar-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 11px;
-            background: linear-gradient(135deg,#991B1B,#EF4444);
-            display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 22px;
-            box-shadow: 0 0 20px rgba(239,68,68,.4);
-            flex-shrink: 0;
+            align-items: center;
+            height: 100vh;
         }
 
-        .topbar-title {
-            flex: 1;
+        .container h1 {
+            text-align: center;
+            font-size: 48px !important;
+            font-weight: bold;
+            opacity: 0;
+            animation: fadeIn 2s ease forwards;
         }
 
-            .topbar-title h1 {
-                font-size: 16px;
-                font-weight: 700;
-                letter-spacing: -.01em;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
 
-            .topbar-title p {
-                font-size: 11px;
-                color: var(--muted2);
-                margin-top: 1px;
-                font-family: 'DM Mono',monospace;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
+        }
+
+        h1 {
+            margin-bottom: 40px;
+        }
+
+        button {
+            padding: 20px 40px;
+            margin: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .preventivo {
+            background: #16a34a;
+            color: white;
+        }
+
+        .correctivo {
+            background: #2563eb;
+            color: white;
+        }
+
+        .bajas {
+            background: #eb2525;
+            color: white;
+        }
+
+        .presupuesto {
+            background: #b3a701;
+            color: white;
+        }
+
+        .serviciosp {
+            background: #eb9525;
+            color: white;
+        }
+
+        .directoriop {
+            background: #2d0a66;
+            color: white;
+        }
+
+        .vales {
+            background: #0c7596;
+            color: white;
+        }
+
+        .logout {
+            background: #475569;
+            color: white;
+            font-size: 14px;
+            padding: 10px 20px;
+            margin: 0;
+            border-radius: 6px;
+        }
+
+        .admin-btn {
+            background: linear-gradient(135deg,#7c3aed,#4f46e5);
+            color: white;
+            font-size: 14px;
+            padding: 10px 20px;
+            margin: 0;
+            border-radius: 6px;
+            border: 1px solid rgba(167,139,250,0.35);
+            box-shadow: 0 0 12px rgba(124,58,237,0.4);
+            display: none;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
 
         .user-chip {
             display: flex;
@@ -86,28 +129,25 @@
             gap: 8px;
             padding: 7px 14px;
             border-radius: 999px;
-            background: rgba(255,255,255,.06);
-            border: 1px solid var(--border2);
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.13);
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
+            color: #94A3B8;
             cursor: pointer;
             position: relative;
             user-select: none;
-            transition: background .2s,border-color .2s;
+            transition: background .2s, border-color .2s;
         }
 
             .user-chip:hover {
-                background: rgba(255,255,255,.1);
-                border-color: var(--accent);
-            }
-
-            .user-chip span {
-                color: var(--muted2);
+                background: rgba(255,255,255,.12);
+                border-color: #3B82F6;
             }
 
         .chip-arrow {
             font-size: 9px;
-            color: var(--muted);
+            color: #64748B;
             transition: transform .2s;
         }
 
@@ -120,11 +160,11 @@
             position: absolute;
             top: calc(100% + 10px);
             right: 0;
-            min-width: 200px;
-            background: var(--surface);
-            border: 1px solid var(--border2);
+            min-width: 210px;
+            background: #111827;
+            border: 1px solid rgba(255,255,255,.13);
             border-radius: 12px;
-            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            box-shadow: 0 16px 48px rgba(0,0,0,.6);
             padding: 8px;
             z-index: 999;
             animation: dropIn .15s ease;
@@ -133,12 +173,12 @@
         @keyframes dropIn {
             from {
                 opacity: 0;
-                transform: translateY(-6px)
+                transform: translateY(-6px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0)
+                transform: translateY(0);
             }
         }
 
@@ -148,24 +188,24 @@
 
         .dropdown-header {
             padding: 10px 12px 8px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(255,255,255,.07);
             margin-bottom: 6px;
         }
 
-            .dropdown-header .d-name {
-                font-size: 13px;
-                font-weight: 700;
-                color: var(--text);
-            }
+        .d-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #F1F5F9;
+        }
 
-            .dropdown-header .d-role {
-                font-size: 10px;
-                color: var(--muted);
-                font-family: 'DM Mono',monospace;
-                text-transform: uppercase;
-                letter-spacing: .08em;
-                margin-top: 2px;
-            }
+        .d-role {
+            font-size: 10px;
+            color: #64748B;
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-top: 2px;
+        }
 
         .dropdown-item {
             display: flex;
@@ -176,19 +216,28 @@
             font-size: 12px;
             font-weight: 500;
             cursor: pointer;
-            color: var(--muted2);
-            transition: background .15s,color .15s;
+            color: #94A3B8;
+            transition: background .15s, color .15s;
             border: none;
             background: none;
             width: 100%;
             text-align: left;
-            font-family: 'DM Sans',sans-serif;
+            font-family: Arial, sans-serif;
         }
 
             .dropdown-item:hover {
                 background: rgba(255,255,255,.06);
-                color: var(--text);
+                color: #F1F5F9;
             }
+
+            .dropdown-item.admin-item {
+                color: #C4B5FD;
+            }
+
+                .dropdown-item.admin-item:hover {
+                    background: rgba(139,92,246,.1);
+                    color: #fff;
+                }
 
             .dropdown-item.danger {
                 color: #FCA5A5;
@@ -201,1176 +250,159 @@
 
         .dropdown-sep {
             height: 1px;
-            background: var(--border);
+            background: rgba(255,255,255,.07);
             margin: 6px 0;
-        }
-
-        /* MAIN */
-        .main {
-            max-width: 100%;
-            padding: 16px 20px;
-        }
-
-        /* PANEL NUEVO REGISTRO */
-        .panel {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 18px 22px;
-            margin-bottom: 14px;
-        }
-
-        .panel-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .1em;
-            color: var(--muted);
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-            .panel-title::before {
-                content: '';
-                width: 3px;
-                height: 14px;
-                background: var(--red);
-                border-radius: 2px;
-                display: inline-block;
-            }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill,minmax(195px,1fr));
-            gap: 10px;
-            margin-bottom: 14px;
-        }
-
-        .field label {
-            font-size: 9px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: .1em;
-            color: var(--muted);
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .field input, .field select, .field textarea {
-            width: 100%;
-            background: var(--surface2);
-            border: 1px solid var(--border2);
-            border-radius: 7px;
-            padding: 7px 9px;
-            font-size: 12px;
-            font-family: 'DM Mono',monospace;
-            color: var(--text);
-            transition: border-color .2s;
-        }
-
-        .field textarea {
-            resize: vertical;
-            min-height: 58px;
-            font-family: 'DM Sans',sans-serif;
-        }
-
-            .field input:focus, .field select:focus, .field textarea:focus {
-                outline: none;
-                border-color: var(--accent);
-                box-shadow: 0 0 0 3px rgba(59,130,246,.12);
-            }
-
-        .field select {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 9px center;
-            padding-right: 26px;
-        }
-
-            .field select option {
-                background: var(--surface2);
-                color: var(--text);
-            }
-
-        .field-wide {
-            grid-column: 1/-1;
-        }
-
-        /* BOTONES */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            border: none;
-            border-radius: 8px;
-            font-family: 'DM Sans',sans-serif;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all .2s;
-            white-space: nowrap;
-        }
-
-        .btn-success {
-            background: var(--green);
-            color: white;
-            box-shadow: 0 3px 10px rgba(16,185,129,.25);
-        }
-
-            .btn-success:hover {
-                background: #059669;
-                transform: translateY(-1px);
-            }
-
-        .btn-danger {
-            background: var(--red);
-            color: white;
-        }
-
-            .btn-danger:hover {
-                background: #DC2626;
-            }
-
-        .btn-amber {
-            background: var(--amber);
-            color: #1c1400;
-        }
-
-            .btn-amber:hover {
-                background: #D97706;
-            }
-
-        .btn-purple {
-            background: var(--purple);
-            color: white;
-        }
-
-            .btn-purple:hover {
-                background: #7C3AED;
-            }
-
-        .btn-cyan {
-            background: var(--cyan);
-            color: #001a1f;
-        }
-
-            .btn-cyan:hover {
-                background: #0891B2;
-            }
-
-        .btn-ghost {
-            background: var(--surface2);
-            color: var(--muted2);
-            border: 1px solid var(--border2);
-        }
-
-            .btn-ghost:hover {
-                color: var(--text);
-                border-color: var(--accent);
-            }
-
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
-
-            .btn-primary:hover {
-                background: #2563EB;
-            }
-
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 11px;
-        }
-
-        /* TOOLBAR */
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-            padding: 12px 18px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            margin-bottom: 14px;
-        }
-
-        .anio-input {
-            background: var(--surface2);
-            border: 1px solid var(--border2);
-            border-radius: 7px;
-            padding: 7px 9px;
-            font-size: 12px;
-            font-family: 'DM Mono',monospace;
-            color: var(--text);
-            width: 110px;
-        }
-
-            .anio-input:focus {
-                outline: none;
-                border-color: var(--accent);
-            }
-
-        /* TABLA WIDE */
-        .table-wrap {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            overflow: hidden;
-            margin-bottom: 14px;
-        }
-
-        .table-scroll {
-            overflow-x: auto;
-            max-height: calc(100vh - 290px);
-            min-height: 480px;
-            overflow-y: auto;
-        }
-
-            .table-scroll::-webkit-scrollbar {
-                width: 7px;
-                height: 7px;
-            }
-
-            .table-scroll::-webkit-scrollbar-track {
-                background: var(--surface2);
-            }
-
-            .table-scroll::-webkit-scrollbar-thumb {
-                background: #334155;
-                border-radius: 999px;
-            }
-
-                .table-scroll::-webkit-scrollbar-thumb:hover {
-                    background: var(--accent);
-                }
-
-        table {
-            border-collapse: collapse;
-            font-size: 11px;
-        }
-
-        th {
-            background: var(--surface3);
-            color: var(--muted2);
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .07em;
-            padding: 9px 10px;
-            border-bottom: 1px solid var(--border2);
-            white-space: nowrap;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            text-align: left;
-        }
-
-        .filter-row th {
-            top: 37px;
-            background: var(--surface2);
-            padding: 4px 5px;
-            z-index: 9;
-        }
-
-        .filter-row input {
-            width: 100%;
-            background: var(--surface3);
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            padding: 4px 6px;
-            font-size: 10px;
-            color: var(--text);
-            font-family: 'DM Mono',monospace;
-        }
-
-            .filter-row input:focus {
-                outline: none;
-                border-color: var(--accent);
-            }
-
-        tbody tr {
-            border-bottom: 1px solid var(--border);
-            transition: background .15s;
-        }
-
-            tbody tr:last-child {
-                border-bottom: none;
-            }
-
-            tbody tr:hover td {
-                filter: brightness(1.18);
-            }
-
-        td {
-            padding: 8px 10px;
-            color: var(--text);
-            vertical-align: middle;
-            white-space: nowrap;
-        }
-
-            td.mono {
-                font-family: 'DM Mono',monospace;
-                font-size: 11px;
-                color: var(--muted2);
-            }
-
-            td.wrap {
-                white-space: normal;
-                word-break: break-word;
-                max-width: 200px;
-            }
-
-        /* Status rows */
-        tr.s-abierto td {
-            background: rgba(245,158,11,.07);
-        }
-
-        tr.s-cerrado td {
-            background: rgba(16,185,129,.07);
-        }
-
-        tr.s-cancelado td {
-            background: rgba(100,116,139,.06);
-            color: var(--muted);
-        }
-
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 9px;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: .03em;
-        }
-
-        .pill-abierto {
-            background: rgba(245,158,11,.18);
-            color: #FCD34D;
-            border: 1px solid rgba(245,158,11,.3);
-        }
-
-        .pill-cerrado {
-            background: rgba(16,185,129,.18);
-            color: #6EE7B7;
-            border: 1px solid rgba(16,185,129,.3);
-        }
-
-        .pill-cancelado {
-            background: rgba(100,116,139,.18);
-            color: #94A3B8;
-            border: 1px solid rgba(100,116,139,.3);
-        }
-
-        /* PAGINACIÓN */
-        .pagination {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            padding: 12px 18px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            margin-bottom: 14px;
-        }
-
-        .page-info {
-            font-size: 12px;
-            font-family: 'DM Mono',monospace;
-            color: var(--muted2);
-        }
-
-        /* MODALES */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.72);
-            backdrop-filter: blur(4px);
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-            .modal.show {
-                display: flex;
-            }
-
-        .modal-box {
-            background: var(--surface);
-            border: 1px solid var(--border2);
-            border-radius: 16px;
-            padding: 24px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 30px 80px rgba(0,0,0,.6);
-            animation: modalIn .2s ease;
-        }
-
-        @keyframes modalIn {
-            from {
-                opacity: 0;
-                transform: scale(.96)
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1)
-            }
-        }
-
-        .modal-box.form-box {
-            width: min(780px,96vw);
-        }
-
-        .modal-box.hist-box {
-            width: min(940px,96vw);
-        }
-
-        .modal-box.det-box {
-            width: min(880px,96vw);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border2);
-            padding-bottom: 14px;
-            margin-bottom: 18px;
-        }
-
-            .modal-header h3 {
-                font-size: 15px;
-                font-weight: 700;
-                color: var(--text);
-            }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            border-top: 1px solid var(--border);
-            padding-top: 14px;
-            margin-top: 14px;
-        }
-
-        .form-cols {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .form-field {
-            margin-bottom: 12px;
-            display: flex;
-            flex-direction: column;
-        }
-
-            .form-field label {
-                font-size: 9px;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: .1em;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-            }
-
-            .form-field input, .form-field textarea, .form-field select {
-                width: 100%;
-                background: var(--surface2);
-                border: 1px solid var(--border2);
-                border-radius: 7px;
-                padding: 8px 10px;
-                font-size: 12px;
-                font-family: 'DM Mono',monospace;
-                color: var(--text);
-                transition: border-color .2s;
-            }
-
-            .form-field textarea {
-                resize: vertical;
-                min-height: 68px;
-                font-family: 'DM Sans',sans-serif;
-            }
-
-            .form-field select {
-                cursor: pointer;
-                appearance: none;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-                background-repeat: no-repeat;
-                background-position: right 9px center;
-                padding-right: 26px;
-            }
-
-                .form-field input:focus, .form-field textarea:focus, .form-field select:focus {
-                    outline: none;
-                    border-color: var(--accent);
-                    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
-                }
-
-        /* DETALLE */
-        .det-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
-            gap: 10px;
-        }
-
-        .det-field {
-            display: flex;
-            flex-direction: column;
-        }
-
-            .det-field label {
-                font-size: 9px;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: .1em;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-            }
-
-            .det-field input {
-                width: 100%;
-                background: var(--surface2);
-                border: 1px solid var(--border);
-                border-radius: 6px;
-                padding: 7px 9px;
-                font-size: 12px;
-                font-family: 'DM Mono',monospace;
-                color: var(--muted2);
-            }
-
-        /* HISTORIAL */
-        .ev-wrap {
-            margin-bottom: 16px;
-            border: 1px solid var(--border2);
-            border-radius: 10px;
-            overflow-x: auto;
-        }
-
-        .ev-header {
-            background: var(--surface2);
-            padding: 12px 16px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
-
-            .ev-header span {
-                font-size: 12px;
-                color: var(--muted2);
-            }
-
-            .ev-header strong {
-                color: var(--text);
-            }
-
-        .badge-cambio {
-            background: rgba(245,158,11,.2);
-            color: var(--amber);
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 999px;
-            font-weight: 700;
-            margin-left: 5px;
-            border: 1px solid rgba(245,158,11,.3);
-        }
-
-        .n-cambios-badge {
-            margin-left: auto;
-            padding: 3px 12px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-
-        .ev-table {
-            width: 100%;
-            min-width: 540px;
-            border-collapse: collapse;
-            font-size: 12px;
-        }
-
-            .ev-table th, .ev-table td {
-                border: 1px solid var(--border);
-                padding: 8px 11px;
-                text-align: left;
-            }
-
-            .ev-table thead th {
-                background: var(--surface3);
-                color: var(--muted);
-                font-size: 10px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: .07em;
-            }
-
-            .ev-table th:first-child {
-                width: 26%;
-            }
-
-        .row-changed td:nth-child(2) {
-            background: rgba(239,68,68,.08);
-            color: #fca5a5;
-        }
-
-        .row-changed td:nth-child(3) {
-            background: rgba(16,185,129,.08);
-            color: #6ee7b7;
-        }
-
-        .empty-val {
-            color: var(--muted);
-            font-style: italic;
-        }
-
-        .sin-hist {
-            text-align: center;
-            padding: 50px;
-            color: var(--muted);
-            font-size: 14px;
         }
     </style>
 </head>
+
 <body>
 
-    <!-- TOP BAR -->
-    <div class="topbar">
-        <div class="topbar-icon">🔧</div>
-        <div class="topbar-title">
-            <h1>Mantenimientos Correctivos</h1>
-            <p>S-Riko Automotive Hose de Chihuahua</p>
-        </div>
-        <div style="position:relative;">
-            <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
-                👤 <span id="usuarioDisplay">Cargando...</span>
-                <span class="chip-arrow">▼</span>
-                <div class="user-dropdown">
-                    <div class="dropdown-header">
-                        <div class="d-name" id="dropdownNombre">—</div>
-                        <div class="d-role" id="dropdownRol">—</div>
-                    </div>
-                    <button class="dropdown-item" onclick="window.location.href='/static/menu.html'">☰ &nbsp;Menú principal</button>
-                    <div class="dropdown-sep"></div>
-                    <button class="dropdown-item danger" onclick="cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
+    <!-- Barra superior con dropdown de usuario -->
+    <div class="top-bar">
+        <div class="user-chip" id="menuUserChip" onclick="toggleChipMenu()">
+            👤 <span id="nombreUsuario">Cargando...</span>
+            <span class="chip-arrow">▼</span>
+            <div class="user-dropdown">
+                <div class="dropdown-header">
+                    <div class="d-name" id="menuDropNombre">—</div>
+                    <div class="d-role" id="menuDropRol">—</div>
                 </div>
+                <button class="dropdown-item admin-item" id="btnAdmin" style="display:none"
+                        onclick="window.location.href='/admin/usuarios'">
+                    ⚙️ &nbsp;Administración
+                </button>
+                <div class="dropdown-sep" id="adminSep" style="display:none"></div>
+                <button class="dropdown-item danger" onclick="cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
             </div>
         </div>
     </div>
 
-    <div class="main">
+    <div class="container">
+        <!-- ICON -->
+        <div style="display:flex;justify-content:center;margin-bottom:18px;">
+            <svg width="96" height="96" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 18px rgba(0,229,255,0.35));">
+                <defs>
+                    <radialGradient id="bgGrad" cx="50%" cy="45%" r="60%"><stop offset="0%" stop-color="#0D1B2A" /><stop offset="100%" stop-color="#04080F" /></radialGradient>
+                    <radialGradient id="blob1" cx="40%" cy="40%" r="55%"><stop offset="0%" stop-color="#FF6B6B" stop-opacity="0.9" /><stop offset="60%" stop-color="#FF4458" stop-opacity="0.6" /><stop offset="100%" stop-color="#C2185B" stop-opacity="0" /></radialGradient>
+                    <radialGradient id="blob2" cx="60%" cy="60%" r="55%"><stop offset="0%" stop-color="#00E5FF" stop-opacity="0.85" /><stop offset="50%" stop-color="#00BCD4" stop-opacity="0.5" /><stop offset="100%" stop-color="#006064" stop-opacity="0" /></radialGradient>
+                    <radialGradient id="blob3" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFD600" stop-opacity="0.7" /><stop offset="60%" stop-color="#FF8F00" stop-opacity="0.4" /><stop offset="100%" stop-color="#E65100" stop-opacity="0" /></radialGradient>
+                    <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFFFFF" stop-opacity="1" /><stop offset="30%" stop-color="#E0F7FA" stop-opacity="0.9" /><stop offset="70%" stop-color="#00E5FF" stop-opacity="0.4" /><stop offset="100%" stop-color="#00E5FF" stop-opacity="0" /></radialGradient>
+                    <filter id="bigGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="22" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+                    <filter id="softBloom" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+                    <filter id="tinyGlow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+                    <filter id="coreGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="30" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="blur" /><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+                    <clipPath id="round"><circle cx="256" cy="256" r="248" /></clipPath>
+                </defs>
+                <circle cx="256" cy="256" r="256" fill="url(#bgGrad)" />
+                <g clip-path="url(#round)" opacity="0.18">
+                    <circle cx="80" cy="100" r="1.2" fill="#fff" />
+                    <circle cx="140" cy="60" r="0.9" fill="#fff" />
+                    <circle cx="200" cy="90" r="1.5" fill="#fff" />
+                    <circle cx="320" cy="75" r="1.0" fill="#fff" />
+                    <circle cx="390" cy="110" r="1.3" fill="#fff" />
+                    <circle cx="430" cy="60" r="0.8" fill="#fff" />
+                    <circle cx="460" cy="180" r="1.1" fill="#fff" />
+                    <circle cx="70" cy="300" r="1.2" fill="#fff" />
+                    <circle cx="50" cy="420" r="0.9" fill="#fff" />
+                    <circle cx="440" cy="380" r="1.4" fill="#fff" />
+                    <circle cx="480" cy="300" r="0.8" fill="#fff" />
+                    <circle cx="160" cy="450" r="1.0" fill="#fff" />
+                    <circle cx="350" cy="440" r="1.2" fill="#fff" />
+                </g>
+                <g clip-path="url(#round)" filter="url(#bigGlow)">
+                    <path d="M256,256 C210,180 130,160 110,210 C85,270 130,340 180,320 C220,305 240,290 256,256 Z" fill="url(#blob1)" opacity="0.9" />
+                    <path d="M256,256 C310,210 380,200 400,255 C418,305 390,370 340,370 C295,370 265,310 256,256 Z" fill="url(#blob2)" opacity="0.9" />
+                    <path d="M256,256 C230,300 210,370 250,405 C285,435 340,420 355,380 C370,340 320,280 256,256 Z" fill="url(#blob3)" opacity="0.85" />
+                </g>
+                <g clip-path="url(#round)" filter="url(#softBloom)" opacity="0.55">
+                    <path d="M256,80 C340,78 420,140 432,220 C445,305 410,395 340,430 C275,463 185,455 130,410 C75,365 68,280 88,210 C108,138 175,82 256,80 Z" fill="none" stroke="#00E5FF" stroke-width="1.5" />
+                    <path d="M256,95 C335,92 408,150 420,228 C432,308 396,390 328,424 C266,455 180,448 126,404 C74,360 68,278 88,212 C110,144 178,97 256,95 Z" fill="none" stroke="#FF6B6B" stroke-width="0.8" opacity="0.6" />
+                </g>
+                <g filter="url(#tinyGlow)" opacity="0.7">
+                    <path d="M256,230 C270,200 310,175 355,160 C390,148 420,155 435,148" stroke="#00E5FF" stroke-width="1.2" fill="none" stroke-linecap="round" />
+                    <path d="M245,275 C220,295 185,310 155,340 C130,365 118,390 108,405" stroke="#FF6B6B" stroke-width="1.2" fill="none" stroke-linecap="round" />
+                    <path d="M268,278 C295,305 330,330 355,368 C372,393 376,418 380,430" stroke="#FFD600" stroke-width="1.2" fill="none" stroke-linecap="round" />
+                </g>
+                <g filter="url(#tinyGlow)">
+                    <circle cx="370" cy="148" r="7" fill="#00E5FF" opacity="0.95" />
+                    <circle cx="370" cy="148" r="12" fill="none" stroke="#00E5FF" stroke-width="1" opacity="0.35" />
+                    <circle cx="118" cy="248" r="6" fill="#FF6B6B" opacity="0.95" />
+                    <circle cx="118" cy="248" r="11" fill="none" stroke="#FF6B6B" stroke-width="1" opacity="0.35" />
+                    <circle cx="356" cy="405" r="6" fill="#FFD600" opacity="0.9" />
+                    <circle cx="356" cy="405" r="10" fill="none" stroke="#FFD600" stroke-width="1" opacity="0.3" />
+                    <circle cx="248" cy="100" r="4" fill="#FFFFFF" opacity="0.7" />
+                    <circle cx="418" cy="300" r="4" fill="#00E5FF" opacity="0.6" />
+                    <circle cx="148" cy="390" r="4" fill="#FF6B6B" opacity="0.6" />
+                </g>
+                <g filter="url(#coreGlow)">
+                    <circle cx="256" cy="256" r="52" fill="none" stroke="#00E5FF" stroke-width="0.8" opacity="0.3" />
+                    <circle cx="256" cy="256" r="40" fill="none" stroke="#FFFFFF" stroke-width="0.8" opacity="0.2" />
+                    <circle cx="256" cy="256" r="28" fill="url(#coreGrad)" />
+                    <circle cx="256" cy="256" r="10" fill="#FFFFFF" opacity="1" />
+                    <circle cx="256" cy="256" r="5" fill="#FFFFFF" opacity="1" />
+                </g>
+                <circle cx="256" cy="256" r="248" fill="none" stroke="#0D1B2A" stroke-width="8" />
+                <circle cx="256" cy="256" r="244" fill="none" stroke="#1a3050" stroke-width="1.5" opacity="0.6" />
+            </svg>
+        </div>
+        <h1>CHI-IT CONTROL CENTER</h1>
 
-        <!-- NUEVO REGISTRO -->
-        <div class="panel">
-            <div class="panel-title">Nuevo registro correctivo</div>
-            <div class="form-grid">
-                <div class="field">
-                    <label>STATUS</label>
-                    <select id="n_STATUS">
-                        <option value="">-- Seleccionar --</option>
-                        <option value="ABIERTO">🟡 Abierto</option>
-                        <option value="CERRADO">🟢 Cerrado</option>
-                        <option value="CANCELADO">⚫ Cancelado</option>
-                    </select>
-                </div>
-                <div class="field"><label>FOLIO</label><input id="n_FOLIO" placeholder="CORR-2026-001"></div>
-                <div class="field">
-                    <label>PLANTA</label>
-                    <select id="n_PLANTA">
-                        <option value="">-- Seleccionar --</option>
-                        <option value="B1">B1</option>
-                        <option value="B2">B2</option>
-                        <option value="PLANTA SATELITE">Planta Satélite</option>
-                        <option value="PLANTA MIXING">Planta Mixing</option>
-                        <option value="BODEGA">Bodega</option>
-                    </select>
-                </div>
-                <div class="field"><label>LINEA / PERSONA</label><input id="n_LINEA_PERSONA" placeholder="Línea o nombre"></div>
-                <div class="field"><label>EQUIPO</label><input id="n_EQUIPO" placeholder="ID o nombre del equipo"></div>
-                <div class="field"><label>MARCA</label><input id="n_MARCA" placeholder="HP, Dell..."></div>
-                <div class="field"><label>MODELO</label><input id="n_MODELO"></div>
-                <div class="field"><label>NUMERO SERIE</label><input id="n_NUMERO_SERIE"></div>
-                <div class="field"><label>FECHA SOLICITUD</label><input id="n_FECHA_SOLICITUD" type="date"></div>
-                <div class="field"><label>REPORTE ELABORADO POR</label><input id="n_REPORTE_ELABORADO_POR"></div>
-                <div class="field"><label>TIPO OBSERVACION</label><input id="n_TIPO_OBSERVACION"></div>
-                <div class="field"><label>TIPO CORRECTIVO</label><input id="n_TIPO_CORRECTIVO"></div>
-                <div class="field"><label>VENCIMIENTO DIAS</label><input id="n_VENCIMIENTO_DIAS" type="number" min="0" placeholder="Días"></div>
-                <div class="field"><label>FECHA CONTEO ACTUAL</label><input id="n_FECHA_CONTEO_ACTUAL" type="date"></div>
-                <div class="field"><label>FECHA LIMITE CIERRE</label><input id="n_FECHA_LIMITE_CIERRE" type="date"></div>
-                <div class="field"><label>CATEGORIA CORRECTIVO</label><input id="n_CATEGORIA_CORRECTIVO"></div>
-                <div class="field"><label>FECHA LLEGADA REFACCION</label><input id="n_FECHA_LLEGADA_REFACCION" type="date"></div>
-                <div class="field"><label>FECHA REPARACION</label><input id="n_FECHA_REPARACION" type="date"></div>
-                <div class="field"><label>QUIEN REALIZO REPARACION</label><input id="n_QUIEN_REALIZO_REPARACION"></div>
-                <div class="field"><label>VALIDACION FUNCIONAMIENTO</label><input id="n_VALIDACION_FUNCIONAMIENTO"></div>
-                <div class="field"><label>OC / FACTURA</label><input id="n_OC_FACTURA"></div>
-                <div class="field field-wide"><label>DESCRIPCION FALLA</label><textarea id="n_DESCRIPCION_FALLA" rows="2"></textarea></div>
-                <div class="field field-wide"><label>ACCESORIO SOLICITADO</label><textarea id="n_ACCESORIO_SOLICITADO" rows="2"></textarea></div>
-                <div class="field field-wide"><label>REFACCION / ACCESORIO COMPRA</label><textarea id="n_REFACCION_ACCESORIO_COMPRA" rows="2"></textarea></div>
-                <div class="field field-wide"><label>DESCRIPCION REPARACION</label><textarea id="n_DESCRIPCION_REPARACION" rows="2"></textarea></div>
-                <div class="field field-wide"><label>OBSERVACIONES</label><textarea id="n_OBSERVACIONES" rows="2"></textarea></div>
-            </div>
-            <button class="btn btn-success" onclick="guardar()">💾 Guardar Registro</button>
-            <button class="btn btn-ghost" onclick="limpiarForm()" style="margin-left:8px;">✕ Limpiar</button>
+        <div style="display:flex; justify-content:center; flex-wrap:wrap; margin-top:20px;">
+
+            <button class="preventivo"
+                    onclick="window.location.href='/static/preventivos.html'">
+                🛡️ MANTENIMIENTOS PREVENTIVOS
+            </button>
+
+            <button class="correctivo"
+                    onclick="window.location.href='/static/correctivos.html'">
+                🔧 MANTENIMIENTOS CORRECTIVOS
+            </button>
+
         </div>
 
-        <!-- TOOLBAR -->
-        <div class="toolbar">
-            <button class="btn btn-purple" onclick="exportarFiltrado()">📊 Exportar Filtrado</button>
-            <button class="btn btn-purple" onclick="exportarTodo()">📦 Exportar Todo</button>
-            <input class="anio-input" id="anioExportar" type="number" placeholder="Año (ej: 2026)">
-            <button class="btn btn-purple" onclick="exportarAnio()">📅 Por Año</button>
-        </div>
-
-        <!-- TABLA -->
-        <div class="table-wrap">
-            <div class="table-scroll">
-                <table>
-                    <colgroup>
-                        <col style="width:52px">
-                        <col style="width:112px">
-                        <col style="width:122px">
-                        <col style="width:88px">
-                        <col style="width:145px">
-                        <col style="width:130px">
-                        <col style="width:100px">
-                        <col style="width:100px">
-                        <col style="width:122px">
-                        <col style="width:220px">
-                        <col style="width:180px">
-                        <col style="width:108px">
-                        <col style="width:152px">
-                        <col style="width:140px">
-                        <col style="width:140px">
-                        <col style="width:88px">
-                        <col style="width:108px">
-                        <col style="width:108px">
-                        <col style="width:140px">
-                        <col style="width:200px">
-                        <col style="width:108px">
-                        <col style="width:108px">
-                        <col style="width:160px">
-                        <col style="width:140px">
-                        <col style="width:200px">
-                        <col style="width:180px">
-                        <col style="width:120px">
-                        <col style="width:170px">
-                        <col style="width:130px">
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Status</th>
-                            <th>Folio</th>
-                            <th>Planta</th>
-                            <th>Línea / Persona</th>
-                            <th>Equipo</th>
-                            <th>Marca</th>
-                            <th>Modelo</th>
-                            <th>N. Serie</th>
-                            <th>Desc. Falla</th>
-                            <th>Accesorio Sol.</th>
-                            <th>Fecha Sol.</th>
-                            <th>Reporte Elab. Por</th>
-                            <th>Tipo Obs.</th>
-                            <th>Tipo Correct.</th>
-                            <th>Venc. Días</th>
-                            <th>F. Conteo</th>
-                            <th>F. Límite Cierre</th>
-                            <th>Categoría</th>
-                            <th>Refacción / Acc. Compra</th>
-                            <th>F. Llegada Ref.</th>
-                            <th>F. Reparación</th>
-                            <th>Quién Realizó Rep.</th>
-                            <th>Validación</th>
-                            <th>Desc. Reparación</th>
-                            <th>Observaciones</th>
-                            <th>OC / Factura</th>
-                            <th>PDF</th>
-                            <th>Acciones</th>
-                        </tr>
-                        <tr class="filter-row">
-                            <th></th>
-                            <th><input id="f_STATUS" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_FOLIO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_PLANTA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_LINEA_PERSONA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_EQUIPO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_MARCA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_MODELO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_NUMERO_SERIE" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_DESCRIPCION_FALLA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_ACCESORIO_SOLICITADO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_FECHA_SOLICITUD" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                            <th><input id="f_REPORTE_ELABORADO_POR" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_TIPO_OBSERVACION" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_TIPO_CORRECTIVO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_VENCIMIENTO_DIAS" oninput="filtrar()" placeholder="Días" type="number" style="width:70px"></th>
-                            <th><input id="f_FECHA_CONTEO_ACTUAL" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                            <th><input id="f_FECHA_LIMITE_CIERRE" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                            <th><input id="f_CATEGORIA_CORRECTIVO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_REFACCION_ACCESORIO_COMPRA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_FECHA_LLEGADA_REFACCION" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                            <th><input id="f_FECHA_REPARACION" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                            <th><input id="f_QUIEN_REALIZO_REPARACION" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_VALIDACION_FUNCIONAMIENTO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_DESCRIPCION_REPARACION" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_OBSERVACIONES" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_OC_FACTURA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- PAGINACIÓN -->
-        <div class="pagination">
-            <button class="btn btn-ghost" onclick="anterior()">◀ Anterior</button>
-            <span class="page-info" id="paginaInfo"></span>
-            <button class="btn btn-ghost" onclick="siguiente()">Siguiente ▶</button>
-        </div>
-
-    </div>
-
-    <!-- MODAL EDITAR -->
-    <div id="modalEditar" class="modal">
-        <div class="modal-box form-box">
-            <div class="modal-header">
-                <h3>✏️ Editar Correctivo &nbsp;<span id="editarIdLabel" style="color:var(--red);font-family:'DM Mono',monospace;">#</span></h3>
-                <button class="btn btn-danger btn-sm" onclick="cerrarEditar()">✕</button>
-            </div>
-            <div class="form-cols">
-                <div class="form-field">
-                    <label>STATUS</label>
-                    <select id="e_STATUS">
-                        <option value="">-- Seleccionar --</option>
-                        <option value="ABIERTO">🟡 Abierto</option>
-                        <option value="CERRADO">🟢 Cerrado</option>
-                        <option value="CANCELADO">⚫ Cancelado</option>
-                    </select>
-                </div>
-                <div class="form-field"><label>FOLIO</label><input type="text" id="e_FOLIO"></div>
-                <div class="form-field">
-                    <label>PLANTA</label>
-                    <select id="e_PLANTA">
-                        <option value="">-- Seleccionar --</option>
-                        <option value="B1">B1</option>
-                        <option value="B2">B2</option>
-                        <option value="PLANTA SATELITE">Planta Satélite</option>
-                        <option value="PLANTA MIXING">Planta Mixing</option>
-                        <option value="BODEGA">Bodega</option>
-                    </select>
-                </div>
-                <div class="form-field"><label>LINEA / PERSONA</label><input type="text" id="e_LINEA_PERSONA"></div>
-                <div class="form-field"><label>EQUIPO</label><input type="text" id="e_EQUIPO"></div>
-                <div class="form-field"><label>MARCA</label><input type="text" id="e_MARCA"></div>
-                <div class="form-field"><label>MODELO</label><input type="text" id="e_MODELO"></div>
-                <div class="form-field"><label>NUMERO SERIE</label><input type="text" id="e_NUMERO_SERIE"></div>
-                <div class="form-field"><label>FECHA SOLICITUD</label><input type="date" id="e_FECHA_SOLICITUD"></div>
-                <div class="form-field"><label>REPORTE ELABORADO POR</label><input type="text" id="e_REPORTE_ELABORADO_POR"></div>
-                <div class="form-field"><label>TIPO OBSERVACION</label><input type="text" id="e_TIPO_OBSERVACION"></div>
-                <div class="form-field"><label>TIPO CORRECTIVO</label><input type="text" id="e_TIPO_CORRECTIVO"></div>
-                <div class="form-field"><label>VENCIMIENTO DIAS</label><input type="number" min="0" id="e_VENCIMIENTO_DIAS"></div>
-                <div class="form-field"><label>FECHA CONTEO ACTUAL</label><input type="date" id="e_FECHA_CONTEO_ACTUAL"></div>
-                <div class="form-field"><label>FECHA LIMITE CIERRE</label><input type="date" id="e_FECHA_LIMITE_CIERRE"></div>
-                <div class="form-field"><label>CATEGORIA CORRECTIVO</label><input type="text" id="e_CATEGORIA_CORRECTIVO"></div>
-                <div class="form-field"><label>FECHA LLEGADA REFACCION</label><input type="date" id="e_FECHA_LLEGADA_REFACCION"></div>
-                <div class="form-field"><label>FECHA REPARACION</label><input type="date" id="e_FECHA_REPARACION"></div>
-                <div class="form-field"><label>QUIEN REALIZO REPARACION</label><input type="text" id="e_QUIEN_REALIZO_REPARACION"></div>
-                <div class="form-field"><label>VALIDACION FUNCIONAMIENTO</label><input type="text" id="e_VALIDACION_FUNCIONAMIENTO"></div>
-                <div class="form-field"><label>OC / FACTURA</label><input type="text" id="e_OC_FACTURA"></div>
-            </div>
-            <div class="form-field"><label>DESCRIPCION FALLA</label><textarea id="e_DESCRIPCION_FALLA"></textarea></div>
-            <div class="form-field"><label>ACCESORIO SOLICITADO</label><textarea id="e_ACCESORIO_SOLICITADO"></textarea></div>
-            <div class="form-field"><label>REFACCION / ACCESORIO COMPRA</label><textarea id="e_REFACCION_ACCESORIO_COMPRA"></textarea></div>
-            <div class="form-field"><label>DESCRIPCION REPARACION</label><textarea id="e_DESCRIPCION_REPARACION"></textarea></div>
-            <div class="form-field"><label>OBSERVACIONES</label><textarea id="e_OBSERVACIONES"></textarea></div>
-            <div class="modal-footer">
-                <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
-                <button class="btn btn-success" onclick="guardarCambios()">💾 Guardar Cambios</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DETALLE -->
-    <div id="modalDetalle" class="modal">
-        <div class="modal-box det-box">
-            <div class="modal-header">
-                <h3>🔍 Detalle Correctivo &nbsp;<span id="detalleIdLabel" style="color:var(--cyan);font-family:'DM Mono',monospace;">#</span></h3>
-                <button class="btn btn-danger btn-sm" onclick="cerrarDetalle()">✕</button>
-            </div>
-            <div id="contenidoDetalle" class="det-grid"></div>
-            <div class="modal-footer"><button class="btn btn-ghost" onclick="cerrarDetalle()">Cerrar</button></div>
-        </div>
-    </div>
-
-    <!-- MODAL HISTORIAL -->
-    <div id="modalHistorial" class="modal">
-        <div class="modal-box hist-box">
-            <div class="modal-header">
-                <h3>📋 Historial de Cambios — Correctivo&nbsp;<span id="histIdLabel" style="color:var(--cyan);font-family:'DM Mono',monospace;">#</span></h3>
-                <button class="btn btn-danger btn-sm" onclick="cerrarHistorial()">✕</button>
-            </div>
-            <div id="contenidoHistorial" style="overflow-y:auto;overflow-x:auto;max-height:55vh;"></div>
-            <div class="modal-footer"><button class="btn btn-ghost" onclick="cerrarHistorial()">Cerrar</button></div>
-        </div>
     </div>
 
     <script>
-        /* ── Estado ── */
-        let paginaActual = 1, limite = 20, totalRegistros = 0, datosActuales = [], editandoID = null;
-        let usuarioActual = 'SISTEMA', rolActual = 'USER', _debouce = null;
-
-        const CAMPOS = [
-            { key: 'STATUS', label: 'Status' }, { key: 'FOLIO', label: 'Folio' }, { key: 'PLANTA', label: 'Planta' },
-            { key: 'LINEA_PERSONA', label: 'Línea / Persona' }, { key: 'EQUIPO', label: 'Equipo' },
-            { key: 'MARCA', label: 'Marca' }, { key: 'MODELO', label: 'Modelo' }, { key: 'NUMERO_SERIE', label: 'Número Serie' },
-            { key: 'DESCRIPCION_FALLA', label: 'Descripción Falla' }, { key: 'ACCESORIO_SOLICITADO', label: 'Accesorio Solicitado' },
-            { key: 'FECHA_SOLICITUD', label: 'Fecha Solicitud' }, { key: 'REPORTE_ELABORADO_POR', label: 'Reporte Elaborado Por' },
-            { key: 'TIPO_OBSERVACION', label: 'Tipo Observación' }, { key: 'TIPO_CORRECTIVO', label: 'Tipo Correctivo' },
-            { key: 'VENCIMIENTO_DIAS', label: 'Vencimiento Días' }, { key: 'FECHA_CONTEO_ACTUAL', label: 'Fecha Conteo Actual' },
-            { key: 'FECHA_LIMITE_CIERRE', label: 'Fecha Límite Cierre' }, { key: 'CATEGORIA_CORRECTIVO', label: 'Categoría Correctivo' },
-            { key: 'REFACCION_ACCESORIO_COMPRA', label: 'Refacción / Accesorio Compra' },
-            { key: 'FECHA_LLEGADA_REFACCION', label: 'Fecha Llegada Refacción' }, { key: 'FECHA_REPARACION', label: 'Fecha Reparación' },
-            { key: 'QUIEN_REALIZO_REPARACION', label: 'Quién Realizó Reparación' },
-            { key: 'VALIDACION_FUNCIONAMIENTO', label: 'Validación Funcionamiento' },
-            { key: 'DESCRIPCION_REPARACION', label: 'Descripción Reparación' },
-            { key: 'OBSERVACIONES', label: 'Observaciones' }, { key: 'OC_FACTURA', label: 'OC / Factura' },
-        ];
-
-        const COLS_WRAP = new Set(['DESCRIPCION_FALLA', 'ACCESORIO_SOLICITADO', 'REFACCION_ACCESORIO_COMPRA',
-            'DESCRIPCION_REPARACION', 'OBSERVACIONES']);
-        const COLS_MONO = new Set(['VENCIMIENTO_DIAS', 'FECHA_SOLICITUD', 'FECHA_CONTEO_ACTUAL',
-            'FECHA_LIMITE_CIERRE', 'FECHA_LLEGADA_REFACCION', 'FECHA_REPARACION', 'FOLIO', 'NUMERO_SERIE', 'OC_FACTURA']);
-
-        /* ── Init ── */
-        window.addEventListener('DOMContentLoaded', () => {
-            fetch('/obtener-usuario').then(r => r.json()).then(d => {
-                usuarioActual = d.usuario || 'SISTEMA'; rolActual = d.rol || 'USER';
-                document.getElementById('usuarioDisplay').textContent = usuarioActual;
-                document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
-                document.getElementById('dropdownRol').textContent = rolActual;
-            }).catch(() => { document.getElementById('usuarioDisplay').textContent = 'Sin sesión'; });
-            cargar();
-        });
-
-        /* ── Carga ── */
-        function obtenerParams() {
-            const p = { page: paginaActual, limit: limite };
-            CAMPOS.forEach(({ key }) => { const el = document.getElementById('f_' + key); if (el && el.value) p[key] = el.value; });
-            return new URLSearchParams(p);
+        function toggleChipMenu() {
+            document.getElementById('menuUserChip').classList.toggle('open');
         }
-        function cargar() {
-            fetch(`/CORRECTIVOS?${obtenerParams()}`).then(r => r.json()).then(resp => {
-                totalRegistros = resp.total; datosActuales = resp.data; renderizar();
-            }).catch(() => {
-                document.getElementById('tabla').innerHTML =
-                    `<tr><td colspan="29" style="text-align:center;padding:30px;color:var(--muted)">Error al cargar datos</td></tr>`;
-            });
-        }
-        function filtrar() { clearTimeout(_debouce); _debouce = setTimeout(() => { paginaActual = 1; cargar(); }, 360); }
-        function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
-        function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
-
-        /* ── Render ── */
-        function statusPill(s) {
-            const v = String(s ?? '').trim().toUpperCase();
-            if (v === 'ABIERTO' || v === '0') return `<span class="status-pill pill-abierto">🟡 Abierto</span>`;
-            if (v === 'CERRADO' || v === '1') return `<span class="status-pill pill-cerrado">🟢 Cerrado</span>`;
-            if (v === 'CANCELADO') return `<span class="status-pill pill-cancelado">⚫ Cancelado</span>`;
-            return esc(s ?? '—');
-        }
-        function statusClass(s) {
-            const v = String(s ?? '').trim().toUpperCase();
-            if (v === 'ABIERTO' || v === '0') return 's-abierto';
-            if (v === 'CERRADO' || v === '1') return 's-cerrado';
-            if (v === 'CANCELADO') return 's-cancelado';
-            return '';
-        }
-        function renderizar() {
-            const tbody = document.getElementById('tabla'); tbody.innerHTML = '';
-            if (!datosActuales.length) {
-                tbody.innerHTML = `<tr><td colspan="29" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>`;
-                document.getElementById('paginaInfo').textContent = 'Sin resultados'; return;
-            }
-            const esAdmin = rolActual === 'ADMIN';
-            datosActuales.forEach(row => {
-                const cls = statusClass(row.STATUS);
-                let tds = `<td class="mono">${row.ID}</td><td>${statusPill(row.STATUS)}</td>`;
-                CAMPOS.slice(1).forEach(({ key }) => {
-                    const val = row[key] ?? '';
-                    const wc = COLS_WRAP.has(key) ? ' wrap' : '';
-                    const mc = COLS_MONO.has(key) ? ' mono' : '';
-                    tds += `<td class="${wc}${mc}" title="${esc(String(val))}">${esc(String(val)) || '—'}</td>`;
-                });
-                tds += `<td>${row.TIENE_PDF
-                    ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                  <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
-                    : `<input type="file" onchange="subirPDF(${row.ID},this)"
-                   style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
-                    }</td>`;
-                tds += `<td style="white-space:nowrap;">
-                ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
-                           <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
-                <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
-                <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-            </td>`;
-                tbody.innerHTML += `<tr class="${cls}">${tds}</tr>`;
-            });
-            document.getElementById('paginaInfo').textContent =
-                `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite) || 1} | Total: ${totalRegistros}`;
-        }
-
-        /* ── Guardar nuevo ── */
-        function guardar() {
-            const data = {};
-            CAMPOS.forEach(({ key }) => {
-                const el = document.getElementById('n_' + key); if (!el) return;
-                data[key] = (key === 'VENCIMIENTO_DIAS') ? (el.value !== '' ? parseInt(el.value) : null) : (el.value || null);
-            });
-            fetch('/CORRECTIVO', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-                .then(r => r.json()).then(d => { if (d.error) { alert('Error: ' + d.error); return; } limpiarForm(); cargar(); });
-        }
-        function limpiarForm() { CAMPOS.forEach(({ key }) => { const el = document.getElementById('n_' + key); if (el) el.value = ''; }); }
-
-        /* ── PDF / Eliminar ── */
-        function eliminar(id) { if (!confirm('¿Eliminar este registro?')) return; fetch(`/CORRECTIVO/${id}`, { method: 'DELETE' }).then(() => cargar()); }
-        function subirPDF(id, input) { const fd = new FormData(); fd.append('file', input.files[0]); fetch(`/CORRECTIVO/PDF/${id}`, { method: 'POST', body: fd }).then(() => cargar()); }
-        function verPDF(id) { window.open(`/CORRECTIVO/PDF/${id}`, '_blank'); }
-        function eliminarPDF(id) { if (!confirm('¿Eliminar el PDF?')) return; fetch(`/CORRECTIVO/PDF/${id}`, { method: 'DELETE' }).then(() => cargar()); }
-
-        /* ── Exportar ── */
-        function exportarFiltrado() { window.open(`/CORRECTIVOS/EXPORTAR?${obtenerParams()}`); }
-        function exportarTodo() { window.open('/CORRECTIVOS/EXPORTAR_TODO'); }
-        function exportarAnio() { const a = document.getElementById('anioExportar').value; if (!a) { alert('Ingresa un año'); return; } window.open(`/CORRECTIVOS/EXPORTAR_ANIO?anio=${a}`); }
-
-        /* ── Modal Editar ── */
-        function abrirEditar(id) {
-            editandoID = id; document.getElementById('editarIdLabel').textContent = id;
-            const row = datosActuales.find(r => r.ID === id);
-            if (row) CAMPOS.forEach(({ key }) => { const el = document.getElementById('e_' + key); if (el) el.value = row[key] ?? ''; });
-            document.getElementById('modalEditar').classList.add('show');
-            document.querySelector('#modalEditar .modal-box').scrollTop = 0;
-        }
-        function cerrarEditar() { document.getElementById('modalEditar').classList.remove('show'); editandoID = null; }
-        async function guardarCambios() {
-            const datos = {};
-            CAMPOS.forEach(({ key }) => {
-                const el = document.getElementById('e_' + key); if (!el) return;
-                datos[key] = (key === 'VENCIMIENTO_DIAS') ? (el.value !== '' ? parseInt(el.value) : null) : (el.value || null);
-            });
-            try {
-                const res = await fetch(`/CORRECTIVO/${editandoID}?usuario=${encodeURIComponent(usuarioActual)}`,
-                    { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual }, body: JSON.stringify(datos) });
-                const result = await res.json();
-                if (res.ok && !result.error) { cerrarEditar(); cargar(); }
-                else alert('Error: ' + (result.error || 'No se pudo guardar'));
-            } catch (e) { alert('Error: ' + e.message); }
-        }
-
-        /* ── Modal Detalle ── */
-        function verDetalle(id) {
-            const row = datosActuales.find(r => r.ID === id); if (!row) return;
-            document.getElementById('detalleIdLabel').textContent = id;
-            const cont = document.getElementById('contenidoDetalle'); cont.innerHTML = '';
-            CAMPOS.forEach(({ key, label }) => {
-                cont.innerHTML += `<div class="det-field"><label>${label}</label><input value="${esc(row[key] ?? '')}" readonly></div>`;
-            });
-            document.getElementById('modalDetalle').classList.add('show');
-            document.querySelector('#modalDetalle .modal-box').scrollTop = 0;
-        }
-        function cerrarDetalle() { document.getElementById('modalDetalle').classList.remove('show'); }
-
-        /* ── Historial — idéntico a preventivos ── */
-        function esc(v) { if (v == null) return ''; return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-        function norm(v) { return (v == null) ? '' : String(v).trim(); }
-        function formatFecha(f) {
-            try { const d = new Date(f); if (!isNaN(d)) return d.toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch (e) { } return f ?? '';
-        }
-        function renderEvento(ev) {
-            let antes = ev.registro_anterior, despues = ev.registro_nuevo;
-            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (e) { }
-            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (e) { }
-            const cambiados = new Set();
-            CAMPOS.forEach(({ key }) => {
-                const dk = key.toLowerCase();
-                if (norm(antes?.[dk]) !== norm(despues?.[dk])) cambiados.add(key);
-            });
-            let filas = '';
-            CAMPOS.forEach(({ key, label }) => {
-                const dk = key.toLowerCase();
-                const va = esc(antes?.[dk] ?? ''), vd = esc(despues?.[dk] ?? '');
-                const chg = cambiados.has(key);
-                filas += `<tr class="${chg ? 'row-changed' : ''}">
-                <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-            </tr>`;
-            });
-            const n = cambiados.size;
-            return `<div class="ev-wrap">
-            <div class="ev-header">
-                <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
-                    color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                    ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                </span>
-            </div>
-            <table class="ev-table">
-                <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                <tbody>${filas}</tbody>
-            </table>
-        </div>`;
-        }
-        function verHistorial(id) {
-            document.getElementById('histIdLabel').textContent = id;
-            document.getElementById('contenidoHistorial').innerHTML =
-                '<p style="text-align:center;padding:40px;color:var(--muted)">⏳ Cargando historial...</p>';
-            document.getElementById('modalHistorial').classList.add('show');
-            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
-            fetch(`/CORRECTIVOS/${id}/HISTORIAL`).then(r => r.json()).then(data => {
-                const lista = (data.historial || []).sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
-                if (!lista.length) {
-                    document.getElementById('contenidoHistorial').innerHTML = '<p class="sin-hist">📭 Sin ediciones registradas</p>';
-                } else {
-                    document.getElementById('contenidoHistorial').innerHTML =
-                        `<p style="color:var(--muted);font-size:12px;margin-bottom:14px;">
-                        ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                    </p>`+ lista.map(ev => renderEvento(ev)).join('');
-                }
-            }).catch(err => {
-                document.getElementById('contenidoHistorial').innerHTML =
-                    `<p style="color:var(--red);text-align:center;padding:30px">❌ Error: ${err.message}</p>`;
-            });
-        }
-        function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
-
-        /* ── Dropdown / Sesión ── */
-        function toggleDropdown() { document.getElementById('userChipMain').classList.toggle('open'); }
         document.addEventListener('click', e => {
-            const chip = document.getElementById('userChipMain');
+            const chip = document.getElementById('menuUserChip');
             if (chip && !chip.contains(e.target)) chip.classList.remove('open');
         });
-        function cerrarSesion() { fetch('/LOGOUT', { method: 'POST', credentials: 'include' }).finally(() => { window.location.href = '/static/login.html'; }); }
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarEditar(); cerrarDetalle(); cerrarHistorial(); } });
+
+        async function verificarSesion() {
+            try {
+                const res = await fetch("/obtener-usuario", { credentials: "include" });
+                if (!res.ok) { window.location.href = "/static/login.html"; return; }
+
+                const data = await res.json();
+                if (!data.usuario) { window.location.href = "/static/login.html"; return; }
+
+                const nombre = data.nombre || data.usuario;
+                document.getElementById('nombreUsuario').textContent = nombre;
+                document.getElementById('menuDropNombre').textContent = nombre;
+                document.getElementById('menuDropRol').textContent = data.rol || 'USER';
+
+                if (data.rol === 'ADMIN') {
+                    document.getElementById('btnAdmin').style.display = 'flex';
+                    document.getElementById('adminSep').style.display = 'block';
+                }
+            } catch {
+                window.location.href = "/static/login.html";
+            }
+        }
+
+        verificarSesion();
+
+        async function cerrarSesion() {
+            try { await fetch("/LOGOUT", { method: "POST", credentials: "include" }); } catch { }
+            sessionStorage.clear();
+            window.location.href = "/static/login.html";
+        }
     </script>
+
 </body>
 </html>
