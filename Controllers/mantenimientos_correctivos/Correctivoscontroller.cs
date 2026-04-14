@@ -10,11 +10,11 @@ namespace ChiIT.Controllers;
 public class CorrectivoController : ControllerBase
 {
     private readonly DbConnectionPool _db;
-    private readonly AuditoriaServicepreventivos _auditoria;
+    private readonly AuditoriaServiceCorrectivos _auditoria;
     private readonly ExcelService _excel;
     private readonly string _pdfDir;
 
-    public CorrectivoController(DbConnectionPool db, AuditoriaServicepreventivos auditoria,
+    public CorrectivoController(DbConnectionPool db, AuditoriaServiceCorrectivos auditoria,
                                 ExcelService excel, IConfiguration config)
     {
         _db = db;
