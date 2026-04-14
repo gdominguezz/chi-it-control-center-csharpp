@@ -630,14 +630,38 @@ public class CorrectivoController : ControllerBase
     }
 }
 
+    // ══════════════════════════════════════════════════════════════════════
+    // GET /CORRECTIVOS/UBICACIONES
+    // Devuelve lista de ubicaciones distintas de mantenimientos_preventivos
+    // para autocompletado del campo Línea / Persona
+    // ══════════════════════════════════════════════════════════════════════
+    [HttpGet("CORRECTIVOS/UBICACIONES")]
+    public IActionResult ObtenerUbicaciones()
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT DISTINCT TRIM(ubicacion)
+            FROM public.mantenimientos_preventivos
+            WHERE ubicacion IS NOT NULL AND TRIM(ubicacion) <> ''
+            ORDER BY TRIM(ubicacion)
+            """;
+
+        var lista = new List<string>();
+        using var r = cmd.ExecuteReader();
+        while (r.Read()) lista.Add(r.GetString(0));
+
+        return Ok(new { ubicaciones = lista });
+    }
+
 // ══════════════════════════════════════════════════════════════════════════
 // MODELOS
 // ══════════════════════════════════════════════════════════════════════════
 
-/// <summary>
-/// Parámetros de filtro + paginación para GET /CORRECTIVOS.
-/// Todos los campos de filtro son opcionales.
-/// </summary>
+    /// <summary>
+    /// Parámetros de filtro + paginación para GET /CORRECTIVOS.
+    /// Todos los campos de filtro son opcionales.
+    /// </summary>
 public class FiltrosCorrectivo
 {
     // Paginación
