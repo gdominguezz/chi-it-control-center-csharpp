@@ -1,421 +1,1376 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>MANTENIMIENTOS CORRECTIVOS</title>
-<style>
-*{box-sizing:border-box;}
-body{margin:0;font-family:Arial;background:#f1f5f9;}
-.header{background:#1e293b;color:white;padding:15px 20px;font-size:20px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;}
-.user-info{font-size:13px;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:6px;}
-.container{padding:20px;}
-.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-bottom:14px;}
-.field{display:flex;flex-direction:column;}
-.field label{font-size:11px;font-weight:bold;color:#1e293b;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;}
-.field input{padding:7px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;background:#f8fafc;}
-.field input:focus{outline:none;border-color:#2563eb;background:white;box-shadow:0 0 0 2px rgba(37,99,235,.15);}
-button{padding:6px 11px;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:12px;margin-right:4px;}
-.save{background:#16a34a;color:white;}.cancel{background:#64748b;color:white;}.delete{background:#dc2626;color:white;}
-.edit{background:#f59e0b;color:black;}.ver{background:#06b6d4;color:white;}.pdf{background:#2563eb;color:white;}
-.export{background:#7c3aed;color:white;}.historial{background:#0ea5e9;color:white;}.back{background:#dc2626;font-style:italic;color:white;}
-.table-container{width:100%;height:500px;overflow:auto;border:1px solid #ccc;background:white;margin-top:10px;}
-table{border-collapse:collapse;min-width:3800px;font-size:11px;}
-th,td{border:1px solid #ccc;padding:6px;white-space:nowrap;text-align:center;}
-th{background:#1e293b;color:white;position:sticky;top:0;z-index:2;}
-.filter-row input{width:100%;font-size:10px;padding:3px;}
-tr.s-abierto td{background:#fef9c3;}
-tr.s-cerrado td{background:#dcfce7;}
-tr.s-cancelado td{background:#e2e8f0;color:#94a3b8;}
-.pagination{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);justify-content:center;align-items:center;z-index:9999;}
-.modal.show{display:flex;}
-.modal-box{background:white;border-radius:10px;padding:24px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.35);}
-.modal-box.form-box{width:min(680px,95vw);}
-.modal-box.hist-box{width:min(1200px,95vw);}
-.modal-box.det-box{width:min(860px,95vw);}
-.modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e2e8f0;padding-bottom:12px;margin-bottom:18px;}
-.modal-header h3{margin:0;color:#1e293b;font-size:16px;}
-.close-btn{background:#dc2626;color:white;border:none;padding:5px 12px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:bold;}
-.modal-footer{display:flex;justify-content:flex-end;gap:8px;border-top:1px solid #e2e8f0;padding-top:14px;margin-top:8px;}
-.modal-footer button{margin-right:0;}
-.form-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.form-field{margin-bottom:12px;display:flex;flex-direction:column;}
-.form-field label{font-size:11px;font-weight:bold;color:#1e293b;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;}
-.form-field input,.form-field textarea{padding:8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;background:#f8fafc;font-family:Arial;}
-.form-field input:focus,.form-field textarea:focus{outline:none;border-color:#2563eb;background:white;box-shadow:0 0 0 2px rgba(37,99,235,.15);}
-.form-field textarea{resize:vertical;min-height:65px;}
-.det-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
-.det-field{display:flex;flex-direction:column;}
-.det-field label{font-size:10px;font-weight:bold;color:#64748b;margin-bottom:3px;text-transform:uppercase;}
-.det-field input{padding:6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;background:#f8fafc;color:#1e293b;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Mantenimientos Correctivos</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0F1A;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --surface3: #1e293b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --accent: #3B82F6;
+            --text: #F1F5F9;
+            --muted: #64748B;
+            --muted2: #94A3B8;
+            --green: #10B981;
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --purple: #8B5CF6;
+            --cyan: #06B6D4;
+        }
 
-/* ESTILOS PARA HISTORIAL MEJORADO */
-.ev-wrap{margin-bottom:20px;border:2px solid #e2e8f0;border-radius:8px;overflow:hidden;background:#f8fafc;}
-.ev-header{background:#1e293b;color:white;padding:12px 16px;display:flex;flex-wrap:wrap;gap:15px;align-items:center;border-bottom:2px solid #2563eb;}
-.ev-header span{font-size:12px;}
-.ev-header strong{color:#7dd3fc;}
-.badge-cambio{background:#f59e0b;color:#111;font-size:10px;padding:3px 8px;border-radius:999px;font-weight:bold;text-transform:uppercase;letter-spacing:.3px;margin-left:5px;}
-.ev-content{display:grid;grid-template-columns:1fr 1fr;gap:0;background:white;}
-.ev-section{padding:14px;}
-.ev-section h4{margin:0 0 10px 0;font-size:13px;color:#1e293b;border-bottom:2px solid #e2e8f0;padding-bottom:8px;}
-.ev-section.before{border-right:2px solid #e2e8f0;}
-.ev-section.before h4{color:#7f1d1d;background:#fee2e2;padding:6px 8px;margin:-14px -14px 10px -14px;}
-.ev-section.after h4{color:#15803d;background:#dcfce7;padding:6px 8px;margin:-14px -14px 10px -14px;}
-.ev-field{margin-bottom:10px;padding:8px;background:#f1f5f9;border-radius:4px;border-left:3px solid #cbd5e1;}
-.ev-field label{font-size:10px;font-weight:bold;color:#475569;text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:3px;}
-.ev-field .value{font-size:12px;color:#1e293b;word-break:break-word;font-family:monospace;background:white;padding:4px 6px;border-radius:3px;min-height:20px;display:flex;align-items:center;}
-.ev-field .empty{color:#94a3b8;font-style:italic;font-family:Arial;}
-.ev-section.before .ev-field{border-left-color:#ef4444;}
-.ev-section.after .ev-field{border-left-color:#22c55e;}
-.ev-field.changed{background:#fffbeb;border-left-color:#f59e0b;}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-.sin-hist{text-align:center;padding:40px;color:#64748b;font-size:14px;}
-.hist-info{background:#eff6ff;border-left:4px solid #0ea5e9;padding:10px 12px;margin-bottom:14px;border-radius:4px;font-size:12px;color:#0c4a6e;}
-</style>
+        body {
+            font-family: 'DM Sans',sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* TOP BAR */
+        .topbar {
+            background: linear-gradient(135deg,#0f1e35,#0B0F1A);
+            border-bottom: 1px solid var(--border2);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+
+        .topbar-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: linear-gradient(135deg,#991B1B,#EF4444);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px rgba(239,68,68,.4);
+            flex-shrink: 0;
+        }
+
+        .topbar-title {
+            flex: 1;
+        }
+
+            .topbar-title h1 {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: -.01em;
+            }
+
+            .topbar-title p {
+                font-size: 11px;
+                color: var(--muted2);
+                margin-top: 1px;
+                font-family: 'DM Mono',monospace;
+            }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background .2s,border-color .2s;
+        }
+
+            .user-chip:hover {
+                background: rgba(255,255,255,.1);
+                border-color: var(--accent);
+            }
+
+            .user-chip span {
+                color: var(--muted2);
+            }
+
+        .chip-arrow {
+            font-size: 9px;
+            color: var(--muted);
+            transition: transform .2s;
+        }
+
+        .user-chip.open .chip-arrow {
+            transform: rotate(180deg);
+        }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
+
+            .dropdown-header .d-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            .dropdown-header .d-role {
+                font-size: 10px;
+                color: var(--muted);
+                font-family: 'DM Mono',monospace;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                margin-top: 2px;
+            }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: background .15s,color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans',sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: var(--text);
+            }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        .dropdown-sep {
+            height: 1px;
+            background: var(--border);
+            margin: 6px 0;
+        }
+
+        /* MAIN */
+        .main {
+            max-width: 100%;
+            padding: 16px 20px;
+        }
+
+        /* PANEL NUEVO REGISTRO */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 22px;
+            margin-bottom: 14px;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .panel-title::before {
+                content: '';
+                width: 3px;
+                height: 14px;
+                background: var(--red);
+                border-radius: 2px;
+                display: inline-block;
+            }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(195px,1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .field input, .field select, .field textarea {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 7px 9px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            transition: border-color .2s;
+        }
+
+        .field textarea {
+            resize: vertical;
+            min-height: 58px;
+            font-family: 'DM Sans',sans-serif;
+        }
+
+            .field input:focus, .field select:focus, .field textarea:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+            }
+
+        .field select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 9px center;
+            padding-right: 26px;
+        }
+
+            .field select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+        .field-wide {
+            grid-column: 1/-1;
+        }
+
+        /* BOTONES */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans',sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+            box-shadow: 0 3px 10px rgba(16,185,129,.25);
+        }
+
+            .btn-success:hover {
+                background: #059669;
+                transform: translateY(-1px);
+            }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+        }
+
+            .btn-danger:hover {
+                background: #DC2626;
+            }
+
+        .btn-amber {
+            background: var(--amber);
+            color: #1c1400;
+        }
+
+            .btn-amber:hover {
+                background: #D97706;
+            }
+
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+
+            .btn-purple:hover {
+                background: #7C3AED;
+            }
+
+        .btn-cyan {
+            background: var(--cyan);
+            color: #001a1f;
+        }
+
+            .btn-cyan:hover {
+                background: #0891B2;
+            }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
+        }
+
+            .btn-ghost:hover {
+                color: var(--text);
+                border-color: var(--accent);
+            }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+            .btn-primary:hover {
+                background: #2563EB;
+            }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+
+        /* TOOLBAR */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 12px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 14px;
+        }
+
+        .anio-input {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 7px 9px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            width: 110px;
+        }
+
+            .anio-input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        /* TABLA WIDE */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: calc(100vh - 290px);
+            min-height: 480px;
+            overflow-y: auto;
+        }
+
+            .table-scroll::-webkit-scrollbar {
+                width: 7px;
+                height: 7px;
+            }
+
+            .table-scroll::-webkit-scrollbar-track {
+                background: var(--surface2);
+            }
+
+            .table-scroll::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 999px;
+            }
+
+                .table-scroll::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent);
+                }
+
+        table {
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        th {
+            background: var(--surface3);
+            color: var(--muted2);
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            padding: 9px 10px;
+            border-bottom: 1px solid var(--border2);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            text-align: left;
+        }
+
+        .filter-row th {
+            top: 37px;
+            background: var(--surface2);
+            padding: 4px 5px;
+            z-index: 9;
+        }
+
+        .filter-row input {
+            width: 100%;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 4px 6px;
+            font-size: 10px;
+            color: var(--text);
+            font-family: 'DM Mono',monospace;
+        }
+
+            .filter-row input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+
+            tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            tbody tr:hover td {
+                filter: brightness(1.18);
+            }
+
+        td {
+            padding: 8px 10px;
+            color: var(--text);
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+            td.mono {
+                font-family: 'DM Mono',monospace;
+                font-size: 11px;
+                color: var(--muted2);
+            }
+
+            td.wrap {
+                white-space: normal;
+                word-break: break-word;
+                max-width: 200px;
+            }
+
+        /* Status rows */
+        tr.s-abierto td {
+            background: rgba(245,158,11,.07);
+        }
+
+        tr.s-cerrado td {
+            background: rgba(16,185,129,.07);
+        }
+
+        tr.s-cancelado td {
+            background: rgba(100,116,139,.06);
+            color: var(--muted);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 9px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .03em;
+        }
+
+        .pill-abierto {
+            background: rgba(245,158,11,.18);
+            color: #FCD34D;
+            border: 1px solid rgba(245,158,11,.3);
+        }
+
+        .pill-cerrado {
+            background: rgba(16,185,129,.18);
+            color: #6EE7B7;
+            border: 1px solid rgba(16,185,129,.3);
+        }
+
+        .pill-cancelado {
+            background: rgba(100,116,139,.18);
+            color: #94A3B8;
+            border: 1px solid rgba(100,116,139,.3);
+        }
+
+        /* PAGINACIÓN */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 12px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 14px;
+        }
+
+        .page-info {
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--muted2);
+        }
+
+        /* MODALES */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.72);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+            .modal.show {
+                display: flex;
+            }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 24px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,.6);
+            animation: modalIn .2s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.96)
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1)
+            }
+        }
+
+        .modal-box.form-box {
+            width: min(780px,96vw);
+        }
+
+        .modal-box.hist-box {
+            width: min(940px,96vw);
+        }
+
+        .modal-box.det-box {
+            width: min(880px,96vw);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 14px;
+            margin-bottom: 18px;
+        }
+
+            .modal-header h3 {
+                font-size: 15px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 14px;
+            margin-top: 14px;
+        }
+
+        .form-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-field {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .form-field label {
+                font-size: 9px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+            }
+
+            .form-field input, .form-field textarea, .form-field select {
+                width: 100%;
+                background: var(--surface2);
+                border: 1px solid var(--border2);
+                border-radius: 7px;
+                padding: 8px 10px;
+                font-size: 12px;
+                font-family: 'DM Mono',monospace;
+                color: var(--text);
+                transition: border-color .2s;
+            }
+
+            .form-field textarea {
+                resize: vertical;
+                min-height: 68px;
+                font-family: 'DM Sans',sans-serif;
+            }
+
+            .form-field select {
+                cursor: pointer;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 9px center;
+                padding-right: 26px;
+            }
+
+                .form-field input:focus, .form-field textarea:focus, .form-field select:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+                }
+
+        /* DETALLE */
+        .det-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+            gap: 10px;
+        }
+
+        .det-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+            .det-field label {
+                font-size: 9px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+            }
+
+            .det-field input {
+                width: 100%;
+                background: var(--surface2);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                padding: 7px 9px;
+                font-size: 12px;
+                font-family: 'DM Mono',monospace;
+                color: var(--muted2);
+            }
+
+        /* HISTORIAL */
+        .ev-wrap {
+            margin-bottom: 16px;
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        .ev-header {
+            background: var(--surface2);
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+            .ev-header span {
+                font-size: 12px;
+                color: var(--muted2);
+            }
+
+            .ev-header strong {
+                color: var(--text);
+            }
+
+        .badge-cambio {
+            background: rgba(245,158,11,.2);
+            color: var(--amber);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+            margin-left: 5px;
+            border: 1px solid rgba(245,158,11,.3);
+        }
+
+        .n-cambios-badge {
+            margin-left: auto;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .ev-table {
+            width: 100%;
+            min-width: 540px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+            .ev-table th, .ev-table td {
+                border: 1px solid var(--border);
+                padding: 8px 11px;
+                text-align: left;
+            }
+
+            .ev-table thead th {
+                background: var(--surface3);
+                color: var(--muted);
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .07em;
+            }
+
+            .ev-table th:first-child {
+                width: 26%;
+            }
+
+        .row-changed td:nth-child(2) {
+            background: rgba(239,68,68,.08);
+            color: #fca5a5;
+        }
+
+        .row-changed td:nth-child(3) {
+            background: rgba(16,185,129,.08);
+            color: #6ee7b7;
+        }
+
+        .empty-val {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .sin-hist {
+            text-align: center;
+            padding: 50px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-<div class="header">
-  <span>MANTENIMIENTOS CORRECTIVOS</span>
-  <div class="user-info">👤 <strong id="usuarioDisplay">Cargando...</strong></div>
-</div>
-<div class="container">
-  <div class="form-grid">
-    <div class="field"><label>STATUS</label><input id="n_STATUS"></div>
-    <div class="field"><label>FOLIO</label><input id="n_FOLIO"></div>
-    <div class="field"><label>PLANTA</label><input id="n_PLANTA"></div>
-    <div class="field"><label>LINEA / PERSONA</label><input id="n_LINEA_PERSONA"></div>
-    <div class="field"><label>EQUIPO</label><input id="n_EQUIPO"></div>
-    <div class="field"><label>MARCA</label><input id="n_MARCA"></div>
-    <div class="field"><label>MODELO</label><input id="n_MODELO"></div>
-    <div class="field"><label>NUMERO SERIE</label><input id="n_NUMERO_SERIE"></div>
-    <div class="field"><label>DESCRIPCION FALLA</label><input id="n_DESCRIPCION_FALLA"></div>
-    <div class="field"><label>ACCESORIO SOLICITADO</label><input id="n_ACCESORIO_SOLICITADO"></div>
-    <div class="field"><label>FECHA SOLICITUD</label><input id="n_FECHA_SOLICITUD" type="date"></div>
-    <div class="field"><label>REPORTE ELABORADO POR</label><input id="n_REPORTE_ELABORADO_POR"></div>
-    <div class="field"><label>TIPO OBSERVACION</label><input id="n_TIPO_OBSERVACION"></div>
-    <div class="field"><label>TIPO CORRECTIVO</label><input id="n_TIPO_CORRECTIVO"></div>
-    <div class="field"><label>VENCIMIENTO DIAS</label><input id="n_VENCIMIENTO_DIAS"></div>
-    <div class="field"><label>FECHA CONTEO ACTUAL</label><input id="n_FECHA_CONTEO_ACTUAL" type="date"></div>
-    <div class="field"><label>FECHA LIMITE CIERRE</label><input id="n_FECHA_LIMITE_CIERRE" type="date"></div>
-    <div class="field"><label>CATEGORIA CORRECTIVO</label><input id="n_CATEGORIA_CORRECTIVO"></div>
-    <div class="field"><label>REFACCION / ACCESORIO COMPRA</label><input id="n_REFACCION_ACCESORIO_COMPRA"></div>
-    <div class="field"><label>FECHA LLEGADA REFACCION</label><input id="n_FECHA_LLEGADA_REFACCION" type="date"></div>
-    <div class="field"><label>FECHA REPARACION</label><input id="n_FECHA_REPARACION" type="date"></div>
-    <div class="field"><label>QUIEN REALIZO REPARACION</label><input id="n_QUIEN_REALIZO_REPARACION"></div>
-    <div class="field"><label>VALIDACION FUNCIONAMIENTO</label><input id="n_VALIDACION_FUNCIONAMIENTO"></div>
-    <div class="field"><label>DESCRIPCION REPARACION</label><input id="n_DESCRIPCION_REPARACION"></div>
-    <div class="field"><label>OBSERVACIONES</label><input id="n_OBSERVACIONES"></div>
-    <div class="field"><label>OC / FACTURA</label><input id="n_OC_FACTURA"></div>
-  </div>
-  <div style="margin-bottom:14px;">
-    <button class="save" onclick="guardar()">GUARDAR</button>
-    <button class="cancel" onclick="limpiarForm()">CANCELAR</button>
-  </div>
-  <div style="margin-bottom:14px;">
-    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
-    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
 
-    <input id="anioExportar" type="number" placeholder="Año (ej: 2026)" style="width:130px;padding:6px;border:1px solid #ccc;border-radius:5px;font-size:12px;">
-
-    <button class="export" onclick="exportarAnio()">Exportar por Año</button>
-  </div>
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr id="encTh"></tr>
-        <tr class="filter-row" id="encFil"></tr>
-      </thead>
-      <tbody id="tabla"></tbody>
-    </table>
-  </div>
-  <div class="pagination">
-    <button onclick="anterior()">◀ Anterior</button>
-    <span id="paginaInfo" style="font-size:13px;color:#475569;"></span>
-    <button onclick="siguiente()">Siguiente ▶</button>
-    <button class="back" onclick="window.location.href='menu.html'">REGRESAR AL MENÚ</button>
-  </div>
-</div>
-
-<!-- MODAL EDITAR -->
-<div id="modalEditar" class="modal">
-  <div class="modal-box form-box">
-    <div class="modal-header">
-      <h3>✏️ Editar Correctivo &nbsp;<span id="editarIdLabel" style="color:#2563eb;">#</span></h3>
-      <button class="close-btn" onclick="cerrarEditar()">✕</button>
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div class="topbar-icon">🔧</div>
+        <div class="topbar-title">
+            <h1>Mantenimientos Correctivos</h1>
+            <p>S-Riko Automotive Hose de Chihuahua</p>
+        </div>
+        <div style="position:relative;">
+            <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
+                👤 <span id="usuarioDisplay">Cargando...</span>
+                <span class="chip-arrow">▼</span>
+                <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name" id="dropdownNombre">—</div>
+                        <div class="d-role" id="dropdownRol">—</div>
+                    </div>
+                    <button class="dropdown-item" onclick="window.location.href='/static/menu.html'">☰ &nbsp;Menú principal</button>
+                    <div class="dropdown-sep"></div>
+                    <button class="dropdown-item danger" onclick="cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-cols">
-      <div class="form-field"><label>STATUS</label><input type="text" id="e_STATUS"></div>
-      <div class="form-field"><label>FOLIO</label><input type="text" id="e_FOLIO"></div>
-      <div class="form-field"><label>PLANTA</label><input type="text" id="e_PLANTA"></div>
-      <div class="form-field"><label>LINEA / PERSONA</label><input type="text" id="e_LINEA_PERSONA"></div>
-      <div class="form-field"><label>EQUIPO</label><input type="text" id="e_EQUIPO"></div>
-      <div class="form-field"><label>MARCA</label><input type="text" id="e_MARCA"></div>
-      <div class="form-field"><label>MODELO</label><input type="text" id="e_MODELO"></div>
-      <div class="form-field"><label>NUMERO SERIE</label><input type="text" id="e_NUMERO_SERIE"></div>
-      <div class="form-field"><label>FECHA SOLICITUD</label><input type="date" id="e_FECHA_SOLICITUD"></div>
-      <div class="form-field"><label>REPORTE ELABORADO POR</label><input type="text" id="e_REPORTE_ELABORADO_POR"></div>
-      <div class="form-field"><label>TIPO OBSERVACION</label><input type="text" id="e_TIPO_OBSERVACION"></div>
-      <div class="form-field"><label>TIPO CORRECTIVO</label><input type="text" id="e_TIPO_CORRECTIVO"></div>
-      <div class="form-field"><label>VENCIMIENTO DIAS</label><input type="text" id="e_VENCIMIENTO_DIAS"></div>
-      <div class="form-field"><label>FECHA CONTEO ACTUAL</label><input type="date" id="e_FECHA_CONTEO_ACTUAL"></div>
-      <div class="form-field"><label>FECHA LIMITE CIERRE</label><input type="date" id="e_FECHA_LIMITE_CIERRE"></div>
-      <div class="form-field"><label>CATEGORIA CORRECTIVO</label><input type="text" id="e_CATEGORIA_CORRECTIVO"></div>
-      <div class="form-field"><label>REFACCION / ACCESORIO</label><input type="text" id="e_REFACCION_ACCESORIO_COMPRA"></div>
-      <div class="form-field"><label>FECHA LLEGADA REFACCION</label><input type="date" id="e_FECHA_LLEGADA_REFACCION"></div>
-      <div class="form-field"><label>FECHA REPARACION</label><input type="date" id="e_FECHA_REPARACION"></div>
-      <div class="form-field"><label>QUIEN REALIZO REPARACION</label><input type="text" id="e_QUIEN_REALIZO_REPARACION"></div>
-      <div class="form-field"><label>VALIDACION FUNCIONAMIENTO</label><input type="text" id="e_VALIDACION_FUNCIONAMIENTO"></div>
-      <div class="form-field"><label>OC / FACTURA</label><input type="text" id="e_OC_FACTURA"></div>
+
+    <div class="main">
+
+        <!-- NUEVO REGISTRO -->
+        <div class="panel">
+            <div class="panel-title">Nuevo registro correctivo</div>
+            <div class="form-grid">
+                <div class="field">
+                    <label>STATUS</label>
+                    <select id="n_STATUS">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="ABIERTO">🟡 Abierto</option>
+                        <option value="CERRADO">🟢 Cerrado</option>
+                        <option value="CANCELADO">⚫ Cancelado</option>
+                    </select>
+                </div>
+                <div class="field"><label>FOLIO</label><input id="n_FOLIO" placeholder="CORR-2026-001"></div>
+                <div class="field">
+                    <label>PLANTA</label>
+                    <select id="n_PLANTA">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                        <option value="PLANTA SATELITE">Planta Satélite</option>
+                        <option value="PLANTA MIXING">Planta Mixing</option>
+                        <option value="BODEGA">Bodega</option>
+                    </select>
+                </div>
+                <div class="field"><label>LINEA / PERSONA</label><input id="n_LINEA_PERSONA" placeholder="Línea o nombre"></div>
+                <div class="field"><label>EQUIPO</label><input id="n_EQUIPO" placeholder="ID o nombre del equipo"></div>
+                <div class="field"><label>MARCA</label><input id="n_MARCA" placeholder="HP, Dell..."></div>
+                <div class="field"><label>MODELO</label><input id="n_MODELO"></div>
+                <div class="field"><label>NUMERO SERIE</label><input id="n_NUMERO_SERIE"></div>
+                <div class="field"><label>FECHA SOLICITUD</label><input id="n_FECHA_SOLICITUD" type="date"></div>
+                <div class="field"><label>REPORTE ELABORADO POR</label><input id="n_REPORTE_ELABORADO_POR"></div>
+                <div class="field"><label>TIPO OBSERVACION</label><input id="n_TIPO_OBSERVACION"></div>
+                <div class="field"><label>TIPO CORRECTIVO</label><input id="n_TIPO_CORRECTIVO"></div>
+                <div class="field"><label>VENCIMIENTO DIAS</label><input id="n_VENCIMIENTO_DIAS" type="number" min="0" placeholder="Días"></div>
+                <div class="field"><label>FECHA CONTEO ACTUAL</label><input id="n_FECHA_CONTEO_ACTUAL" type="date"></div>
+                <div class="field"><label>FECHA LIMITE CIERRE</label><input id="n_FECHA_LIMITE_CIERRE" type="date"></div>
+                <div class="field"><label>CATEGORIA CORRECTIVO</label><input id="n_CATEGORIA_CORRECTIVO"></div>
+                <div class="field"><label>FECHA LLEGADA REFACCION</label><input id="n_FECHA_LLEGADA_REFACCION" type="date"></div>
+                <div class="field"><label>FECHA REPARACION</label><input id="n_FECHA_REPARACION" type="date"></div>
+                <div class="field"><label>QUIEN REALIZO REPARACION</label><input id="n_QUIEN_REALIZO_REPARACION"></div>
+                <div class="field"><label>VALIDACION FUNCIONAMIENTO</label><input id="n_VALIDACION_FUNCIONAMIENTO"></div>
+                <div class="field"><label>OC / FACTURA</label><input id="n_OC_FACTURA"></div>
+                <div class="field field-wide"><label>DESCRIPCION FALLA</label><textarea id="n_DESCRIPCION_FALLA" rows="2"></textarea></div>
+                <div class="field field-wide"><label>ACCESORIO SOLICITADO</label><textarea id="n_ACCESORIO_SOLICITADO" rows="2"></textarea></div>
+                <div class="field field-wide"><label>REFACCION / ACCESORIO COMPRA</label><textarea id="n_REFACCION_ACCESORIO_COMPRA" rows="2"></textarea></div>
+                <div class="field field-wide"><label>DESCRIPCION REPARACION</label><textarea id="n_DESCRIPCION_REPARACION" rows="2"></textarea></div>
+                <div class="field field-wide"><label>OBSERVACIONES</label><textarea id="n_OBSERVACIONES" rows="2"></textarea></div>
+            </div>
+            <button class="btn btn-success" onclick="guardar()">💾 Guardar Registro</button>
+            <button class="btn btn-ghost" onclick="limpiarForm()" style="margin-left:8px;">✕ Limpiar</button>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <button class="btn btn-purple" onclick="exportarFiltrado()">📊 Exportar Filtrado</button>
+            <button class="btn btn-purple" onclick="exportarTodo()">📦 Exportar Todo</button>
+            <input class="anio-input" id="anioExportar" type="number" placeholder="Año (ej: 2026)">
+            <button class="btn btn-purple" onclick="exportarAnio()">📅 Por Año</button>
+        </div>
+
+        <!-- TABLA -->
+        <div class="table-wrap">
+            <div class="table-scroll">
+                <table>
+                    <colgroup>
+                        <col style="width:52px">
+                        <col style="width:112px">
+                        <col style="width:122px">
+                        <col style="width:88px">
+                        <col style="width:145px">
+                        <col style="width:130px">
+                        <col style="width:100px">
+                        <col style="width:100px">
+                        <col style="width:122px">
+                        <col style="width:220px">
+                        <col style="width:180px">
+                        <col style="width:108px">
+                        <col style="width:152px">
+                        <col style="width:140px">
+                        <col style="width:140px">
+                        <col style="width:88px">
+                        <col style="width:108px">
+                        <col style="width:108px">
+                        <col style="width:140px">
+                        <col style="width:200px">
+                        <col style="width:108px">
+                        <col style="width:108px">
+                        <col style="width:160px">
+                        <col style="width:140px">
+                        <col style="width:200px">
+                        <col style="width:180px">
+                        <col style="width:120px">
+                        <col style="width:170px">
+                        <col style="width:130px">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Status</th>
+                            <th>Folio</th>
+                            <th>Planta</th>
+                            <th>Línea / Persona</th>
+                            <th>Equipo</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>N. Serie</th>
+                            <th>Desc. Falla</th>
+                            <th>Accesorio Sol.</th>
+                            <th>Fecha Sol.</th>
+                            <th>Reporte Elab. Por</th>
+                            <th>Tipo Obs.</th>
+                            <th>Tipo Correct.</th>
+                            <th>Venc. Días</th>
+                            <th>F. Conteo</th>
+                            <th>F. Límite Cierre</th>
+                            <th>Categoría</th>
+                            <th>Refacción / Acc. Compra</th>
+                            <th>F. Llegada Ref.</th>
+                            <th>F. Reparación</th>
+                            <th>Quién Realizó Rep.</th>
+                            <th>Validación</th>
+                            <th>Desc. Reparación</th>
+                            <th>Observaciones</th>
+                            <th>OC / Factura</th>
+                            <th>PDF</th>
+                            <th>Acciones</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th></th>
+                            <th><input id="f_STATUS" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_FOLIO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_PLANTA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_LINEA_PERSONA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_EQUIPO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_MARCA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_MODELO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_NUMERO_SERIE" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_DESCRIPCION_FALLA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_ACCESORIO_SOLICITADO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_FECHA_SOLICITUD" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                            <th><input id="f_REPORTE_ELABORADO_POR" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_TIPO_OBSERVACION" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_TIPO_CORRECTIVO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_VENCIMIENTO_DIAS" oninput="filtrar()" placeholder="Días" type="number" style="width:70px"></th>
+                            <th><input id="f_FECHA_CONTEO_ACTUAL" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                            <th><input id="f_FECHA_LIMITE_CIERRE" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                            <th><input id="f_CATEGORIA_CORRECTIVO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_REFACCION_ACCESORIO_COMPRA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_FECHA_LLEGADA_REFACCION" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                            <th><input id="f_FECHA_REPARACION" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                            <th><input id="f_QUIEN_REALIZO_REPARACION" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_VALIDACION_FUNCIONAMIENTO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_DESCRIPCION_REPARACION" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_OBSERVACIONES" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input id="f_OC_FACTURA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGINACIÓN -->
+        <div class="pagination">
+            <button class="btn btn-ghost" onclick="anterior()">◀ Anterior</button>
+            <span class="page-info" id="paginaInfo"></span>
+            <button class="btn btn-ghost" onclick="siguiente()">Siguiente ▶</button>
+        </div>
+
     </div>
-    <div class="form-field"><label>DESCRIPCION FALLA</label><textarea id="e_DESCRIPCION_FALLA"></textarea></div>
-    <div class="form-field"><label>ACCESORIO SOLICITADO</label><textarea id="e_ACCESORIO_SOLICITADO"></textarea></div>
-    <div class="form-field"><label>DESCRIPCION REPARACION</label><textarea id="e_DESCRIPCION_REPARACION"></textarea></div>
-    <div class="form-field"><label>OBSERVACIONES</label><textarea id="e_OBSERVACIONES"></textarea></div>
-    <div class="modal-footer">
-      <button class="delete" onclick="cerrarEditar()">Cancelar</button>
-      <button class="save" onclick="guardarCambios()">💾 Guardar Cambios</button>
+
+    <!-- MODAL EDITAR -->
+    <div id="modalEditar" class="modal">
+        <div class="modal-box form-box">
+            <div class="modal-header">
+                <h3>✏️ Editar Correctivo &nbsp;<span id="editarIdLabel" style="color:var(--red);font-family:'DM Mono',monospace;">#</span></h3>
+                <button class="btn btn-danger btn-sm" onclick="cerrarEditar()">✕</button>
+            </div>
+            <div class="form-cols">
+                <div class="form-field">
+                    <label>STATUS</label>
+                    <select id="e_STATUS">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="ABIERTO">🟡 Abierto</option>
+                        <option value="CERRADO">🟢 Cerrado</option>
+                        <option value="CANCELADO">⚫ Cancelado</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>FOLIO</label><input type="text" id="e_FOLIO"></div>
+                <div class="form-field">
+                    <label>PLANTA</label>
+                    <select id="e_PLANTA">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                        <option value="PLANTA SATELITE">Planta Satélite</option>
+                        <option value="PLANTA MIXING">Planta Mixing</option>
+                        <option value="BODEGA">Bodega</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>LINEA / PERSONA</label><input type="text" id="e_LINEA_PERSONA"></div>
+                <div class="form-field"><label>EQUIPO</label><input type="text" id="e_EQUIPO"></div>
+                <div class="form-field"><label>MARCA</label><input type="text" id="e_MARCA"></div>
+                <div class="form-field"><label>MODELO</label><input type="text" id="e_MODELO"></div>
+                <div class="form-field"><label>NUMERO SERIE</label><input type="text" id="e_NUMERO_SERIE"></div>
+                <div class="form-field"><label>FECHA SOLICITUD</label><input type="date" id="e_FECHA_SOLICITUD"></div>
+                <div class="form-field"><label>REPORTE ELABORADO POR</label><input type="text" id="e_REPORTE_ELABORADO_POR"></div>
+                <div class="form-field"><label>TIPO OBSERVACION</label><input type="text" id="e_TIPO_OBSERVACION"></div>
+                <div class="form-field"><label>TIPO CORRECTIVO</label><input type="text" id="e_TIPO_CORRECTIVO"></div>
+                <div class="form-field"><label>VENCIMIENTO DIAS</label><input type="number" min="0" id="e_VENCIMIENTO_DIAS"></div>
+                <div class="form-field"><label>FECHA CONTEO ACTUAL</label><input type="date" id="e_FECHA_CONTEO_ACTUAL"></div>
+                <div class="form-field"><label>FECHA LIMITE CIERRE</label><input type="date" id="e_FECHA_LIMITE_CIERRE"></div>
+                <div class="form-field"><label>CATEGORIA CORRECTIVO</label><input type="text" id="e_CATEGORIA_CORRECTIVO"></div>
+                <div class="form-field"><label>FECHA LLEGADA REFACCION</label><input type="date" id="e_FECHA_LLEGADA_REFACCION"></div>
+                <div class="form-field"><label>FECHA REPARACION</label><input type="date" id="e_FECHA_REPARACION"></div>
+                <div class="form-field"><label>QUIEN REALIZO REPARACION</label><input type="text" id="e_QUIEN_REALIZO_REPARACION"></div>
+                <div class="form-field"><label>VALIDACION FUNCIONAMIENTO</label><input type="text" id="e_VALIDACION_FUNCIONAMIENTO"></div>
+                <div class="form-field"><label>OC / FACTURA</label><input type="text" id="e_OC_FACTURA"></div>
+            </div>
+            <div class="form-field"><label>DESCRIPCION FALLA</label><textarea id="e_DESCRIPCION_FALLA"></textarea></div>
+            <div class="form-field"><label>ACCESORIO SOLICITADO</label><textarea id="e_ACCESORIO_SOLICITADO"></textarea></div>
+            <div class="form-field"><label>REFACCION / ACCESORIO COMPRA</label><textarea id="e_REFACCION_ACCESORIO_COMPRA"></textarea></div>
+            <div class="form-field"><label>DESCRIPCION REPARACION</label><textarea id="e_DESCRIPCION_REPARACION"></textarea></div>
+            <div class="form-field"><label>OBSERVACIONES</label><textarea id="e_OBSERVACIONES"></textarea></div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
+                <button class="btn btn-success" onclick="guardarCambios()">💾 Guardar Cambios</button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- MODAL DETALLE -->
-<div id="modalDetalle" class="modal">
-  <div class="modal-box det-box">
-    <div class="modal-header">
-      <h3>🔍 Detalle Correctivo &nbsp;<span id="detalleIdLabel" style="color:#06b6d4;">#</span></h3>
-      <button class="close-btn" onclick="cerrarDetalle()">✕</button>
+    <!-- MODAL DETALLE -->
+    <div id="modalDetalle" class="modal">
+        <div class="modal-box det-box">
+            <div class="modal-header">
+                <h3>🔍 Detalle Correctivo &nbsp;<span id="detalleIdLabel" style="color:var(--cyan);font-family:'DM Mono',monospace;">#</span></h3>
+                <button class="btn btn-danger btn-sm" onclick="cerrarDetalle()">✕</button>
+            </div>
+            <div id="contenidoDetalle" class="det-grid"></div>
+            <div class="modal-footer"><button class="btn btn-ghost" onclick="cerrarDetalle()">Cerrar</button></div>
+        </div>
     </div>
-    <div id="contenidoDetalle" class="det-grid"></div>
-    <div class="modal-footer"><button class="delete" onclick="cerrarDetalle()">Cerrar</button></div>
-  </div>
-</div>
 
-<!-- MODAL HISTORIAL MEJORADO -->
-<div id="modalHistorial" class="modal">
-  <div class="modal-box hist-box">
-    <div class="modal-header">
-      <h3>📋 Historial de Cambios — Correctivo&nbsp;<span id="histIdLabel" style="color:#0ea5e9;">#</span></h3>
-      <button class="close-btn" onclick="cerrarHistorial()">✕</button>
+    <!-- MODAL HISTORIAL -->
+    <div id="modalHistorial" class="modal">
+        <div class="modal-box hist-box">
+            <div class="modal-header">
+                <h3>📋 Historial de Cambios — Correctivo&nbsp;<span id="histIdLabel" style="color:var(--cyan);font-family:'DM Mono',monospace;">#</span></h3>
+                <button class="btn btn-danger btn-sm" onclick="cerrarHistorial()">✕</button>
+            </div>
+            <div id="contenidoHistorial" style="overflow-y:auto;overflow-x:auto;max-height:55vh;"></div>
+            <div class="modal-footer"><button class="btn btn-ghost" onclick="cerrarHistorial()">Cerrar</button></div>
+        </div>
     </div>
-    <div class="hist-info">
-      ℹ️ Se muestran todos los cambios realizados al registro. Lado izquierdo: valores anteriores | Lado derecho: nuevos valores
-    </div>
-    <div id="contenidoHistorial"></div>
-    <div class="modal-footer"><button class="delete" onclick="cerrarHistorial()">Cerrar</button></div>
-  </div>
-</div>
 
-<script>
-let paginaActual=1,limite=10,totalRegistros=0,datosActuales=[],editandoID=null,usuarioActual='SISTEMA';
+    <script>
+        /* ── Estado ── */
+        let paginaActual = 1, limite = 20, totalRegistros = 0, datosActuales = [], editandoID = null;
+        let usuarioActual = 'SISTEMA', rolActual = 'USER', _debouce = null;
 
-const CAMPOS=[
-  {key:'STATUS',label:'Status'},{key:'FOLIO',label:'Folio'},{key:'PLANTA',label:'Planta'},
-  {key:'LINEA_PERSONA',label:'Línea / Persona'},{key:'EQUIPO',label:'Equipo'},{key:'MARCA',label:'Marca'},
-  {key:'MODELO',label:'Modelo'},{key:'NUMERO_SERIE',label:'Número Serie'},
-  {key:'DESCRIPCION_FALLA',label:'Descripción Falla'},{key:'ACCESORIO_SOLICITADO',label:'Accesorio Solicitado'},
-  {key:'FECHA_SOLICITUD',label:'Fecha Solicitud'},{key:'REPORTE_ELABORADO_POR',label:'Reporte Elaborado Por'},
-  {key:'TIPO_OBSERVACION',label:'Tipo Observación'},{key:'TIPO_CORRECTIVO',label:'Tipo Correctivo'},
-  {key:'VENCIMIENTO_DIAS',label:'Vencimiento Días'},{key:'FECHA_CONTEO_ACTUAL',label:'Fecha Conteo Actual'},
-  {key:'FECHA_LIMITE_CIERRE',label:'Fecha Límite Cierre'},{key:'CATEGORIA_CORRECTIVO',label:'Categoría Correctivo'},
-  {key:'REFACCION_ACCESORIO_COMPRA',label:'Refacción / Accesorio Compra'},
-  {key:'FECHA_LLEGADA_REFACCION',label:'Fecha Llegada Refacción'},{key:'FECHA_REPARACION',label:'Fecha Reparación'},
-  {key:'QUIEN_REALIZO_REPARACION',label:'Quién Realizó Reparación'},
-  {key:'VALIDACION_FUNCIONAMIENTO',label:'Validación Funcionamiento'},
-  {key:'DESCRIPCION_REPARACION',label:'Descripción Reparación'},
-  {key:'OBSERVACIONES',label:'Observaciones'},{key:'OC_FACTURA',label:'OC / Factura'},
-];
+        const CAMPOS = [
+            { key: 'STATUS', label: 'Status' }, { key: 'FOLIO', label: 'Folio' }, { key: 'PLANTA', label: 'Planta' },
+            { key: 'LINEA_PERSONA', label: 'Línea / Persona' }, { key: 'EQUIPO', label: 'Equipo' },
+            { key: 'MARCA', label: 'Marca' }, { key: 'MODELO', label: 'Modelo' }, { key: 'NUMERO_SERIE', label: 'Número Serie' },
+            { key: 'DESCRIPCION_FALLA', label: 'Descripción Falla' }, { key: 'ACCESORIO_SOLICITADO', label: 'Accesorio Solicitado' },
+            { key: 'FECHA_SOLICITUD', label: 'Fecha Solicitud' }, { key: 'REPORTE_ELABORADO_POR', label: 'Reporte Elaborado Por' },
+            { key: 'TIPO_OBSERVACION', label: 'Tipo Observación' }, { key: 'TIPO_CORRECTIVO', label: 'Tipo Correctivo' },
+            { key: 'VENCIMIENTO_DIAS', label: 'Vencimiento Días' }, { key: 'FECHA_CONTEO_ACTUAL', label: 'Fecha Conteo Actual' },
+            { key: 'FECHA_LIMITE_CIERRE', label: 'Fecha Límite Cierre' }, { key: 'CATEGORIA_CORRECTIVO', label: 'Categoría Correctivo' },
+            { key: 'REFACCION_ACCESORIO_COMPRA', label: 'Refacción / Accesorio Compra' },
+            { key: 'FECHA_LLEGADA_REFACCION', label: 'Fecha Llegada Refacción' }, { key: 'FECHA_REPARACION', label: 'Fecha Reparación' },
+            { key: 'QUIEN_REALIZO_REPARACION', label: 'Quién Realizó Reparación' },
+            { key: 'VALIDACION_FUNCIONAMIENTO', label: 'Validación Funcionamiento' },
+            { key: 'DESCRIPCION_REPARACION', label: 'Descripción Reparación' },
+            { key: 'OBSERVACIONES', label: 'Observaciones' }, { key: 'OC_FACTURA', label: 'OC / Factura' },
+        ];
 
-window.addEventListener('DOMContentLoaded',()=>{
-  const usr=sessionStorage.getItem('usuario');
-  if(usr){usuarioActual=usr;document.getElementById('usuarioDisplay').textContent=usr;}
-  else fetch('/obtener-usuario').then(r=>r.json()).then(d=>{usuarioActual=d.usuario||'SISTEMA';document.getElementById('usuarioDisplay').textContent=usuarioActual;}).catch(()=>{document.getElementById('usuarioDisplay').textContent='Sin sesión';});
-  construirEncabezado();cargar();
-});
+        const COLS_WRAP = new Set(['DESCRIPCION_FALLA', 'ACCESORIO_SOLICITADO', 'REFACCION_ACCESORIO_COMPRA',
+            'DESCRIPCION_REPARACION', 'OBSERVACIONES']);
+        const COLS_MONO = new Set(['VENCIMIENTO_DIAS', 'FECHA_SOLICITUD', 'FECHA_CONTEO_ACTUAL',
+            'FECHA_LIMITE_CIERRE', 'FECHA_LLEGADA_REFACCION', 'FECHA_REPARACION', 'FOLIO', 'NUMERO_SERIE', 'OC_FACTURA']);
 
-function construirEncabezado(){
-  const ths=document.getElementById('encTh'),fils=document.getElementById('encFil');
-  ths.innerHTML='<th>ID</th>';fils.innerHTML='<th></th>';
-  CAMPOS.forEach(({key,label})=>{
-    ths.innerHTML+=`<th>${label.toUpperCase()}</th>`;
-    fils.innerHTML+=`<th><input id="f_${key}" oninput="filtrar()"></th>`;
-  });
-  ths.innerHTML+='<th>PDF</th><th>ACCIONES</th>';
-  fils.innerHTML+='<th></th><th></th>';
-}
+        /* ── Init ── */
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch('/obtener-usuario').then(r => r.json()).then(d => {
+                usuarioActual = d.usuario || 'SISTEMA'; rolActual = d.rol || 'USER';
+                document.getElementById('usuarioDisplay').textContent = usuarioActual;
+                document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
+                document.getElementById('dropdownRol').textContent = rolActual;
+            }).catch(() => { document.getElementById('usuarioDisplay').textContent = 'Sin sesión'; });
+            cargar();
+        });
 
-function obtenerParams(){
-  const p={page:paginaActual,limit:limite};
-  CAMPOS.forEach(({key})=>{const el=document.getElementById('f_'+key);if(el&&el.value)p[key]=el.value;});
-  return new URLSearchParams(p);
-}
+        /* ── Carga ── */
+        function obtenerParams() {
+            const p = { page: paginaActual, limit: limite };
+            CAMPOS.forEach(({ key }) => { const el = document.getElementById('f_' + key); if (el && el.value) p[key] = el.value; });
+            return new URLSearchParams(p);
+        }
+        function cargar() {
+            fetch(`/CORRECTIVOS?${obtenerParams()}`).then(r => r.json()).then(resp => {
+                totalRegistros = resp.total; datosActuales = resp.data; renderizar();
+            }).catch(() => {
+                document.getElementById('tabla').innerHTML =
+                    `<tr><td colspan="29" style="text-align:center;padding:30px;color:var(--muted)">Error al cargar datos</td></tr>`;
+            });
+        }
+        function filtrar() { clearTimeout(_debouce); _debouce = setTimeout(() => { paginaActual = 1; cargar(); }, 360); }
+        function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
+        function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
 
-function cargar(){
-  fetch(`/CORRECTIVOS?${obtenerParams()}`).then(r=>r.json()).then(resp=>{
-    totalRegistros=resp.total;datosActuales=resp.data;renderizar();
-  });
-}
+        /* ── Render ── */
+        function statusPill(s) {
+            const v = String(s ?? '').trim().toUpperCase();
+            if (v === 'ABIERTO' || v === '0') return `<span class="status-pill pill-abierto">🟡 Abierto</span>`;
+            if (v === 'CERRADO' || v === '1') return `<span class="status-pill pill-cerrado">🟢 Cerrado</span>`;
+            if (v === 'CANCELADO') return `<span class="status-pill pill-cancelado">⚫ Cancelado</span>`;
+            return esc(s ?? '—');
+        }
+        function statusClass(s) {
+            const v = String(s ?? '').trim().toUpperCase();
+            if (v === 'ABIERTO' || v === '0') return 's-abierto';
+            if (v === 'CERRADO' || v === '1') return 's-cerrado';
+            if (v === 'CANCELADO') return 's-cancelado';
+            return '';
+        }
+        function renderizar() {
+            const tbody = document.getElementById('tabla'); tbody.innerHTML = '';
+            if (!datosActuales.length) {
+                tbody.innerHTML = `<tr><td colspan="29" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>`;
+                document.getElementById('paginaInfo').textContent = 'Sin resultados'; return;
+            }
+            const esAdmin = rolActual === 'ADMIN';
+            datosActuales.forEach(row => {
+                const cls = statusClass(row.STATUS);
+                let tds = `<td class="mono">${row.ID}</td><td>${statusPill(row.STATUS)}</td>`;
+                CAMPOS.slice(1).forEach(({ key }) => {
+                    const val = row[key] ?? '';
+                    const wc = COLS_WRAP.has(key) ? ' wrap' : '';
+                    const mc = COLS_MONO.has(key) ? ' mono' : '';
+                    tds += `<td class="${wc}${mc}" title="${esc(String(val))}">${esc(String(val)) || '—'}</td>`;
+                });
+                tds += `<td>${row.TIENE_PDF
+                    ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
+                      <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
+                    : `<input type="file" onchange="subirPDF(${row.ID},this)"
+                       style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
+                    }</td>`;
+                tds += `<td style="white-space:nowrap;">
+                    ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                               <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
+                    <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
+                    <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                </td>`;
+                tbody.innerHTML += `<tr class="${cls}">${tds}</tr>`;
+            });
+            document.getElementById('paginaInfo').textContent =
+                `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite) || 1} | Total: ${totalRegistros}`;
+        }
 
-function colorStatus(s){
-  const v=String(s??'').trim().toLowerCase();
-  if(v==='0'||v==='abierto'||v==='pendiente')return 's-abierto';
-  if(v==='1'||v==='cerrado'||v==='cerrada')return 's-cerrado';
-  if(v==='cancelado'||v==='cancelada')return 's-cancelado';
-  return '';
-}
+        /* ── Guardar nuevo ── */
+        function guardar() {
+            const data = {};
+            CAMPOS.forEach(({ key }) => {
+                const el = document.getElementById('n_' + key); if (!el) return;
+                data[key] = (key === 'VENCIMIENTO_DIAS') ? (el.value !== '' ? parseInt(el.value) : null) : (el.value || null);
+            });
+            fetch('/CORRECTIVO', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+                .then(r => r.json()).then(d => { if (d.error) { alert('Error: ' + d.error); return; } limpiarForm(); cargar(); });
+        }
+        function limpiarForm() { CAMPOS.forEach(({ key }) => { const el = document.getElementById('n_' + key); if (el) el.value = ''; }); }
 
-function esc(v){if(v==null)return'';return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function norm(v){return(v==null)?'':String(v).trim();}
-function formatFecha(f){try{const d=new Date(f);if(!isNaN(d))return d.toLocaleString('es-MX',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});}catch(e){}return f??'';}
+        /* ── PDF / Eliminar ── */
+        function eliminar(id) { if (!confirm('¿Eliminar este registro?')) return; fetch(`/CORRECTIVO/${id}`, { method: 'DELETE' }).then(() => cargar()); }
+        function subirPDF(id, input) { const fd = new FormData(); fd.append('file', input.files[0]); fetch(`/CORRECTIVO/PDF/${id}`, { method: 'POST', body: fd }).then(() => cargar()); }
+        function verPDF(id) { window.open(`/CORRECTIVO/PDF/${id}`, '_blank'); }
+        function eliminarPDF(id) { if (!confirm('¿Eliminar el PDF?')) return; fetch(`/CORRECTIVO/PDF/${id}`, { method: 'DELETE' }).then(() => cargar()); }
 
-function renderizar(){
-  const tbody=document.getElementById('tabla');tbody.innerHTML='';
-  if(!datosActuales.length){tbody.innerHTML=`<tr><td colspan="${CAMPOS.length+3}" style="text-align:center;padding:20px">Sin registros</td></tr>`;return;}
-  datosActuales.forEach(row=>{
-    tbody.innerHTML+=`<tr class="${colorStatus(row.STATUS)}">
-      <td>${row.ID}</td>
-      ${CAMPOS.map(({key})=>`<td>${esc(row[key]??'')}</td>`).join('')}
-      <td>${row.TIENE_PDF?`<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button><button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`:`<input type="file" onchange="subirPDF(${row.ID},this)">`}</td>
-      <td style="white-space:nowrap;">
-        <button class="edit" onclick="abrirEditar(${row.ID})">✏️</button>
-        <button class="ver" onclick="verDetalle(${row.ID})">🔍</button>
-        <button class="delete" onclick="eliminar(${row.ID})">🗑️</button>
-        <button class="historial" onclick="verHistorial(${row.ID})">📋</button>
-      </td></tr>`;
-  });
-  document.getElementById('paginaInfo').innerText=`Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)} | Total: ${totalRegistros}`;
-}
+        /* ── Exportar ── */
+        function exportarFiltrado() { window.open(`/CORRECTIVOS/EXPORTAR?${obtenerParams()}`); }
+        function exportarTodo() { window.open('/CORRECTIVOS/EXPORTAR_TODO'); }
+        function exportarAnio() { const a = document.getElementById('anioExportar').value; if (!a) { alert('Ingresa un año'); return; } window.open(`/CORRECTIVOS/EXPORTAR_ANIO?anio=${a}`); }
 
-function filtrar(){paginaActual=1;cargar();}
-function siguiente(){if(paginaActual*limite<totalRegistros){paginaActual++;cargar();}}
-function anterior(){if(paginaActual>1){paginaActual--;cargar();}}
+        /* ── Modal Editar ── */
+        function abrirEditar(id) {
+            editandoID = id; document.getElementById('editarIdLabel').textContent = id;
+            const row = datosActuales.find(r => r.ID === id);
+            if (row) CAMPOS.forEach(({ key }) => { const el = document.getElementById('e_' + key); if (el) el.value = row[key] ?? ''; });
+            document.getElementById('modalEditar').classList.add('show');
+            document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+        }
+        function cerrarEditar() { document.getElementById('modalEditar').classList.remove('show'); editandoID = null; }
+        async function guardarCambios() {
+            const datos = {};
+            CAMPOS.forEach(({ key }) => {
+                const el = document.getElementById('e_' + key); if (!el) return;
+                datos[key] = (key === 'VENCIMIENTO_DIAS') ? (el.value !== '' ? parseInt(el.value) : null) : (el.value || null);
+            });
+            try {
+                const res = await fetch(`/CORRECTIVO/${editandoID}?usuario=${encodeURIComponent(usuarioActual)}`,
+                    { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual }, body: JSON.stringify(datos) });
+                const result = await res.json();
+                if (res.ok && !result.error) { cerrarEditar(); cargar(); }
+                else alert('Error: ' + (result.error || 'No se pudo guardar'));
+            } catch (e) { alert('Error: ' + e.message); }
+        }
 
-function guardar(){
-  const data={};
-  CAMPOS.forEach(({key})=>{const el=document.getElementById('n_'+key);data[key]=el?(el.value||null):null;});
-  fetch('/CORRECTIVO',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
-    .then(r=>r.json()).then(d=>{if(d.error){alert('Error: '+d.error);return;}limpiarForm();cargar();});
-}
-function limpiarForm(){CAMPOS.forEach(({key})=>{const el=document.getElementById('n_'+key);if(el)el.value='';});}
-function eliminar(id){if(!confirm('¿Eliminar este registro?'))return;fetch(`/CORRECTIVO/${id}`,{method:'DELETE'}).then(()=>cargar());}
-function subirPDF(id,input){const fd=new FormData();fd.append('file',input.files[0]);fetch(`/CORRECTIVO/PDF/${id}`,{method:'POST',body:fd}).then(()=>cargar());}
-function verPDF(id){window.open(`/CORRECTIVO/PDF/${id}`,'_blank');}
-function eliminarPDF(id){if(!confirm('¿Eliminar el PDF?'))return;fetch(`/CORRECTIVO/PDF/${id}`,{method:'DELETE'}).then(()=>cargar());}
-function exportarFiltrado(){
+        /* ── Modal Detalle ── */
+        function verDetalle(id) {
+            const row = datosActuales.find(r => r.ID === id); if (!row) return;
+            document.getElementById('detalleIdLabel').textContent = id;
+            const cont = document.getElementById('contenidoDetalle'); cont.innerHTML = '';
+            CAMPOS.forEach(({ key, label }) => {
+                cont.innerHTML += `<div class="det-field"><label>${label}</label><input value="${esc(row[key] ?? '')}" readonly></div>`;
+            });
+            document.getElementById('modalDetalle').classList.add('show');
+            document.querySelector('#modalDetalle .modal-box').scrollTop = 0;
+        }
+        function cerrarDetalle() { document.getElementById('modalDetalle').classList.remove('show'); }
 
-    const params = obtenerParams()
+        /* ── Historial — idéntico a preventivos ── */
+        function esc(v) { if (v == null) return ''; return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+        function norm(v) { return (v == null) ? '' : String(v).trim(); }
+        function formatFecha(f) {
+            try { const d = new Date(f); if (!isNaN(d)) return d.toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch (e) { } return f ?? '';
+        }
+        function renderEvento(ev) {
+            let antes = ev.registro_anterior, despues = ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (e) { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (e) { }
+            const cambiados = new Set();
+            CAMPOS.forEach(({ key }) => {
+                const dk = key.toLowerCase();
+                if (norm(antes?.[dk]) !== norm(despues?.[dk])) cambiados.add(key);
+            });
+            let filas = '';
+            CAMPOS.forEach(({ key, label }) => {
+                const dk = key.toLowerCase();
+                const va = esc(antes?.[dk] ?? ''), vd = esc(despues?.[dk] ?? '');
+                const chg = cambiados.has(key);
+                filas += `<tr class="${chg ? 'row-changed' : ''}">
+                    <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                    <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                    <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                </tr>`;
+            });
+            const n = cambiados.size;
+            return `<div class="ev-wrap">
+                <div class="ev-header">
+                    <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                    <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                    <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                        color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                        ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                    </span>
+                </div>
+                <table class="ev-table">
+                    <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                    <tbody>${filas}</tbody>
+                </table>
+            </div>`;
+        }
+        function verHistorial(id) {
+            document.getElementById('histIdLabel').textContent = id;
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="text-align:center;padding:40px;color:var(--muted)">⏳ Cargando historial...</p>';
+            document.getElementById('modalHistorial').classList.add('show');
+            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+            fetch(`/CORRECTIVOS/${id}/HISTORIAL`).then(r => r.json()).then(data => {
+                const lista = (data.historial || []).sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+                if (!lista.length) {
+                    document.getElementById('contenidoHistorial').innerHTML = '<p class="sin-hist">📭 Sin ediciones registradas</p>';
+                } else {
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        `<p style="color:var(--muted);font-size:12px;margin-bottom:14px;">
+                            ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                        </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                }
+            }).catch(err => {
+                document.getElementById('contenidoHistorial').innerHTML =
+                    `<p style="color:var(--red);text-align:center;padding:30px">❌ Error: ${err.message}</p>`;
+            });
+        }
+        function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
 
-    window.open(`/CORRECTIVOS/EXPORTAR?${params.toString()}`)
-
-}
-function exportarTodo(){window.open('/CORRECTIVOS/EXPORTAR_TODO');}
-function exportarAnio(){const a=document.getElementById('anioExportar').value;if(!a){alert('Ingresa un año');return;}window.open(`/CORRECTIVOS/EXPORTAR_ANIO?anio=${a}`);}
-
-function abrirEditar(id){
-  editandoID=id;document.getElementById('editarIdLabel').textContent=id;
-  const row=datosActuales.find(r=>r.ID===id);
-  if(row)CAMPOS.forEach(({key})=>{const el=document.getElementById('e_'+key);if(el)el.value=row[key]??'';});
-  document.getElementById('modalEditar').classList.add('show');
-  document.querySelector('#modalEditar .modal-box').scrollTop=0;
-}
-function cerrarEditar(){document.getElementById('modalEditar').classList.remove('show');editandoID=null;}
-async function guardarCambios(){
-  const datos={};
-  CAMPOS.forEach(({key})=>{const el=document.getElementById('e_'+key);datos[key]=el?(el.value||null):null;});
-  try{
-    const res=await fetch(`/CORRECTIVO/${editandoID}?usuario=${encodeURIComponent(usuarioActual)}`,
-      {method:'PUT',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(datos)});
-    const result=await res.json();
-    if(res.ok&&!result.error){cerrarEditar();cargar();}
-    else alert('Error: '+(result.error||'No se pudo guardar'));
-  }catch(e){alert('Error: '+e.message);}
-}
-
-function verDetalle(id){
-  const row=datosActuales.find(r=>r.ID===id);if(!row)return;
-  document.getElementById('detalleIdLabel').textContent=id;
-  const cont=document.getElementById('contenidoDetalle');cont.innerHTML='';
-  CAMPOS.forEach(({key,label})=>{cont.innerHTML+=`<div class="det-field"><label>${label}</label><input value="${esc(row[key]??'')}" readonly></div>`;});
-  document.getElementById('modalDetalle').classList.add('show');
-  document.querySelector('#modalDetalle .modal-box').scrollTop=0;
-}
-function cerrarDetalle(){document.getElementById('modalDetalle').classList.remove('show');}
-
-function normalizarDatos(obj){
-  if(!obj)return {};
-  if(typeof obj==='string'){try{return JSON.parse(obj);}catch(e){return {};}}
-  return obj;
-}
-
-function renderEvento(ev){
-  let antes=normalizarDatos(ev.registro_anterior);
-  let despues=normalizarDatos(ev.registro_nuevo);
-  
-  const cambiados=new Set();
-  CAMPOS.forEach(({key})=>{
-    const valAnt=norm(antes[key]);
-    const valDes=norm(despues[key]);
-    if(valAnt!==valDes)cambiados.add(key);
-  });
-  
-  let contenidoAntes='',contenidoDespues='';
-  CAMPOS.forEach(({key,label})=>{
-    const valAnt=antes[key]??'',valDes=despues[key]??'';
-    const esChanged=cambiados.has(key);
-    const claseChanged=esChanged?' changed':'';
-    
-    const etiqueta=`<label>${esc(label)}</label>`;
-    const valAntEsc=norm(valAnt)===''?'<span class="empty">sin valor</span>':esc(String(valAnt));
-    const valDesEsc=norm(valDes)===''?'<span class="empty">sin valor</span>':esc(String(valDes));
-    
-    contenidoAntes+=`<div class="ev-field${claseChanged}"><label>${esc(label)}</label><div class="value">${valAntEsc}</div></div>`;
-    contenidoDespues+=`<div class="ev-field${claseChanged}"><label>${esc(label)}</label><div class="value">${valDesEsc}</div></div>`;
-  });
-  
-  const numCambios=cambiados.size;
-  return `<div class="ev-wrap">
-    <div class="ev-header">
-      <span>🕐 <strong>Fecha y hora:</strong> ${formatFecha(ev.fecha)}</span>
-      <span>👤 <strong>Editado por:</strong> <strong style="color:#fbbf24;">${esc(ev.usuario)||'Desconocido'}</strong></span>
-      <span style="margin-left:auto;"><span class="badge-cambio">📝 ${numCambios} campo${numCambios!==1?'s':''} modificado${numCambios!==1?'s':''}</span></span>
-    </div>
-    <div class="ev-content">
-      <div class="ev-section before">
-        <h4>⬅️ REGISTRO ANTERIOR</h4>
-        ${contenidoAntes}
-      </div>
-      <div class="ev-section after">
-        <h4>➡️ REGISTRO ACTUAL</h4>
-        ${contenidoDespues}
-      </div>
-    </div>
-  </div>`;
-}
-
-function verHistorial(id){
-  document.getElementById('histIdLabel').textContent=id;
-  document.getElementById('contenidoHistorial').innerHTML='<p style="text-align:center;padding:30px;color:#64748b">⏳ Cargando historial...</p>';
-  document.getElementById('modalHistorial').classList.add('show');
-  document.querySelector('#modalHistorial .modal-box').scrollTop=0;
-  
-  fetch(`/CORRECTIVOS/${id}/HISTORIAL`)
-    .then(r=>r.json())
-    .then(data=>{
-      const lista=(data.historial||[]).sort((a,b)=>new Date(b.fecha||0)-new Date(a.fecha||0));
-      if(!lista.length){
-        document.getElementById('contenidoHistorial').innerHTML='<p class="sin-hist">📭 Este registro no tiene ediciones registradas aún.</p>';
-      }else{
-        let html=`<p style="color:#64748b;font-size:13px;margin-bottom:18px;padding:10px;background:#f0f9ff;border-radius:4px;">📊 Se encontraron <strong>${lista.length}</strong> edición${lista.length!==1?'es':''} para este registro</p>`;
-        html+=lista.map(ev=>renderEvento(ev)).join('');
-        document.getElementById('contenidoHistorial').innerHTML=html;
-      }
-    })
-    .catch(err=>{
-      document.getElementById('contenidoHistorial').innerHTML=`<p style="color:#dc2626;text-align:center;padding:30px">❌ Error al cargar historial: ${err.message}</p>`;
-    });
-}
-function cerrarHistorial(){document.getElementById('modalHistorial').classList.remove('show');}
-
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){cerrarEditar();cerrarDetalle();cerrarHistorial();}});
-</script>
+        /* ── Dropdown / Sesión ── */
+        function toggleDropdown() { document.getElementById('userChipMain').classList.toggle('open'); }
+        document.addEventListener('click', e => {
+            const chip = document.getElementById('userChipMain');
+            if (chip && !chip.contains(e.target)) chip.classList.remove('open');
+        });
+        function cerrarSesion() { fetch('/LOGOUT', { method: 'POST', credentials: 'include' }).finally(() => { window.location.href = '/static/login.html'; }); }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarEditar(); cerrarDetalle(); cerrarHistorial(); } });
+    </script>
 </body>
 </html>
