@@ -900,7 +900,7 @@
                         <option value="BODEGA">Bodega</option>
                     </select>
                 </div>
-                <div class="field"><label>LINEA / PERSONA</label><input id="n_LINEA_PERSONA" placeholder="Línea o nombre"></div>
+                <div class="field"><label>LINEA / PERSONA</label><input id="n_LINEA_PERSONA" placeholder="Línea o nombre" autocomplete="off" list="lista-ubicaciones-nuevo"><datalist id="lista-ubicaciones-nuevo"></datalist></div>
                 <div class="field"><label>EQUIPO</label><input id="n_EQUIPO" placeholder="ID o nombre del equipo"></div>
                 <div class="field"><label>MARCA</label><input id="n_MARCA" placeholder="HP, Dell..."></div>
                 <div class="field"><label>MODELO</label><input id="n_MODELO"></div>
@@ -1078,7 +1078,7 @@
                         <option value="BODEGA">Bodega</option>
                     </select>
                 </div>
-                <div class="form-field"><label>LINEA / PERSONA</label><input type="text" id="e_LINEA_PERSONA"></div>
+                <div class="form-field"><label>LINEA / PERSONA</label><input type="text" id="e_LINEA_PERSONA" autocomplete="off" list="lista-ubicaciones-edit"><datalist id="lista-ubicaciones-edit"></datalist></div>
                 <div class="form-field"><label>EQUIPO</label><input type="text" id="e_EQUIPO"></div>
                 <div class="form-field"><label>MARCA</label><input type="text" id="e_MARCA"></div>
                 <div class="form-field"><label>MODELO</label><input type="text" id="e_MODELO"></div>
@@ -1169,7 +1169,21 @@
                 document.getElementById('dropdownRol').textContent = rolActual;
             }).catch(() => { document.getElementById('usuarioDisplay').textContent = 'Sin sesión'; });
             cargar();
+            cargarUbicaciones();
         });
+
+        async function cargarUbicaciones() {
+            try {
+                const res = await fetch('/PREVENTIVOS/UBICACIONES');
+                const data = await res.json();
+                const ids = ['lista-ubicaciones-nuevo', 'lista-ubicaciones-edit'];
+                ids.forEach(id => {
+                    const dl = document.getElementById(id);
+                    if (!dl) return;
+                    dl.innerHTML = data.ubicaciones.map(u => `<option value="${u}">`).join('');
+                });
+            } catch (e) { console.warn('No se pudieron cargar ubicaciones', e); }
+        }
 
         /* ── Carga ── */
         function obtenerParams() {
@@ -1222,16 +1236,16 @@
                 });
                 tds += `<td>${row.TIENE_PDF
                     ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                      <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
+                          <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
                     : `<input type="file" onchange="subirPDF(${row.ID},this)"
-                       style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
+                           style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
                     }</td>`;
                 tds += `<td style="white-space:nowrap;">
-                    ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
-                               <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
-                    <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
-                    <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-                </td>`;
+                        ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                   <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
+                        <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
+                        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                    </td>`;
                 tbody.innerHTML += `<tr class="${cls}">${tds}</tr>`;
             });
             document.getElementById('paginaInfo').textContent =
@@ -1319,26 +1333,26 @@
                 const va = esc(antes?.[dk] ?? ''), vd = esc(despues?.[dk] ?? '');
                 const chg = cambiados.has(key);
                 filas += `<tr class="${chg ? 'row-changed' : ''}">
-                    <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                    <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                    <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                </tr>`;
+                        <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                        <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                        <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                    </tr>`;
             });
             const n = cambiados.size;
             return `<div class="ev-wrap">
-                <div class="ev-header">
-                    <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                    <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                    <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
-                        color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                        ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                    </span>
-                </div>
-                <table class="ev-table">
-                    <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                    <tbody>${filas}</tbody>
-                </table>
-            </div>`;
+                    <div class="ev-header">
+                        <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                        <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                        <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                            color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                            ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                    <table class="ev-table">
+                        <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                        <tbody>${filas}</tbody>
+                    </table>
+                </div>`;
         }
         function verHistorial(id) {
             document.getElementById('histIdLabel').textContent = id;
@@ -1353,8 +1367,8 @@
                 } else {
                     document.getElementById('contenidoHistorial').innerHTML =
                         `<p style="color:var(--muted);font-size:12px;margin-bottom:14px;">
-                            ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                        </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                                ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                            </p>`+ lista.map(ev => renderEvento(ev)).join('');
                 }
             }).catch(err => {
                 document.getElementById('contenidoHistorial').innerHTML =
