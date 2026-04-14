@@ -954,7 +954,6 @@
                         <col style="width:108px">
                         <col style="width:152px">
                         <col style="width:140px">
-                        <col style="width:140px">
                         <col style="width:88px">
                         <col style="width:108px">
                         <col style="width:108px">
@@ -1016,7 +1015,6 @@
                             <th><input id="f_FECHA_SOLICITUD" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
                             <th><input id="f_REPORTE_ELABORADO_POR" oninput="filtrar()" placeholder="Filtrar..."></th>
                             <th><input id="f_TIPO_OBSERVACION" oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input id="f_TIPO_CORRECTIVO" oninput="filtrar()" placeholder="Filtrar..."></th>
                             <th><input id="f_VENCIMIENTO_DIAS" oninput="filtrar()" placeholder="Días" type="number" style="width:70px"></th>
                             <th><input id="f_FECHA_CONTEO_ACTUAL" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
                             <th><input id="f_FECHA_LIMITE_CIERRE" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
@@ -1084,7 +1082,7 @@
                 <div class="form-field"><label>FECHA SOLICITUD</label><input type="date" id="e_FECHA_SOLICITUD"></div>
                 <div class="form-field"><label>REPORTE ELABORADO POR</label><input type="text" id="e_REPORTE_ELABORADO_POR"></div>
                 <div class="form-field"><label>TIPO OBSERVACION</label><input type="text" id="e_TIPO_OBSERVACION"></div>
-                
+
                 <div class="form-field"><label>VENCIMIENTO DIAS</label><input type="number" min="0" id="e_VENCIMIENTO_DIAS"></div>
                 <div class="form-field"><label>FECHA CONTEO ACTUAL</label><input type="date" id="e_FECHA_CONTEO_ACTUAL"></div>
                 <div class="form-field"><label>FECHA LIMITE CIERRE</label><input type="date" id="e_FECHA_LIMITE_CIERRE"></div>
@@ -1194,7 +1192,7 @@
                 totalRegistros = resp.total; datosActuales = resp.data; renderizar();
             }).catch(() => {
                 document.getElementById('tabla').innerHTML =
-                    `<tr><td colspan="29" style="text-align:center;padding:30px;color:var(--muted)">Error al cargar datos</td></tr>`;
+                    `<tr><td colspan="28" style="text-align:center;padding:30px;color:var(--muted)">Error al cargar datos</td></tr>`;
             });
         }
         function filtrar() { clearTimeout(_debouce); _debouce = setTimeout(() => { paginaActual = 1; cargar(); }, 360); }
@@ -1219,7 +1217,7 @@
         function renderizar() {
             const tbody = document.getElementById('tabla'); tbody.innerHTML = '';
             if (!datosActuales.length) {
-                tbody.innerHTML = `<tr><td colspan="29" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="28" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>`;
                 document.getElementById('paginaInfo').textContent = 'Sin resultados'; return;
             }
             const esAdmin = rolActual === 'ADMIN';
@@ -1234,16 +1232,16 @@
                 });
                 tds += `<td>${row.TIENE_PDF
                     ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                              <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
+                                  <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
                     : `<input type="file" onchange="subirPDF(${row.ID},this)"
-                               style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
+                                   style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
                     }</td>`;
                 tds += `<td style="white-space:nowrap;">
-                            ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
-                                       <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
-                            <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
-                            <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-                        </td>`;
+                                ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                           <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
+                                <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
+                                <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                            </td>`;
                 tbody.innerHTML += `<tr class="${cls}">${tds}</tr>`;
             });
             document.getElementById('paginaInfo').textContent =
@@ -1331,26 +1329,26 @@
                 const va = esc(antes?.[dk] ?? ''), vd = esc(despues?.[dk] ?? '');
                 const chg = cambiados.has(key);
                 filas += `<tr class="${chg ? 'row-changed' : ''}">
-                            <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                            <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                            <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                        </tr>`;
+                                <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                            </tr>`;
             });
             const n = cambiados.size;
             return `<div class="ev-wrap">
-                        <div class="ev-header">
-                            <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                            <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                            <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
-                                color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                            </span>
-                        </div>
-                        <table class="ev-table">
-                            <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                            <tbody>${filas}</tbody>
-                        </table>
-                    </div>`;
+                            <div class="ev-header">
+                                <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                                <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                                    color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                    ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                </span>
+                            </div>
+                            <table class="ev-table">
+                                <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                <tbody>${filas}</tbody>
+                            </table>
+                        </div>`;
         }
         function verHistorial(id) {
             document.getElementById('histIdLabel').textContent = id;
@@ -1365,8 +1363,8 @@
                 } else {
                     document.getElementById('contenidoHistorial').innerHTML =
                         `<p style="color:var(--muted);font-size:12px;margin-bottom:14px;">
-                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                                        ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                    </p>`+ lista.map(ev => renderEvento(ev)).join('');
                 }
             }).catch(err => {
                 document.getElementById('contenidoHistorial').innerHTML =
