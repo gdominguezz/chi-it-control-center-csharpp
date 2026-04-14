@@ -628,12 +628,9 @@ public class CorrectivoController : ControllerBase
 
         return (where, parms);
     }
-}
 
     // ══════════════════════════════════════════════════════════════════════
     // GET /CORRECTIVOS/UBICACIONES
-    // Devuelve lista de ubicaciones distintas de mantenimientos_preventivos
-    // para autocompletado del campo Línea / Persona
     // ══════════════════════════════════════════════════════════════════════
     [HttpGet("CORRECTIVOS/UBICACIONES")]
     public IActionResult ObtenerUbicaciones()
@@ -653,15 +650,16 @@ public class CorrectivoController : ControllerBase
 
         return Ok(new { ubicaciones = lista });
     }
+}
 
 // ══════════════════════════════════════════════════════════════════════════
 // MODELOS
 // ══════════════════════════════════════════════════════════════════════════
 
-    /// <summary>
-    /// Parámetros de filtro + paginación para GET /CORRECTIVOS.
-    /// Todos los campos de filtro son opcionales.
-    /// </summary>
+/// <summary>
+/// Parámetros de filtro + paginación para GET /CORRECTIVOS.
+/// Todos los campos de filtro son opcionales.
+/// </summary>
 public class FiltrosCorrectivo
 {
     // Paginación
