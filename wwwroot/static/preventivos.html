@@ -2373,7 +2373,7 @@
                                                                         <butt    lass="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</butto                                                                            <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button                                                                               ''}
                                                                         <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
                                                                       </td>
-                                                                    </tr>`;
+                                                                    </tr>`
             });
             document.getElementById('paginaInfo').textContent =
                 `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite)} | Total: ${totalRegistros}`;
@@ -2708,7 +2708,7 @@
             const vencidos = s.vencidos || 0;
             const pSano = Math.min(s.pct_al_corriente || 0, 100);
             const pProx = Math.min(s.pct_por_vencer || 0, 100);
-            const pVenc = Math.min(s.pct_vencidos |     100);
+            const pVenc = Math.min(s.pct_vencidos || 0, 100);
             const score = Math.min(s.indice_salud || 0, 100);
             const e     = s.emoji || '😊';
             const scoreColor = score >= 90 ? '#10B981' : score >= 70 ? '#    0B' : '#EF4444';
