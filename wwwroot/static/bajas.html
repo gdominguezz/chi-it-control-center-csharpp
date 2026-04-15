@@ -1756,29 +1756,24 @@
 
             // ── Chart: Mes año actual (line) ───────────────────────
             destroyChart('chartMes');
+
             const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
             const porMes = new Array(12).fill(0);
+
             rowsAnio.forEach(r => {
-                const f = r.FECHA || '';
-                if (!f) return;
-                // Soporta: YYYY-MM-DD, YYYY-MM-DD HH:mm:ss, DD/MM/YYYY, DD-MM-YYYY
-                let y, m;
-                const isoMatch = f.match(/^(\d{4})[-\/](\d{2})/);
-                const dmyMatch = f.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})/);
-                if (isoMatch) {
-                    y = parseInt(isoMatch[1]);
-                    m = parseInt(isoMatch[2]) - 1;
-                } else if (dmyMatch) {
-                    y = parseInt(dmyMatch[3]);
-                    m = parseInt(dmyMatch[2]) - 1;
-                } else {
-                    const d = new Date(f);
-                    if (isNaN(d)) return;
-                    y = d.getFullYear();
-                    m = d.getMonth();
+                if (!r.FECHA) return;
+
+                const fecha = new Date(r.FECHA);
+                if (isNaN(fecha)) return;
+
+                const y = fecha.getFullYear();
+                const m = fecha.getMonth();
+
+                if (y === anio && m >= 0 && m < 12) {
+                    porMes[m]++;
                 }
-                if (y === anio && m >= 0 && m < 12) porMes[m]++;
             });
+
             chartInstances['chartMes'] = new Chart(document.getElementById('chartMes'), {
                 type: 'line',
                 data: {
@@ -1788,9 +1783,11 @@
                         data: porMes,
                         borderColor: '#EF4444',
                         backgroundColor: 'rgba(239,68,68,0.12)',
-                        tension: 0.4, fill: true,
+                        tension: 0.4,
+                        fill: true,
                         pointBackgroundColor: '#EF4444',
-                        pointRadius: 5, pointHoverRadius: 7
+                        pointRadius: 5,
+                        pointHoverRadius: 7
                     }]
                 },
                 options: {
