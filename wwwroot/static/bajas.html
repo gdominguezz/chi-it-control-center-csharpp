@@ -845,6 +845,132 @@
             .file-label input[type=file] {
                 display: none;
             }
+
+        /* ── TABS ────────────────────────────────────────────────────────── */
+        .tabs-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--muted2);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            margin-bottom: -1px;
+        }
+
+            .tab-btn:hover {
+                color: var(--text);
+            }
+
+            .tab-btn.active {
+                color: var(--accent);
+                border-bottom-color: var(--accent);
+            }
+
+        /* ── DASHBOARD ───────────────────────────────────────────────────── */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'DM Mono', monospace;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .kpi-label {
+            font-size: 11px;
+            color: var(--muted2);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            font-weight: 600;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 22px;
+        }
+
+        .chart-wide {
+            grid-column: 1 / -1;
+        }
+
+        .chart-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .chart-title::before {
+                content: '';
+                width: 3px;
+                height: 14px;
+                background: var(--accent);
+                border-radius: 2px;
+                display: inline-block;
+            }
+
+        @media(max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-wide {
+                grid-column: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -887,98 +1013,181 @@
     ══════════════════════════════════════════════════════════════════════ -->
     <div class="main">
 
-        <!-- Nuevo registro -->
-        <div class="panel">
-            <div class="panel-title">➕ Nuevo Registro de Baja</div>
-            <div class="form-grid">
-                <div class="field"><label>Folio</label>                 <input id="FOLIO"></div>
-                <div class="field"><label>Estado</label>                <input id="ESTADO"></div>
-                <div class="field"><label>Planta</label>                <input id="PLANTA"></div>
-                <div class="field"><label>Fecha</label>                 <input id="FECHA" type="date"></div>
-                <div class="field"><label>Equipo</label>                <input id="EQUIPO"></div>
-                <div class="field"><label>Marca</label>                 <input id="MARCA"></div>
-                <div class="field"><label>Modelo</label>                <input id="MODELO"></div>
-                <div class="field"><label>No. Serie</label>             <input id="NO_SERIE"></div>
-                <div class="field"><label>Activo Fijo</label>           <input id="ACTIVO_FIJO"></div>
-                <div class="field"><label>Ubicación / Persona</label>   <input id="UBICACION_PERSONA"></div>
-                <div class="field"><label>Motivo de Baja</label>        <input id="MOTIVO_DE_BAJA"></div>
-                <div class="field"><label>Diagnóstico</label>           <input id="DIAGNOSTICO"></div>
-                <div class="field"><label>Comentarios</label>           <input id="COMENTARIOS"></div>
-                <div class="field"><label>Motivo de Cancelación</label> <input id="MOTIVO_DE_CANCELACION"></div>
+        <!-- TABS -->
+        <div class="tabs-bar">
+            <button class="tab-btn active" onclick="switchTab('registros')">📋 Registros</button>
+            <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard</button>
+        </div>
+
+        <!-- TAB: Registros -->
+        <div id="tab-registros">
+
+            <!-- Nuevo registro -->
+            <div class="panel">
+                <div class="panel-title">➕ Nuevo Registro de Baja</div>
+                <div class="form-grid">
+                    <div class="field"><label>Folio</label>                 <input id="FOLIO"></div>
+                    <div class="field"><label>Estado</label>                <input id="ESTADO"></div>
+                    <div class="field">
+                        <label>Planta</label>
+                        <select id="PLANTA">
+                            <option value="">— Seleccionar —</option>
+                            <option value="B1">B1</option>
+                            <option value="B2">B2</option>
+                            <option value="Planta satelite">Planta satélite</option>
+                            <option value="Planta mixing">Planta mixing</option>
+                            <option value="Bodega">Bodega</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Fecha</label>                 <input id="FECHA" type="date"></div>
+                    <div class="field"><label>Equipo</label>                <input id="EQUIPO"></div>
+                    <div class="field"><label>Marca</label>                 <input id="MARCA"></div>
+                    <div class="field"><label>Modelo</label>                <input id="MODELO"></div>
+                    <div class="field"><label>No. Serie</label>             <input id="NO_SERIE"></div>
+                    <div class="field"><label>Activo Fijo</label>           <input id="ACTIVO_FIJO"></div>
+                    <div class="field"><label>Ubicación / Persona</label>   <input id="UBICACION_PERSONA"></div>
+                    <div class="field"><label>Motivo de Baja</label>        <input id="MOTIVO_DE_BAJA"></div>
+                    <div class="field"><label>Diagnóstico</label>           <input id="DIAGNOSTICO"></div>
+                    <div class="field"><label>Comentarios</label>           <input id="COMENTARIOS"></div>
+                    <div class="field"><label>Motivo de Cancelación</label> <input id="MOTIVO_DE_CANCELACION"></div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-danger" onclick="guardar()">💾 Guardar</button>
+                    <button class="btn btn-ghost" onclick="cancelarEdicion()">✕ Cancelar</button>
+                </div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn btn-danger" onclick="guardar()">💾 Guardar</button>
-                <button class="btn btn-ghost" onclick="cancelarEdicion()">✕ Cancelar</button>
+
+            <!-- Toolbar exportar -->
+            <div class="toolbar">
+                <button class="btn btn-purple btn-sm" onclick="exportarFiltrado()">⬇ Exportar Filtrado</button>
+                <button class="btn btn-purple btn-sm" onclick="exportarTodo()">⬇ Exportar Todo</button>
+                <div class="toolbar-sep"></div>
+                <input class="anio-input" id="anioExportar" type="number" placeholder="Año (ej: 2026)">
+                <button class="btn btn-purple btn-sm" onclick="exportarPorAnio()">⬇ Exportar por Año</button>
+            </div>
+
+            <!-- Tabla -->
+            <div class="table-wrap">
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>FOLIO</th>
+                                <th>ESTADO</th>
+                                <th>PLANTA</th>
+                                <th>FECHA</th>
+                                <th>EQUIPO</th>
+                                <th>MARCA</th>
+                                <th>MODELO</th>
+                                <th>NO SERIE</th>
+                                <th>ACTIVO FIJO</th>
+                                <th>UBICACIÓN / PERSONA</th>
+                                <th>MOTIVO BAJA</th>
+                                <th>DIAGNÓSTICO</th>
+                                <th>COMENTARIOS</th>
+                                <th>MOTIVO CANCELACIÓN</th>
+                                <th>PDF</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                            <tr class="filter-row">
+                                <th></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th><input oninput="filtrar()" placeholder="🔍"></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Paginación -->
+            <div class="pagination">
+                <button class="btn btn-ghost btn-sm" onclick="anterior()">◀ Anterior</button>
+                <span class="page-info" id="paginaInfo">—</span>
+                <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
+            </div>
+
+        </div>
+
+    </div><!-- /tab-registros -->
+    <!-- TAB: Dashboard -->
+    <div id="tab-dashboard" style="display:none">
+        <div class="dash-grid">
+            <!-- KPIs -->
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:linear-gradient(135deg,#991B1B,#EF4444)">🗑️</div>
+                <div class="kpi-body">
+                    <div class="kpi-value" id="kpi-total">—</div>
+                    <div class="kpi-label">Total Bajas</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:linear-gradient(135deg,#065F46,#10B981)">✅</div>
+                <div class="kpi-body">
+                    <div class="kpi-value" id="kpi-activas">—</div>
+                    <div class="kpi-label">Bajas Activas</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:linear-gradient(135deg,#78350F,#F59E0B)">⚠️</div>
+                <div class="kpi-body">
+                    <div class="kpi-value" id="kpi-canceladas">—</div>
+                    <div class="kpi-label">Canceladas</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:linear-gradient(135deg,#1E3A5F,#3B82F6)">📄</div>
+                <div class="kpi-body">
+                    <div class="kpi-value" id="kpi-con-pdf">—</div>
+                    <div class="kpi-label">Con PDF</div>
+                </div>
             </div>
         </div>
 
-        <!-- Toolbar exportar -->
-        <div class="toolbar">
-            <button class="btn btn-purple btn-sm" onclick="exportarFiltrado()">⬇ Exportar Filtrado</button>
-            <button class="btn btn-purple btn-sm" onclick="exportarTodo()">⬇ Exportar Todo</button>
-            <div class="toolbar-sep"></div>
-            <input class="anio-input" id="anioExportar" type="number" placeholder="Año (ej: 2026)">
-            <button class="btn btn-purple btn-sm" onclick="exportarPorAnio()">⬇ Exportar por Año</button>
-        </div>
-
-        <!-- Tabla -->
-        <div class="table-wrap">
-            <div class="table-scroll">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>FOLIO</th>
-                            <th>ESTADO</th>
-                            <th>PLANTA</th>
-                            <th>FECHA</th>
-                            <th>EQUIPO</th>
-                            <th>MARCA</th>
-                            <th>MODELO</th>
-                            <th>NO SERIE</th>
-                            <th>ACTIVO FIJO</th>
-                            <th>UBICACIÓN / PERSONA</th>
-                            <th>MOTIVO BAJA</th>
-                            <th>DIAGNÓSTICO</th>
-                            <th>COMENTARIOS</th>
-                            <th>MOTIVO CANCELACIÓN</th>
-                            <th>PDF</th>
-                            <th>ACCIONES</th>
-                        </tr>
-                        <tr class="filter-row">
-                            <th></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" placeholder="🔍"></th>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla"></tbody>
-                </table>
+        <div class="charts-grid">
+            <!-- Chart: por Planta -->
+            <div class="chart-card">
+                <div class="chart-title">Bajas por Planta</div>
+                <canvas id="chartPlanta" height="220"></canvas>
+            </div>
+            <!-- Chart: por Estado -->
+            <div class="chart-card">
+                <div class="chart-title">Distribución por Estado</div>
+                <canvas id="chartEstado" height="220"></canvas>
+            </div>
+            <!-- Chart: por Mes (año actual) -->
+            <div class="chart-card chart-wide">
+                <div class="chart-title">Bajas por Mes — <span id="anioActualLabel"></span></div>
+                <canvas id="chartMes" height="180"></canvas>
+            </div>
+            <!-- Chart: por Equipo top 8 -->
+            <div class="chart-card">
+                <div class="chart-title">Top Equipos</div>
+                <canvas id="chartEquipo" height="220"></canvas>
+            </div>
+            <!-- Chart: por Motivo de baja top 6 -->
+            <div class="chart-card">
+                <div class="chart-title">Motivos de Baja</div>
+                <canvas id="chartMotivo" height="220"></canvas>
             </div>
         </div>
-
-        <!-- Paginación -->
-        <div class="pagination">
-            <button class="btn btn-ghost btn-sm" onclick="anterior()">◀ Anterior</button>
-            <span class="page-info" id="paginaInfo">—</span>
-            <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
-        </div>
-
-    </div>
-
+    </div><!-- /tab-dashboard -->
+    </div><!-- /main -->
     <!-- ══════════════════════════════════════════════════════════════════
          MODAL EDITAR
     ══════════════════════════════════════════════════════════════════════ -->
@@ -992,7 +1201,17 @@
             <div class="form-grid-2">
                 <div class="form-field"><label>Folio</label>                 <input id="e_FOLIO"></div>
                 <div class="form-field"><label>Estado</label>                <input id="e_ESTADO"></div>
-                <div class="form-field"><label>Planta</label>                <input id="e_PLANTA"></div>
+                <div class="form-field">
+                    <label>Planta</label>
+                    <select id="e_PLANTA">
+                        <option value="">— Seleccionar —</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                        <option value="Planta satelite">Planta satélite</option>
+                        <option value="Planta mixing">Planta mixing</option>
+                        <option value="Bodega">Bodega</option>
+                    </select>
+                </div>
                 <div class="form-field"><label>Fecha</label>                 <input type="date" id="e_FECHA"></div>
                 <div class="form-field"><label>Equipo</label>                <input id="e_EQUIPO"></div>
                 <div class="form-field"><label>Marca</label>                 <input id="e_MARCA"></div>
@@ -1139,7 +1358,7 @@
                 .catch(() => {
                     document.getElementById('tabla').innerHTML =
                         `<tr><td colspan="17" style="text-align:center;padding:30px;color:var(--muted)">
-                        ⚠️ Error al cargar datos</td></tr>`;
+                            ⚠️ Error al cargar datos</td></tr>`;
                 });
         }
 
@@ -1149,44 +1368,44 @@
 
             if (!datosActuales.length) {
                 tbody.innerHTML = `<tr><td colspan="17"
-                style="text-align:center;padding:40px;color:var(--muted)">
-                📭 Sin registros</td></tr>`;
+                    style="text-align:center;padding:40px;color:var(--muted)">
+                    📭 Sin registros</td></tr>`;
                 return;
             }
 
             datosActuales.forEach(row => {
                 tbody.innerHTML += `
-            <tr>
-                <td class="mono">${row.ID}</td>
-                <td class="mono">${row.FOLIO ?? ''}</td>
-                <td>${estadoPill(row.ESTADO)}</td>
-                <td>${row.PLANTA ?? ''}</td>
-                <td class="mono">${row.FECHA ?? ''}</td>
-                <td>${row.EQUIPO ?? ''}</td>
-                <td>${row.MARCA ?? ''}</td>
-                <td>${row.MODELO ?? ''}</td>
-                <td class="mono">${row.NO_SERIE ?? ''}</td>
-                <td class="mono">${row.ACTIVO_FIJO ?? ''}</td>
-                <td>${row.UBICACION_PERSONA ?? ''}</td>
-                <td>${row.MOTIVO_DE_BAJA ?? ''}</td>
-                <td>${row.DIAGNOSTICO ?? ''}</td>
-                <td>${row.COMENTARIOS ?? ''}</td>
-                <td>${row.MOTIVO_DE_CANCELACION ?? ''}</td>
-                <td>
-                    ${row.TIENE_PDF
+                <tr>
+                    <td class="mono">${row.ID}</td>
+                    <td class="mono">${row.FOLIO ?? ''}</td>
+                    <td>${estadoPill(row.ESTADO)}</td>
+                    <td>${row.PLANTA ?? ''}</td>
+                    <td class="mono">${row.FECHA ?? ''}</td>
+                    <td>${row.EQUIPO ?? ''}</td>
+                    <td>${row.MARCA ?? ''}</td>
+                    <td>${row.MODELO ?? ''}</td>
+                    <td class="mono">${row.NO_SERIE ?? ''}</td>
+                    <td class="mono">${row.ACTIVO_FIJO ?? ''}</td>
+                    <td>${row.UBICACION_PERSONA ?? ''}</td>
+                    <td>${row.MOTIVO_DE_BAJA ?? ''}</td>
+                    <td>${row.DIAGNOSTICO ?? ''}</td>
+                    <td>${row.COMENTARIOS ?? ''}</td>
+                    <td>${row.MOTIVO_DE_CANCELACION ?? ''}</td>
+                    <td>
+                        ${row.TIENE_PDF
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                           <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
+                               <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
                         : `<label class="file-label">
-                               📎 Subir PDF
-                               <input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)">
-                           </label>`}
-                </td>
-                <td style="white-space:nowrap;">
-                    <button class="btn btn-amber btn-sm"   onclick="abrirEditar(${row.ID})">✏️</button>
-                    <button class="btn btn-danger btn-sm"  onclick="eliminar(${row.ID})">🗑️</button>
-                    <button class="btn btn-cyan btn-sm"    onclick="verHistorial(${row.ID})">📋</button>
-                </td>
-            </tr>`;
+                                   📎 Subir PDF
+                                   <input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)">
+                               </label>`}
+                    </td>
+                    <td style="white-space:nowrap;">
+                        <button class="btn btn-amber btn-sm"   onclick="abrirEditar(${row.ID})">✏️</button>
+                        <button class="btn btn-danger btn-sm"  onclick="eliminar(${row.ID})">🗑️</button>
+                        <button class="btn btn-cyan btn-sm"    onclick="verHistorial(${row.ID})">📋</button>
+                    </td>
+                </tr>`;
             });
 
             const totalPags = Math.ceil(totalRegistros / limite) || 1;
@@ -1342,32 +1561,32 @@
                 const mA = (vA === null || vA === '') ? '<span class="empty-val">vacío</span>' : esc(vA);
                 const mD = (vD === null || vD === '') ? '<span class="empty-val">vacío</span>' : esc(vD);
                 filas += `
-            <tr class="${cambiado ? 'row-changed' : ''}">
-                <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                <td>${mA}</td>
-                <td>${mD}</td>
-            </tr>`;
+                <tr class="${cambiado ? 'row-changed' : ''}">
+                    <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                    <td>${mA}</td>
+                    <td>${mD}</td>
+                </tr>`;
             });
 
             return `
-        <div class="ev-wrap">
-            <div class="ev-header">
-                <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                <span style="margin-left:auto;background:var(--amber);color:#111;
-                    padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-                    ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-                </span>
-            </div>
-            <table class="ev-table">
-                <thead><tr>
-                    <th>Campo</th>
-                    <th style="color:#FCA5A5">⬅ Antes</th>
-                    <th style="color:#6EE7B7">➡ Después</th>
-                </tr></thead>
-                <tbody>${filas}</tbody>
-            </table>
-        </div>`;
+            <div class="ev-wrap">
+                <div class="ev-header">
+                    <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                    <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                    <span style="margin-left:auto;background:var(--amber);color:#111;
+                        padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                        ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                    </span>
+                </div>
+                <table class="ev-table">
+                    <thead><tr>
+                        <th>Campo</th>
+                        <th style="color:#FCA5A5">⬅ Antes</th>
+                        <th style="color:#6EE7B7">➡ Después</th>
+                    </tr></thead>
+                    <tbody>${filas}</tbody>
+                </table>
+            </div>`;
         }
 
         function verHistorial(id) {
@@ -1389,8 +1608,8 @@
                     } else {
                         document.getElementById('contenidoHistorial').innerHTML =
                             `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                            ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                        </p>` + lista.map(renderEvento).join('');
+                                ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                            </p>` + lista.map(renderEvento).join('');
                     }
                 })
                 .catch(() => {
@@ -1407,6 +1626,167 @@
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
         });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script>
+        // ════════════════════════════════════════════════════════
+        //  TAB SYSTEM
+        // ════════════════════════════════════════════════════════
+        function switchTab(tab) {
+            document.getElementById('tab-registros').style.display = tab === 'registros' ? '' : 'none';
+            document.getElementById('tab-dashboard').style.display = tab === 'dashboard' ? '' : 'none';
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            if (tab === 'dashboard') cargarDashboard();
+        }
+
+        // ════════════════════════════════════════════════════════
+        //  DASHBOARD
+        // ════════════════════════════════════════════════════════
+        let dashCargado = false;
+        const chartInstances = {};
+
+        function destroyChart(id) {
+            if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+        }
+
+        const PALETTE = [
+            '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6',
+            '#06B6D4', '#F472B6', '#84CC16', '#FB923C', '#A78BFA'
+        ];
+
+        async function cargarDashboard() {
+            // Traer todos los registros (sin paginado) para calcular stats client-side
+            const res = await fetch('/BAJAS?page=1&limit=9999');
+            const json = await res.json();
+            const rows = json.data || [];
+
+            // ── KPIs ──────────────────────────────────────────────
+            document.getElementById('kpi-total').textContent = rows.length;
+            document.getElementById('kpi-activas').textContent = rows.filter(r => (r.ESTADO || '').toLowerCase().includes('baja')).length;
+            document.getElementById('kpi-canceladas').textContent = rows.filter(r => (r.ESTADO || '').toLowerCase().includes('cancel')).length;
+            document.getElementById('kpi-con-pdf').textContent = rows.filter(r => r.TIENE_PDF).length;
+
+            const anio = new Date().getFullYear();
+            document.getElementById('anioActualLabel').textContent = anio;
+
+            // ── helper: agrupar ────────────────────────────────────
+            function agrupar(arr, key, top) {
+                const m = {};
+                arr.forEach(r => {
+                    const v = (r[key] || 'Sin datos').trim() || 'Sin datos';
+                    m[v] = (m[v] || 0) + 1;
+                });
+                let entries = Object.entries(m).sort((a, b) => b[1] - a[1]);
+                if (top) entries = entries.slice(0, top);
+                return { labels: entries.map(e => e[0]), data: entries.map(e => e[1]) };
+            }
+
+            // ── Chart: Planta (bar) ────────────────────────────────
+            destroyChart('chartPlanta');
+            const gPlanta = agrupar(rows, 'PLANTA');
+            chartInstances['chartPlanta'] = new Chart(document.getElementById('chartPlanta'), {
+                type: 'bar',
+                data: {
+                    labels: gPlanta.labels, datasets: [{
+                        label: 'Bajas', data: gPlanta.data,
+                        backgroundColor: PALETTE, borderRadius: 6, borderSkipped: false
+                    }]
+                },
+                options: chartOpts('Bajas por Planta', false)
+            });
+
+            // ── Chart: Estado (doughnut) ───────────────────────────
+            destroyChart('chartEstado');
+            const gEstado = agrupar(rows, 'ESTADO');
+            chartInstances['chartEstado'] = new Chart(document.getElementById('chartEstado'), {
+                type: 'doughnut',
+                data: {
+                    labels: gEstado.labels, datasets: [{
+                        data: gEstado.data,
+                        backgroundColor: PALETTE, borderWidth: 2, borderColor: '#111827'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 11 }, padding: 12 } },
+                        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } }
+                    }
+                }
+            });
+
+            // ── Chart: Mes año actual (line) ───────────────────────
+            destroyChart('chartMes');
+            const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            const porMes = new Array(12).fill(0);
+            rows.forEach(r => {
+                const f = r.FECHA || '';
+                const y = parseInt(f.substring(0, 4));
+                const m = parseInt(f.substring(5, 7)) - 1;
+                if (y === anio && m >= 0 && m < 12) porMes[m]++;
+            });
+            chartInstances['chartMes'] = new Chart(document.getElementById('chartMes'), {
+                type: 'line',
+                data: {
+                    labels: meses, datasets: [{
+                        label: 'Bajas', data: porMes,
+                        borderColor: '#EF4444', backgroundColor: 'rgba(239,68,68,0.12)',
+                        tension: 0.4, fill: true, pointBackgroundColor: '#EF4444',
+                        pointRadius: 5, pointHoverRadius: 7
+                    }]
+                },
+                options: chartOpts('Bajas por Mes', false)
+            });
+
+            // ── Chart: Equipo top 8 (bar horizontal) ──────────────
+            destroyChart('chartEquipo');
+            const gEquipo = agrupar(rows, 'EQUIPO', 8);
+            chartInstances['chartEquipo'] = new Chart(document.getElementById('chartEquipo'), {
+                type: 'bar',
+                data: {
+                    labels: gEquipo.labels, datasets: [{
+                        label: 'Bajas', data: gEquipo.data,
+                        backgroundColor: PALETTE, borderRadius: 5, borderSkipped: false
+                    }]
+                },
+                options: { ...chartOpts('Top Equipos', false), indexAxis: 'y' }
+            });
+
+            // ── Chart: Motivo top 6 (pie) ──────────────────────────
+            destroyChart('chartMotivo');
+            const gMotivo = agrupar(rows, 'MOTIVO_DE_BAJA', 6);
+            chartInstances['chartMotivo'] = new Chart(document.getElementById('chartMotivo'), {
+                type: 'pie',
+                data: {
+                    labels: gMotivo.labels, datasets: [{
+                        data: gMotivo.data,
+                        backgroundColor: PALETTE, borderWidth: 2, borderColor: '#111827'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 10 }, padding: 10 } },
+                        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } }
+                    }
+                }
+            });
+        }
+
+        function chartOpts(title, showLegend) {
+            return {
+                responsive: true,
+                plugins: {
+                    legend: { display: showLegend, labels: { color: '#94A3B8' } },
+                    tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label || ''}: ${ctx.parsed.y ?? ctx.parsed.x ?? ctx.parsed}` } }
+                },
+                scales: {
+                    x: { ticks: { color: '#64748B', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { ticks: { color: '#64748B', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                }
+            };
+        }
     </script>
 </body>
 </html>
