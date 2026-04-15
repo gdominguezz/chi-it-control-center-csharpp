@@ -1656,8 +1656,7 @@
             '#06B6D4', '#F472B6', '#84CC16', '#FB923C', '#A78BFA'
         ];
 
-        // ── Re-renderizar todos los charts al cambiar zoom / devicePixelRatio ──
-        // Esto previene el blur al hacer zoom en el navegador
+        // ── Resize: zoom del navegador + cambio de tamaño de contenedor ──
         let _lastDPR = window.devicePixelRatio;
         setInterval(() => {
             const dpr = window.devicePixelRatio;
@@ -1666,6 +1665,12 @@
                 Object.values(chartInstances).forEach(c => c.resize());
             }
         }, 300);
+
+        // ResizeObserver: redimensiona al hacer zoom o cambiar tamaño de ventana
+        const _ro = new ResizeObserver(() => {
+            Object.values(chartInstances).forEach(c => c.resize());
+        });
+        document.querySelectorAll('.chart-canvas-wrap').forEach(el => _ro.observe(el));
 
         async function cargarDashboard() {
             const res = await fetch('/BAJAS?page=1&limit=9999');
@@ -1745,8 +1750,23 @@
             const porMes = new Array(12).fill(0);
             rows.forEach(r => {
                 const f = r.FECHA || '';
-                const y = parseInt(f.substring(0, 4));
-                const m = parseInt(f.substring(5, 7)) - 1;
+                if (!f) return;
+                // Soporta: YYYY-MM-DD, YYYY-MM-DD HH:mm:ss, DD/MM/YYYY, DD-MM-YYYY
+                let y, m;
+                const isoMatch = f.match(/^(\d{4})[-\/](\d{2})/);
+                const dmyMatch = f.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})/);
+                if (isoMatch) {
+                    y = parseInt(isoMatch[1]);
+                    m = parseInt(isoMatch[2]) - 1;
+                } else if (dmyMatch) {
+                    y = parseInt(dmyMatch[3]);
+                    m = parseInt(dmyMatch[2]) - 1;
+                } else {
+                    const d = new Date(f);
+                    if (isNaN(d)) return;
+                    y = d.getFullYear();
+                    m = d.getMonth();
+                }
                 if (y === anio && m >= 0 && m < 12) porMes[m]++;
             });
             chartInstances['chartMes'] = new Chart(document.getElementById('chartMes'), {
