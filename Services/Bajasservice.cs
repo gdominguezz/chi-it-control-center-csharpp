@@ -95,6 +95,10 @@ public class BajasService
                 fecha_creacion      TIMESTAMPTZ DEFAULT NOW()
             );
 
+            -- Migración: agrega la columna si la tabla ya existía sin ella
+            ALTER TABLE bajas_equipos
+                ADD COLUMN IF NOT EXISTS tiene_pdf BOOLEAN DEFAULT FALSE;
+
             CREATE TABLE IF NOT EXISTS bajas_historial (
                 id                  SERIAL PRIMARY KEY,
                 baja_id             INTEGER NOT NULL REFERENCES bajas_equipos(id) ON DELETE CASCADE,
