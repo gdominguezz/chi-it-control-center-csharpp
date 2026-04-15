@@ -178,7 +178,7 @@ public class BajasService
                  no_serie,activo_fijo,ubicacion_persona,
                  MOTIVO_DE_BAJA,diagnostico,comentarios,motivo_de_cancelacion)
             VALUES
-                (@folio,@estado,@planta,@fecha,@equipo,@marca,@modelo,
+                (@folio,@estado,@planta,@fecha::date,@equipo,@marca,@modelo,
                  @no_serie,@activo_fijo,@ubicacion_persona,
                  @motivo_de_baja,@diagnostico,@comentarios,@motivo_de_cancelacion)
             RETURNING id
@@ -206,7 +206,7 @@ public class BajasService
         {
             await using var cmd = new NpgsqlCommand("""
                 UPDATE bajas_equipos SET
-                    folio=@folio, estado=@estado, planta=@planta, fecha=@fecha,
+                    folio=@folio, estado=@estado, planta=@planta, fecha=@fecha::date,
                     equipo=@equipo, marca=@marca, modelo=@modelo, no_serie=@no_serie,
                     activo_fijo=@activo_fijo, ubicacion_persona=@ubicacion_persona,
                     motivo_de_baja=@motivo_de_baja, diagnostico=@diagnostico,
