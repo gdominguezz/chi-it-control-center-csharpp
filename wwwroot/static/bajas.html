@@ -1007,10 +1007,6 @@
                     <button class="dropdown-item danger" onclick="cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
                 </div>
             </div>
-            <button class="btn btn-ghost btn-sm"
-                    onclick="window.location.href='/static/menu.html'">
-                ← Menú
-            </button>
         </div>
     </div>
 
@@ -1686,6 +1682,20 @@
             const anio = new Date().getFullYear();
             document.getElementById('anioActualLabel').textContent = anio;
 
+            // ── helper: parsear año de una fecha ──────────────────
+            function parsearAnio(f) {
+                if (!f) return null;
+                const iso = f.match(/^(\d{4})[-\/]/);
+                if (iso) return parseInt(iso[1]);
+                const dmy = f.match(/^\d{2}[-\/]\d{2}[-\/](\d{4})/);
+                if (dmy) return parseInt(dmy[1]);
+                const d = new Date(f);
+                return isNaN(d) ? null : d.getFullYear();
+            }
+
+            // ── Filtrar solo registros del año en curso ────────────
+            const rowsAnio = rows.filter(r => parsearAnio(r.FECHA) === anio);
+
             // ── helper: agrupar ────────────────────────────────────
             function agrupar(arr, key, top) {
                 const m = {};
@@ -1700,7 +1710,7 @@
 
             // ── Chart: Planta (bar) ────────────────────────────────
             destroyChart('chartPlanta');
-            const gPlanta = agrupar(rows, 'PLANTA');
+            const gPlanta = agrupar(rowsAnio, 'PLANTA');
             chartInstances['chartPlanta'] = new Chart(document.getElementById('chartPlanta'), {
                 type: 'bar',
                 data: {
@@ -1718,7 +1728,7 @@
 
             // ── Chart: Estado (doughnut) ───────────────────────────
             destroyChart('chartEstado');
-            const gEstado = agrupar(rows, 'ESTADO');
+            const gEstado = agrupar(rowsAnio, 'ESTADO');
             chartInstances['chartEstado'] = new Chart(document.getElementById('chartEstado'), {
                 type: 'doughnut',
                 data: {
@@ -1748,7 +1758,7 @@
             destroyChart('chartMes');
             const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
             const porMes = new Array(12).fill(0);
-            rows.forEach(r => {
+            rowsAnio.forEach(r => {
                 const f = r.FECHA || '';
                 if (!f) return;
                 // Soporta: YYYY-MM-DD, YYYY-MM-DD HH:mm:ss, DD/MM/YYYY, DD-MM-YYYY
@@ -1802,7 +1812,7 @@
 
             // ── Chart: Equipo top 8 (bar horizontal) ──────────────
             destroyChart('chartEquipo');
-            const gEquipo = agrupar(rows, 'EQUIPO', 8);
+            const gEquipo = agrupar(rowsAnio, 'EQUIPO', 8);
             chartInstances['chartEquipo'] = new Chart(document.getElementById('chartEquipo'), {
                 type: 'bar',
                 data: {
@@ -1835,7 +1845,7 @@
 
             // ── Chart: Motivo top 6 (pie) ──────────────────────────
             destroyChart('chartMotivo');
-            const gMotivo = agrupar(rows, 'MOTIVO_DE_BAJA', 6);
+            const gMotivo = agrupar(rowsAnio, 'MOTIVO_DE_BAJA', 6);
             chartInstances['chartMotivo'] = new Chart(document.getElementById('chartMotivo'), {
                 type: 'pie',
                 data: {
