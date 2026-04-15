@@ -8,7 +8,9 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Servicios ──
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+        o.JsonSerializerOptions.PropertyNamingPolicy = null); // mantiene mayúsculas tal cual
 builder.Services.AddSingleton<DbConnectionPool>();
 builder.Services.AddScoped<AuditoriaServicepreventivos>();
 builder.Services.AddSingleton<AuditoriaServiceCorrectivos>();
