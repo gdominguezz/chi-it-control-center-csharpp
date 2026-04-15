@@ -1355,7 +1355,7 @@
                 .catch(() => {
                     document.getElementById('tabla').innerHTML =
                         `<tr><td colspan="17" style="text-align:center;padding:30px;color:var(--muted)">
-                                    ⚠️ Error al cargar datos</td></tr>`;
+                                        ⚠️ Error al cargar datos</td></tr>`;
                 });
         }
 
@@ -1365,44 +1365,44 @@
 
             if (!datosActuales.length) {
                 tbody.innerHTML = `<tr><td colspan="17"
-                            style="text-align:center;padding:40px;color:var(--muted)">
-                            📭 Sin registros</td></tr>`;
+                                style="text-align:center;padding:40px;color:var(--muted)">
+                                📭 Sin registros</td></tr>`;
                 return;
             }
 
             datosActuales.forEach(row => {
                 tbody.innerHTML += `
-                        <tr>
-                            <td class="mono">${row.ID}</td>
-                            <td class="mono">${row.FOLIO ?? ''}</td>
-                            <td>${estadoPill(row.ESTADO)}</td>
-                            <td>${row.PLANTA ?? ''}</td>
-                            <td class="mono">${row.FECHA ?? ''}</td>
-                            <td>${row.EQUIPO ?? ''}</td>
-                            <td>${row.MARCA ?? ''}</td>
-                            <td>${row.MODELO ?? ''}</td>
-                            <td class="mono">${row.NO_SERIE ?? ''}</td>
-                            <td class="mono">${row.ACTIVO_FIJO ?? ''}</td>
-                            <td>${row.UBICACION_PERSONA ?? ''}</td>
-                            <td>${row.MOTIVO_DE_BAJA ?? ''}</td>
-                            <td>${row.DIAGNOSTICO ?? ''}</td>
-                            <td>${row.COMENTARIOS ?? ''}</td>
-                            <td>${row.MOTIVO_DE_CANCELACION ?? ''}</td>
-                            <td>
-                                ${row.TIENE_PDF
+                            <tr>
+                                <td class="mono">${row.ID}</td>
+                                <td class="mono">${row.FOLIO ?? ''}</td>
+                                <td>${estadoPill(row.ESTADO)}</td>
+                                <td>${row.PLANTA ?? ''}</td>
+                                <td class="mono">${row.FECHA ?? ''}</td>
+                                <td>${row.EQUIPO ?? ''}</td>
+                                <td>${row.MARCA ?? ''}</td>
+                                <td>${row.MODELO ?? ''}</td>
+                                <td class="mono">${row.NO_SERIE ?? ''}</td>
+                                <td class="mono">${row.ACTIVO_FIJO ?? ''}</td>
+                                <td>${row.UBICACION_PERSONA ?? ''}</td>
+                                <td>${row.MOTIVO_DE_BAJA ?? ''}</td>
+                                <td>${row.DIAGNOSTICO ?? ''}</td>
+                                <td>${row.COMENTARIOS ?? ''}</td>
+                                <td>${row.MOTIVO_DE_CANCELACION ?? ''}</td>
+                                <td>
+                                    ${row.TIENE_PDF
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                                       <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
+                                           <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
                         : `<label class="file-label">
-                                           📎 Subir PDF
-                                           <input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)">
-                                       </label>`}
-                            </td>
-                            <td style="white-space:nowrap;">
-                                <button class="btn btn-amber btn-sm"   onclick="abrirEditar(${row.ID})">✏️</button>
-                                <button class="btn btn-danger btn-sm"  onclick="eliminar(${row.ID})">🗑️</button>
-                                <button class="btn btn-cyan btn-sm"    onclick="verHistorial(${row.ID})">📋</button>
-                            </td>
-                        </tr>`;
+                                               📎 Subir PDF
+                                               <input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)">
+                                           </label>`}
+                                </td>
+                                <td style="white-space:nowrap;">
+                                    <button class="btn btn-amber btn-sm"   onclick="abrirEditar(${row.ID})">✏️</button>
+                                    <button class="btn btn-danger btn-sm"  onclick="eliminar(${row.ID})">🗑️</button>
+                                    <button class="btn btn-cyan btn-sm"    onclick="verHistorial(${row.ID})">📋</button>
+                                </td>
+                            </tr>`;
             });
 
             const totalPags = Math.ceil(totalRegistros / limite) || 1;
@@ -1483,7 +1483,14 @@
             if (row) {
                 CAMPOS.forEach(({ key }) => {
                     const el = document.getElementById('e_' + key);
-                    if (el) el.value = row[key] ?? '';
+                    if (!el) return;
+                    let val = row[key] ?? '';
+                    // Normalizar FECHA a YYYY-MM-DD para que input type="date" la muestre correctamente
+                    if (key === 'FECHA' && val) {
+                        const d = new Date(val);
+                        if (!isNaN(d)) val = d.toISOString().slice(0, 10);
+                    }
+                    el.value = val;
                 });
             }
             document.getElementById('modalEditar').classList.add('show');
@@ -1562,32 +1569,32 @@
                 const mA = (vA === null || vA === '') ? '<span class="empty-val">vacío</span>' : esc(vA);
                 const mD = (vD === null || vD === '') ? '<span class="empty-val">vacío</span>' : esc(vD);
                 filas += `
-                        <tr class="${cambiado ? 'row-changed' : ''}">
-                            <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                            <td>${mA}</td>
-                            <td>${mD}</td>
-                        </tr>`;
+                            <tr class="${cambiado ? 'row-changed' : ''}">
+                                <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                                <td>${mA}</td>
+                                <td>${mD}</td>
+                            </tr>`;
             });
 
             return `
-                    <div class="ev-wrap">
-                        <div class="ev-header">
-                            <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                            <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                            <span style="margin-left:auto;background:var(--amber);color:#111;
-                                padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-                                ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-                            </span>
-                        </div>
-                        <table class="ev-table">
-                            <thead><tr>
-                                <th>Campo</th>
-                                <th style="color:#FCA5A5">⬅ Antes</th>
-                                <th style="color:#6EE7B7">➡ Después</th>
-                            </tr></thead>
-                            <tbody>${filas}</tbody>
-                        </table>
-                    </div>`;
+                        <div class="ev-wrap">
+                            <div class="ev-header">
+                                <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                                <span style="margin-left:auto;background:var(--amber);color:#111;
+                                    padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                                    ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                                </span>
+                            </div>
+                            <table class="ev-table">
+                                <thead><tr>
+                                    <th>Campo</th>
+                                    <th style="color:#FCA5A5">⬅ Antes</th>
+                                    <th style="color:#6EE7B7">➡ Después</th>
+                                </tr></thead>
+                                <tbody>${filas}</tbody>
+                            </table>
+                        </div>`;
         }
 
         function verHistorial(id) {
@@ -1609,8 +1616,8 @@
                     } else {
                         document.getElementById('contenidoHistorial').innerHTML =
                             `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                        ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                    </p>` + lista.map(renderEvento).join('');
+                                            ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                        </p>` + lista.map(renderEvento).join('');
                     }
                 })
                 .catch(() => {
