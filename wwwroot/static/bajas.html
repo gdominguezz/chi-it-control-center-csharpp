@@ -937,14 +937,14 @@
             padding: 20px 22px;
         }
 
-            .chart-card .chart-canvas-wrap {
-                position: relative;
-                height: 220px;
-            }
+        .chart-canvas-wrap {
+            position: relative;
+            height: 220px;
+        }
 
-            .chart-card.chart-wide .chart-canvas-wrap {
-                height: 180px;
-            }
+        .chart-wide .chart-canvas-wrap {
+            height: 180px;
+        }
 
         .chart-wide {
             grid-column: 1 / -1;
@@ -1664,8 +1664,18 @@
             '#06B6D4', '#F472B6', '#84CC16', '#FB923C', '#A78BFA'
         ];
 
+        // ── Re-renderizar todos los charts al cambiar zoom / devicePixelRatio ──
+        // Esto previene el blur al hacer zoom en el navegador
+        let _lastDPR = window.devicePixelRatio;
+        setInterval(() => {
+            const dpr = window.devicePixelRatio;
+            if (dpr !== _lastDPR) {
+                _lastDPR = dpr;
+                Object.values(chartInstances).forEach(c => c.resize());
+            }
+        }, 300);
+
         async function cargarDashboard() {
-            // Traer todos los registros (sin paginado) para calcular stats client-side
             const res = await fetch('/BAJAS?page=1&limit=9999');
             const json = await res.json();
             const rows = json.data || [];
@@ -1697,12 +1707,16 @@
             chartInstances['chartPlanta'] = new Chart(document.getElementById('chartPlanta'), {
                 type: 'bar',
                 data: {
-                    labels: gPlanta.labels, datasets: [{
-                        label: 'Bajas', data: gPlanta.data,
-                        backgroundColor: PALETTE, borderRadius: 6, borderSkipped: false
+                    labels: gPlanta.labels,
+                    datasets: [{
+                        label: 'Bajas',
+                        data: gPlanta.data,
+                        backgroundColor: PALETTE.slice(0, gPlanta.labels.length),
+                        borderRadius: 6,
+                        borderSkipped: false
                     }]
                 },
-                options: chartOpts('Bajas por Planta', false)
+                options: chartOpts(false)
             });
 
             // ── Chart: Estado (doughnut) ───────────────────────────
@@ -1711,9 +1725,12 @@
             chartInstances['chartEstado'] = new Chart(document.getElementById('chartEstado'), {
                 type: 'doughnut',
                 data: {
-                    labels: gEstado.labels, datasets: [{
+                    labels: gEstado.labels,
+                    datasets: [{
                         data: gEstado.data,
-                        backgroundColor: PALETTE, borderWidth: 2, borderColor: '#111827'
+                        backgroundColor: PALETTE.slice(0, gEstado.labels.length),
+                        borderWidth: 2,
+                        borderColor: '#111827'
                     }]
                 },
                 options: {
@@ -1721,7 +1738,11 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 11 }, padding: 12 } },
-                        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } }
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.label}: ${ctx.parsed}`
+                            }
+                        }
                     }
                 }
             });
@@ -1739,14 +1760,32 @@
             chartInstances['chartMes'] = new Chart(document.getElementById('chartMes'), {
                 type: 'line',
                 data: {
-                    labels: meses, datasets: [{
-                        label: 'Bajas', data: porMes,
-                        borderColor: '#EF4444', backgroundColor: 'rgba(239,68,68,0.12)',
-                        tension: 0.4, fill: true, pointBackgroundColor: '#EF4444',
+                    labels: meses,
+                    datasets: [{
+                        label: 'Bajas',
+                        data: porMes,
+                        borderColor: '#EF4444',
+                        backgroundColor: 'rgba(239,68,68,0.12)',
+                        tension: 0.4, fill: true,
+                        pointBackgroundColor: '#EF4444',
                         pointRadius: 5, pointHoverRadius: 7
                     }]
                 },
-                options: chartOpts('Bajas por Mes', false)
+                options: {
+                    ...chartOpts(false),
+                    scales: {
+                        x: {
+                            type: 'category',
+                            ticks: { color: '#64748B', font: { size: 11 } },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#64748B', font: { size: 11 }, precision: 0 },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        }
+                    }
+                }
             });
 
             // ── Chart: Equipo top 8 (bar horizontal) ──────────────
@@ -1755,12 +1794,31 @@
             chartInstances['chartEquipo'] = new Chart(document.getElementById('chartEquipo'), {
                 type: 'bar',
                 data: {
-                    labels: gEquipo.labels, datasets: [{
-                        label: 'Bajas', data: gEquipo.data,
-                        backgroundColor: PALETTE, borderRadius: 5, borderSkipped: false
+                    labels: gEquipo.labels,
+                    datasets: [{
+                        label: 'Bajas',
+                        data: gEquipo.data,
+                        backgroundColor: PALETTE.slice(0, gEquipo.labels.length),
+                        borderRadius: 5,
+                        borderSkipped: false
                     }]
                 },
-                options: { ...chartOpts('Top Equipos', false), indexAxis: 'y' }
+                options: {
+                    ...chartOpts(false),
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { color: '#64748B', font: { size: 11 }, precision: 0 },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            type: 'category',
+                            ticks: { color: '#64748B', font: { size: 11 } },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        }
+                    }
+                }
             });
 
             // ── Chart: Motivo top 6 (pie) ──────────────────────────
@@ -1769,9 +1827,12 @@
             chartInstances['chartMotivo'] = new Chart(document.getElementById('chartMotivo'), {
                 type: 'pie',
                 data: {
-                    labels: gMotivo.labels, datasets: [{
+                    labels: gMotivo.labels,
+                    datasets: [{
                         data: gMotivo.data,
-                        backgroundColor: PALETTE, borderWidth: 2, borderColor: '#111827'
+                        backgroundColor: PALETTE.slice(0, gMotivo.labels.length),
+                        borderWidth: 2,
+                        borderColor: '#111827'
                     }]
                 },
                 options: {
@@ -1779,23 +1840,45 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 10 }, padding: 10 } },
-                        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } }
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.label}: ${ctx.parsed}`
+                            }
+                        }
                     }
                 }
             });
         }
 
-        function chartOpts(title, showLegend) {
+        // ── Opciones base para gráficas con ejes ──────────────────
+        function chartOpts(showLegend) {
             return {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: showLegend, labels: { color: '#94A3B8' } },
-                    tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label || ''}: ${ctx.parsed.y ?? ctx.parsed.x ?? ctx.parsed}` } }
+                    tooltip: {
+                        callbacks: {
+                            // Muestra el label real del eje categórico + el valor numérico
+                            title: ctx => ctx[0].label,
+                            label: ctx => {
+                                const val = ctx.parsed.y ?? ctx.parsed.x ?? ctx.parsed;
+                                return ` ${ctx.dataset.label || 'Bajas'}: ${val}`;
+                            }
+                        }
+                    }
                 },
                 scales: {
-                    x: { ticks: { color: '#64748B', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    y: { ticks: { color: '#64748B', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    x: {
+                        type: 'category',
+                        ticks: { color: '#64748B', font: { size: 11 } },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#64748B', font: { size: 11 }, precision: 0 },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    }
                 }
             };
         }
