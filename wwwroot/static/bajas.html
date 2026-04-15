@@ -904,7 +904,7 @@
                 <div class="field"><label>Motivo de Baja</label>        <input id="MOTIVO_BAJA"></div>
                 <div class="field"><label>Diagnóstico</label>           <input id="DIAGNOSTICO"></div>
                 <div class="field"><label>Comentarios</label>           <input id="COMENTARIOS"></div>
-                <div class="field"><label>Motivo de Cancelación</label> <input id="MOTIVO_CANCELACION"></div>
+                <div class="field"><label>Motivo de Cancelación</label> <input id="MOTIVO_DE_CANCELACION"></div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button class="btn btn-danger" onclick="guardar()">💾 Guardar</button>
@@ -1004,7 +1004,7 @@
             <div class="form-field"><label>Motivo de Baja</label>            <textarea id="e_MOTIVO_BAJA"></textarea></div>
             <div class="form-field"><label>Diagnóstico</label>               <textarea id="e_DIAGNOSTICO"></textarea></div>
             <div class="form-field"><label>Comentarios</label>               <textarea id="e_COMENTARIOS"></textarea></div>
-            <div class="form-field"><label>Motivo de Cancelación</label>     <textarea id="e_MOTIVO_CANCELACION"></textarea></div>
+            <div class="form-field"><label>Motivo de Cancelación</label>     <textarea id="e_MOTIVO_DE_CANCELACION"></textarea></div>
 
             <div class="modal-footer">
                 <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
@@ -1058,7 +1058,7 @@
             { key: 'MOTIVO_BAJA', label: 'Motivo de Baja' },
             { key: 'DIAGNOSTICO', label: 'Diagnóstico' },
             { key: 'COMENTARIOS', label: 'Comentarios' },
-            { key: 'MOTIVO_CANCELACION', label: 'Motivo de Cancelación' },
+            { key: 'MOTIVO_DE_CANCELACION', label: 'Motivo de Cancelación' },
         ];
 
         // ── Init ───────────────────────────────────────────────────────────
@@ -1123,7 +1123,7 @@
                 MOTIVO_BAJA: f[10].value,
                 DIAGNOSTICO: f[11].value,
                 COMENTARIOS: f[12].value,
-                MOTIVO_CANCELACION: f[13].value,
+                MOTIVO_DE_CANCELACION: f[13].value,
             });
         }
 
@@ -1171,7 +1171,7 @@
                 <td>${row.MOTIVO_BAJA ?? ''}</td>
                 <td>${row.DIAGNOSTICO ?? ''}</td>
                 <td>${row.COMENTARIOS ?? ''}</td>
-                <td>${row.MOTIVO_CANCELACION ?? ''}</td>
+                <td>${row.MOTIVO_DE_CANCELACION ?? ''}</td>
                 <td>
                     ${row.TIENE_PDF
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
