@@ -26,7 +26,7 @@ public class BajasController : ControllerBase
         [FromQuery] string? NO_SERIE           = null,
         [FromQuery] string? ACTIVO_FIJO        = null,
         [FromQuery] string? UBICACION_PERSONA  = null,
-        [FromQuery] string? MOTIVO_BAJA        = null,
+        [FromQuery] string? MOTIVO_DE_BAJA        = null,
         [FromQuery] string? DIAGNOSTICO        = null,
         [FromQuery] string? COMENTARIOS        = null,
         [FromQuery] string? MOTIVO_DE_CANCELACION = null)
@@ -43,7 +43,7 @@ public class BajasController : ControllerBase
             NO_SERIE           = NO_SERIE,
             ACTIVO_FIJO        = ACTIVO_FIJO,
             UBICACION_PERSONA  = UBICACION_PERSONA,
-            MOTIVO_BAJA        = MOTIVO_BAJA,
+            MOTIVO_DE_BAJA        = MOTIVO_DE_BAJA,
             DIAGNOSTICO        = DIAGNOSTICO,
             COMENTARIOS        = COMENTARIOS,
             MOTIVO_DE_CANCELACION = MOTIVO_DE_CANCELACION
@@ -128,7 +128,7 @@ public class BajasController : ControllerBase
         [FromQuery] string? NO_SERIE           = null,
         [FromQuery] string? ACTIVO_FIJO        = null,
         [FromQuery] string? UBICACION_PERSONA  = null,
-        [FromQuery] string? MOTIVO_BAJA        = null,
+        [FromQuery] string? MOTIVO_DE_BAJA        = null,
         [FromQuery] string? DIAGNOSTICO        = null,
         [FromQuery] string? COMENTARIOS        = null,
         [FromQuery] string? MOTIVO_DE_CANCELACION = null)
@@ -145,7 +145,7 @@ public class BajasController : ControllerBase
             NO_SERIE           = NO_SERIE,
             ACTIVO_FIJO        = ACTIVO_FIJO,
             UBICACION_PERSONA  = UBICACION_PERSONA,
-            MOTIVO_BAJA        = MOTIVO_BAJA,
+            MOTIVO_DE_BAJA        = MOTIVO_DE_BAJA,
             DIAGNOSTICO        = DIAGNOSTICO,
             COMENTARIOS        = COMENTARIOS,
             MOTIVO_DE_CANCELACION = MOTIVO_DE_CANCELACION

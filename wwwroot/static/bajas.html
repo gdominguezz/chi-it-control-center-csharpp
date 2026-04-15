@@ -901,7 +901,7 @@
                 <div class="field"><label>No. Serie</label>             <input id="NO_SERIE"></div>
                 <div class="field"><label>Activo Fijo</label>           <input id="ACTIVO_FIJO"></div>
                 <div class="field"><label>Ubicación / Persona</label>   <input id="UBICACION_PERSONA"></div>
-                <div class="field"><label>Motivo de Baja</label>        <input id="MOTIVO_BAJA"></div>
+                <div class="field"><label>Motivo de Baja</label>        <input id="MOTIVO_DE_BAJA"></div>
                 <div class="field"><label>Diagnóstico</label>           <input id="DIAGNOSTICO"></div>
                 <div class="field"><label>Comentarios</label>           <input id="COMENTARIOS"></div>
                 <div class="field"><label>Motivo de Cancelación</label> <input id="MOTIVO_DE_CANCELACION"></div>
@@ -1001,7 +1001,7 @@
                 <div class="form-field"><label>Activo Fijo</label>           <input id="e_ACTIVO_FIJO"></div>
                 <div class="form-field"><label>Ubicación / Persona</label>   <input id="e_UBICACION_PERSONA"></div>
             </div>
-            <div class="form-field"><label>Motivo de Baja</label>            <textarea id="e_MOTIVO_BAJA"></textarea></div>
+            <div class="form-field"><label>Motivo de Baja</label>            <textarea id="e_MOTIVO_DE_BAJA"></textarea></div>
             <div class="form-field"><label>Diagnóstico</label>               <textarea id="e_DIAGNOSTICO"></textarea></div>
             <div class="form-field"><label>Comentarios</label>               <textarea id="e_COMENTARIOS"></textarea></div>
             <div class="form-field"><label>Motivo de Cancelación</label>     <textarea id="e_MOTIVO_DE_CANCELACION"></textarea></div>
@@ -1055,7 +1055,7 @@
             { key: 'NO_SERIE', label: 'No. Serie' },
             { key: 'ACTIVO_FIJO', label: 'Activo Fijo' },
             { key: 'UBICACION_PERSONA', label: 'Ubicación / Persona' },
-            { key: 'MOTIVO_BAJA', label: 'Motivo de Baja' },
+            { key: 'MOTIVO_DE_BAJA', label: 'Motivo de Baja' },
             { key: 'DIAGNOSTICO', label: 'Diagnóstico' },
             { key: 'COMENTARIOS', label: 'Comentarios' },
             { key: 'MOTIVO_DE_CANCELACION', label: 'Motivo de Cancelación' },
@@ -1120,7 +1120,7 @@
                 NO_SERIE: f[7].value,
                 ACTIVO_FIJO: f[8].value,
                 UBICACION_PERSONA: f[9].value,
-                MOTIVO_BAJA: f[10].value,
+                MOTIVO_DE_BAJA: f[10].value,
                 DIAGNOSTICO: f[11].value,
                 COMENTARIOS: f[12].value,
                 MOTIVO_DE_CANCELACION: f[13].value,
@@ -1168,7 +1168,7 @@
                 <td class="mono">${row.NO_SERIE ?? ''}</td>
                 <td class="mono">${row.ACTIVO_FIJO ?? ''}</td>
                 <td>${row.UBICACION_PERSONA ?? ''}</td>
-                <td>${row.MOTIVO_BAJA ?? ''}</td>
+                <td>${row.MOTIVO_DE_BAJA ?? ''}</td>
                 <td>${row.DIAGNOSTICO ?? ''}</td>
                 <td>${row.COMENTARIOS ?? ''}</td>
                 <td>${row.MOTIVO_DE_CANCELACION ?? ''}</td>
