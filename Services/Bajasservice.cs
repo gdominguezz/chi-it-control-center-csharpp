@@ -372,7 +372,7 @@ public class BajasService
         Add("motivo_baja", f.MOTIVO_BAJA);
         Add("diagnostico", f.DIAGNOSTICO);
         Add("comentarios", f.COMENTARIOS);
-        Add("motivo_de_cancelacion", f.MOTIVO_CANCELACION);
+        Add("motivo_de_cancelacion", f.MOTIVO_DE_CANCELACION);
 
         var where = conds.Count > 0 ? "WHERE " + string.Join(" AND ", conds) : "";
         return (where, parms);
@@ -393,7 +393,7 @@ public class BajasService
         cmd.Parameters.AddWithValue("motivo_baja", (object?)dto.MOTIVO_BAJA ?? DBNull.Value);
         cmd.Parameters.AddWithValue("diagnostico", (object?)dto.DIAGNOSTICO ?? DBNull.Value);
         cmd.Parameters.AddWithValue("comentarios", (object?)dto.COMENTARIOS ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("motivo_cancelacion", (object?)dto.MOTIVO_CANCELACION ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("motivo_de_cancelacion", (object?)dto.MOTIVO_DE_CANCELACION ?? DBNull.Value);
     }
 
     private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
