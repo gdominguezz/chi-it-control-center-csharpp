@@ -191,32 +191,43 @@ public class BajasService
     // ── Editar ────────────────────────────────────────────────────────────
     public async Task<bool> EditarAsync(int id, BajaDto dto, string usuario)
     {
-        await using var conn = await _pool.OpenAsync();
+        // Cada operación usa su propia conexión para evitar conflictos
+        // entre readers y comandos activos sobre la misma conexión (Npgsql).
 
-        // Snapshot anterior
-        var anterior = await SnapshotAsync(conn, id);
+        // 1. Snapshot anterior
+        Dictionary<string, object?>? anterior;
+        await using (var conn1 = await _pool.OpenAsync())
+            anterior = await SnapshotAsync(conn1, id);
         if (anterior == null) return false;
 
-        await using var cmd = new NpgsqlCommand("""
-            UPDATE bajas_equipos SET
-                folio=@folio, estado=@estado, planta=@planta, fecha=@fecha,
-                equipo=@equipo, marca=@marca, modelo=@modelo, no_serie=@no_serie,
-                activo_fijo=@activo_fijo, ubicacion_persona=@ubicacion_persona,
-                motivo_de_baja=@motivo_de_baja, diagnostico=@diagnostico,
-                comentarios=@comentarios, motivo_de_cancelacion=@motivo_de_cancelacion
-            WHERE id=@id
-            """, conn);
-
-        AgregarParametros(cmd, dto);
-        cmd.Parameters.AddWithValue("id", id);
-        var rows = await cmd.ExecuteNonQueryAsync();
+        // 2. UPDATE
+        int rows;
+        await using (var conn2 = await _pool.OpenAsync())
+        {
+            await using var cmd = new NpgsqlCommand("""
+                UPDATE bajas_equipos SET
+                    folio=@folio, estado=@estado, planta=@planta, fecha=@fecha,
+                    equipo=@equipo, marca=@marca, modelo=@modelo, no_serie=@no_serie,
+                    activo_fijo=@activo_fijo, ubicacion_persona=@ubicacion_persona,
+                    motivo_de_baja=@motivo_de_baja, diagnostico=@diagnostico,
+                    comentarios=@comentarios, motivo_de_cancelacion=@motivo_de_cancelacion
+                WHERE id=@id
+                """, conn2);
+            AgregarParametros(cmd, dto);
+            cmd.Parameters.AddWithValue("id", id);
+            rows = await cmd.ExecuteNonQueryAsync();
+        }
         if (rows == 0) return false;
 
-        // Snapshot nuevo
-        var nuevo = await SnapshotAsync(conn, id);
+        // 3. Snapshot nuevo
+        Dictionary<string, object?>? nuevo;
+        await using (var conn3 = await _pool.OpenAsync())
+            nuevo = await SnapshotAsync(conn3, id);
 
-        // Historial
-        await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
+        // 4. Historial
+        await using (var conn4 = await _pool.OpenAsync())
+            await RegistrarHistorialAsync(conn4, id, usuario, anterior, nuevo!);
+
         return true;
     }
 
