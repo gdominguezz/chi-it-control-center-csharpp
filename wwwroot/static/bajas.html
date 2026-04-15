@@ -1005,7 +1005,6 @@
                     <button class="dropdown-item" onclick="window.location.href='/static/menu.html'">☰ &nbsp;Menú principal</button>
                     <div class="dropdown-sep"></div>
                     <button class="dropdown-item danger" onclick="cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
-                    <div class="dropdown-sep" id="adminSep" style="display:none"></div>
                 </div>
             </div>
             <button class="btn btn-ghost btn-sm"
@@ -1307,11 +1306,6 @@
                 document.getElementById('nombreUsuario').textContent = nombre;
                 document.getElementById('dropNombre').textContent = nombre;
                 document.getElementById('dropRol').textContent = data.rol || 'USER';
-
-                if (data.rol === 'ADMIN') {
-                    document.getElementById('btnAdmin').style.display = 'flex';
-                    document.getElementById('adminSep').style.display = 'block';
-                }
             } catch {
                 window.location.href = '/static/login.html';
             }
