@@ -1,658 +1,1412 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>BAJAS DE EQUIPOS</title>
-<style>
-/* ══════════ BASE ══════════ */
-*{box-sizing:border-box;}
-body{margin:0;font-family:Arial;background:#f1f5f9;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Bajas de Equipos</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0F1A;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --surface3: #1e293b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --accent: #EF4444; /* rojo — identidad de "bajas" */
+            --accent2: #F87171;
+            --text: #F1F5F9;
+            --muted: #64748B;
+            --muted2: #94A3B8;
+            --green: #10B981;
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --purple: #8B5CF6;
+            --cyan: #06B6D4;
+            --blue: #3B82F6;
+        }
 
-.header{
-    background:#1e293b;color:white;padding:15px 20px;
-    font-size:20px;font-weight:bold;
-    display:flex;justify-content:space-between;align-items:center;
-}
-.user-info{
-    font-size:13px;background:rgba(255,255,255,0.15);
-    padding:7px 14px;border-radius:6px;
-}
-.container{padding:20px;}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-.form-grid{
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
-    gap:10px;margin-bottom:14px;
-}
-.field{display:flex;flex-direction:column;}
-.field label{
-    font-size:11px;font-weight:bold;color:#1e293b;
-    margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;
-}
-.field input{
-    padding:7px;border:1px solid #cbd5e1;border-radius:5px;
-    font-size:12px;background:#f8fafc;transition:border-color .2s;
-}
-.field input:focus{
-    outline:none;border-color:#2563eb;background:white;
-    box-shadow:0 0 0 2px rgba(37,99,235,.15);
-}
+        body {
+            font-family: 'DM Sans',sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
 
-button{
-    padding:6px 13px;border:none;border-radius:5px;
-    cursor:pointer;font-weight:bold;font-size:12px;margin-right:5px;
-}
-.save     {background:#16a34a;color:white;}
-.delete   {background:#dc2626;color:white;}
-.edit     {background:#f59e0b;color:black;}
-.pdf      {background:#2563eb;color:white;}
-.export   {background:#7c3aed;color:white;}
-.historial{background:#0ea5e9;color:white;}
-.back     {background:#dc2626;font-style:italic;color:white;}
+        /* ── TOPBAR ─────────────────────────────────────────────────────── */
+        .topbar {
+            background: linear-gradient(135deg,#1a0505,#0B0F1A);
+            border-bottom: 1px solid var(--border2);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
 
-/* ══════════ TABLA ══════════ */
-.table-container{
-    width:100%;height:500px;overflow:auto;
-    border:1px solid #ccc;background:white;margin-top:10px;
-}
-table{border-collapse:collapse;min-width:3200px;font-size:11px;}
-th,td{border:1px solid #ccc;padding:6px;white-space:nowrap;text-align:center;}
-th{background:#1e293b;color:white;position:sticky;top:0;z-index:2;}
-.filter-row input{width:100%;font-size:11px;padding:3px;}
-.pagination{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .topbar-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: linear-gradient(135deg,#991B1B,#EF4444);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px rgba(239,68,68,.45);
+            flex-shrink: 0;
+        }
 
-/* ══════════ MODALES ══════════ */
-.modal{
-    display:none;position:fixed;inset:0;
-    background:rgba(0,0,0,0.55);
-    justify-content:center;align-items:center;z-index:9999;
-}
-.modal.show{display:flex;}
+        .topbar-title {
+            flex: 1;
+        }
 
-.modal-box{
-    background:white;border-radius:10px;padding:24px;
-    max-height:90vh;overflow-y:auto;
-    box-shadow:0 25px 60px rgba(0,0,0,.35);
-}
-.modal-box.form-box {width:min(560px,95vw);}
-.modal-box.hist-box {width:min(950px,95vw);}
+            .topbar-title h1 {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: -.01em;
+            }
 
-.modal-header{
-    display:flex;justify-content:space-between;align-items:center;
-    border-bottom:2px solid #e2e8f0;padding-bottom:12px;margin-bottom:18px;
-}
-.modal-header h3{margin:0;color:#1e293b;font-size:16px;}
-.close-btn{
-    background:#dc2626;color:white;border:none;
-    padding:5px 12px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:bold;
-}
-.modal-footer{
-    display:flex;justify-content:flex-end;gap:8px;
-    border-top:1px solid #e2e8f0;padding-top:14px;margin-top:8px;
-}
-.modal-footer button{margin-right:0;}
+            .topbar-title p {
+                font-size: 11px;
+                color: var(--muted2);
+                margin-top: 1px;
+                font-family: 'DM Mono',monospace;
+            }
 
-/* ── Form editar ── */
-.form-field{margin-bottom:13px;display:flex;flex-direction:column;}
-.form-field label{
-    font-size:11px;font-weight:bold;color:#1e293b;
-    margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;
-}
-.form-field input,.form-field textarea{
-    padding:8px;border:1px solid #cbd5e1;border-radius:5px;
-    font-size:12px;background:#f8fafc;font-family:Arial;
-}
-.form-field input:focus,.form-field textarea:focus{
-    outline:none;border-color:#2563eb;background:white;
-    box-shadow:0 0 0 2px rgba(37,99,235,.15);
-}
-.form-field textarea{resize:vertical;min-height:70px;}
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
 
-/* ── Historial ── */
-.ev-wrap{margin-bottom:22px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;}
-.ev-header{
-    background:#1e293b;color:white;padding:11px 16px;
-    display:flex;flex-wrap:wrap;gap:20px;align-items:center;
-}
-.ev-header span{font-size:12px;}
-.ev-header strong{color:#7dd3fc;}
-.badge-cambio{
-    background:#f59e0b;color:#111;font-size:10px;
-    padding:2px 7px;border-radius:999px;font-weight:bold;
-    text-transform:uppercase;letter-spacing:.3px;margin-left:5px;
-}
-.ev-table{width:100%;border-collapse:collapse;font-size:12px;}
-.ev-table th,.ev-table td{border:1px solid #e5e7eb;padding:8px 10px;text-align:left;}
-.ev-table thead th{background:#f1f5f9;color:#374151;font-weight:bold;}
-.ev-table th:first-child{width:22%;}
-.row-changed{background:#fffbeb!important;}
-.row-changed td:nth-child(2){background:#fee2e2;color:#b91c1c;}
-.row-changed td:nth-child(3){background:#dcfce7;color:#15803d;}
-.empty-val{color:#94a3b8;font-style:italic;}
-.sin-hist{text-align:center;padding:40px;color:#64748b;font-size:14px;}
-</style>
+        /* ── USER CHIP ───────────────────────────────────────────────────── */
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background .2s, border-color .2s;
+        }
+
+            .user-chip:hover {
+                background: rgba(255,255,255,.1);
+                border-color: var(--accent);
+            }
+
+            .user-chip span {
+                color: var(--muted2);
+            }
+
+            .user-chip .chip-arrow {
+                font-size: 9px;
+                color: var(--muted);
+                transition: transform .2s;
+            }
+
+            .user-chip.open .chip-arrow {
+                transform: rotate(180deg);
+            }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
+
+            .dropdown-header .d-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            .dropdown-header .d-role {
+                font-size: 10px;
+                color: var(--muted);
+                font-family: 'DM Mono',monospace;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                margin-top: 2px;
+            }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: background .15s, color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans',sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: var(--text);
+            }
+
+            .dropdown-item.admin-item {
+                color: #C4B5FD;
+            }
+
+                .dropdown-item.admin-item:hover {
+                    background: rgba(139,92,246,.1);
+                    color: #fff;
+                }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        .dropdown-sep {
+            height: 1px;
+            background: var(--border);
+            margin: 6px 0;
+        }
+
+        /* ── MAIN ─────────────────────────────────────────────────────────── */
+        .main {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px 24px;
+        }
+
+        /* ── PANEL NUEVO REGISTRO ────────────────────────────────────────── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .panel-title::before {
+                content: '';
+                width: 3px;
+                height: 14px;
+                background: var(--accent);
+                border-radius: 2px;
+                display: inline-block;
+            }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .field input, .field select, .field textarea {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+            .field input:focus, .field select:focus, .field textarea:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(239,68,68,.12);
+            }
+
+        /* ── BOTONES ─────────────────────────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans',sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+            box-shadow: 0 3px 10px rgba(239,68,68,.3);
+        }
+
+            .btn-danger:hover {
+                background: #DC2626;
+                transform: translateY(-1px);
+            }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+            box-shadow: 0 3px 10px rgba(16,185,129,.25);
+        }
+
+            .btn-success:hover {
+                background: #059669;
+                transform: translateY(-1px);
+            }
+
+        .btn-amber {
+            background: var(--amber);
+            color: #1c1400;
+        }
+
+            .btn-amber:hover {
+                background: #D97706;
+            }
+
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+
+            .btn-purple:hover {
+                background: #7C3AED;
+            }
+
+        .btn-cyan {
+            background: var(--cyan);
+            color: #001a1f;
+        }
+
+            .btn-cyan:hover {
+                background: #0891B2;
+            }
+
+        .btn-primary {
+            background: var(--blue);
+            color: white;
+            box-shadow: 0 3px 10px rgba(59,130,246,.3);
+        }
+
+            .btn-primary:hover {
+                background: #2563EB;
+                transform: translateY(-1px);
+            }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
+        }
+
+            .btn-ghost:hover {
+                color: var(--text);
+                border-color: var(--accent);
+            }
+
+        .btn-sm {
+            padding: 6px 11px;
+            font-size: 11px;
+        }
+
+        /* ── TOOLBAR ─────────────────────────────────────────────────────── */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .toolbar-sep {
+            width: 1px;
+            height: 24px;
+            background: var(--border2);
+            margin: 0 4px;
+        }
+
+        .anio-input {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            width: 110px;
+        }
+
+            .anio-input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        /* ── TABLA ────────────────────────────────────────────────────────── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: calc(100vh - 420px);
+            min-height: 380px;
+            overflow-y: auto;
+        }
+
+            .table-scroll::-webkit-scrollbar {
+                width: 7px;
+                height: 7px;
+            }
+
+            .table-scroll::-webkit-scrollbar-track {
+                background: var(--surface2);
+                border-radius: 999px;
+            }
+
+            .table-scroll::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 999px;
+            }
+
+                .table-scroll::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent);
+                }
+
+            .table-scroll::-webkit-scrollbar-corner {
+                background: var(--surface2);
+            }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 2400px;
+            font-size: 12px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+            thead tr:first-child th {
+                background: var(--surface3);
+                color: var(--muted2);
+                padding: 11px 12px;
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                border-bottom: 1px solid var(--border2);
+                white-space: nowrap;
+            }
+
+        .filter-row th {
+            background: var(--surface2);
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border2);
+        }
+
+        .filter-row input {
+            width: 100%;
+            background: rgba(255,255,255,.04);
+            border: 1px solid var(--border2);
+            border-radius: 5px;
+            padding: 6px 8px;
+            font-size: 11px;
+            color: var(--text);
+            font-family: 'DM Mono',monospace;
+        }
+
+            .filter-row input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+
+            tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            tbody tr:hover td {
+                filter: brightness(1.12);
+            }
+
+        td {
+            padding: 9px 12px;
+            color: var(--text);
+            vertical-align: middle;
+            line-height: 1.4;
+            font-size: 12px;
+        }
+
+            td.mono {
+                font-family: 'DM Mono',monospace;
+                color: var(--muted2);
+                font-size: 12px;
+            }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .03em;
+        }
+
+        .pill-red {
+            background: rgba(239,68,68,.15);
+            color: #FCA5A5;
+        }
+
+        .pill-green {
+            background: rgba(16,185,129,.12);
+            color: #6EE7B7;
+        }
+
+        .pill-amber {
+            background: rgba(245,158,11,.12);
+            color: #FDE68A;
+        }
+
+        .pill-blue {
+            background: rgba(59,130,246,.12);
+            color: #93C5FD;
+        }
+
+        .pill-gray {
+            background: rgba(100,116,139,.15);
+            color: var(--muted2);
+        }
+
+        /* ── PAGINACIÓN ───────────────────────────────────────────────────── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .page-info {
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--muted2);
+        }
+
+        /* ── MODALES ──────────────────────────────────────────────────────── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.65);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+            .modal.show {
+                display: flex;
+            }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 26px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,.55);
+        }
+
+            .modal-box.form-box {
+                width: min(580px,95vw);
+            }
+
+            .modal-box.hist-box {
+                width: min(980px,95vw);
+            }
+
+            .modal-box::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .modal-box::-webkit-scrollbar-track {
+                background: var(--surface2);
+                border-radius: 999px;
+            }
+
+            .modal-box::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 999px;
+            }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+            .modal-header h3 {
+                margin: 0;
+                color: var(--text);
+                font-size: 15px;
+                font-weight: 700;
+            }
+
+        .close-btn {
+            background: rgba(239,68,68,.15);
+            color: #FCA5A5;
+            border: 1px solid rgba(239,68,68,.3);
+            padding: 5px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all .2s;
+        }
+
+            .close-btn:hover {
+                background: var(--red);
+                color: white;
+            }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 10px;
+        }
+
+        .form-field {
+            margin-bottom: 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .form-field label {
+                font-size: 9px;
+                font-weight: 700;
+                color: var(--muted);
+                margin-bottom: 5px;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+            }
+
+            .form-field input, .form-field textarea, .form-field select {
+                padding: 9px 11px;
+                border: 1px solid var(--border2);
+                border-radius: 7px;
+                font-size: 12px;
+                background: var(--surface2);
+                color: var(--text);
+                font-family: 'DM Mono',monospace;
+                transition: border-color .2s, box-shadow .2s;
+            }
+
+                .form-field input:focus, .form-field textarea:focus, .form-field select:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                    box-shadow: 0 0 0 3px rgba(239,68,68,.12);
+                }
+
+            .form-field textarea {
+                resize: vertical;
+                min-height: 70px;
+            }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media(max-width:500px) {
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── HISTORIAL ────────────────────────────────────────────────────── */
+        .ev-wrap {
+            margin-bottom: 18px;
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .ev-header {
+            background: var(--surface3);
+            padding: 11px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+            .ev-header span {
+                font-size: 12px;
+                color: var(--muted2);
+            }
+
+            .ev-header strong {
+                color: #7dd3fc;
+            }
+
+        .badge-cambio {
+            background: var(--amber);
+            color: #111;
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+            margin-left: 6px;
+        }
+
+        .ev-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+            .ev-table th, .ev-table td {
+                border: 1px solid var(--border2);
+                padding: 8px 10px;
+                text-align: left;
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+            .ev-table thead th {
+                background: var(--surface3);
+                color: var(--muted2);
+                font-weight: 700;
+            }
+
+            .ev-table th:first-child {
+                width: 22%;
+            }
+
+        .row-changed {
+        }
+
+            .row-changed td:nth-child(2) {
+                background: rgba(239,68,68,.1);
+                color: #FCA5A5;
+            }
+
+            .row-changed td:nth-child(3) {
+                background: rgba(16,185,129,.1);
+                color: #6EE7B7;
+            }
+
+        .empty-val {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .sin-hist {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* ── INPUT FILE CUSTOM ────────────────────────────────────────────── */
+        .file-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            background: rgba(59,130,246,.1);
+            color: #93C5FD;
+            border: 1px solid rgba(59,130,246,.25);
+            font-size: 11px;
+            font-weight: 600;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+            .file-label:hover {
+                background: rgba(59,130,246,.2);
+                border-color: #3B82F6;
+            }
+
+            .file-label input[type=file] {
+                display: none;
+            }
+    </style>
 </head>
 <body>
 
-<div class="header">
-    <span>BAJAS DE EQUIPOS</span>
-    <div class="user-info">👤 <strong id="usuarioDisplay">Cargando...</strong></div>
-</div>
-
-<div class="container">
-
-    <div class="form-grid">
-        <div class="field"><label>FOLIO</label>                  <input id="FOLIO"></div>
-        <div class="field"><label>ESTADO</label>                 <input id="ESTADO"></div>
-        <div class="field"><label>PLANTA</label>                 <input id="PLANTA"></div>
-        <div class="field"><label>FECHA</label>                  <input id="FECHA" type="date"></div>
-        <div class="field"><label>EQUIPO</label>                 <input id="EQUIPO"></div>
-        <div class="field"><label>MARCA</label>                  <input id="MARCA"></div>
-        <div class="field"><label>MODELO</label>                 <input id="MODELO"></div>
-        <div class="field"><label>NO SERIE</label>               <input id="NO_SERIE"></div>
-        <div class="field"><label>ACTIVO FIJO</label>            <input id="ACTIVO_FIJO"></div>
-        <div class="field"><label>UBICACION / PERSONA</label>    <input id="UBICACION_PERSONA"></div>
-        <div class="field"><label>MOTIVO DE BAJA</label>         <input id="MOTIVO_BAJA"></div>
-        <div class="field"><label>DIAGNOSTICO</label>            <input id="DIAGNOSTICO"></div>
-        <div class="field"><label>COMENTARIOS</label>            <input id="COMENTARIOS"></div>
-        <div class="field"><label>MOTIVO DE CANCELACION</label>  <input id="MOTIVO_CANCELACION"></div>
-    </div>
-
-    <div style="margin-bottom:14px;">
-        <button class="save"   onclick="guardar()">GUARDAR</button>
-        <button class="edit"   onclick="cancelarEdicion()" style="background:#64748b;color:white;">CANCELAR</button>
-    </div>
-
-    <div style="margin-bottom:14px;">
-        <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
-        <button class="export" onclick="exportarTodo()">Exportar Todo</button>
-        <input id="anioExportar" type="number" placeholder="Año (ej: 2026)"
-               style="width:130px;padding:6px;border:1px solid #ccc;border-radius:5px;font-size:12px;">
-        <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
-    </div>
-
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>FOLIO</th><th>ESTADO</th><th>PLANTA</th><th>FECHA</th>
-                    <th>EQUIPO</th><th>MARCA</th><th>MODELO</th><th>NO_SERIE</th>
-                    <th>ACTIVO_FIJO</th><th>UBICACION_PERSONA</th>
-                    <th>MOTIVO_BAJA</th><th>DIAGNOSTICO</th>
-                    <th>COMENTARIOS</th><th>MOTIVO_CANCELACION</th>
-                    <th>PDF</th><th>ACCIONES</th>
-                </tr>
-                <tr class="filter-row">
-                    <th></th>
-                    <th><input oninput="filtrar()"></th><!-- FOLIO -->
-                    <th><input oninput="filtrar()"></th><!-- ESTADO -->
-                    <th><input oninput="filtrar()"></th><!-- PLANTA -->
-                    <th><input oninput="filtrar()"></th><!-- FECHA -->
-                    <th><input oninput="filtrar()"></th><!-- EQUIPO -->
-                    <th><input oninput="filtrar()"></th><!-- MARCA -->
-                    <th><input oninput="filtrar()"></th><!-- MODELO -->
-                    <th><input oninput="filtrar()"></th><!-- NO_SERIE -->
-                    <th><input oninput="filtrar()"></th><!-- ACTIVO_FIJO -->
-                    <th><input oninput="filtrar()"></th><!-- UBICACION_PERSONA -->
-                    <th><input oninput="filtrar()"></th><!-- MOTIVO_BAJA -->
-                    <th><input oninput="filtrar()"></th><!-- DIAGNOSTICO -->
-                    <th><input oninput="filtrar()"></th><!-- COMENTARIOS -->
-                    <th><input oninput="filtrar()"></th><!-- MOTIVO_CANCELACION -->
-                    <th></th><th></th>
-                </tr>
-            </thead>
-            <tbody id="tabla"></tbody>
-        </table>
-    </div>
-
-    <div class="pagination">
-        <button onclick="anterior()">◀ Anterior</button>
-        <span id="paginaInfo" style="font-size:13px;color:#475569;"></span>
-        <button onclick="siguiente()">Siguiente ▶</button>
-        <button class="back" onclick="window.location.href='menu.html'">REGRESAR AL MENÚ</button>
-    </div>
-</div>
-
-<!-- ════════════════════════════════════════════
-     MODAL EDITAR
-     ════════════════════════════════════════════ -->
-<div id="modalEditar" class="modal">
-    <div class="modal-box form-box">
-        <div class="modal-header">
-            <h3>✏️ Editar Baja &nbsp;<span id="editarIdLabel" style="color:#2563eb;">#</span></h3>
-            <button class="close-btn" onclick="cerrarEditar()">✕</button>
+    <!-- ══════════════════════════════════════════════════════════════════
+         TOP BAR
+    ══════════════════════════════════════════════════════════════════════ -->
+    <div class="topbar">
+        <div class="topbar-icon">🗑️</div>
+        <div class="topbar-title">
+            <h1>BAJAS DE EQUIPOS</h1>
+            <p>Gestión de equipos dados de baja · CHI-IT</p>
         </div>
-
-        <div class="form-field"><label>FOLIO</label>
-            <input type="text" id="e_FOLIO"></div>
-        <div class="form-field"><label>ESTADO</label>
-            <input type="text" id="e_ESTADO"></div>
-        <div class="form-field"><label>PLANTA</label>
-            <input type="text" id="e_PLANTA"></div>
-        <div class="form-field"><label>FECHA</label>
-            <input type="date" id="e_FECHA"></div>
-        <div class="form-field"><label>EQUIPO</label>
-            <input type="text" id="e_EQUIPO"></div>
-        <div class="form-field"><label>MARCA</label>
-            <input type="text" id="e_MARCA"></div>
-        <div class="form-field"><label>MODELO</label>
-            <input type="text" id="e_MODELO"></div>
-        <div class="form-field"><label>NO SERIE</label>
-            <input type="text" id="e_NO_SERIE"></div>
-        <div class="form-field"><label>ACTIVO FIJO</label>
-            <input type="text" id="e_ACTIVO_FIJO"></div>
-        <div class="form-field"><label>UBICACION / PERSONA</label>
-            <input type="text" id="e_UBICACION_PERSONA"></div>
-        <div class="form-field"><label>MOTIVO DE BAJA</label>
-            <textarea id="e_MOTIVO_BAJA"></textarea></div>
-        <div class="form-field"><label>DIAGNOSTICO</label>
-            <textarea id="e_DIAGNOSTICO"></textarea></div>
-        <div class="form-field"><label>COMENTARIOS</label>
-            <textarea id="e_COMENTARIOS"></textarea></div>
-        <div class="form-field"><label>MOTIVO DE CANCELACION</label>
-            <textarea id="e_MOTIVO_CANCELACION"></textarea></div>
-
-        <div class="modal-footer">
-            <button class="delete" onclick="cerrarEditar()">Cancelar</button>
-            <button class="save"   onclick="guardarCambios()">💾 Guardar Cambios</button>
+        <div class="topbar-actions">
+            <div class="user-chip" id="userChip" onclick="toggleChip()">
+                👤 <span id="nombreUsuario">Cargando...</span>
+                <span class="chip-arrow">▼</span>
+                <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name" id="dropNombre">—</div>
+                        <div class="d-role" id="dropRol">—</div>
+                    </div>
+                    <button class="dropdown-item admin-item" id="btnAdmin" style="display:none"
+                            onclick="window.location.href='/admin/usuarios'">
+                        ⚙️ &nbsp;Administración
+                    </button>
+                    <div class="dropdown-sep" id="adminSep" style="display:none"></div>
+                    <button class="dropdown-item danger" onclick="cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
+                </div>
+            </div>
+            <button class="btn btn-ghost btn-sm"
+                    onclick="window.location.href='/static/menu.html'">
+                ← Menú
+            </button>
         </div>
     </div>
-</div>
 
-<!-- ════════════════════════════════════════════
-     MODAL HISTORIAL
-     ════════════════════════════════════════════ -->
-<div id="modalHistorial" class="modal">
-    <div class="modal-box hist-box">
-        <div class="modal-header">
-            <h3>📋 Historial de Cambios — Baja&nbsp;
-                <span id="histIdLabel" style="color:#0ea5e9;">#</span>
-            </h3>
-            <button class="close-btn" onclick="cerrarHistorial()">✕</button>
+    <!-- ══════════════════════════════════════════════════════════════════
+         MAIN
+    ══════════════════════════════════════════════════════════════════════ -->
+    <div class="main">
+
+        <!-- Nuevo registro -->
+        <div class="panel">
+            <div class="panel-title">➕ Nuevo Registro de Baja</div>
+            <div class="form-grid">
+                <div class="field"><label>Folio</label>                 <input id="FOLIO"></div>
+                <div class="field"><label>Estado</label>                <input id="ESTADO"></div>
+                <div class="field"><label>Planta</label>                <input id="PLANTA"></div>
+                <div class="field"><label>Fecha</label>                 <input id="FECHA" type="date"></div>
+                <div class="field"><label>Equipo</label>                <input id="EQUIPO"></div>
+                <div class="field"><label>Marca</label>                 <input id="MARCA"></div>
+                <div class="field"><label>Modelo</label>                <input id="MODELO"></div>
+                <div class="field"><label>No. Serie</label>             <input id="NO_SERIE"></div>
+                <div class="field"><label>Activo Fijo</label>           <input id="ACTIVO_FIJO"></div>
+                <div class="field"><label>Ubicación / Persona</label>   <input id="UBICACION_PERSONA"></div>
+                <div class="field"><label>Motivo de Baja</label>        <input id="MOTIVO_BAJA"></div>
+                <div class="field"><label>Diagnóstico</label>           <input id="DIAGNOSTICO"></div>
+                <div class="field"><label>Comentarios</label>           <input id="COMENTARIOS"></div>
+                <div class="field"><label>Motivo de Cancelación</label> <input id="MOTIVO_CANCELACION"></div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-danger" onclick="guardar()">💾 Guardar</button>
+                <button class="btn btn-ghost" onclick="cancelarEdicion()">✕ Cancelar</button>
+            </div>
         </div>
-        <div id="contenidoHistorial"></div>
-        <div class="modal-footer">
-            <button class="delete" onclick="cerrarHistorial()">Cerrar</button>
+
+        <!-- Toolbar exportar -->
+        <div class="toolbar">
+            <button class="btn btn-purple btn-sm" onclick="exportarFiltrado()">⬇ Exportar Filtrado</button>
+            <button class="btn btn-purple btn-sm" onclick="exportarTodo()">⬇ Exportar Todo</button>
+            <div class="toolbar-sep"></div>
+            <input class="anio-input" id="anioExportar" type="number" placeholder="Año (ej: 2026)">
+            <button class="btn btn-purple btn-sm" onclick="exportarPorAnio()">⬇ Exportar por Año</button>
+        </div>
+
+        <!-- Tabla -->
+        <div class="table-wrap">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>FOLIO</th>
+                            <th>ESTADO</th>
+                            <th>PLANTA</th>
+                            <th>FECHA</th>
+                            <th>EQUIPO</th>
+                            <th>MARCA</th>
+                            <th>MODELO</th>
+                            <th>NO SERIE</th>
+                            <th>ACTIVO FIJO</th>
+                            <th>UBICACIÓN / PERSONA</th>
+                            <th>MOTIVO BAJA</th>
+                            <th>DIAGNÓSTICO</th>
+                            <th>COMENTARIOS</th>
+                            <th>MOTIVO CANCELACIÓN</th>
+                            <th>PDF</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" placeholder="🔍"></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Paginación -->
+        <div class="pagination">
+            <button class="btn btn-ghost btn-sm" onclick="anterior()">◀ Anterior</button>
+            <span class="page-info" id="paginaInfo">—</span>
+            <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
+        </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         MODAL EDITAR
+    ══════════════════════════════════════════════════════════════════════ -->
+    <div id="modalEditar" class="modal">
+        <div class="modal-box form-box">
+            <div class="modal-header">
+                <h3>✏️ Editar Baja &nbsp;<span id="editarIdLabel" style="color:var(--accent2);">#</span></h3>
+                <button class="close-btn" onclick="cerrarEditar()">✕</button>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-field"><label>Folio</label>                 <input id="e_FOLIO"></div>
+                <div class="form-field"><label>Estado</label>                <input id="e_ESTADO"></div>
+                <div class="form-field"><label>Planta</label>                <input id="e_PLANTA"></div>
+                <div class="form-field"><label>Fecha</label>                 <input type="date" id="e_FECHA"></div>
+                <div class="form-field"><label>Equipo</label>                <input id="e_EQUIPO"></div>
+                <div class="form-field"><label>Marca</label>                 <input id="e_MARCA"></div>
+                <div class="form-field"><label>Modelo</label>                <input id="e_MODELO"></div>
+                <div class="form-field"><label>No. Serie</label>             <input id="e_NO_SERIE"></div>
+                <div class="form-field"><label>Activo Fijo</label>           <input id="e_ACTIVO_FIJO"></div>
+                <div class="form-field"><label>Ubicación / Persona</label>   <input id="e_UBICACION_PERSONA"></div>
+            </div>
+            <div class="form-field"><label>Motivo de Baja</label>            <textarea id="e_MOTIVO_BAJA"></textarea></div>
+            <div class="form-field"><label>Diagnóstico</label>               <textarea id="e_DIAGNOSTICO"></textarea></div>
+            <div class="form-field"><label>Comentarios</label>               <textarea id="e_COMENTARIOS"></textarea></div>
+            <div class="form-field"><label>Motivo de Cancelación</label>     <textarea id="e_MOTIVO_CANCELACION"></textarea></div>
+
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
+                <button class="btn btn-success" onclick="guardarCambios()">💾 Guardar Cambios</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-// ═══════════════════════════════════════════
-// ESTADO GLOBAL
-// ═══════════════════════════════════════════
-let paginaActual   = 1;
-let limite         = 10;
-let totalRegistros = 0;
-let datosActuales  = [];
-let editandoID     = null;
-let usuarioActual  = 'SISTEMA';
+    <!-- ══════════════════════════════════════════════════════════════════
+         MODAL HISTORIAL
+    ══════════════════════════════════════════════════════════════════════ -->
+    <div id="modalHistorial" class="modal">
+        <div class="modal-box hist-box">
+            <div class="modal-header">
+                <h3>
+                    📋 Historial de Cambios — Baja
+                    <span id="histIdLabel" style="color:var(--cyan);">#</span>
+                </h3>
+                <button class="close-btn" onclick="cerrarHistorial()">✕</button>
+            </div>
+            <div id="contenidoHistorial"></div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="cerrarHistorial()">Cerrar</button>
+            </div>
+        </div>
+    </div>
 
-const CAMPOS = [
-    {key:'FOLIO',              label:'Folio'},
-    {key:'ESTADO',             label:'Estado'},
-    {key:'PLANTA',             label:'Planta'},
-    {key:'FECHA',              label:'Fecha'},
-    {key:'EQUIPO',             label:'Equipo'},
-    {key:'MARCA',              label:'Marca'},
-    {key:'MODELO',             label:'Modelo'},
-    {key:'NO_SERIE',           label:'No. Serie'},
-    {key:'ACTIVO_FIJO',        label:'Activo Fijo'},
-    {key:'UBICACION_PERSONA',  label:'Ubicación / Persona'},
-    {key:'MOTIVO_BAJA',        label:'Motivo de Baja'},
-    {key:'DIAGNOSTICO',        label:'Diagnóstico'},
-    {key:'COMENTARIOS',        label:'Comentarios'},
-    {key:'MOTIVO_CANCELACION', label:'Motivo de Cancelación'},
-];
+    <!-- ══════════════════════════════════════════════════════════════════
+         SCRIPT
+    ══════════════════════════════════════════════════════════════════════ -->
+    <script>
+        // ── Estado global ──────────────────────────────────────────────────
+        let paginaActual = 1;
+        let limite = 10;
+        let totalRegistros = 0;
+        let datosActuales = [];
+        let editandoID = null;
+        let usuarioActual = 'SISTEMA';
 
-// ═══════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-    const usr = sessionStorage.getItem('usuario');
-    if (usr) {
-        usuarioActual = usr;
-        document.getElementById('usuarioDisplay').textContent = usr;
-    } else {
-        fetch('/obtener-usuario')
-            .then(r => r.json())
-            .then(d => {
-                usuarioActual = d.usuario || 'SISTEMA';
-                document.getElementById('usuarioDisplay').textContent = usuarioActual;
-            })
-            .catch(() => document.getElementById('usuarioDisplay').textContent = 'Sin sesión');
-    }
-    cargar();
-});
+        const CAMPOS = [
+            { key: 'FOLIO', label: 'Folio' },
+            { key: 'ESTADO', label: 'Estado' },
+            { key: 'PLANTA', label: 'Planta' },
+            { key: 'FECHA', label: 'Fecha' },
+            { key: 'EQUIPO', label: 'Equipo' },
+            { key: 'MARCA', label: 'Marca' },
+            { key: 'MODELO', label: 'Modelo' },
+            { key: 'NO_SERIE', label: 'No. Serie' },
+            { key: 'ACTIVO_FIJO', label: 'Activo Fijo' },
+            { key: 'UBICACION_PERSONA', label: 'Ubicación / Persona' },
+            { key: 'MOTIVO_BAJA', label: 'Motivo de Baja' },
+            { key: 'DIAGNOSTICO', label: 'Diagnóstico' },
+            { key: 'COMENTARIOS', label: 'Comentarios' },
+            { key: 'MOTIVO_CANCELACION', label: 'Motivo de Cancelación' },
+        ];
 
-// ═══════════════════════════════════════════
-// CARGA Y RENDERIZADO
-// ═══════════════════════════════════════════
-function obtenerParametros() {
-    const f = document.querySelectorAll('.filter-row input');
-    return new URLSearchParams({
-        page: paginaActual, limit: limite,
-        FOLIO:              f[0].value,
-        ESTADO:             f[1].value,
-        PLANTA:             f[2].value,
-        FECHA:              f[3].value,
-        EQUIPO:             f[4].value,
-        MARCA:              f[5].value,
-        MODELO:             f[6].value,
-        NO_SERIE:           f[7].value,
-        ACTIVO_FIJO:        f[8].value,
-        UBICACION_PERSONA:  f[9].value,
-        MOTIVO_BAJA:        f[10].value,
-        DIAGNOSTICO:        f[11].value,
-        COMENTARIOS:        f[12].value,
-        MOTIVO_CANCELACION: f[13].value,
-    });
-}
-
-function cargar() {
-    fetch(`/BAJAS?${obtenerParametros()}`)
-        .then(r => r.json())
-        .then(resp => {
-            totalRegistros = resp.total;
-            datosActuales  = resp.data;
-            renderizar();
-        })
-        .catch(() => {
-            document.getElementById('tabla').innerHTML =
-                '<tr><td colspan="17" style="text-align:center;padding:20px">Error al cargar datos</td></tr>';
-        });
-}
-
-function renderizar() {
-    const tbody = document.getElementById('tabla');
-    tbody.innerHTML = '';
-    if (!datosActuales.length) {
-        tbody.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:20px">Sin registros</td></tr>';
-        return;
-    }
-    datosActuales.forEach(row => {
-        tbody.innerHTML += `
-        <tr>
-            <td>${row.ID}</td>
-            <td>${row.FOLIO??''}</td>
-            <td>${row.ESTADO??''}</td>
-            <td>${row.PLANTA??''}</td>
-            <td>${row.FECHA??''}</td>
-            <td>${row.EQUIPO??''}</td>
-            <td>${row.MARCA??''}</td>
-            <td>${row.MODELO??''}</td>
-            <td>${row.NO_SERIE??''}</td>
-            <td>${row.ACTIVO_FIJO??''}</td>
-            <td>${row.UBICACION_PERSONA??''}</td>
-            <td>${row.MOTIVO_BAJA??''}</td>
-            <td>${row.DIAGNOSTICO??''}</td>
-            <td>${row.COMENTARIOS??''}</td>
-            <td>${row.MOTIVO_CANCELACION??''}</td>
-            <td>
-                ${row.TIENE_PDF
-                    ? `<button class="pdf"    onclick="verPDF(${row.ID})">Ver PDF</button>
-                       <button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
-                    : `<input type="file" onchange="subirPDF(${row.ID},this)">`}
-            </td>
-            <td>
-                <button class="edit"      onclick="abrirEditar(${row.ID})">✏️ Editar</button>
-                <button class="delete"    onclick="eliminar(${row.ID})">🗑️ Eliminar</button>
-                <button class="historial" onclick="verHistorial(${row.ID})">📋 Historial</button>
-            </td>
-        </tr>`;
-    });
-    document.getElementById('paginaInfo').innerText =
-        `Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)} | Total: ${totalRegistros}`;
-}
-
-function filtrar()   { paginaActual = 1; cargar(); }
-function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
-function anterior()  { if (paginaActual > 1) { paginaActual--; cargar(); } }
-
-// ═══════════════════════════════════════════
-// GUARDAR NUEVO
-// ═══════════════════════════════════════════
-function guardar() {
-    const data = {};
-    CAMPOS.forEach(({key}) => {
-        const el = document.getElementById(key);
-        data[key] = el ? (el.value || null) : null;
-    });
-    fetch('/BAJA', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(data)
-    }).then(() => {
-        document.querySelectorAll('.form-grid input').forEach(i => i.value = '');
-        cargar();
-    });
-}
-
-function cancelarEdicion() {
-    editandoID = null;
-    document.querySelectorAll('.form-grid input').forEach(i => i.value = '');
-}
-
-// ═══════════════════════════════════════════
-// ELIMINAR / PDF
-// ═══════════════════════════════════════════
-function eliminar(id) {
-    if (!confirm('¿Eliminar este registro?')) return;
-    fetch(`/BAJA/${id}`, {method:'DELETE'}).then(() => cargar());
-}
-function subirPDF(id, input) {
-    const fd = new FormData();
-    fd.append('file', input.files[0]);
-    fetch(`/BAJA/PDF/${id}`, {method:'POST', body:fd}).then(() => cargar());
-}
-function verPDF(id)      { window.open(`/BAJA/PDF/${id}`, '_blank'); }
-function eliminarPDF(id) {
-    if (!confirm('¿Eliminar el PDF?')) return;
-    fetch(`/BAJA/PDF/${id}`, {method:'DELETE'}).then(() => cargar());
-}
-
-// ═══════════════════════════════════════════
-// EXPORTAR
-// ═══════════════════════════════════════════
-function exportarFiltrado() { window.open(`/BAJAS/EXPORTAR?${obtenerParametros()}`); }
-function exportarTodo()     { window.open('/BAJAS/EXPORTAR_TODO'); }
-function exportarPorAnio()  {
-    const a = document.getElementById('anioExportar').value;
-    if (!a) { alert('Ingresa un año'); return; }
-    window.open(`/BAJAS/EXPORTAR_ANIO?anio=${a}`);
-}
-
-// ═══════════════════════════════════════════
-// MODAL EDITAR
-// ═══════════════════════════════════════════
-function abrirEditar(id) {
-    editandoID = id;
-    document.getElementById('editarIdLabel').textContent = id;
-    const row = datosActuales.find(r => r.ID === id);
-    if (row) {
-        CAMPOS.forEach(({key}) => {
-            const el = document.getElementById('e_' + key);
-            if (el) el.value = row[key] ?? '';
-        });
-    }
-    document.getElementById('modalEditar').classList.add('show');
-    document.querySelector('#modalEditar .modal-box').scrollTop = 0;
-}
-
-function cerrarEditar() {
-    document.getElementById('modalEditar').classList.remove('show');
-    editandoID = null;
-}
-
-async function guardarCambios() {
-    const datos = {};
-    CAMPOS.forEach(({key}) => {
-        const el = document.getElementById('e_' + key);
-        datos[key] = el ? (el.value || null) : null;
-    });
-    try {
-        const res = await fetch(
-            `/BAJA/${editandoID}?usuario=${encodeURIComponent(usuarioActual)}`,
-            {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Usuario': usuarioActual
-                },
-                body: JSON.stringify(datos)
-            }
-        );
-        const result = await res.json();
-        if (res.ok && !result.error) {
-            cerrarEditar();
+        // ── Init ───────────────────────────────────────────────────────────
+        window.addEventListener('DOMContentLoaded', () => {
+            verificarSesion();
             cargar();
-        } else {
-            alert('Error: ' + (result.error || 'No se pudo guardar'));
-        }
-    } catch(e) {
-        alert('Error: ' + e.message);
-    }
-}
-
-// ═══════════════════════════════════════════
-// MODAL HISTORIAL
-// ═══════════════════════════════════════════
-function esc(v) {
-    if (v == null) return '';
-    return String(v)
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function norm(v) { return (v == null) ? '' : String(v).trim(); }
-
-function formatFecha(f) {
-    try {
-        const d = new Date(f);
-        if (!isNaN(d)) return d.toLocaleString('es-MX', {
-            year:'numeric', month:'2-digit', day:'2-digit',
-            hour:'2-digit', minute:'2-digit', second:'2-digit'
         });
-    } catch(e) {}
-    return f ?? '';
-}
 
-function renderEvento(ev){
+        // ── Sesión ─────────────────────────────────────────────────────────
+        async function verificarSesion() {
+            try {
+                const res = await fetch('/obtener-usuario', { credentials: 'include' });
+                if (!res.ok) { window.location.href = '/static/login.html'; return; }
+                const data = await res.json();
+                if (!data.usuario) { window.location.href = '/static/login.html'; return; }
 
-    let antes = ev.registro_anterior;
-    let despues = ev.registro_nuevo;
+                usuarioActual = data.usuario;
+                const nombre = data.nombre || data.usuario;
 
-    try{ if(typeof antes==="string") antes=JSON.parse(antes); }catch{}
-    try{ if(typeof despues==="string") despues=JSON.parse(despues); }catch{}
+                document.getElementById('nombreUsuario').textContent = nombre;
+                document.getElementById('dropNombre').textContent = nombre;
+                document.getElementById('dropRol').textContent = data.rol || 'USER';
 
-    const cambios=new Set();
-
-    CAMPOS.forEach(({key})=>{
-        if(String(antes?.[key] ?? "") !== String(despues?.[key] ?? "")){
-            cambios.add(key);
-        }
-    });
-
-    let filas="";
-
-    CAMPOS.forEach(({key,label})=>{
-
-        const valorAntes = antes && key in antes ? antes[key] : "";
-        const valorDespues = despues && key in despues ? despues[key] : "";
-
-        const cambiado=cambios.has(key);
-
-        const mostrarAntes =
-            valorAntes===null || valorAntes===""
-            ? '<span class="empty-val">vacío</span>'
-            : valorAntes;
-
-        const mostrarDespues =
-            valorDespues===null || valorDespues===""
-            ? '<span class="empty-val">vacío</span>'
-            : valorDespues;
-
-        filas+=`
-        <tr class="${cambiado?'row-changed':''}">
-            <td>
-                <strong>${label}</strong>
-                ${cambiado?'<span class="badge-cambio">CAMBIO</span>':''}
-            </td>
-
-            <td>${mostrarAntes}</td>
-            <td>${mostrarDespues}</td>
-        </tr>
-        `;
-    });
-
-    return `
-
-    <div class="ev-wrap">
-
-        <div class="ev-header">
-            <span>🕒 Fecha: <strong>${formatFecha(ev.fecha)}</strong></span>
-            <span>👤 Usuario: <strong>${ev.usuario}</strong></span>
-            <span style="margin-left:auto;background:#f59e0b;color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:bold;">
-                ${cambios.size} campo${cambios.size!=1?"s":""} modificado${cambios.size!=1?"s":""}
-            </span>
-        </div>
-
-        <table class="ev-table">
-
-            <thead>
-                <tr>
-                    <th>Campo</th>
-                    <th style="background:#fee2e2">⬅ Antes</th>
-                    <th style="background:#dcfce7">➡ Después</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                ${filas}
-            </tbody>
-
-        </table>
-
-    </div>
-    `;
-}
-
-function verHistorial(id) {
-    document.getElementById('histIdLabel').textContent = id;
-    document.getElementById('contenidoHistorial').innerHTML =
-        '<p style="text-align:center;padding:30px;color:#64748b">Cargando historial...</p>';
-    document.getElementById('modalHistorial').classList.add('show');
-    document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
-
-    fetch(`/BAJAS/${id}/HISTORIAL`)
-        .then(r => r.json())
-        .then(data => {
-            const lista = (data.historial || []).sort(
-                (a,b) => new Date(b.fecha||0) - new Date(a.fecha||0)
-            );
-            if (!lista.length) {
-                document.getElementById('contenidoHistorial').innerHTML =
-                    '<p class="sin-hist">📭 Este registro no tiene ediciones registradas.</p>';
-            } else {
-                document.getElementById('contenidoHistorial').innerHTML =
-                    `<p style="color:#64748b;font-size:12px;margin-bottom:14px">
-                        ${lista.length} edición${lista.length!==1?'es':''} registrada${lista.length!==1?'s':''}
-                    </p>` + lista.map(ev => renderEvento(ev)).join('');
+                if (data.rol === 'ADMIN') {
+                    document.getElementById('btnAdmin').style.display = 'flex';
+                    document.getElementById('adminSep').style.display = 'block';
+                }
+            } catch {
+                window.location.href = '/static/login.html';
             }
-        })
-        .catch(() => {
-            document.getElementById('contenidoHistorial').innerHTML =
-                '<p style="color:#dc2626;text-align:center;padding:30px">Error al cargar historial.</p>';
+        }
+
+        async function cerrarSesion() {
+            try { await fetch('/LOGOUT', { method: 'POST', credentials: 'include' }); } catch { }
+            sessionStorage.clear();
+            window.location.href = '/static/login.html';
+        }
+
+        function toggleChip() {
+            document.getElementById('userChip').classList.toggle('open');
+        }
+        document.addEventListener('click', e => {
+            const c = document.getElementById('userChip');
+            if (c && !c.contains(e.target)) c.classList.remove('open');
         });
-}
 
-function cerrarHistorial() {
-    document.getElementById('modalHistorial').classList.remove('show');
-}
+        // ── Filtros ────────────────────────────────────────────────────────
+        function obtenerParametros() {
+            const f = document.querySelectorAll('.filter-row input');
+            return new URLSearchParams({
+                page: paginaActual, limit: limite,
+                FOLIO: f[0].value,
+                ESTADO: f[1].value,
+                PLANTA: f[2].value,
+                FECHA: f[3].value,
+                EQUIPO: f[4].value,
+                MARCA: f[5].value,
+                MODELO: f[6].value,
+                NO_SERIE: f[7].value,
+                ACTIVO_FIJO: f[8].value,
+                UBICACION_PERSONA: f[9].value,
+                MOTIVO_BAJA: f[10].value,
+                DIAGNOSTICO: f[11].value,
+                COMENTARIOS: f[12].value,
+                MOTIVO_CANCELACION: f[13].value,
+            });
+        }
 
-// Cerrar con ESC
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
-});
-</script>
+        // ── Cargar / Renderizar ────────────────────────────────────────────
+        function cargar() {
+            fetch(`/BAJAS?${obtenerParametros()}`)
+                .then(r => r.json())
+                .then(resp => {
+                    totalRegistros = resp.total;
+                    datosActuales = resp.data;
+                    renderizar();
+                })
+                .catch(() => {
+                    document.getElementById('tabla').innerHTML =
+                        `<tr><td colspan="17" style="text-align:center;padding:30px;color:var(--muted)">
+                        ⚠️ Error al cargar datos</td></tr>`;
+                });
+        }
+
+        function renderizar() {
+            const tbody = document.getElementById('tabla');
+            tbody.innerHTML = '';
+
+            if (!datosActuales.length) {
+                tbody.innerHTML = `<tr><td colspan="17"
+                style="text-align:center;padding:40px;color:var(--muted)">
+                📭 Sin registros</td></tr>`;
+                return;
+            }
+
+            datosActuales.forEach(row => {
+                tbody.innerHTML += `
+            <tr>
+                <td class="mono">${row.ID}</td>
+                <td class="mono">${row.FOLIO ?? ''}</td>
+                <td>${estadoPill(row.ESTADO)}</td>
+                <td>${row.PLANTA ?? ''}</td>
+                <td class="mono">${row.FECHA ?? ''}</td>
+                <td>${row.EQUIPO ?? ''}</td>
+                <td>${row.MARCA ?? ''}</td>
+                <td>${row.MODELO ?? ''}</td>
+                <td class="mono">${row.NO_SERIE ?? ''}</td>
+                <td class="mono">${row.ACTIVO_FIJO ?? ''}</td>
+                <td>${row.UBICACION_PERSONA ?? ''}</td>
+                <td>${row.MOTIVO_BAJA ?? ''}</td>
+                <td>${row.DIAGNOSTICO ?? ''}</td>
+                <td>${row.COMENTARIOS ?? ''}</td>
+                <td>${row.MOTIVO_CANCELACION ?? ''}</td>
+                <td>
+                    ${row.TIENE_PDF
+                        ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
+                           <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
+                        : `<label class="file-label">
+                               📎 Subir PDF
+                               <input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)">
+                           </label>`}
+                </td>
+                <td style="white-space:nowrap;">
+                    <button class="btn btn-amber btn-sm"   onclick="abrirEditar(${row.ID})">✏️</button>
+                    <button class="btn btn-danger btn-sm"  onclick="eliminar(${row.ID})">🗑️</button>
+                    <button class="btn btn-cyan btn-sm"    onclick="verHistorial(${row.ID})">📋</button>
+                </td>
+            </tr>`;
+            });
+
+            const totalPags = Math.ceil(totalRegistros / limite) || 1;
+            document.getElementById('paginaInfo').textContent =
+                `Página ${paginaActual} / ${totalPags} · Total: ${totalRegistros} registros`;
+        }
+
+        function estadoPill(estado) {
+            if (!estado) return '';
+            const e = estado.toLowerCase();
+            let cls = 'pill-gray';
+            if (e.includes('activ')) cls = 'pill-green';
+            if (e.includes('baja')) cls = 'pill-red';
+            if (e.includes('cancel')) cls = 'pill-amber';
+            if (e.includes('proces')) cls = 'pill-blue';
+            return `<span class="pill ${cls}">${estado}</span>`;
+        }
+
+        function filtrar() { paginaActual = 1; cargar(); }
+        function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
+        function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
+
+        // ── Guardar nuevo ──────────────────────────────────────────────────
+        function guardar() {
+            const data = {};
+            CAMPOS.forEach(({ key }) => {
+                const el = document.getElementById(key);
+                data[key] = el ? (el.value || null) : null;
+            });
+
+            fetch('/BAJA', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                body: JSON.stringify(data)
+            }).then(r => r.json())
+                .then(() => {
+                    document.querySelectorAll('.panel .form-grid input').forEach(i => i.value = '');
+                    cargar();
+                })
+                .catch(e => alert('Error al guardar: ' + e.message));
+        }
+
+        function cancelarEdicion() {
+            editandoID = null;
+            document.querySelectorAll('.panel .form-grid input').forEach(i => i.value = '');
+        }
+
+        // ── Eliminar / PDF ─────────────────────────────────────────────────
+        function eliminar(id) {
+            if (!confirm('¿Eliminar este registro de baja?')) return;
+            fetch(`/BAJA/${id}`, { method: 'DELETE' }).then(() => cargar());
+        }
+        function subirPDF(id, input) {
+            const fd = new FormData();
+            fd.append('file', input.files[0]);
+            fetch(`/BAJA/PDF/${id}`, { method: 'POST', body: fd }).then(() => cargar());
+        }
+        function verPDF(id) { window.open(`/BAJA/PDF/${id}`, '_blank'); }
+        function eliminarPDF(id) {
+            if (!confirm('¿Eliminar el PDF adjunto?')) return;
+            fetch(`/BAJA/PDF/${id}`, { method: 'DELETE' }).then(() => cargar());
+        }
+
+        // ── Exportar ───────────────────────────────────────────────────────
+        function exportarFiltrado() { window.open(`/BAJAS/EXPORTAR?${obtenerParametros()}`); }
+        function exportarTodo() { window.open('/BAJAS/EXPORTAR_TODO'); }
+        function exportarPorAnio() {
+            const a = document.getElementById('anioExportar').value;
+            if (!a) { alert('Ingresa un año'); return; }
+            window.open(`/BAJAS/EXPORTAR_ANIO?anio=${a}`);
+        }
+
+        // ── Modal Editar ───────────────────────────────────────────────────
+        function abrirEditar(id) {
+            editandoID = id;
+            document.getElementById('editarIdLabel').textContent = id;
+            const row = datosActuales.find(r => r.ID === id);
+            if (row) {
+                CAMPOS.forEach(({ key }) => {
+                    const el = document.getElementById('e_' + key);
+                    if (el) el.value = row[key] ?? '';
+                });
+            }
+            document.getElementById('modalEditar').classList.add('show');
+            document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+        }
+
+        function cerrarEditar() {
+            document.getElementById('modalEditar').classList.remove('show');
+            editandoID = null;
+        }
+
+        async function guardarCambios() {
+            const datos = {};
+            CAMPOS.forEach(({ key }) => {
+                const el = document.getElementById('e_' + key);
+                datos[key] = el ? (el.value || null) : null;
+            });
+
+            try {
+                const res = await fetch(`/BAJA/${editandoID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(datos)
+                });
+                const result = await res.json();
+                if (res.ok && !result.error) {
+                    cerrarEditar();
+                    cargar();
+                } else {
+                    alert('Error: ' + (result.error || 'No se pudo guardar'));
+                }
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        // ── Modal Historial ────────────────────────────────────────────────
+        function esc(v) {
+            if (v == null) return '';
+            return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function formatFecha(f) {
+            try {
+                const d = new Date(f);
+                if (!isNaN(d)) return d.toLocaleString('es-MX', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+            } catch { }
+            return f ?? '';
+        }
+
+        function renderEvento(ev) {
+            let antes = ev.registro_anterior;
+            let despues = ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch { }
+
+            const cambios = new Set();
+            CAMPOS.forEach(({ key }) => {
+                if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? ''))
+                    cambios.add(key);
+            });
+
+            let filas = '';
+            CAMPOS.forEach(({ key, label }) => {
+                const vA = antes && key in antes ? antes[key] : '';
+                const vD = despues && key in despues ? despues[key] : '';
+                const cambiado = cambios.has(key);
+                const mA = (vA === null || vA === '') ? '<span class="empty-val">vacío</span>' : esc(vA);
+                const mD = (vD === null || vD === '') ? '<span class="empty-val">vacío</span>' : esc(vD);
+                filas += `
+            <tr class="${cambiado ? 'row-changed' : ''}">
+                <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                <td>${mA}</td>
+                <td>${mD}</td>
+            </tr>`;
+            });
+
+            return `
+        <div class="ev-wrap">
+            <div class="ev-header">
+                <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                <span style="margin-left:auto;background:var(--amber);color:#111;
+                    padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                    ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                </span>
+            </div>
+            <table class="ev-table">
+                <thead><tr>
+                    <th>Campo</th>
+                    <th style="color:#FCA5A5">⬅ Antes</th>
+                    <th style="color:#6EE7B7">➡ Después</th>
+                </tr></thead>
+                <tbody>${filas}</tbody>
+            </table>
+        </div>`;
+        }
+
+        function verHistorial(id) {
+            document.getElementById('histIdLabel').textContent = id;
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="text-align:center;padding:30px;color:var(--muted)">Cargando historial...</p>';
+            document.getElementById('modalHistorial').classList.add('show');
+            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+
+            fetch(`/BAJAS/${id}/HISTORIAL`)
+                .then(r => r.json())
+                .then(data => {
+                    const lista = (data.historial || []).sort(
+                        (a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0)
+                    );
+                    if (!lista.length) {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            '<p class="sin-hist">📭 Este registro no tiene ediciones registradas.</p>';
+                    } else {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
+                            ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                        </p>` + lista.map(renderEvento).join('');
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        '<p style="color:var(--red);text-align:center;padding:30px">Error al cargar historial.</p>';
+                });
+        }
+
+        function cerrarHistorial() {
+            document.getElementById('modalHistorial').classList.remove('show');
+        }
+
+        // Cerrar con ESC
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
+        });
+    </script>
 </body>
 </html>
