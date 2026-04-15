@@ -398,8 +398,7 @@ public class BajasService
         cmd.Parameters.AddWithValue("folio", (object?)dto.FOLIO ?? DBNull.Value);
         cmd.Parameters.AddWithValue("estado", (object?)dto.ESTADO ?? DBNull.Value);
         cmd.Parameters.AddWithValue("planta", (object?)dto.PLANTA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("fecha", NpgsqlTypes.NpgsqlDbType.Text,
-            (object?)dto.FECHA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("fecha", (object?)dto.FECHA ?? DBNull.Value);
         cmd.Parameters.AddWithValue("equipo", (object?)dto.EQUIPO ?? DBNull.Value);
         cmd.Parameters.AddWithValue("marca", (object?)dto.MARCA ?? DBNull.Value);
         cmd.Parameters.AddWithValue("modelo", (object?)dto.MODELO ?? DBNull.Value);
