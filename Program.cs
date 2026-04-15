@@ -14,6 +14,7 @@ builder.Services.AddScoped<AuditoriaServicepreventivos>();
 builder.Services.AddSingleton<AuditoriaServiceCorrectivos>();
 builder.Services.AddScoped<ExcelService>();
 builder.Services.AddScoped<QrService>();
+builder.Services.AddScoped<BajasService>();          // ← BAJAS
 
 // CORS
 builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
@@ -34,6 +35,7 @@ app.MapControllers();
 
 // ── Crear directorios necesarios al iniciar ──
 Directory.CreateDirectory("PDF_DATABASE/PREVENTIVOS");
+Directory.CreateDirectory("PDF_DATABASE/BAJAS");         // ← BAJAS
 Directory.CreateDirectory("QR_CODES/MESAS");
 
 

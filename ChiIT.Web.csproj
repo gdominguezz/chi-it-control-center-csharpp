@@ -9,9 +9,11 @@
 
   <ItemGroup>
     <None Include="wwwroot\static\correctivos.html" />
+    <None Include="wwwroot\static\bajas.html" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="EPPlus" Version="8.5.1" />
     <PackageReference Include="Npgsql" Version="8.0.3" />
     <PackageReference Include="ClosedXML" Version="0.102.2" />
     <PackageReference Include="QRCoder" Version="1.6.0" />
