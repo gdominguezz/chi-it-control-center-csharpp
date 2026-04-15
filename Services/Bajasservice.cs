@@ -27,7 +27,7 @@ public class BajaDto
     public string? MOTIVO_BAJA { get; set; }
     public string? DIAGNOSTICO { get; set; }
     public string? COMENTARIOS { get; set; }
-    public string? MOTIVO_CANCELACION { get; set; }
+    public string? MOTIVO_DE_CANCELACION { get; set; }
 }
 
 public class BajaFiltros
@@ -45,7 +45,7 @@ public class BajaFiltros
     public string? MOTIVO_BAJA { get; set; }
     public string? DIAGNOSTICO { get; set; }
     public string? COMENTARIOS { get; set; }
-    public string? MOTIVO_CANCELACION { get; set; }
+    public string? MOTIVO_DE_CANCELACION { get; set; }
 }
 
 // ── Servicio ──────────────────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ public class BajasService
     [
         "FOLIO","ESTADO","PLANTA","FECHA","EQUIPO","MARCA","MODELO",
         "NO_SERIE","ACTIVO_FIJO","UBICACION_PERSONA",
-        "MOTIVO_BAJA","DIAGNOSTICO","COMENTARIOS","MOTIVO_CANCELACION"
+        "MOTIVO_BAJA","DIAGNOSTICO","COMENTARIOS","MOTIVO_DE_CANCELACION"
     ];
 
     public BajasService(DbConnectionPool pool)
@@ -90,7 +90,7 @@ public class BajasService
                 motivo_baja         TEXT,
                 diagnostico         TEXT,
                 comentarios         TEXT,
-                motivo_cancelacion  TEXT,
+                motivo_de_cancelacion  TEXT,
                 tiene_pdf           BOOLEAN DEFAULT FALSE,
                 fecha_creacion      TIMESTAMPTZ DEFAULT NOW()
             );
@@ -176,7 +176,7 @@ public class BajasService
             VALUES
                 (@folio,@estado,@planta,@fecha,@equipo,@marca,@modelo,
                  @no_serie,@activo_fijo,@ubicacion_persona,
-                 @motivo_baja,@diagnostico,@comentarios,@motivo_cancelacion)
+                 @motivo_baja,@diagnostico,@comentarios,@motivo_de_cancelacion)
             RETURNING id
             """, conn);
 
@@ -199,7 +199,7 @@ public class BajasService
                 equipo=@equipo, marca=@marca, modelo=@modelo, no_serie=@no_serie,
                 activo_fijo=@activo_fijo, ubicacion_persona=@ubicacion_persona,
                 motivo_baja=@motivo_baja, diagnostico=@diagnostico,
-                comentarios=@comentarios, motivo_cancelacion=@motivo_cancelacion
+                comentarios=@comentarios, motivo_cancelacion=@motivo_de_cancelacion
             WHERE id=@id
             """, conn);
 
@@ -372,7 +372,7 @@ public class BajasService
         Add("motivo_baja", f.MOTIVO_BAJA);
         Add("diagnostico", f.DIAGNOSTICO);
         Add("comentarios", f.COMENTARIOS);
-        Add("motivo_cancelacion", f.MOTIVO_CANCELACION);
+        Add("motivo_de_cancelacion", f.MOTIVO_CANCELACION);
 
         var where = conds.Count > 0 ? "WHERE " + string.Join(" AND ", conds) : "";
         return (where, parms);
@@ -446,7 +446,7 @@ public class BajasService
         // Encabezados
         string[] headers = ["ID","FOLIO","ESTADO","PLANTA","FECHA","EQUIPO","MARCA","MODELO",
                              "NO SERIE","ACTIVO FIJO","UBICACION / PERSONA",
-                             "MOTIVO BAJA","DIAGNOSTICO","COMENTARIOS","MOTIVO CANCELACION"];
+                             "MOTIVO BAJA","DIAGNOSTICO","COMENTARIOS","MOTIVO DE CANCELACION"];
 
         for (int c = 0; c < headers.Length; c++)
         {

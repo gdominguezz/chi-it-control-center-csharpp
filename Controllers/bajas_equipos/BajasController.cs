@@ -29,7 +29,7 @@ public class BajasController : ControllerBase
         [FromQuery] string? MOTIVO_BAJA        = null,
         [FromQuery] string? DIAGNOSTICO        = null,
         [FromQuery] string? COMENTARIOS        = null,
-        [FromQuery] string? MOTIVO_CANCELACION = null)
+        [FromQuery] string? MOTIVO_DE_CANCELACION = null)
     {
         var filtros = new BajaFiltros
         {
@@ -46,7 +46,7 @@ public class BajasController : ControllerBase
             MOTIVO_BAJA        = MOTIVO_BAJA,
             DIAGNOSTICO        = DIAGNOSTICO,
             COMENTARIOS        = COMENTARIOS,
-            MOTIVO_CANCELACION = MOTIVO_CANCELACION
+            MOTIVO_DE_CANCELACION = MOTIVO_DE_CANCELACION
         };
 
         var resultado = await _svc.ListarAsync(page, limit, filtros);
@@ -131,7 +131,7 @@ public class BajasController : ControllerBase
         [FromQuery] string? MOTIVO_BAJA        = null,
         [FromQuery] string? DIAGNOSTICO        = null,
         [FromQuery] string? COMENTARIOS        = null,
-        [FromQuery] string? MOTIVO_CANCELACION = null)
+        [FromQuery] string? MOTIVO_DE_CANCELACION = null)
     {
         var filtros = new BajaFiltros
         {
@@ -148,7 +148,7 @@ public class BajasController : ControllerBase
             MOTIVO_BAJA        = MOTIVO_BAJA,
             DIAGNOSTICO        = DIAGNOSTICO,
             COMENTARIOS        = COMENTARIOS,
-            MOTIVO_CANCELACION = MOTIVO_CANCELACION
+            MOTIVO_DE_CANCELACION = MOTIVO_DE_CANCELACION
         };
 
         var bytes = await _svc.ExportarAsync(filtros);
