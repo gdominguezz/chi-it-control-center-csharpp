@@ -14,38 +14,38 @@ public class BajasController : ControllerBase
     // ── GET /BAJAS  (paginado + filtros) ──────────────────────────────────
     [HttpGet("/BAJAS")]
     public async Task<IActionResult> Listar(
-        [FromQuery] int page  = 1,
+        [FromQuery] int page = 1,
         [FromQuery] int limit = 10,
-        [FromQuery] string? FOLIO              = null,
-        [FromQuery] string? ESTADO             = null,
-        [FromQuery] string? PLANTA             = null,
-        [FromQuery] string? FECHA              = null,
-        [FromQuery] string? EQUIPO             = null,
-        [FromQuery] string? MARCA              = null,
-        [FromQuery] string? MODELO             = null,
-        [FromQuery] string? NO_SERIE           = null,
-        [FromQuery] string? ACTIVO_FIJO        = null,
-        [FromQuery] string? UBICACION_PERSONA  = null,
-        [FromQuery] string? MOTIVO_DE_BAJA        = null,
-        [FromQuery] string? DIAGNOSTICO        = null,
-        [FromQuery] string? COMENTARIOS        = null,
+        [FromQuery] string? FOLIO = null,
+        [FromQuery] string? ESTADO = null,
+        [FromQuery] string? PLANTA = null,
+        [FromQuery] string? FECHA = null,
+        [FromQuery] string? EQUIPO = null,
+        [FromQuery] string? MARCA = null,
+        [FromQuery] string? MODELO = null,
+        [FromQuery] string? NO_SERIE = null,
+        [FromQuery] string? ACTIVO_FIJO = null,
+        [FromQuery] string? UBICACION_PERSONA = null,
+        [FromQuery] string? MOTIVO_DE_BAJA = null,
+        [FromQuery] string? DIAGNOSTICO = null,
+        [FromQuery] string? COMENTARIOS = null,
         [FromQuery] string? MOTIVO_DE_CANCELACION = null)
     {
         var filtros = new BajaFiltros
         {
-            FOLIO              = FOLIO,
-            ESTADO             = ESTADO,
-            PLANTA             = PLANTA,
-            FECHA              = FECHA,
-            EQUIPO             = EQUIPO,
-            MARCA              = MARCA,
-            MODELO             = MODELO,
-            NO_SERIE           = NO_SERIE,
-            ACTIVO_FIJO        = ACTIVO_FIJO,
-            UBICACION_PERSONA  = UBICACION_PERSONA,
-            MOTIVO_DE_BAJA        = MOTIVO_DE_BAJA,
-            DIAGNOSTICO        = DIAGNOSTICO,
-            COMENTARIOS        = COMENTARIOS,
+            FOLIO = FOLIO,
+            ESTADO = ESTADO,
+            PLANTA = PLANTA,
+            FECHA = FECHA,
+            EQUIPO = EQUIPO,
+            MARCA = MARCA,
+            MODELO = MODELO,
+            NO_SERIE = NO_SERIE,
+            ACTIVO_FIJO = ACTIVO_FIJO,
+            UBICACION_PERSONA = UBICACION_PERSONA,
+            MOTIVO_DE_BAJA = MOTIVO_DE_BAJA,
+            DIAGNOSTICO = DIAGNOSTICO,
+            COMENTARIOS = COMENTARIOS,
             MOTIVO_DE_CANCELACION = MOTIVO_DE_CANCELACION
         };
 
@@ -118,36 +118,36 @@ public class BajasController : ControllerBase
     // ── GET /BAJAS/EXPORTAR  (Excel filtrado) ─────────────────────────────
     [HttpGet("/BAJAS/EXPORTAR")]
     public async Task<IActionResult> ExportarFiltrado(
-        [FromQuery] string? FOLIO              = null,
-        [FromQuery] string? ESTADO             = null,
-        [FromQuery] string? PLANTA             = null,
-        [FromQuery] string? FECHA              = null,
-        [FromQuery] string? EQUIPO             = null,
-        [FromQuery] string? MARCA              = null,
-        [FromQuery] string? MODELO             = null,
-        [FromQuery] string? NO_SERIE           = null,
-        [FromQuery] string? ACTIVO_FIJO        = null,
-        [FromQuery] string? UBICACION_PERSONA  = null,
-        [FromQuery] string? MOTIVO_DE_BAJA        = null,
-        [FromQuery] string? DIAGNOSTICO        = null,
-        [FromQuery] string? COMENTARIOS        = null,
+        [FromQuery] string? FOLIO = null,
+        [FromQuery] string? ESTADO = null,
+        [FromQuery] string? PLANTA = null,
+        [FromQuery] string? FECHA = null,
+        [FromQuery] string? EQUIPO = null,
+        [FromQuery] string? MARCA = null,
+        [FromQuery] string? MODELO = null,
+        [FromQuery] string? NO_SERIE = null,
+        [FromQuery] string? ACTIVO_FIJO = null,
+        [FromQuery] string? UBICACION_PERSONA = null,
+        [FromQuery] string? MOTIVO_DE_BAJA = null,
+        [FromQuery] string? DIAGNOSTICO = null,
+        [FromQuery] string? COMENTARIOS = null,
         [FromQuery] string? MOTIVO_DE_CANCELACION = null)
     {
         var filtros = new BajaFiltros
         {
-            FOLIO              = FOLIO,
-            ESTADO             = ESTADO,
-            PLANTA             = PLANTA,
-            FECHA              = FECHA,
-            EQUIPO             = EQUIPO,
-            MARCA              = MARCA,
-            MODELO             = MODELO,
-            NO_SERIE           = NO_SERIE,
-            ACTIVO_FIJO        = ACTIVO_FIJO,
-            UBICACION_PERSONA  = UBICACION_PERSONA,
-            MOTIVO_DE_BAJA        = MOTIVO_DE_BAJA,
-            DIAGNOSTICO        = DIAGNOSTICO,
-            COMENTARIOS        = COMENTARIOS,
+            FOLIO = FOLIO,
+            ESTADO = ESTADO,
+            PLANTA = PLANTA,
+            FECHA = FECHA,
+            EQUIPO = EQUIPO,
+            MARCA = MARCA,
+            MODELO = MODELO,
+            NO_SERIE = NO_SERIE,
+            ACTIVO_FIJO = ACTIVO_FIJO,
+            UBICACION_PERSONA = UBICACION_PERSONA,
+            MOTIVO_DE_BAJA = MOTIVO_DE_BAJA,
+            DIAGNOSTICO = DIAGNOSTICO,
+            COMENTARIOS = COMENTARIOS,
             MOTIVO_DE_CANCELACION = MOTIVO_DE_CANCELACION
         };
 
@@ -172,6 +172,14 @@ public class BajasController : ControllerBase
         var bytes = await _svc.ExportarPorAnioAsync(anio);
         return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     $"bajas_{anio}.xlsx");
+    }
+
+    // ── GET /BAJAS/UBICACIONES  (autocomplete) ────────────────────────────
+    [HttpGet("/BAJAS/UBICACIONES")]
+    public async Task<IActionResult> Ubicaciones([FromQuery] string? q = null)
+    {
+        var lista = await _svc.ObtenerUbicacionesAsync(q);
+        return Ok(lista);
     }
 
     // ── Helper: leer usuario del header o query ───────────────────────────

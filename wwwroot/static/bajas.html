@@ -980,6 +980,57 @@
                 grid-column: 1;
             }
         }
+
+        /* ── Autocomplete ubicacion ── */
+        .ac-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface2, #1e1e2e);
+            border: 1px solid var(--border, #444);
+            border-radius: 6px;
+            z-index: 999;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 16px rgba(0,0,0,.4);
+        }
+
+            .ac-dropdown.open {
+                display: block;
+            }
+
+        .ac-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: .85rem;
+            border-bottom: 1px solid var(--border, #333);
+        }
+
+            .ac-item:last-child {
+                border-bottom: none;
+            }
+
+            .ac-item:hover {
+                background: var(--accent, #6c63ff33);
+            }
+
+        /* ── Estado select colores ── */
+        select.estado-pendiente {
+            border-left: 4px solid #f59e0b !important;
+            color: #f59e0b;
+        }
+
+        select.estado-cerrado {
+            border-left: 4px solid #22c55e !important;
+            color: #22c55e;
+        }
+
+        select.estado-cancelado {
+            border-left: 4px solid #ef4444 !important;
+            color: #ef4444;
+        }
     </style>
 </head>
 <body>
@@ -1029,7 +1080,15 @@
                 <div class="panel-title">➕ Nuevo Registro de Baja</div>
                 <div class="form-grid">
                     <div class="field"><label>Folio</label>                 <input id="FOLIO"></div>
-                    <div class="field"><label>Estado</label>                <input id="ESTADO"></div>
+                    <div class="field">
+                        <label>Estado</label>
+                        <select id="ESTADO" onchange="colorearEstado(this)">
+                            <option value="">— Seleccionar —</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Cerrado">Cerrado</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
                     <div class="field">
                         <label>Planta</label>
                         <select id="PLANTA">
@@ -1047,7 +1106,11 @@
                     <div class="field"><label>Modelo</label>                <input id="MODELO"></div>
                     <div class="field"><label>No. Serie</label>             <input id="NO_SERIE"></div>
                     <div class="field"><label>Activo Fijo</label>           <input id="ACTIVO_FIJO"></div>
-                    <div class="field"><label>Ubicación / Persona</label>   <input id="UBICACION_PERSONA"></div>
+                    <div class="field" style="position:relative;">
+                        <label>Ubicación / Persona</label>
+                        <input id="UBICACION_PERSONA" autocomplete="off" oninput="autocompleteUbicacion(this,'ac_ubic_new')">
+                        <div id="ac_ubic_new" class="ac-dropdown"></div>
+                    </div>
                     <div class="field"><label>Motivo de Baja</label>        <input id="MOTIVO_DE_BAJA"></div>
                     <div class="field"><label>Diagnóstico</label>           <input id="DIAGNOSTICO"></div>
                     <div class="field"><label>Comentarios</label>           <input id="COMENTARIOS"></div>
@@ -1202,7 +1265,15 @@
 
             <div class="form-grid-2">
                 <div class="form-field"><label>Folio</label>                 <input id="e_FOLIO"></div>
-                <div class="form-field"><label>Estado</label>                <input id="e_ESTADO"></div>
+                <div class="form-field">
+                    <label>Estado</label>
+                    <select id="e_ESTADO" onchange="colorearEstado(this)">
+                        <option value="">— Seleccionar —</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Cerrado">Cerrado</option>
+                        <option value="Cancelado">Cancelado</option>
+                    </select>
+                </div>
                 <div class="form-field">
                     <label>Planta</label>
                     <select id="e_PLANTA">
@@ -1220,7 +1291,11 @@
                 <div class="form-field"><label>Modelo</label>                <input id="e_MODELO"></div>
                 <div class="form-field"><label>No. Serie</label>             <input id="e_NO_SERIE"></div>
                 <div class="form-field"><label>Activo Fijo</label>           <input id="e_ACTIVO_FIJO"></div>
-                <div class="form-field"><label>Ubicación / Persona</label>   <input id="e_UBICACION_PERSONA"></div>
+                <div class="form-field" style="position:relative;">
+                    <label>Ubicación / Persona</label>
+                    <input id="e_UBICACION_PERSONA" autocomplete="off" oninput="autocompleteUbicacion(this,'ac_ubic_edit')">
+                    <div id="ac_ubic_edit" class="ac-dropdown"></div>
+                </div>
             </div>
             <div class="form-field"><label>Motivo de Baja</label>            <textarea id="e_MOTIVO_DE_BAJA"></textarea></div>
             <div class="form-field"><label>Diagnóstico</label>               <textarea id="e_DIAGNOSTICO"></textarea></div>
@@ -1355,7 +1430,7 @@
                 .catch(() => {
                     document.getElementById('tabla').innerHTML =
                         `<tr><td colspan="17" style="text-align:center;padding:30px;color:var(--muted)">
-                                        ⚠️ Error al cargar datos</td></tr>`;
+                                            ⚠️ Error al cargar datos</td></tr>`;
                 });
         }
 
@@ -1365,50 +1440,89 @@
 
             if (!datosActuales.length) {
                 tbody.innerHTML = `<tr><td colspan="17"
-                                style="text-align:center;padding:40px;color:var(--muted)">
-                                📭 Sin registros</td></tr>`;
+                                    style="text-align:center;padding:40px;color:var(--muted)">
+                                    📭 Sin registros</td></tr>`;
                 return;
             }
 
             datosActuales.forEach(row => {
                 tbody.innerHTML += `
-                            <tr>
-                                <td class="mono">${row.ID}</td>
-                                <td class="mono">${row.FOLIO ?? ''}</td>
-                                <td>${estadoPill(row.ESTADO)}</td>
-                                <td>${row.PLANTA ?? ''}</td>
-                                <td class="mono">${row.FECHA ?? ''}</td>
-                                <td>${row.EQUIPO ?? ''}</td>
-                                <td>${row.MARCA ?? ''}</td>
-                                <td>${row.MODELO ?? ''}</td>
-                                <td class="mono">${row.NO_SERIE ?? ''}</td>
-                                <td class="mono">${row.ACTIVO_FIJO ?? ''}</td>
-                                <td>${row.UBICACION_PERSONA ?? ''}</td>
-                                <td>${row.MOTIVO_DE_BAJA ?? ''}</td>
-                                <td>${row.DIAGNOSTICO ?? ''}</td>
-                                <td>${row.COMENTARIOS ?? ''}</td>
-                                <td>${row.MOTIVO_DE_CANCELACION ?? ''}</td>
-                                <td>
-                                    ${row.TIENE_PDF
+                                <tr>
+                                    <td class="mono">${row.ID}</td>
+                                    <td class="mono">${row.FOLIO ?? ''}</td>
+                                    <td>${estadoPill(row.ESTADO)}</td>
+                                    <td>${row.PLANTA ?? ''}</td>
+                                    <td class="mono">${row.FECHA ?? ''}</td>
+                                    <td>${row.EQUIPO ?? ''}</td>
+                                    <td>${row.MARCA ?? ''}</td>
+                                    <td>${row.MODELO ?? ''}</td>
+                                    <td class="mono">${row.NO_SERIE ?? ''}</td>
+                                    <td class="mono">${row.ACTIVO_FIJO ?? ''}</td>
+                                    <td>${row.UBICACION_PERSONA ?? ''}</td>
+                                    <td>${row.MOTIVO_DE_BAJA ?? ''}</td>
+                                    <td>${row.DIAGNOSTICO ?? ''}</td>
+                                    <td>${row.COMENTARIOS ?? ''}</td>
+                                    <td>${row.MOTIVO_DE_CANCELACION ?? ''}</td>
+                                    <td>
+                                        ${row.TIENE_PDF
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                                           <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
+                                               <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
                         : `<label class="file-label">
-                                               📎 Subir PDF
-                                               <input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)">
-                                           </label>`}
-                                </td>
-                                <td style="white-space:nowrap;">
-                                    <button class="btn btn-amber btn-sm"   onclick="abrirEditar(${row.ID})">✏️</button>
-                                    <button class="btn btn-danger btn-sm"  onclick="eliminar(${row.ID})">🗑️</button>
-                                    <button class="btn btn-cyan btn-sm"    onclick="verHistorial(${row.ID})">📋</button>
-                                </td>
-                            </tr>`;
+                                                   📎 Subir PDF
+                                                   <input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)">
+                                               </label>`}
+                                    </td>
+                                    <td style="white-space:nowrap;">
+                                        <button class="btn btn-amber btn-sm"   onclick="abrirEditar(${row.ID})">✏️</button>
+                                        <button class="btn btn-danger btn-sm"  onclick="eliminar(${row.ID})">🗑️</button>
+                                        <button class="btn btn-cyan btn-sm"    onclick="verHistorial(${row.ID})">📋</button>
+                                    </td>
+                                </tr>`;
             });
 
             const totalPags = Math.ceil(totalRegistros / limite) || 1;
             document.getElementById('paginaInfo').textContent =
                 `Página ${paginaActual} / ${totalPags} · Total: ${totalRegistros} registros`;
         }
+
+        // ── Select Estado colores ──────────────────────────────────────────
+        function colorearEstado(sel) {
+            sel.className = sel.className.replace(/\bestado-\S+/g, '').trim();
+            const v = sel.value.toLowerCase();
+            if (v === 'pendiente') sel.classList.add('estado-pendiente');
+            else if (v === 'cerrado') sel.classList.add('estado-cerrado');
+            else if (v === 'cancelado') sel.classList.add('estado-cancelado');
+        }
+
+        // ── Autocomplete Ubicación ─────────────────────────────────────────
+        let _acTimer = null;
+        async function autocompleteUbicacion(input, dropId) {
+            clearTimeout(_acTimer);
+            const drop = document.getElementById(dropId);
+            const q = input.value.trim();
+            if (q.length < 1) { drop.classList.remove('open'); return; }
+            _acTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/BAJAS/UBICACIONES?q=${encodeURIComponent(q)}`);
+                    const lista = await res.json();
+                    drop.innerHTML = '';
+                    if (!lista.length) { drop.classList.remove('open'); return; }
+                    lista.forEach(u => {
+                        const d = document.createElement('div');
+                        d.className = 'ac-item';
+                        d.textContent = u;
+                        d.onclick = () => { input.value = u; drop.classList.remove('open'); };
+                        drop.appendChild(d);
+                    });
+                    drop.classList.add('open');
+                } catch { drop.classList.remove('open'); }
+            }, 250);
+        }
+        document.addEventListener('click', e => {
+            document.querySelectorAll('.ac-dropdown').forEach(d => {
+                if (!d.previousElementSibling?.contains(e.target)) d.classList.remove('open');
+            });
+        });
 
         function estadoPill(estado) {
             if (!estado) return '';
@@ -1495,6 +1609,7 @@
             }
             document.getElementById('modalEditar').classList.add('show');
             document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+            colorearEstado(document.getElementById('e_ESTADO'));
         }
 
         function cerrarEditar() {
@@ -1569,32 +1684,32 @@
                 const mA = (vA === null || vA === '') ? '<span class="empty-val">vacío</span>' : esc(vA);
                 const mD = (vD === null || vD === '') ? '<span class="empty-val">vacío</span>' : esc(vD);
                 filas += `
-                            <tr class="${cambiado ? 'row-changed' : ''}">
-                                <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                                <td>${mA}</td>
-                                <td>${mD}</td>
-                            </tr>`;
+                                <tr class="${cambiado ? 'row-changed' : ''}">
+                                    <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                                    <td>${mA}</td>
+                                    <td>${mD}</td>
+                                </tr>`;
             });
 
             return `
-                        <div class="ev-wrap">
-                            <div class="ev-header">
-                                <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                                <span style="margin-left:auto;background:var(--amber);color:#111;
-                                    padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-                                    ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-                                </span>
-                            </div>
-                            <table class="ev-table">
-                                <thead><tr>
-                                    <th>Campo</th>
-                                    <th style="color:#FCA5A5">⬅ Antes</th>
-                                    <th style="color:#6EE7B7">➡ Después</th>
-                                </tr></thead>
-                                <tbody>${filas}</tbody>
-                            </table>
-                        </div>`;
+                            <div class="ev-wrap">
+                                <div class="ev-header">
+                                    <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                    <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                                    <span style="margin-left:auto;background:var(--amber);color:#111;
+                                        padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                                        ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                                    </span>
+                                </div>
+                                <table class="ev-table">
+                                    <thead><tr>
+                                        <th>Campo</th>
+                                        <th style="color:#FCA5A5">⬅ Antes</th>
+                                        <th style="color:#6EE7B7">➡ Después</th>
+                                    </tr></thead>
+                                    <tbody>${filas}</tbody>
+                                </table>
+                            </div>`;
         }
 
         function verHistorial(id) {
@@ -1616,8 +1731,8 @@
                     } else {
                         document.getElementById('contenidoHistorial').innerHTML =
                             `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                            ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                        </p>` + lista.map(renderEvento).join('');
+                                                ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                            </p>` + lista.map(renderEvento).join('');
                     }
                 })
                 .catch(() => {

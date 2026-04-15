@@ -342,7 +342,7 @@ public class BajasService
                      no_serie, activo_fijo, ubicacion_persona,
                      MOTIVO_DE_BAJA, diagnostico, comentarios, motivo_de_cancelacion
               FROM bajas_equipos
-              WHERE EXTRACT(YEAR FROM fecha_creacion) = @anio
+              WHERE EXTRACT(YEAR FROM fecha::date) = @anio
               ORDER BY id DESC", conn);
         cmd.Parameters.AddWithValue("anio", anio);
 
@@ -356,6 +356,26 @@ public class BajasService
         }
 
         return GenerarExcel(rows);
+    }
+
+    // ── Ubicaciones desde mantenimientos_preventivos ───────────────────────
+    public async Task<List<string>> ObtenerUbicacionesAsync(string? q)
+    {
+        await using var conn = await _pool.OpenAsync();
+        var sql = string.IsNullOrWhiteSpace(q)
+            ? @"SELECT DISTINCT ""UBICACION_PERSONA"" FROM mantenimientos_preventivos
+                WHERE ""UBICACION_PERSONA"" IS NOT NULL AND ""UBICACION_PERSONA"" <> ''
+                ORDER BY ""UBICACION_PERSONA"" LIMIT 50"
+            : @"SELECT DISTINCT ""UBICACION_PERSONA"" FROM mantenimientos_preventivos
+                WHERE ""UBICACION_PERSONA"" ILIKE @q AND ""UBICACION_PERSONA"" <> ''
+                ORDER BY ""UBICACION_PERSONA"" LIMIT 20";
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        if (!string.IsNullOrWhiteSpace(q))
+            cmd.Parameters.AddWithValue("q", $"%{q}%");
+        var lista = new List<string>();
+        await using var r = await cmd.ExecuteReaderAsync();
+        while (await r.ReadAsync()) lista.Add(r.GetString(0));
+        return lista;
     }
 
     // ── Helpers privados ──────────────────────────────────────────────────
