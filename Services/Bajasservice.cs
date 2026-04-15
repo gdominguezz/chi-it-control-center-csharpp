@@ -155,7 +155,7 @@ public class BajasService
                 MOTIVO_DE_BAJA = Str(reader, 11),
                 DIAGNOSTICO = Str(reader, 12),
                 COMENTARIOS = Str(reader, 13),
-                MOTIVO_CANCELACION = Str(reader, 14),
+                MOTIVO_DE_CANCELACION = Str(reader, 14),
                 TIENE_PDF = !reader.IsDBNull(15) && reader.GetBoolean(15)
             });
         }
@@ -199,7 +199,7 @@ public class BajasService
                 equipo=@equipo, marca=@marca, modelo=@modelo, no_serie=@no_serie,
                 activo_fijo=@activo_fijo, ubicacion_persona=@ubicacion_persona,
                 motivo_de_baja=@motivo_de_baja, diagnostico=@diagnostico,
-                comentarios=@comentarios, motivo_cancelacion=@motivo_de_cancelacion
+                comentarios=@comentarios, motivo_de_cancelacion=@motivo_de_cancelacion
             WHERE id=@id
             """, conn);
 
