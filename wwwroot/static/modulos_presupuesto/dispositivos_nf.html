@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DISPOSITIVOS NF</title>
+<style>
+body{ font-family:Arial; margin:0; background:#f1f5f9; }
+.header{ background:#1e293b; color:white; padding:15px; font-size:20px; font-weight:bold; }
+.container{ padding:15px; }
+.form-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-bottom:15px; }
+.field{ display:flex; flex-direction:column; }
+.field label{ font-size:11px; font-weight:bold; color:#1e293b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.3px; }
+.field input{ padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:12px; background:#f8fafc; transition:border-color 0.2s; }
+.field input:focus{ outline:none; border-color:#2563eb; background:white; box-shadow:0 0 0 2px rgba(37,99,235,0.15); }
+button{ padding:6px 12px; border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; margin-right:5px; }
+.save{background:#16a34a;color:white;} .cancel{background:#64748b;color:white;} .delete{background:#dc2626;color:white;}
+.edit{background:#f59e0b;color:white;} .pdf{background:#2563eb;color:white;} .export{background:#7c3aed;color:white;}
+.btn-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:12px; }
+.btn-bar input[type="number"]{ padding:6px; border:1px solid #ccc; border-radius:5px; font-size:12px; width:110px; }
+.table-container{ width:100%; height:500px; overflow:auto; border:1px solid #ccc; background:white; }
+table{ border-collapse:collapse; min-width:6000px; font-size:11px; }
+th,td{ border:1px solid #ccc; padding:6px; white-space:nowrap; text-align:center; }
+th{ background:#1e293b; color:white; position:sticky; top:0; z-index:2; }
+.filter-row input{ width:100%; font-size:11px; }
+.pagination{ margin-top:10px; }
+.back{
+    background:#dc2626;
+    font-style: italic; color:#ffffff;
+}
+</style>
+</head>
+<body>
+<div class="header">DISPOSITIVOS NF</div>
+<div class="container">
+<div class="form-grid">
+<div class="field"><label>ID Unico</label><input id="ID_UNICO"></div>
+<div class="field"><label>OC</label><input id="OC"></div>
+<div class="field"><label>Folio</label><input id="FOLIO"></div>
+<div class="field"><label>Fecha Registro</label><input id="FECHA_REGISTRO" type="date"></div>
+<div class="field"><label>Recibido Por</label><input id="RECIBIDO_POR"></div>
+<div class="field"><label>Subcategoria</label><input id="SUBCATEGORIA"></div>
+<div class="field"><label>Marca</label><input id="MARCA"></div>
+<div class="field"><label>Modelo</label><input id="MODELO"></div>
+<div class="field"><label>No. Serie</label><input id="NO_SERIE"></div>
+<div class="field"><label>Cantidad</label><input id="CANTIDAD"></div>
+<div class="field"><label>Costo</label><input id="COSTO"></div>
+<div class="field"><label>Proveedor</label><input id="PROVEEDOR"></div>
+<div class="field"><label>Activo Fijo</label><input id="ACTIVO_FIJO"></div>
+<div class="field"><label>Procesador</label><input id="PROCESADOR"></div>
+<div class="field"><label>Arquitectura</label><input id="ARQUITECTURA"></div>
+<div class="field"><label>Almacenamiento</label><input id="ALMACENAMIENTO"></div>
+<div class="field"><label>Tipo Disco</label><input id="TIPO_DISCO"></div>
+<div class="field"><label>Sistema Operativo</label><input id="SISTEMA_OPERATIVO"></div>
+<div class="field"><label>Licencia SO</label><input id="LICENCIA_SO"></div>
+<div class="field"><label>Memoria RAM</label><input id="MEMORIA_RAM"></div>
+<div class="field"><label>Velocidad Memoria</label><input id="VELOCIDAD_MEMORIA"></div>
+<div class="field"><label>Tipo Memoria</label><input id="TIPO_MEMORIA"></div>
+<div class="field"><label>Slot Memoria</label><input id="SLOT_MEMORIA"></div>
+<div class="field"><label>Max Memoria</label><input id="MAX_MEMORIA"></div>
+<div class="field"><label>Modelo Cargador</label><input id="MODELO_CARGADOR"></div>
+<div class="field"><label>No. Serie Eliminador</label><input id="NO_SERIE_ELIMINADOR"></div>
+<div class="field"><label>Bateria Laptop</label><input id="BATERIA_LAPTOP"></div>
+<div class="field"><label>WIFI MAC</label><input id="WIFI_MAC"></div>
+<div class="field"><label>ETH MAC</label><input id="ETH_MAC"></div>
+<div class="field"><label>Accesorios</label><input id="ACCESORIOS"></div>
+<div class="field"><label>Ubicacion</label><input id="UBICACION"></div>
+<div class="field"><label>Edificio</label><input id="EDIFICIO"></div>
+<div class="field"><label>Fecha Salida</label><input id="FECHA_SALIDA" type="date"></div>
+<div class="field"><label>Asignado A</label><input id="ASIGNADO_A"></div>
+<div class="field"><label>Destino Planta</label><input id="DESTINO_PLANTA"></div>
+<div class="field"><label>Disponible</label><input id="DISPONIBLE"></div>
+<div class="field"><label>Personal IT que Asigna</label><input id="PERSONAL_IT_ASIGNA"></div>
+<div class="field"><label>Formato de Baja</label><input id="FORMATO_BAJA"></div>
+</div>
+
+<div class="btn-bar">
+    <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
+    <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
+</div>
+<div class="btn-bar">
+    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
+    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
+    <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
+    <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
+</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>ID</th><th>ID UNICO</th><th>OC</th><th>FOLIO</th><th>FECHA REG</th>
+<th>RECIBIDO</th><th>SUBCATEGORIA</th><th>MARCA</th><th>MODELO</th><th>NO SERIE</th>
+<th>CANTIDAD</th><th>COSTO</th><th>PROVEEDOR</th><th>ACTIVO FIJO</th>
+<th>PROCESADOR</th><th>ARQUITECTURA</th><th>ALMACENAMIENTO</th><th>TIPO DISCO</th>
+<th>SISTEMA OP</th><th>LICENCIA SO</th><th>MEMORIA RAM</th><th>VEL MEMORIA</th>
+<th>TIPO MEM</th><th>SLOT MEM</th><th>MAX MEM</th><th>MOD CARGADOR</th>
+<th>NO SERIE ELIM</th><th>BATERIA</th><th>WIFI MAC</th><th>ETH MAC</th>
+<th>ACCESORIOS</th><th>UBICACION</th><th>EDIFICIO</th><th>FECHA SALIDA</th>
+<th>ASIGNADO A</th><th>DESTINO</th><th>DISPONIBLE</th><th>PERSONAL IT</th>
+<th>FORMATO BAJA</th><th>PDF</th><th>ACCIONES</th>
+</tr>
+<tr class="filter-row">
+<th></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th></th><th></th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+</div>
+<div class="pagination">
+<button onclick="anterior()">Anterior</button>
+<span id="paginaInfo"></span>
+<button onclick="siguiente()">Siguiente</button>
+<button class="back" onclick="window.location.href='presupuestos_menu.html'">
+REGRESAR A PRESUPUESTOS
+</button>
+</div>
+</div>
+
+<script>
+let paginaActual=1, limite=10, totalRegistros=0, editandoID=null;
+
+function guardar(){
+    let ids=['ID_UNICO','OC','FOLIO','FECHA_REGISTRO','RECIBIDO_POR','SUBCATEGORIA',
+             'MARCA','MODELO','NO_SERIE','CANTIDAD','COSTO','PROVEEDOR','ACTIVO_FIJO',
+             'PROCESADOR','ARQUITECTURA','ALMACENAMIENTO','TIPO_DISCO','SISTEMA_OPERATIVO',
+             'LICENCIA_SO','MEMORIA_RAM','VELOCIDAD_MEMORIA','TIPO_MEMORIA','SLOT_MEMORIA',
+             'MAX_MEMORIA','MODELO_CARGADOR','NO_SERIE_ELIMINADOR','BATERIA_LAPTOP',
+             'WIFI_MAC','ETH_MAC','ACCESORIOS','UBICACION','EDIFICIO','FECHA_SALIDA',
+             'ASIGNADO_A','DESTINO_PLANTA','DISPONIBLE','PERSONAL_IT_ASIGNA','FORMATO_BAJA'];
+    let data={};
+    ids.forEach(k=>{ let el=document.getElementById(k); data[k]=el&&el.value?el.value:null; });
+    if(editandoID){
+        fetch(`/DISPOSITIVOS_NF/${editandoID}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
+        .then(()=>{ editandoID=null; limpiarFormulario(); cargar(); });
+    } else {
+        fetch("/DISPOSITIVOS_NF",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
+        .then(()=>{ limpiarFormulario(); cargar(); });
+    }
+}
+
+function limpiarFormulario(){ document.querySelectorAll(".form-grid input").forEach(i=>i.value=""); }
+function cancelarEdicion(){ editandoID=null; limpiarFormulario(); }
+
+function obtenerParametros(){
+    let f=document.querySelectorAll(".filter-row input");
+    return new URLSearchParams({
+        page:paginaActual,limit:limite,
+        ID_UNICO:f[0].value,OC:f[1].value,FOLIO:f[2].value,
+        FECHA_REGISTRO:f[3].value,RECIBIDO_POR:f[4].value,SUBCATEGORIA:f[5].value,
+        MARCA:f[6].value,MODELO:f[7].value,NO_SERIE:f[8].value,
+        CANTIDAD:f[9].value,COSTO:f[10].value,PROVEEDOR:f[11].value,
+        ACTIVO_FIJO:f[12].value,PROCESADOR:f[13].value,ARQUITECTURA:f[14].value,
+        ALMACENAMIENTO:f[15].value,TIPO_DISCO:f[16].value,SISTEMA_OPERATIVO:f[17].value,
+        LICENCIA_SO:f[18].value,MEMORIA_RAM:f[19].value,VELOCIDAD_MEMORIA:f[20].value,
+        TIPO_MEMORIA:f[21].value,SLOT_MEMORIA:f[22].value,MAX_MEMORIA:f[23].value,
+        MODELO_CARGADOR:f[24].value,NO_SERIE_ELIMINADOR:f[25].value,BATERIA_LAPTOP:f[26].value,
+        WIFI_MAC:f[27].value,ETH_MAC:f[28].value,ACCESORIOS:f[29].value,
+        UBICACION:f[30].value,EDIFICIO:f[31].value,FECHA_SALIDA:f[32].value,
+        ASIGNADO_A:f[33].value,DESTINO_PLANTA:f[34].value,DISPONIBLE:f[35].value,
+        PERSONAL_IT_ASIGNA:f[36].value,FORMATO_BAJA:f[37].value
+    });
+}
+
+function cargar(){
+    fetch(`/DISPOSITIVOS_NF?${obtenerParametros().toString()}`)
+    .then(r=>r.json()).then(resp=>{ totalRegistros=resp.total; renderizar(resp.data); });
+}
+
+function renderizar(datos){
+    tabla.innerHTML="";
+    datos.forEach(row=>{
+        tabla.innerHTML+=`<tr>
+        <td>${row.ID}</td><td>${row.ID_UNICO??""}</td><td>${row.OC??""}</td>
+        <td>${row.FOLIO??""}</td><td>${row.FECHA_REGISTRO??""}</td>
+        <td>${row.RECIBIDO_POR??""}</td><td>${row.SUBCATEGORIA??""}</td>
+        <td>${row.MARCA??""}</td><td>${row.MODELO??""}</td><td>${row.NO_SERIE??""}</td>
+        <td>${row.CANTIDAD??""}</td><td>${row.COSTO??""}</td><td>${row.PROVEEDOR??""}</td>
+        <td>${row.ACTIVO_FIJO??""}</td><td>${row.PROCESADOR??""}</td>
+        <td>${row.ARQUITECTURA??""}</td><td>${row.ALMACENAMIENTO??""}</td>
+        <td>${row.TIPO_DISCO??""}</td><td>${row.SISTEMA_OPERATIVO??""}</td>
+        <td>${row.LICENCIA_SO??""}</td><td>${row.MEMORIA_RAM??""}</td>
+        <td>${row.VELOCIDAD_MEMORIA??""}</td><td>${row.TIPO_MEMORIA??""}</td>
+        <td>${row.SLOT_MEMORIA??""}</td><td>${row.MAX_MEMORIA??""}</td>
+        <td>${row.MODELO_CARGADOR??""}</td><td>${row.NO_SERIE_ELIMINADOR??""}</td>
+        <td>${row.BATERIA_LAPTOP??""}</td><td>${row.WIFI_MAC??""}</td>
+        <td>${row.ETH_MAC??""}</td><td>${row.ACCESORIOS??""}</td>
+        <td>${row.UBICACION??""}</td><td>${row.EDIFICIO??""}</td>
+        <td>${row.FECHA_SALIDA??""}</td><td>${row.ASIGNADO_A??""}</td>
+        <td>${row.DESTINO_PLANTA??""}</td><td>${row.DISPONIBLE??""}</td>
+        <td>${row.PERSONAL_IT_ASIGNA??""}</td><td>${row.FORMATO_BAJA??""}</td>
+        <td>${row.TIENE_PDF
+            ? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button><button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
+            : `<input type="file" onchange="subirPDF(${row.ID},this)">`}</td>
+        <td><button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
+        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button></td>
+        </tr>`;
+    });
+    paginaInfo.innerText=`Pagina ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
+}
+
+function editar(row){
+    editandoID=row.ID;
+    Object.keys(row).forEach(key=>{ let el=document.getElementById(key); if(el) el.value=row[key]??""; });
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+function eliminar(id){ if(!confirm("Eliminar este registro?")) return; fetch(`/DISPOSITIVOS_NF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
+function subirPDF(id,input){ let file=input.files[0]; if(!file) return; let fd=new FormData(); fd.append("file",file); fetch(`/DISPOSITIVOS_NF/PDF/${id}`,{method:"POST",body:fd}).then(()=>cargar()); }
+function verPDF(id){ window.open(`/DISPOSITIVOS_NF/PDF/${id}`,"_blank"); }
+function eliminarPDF(id){ if(!confirm("Eliminar el PDF?")) return; fetch(`/DISPOSITIVOS_NF/PDF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
+function filtrar(){ paginaActual=1; cargar(); }
+function exportarFiltrado(){ window.open(`/DISPOSITIVOS_NF/EXPORTAR?${obtenerParametros().toString()}`); }
+function exportarTodo(){ window.open(`/DISPOSITIVOS_NF/EXPORTAR_TODO`); }
+function exportarPorAnio(){ let a=document.getElementById("anioExportar").value; if(!a){alert("Ingresa un año");return;} window.open(`/DISPOSITIVOS_NF/EXPORTAR_ANIO?anio=${a}`); }
+function siguiente(){ if(paginaActual*limite<totalRegistros){ paginaActual++; cargar(); } }
+function anterior(){ if(paginaActual>1){ paginaActual--; cargar(); } }
+
+cargar();
+</script>
+</body>
+</html>

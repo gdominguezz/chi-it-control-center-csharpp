@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>PRESUPUESTOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0F1A;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --surface3: #1e293b;
+            --border: rgba(255,255,255,.08);
+            --text: #F1F5F9;
+            --muted: #94A3B8;
+            --muted2: #64748B;
+            --accent: #2563EB;
+            --accent2: #60A5FA;
+            --danger: #EF4444;
+            --green: #22C55E;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 0 28px;
+            height: 58px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-logo {
+            font-family: 'DM Mono', monospace;
+            font-size: .78rem;
+            color: var(--accent2);
+            letter-spacing: .08em;
+            white-space: nowrap;
+        }
+
+        .topbar-title {
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: .04em;
+        }
+
+        .topbar-sep {
+            flex: 1;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--muted);
+            font-size: .82rem;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: .18s;
+            text-decoration: none;
+        }
+
+            .btn-back:hover {
+                border-color: var(--danger);
+                color: var(--danger);
+            }
+
+        /* ── SEARCH ── */
+        .search-wrap {
+            max-width: 860px;
+            margin: 32px auto 0;
+            padding: 0 24px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 10px;
+            transition: border-color .2s;
+        }
+
+            .search-box:focus-within {
+                border-color: var(--accent);
+            }
+
+            .search-box input {
+                flex: 1;
+                background: transparent;
+                border: none;
+                outline: none;
+                color: var(--text);
+                font-family: 'DM Sans', sans-serif;
+                font-size: .95rem;
+                padding: 4px 8px;
+            }
+
+                .search-box input::placeholder {
+                    color: var(--muted2);
+                }
+
+        .btn-search {
+            padding: 8px 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s;
+            white-space: nowrap;
+        }
+
+            .btn-search:hover {
+                background: #1d4ed8;
+            }
+
+        .btn-clear {
+            padding: 8px 14px;
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .85rem;
+            cursor: pointer;
+            transition: .15s;
+            white-space: nowrap;
+        }
+
+            .btn-clear:hover {
+                border-color: var(--muted);
+                color: var(--text);
+            }
+
+        /* ── SPINNER ── */
+        #spinner {
+            display: none;
+            text-align: center;
+            padding: 28px;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+
+        .spin {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent2);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── RESULTADOS ── */
+        #resultados {
+            max-width: 860px;
+            margin: 18px auto;
+            padding: 0 24px;
+            display: none;
+        }
+
+        .res-summary {
+            font-size: .85rem;
+            color: var(--muted);
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+            .res-summary strong {
+                color: var(--text);
+            }
+
+        .modulo-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .modulo-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--surface2);
+            cursor: pointer;
+            user-select: none;
+        }
+
+            .modulo-head:hover {
+                background: var(--surface3);
+            }
+
+        .modulo-icon {
+            font-size: 1rem;
+        }
+
+        .modulo-name {
+            font-size: .9rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .badge {
+            background: var(--accent);
+            color: white;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: .75rem;
+            font-weight: 600;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .btn-ir {
+            padding: 4px 12px;
+            background: var(--green);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: .75rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: background .15s;
+        }
+
+            .btn-ir:hover {
+                background: #16a34a;
+            }
+
+        .chevron {
+            color: var(--muted2);
+            font-size: .75rem;
+            transition: transform .2s;
+        }
+
+            .chevron.open {
+                transform: rotate(180deg);
+            }
+
+        .modulo-body {
+            display: block;
+            overflow-x: auto;
+        }
+
+            .modulo-body table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: .78rem;
+                font-family: 'DM Mono', monospace;
+            }
+
+            .modulo-body th {
+                background: var(--surface3);
+                color: var(--muted);
+                padding: 7px 10px;
+                text-align: left;
+                border-bottom: 1px solid var(--border);
+                white-space: nowrap;
+                position: sticky;
+                top: 0;
+                font-size: .72rem;
+                letter-spacing: .04em;
+            }
+
+            .modulo-body td {
+                padding: 6px 10px;
+                border-bottom: 1px solid var(--border);
+                color: var(--text);
+                white-space: nowrap;
+            }
+
+            .modulo-body tr:last-child td {
+                border-bottom: none;
+            }
+
+            .modulo-body tr:hover td {
+                background: rgba(255,255,255,.03);
+            }
+
+        .highlight {
+            background: #FBBF24;
+            color: #0B0F1A;
+            border-radius: 2px;
+            padding: 0 2px;
+            font-weight: 700;
+        }
+
+        .more-notice {
+            padding: 8px 12px;
+            background: rgba(245,158,11,.08);
+            color: #FBBF24;
+            font-size: .78rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .no-results {
+            padding: 20px;
+            text-align: center;
+            color: var(--muted2);
+            font-size: .88rem;
+            font-style: italic;
+        }
+
+        /* ── MÓDULOS GRID ── */
+        .section-label {
+            max-width: 1100px;
+            margin: 36px auto 12px;
+            padding: 0 24px;
+            font-size: .72rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            color: var(--muted2);
+            text-transform: uppercase;
+        }
+
+        .modules-grid {
+            max-width: 1100px;
+            margin: 0 auto 40px;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .mod-btn {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 18px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: border-color .18s, background .18s, transform .15s;
+            text-align: left;
+            line-height: 1.3;
+        }
+
+            .mod-btn .mod-icon {
+                font-size: 1.4rem;
+                margin-bottom: 2px;
+            }
+
+            .mod-btn:hover {
+                border-color: var(--accent);
+                background: rgba(37,99,235,.08);
+                transform: translateY(-2px);
+            }
+
+            .mod-btn:active {
+                transform: translateY(0);
+            }
+
+            .mod-btn.danger {
+                border-color: rgba(239,68,68,.25);
+                background: rgba(239,68,68,.05);
+                color: var(--muted);
+            }
+
+                .mod-btn.danger:hover {
+                    border-color: var(--danger);
+                    background: rgba(239,68,68,.1);
+                    color: var(--danger);
+                    transform: translateY(-2px);
+                }
+
+            .mod-btn .arrow {
+                position: absolute;
+                right: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--muted2);
+                font-size: .85rem;
+                transition: right .15s;
+            }
+
+            .mod-btn:hover .arrow {
+                right: 12px;
+                color: var(--accent2);
+            }
+
+            .mod-btn.danger:hover .arrow {
+                color: var(--danger);
+            }
+    </style>
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <span class="topbar-logo">CHI IT</span>
+        <span style="color:var(--muted2);">/</span>
+        <span class="topbar-title">PRESUPUESTOS</span>
+        <div class="topbar-sep"></div>
+        <a class="btn-back" href="/static/menu.html">← Menú principal</a>
+    </div>
+
+    <!-- BUSCADOR GLOBAL -->
+    <div class="search-wrap">
+        <div class="search-box">
+            <input type="text" id="inputBusqueda"
+                   placeholder="🔍  Buscar en todos los módulos... (marca, modelo, serie, OC, proveedor…)"
+                   onkeydown="if(event.key==='Enter') buscarGlobal()">
+            <button class="btn-clear" onclick="limpiarBusqueda()">Limpiar</button>
+            <button class="btn-search" onclick="buscarGlobal()">Buscar</button>
+        </div>
+    </div>
+
+    <div id="spinner"><span class="spin"></span> Buscando en todos los módulos…</div>
+
+    <div id="resultados">
+        <p class="res-summary" id="resSummary"></p>
+        <div id="resContent"></div>
+    </div>
+
+    <!-- MÓDULOS -->
+    <div class="section-label">Módulos disponibles</div>
+    <div class="modules-grid">
+
+        <button class="mod-btn" onclick="ir('req_oc.html')">
+            <span class="mod-icon">🔄</span>REQ vs ORDEN DE COMPRA<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('ordenes_de_compra.html')">
+            <span class="mod-icon">📋</span>ORDENES DE COMPRA<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('pantallas_nf.html')">
+            <span class="mod-icon">🖥️</span>PANTALLAS NF<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('refacciones_nf.html')">
+            <span class="mod-icon">🔧</span>REFACCIONES NF<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('accesorios_nf.html')">
+            <span class="mod-icon">🔌</span>ACCESORIOS NF<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('dispositivos_nf.html')">
+            <span class="mod-icon">💾</span>DISPOSITIVOS NF<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('inventarios.html')">
+            <span class="mod-icon">📦</span>INVENTARIOS<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('perifericos_nf.html')">
+            <span class="mod-icon">🖱️</span>PERIFERICOS NF<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('camaras_audio.html')">
+            <span class="mod-icon">📷</span>CAMARAS DE AUDIO<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('herramientas_nf.html')">
+            <span class="mod-icon">🛠️</span>HERRAMIENTA NF<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('impresoras_nf.html')">
+            <span class="mod-icon">🖨️</span>IMPRESORAS NF<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('telefonia_nf.html')">
+            <span class="mod-icon">📱</span>TELEFONIA NF<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('consumibles_nf.html')">
+            <span class="mod-icon">🖊️</span>CONSUMIBLES NF<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('radio_nf.html')">
+            <span class="mod-icon">📻</span>RADIOS NF<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('tintas_toner_ribon_nf.html')">
+            <span class="mod-icon">🖋️</span>TINTAS TONER RIBON NF<span class="arrow">›</span>
+        </button>
+        <button class="mod-btn" onclick="ir('refacciones_red_nf.html')">
+            <span class="mod-icon">🌐</span>EQUIPO DE RED NF<span class="arrow">›</span>
+        </button>
+
+        <button class="mod-btn danger" onclick="window.location.href='/static/menu.html'">
+            <span class="mod-icon">←</span>REGRESAR AL MENÚ<span class="arrow">›</span>
+        </button>
+    </div>
+
+    <script>
+        const BASE = '/static/modulos_presupuesto/';
+
+        function ir(pagina) {
+            window.location.href = BASE + pagina;
+        }
+
+        const PAGINA_MAP = {
+            "PREVENTIVOS": "/static/preventivos.html",
+            "CORRECTIVOS": "/static/correctivos.html",
+            "BAJAS": "/static/bajas.html",
+            "REQ vs OC": BASE + "req_oc.html",
+            "ORDENES DE COMPRA": BASE + "ordenes_de_compra.html",
+            "PANTALLAS NF": BASE + "pantallas_nf.html",
+            "REFACCIONES NF": BASE + "refacciones_nf.html",
+            "ACCESORIOS NF": BASE + "accesorios_nf.html",
+            "DISPOSITIVOS NF": BASE + "dispositivos_nf.html",
+            "INVENTARIOS": BASE + "inventarios.html",
+            "CAMARAS DE AUDIO": BASE + "camaras_audio.html",
+            "PERIFERICOS NF": BASE + "perifericos_nf.html",
+            "HERRAMIENTA NF": BASE + "herramientas_nf.html",
+            "IMPRESORAS NF": BASE + "impresoras_nf.html",
+            "TELEFONIA NF": BASE + "telefonia_nf.html",
+            "CONSUMIBLES NF": BASE + "consumibles_nf.html",
+            "RADIOS NF": BASE + "radio_nf.html",
+            "TINTAS TONER RIBON": BASE + "tintas_toner_ribon_nf.html",
+            "SERVICIOS PROVEEDORES": BASE + "servicios_proveedores_nf.html",
+            "DIRECTORIO PROVEEDORES": BASE + "servicios_proveedores_nf.html",
+            "EQUIPO DE RED NF": BASE + "refacciones_red_nf.html"
+        };
+
+        async function buscarGlobal() {
+            const termino = document.getElementById('inputBusqueda').value.trim();
+            if (!termino) { alert('Ingresa un término de búsqueda'); return; }
+
+            document.getElementById('spinner').style.display = 'block';
+            document.getElementById('resultados').style.display = 'none';
+            document.getElementById('resContent').innerHTML = '';
+
+            try {
+                const res = await fetch(`/BUSCAR_GLOBAL?q=${encodeURIComponent(termino)}`);
+                const data = await res.json();
+
+                document.getElementById('spinner').style.display = 'none';
+
+                const cont = document.getElementById('resContent');
+
+                if (data.modulos_con_resultados === 0) {
+                    document.getElementById('resSummary').innerHTML =
+                        `❌ Sin resultados para: "<em>${termino}</em>"`;
+                    cont.innerHTML = `<div class="no-results">Ningún módulo contiene esa información.</div>`;
+                } else {
+                    const total = data.resultados.reduce((a, r) => a + r.total, 0);
+                    document.getElementById('resSummary').innerHTML =
+                        `✅ <strong>${total}</strong> resultado(s) en <strong>${data.modulos_con_resultados}</strong> módulo(s) para: "<em>${termino}</em>"`;
+
+                    data.resultados.forEach(r => {
+                        const cols = Object.keys(r.registros[0] || {});
+                        const filas = r.registros.map(row =>
+                            `<tr>${cols.map(c => `<td>${resaltar(String(row[c] ?? ''), termino)}</td>`).join('')}</tr>`
+                        ).join('');
+
+                        const masReg = r.total > r.registros.length
+                            ? `<div class="more-notice">⚠️ Mostrando ${r.registros.length} de ${r.total} registros. Entra al módulo para ver todos.</div>`
+                            : '';
+
+                        const pagina = PAGINA_MAP[r.modulo] || '/static/menu.html';
+                        const cardId = 'card_' + Math.random().toString(36).slice(2);
+
+                        cont.innerHTML += `
+                        <div class="modulo-card">
+                            <div class="modulo-head" onclick="toggleCard('${cardId}')">
+                                <span class="modulo-icon">📦</span>
+                                <span class="modulo-name">${r.modulo}</span>
+                                <span class="badge">${r.total}</span>
+                                <button class="btn-ir" onclick="event.stopPropagation();window.location.href='${pagina}'">IR AL MÓDULO</button>
+                                <span class="chevron open" id="chev_${cardId}">▼</span>
+                            </div>
+                            <div class="modulo-body" id="${cardId}" style="max-height:260px;overflow-y:auto;">
+                                ${masReg}
+                                <table>
+                                    <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+                                    <tbody>${filas}</tbody>
+                                </table>
+                            </div>
+                        </div>`;
+                    });
+                }
+
+                document.getElementById('resultados').style.display = 'block';
+                document.getElementById('resultados').scrollIntoView({ behavior: 'smooth' });
+            } catch (e) {
+                document.getElementById('spinner').style.display = 'none';
+                alert('Error al buscar: ' + e.message);
+            }
+        }
+
+        function toggleCard(id) {
+            const body = document.getElementById(id);
+            const chev = document.getElementById('chev_' + id);
+            const open = body.style.display !== 'none';
+            body.style.display = open ? 'none' : 'block';
+            chev.classList.toggle('open', !open);
+        }
+
+        function resaltar(texto, termino) {
+            if (!texto || !termino) return texto;
+            const re = new RegExp(`(${termino.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return texto.replace(re, '<span class="highlight">$1</span>');
+        }
+
+        function limpiarBusqueda() {
+            document.getElementById('inputBusqueda').value = '';
+            document.getElementById('resultados').style.display = 'none';
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('resContent').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

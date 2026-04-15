@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>INVENTARIOS</title>
+
+<style>
+body{
+    font-family:Arial;
+    margin:0;
+    background:#f1f5f9;
+}
+
+.header{
+    background:#1e293b;
+    color:white;
+    padding:15px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.container{
+    padding:15px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:12px;
+    margin-bottom:15px;
+}
+.back{
+    background:#dc2626;
+    font-style: italic; color:#ffffff;
+}
+
+.field{
+    display:flex;
+    flex-direction:column;
+}
+
+.field label{
+    font-size:11px;
+    font-weight:bold;
+    color:#1e293b;
+    margin-bottom:4px;
+    text-transform:uppercase;
+    letter-spacing:0.3px;
+}
+
+.field input{
+    padding:7px;
+    border:1px solid #cbd5e1;
+    border-radius:5px;
+    font-size:12px;
+    background:#f8fafc;
+    transition:border-color 0.2s;
+}
+
+.field input:focus{
+    outline:none;
+    border-color:#2563eb;
+    background:white;
+    box-shadow:0 0 0 2px rgba(37,99,235,0.15);
+}
+
+button{
+    padding:6px 12px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:bold;
+    margin-right:5px;
+}
+
+.save{background:#16a34a;color:white;}
+.cancel{background:#64748b;color:white;}
+.delete{background:#dc2626;color:white;}
+.edit{background:#f59e0b;color:white;}
+.pdf{background:#2563eb;color:white;}
+.export{background:#7c3aed;color:white;}
+
+.btn-bar{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:8px;
+    margin-bottom:12px;
+}
+
+.btn-bar input[type="number"]{
+    padding:6px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:12px;
+    width:110px;
+}
+
+.table-container{
+    width:100%;
+    height:500px;
+    overflow:auto;
+    border:1px solid #ccc;
+    background:white;
+}
+
+table{
+    border-collapse:collapse;
+    min-width:2600px;
+    font-size:11px;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:6px;
+    white-space:nowrap;
+    text-align:center;
+}
+
+th{
+    background:#1e293b;
+    color:white;
+    position:sticky;
+    top:0;
+    z-index:2;
+}
+
+.filter-row input{
+    width:100%;
+    font-size:11px;
+}
+
+.pagination{
+    margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">INVENTARIOS</div>
+
+<div class="container">
+
+<div class="form-grid">
+
+<div class="field">
+    <label>INV Folio</label>
+    <input id="INV_FOLIO">
+</div>
+
+<div class="field">
+    <label>Equipo</label>
+    <input id="EQUIPO">
+</div>
+
+<div class="field">
+    <label>Marca</label>
+    <input id="MARCA">
+</div>
+
+<div class="field">
+    <label>Modelo</label>
+    <input id="MODELO">
+</div>
+
+<div class="field">
+    <label>Cantidad</label>
+    <input id="CANTIDAD">
+</div>
+
+<div class="field">
+    <label>Precio Unitario</label>
+    <input id="PRECIO_UNITARIO" type="number" step="0.01">
+</div>
+
+<div class="field">
+    <label>Moneda</label>
+    <input id="MONEDA">
+</div>
+
+<div class="field">
+    <label>Proveedor</label>
+    <input id="PROVEEDOR">
+</div>
+
+<div class="field">
+    <label>Presupuesto</label>
+    <input id="PRESUPUESTO">
+</div>
+
+<div class="field">
+    <label>Status</label>
+    <input id="STATUS">
+</div>
+
+<div class="field">
+    <label>Año</label>
+    <input id="ANO">
+</div>
+
+<div class="field">
+    <label>OC</label>
+    <input id="OC">
+</div>
+
+<div class="field">
+    <label>Número de Serie</label>
+    <input id="NUMERO_SERIE">
+</div>
+
+<div class="field">
+    <label>Ubicación Actual</label>
+    <input id="UBICACION_ACTUAL">
+</div>
+
+</div>
+
+<div class="btn-bar">
+    <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
+    <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
+</div>
+
+<div class="btn-bar">
+    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
+    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
+    <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
+    <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
+</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>INV FOLIO</th>
+<th>EQUIPO</th>
+<th>MARCA</th>
+<th>MODELO</th>
+<th>CANTIDAD</th>
+<th>PRECIO UNITARIO</th>
+<th>PRECIO CON IVA</th>
+<th>MONEDA</th>
+<th>PROVEEDOR</th>
+<th>PRESUPUESTO</th>
+<th>STATUS</th>
+<th>AÑO</th>
+<th>OC</th>
+<th>NO. SERIE</th>
+<th>UBICACION</th>
+<th>PDF</th>
+<th>ACCIONES</th>
+</tr>
+<tr class="filter-row">
+<th></th>
+<th><input oninput="filtrar()"></th><!-- f[0]  INV_FOLIO -->
+<th><input oninput="filtrar()"></th><!-- f[1]  EQUIPO -->
+<th><input oninput="filtrar()"></th><!-- f[2]  MARCA -->
+<th><input oninput="filtrar()"></th><!-- f[3]  MODELO -->
+<th><input oninput="filtrar()"></th><!-- f[4]  CANTIDAD -->
+<th><input oninput="filtrar()"></th><!-- f[5]  PRECIO_UNITARIO -->
+<th><input oninput="filtrar()"></th><!-- f[6]  PRECIO_CON_IVA -->
+<th><input oninput="filtrar()"></th><!-- f[7]  MONEDA -->
+<th><input oninput="filtrar()"></th><!-- f[8]  PROVEEDOR -->
+<th><input oninput="filtrar()"></th><!-- f[9]  PRESUPUESTO -->
+<th><input oninput="filtrar()"></th><!-- f[10] STATUS -->
+<th><input oninput="filtrar()"></th><!-- f[11] ANO -->
+<th><input oninput="filtrar()"></th><!-- f[12] OC -->
+<th><input oninput="filtrar()"></th><!-- f[13] NUMERO_SERIE -->
+<th><input oninput="filtrar()"></th><!-- f[14] UBICACION_ACTUAL -->
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+</div>
+
+<div class="pagination">
+<button onclick="anterior()">Anterior</button>
+<span id="paginaInfo"></span>
+<button onclick="siguiente()">Siguiente</button>
+<button class="back" onclick="window.location.href='presupuestos_menu.html'">
+REGRESAR A PRESUPUESTOS
+</button>
+</div>
+
+</div>
+
+<script>
+
+let paginaActual = 1;
+let limite = 10;
+let totalRegistros = 0;
+let editandoID = null;
+
+function guardar(){
+    let data = {
+        INV_FOLIO:       INV_FOLIO.value        || null,
+        EQUIPO:          EQUIPO.value           || null,
+        MARCA:           MARCA.value            || null,
+        MODELO:          MODELO.value           || null,
+        CANTIDAD:        CANTIDAD.value         || null,
+        PRECIO_UNITARIO: PRECIO_UNITARIO.value  ? parseFloat(PRECIO_UNITARIO.value) : null,
+        MONEDA:          MONEDA.value           || null,
+        PROVEEDOR:       PROVEEDOR.value        || null,
+        PRESUPUESTO:     PRESUPUESTO.value      || null,
+        STATUS:          STATUS.value           || null,
+        ANO:             ANO.value              || null,
+        OC:              OC.value               || null,
+        NUMERO_SERIE:    NUMERO_SERIE.value     || null,
+        UBICACION_ACTUAL:UBICACION_ACTUAL.value || null
+    };
+
+    if(editandoID){
+        fetch(`/INVENTARIOS/${editandoID}`,{
+            method:"PUT",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(data)
+        }).then(()=>{ editandoID=null; limpiarFormulario(); cargar(); });
+    } else {
+        fetch("/INVENTARIOS",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(data)
+        }).then(()=>{ limpiarFormulario(); cargar(); });
+    }
+}
+
+function limpiarFormulario(){
+    document.querySelectorAll(".form-grid input").forEach(i=>i.value="");
+}
+
+function cancelarEdicion(){
+    editandoID = null;
+    limpiarFormulario();
+}
+
+function obtenerParametros(){
+    let f = document.querySelectorAll(".filter-row input");
+    return new URLSearchParams({
+        page:            paginaActual,
+        limit:           limite,
+        INV_FOLIO:       f[0].value,
+        EQUIPO:          f[1].value,
+        MARCA:           f[2].value,
+        MODELO:          f[3].value,
+        CANTIDAD:        f[4].value,
+        PRECIO_UNITARIO: f[5].value,
+        PRECIO_CON_IVA:  f[6].value,
+        MONEDA:          f[7].value,
+        PROVEEDOR:       f[8].value,
+        PRESUPUESTO:     f[9].value,
+        STATUS:          f[10].value,
+        ANO:             f[11].value,
+        OC:              f[12].value,
+        NUMERO_SERIE:    f[13].value,
+        UBICACION_ACTUAL:f[14].value
+    });
+}
+
+function cargar(){
+    let params = obtenerParametros();
+    fetch(`/INVENTARIOS?${params.toString()}`)
+    .then(res=>res.json())
+    .then(resp=>{
+        totalRegistros = resp.total;
+        renderizar(resp.data);
+    });
+}
+
+function renderizar(datos){
+    tabla.innerHTML="";
+    datos.forEach(row=>{
+        tabla.innerHTML+=`
+        <tr>
+        <td>${row.ID}</td>
+        <td>${row.INV_FOLIO??""}</td>
+        <td>${row.EQUIPO??""}</td>
+        <td>${row.MARCA??""}</td>
+        <td>${row.MODELO??""}</td>
+        <td>${row.CANTIDAD??""}</td>
+        <td>${row.PRECIO_UNITARIO??""}</td>
+        <td>${row.PRECIO_CON_IVA??""}</td>
+        <td>${row.MONEDA??""}</td>
+        <td>${row.PROVEEDOR??""}</td>
+        <td>${row.PRESUPUESTO??""}</td>
+        <td>${row.STATUS??""}</td>
+        <td>${row.ANO??""}</td>
+        <td>${row.OC??""}</td>
+        <td>${row.NUMERO_SERIE??""}</td>
+        <td>${row.UBICACION_ACTUAL??""}</td>
+        <td>
+        ${row.TIENE_PDF
+        ? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button>
+           <button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
+        : `<input type="file" onchange="subirPDF(${row.ID},this)">`
+        }
+        </td>
+        <td>
+        <button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
+        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button>
+        </td>
+        </tr>`;
+    });
+    paginaInfo.innerText=`Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
+}
+
+function editar(row){
+    editandoID = row.ID;
+    Object.keys(row).forEach(key=>{
+        let el = document.getElementById(key);
+        if(el) el.value = row[key] ?? "";
+    });
+    window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function eliminar(id){
+    if(!confirm("¿Eliminar este registro?")) return;
+    fetch(`/INVENTARIOS/${id}`,{method:"DELETE"}).then(()=>cargar());
+}
+
+function subirPDF(id, input){
+    let file = input.files[0];
+    if(!file) return;
+    let formData = new FormData();
+    formData.append("file", file);
+    fetch(`/INVENTARIOS/PDF/${id}`,{method:"POST", body:formData})
+    .then(()=>cargar());
+}
+
+function verPDF(id){
+    window.open(`/INVENTARIOS/PDF/${id}`,"_blank");
+}
+
+function eliminarPDF(id){
+    if(!confirm("¿Seguro que deseas eliminar el PDF?")) return;
+    fetch(`/INVENTARIOS/PDF/${id}`,{method:"DELETE"})
+    .then(()=>cargar());
+}
+
+function filtrar(){
+    paginaActual = 1;
+    cargar();
+}
+
+function exportarFiltrado(){
+    let params = obtenerParametros();
+    window.open(`/INVENTARIOS/EXPORTAR?${params.toString()}`);
+}
+
+function exportarTodo(){
+    window.open(`/INVENTARIOS/EXPORTAR_TODO`);
+}
+
+function exportarPorAnio(){
+    let anio = document.getElementById("anioExportar").value;
+    if(!anio){ alert("Ingresa un año"); return; }
+    window.open(`/INVENTARIOS/EXPORTAR_ANIO?anio=${anio}`);
+}
+
+function siguiente(){
+    if(paginaActual*limite<totalRegistros){ paginaActual++; cargar(); }
+}
+
+function anterior(){
+    if(paginaActual>1){ paginaActual--; cargar(); }
+}
+
+cargar();
+
+</script>
+
+</body>
+</html>

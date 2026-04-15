@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CAMARAS DE AUDIO</title>
+<style>
+body{ font-family:Arial; margin:0; background:#f1f5f9; }
+.header{ background:#1e293b; color:white; padding:15px; font-size:20px; font-weight:bold; }
+.container{ padding:15px; }
+.form-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-bottom:15px; }
+.field{ display:flex; flex-direction:column; }
+.field label{ font-size:11px; font-weight:bold; color:#1e293b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.3px; }
+.field input{ padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:12px; background:#f8fafc; transition:border-color 0.2s; }
+.field input:focus{ outline:none; border-color:#2563eb; background:white; box-shadow:0 0 0 2px rgba(37,99,235,0.15); }
+button{ padding:6px 12px; border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; margin-right:5px; }
+.save{background:#16a34a;color:white;} .cancel{background:#64748b;color:white;} .delete{background:#dc2626;color:white;}
+.edit{background:#f59e0b;color:white;} .pdf{background:#2563eb;color:white;} .export{background:#7c3aed;color:white;}
+.btn-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:12px; }
+.btn-bar input[type="number"]{ padding:6px; border:1px solid #ccc; border-radius:5px; font-size:12px; width:110px; }
+.table-container{ width:100%; height:500px; overflow:auto; border:1px solid #ccc; background:white; }
+table{ border-collapse:collapse; min-width:3400px; font-size:11px; }
+th,td{ border:1px solid #ccc; padding:6px; white-space:nowrap; text-align:center; }
+th{ background:#1e293b; color:white; position:sticky; top:0; z-index:2; }
+.filter-row input{ width:100%; font-size:11px; }
+.pagination{ margin-top:10px; }
+.back{
+    background:#dc2626;
+    font-style: italic; color:#ffffff;
+}
+</style>
+</head>
+<body>
+<div class="header">CAMARAS DE AUDIO</div>
+<div class="container">
+<div class="form-grid">
+<div class="field"><label>OC</label><input id="OC"></div>
+<div class="field"><label>Folio Inventario</label><input id="FOLIO_INVENTARIO"></div>
+<div class="field"><label>Fecha Registro</label><input id="FECHA_REGISTRO" type="date"></div>
+<div class="field"><label>Recibido Por</label><input id="RECIBIDO_POR"></div>
+<div class="field"><label>Subcategoria</label><input id="SUBCATEGORIA"></div>
+<div class="field"><label>Tipo</label><input id="TIPO"></div>
+<div class="field"><label>Marca</label><input id="MARCA"></div>
+<div class="field"><label>Modelo</label><input id="MODELO"></div>
+<div class="field"><label>Numero Serie</label><input id="NUMERO_SERIE"></div>
+<div class="field"><label>Proveedor</label><input id="PROVEEDOR"></div>
+<div class="field"><label>Cantidad</label><input id="CANTIDAD"></div>
+<div class="field"><label>Costo</label><input id="COSTO"></div>
+<div class="field"><label>Moneda</label><input id="MONEDA"></div>
+<div class="field"><label>Destino</label><input id="DESTINO"></div>
+<div class="field"><label>Accesorios</label><input id="ACCESORIOS"></div>
+<div class="field"><label>Fecha Salida</label><input id="FECHA_SALIDA" type="date"></div>
+<div class="field"><label>Planta</label><input id="PLANTA"></div>
+<div class="field"><label>Destino 2</label><input id="DESTINO2"></div>
+<div class="field"><label>Personal IT que Asigna</label><input id="PERSONAL_IT_ASIGNA"></div>
+<div class="field"><label>Folio Servicio</label><input id="FOLIO_SERVICIO"></div>
+</div>
+
+<div class="btn-bar">
+    <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
+    <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
+</div>
+<div class="btn-bar">
+    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
+    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
+    <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
+    <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
+</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>ID</th><th>OC</th><th>FOLIO INV</th><th>FECHA REG</th><th>RECIBIDO</th>
+<th>SUBCATEGORIA</th><th>TIPO</th><th>MARCA</th><th>MODELO</th><th>NO SERIE</th>
+<th>PROVEEDOR</th><th>CANTIDAD</th><th>COSTO</th><th>MONEDA</th><th>DESTINO</th>
+<th>ACCESORIOS</th><th>FECHA SALIDA</th><th>PLANTA</th><th>DESTINO 2</th>
+<th>PERSONAL IT</th><th>FOLIO SERVICIO</th><th>PDF</th><th>ACCIONES</th>
+</tr>
+<tr class="filter-row">
+<th></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th><input oninput="filtrar()"></th>
+<th></th><th></th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+</div>
+<div class="pagination">
+<button onclick="anterior()">Anterior</button>
+<span id="paginaInfo"></span>
+<button onclick="siguiente()">Siguiente</button>
+<button class="back" onclick="window.location.href='presupuestos_menu.html'">
+REGRESAR A PRESUPUESTOS
+</button>
+</div>
+</div>
+
+<script>
+let paginaActual=1, limite=10, totalRegistros=0, editandoID=null;
+
+function guardar(){
+    let data={
+        OC: OC.value||null, FOLIO_INVENTARIO: FOLIO_INVENTARIO.value||null,
+        FECHA_REGISTRO: FECHA_REGISTRO.value||null, RECIBIDO_POR: RECIBIDO_POR.value||null,
+        SUBCATEGORIA: SUBCATEGORIA.value||null, TIPO: TIPO.value||null,
+        MARCA: MARCA.value||null, MODELO: MODELO.value||null,
+        NUMERO_SERIE: NUMERO_SERIE.value||null, PROVEEDOR: PROVEEDOR.value||null,
+        CANTIDAD: CANTIDAD.value||null, COSTO: COSTO.value||null,
+        MONEDA: MONEDA.value||null, DESTINO: DESTINO.value||null,
+        ACCESORIOS: ACCESORIOS.value||null, FECHA_SALIDA: FECHA_SALIDA.value||null,
+        PLANTA: PLANTA.value||null, DESTINO2: DESTINO2.value||null,
+        PERSONAL_IT_ASIGNA: PERSONAL_IT_ASIGNA.value||null, FOLIO_SERVICIO: FOLIO_SERVICIO.value||null
+    };
+    if(editandoID){
+        fetch(`/CAMARAS_DE_AUDIO/${editandoID}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
+        .then(()=>{ editandoID=null; limpiarFormulario(); cargar(); });
+    } else {
+        fetch("/CAMARAS_DE_AUDIO",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
+        .then(()=>{ limpiarFormulario(); cargar(); });
+    }
+}
+
+function limpiarFormulario(){ document.querySelectorAll(".form-grid input").forEach(i=>i.value=""); }
+function cancelarEdicion(){ editandoID=null; limpiarFormulario(); }
+
+function obtenerParametros(){
+    let f=document.querySelectorAll(".filter-row input");
+    return new URLSearchParams({
+        page:paginaActual, limit:limite,
+        OC:f[0].value, FOLIO_INVENTARIO:f[1].value, FECHA_REGISTRO:f[2].value,
+        RECIBIDO_POR:f[3].value, SUBCATEGORIA:f[4].value, TIPO:f[5].value,
+        MARCA:f[6].value, MODELO:f[7].value, NUMERO_SERIE:f[8].value,
+        PROVEEDOR:f[9].value, CANTIDAD:f[10].value, COSTO:f[11].value,
+        MONEDA:f[12].value, DESTINO:f[13].value, ACCESORIOS:f[14].value,
+        FECHA_SALIDA:f[15].value, PLANTA:f[16].value, DESTINO2:f[17].value,
+        PERSONAL_IT_ASIGNA:f[18].value, FOLIO_SERVICIO:f[19].value
+    });
+}
+
+function cargar(){
+    fetch(`/CAMARAS_DE_AUDIO?${obtenerParametros().toString()}`)
+    .then(r=>r.json()).then(resp=>{ totalRegistros=resp.total; renderizar(resp.data); });
+}
+
+function renderizar(datos){
+    tabla.innerHTML="";
+    datos.forEach(row=>{
+        tabla.innerHTML+=`<tr>
+        <td>${row.ID}</td><td>${row.OC??""}</td><td>${row.FOLIO_INVENTARIO??""}</td>
+        <td>${row.FECHA_REGISTRO??""}</td><td>${row.RECIBIDO_POR??""}</td>
+        <td>${row.SUBCATEGORIA??""}</td><td>${row.TIPO??""}</td><td>${row.MARCA??""}</td>
+        <td>${row.MODELO??""}</td><td>${row.NUMERO_SERIE??""}</td><td>${row.PROVEEDOR??""}</td>
+        <td>${row.CANTIDAD??""}</td><td>${row.COSTO??""}</td><td>${row.MONEDA??""}</td>
+        <td>${row.DESTINO??""}</td><td>${row.ACCESORIOS??""}</td><td>${row.FECHA_SALIDA??""}</td>
+        <td>${row.PLANTA??""}</td><td>${row.DESTINO2??""}</td><td>${row.PERSONAL_IT_ASIGNA??""}</td>
+        <td>${row.FOLIO_SERVICIO??""}</td>
+        <td>${row.TIENE_PDF
+            ? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button><button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
+            : `<input type="file" onchange="subirPDF(${row.ID},this)">`}</td>
+        <td><button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
+        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button></td>
+        </tr>`;
+    });
+    paginaInfo.innerText=`Pagina ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
+}
+
+function editar(row){
+    editandoID=row.ID;
+    Object.keys(row).forEach(key=>{ let el=document.getElementById(key); if(el) el.value=row[key]??""; });
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+function eliminar(id){ if(!confirm("Eliminar este registro?")) return; fetch(`/CAMARAS_DE_AUDIO/${id}`,{method:"DELETE"}).then(()=>cargar()); }
+function subirPDF(id,input){ let file=input.files[0]; if(!file) return; let fd=new FormData(); fd.append("file",file); fetch(`/CAMARAS_DE_AUDIO/PDF/${id}`,{method:"POST",body:fd}).then(()=>cargar()); }
+function verPDF(id){ window.open(`/CAMARAS_DE_AUDIO/PDF/${id}`,"_blank"); }
+function eliminarPDF(id){ if(!confirm("Eliminar el PDF?")) return; fetch(`/CAMARAS_DE_AUDIO/PDF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
+function filtrar(){ paginaActual=1; cargar(); }
+function exportarFiltrado(){ window.open(`/CAMARAS_DE_AUDIO/EXPORTAR?${obtenerParametros().toString()}`); }
+function exportarTodo(){ window.open(`/CAMARAS_DE_AUDIO/EXPORTAR_TODO`); }
+function exportarPorAnio(){ let a=document.getElementById("anioExportar").value; if(!a){alert("Ingresa un año");return;} window.open(`/CAMARAS_DE_AUDIO/EXPORTAR_ANIO?anio=${a}`); }
+function siguiente(){ if(paginaActual*limite<totalRegistros){ paginaActual++; cargar(); } }
+function anterior(){ if(paginaActual>1){ paginaActual--; cargar(); } }
+
+cargar();
+</script>
+</body>
+</html>

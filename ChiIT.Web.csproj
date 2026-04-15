@@ -10,6 +10,7 @@
   <ItemGroup>
     <None Include="wwwroot\static\correctivos.html" />
     <None Include="wwwroot\static\bajas.html" />
+    <None Include="wwwroot\static\presupuestos_menu.html" />
   </ItemGroup>
 
   <ItemGroup>
