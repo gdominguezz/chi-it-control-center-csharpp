@@ -126,7 +126,7 @@ public class BajasService
         await using var cmdData = new NpgsqlCommand(
             $@"SELECT id, folio, estado, planta, fecha, equipo, marca, modelo,
                       no_serie, activo_fijo, ubicacion_persona,
-                      MOTIVO_DE_BAJA, diagnostico, comentarios, motivo_cancelacion, tiene_pdf
+                      MOTIVO_DE_BAJA, diagnostico, comentarios, motivo_de_cancelacion, tiene_pdf
                FROM bajas_equipos {where}
                ORDER BY id DESC
                LIMIT @lim OFFSET @off", conn);
@@ -172,7 +172,7 @@ public class BajasService
             INSERT INTO bajas_equipos
                 (folio,estado,planta,fecha,equipo,marca,modelo,
                  no_serie,activo_fijo,ubicacion_persona,
-                 MOTIVO_DE_BAJA,diagnostico,comentarios,motivo_cancelacion)
+                 MOTIVO_DE_BAJA,diagnostico,comentarios,motivo_de_cancelacion)
             VALUES
                 (@folio,@estado,@planta,@fecha,@equipo,@marca,@modelo,
                  @no_serie,@activo_fijo,@ubicacion_persona,
@@ -302,7 +302,7 @@ public class BajasService
         await using var cmd = new NpgsqlCommand(
             $@"SELECT id, folio, estado, planta, fecha, equipo, marca, modelo,
                       no_serie, activo_fijo, ubicacion_persona,
-                      MOTIVO_DE_BAJA, diagnostico, comentarios, motivo_cancelacion
+                      MOTIVO_DE_BAJA, diagnostico, comentarios, motivo_de_cancelacion
                FROM bajas_equipos {where} ORDER BY id DESC", conn);
 
         foreach (var (k, v) in parms) cmd.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
@@ -325,7 +325,7 @@ public class BajasService
         await using var cmd = new NpgsqlCommand(
             @"SELECT id, folio, estado, planta, fecha, equipo, marca, modelo,
                      no_serie, activo_fijo, ubicacion_persona,
-                     MOTIVO_DE_BAJA, diagnostico, comentarios, motivo_cancelacion
+                     MOTIVO_DE_BAJA, diagnostico, comentarios, motivo_de_cancelacion
               FROM bajas_equipos
               WHERE EXTRACT(YEAR FROM fecha_creacion) = @anio
               ORDER BY id DESC", conn);
@@ -401,7 +401,7 @@ public class BajasService
         await using var cmd = new NpgsqlCommand(
             @"SELECT folio,estado,planta,fecha,equipo,marca,modelo,
                      no_serie,activo_fijo,ubicacion_persona,
-                     MOTIVO_DE_BAJA,diagnostico,comentarios,motivo_cancelacion
+                     MOTIVO_DE_BAJA,diagnostico,comentarios,motivo_de_cancelacion
               FROM bajas_equipos WHERE id=@id", conn);
         cmd.Parameters.AddWithValue("id", id);
 
