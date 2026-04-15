@@ -1508,13 +1508,17 @@
                     headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
                     body: JSON.stringify(datos)
                 });
-                const result = await res.json();
+
+                const text = await res.text();
+                const result = text ? JSON.parse(text) : {};
+
                 if (res.ok && !result.error) {
                     cerrarEditar();
                     cargar();
                 } else {
                     alert('Error: ' + (result.error || 'No se pudo guardar'));
                 }
+
             } catch (e) {
                 alert('Error: ' + e.message);
             }
