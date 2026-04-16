@@ -1556,6 +1556,29 @@
                 font-weight: 700;
                 font-family: 'DM Mono', monospace;
             }
+            .file-label {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 12px;
+                font-size: 11px;
+                font-weight: 600;
+                border-radius: 8px;
+                cursor: pointer;
+                background: var(--surface2);
+                border: 1px solid var(--border2);
+                color: var(--muted2);
+                transition: all .2s;
+            }
+
+            .file-label:hover {
+                border-color: var(--accent);
+                color: var(--text);
+            }
+
+            .file-label input {
+                display: none;
+            }
     </style>
 </head>
 <body>
@@ -2346,41 +2369,99 @@
         function renderizar() {
             const tbody = document.getElementById('tabla');
             tbody.innerHTML = '';
+
             if (!datosActuales.length) {
-                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
                 return;
             }
+
             const esAdmin = rolActual === "ADMIN";
+
             datosActuales.forEach(row => {
+
                 const pill = colorPill(row.categoria_color);
                 const bg = rowBg(row.categoria_color);
                 const tdStyle = bg ? `style="background:${bg}"` : '';
+
                 tbody.innerHTML += `
-                                                                    <tr>
-                                                                      <td class="mono" ${tdStyle}>${row.id}</td>
-                                                                      <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
-                                                                      <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
-                                                                      <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
-                                                                      <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
-                                                                      <td ${tdStyle}><span class="color-pill" style="background:${pill.bg};color:${pill.color}">${pill.label || '—'}</span></td>
-                                                                      <td ${tdStyle} style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.observaciones ?? ''}">${row.observaciones ?? '—'}</td>
-                                                                      <td class="mono" ${tdStyle}>${row.anio_creacion ?? '—'}</td>
-                                                                      <td ${tdStyle}>
-                                                                        ${row.tiene_pdf
-                        ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.id})">📄 Ver</button>
-                                                                             <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
-                        : `<input type="file" onchange="subirPDF(${row.id},this)"
-                                                                               style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
-                                                                      </td>
-                                                                      <td ${tdStyle} style="white-space:nowrap;">
-                                                                        ${esAdmin ? `
-                                                                        <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.id})">✏️ Editar</button>
-                                                                        <button class="btn btn-danger btn-sm" onclick="eliminar(${row.id})">🗑</button>
-                                                                        ` : ''}
-                                                                        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.id})">📋</button>
-                                                                      </td>
-                                                                    </tr>`;
+        <tr>
+
+            <td class="mono" ${tdStyle}>${row.id}</td>
+
+            <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
+
+            <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
+
+            <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
+
+            <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
+
+            <td ${tdStyle}>
+                <span class="color-pill"
+                style="background:${pill.bg};color:${pill.color}">
+                ${pill.label || '—'}
+                </span>
+            </td>
+
+            <td ${tdStyle}
+                style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                title="${row.observaciones ?? ''}">
+                ${row.observaciones ?? '—'}
+            </td>
+
+            <td class="mono" ${tdStyle}>
+                ${row.anio_creacion ?? '—'}
+            </td>
+
+            <td ${tdStyle}>
+                ${row.tiene_pdf
+                        ? `
+                    <button class="btn btn-primary btn-sm"
+                        onclick="verPDF(${row.id})">
+                        📄 Ver
+                    </button>
+
+                    <button class="btn btn-danger btn-sm"
+                        onclick="eliminarPDF(${row.id})">
+                        ✕
+                    </button>
+                  `
+                        : `
+                    <label class="file-label">
+                        📎 Subir PDF
+                        <input type="file"
+                               accept=".pdf"
+                               onchange="subirPDF(${row.id},this)">
+                    </label>
+                  `
+                    }
+            </td>
+
+            <td ${tdStyle} style="white-space:nowrap;">
+
+                ${esAdmin ? `
+                    <button class="btn btn-amber btn-sm"
+                        onclick="abrirEditar(${row.id})">
+                        ✏️ Editar
+                    </button>
+
+                    <button class="btn btn-danger btn-sm"
+                        onclick="eliminar(${row.id})">
+                        🗑
+                    </button>
+                ` : ''}
+
+                <button class="btn btn-ghost btn-sm"
+                    onclick="verHistorial(${row.id})">
+                    📋
+                </button>
+
+            </td>
+
+        </tr>`;
             });
+
             document.getElementById('paginaInfo').textContent =
                 `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite)} | Total: ${totalRegistros}`;
         }
