@@ -38,6 +38,19 @@
             color: var(--text);
             min-height: 100vh;
         }
+        /*colores por estado en las rows*/
+        tr.estado-pendiente td {
+            background: rgba(245,158,11,0.08);
+        }
+     
+
+        tr.estado-cerrado td {
+            background: rgba(16,185,129,0.08);
+        }
+
+        tr.estado-cancelado td {
+            background: rgba(239,68,68,0.08);
+        }
 
         /* ── TOPBAR ─────────────────────────────────────────────────────── */
         .topbar {
@@ -1446,6 +1459,17 @@
             }
 
             datosActuales.forEach(row => {
+
+                let estadoClase = '';
+
+                if (row.ESTADO) {
+                    const e = row.ESTADO.toLowerCase();
+
+                    if (e === 'pendiente') estadoClase = 'estado-pendiente';
+                    else if (e === 'cerrado') estadoClase = 'estado-cerrado';
+                    else if (e === 'cancelado') estadoClase = 'estado-cancelado';
+                }
+
                 tbody.innerHTML += `
                                 <tr>
                                     <td class="mono">${row.ID}</td>
@@ -1526,12 +1550,14 @@
 
         function estadoPill(estado) {
             if (!estado) return '';
+
             const e = estado.toLowerCase();
             let cls = 'pill-gray';
-            if (e.includes('activ')) cls = 'pill-green';
-            if (e.includes('baja')) cls = 'pill-red';
-            if (e.includes('cancel')) cls = 'pill-amber';
-            if (e.includes('proces')) cls = 'pill-blue';
+
+            if (e === 'pendiente') cls = 'pill-amber';
+            else if (e === 'cerrado') cls = 'pill-green';
+            else if (e === 'cancelado') cls = 'pill-red';
+
             return `<span class="pill ${cls}">${estado}</span>`;
         }
 
