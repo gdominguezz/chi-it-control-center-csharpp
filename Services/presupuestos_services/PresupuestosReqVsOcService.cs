@@ -31,21 +31,6 @@ public class PresupuestosReqVsOcService
     private NpgsqlConnection Abrir()
         => _db.Open();
 
-    // ── filtros dinámicos ─────────────────────────────
-    private static void AddFilter(
-        NpgsqlCommand cmd,
-        List<string> where,
-        string column,
-        string? value,
-        string param)
-    {
-        if (!string.IsNullOrWhiteSpace(value))
-        {
-            where.Add($"{column} ILIKE @{param}");
-            cmd.Parameters.AddWithValue(param, $"%{value}%");
-        }
-    }
-
     // ── GET PAGINADO ──────────────────────────────────
     public (List<ReqVsOcRow> data, int total) GetAll(
         int page = 1,
@@ -59,53 +44,77 @@ public class PresupuestosReqVsOcService
         string? REGISTRADA_EN_OC = null)
     {
         using var con = Abrir();
-        using var cmd = con.CreateCommand();
 
-        var where = new List<string>();
+        // Recopilar condiciones y valores de filtro
+        var whereConditions = new List<string>();
+        var paramValues = new List<(string name, string value)>();
 
-        AddFilter(cmd, where, "no_requisicion", NO_REQUISICION, "nr");
-        AddFilter(cmd, where, "orden_compra", ORDEN_COMPRA, "oc");
-        AddFilter(cmd, where, "fecha_compra::text", FECHA_COMPRA, "fc");
-        AddFilter(cmd, where, "po_subtotal::text", PO_SUBTOTAL, "ps");
-        AddFilter(cmd, where, "moneda", MONEDA, "mo");
-        AddFilter(cmd, where, "oc_subtotal", OC_SUBTOTAL, "os");
-        AddFilter(cmd, where, "registrada_en_oc", REGISTRADA_EN_OC, "re");
+        void CollectFilter(string column, string? value, string param)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                whereConditions.Add($"{column} ILIKE @{param}");
+                paramValues.Add((param, $"%{value}%"));
+            }
+        }
 
-        string filtro = where.Count > 0 ? "WHERE " + string.Join(" AND ", where) : "";
+        CollectFilter("no_requisicion", NO_REQUISICION, "nr");
+        CollectFilter("orden_compra", ORDEN_COMPRA, "oc");
+        CollectFilter("fecha_compra::text", FECHA_COMPRA, "fc");
+        CollectFilter("po_subtotal::text", PO_SUBTOTAL, "ps");
+        CollectFilter("moneda", MONEDA, "mo");
+        CollectFilter("oc_subtotal", OC_SUBTOTAL, "os");
+        CollectFilter("registrada_en_oc", REGISTRADA_EN_OC, "re");
 
-        cmd.CommandText = $"SELECT COUNT(*) FROM req_vs_oc {filtro}";
-        int total = Convert.ToInt32(cmd.ExecuteScalar());
+        string filtro = whereConditions.Count > 0
+            ? "WHERE " + string.Join(" AND ", whereConditions)
+            : "";
 
+        // ── COUNT (comando independiente) ─────────────────────────────────
+        int total;
+        using (var cmdCount = con.CreateCommand())
+        {
+            cmdCount.CommandText = $"SELECT COUNT(*) FROM req_vs_oc {filtro}";
+            foreach (var (name, value) in paramValues)
+                cmdCount.Parameters.AddWithValue(name, value);
+            total = Convert.ToInt32(cmdCount.ExecuteScalar());
+        }
+
+        // ── SELECT paginado (comando independiente) ───────────────────────
         int offset = (page - 1) * limit;
-
-        cmd.CommandText = $"""
-        SELECT id, no_requisicion, orden_compra, fecha_compra,
-               po_subtotal, moneda, oc_subtotal, registrada_en_oc,
-               CASE WHEN pdf IS NOT NULL THEN 1 ELSE 0 END
-        FROM req_vs_oc
-        {filtro}
-        ORDER BY id DESC
-        OFFSET {offset} LIMIT {limit}
-        """;
-
         var list = new List<ReqVsOcRow>();
 
-        using var dr = cmd.ExecuteReader();
-
-        while (dr.Read())
+        using (var cmdSelect = con.CreateCommand())
         {
-            list.Add(new ReqVsOcRow
+            cmdSelect.CommandText = $"""
+                SELECT id, no_requisicion, orden_compra, fecha_compra,
+                       po_subtotal, moneda, oc_subtotal, registrada_en_oc,
+                       CASE WHEN pdf IS NOT NULL THEN 1 ELSE 0 END
+                FROM req_vs_oc
+                {filtro}
+                ORDER BY id DESC
+                OFFSET {offset} LIMIT {limit}
+                """;
+
+            foreach (var (name, value) in paramValues)
+                cmdSelect.Parameters.AddWithValue(name, value);
+
+            using var dr = cmdSelect.ExecuteReader();
+            while (dr.Read())
             {
-                ID = dr.GetInt32(0),
-                NO_REQUISICION = dr.IsDBNull(1) ? null : dr.GetString(1),
-                ORDEN_COMPRA = dr.IsDBNull(2) ? null : dr.GetString(2),
-                FECHA_COMPRA = dr.IsDBNull(3) ? null : dr.GetValue(3).ToString(),
-                PO_SUBTOTAL = dr.IsDBNull(4) ? null : dr.GetDecimal(4),
-                MONEDA = dr.IsDBNull(5) ? null : dr.GetString(5),
-                OC_SUBTOTAL = dr.IsDBNull(6) ? null : dr.GetString(6),
-                REGISTRADA_EN_OC = dr.IsDBNull(7) ? null : dr.GetString(7),
-                TIENE_PDF = dr.GetInt32(8) == 1
-            });
+                list.Add(new ReqVsOcRow
+                {
+                    ID = dr.GetInt32(0),
+                    NO_REQUISICION = dr.IsDBNull(1) ? null : dr.GetString(1),
+                    ORDEN_COMPRA = dr.IsDBNull(2) ? null : dr.GetString(2),
+                    FECHA_COMPRA = dr.IsDBNull(3) ? null : dr.GetValue(3).ToString(),
+                    PO_SUBTOTAL = dr.IsDBNull(4) ? null : dr.GetDecimal(4),
+                    MONEDA = dr.IsDBNull(5) ? null : dr.GetString(5),
+                    OC_SUBTOTAL = dr.IsDBNull(6) ? null : dr.GetString(6),
+                    REGISTRADA_EN_OC = dr.IsDBNull(7) ? null : dr.GetString(7),
+                    TIENE_PDF = dr.GetInt32(8) == 1
+                });
+            }
         }
 
         return (list, total);
@@ -255,19 +264,21 @@ public class PresupuestosReqVsOcService
 
         return ms.ToArray();
     }
+
+    // ── GET POR AÑO ──────────────────────────────────
     public List<ReqVsOcRow> GetPorAnio(int anio)
     {
         using var con = Abrir();
         using var cmd = con.CreateCommand();
 
         cmd.CommandText = """
-    SELECT id, no_requisicion, orden_compra, fecha_compra,
-           po_subtotal, moneda, oc_subtotal, registrada_en_oc,
-           CASE WHEN pdf IS NOT NULL THEN 1 ELSE 0 END
-    FROM req_vs_oc
-    WHERE EXTRACT(YEAR FROM fecha_compra) = @anio
-    ORDER BY id DESC
-    """;
+            SELECT id, no_requisicion, orden_compra, fecha_compra,
+                   po_subtotal, moneda, oc_subtotal, registrada_en_oc,
+                   CASE WHEN pdf IS NOT NULL THEN 1 ELSE 0 END
+            FROM req_vs_oc
+            WHERE EXTRACT(YEAR FROM fecha_compra) = @anio
+            ORDER BY id DESC
+            """;
 
         cmd.Parameters.AddWithValue("anio", anio);
 

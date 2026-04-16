@@ -1,11 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>REQ vs ORDEN DE COMPRA</title>
-
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>REQ vs Orden de Compra</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        /* ── Reset & base ────────────────────────────────────────────── */
+        :root {
+            --bg: #0B0F1A;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --surface3: #1e293b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --accent: #3B82F6;
+            --text: #F1F5F9;
+            --muted: #64748B;
+            --muted2: #94A3B8;
+            --green: #10B981;
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --purple: #8B5CF6;
+            --cyan: #06B6D4;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -13,309 +31,503 @@
         }
 
         body {
-            font-family: Arial,sans-serif;
-            background: #f1f5f9;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
         }
 
-        /* ── Header ──────────────────────────────────────────────────── */
-        .header {
-            background: #1e293b;
-            color: #fff;
-            padding: 14px 20px;
-            font-size: 18px;
-            font-weight: bold;
+        /* ── TOP BAR ── */
+        .topbar {
+            background: linear-gradient(135deg,#0f1e35,#0B0F1A);
+            border-bottom: 1px solid var(--border2);
+            padding: 14px 24px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            letter-spacing: .4px;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
         }
 
-            .header span.sub {
-                font-size: 12px;
-                font-weight: normal;
-                color: #94a3b8;
-                margin-left: auto;
+        .topbar-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: linear-gradient(135deg,#1d4ed8,#3B82F6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px rgba(59,130,246,.45);
+            flex-shrink: 0;
+        }
+
+        .topbar-title {
+            flex: 1;
+        }
+
+            .topbar-title h1 {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: -.01em;
             }
 
-        /* ── Container ───────────────────────────────────────────────── */
-        .container {
-            padding: 15px 18px;
+            .topbar-title p {
+                font-size: 11px;
+                color: var(--muted2);
+                margin-top: 1px;
+                font-family: 'DM Mono', monospace;
+            }
+
+        .topbar-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            text-decoration: none;
+            transition: background .2s, border-color .2s, color .2s;
         }
 
-        /* ── Card form ───────────────────────────────────────────────── */
-        .card {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 14px 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            .topbar-back:hover {
+                background: rgba(239,68,68,.12);
+                border-color: var(--red);
+                color: #fca5a5;
+            }
+
+        /* ── MAIN ── */
+        .main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 24px;
         }
 
-        .card-title {
+        /* ── PANEL ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
             font-size: 11px;
-            font-weight: bold;
-            color: #475569;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: .6px;
-            margin-bottom: 10px;
-            padding-bottom: 6px;
-            border-bottom: 2px solid #e2e8f0;
+            letter-spacing: .1em;
+            color: var(--muted);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* ── Form grid ───────────────────────────────────────────────── */
+            .panel-title::before {
+                content: '';
+                width: 3px;
+                height: 14px;
+                background: var(--accent);
+                border-radius: 2px;
+                display: inline-block;
+            }
+
+        /* ── FORM GRID ── */
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill,minmax(210px,1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+            gap: 12px;
+            margin-bottom: 14px;
         }
 
-        .field {
-            display: flex;
-            flex-direction: column;
+        .field label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 5px;
         }
 
-            .field label {
-                font-size: 10.5px;
-                font-weight: bold;
-                color: #334155;
-                margin-bottom: 3px;
-                text-transform: uppercase;
-                letter-spacing: .3px;
-            }
-
-            .field input, .field select {
-                padding: 7px 9px;
-                border: 1px solid #cbd5e1;
-                border-radius: 5px;
-                font-size: 12px;
-                background: #f8fafc;
-                color: #1e293b;
-                transition: border-color .15s,box-shadow .15s;
-            }
-
-                .field input:focus, .field select:focus {
-                    outline: none;
-                    border-color: #2563eb;
-                    background: #fff;
-                    box-shadow: 0 0 0 2px rgba(37,99,235,.15);
-                }
-
-        /* ── Botones ─────────────────────────────────────────────────── */
-        button {
-            padding: 6px 13px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .field input, .field select {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
             font-size: 12px;
-            font-weight: bold;
-            transition: filter .15s,transform .1s;
+            font-family: 'DM Mono', monospace;
+            color: var(--text);
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 28px;
+        }
+
+            .field select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+            .field input:focus, .field select:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+            }
+
+        /* ── BOTONES ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
             white-space: nowrap;
         }
 
-            button:hover {
-                filter: brightness(1.1);
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(59,130,246,.3);
+        }
+
+            .btn-primary:hover {
+                background: #2563EB;
+                transform: translateY(-1px);
             }
 
-            button:active {
-                transform: scale(.97);
+        .btn-success {
+            background: var(--green);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(16,185,129,.25);
+        }
+
+            .btn-success:hover {
+                background: #059669;
+                transform: translateY(-1px);
             }
 
-        .btn-save {
-            background: #16a34a;
+        .btn-danger {
+            background: var(--red);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(239,68,68,.25);
+        }
+
+            .btn-danger:hover {
+                background: #DC2626;
+                transform: translateY(-1px);
+            }
+
+        .btn-amber {
+            background: var(--amber);
+            color: #1c1400;
+        }
+
+            .btn-amber:hover {
+                background: #D97706;
+            }
+
+        .btn-purple {
+            background: var(--purple);
             color: #fff;
         }
 
-        .btn-cancel {
-            background: #64748b;
-            color: #fff;
+            .btn-purple:hover {
+                background: #7C3AED;
+            }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
         }
 
-        .btn-delete {
-            background: #dc2626;
-            color: #fff;
+            .btn-ghost:hover {
+                color: var(--text);
+                border-color: var(--accent);
+            }
+
+        .btn-sm {
+            padding: 7px 12px;
+            font-size: 11px;
         }
 
-        .btn-edit {
-            background: #f59e0b;
-            color: #fff;
+        /* ── EDITING BANNER ── */
+        .editing-banner {
+            display: none;
+            background: rgba(245,158,11,.1);
+            border: 1px solid rgba(245,158,11,.35);
+            border-radius: 10px;
+            padding: 9px 16px;
+            font-size: 12px;
+            color: var(--amber);
+            font-weight: 600;
+            margin-bottom: 12px;
         }
 
-        .btn-pdf {
-            background: #2563eb;
-            color: #fff;
-        }
+            .editing-banner.visible {
+                display: block;
+            }
 
-        .btn-export {
-            background: #7c3aed;
-            color: #fff;
-        }
-
-        .btn-back {
-            background: #dc2626;
-            color: #fff;
-            font-style: italic;
-        }
-
-        /* ── Barra de botones ────────────────────────────────────────── */
-        .btn-bar {
+        /* ── TOOLBAR ── */
+        .toolbar {
             display: flex;
             flex-wrap: wrap;
+            gap: 8px;
             align-items: center;
-            gap: 7px;
-            margin-bottom: 10px;
+            padding: 14px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
         }
 
-            .btn-bar input[type="number"] {
-                padding: 6px 8px;
-                border: 1px solid #cbd5e1;
-                border-radius: 5px;
-                font-size: 12px;
-                width: 120px;
-                background: #fff;
+        .toolbar-sep {
+            width: 1px;
+            height: 24px;
+            background: var(--border2);
+            margin: 0 4px;
+        }
+
+        .anio-input {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono', monospace;
+            color: var(--text);
+            width: 110px;
+        }
+
+            .anio-input:focus {
+                outline: none;
+                border-color: var(--accent);
             }
 
-        /* ── Tabla ───────────────────────────────────────────────────── */
+        /* ── TABLA ── */
         .table-wrap {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
             overflow: hidden;
-            box-shadow: 0 1px 4px rgba(0,0,0,.06);
-            margin-bottom: 10px;
+            margin-bottom: 16px;
         }
 
-        .table-container {
-            width: 100%;
-            height: 490px;
-            overflow: auto;
+        .table-scroll {
+            overflow-x: auto;
+            max-height: calc(100vh - 380px);
+            min-height: 420px;
+            overflow-y: auto;
         }
+
+            .table-scroll::-webkit-scrollbar {
+                width: 7px;
+                height: 7px;
+            }
+
+            .table-scroll::-webkit-scrollbar-track {
+                background: var(--surface2);
+                border-radius: 999px;
+            }
+
+            .table-scroll::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 999px;
+            }
+
+                .table-scroll::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent);
+                }
 
         table {
             border-collapse: collapse;
-            min-width: 1800px;
-            font-size: 11px;
             width: 100%;
-        }
-
-        th, td {
-            border: 1px solid #e2e8f0;
-            padding: 6px 8px;
-            white-space: nowrap;
-            text-align: center;
+            min-width: 1100px;
+            font-size: 12px;
         }
 
         thead th {
-            background: #1e293b;
-            color: #fff;
-            font-size: 10.5px;
-            letter-spacing: .3px;
+            background: var(--surface3);
+            color: var(--muted2);
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border2);
+            white-space: nowrap;
             position: sticky;
             top: 0;
             z-index: 2;
         }
 
         .filter-row th {
-            background: #f1f5f9;
-            padding: 4px 5px;
+            background: var(--surface2);
+            padding: 6px 8px;
             position: sticky;
-            top: 28px;
+            top: 38px;
             z-index: 2;
+            border-bottom: 1px solid var(--border2);
         }
 
         .filter-row input {
             width: 100%;
-            padding: 4px 6px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
+            background: var(--surface3);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            padding: 5px 8px;
             font-size: 11px;
-            background: #fff;
+            font-family: 'DM Mono', monospace;
+            color: var(--text);
         }
 
             .filter-row input:focus {
                 outline: none;
-                border-color: #2563eb;
+                border-color: var(--accent);
             }
 
-        tbody tr:nth-child(even) {
-            background: #f8fafc;
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
         }
 
-        tbody tr:hover {
-            background: #eff6ff;
-        }
-
-        /* ── Paginación ──────────────────────────────────────────────── */
-        .pagination {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-            .pagination button {
-                padding: 5px 12px;
+            tbody tr:last-child {
+                border-bottom: none;
             }
 
-        #paginaInfo {
-            font-size: 12px;
-            color: #475569;
-            font-weight: bold;
+            tbody tr:hover td {
+                background: rgba(59,130,246,.05);
+            }
+
+        td {
+            padding: 10px 14px;
+            color: var(--text);
+            vertical-align: middle;
+            white-space: nowrap;
         }
 
-        /* ── Badge estado ────────────────────────────────────────────── */
+            td.mono {
+                font-family: 'DM Mono', monospace;
+                font-size: 12px;
+                color: var(--muted2);
+            }
+
+        /* ── BADGE ── */
         .badge {
             display: inline-block;
-            padding: 2px 8px;
-            border-radius: 99px;
+            padding: 3px 10px;
+            border-radius: 999px;
             font-size: 10px;
-            font-weight: bold;
-            letter-spacing: .3px;
+            font-weight: 700;
+            letter-spacing: .05em;
         }
 
         .badge-si {
-            background: #dcfce7;
-            color: #15803d;
+            background: rgba(16,185,129,.15);
+            color: var(--green);
+            border: 1px solid rgba(16,185,129,.3);
         }
 
         .badge-no {
-            background: #fee2e2;
-            color: #b91c1c;
+            background: rgba(239,68,68,.15);
+            color: var(--red);
+            border: 1px solid rgba(239,68,68,.3);
         }
 
         .badge-otro {
-            background: #f1f5f9;
-            color: #475569;
+            background: rgba(100,116,139,.15);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
         }
 
-        /* ── Modo edición ────────────────────────────────────────────── */
-        .editing-banner {
-            display: none;
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
-            border-radius: 6px;
-            padding: 7px 12px;
+        /* ── PAGINACIÓN ── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 14px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .page-info {
             font-size: 12px;
-            color: #92400e;
-            font-weight: bold;
-            margin-bottom: 10px;
+            font-family: 'DM Mono', monospace;
+            color: var(--muted2);
+            margin-left: auto;
         }
 
-            .editing-banner.visible {
-                display: block;
+        /* ── FILE INPUT ── */
+        input[type="file"] {
+            font-size: 11px;
+            color: var(--muted2);
+            font-family: 'DM Sans', sans-serif;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            padding: 4px 8px;
+            cursor: pointer;
+            max-width: 180px;
+        }
+
+            input[type="file"]::-webkit-file-upload-button {
+                background: var(--surface3);
+                color: var(--muted2);
+                border: 1px solid var(--border2);
+                border-radius: 5px;
+                padding: 3px 8px;
+                font-size: 10px;
+                cursor: pointer;
+                font-family: 'DM Sans', sans-serif;
             }
+
+        /* ── ACCIONES TD ── */
+        .td-actions {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
     </style>
 </head>
-
 <body>
 
-    <div class="header">
-        📋 REQ vs ORDEN DE COMPRA
-        <span class="sub">Módulo de Presupuestos</span>
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div class="topbar-icon">🛒</div>
+        <div class="topbar-title">
+            <h1>REQ vs Orden de Compra</h1>
+            <p>Módulo de Presupuestos · PRESUPUESTOS_REQ_VS_OC</p>
+        </div>
+        <a class="topbar-back" href="presupuestos_menu.html">↩ Regresar a Presupuestos</a>
     </div>
 
-    <div class="container">
+    <div class="main">
 
         <!-- Banner modo edición -->
         <div class="editing-banner" id="editingBanner">
@@ -323,30 +535,25 @@
         </div>
 
         <!-- Formulario -->
-        <div class="card">
-            <div class="card-title">📝 Registro de Requisición vs Orden de Compra</div>
+        <div class="panel">
+            <div class="panel-title">Registro de Requisición vs Orden de Compra</div>
             <div class="form-grid">
-
                 <div class="field">
                     <label>No. Requisición</label>
                     <input id="NO_REQUISICION" placeholder="Ej: REQ-001">
                 </div>
-
                 <div class="field">
                     <label>Orden de Compra</label>
                     <input id="ORDEN_COMPRA" placeholder="Ej: OC-2024-001">
                 </div>
-
                 <div class="field">
                     <label>Fecha de Compra</label>
                     <input id="FECHA_COMPRA" type="date">
                 </div>
-
                 <div class="field">
                     <label>PO Subtotal</label>
                     <input id="PO_SUBTOTAL" type="number" step="0.01" placeholder="Ej: 1500.00">
                 </div>
-
                 <div class="field">
                     <label>Moneda</label>
                     <select id="MONEDA">
@@ -356,12 +563,10 @@
                         <option value="EUR">EUR</option>
                     </select>
                 </div>
-
                 <div class="field">
                     <label>OC Subtotal</label>
                     <input id="OC_SUBTOTAL" placeholder="Ej: 1500.00">
                 </div>
-
                 <div class="field">
                     <label>Registrada en OC</label>
                     <select id="REGISTRADA_EN_OC">
@@ -370,29 +575,25 @@
                         <option value="NO">NO</option>
                     </select>
                 </div>
-
             </div>
-
-            <div class="btn-bar" style="margin-top:12px;">
-                <button class="btn-save" onclick="guardar()">💾 GUARDAR / ACTUALIZAR</button>
-                <button class="btn-cancel" onclick="cancelarEdicion()">✖ CANCELAR</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-success" onclick="guardar()">💾 Guardar / Actualizar</button>
+                <button class="btn btn-ghost" onclick="cancelarEdicion()">✖ Cancelar</button>
             </div>
         </div>
 
         <!-- Exportaciones -->
-        <div class="card">
-            <div class="card-title">📤 Exportaciones</div>
-            <div class="btn-bar">
-                <button class="btn-export" onclick="exportarFiltrado()">⬇ Exportar Filtrado</button>
-                <button class="btn-export" onclick="exportarTodo()">⬇ Exportar Todo</button>
-                <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
-                <button class="btn-export" onclick="exportarPorAnio()">📅 Exportar por Año</button>
-            </div>
+        <div class="toolbar">
+            <button class="btn btn-purple btn-sm" onclick="exportarFiltrado()">⬇ Exportar Filtrado</button>
+            <button class="btn btn-purple btn-sm" onclick="exportarTodo()">⬇ Exportar Todo</button>
+            <div class="toolbar-sep"></div>
+            <input class="anio-input" type="number" id="anioExportar" placeholder="Año (ej: 2026)">
+            <button class="btn btn-purple btn-sm" onclick="exportarPorAnio()">📅 Exportar por Año</button>
         </div>
 
         <!-- Tabla -->
         <div class="table-wrap">
-            <div class="table-container">
+            <div class="table-scroll">
                 <table>
                     <thead>
                         <tr>
@@ -405,7 +606,7 @@
                             <th>OC Subtotal</th>
                             <th>Registrada en OC</th>
                             <th>PDF</th>
-                            <th>ACCIONES</th>
+                            <th>Acciones</th>
                         </tr>
                         <tr class="filter-row">
                             <th></th>
@@ -427,15 +628,12 @@
 
         <!-- Paginación -->
         <div class="pagination">
-            <button onclick="anterior()">◀ Anterior</button>
-            <span id="paginaInfo">—</span>
-            <button onclick="siguiente()">Siguiente ▶</button>
-            <button class="btn-back" onclick="window.location.href='presupuestos_menu.html'">
-                ↩ REGRESAR A PRESUPUESTOS
-            </button>
+            <button class="btn btn-ghost btn-sm" onclick="anterior()">◀ Anterior</button>
+            <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
+            <span class="page-info" id="paginaInfo">—</span>
         </div>
 
-    </div><!-- /container -->
+    </div><!-- /main -->
 
     <script>
         let paginaActual = 1;
@@ -445,57 +643,54 @@
         let datosOriginales = [];
         let datosFiltrados = [];
 
-        // ── Badge Registrada en OC ─────────────────────────────────────────────────
+        // ── Badge ──────────────────────────────────────────────────────────
         function badge(val) {
             if (!val) return '<span class="badge badge-otro">—</span>';
             const v = val.toString().toUpperCase();
-            if (v === "SI") return `<span class="badge badge-si">SI</span>`;
-            if (v === "NO") return `<span class="badge badge-no">NO</span>`;
+            if (v === 'SI') return `<span class="badge badge-si">SI</span>`;
+            if (v === 'NO') return `<span class="badge badge-no">NO</span>`;
             return `<span class="badge badge-otro">${val}</span>`;
         }
 
-        // ── Guardar / Actualizar ───────────────────────────────────────────────────
+        // ── Guardar / Actualizar ───────────────────────────────────────────
         function guardar() {
             const data = {
-                NO_REQUISICION: document.getElementById("NO_REQUISICION").value || null,
-                ORDEN_COMPRA: document.getElementById("ORDEN_COMPRA").value || null,
-                FECHA_COMPRA: document.getElementById("FECHA_COMPRA").value || null,
-                PO_SUBTOTAL: document.getElementById("PO_SUBTOTAL").value || null,
-                MONEDA: document.getElementById("MONEDA").value || null,
-                OC_SUBTOTAL: document.getElementById("OC_SUBTOTAL").value || null,
-                REGISTRADA_EN_OC: document.getElementById("REGISTRADA_EN_OC").value || null
+                NO_REQUISICION: document.getElementById('NO_REQUISICION').value || null,
+                ORDEN_COMPRA: document.getElementById('ORDEN_COMPRA').value || null,
+                FECHA_COMPRA: document.getElementById('FECHA_COMPRA').value || null,
+                PO_SUBTOTAL: document.getElementById('PO_SUBTOTAL').value || null,
+                MONEDA: document.getElementById('MONEDA').value || null,
+                OC_SUBTOTAL: document.getElementById('OC_SUBTOTAL').value || null,
+                REGISTRADA_EN_OC: document.getElementById('REGISTRADA_EN_OC').value || null
             };
 
             if (editandoID) {
                 fetch(`/PRESUPUESTOS_REQ_VS_OC/${editandoID}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 }).then(() => { editandoID = null; limpiar(); cargar(); });
             } else {
-                fetch("/PRESUPUESTOS_REQ_VS_OC", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                fetch('/PRESUPUESTOS_REQ_VS_OC', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 }).then(() => { limpiar(); cargar(); });
             }
         }
 
         function limpiar() {
-            ["NO_REQUISICION", "ORDEN_COMPRA", "FECHA_COMPRA",
-                "PO_SUBTOTAL", "MONEDA", "OC_SUBTOTAL", "REGISTRADA_EN_OC"]
-                .forEach(id => document.getElementById(id).value = "");
-            document.getElementById("editingBanner").classList.remove("visible");
+            ['NO_REQUISICION', 'ORDEN_COMPRA', 'FECHA_COMPRA',
+                'PO_SUBTOTAL', 'MONEDA', 'OC_SUBTOTAL', 'REGISTRADA_EN_OC']
+                .forEach(id => document.getElementById(id).value = '');
+            document.getElementById('editingBanner').classList.remove('visible');
         }
 
-        function cancelarEdicion() {
-            editandoID = null;
-            limpiar();
-        }
+        function cancelarEdicion() { editandoID = null; limpiar(); }
 
-        // ── Cargar ─────────────────────────────────────────────────────────────────
+        // ── Cargar ─────────────────────────────────────────────────────────
         function obtenerParametros() {
-            const filtros = document.querySelectorAll(".filter-row input");
+            const filtros = document.querySelectorAll('.filter-row input');
             return new URLSearchParams({
                 page: paginaActual,
                 limit: limite,
@@ -520,45 +715,48 @@
                 });
         }
 
-        // ── Renderizar ─────────────────────────────────────────────────────────────
+        // ── Renderizar ─────────────────────────────────────────────────────
         function renderizar() {
-            const tbody = document.getElementById("tabla");
-            tbody.innerHTML = "";
+            const tbody = document.getElementById('tabla');
+            tbody.innerHTML = '';
 
             datosFiltrados.forEach(row => {
-                const tr = document.createElement("tr");
+                const tr = document.createElement('tr');
                 tr.innerHTML = `
-                <td>${row.ID}</td>
-                <td>${row.NO_REQUISICION ?? ""}</td>
-                <td>${row.ORDEN_COMPRA ?? ""}</td>
-                <td>${row.FECHA_COMPRA ?? ""}</td>
-                <td>${row.PO_SUBTOTAL != null
-                        ? Number(row.PO_SUBTOTAL).toLocaleString("es-MX", { minimumFractionDigits: 2 })
-                        : ""}</td>
-                <td>${row.MONEDA ?? ""}</td>
-                <td>${row.OC_SUBTOTAL ?? ""}</td>
-                <td>${badge(row.REGISTRADA_EN_OC)}</td>
-                <td>
-                ${row.TIENE_PDF
-                        ? `<button class="btn-pdf"    onclick="verPDF(${row.ID})">📄 Ver PDF</button>
-                     <button class="btn-delete" onclick="eliminarPDF(${row.ID})">🗑 Quitar</button>`
-                        : `<input type="file" accept="application/pdf"
-                            onchange="subirPDF(${row.ID},this)">`
+                        <td class="mono">${row.ID}</td>
+                        <td>${row.NO_REQUISICION ?? ''}</td>
+                        <td>${row.ORDEN_COMPRA ?? ''}</td>
+                        <td class="mono">${row.FECHA_COMPRA ?? ''}</td>
+                        <td class="mono">${row.PO_SUBTOTAL != null
+                        ? Number(row.PO_SUBTOTAL).toLocaleString('es-MX', { minimumFractionDigits: 2 })
+                        : ''}</td>
+                        <td>${row.MONEDA ?? ''}</td>
+                        <td class="mono">${row.OC_SUBTOTAL ?? ''}</td>
+                        <td>${badge(row.REGISTRADA_EN_OC)}</td>
+                        <td>
+                            <div class="td-actions">
+                            ${row.TIENE_PDF
+                        ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver PDF</button>
+                                   <button class="btn btn-danger  btn-sm" onclick="eliminarPDF(${row.ID})">🗑</button>`
+                        : `<input type="file" accept="application/pdf" onchange="subirPDF(${row.ID},this)">`
                     }
-                </td>
-                <td>
-                <button class="btn-edit"   onclick='editar(${JSON.stringify(row)})'>✏️ Editar</button>
-                <button class="btn-delete" onclick="eliminar(${row.ID})">🗑 Eliminar</button>
-                </td>`;
+                            </div>
+                        </td>
+                        <td>
+                            <div class="td-actions">
+                                <button class="btn btn-amber  btn-sm" onclick='editar(${JSON.stringify(row)})'>✏️ Editar</button>
+                                <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑 Eliminar</button>
+                            </div>
+                        </td>`;
                 tbody.appendChild(tr);
             });
 
             const total = Math.max(1, Math.ceil(totalRegistros / limite));
-            document.getElementById("paginaInfo").textContent =
+            document.getElementById('paginaInfo').textContent =
                 `Página ${paginaActual} de ${total}  (${totalRegistros} registros)`;
         }
 
-        // ── Editar ─────────────────────────────────────────────────────────────────
+        // ── Editar ─────────────────────────────────────────────────────────
         function editar(row) {
             editandoID = row.ID;
             const map = {
@@ -572,45 +770,43 @@
             };
             Object.entries(map).forEach(([k, v]) => {
                 const el = document.getElementById(k);
-                if (el) el.value = v ?? "";
+                if (el) el.value = v ?? '';
             });
-            document.getElementById("editingBanner").classList.add("visible");
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            document.getElementById('editingBanner').classList.add('visible');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // ── Eliminar ───────────────────────────────────────────────────────────────
+        // ── Eliminar ───────────────────────────────────────────────────────
         function eliminar(id) {
-            if (!confirm("¿Eliminar este registro?")) return;
-            fetch(`/PRESUPUESTOS_REQ_VS_OC/${id}`, { method: "DELETE" }).then(() => cargar());
+            if (!confirm('¿Eliminar este registro?')) return;
+            fetch(`/PRESUPUESTOS_REQ_VS_OC/${id}`, { method: 'DELETE' }).then(() => cargar());
         }
 
-        // ── PDF ────────────────────────────────────────────────────────────────────
+        // ── PDF ────────────────────────────────────────────────────────────
         function subirPDF(id, input) {
             const file = input.files[0];
             if (!file) return;
             const fd = new FormData();
-            fd.append("file", file);
-            fetch(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, { method: "POST", body: fd })
+            fd.append('file', file);
+            fetch(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, { method: 'POST', body: fd })
                 .then(() => cargar());
         }
 
-        function verPDF(id) {
-            window.open(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, "_blank");
-        }
+        function verPDF(id) { window.open(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, '_blank'); }
 
         function eliminarPDF(id) {
-            if (!confirm("¿Seguro que deseas eliminar el PDF?")) return;
-            fetch(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, { method: "DELETE" }).then(() => cargar());
+            if (!confirm('¿Eliminar el PDF de este registro?')) return;
+            fetch(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, { method: 'DELETE' }).then(() => cargar());
         }
 
-        // ── Filtrar / Paginación ───────────────────────────────────────────────────
+        // ── Filtrar / Paginación ───────────────────────────────────────────
         function filtrar() { paginaActual = 1; cargar(); }
         function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
         function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
 
-        // ── Exportar ───────────────────────────────────────────────────────────────
+        // ── Exportar ───────────────────────────────────────────────────────
         function exportarFiltrado() {
-            const filtros = document.querySelectorAll(".filter-row input");
+            const filtros = document.querySelectorAll('.filter-row input');
             const p = new URLSearchParams({
                 NO_REQUISICION: filtros[0].value,
                 ORDEN_COMPRA: filtros[1].value,
@@ -623,17 +819,15 @@
             window.open(`/PRESUPUESTOS_REQ_VS_OC/EXPORTAR?${p.toString()}`);
         }
 
-        function exportarTodo() {
-            window.open(`/PRESUPUESTOS_REQ_VS_OC/EXPORTAR_TODO`);
-        }
+        function exportarTodo() { window.open('/PRESUPUESTOS_REQ_VS_OC/EXPORTAR_TODO'); }
 
         function exportarPorAnio() {
-            const anio = document.getElementById("anioExportar").value;
-            if (!anio) { alert("Ingresa un año"); return; }
+            const anio = document.getElementById('anioExportar').value;
+            if (!anio) { alert('Ingresa un año'); return; }
             window.open(`/PRESUPUESTOS_REQ_VS_OC/EXPORTAR_ANIO?anio=${anio}`);
         }
 
-        // ── Init ───────────────────────────────────────────────────────────────────
+        // ── Init ───────────────────────────────────────────────────────────
         cargar();
     </script>
 </body>
