@@ -17,6 +17,7 @@ public class ReqVsOcRow : ReqVsOcDto
 {
     public int ID { get; set; }
     public bool TIENE_PDF { get; set; }
+    public string? PDF_RUTA { get; set; }
 }
 
 public class PresupuestosReqVsOcService
@@ -45,7 +46,6 @@ public class PresupuestosReqVsOcService
     {
         using var con = Abrir();
 
-        // Recopilar condiciones y valores de filtro
         var whereConditions = new List<string>();
         var paramValues = new List<(string name, string value)>();
 
@@ -70,7 +70,7 @@ public class PresupuestosReqVsOcService
             ? "WHERE " + string.Join(" AND ", whereConditions)
             : "";
 
-        // ── COUNT (comando independiente) ─────────────────────────────────
+        // ── COUNT ─────────────────────────────────────
         int total;
         using (var cmdCount = con.CreateCommand())
         {
@@ -80,7 +80,7 @@ public class PresupuestosReqVsOcService
             total = Convert.ToInt32(cmdCount.ExecuteScalar());
         }
 
-        // ── SELECT paginado (comando independiente) ───────────────────────
+        // ── SELECT paginado ───────────────────────────
         int offset = (page - 1) * limit;
         var list = new List<ReqVsOcRow>();
 
@@ -89,7 +89,7 @@ public class PresupuestosReqVsOcService
             cmdSelect.CommandText = $"""
                 SELECT id, no_requisicion, orden_compra, fecha_compra,
                        po_subtotal, moneda, oc_subtotal, registrada_en_oc,
-                       CASE WHEN pdf IS NOT NULL THEN 1 ELSE 0 END
+                       pdf
                 FROM req_vs_oc
                 {filtro}
                 ORDER BY id DESC
@@ -102,6 +102,7 @@ public class PresupuestosReqVsOcService
             using var dr = cmdSelect.ExecuteReader();
             while (dr.Read())
             {
+                var ruta = dr.IsDBNull(8) ? null : dr.GetString(8);
                 list.Add(new ReqVsOcRow
                 {
                     ID = dr.GetInt32(0),
@@ -112,7 +113,8 @@ public class PresupuestosReqVsOcService
                     MONEDA = dr.IsDBNull(5) ? null : dr.GetString(5),
                     OC_SUBTOTAL = dr.IsDBNull(6) ? null : dr.GetString(6),
                     REGISTRADA_EN_OC = dr.IsDBNull(7) ? null : dr.GetString(7),
-                    TIENE_PDF = dr.GetInt32(8) == 1
+                    PDF_RUTA = ruta,
+                    TIENE_PDF = ruta != null
                 });
             }
         }
@@ -153,14 +155,14 @@ public class PresupuestosReqVsOcService
 
         cmd.CommandText = """
         UPDATE req_vs_oc SET
-            no_requisicion=@nr,
-            orden_compra=@oc,
-            fecha_compra=@fc,
-            po_subtotal=@ps,
-            moneda=@mo,
-            oc_subtotal=@os,
-            registrada_en_oc=@re
-        WHERE id=@id
+            no_requisicion   = @nr,
+            orden_compra     = @oc,
+            fecha_compra     = @fc,
+            po_subtotal      = @ps,
+            moneda           = @mo,
+            oc_subtotal      = @os,
+            registrada_en_oc = @re
+        WHERE id = @id
         """;
 
         cmd.Parameters.AddWithValue("nr", (object?)d.NO_REQUISICION ?? DBNull.Value);
@@ -181,44 +183,45 @@ public class PresupuestosReqVsOcService
         using var con = Abrir();
         using var cmd = con.CreateCommand();
 
-        cmd.CommandText = "DELETE FROM req_vs_oc WHERE id=@id";
+        cmd.CommandText = "DELETE FROM req_vs_oc WHERE id = @id";
         cmd.Parameters.AddWithValue("id", id);
 
         cmd.ExecuteNonQuery();
     }
 
-    // ── PDF ──────────────────────────────────────────
-    public void GuardarPDF(int id, byte[] bytes)
+    // ── PDF: guardar ruta ─────────────────────────────
+    public void GuardarRutaPDF(int id, string ruta)
     {
         using var con = Abrir();
         using var cmd = con.CreateCommand();
 
-        cmd.CommandText = "UPDATE req_vs_oc SET pdf=@pdf WHERE id=@id";
-        cmd.Parameters.AddWithValue("pdf", bytes);
+        cmd.CommandText = "UPDATE req_vs_oc SET pdf = @ruta WHERE id = @id";
+        cmd.Parameters.AddWithValue("ruta", ruta);
         cmd.Parameters.AddWithValue("id", id);
 
         cmd.ExecuteNonQuery();
     }
 
-    public byte[]? ObtenerPDF(int id)
+    // ── PDF: obtener ruta ─────────────────────────────
+    public string? ObtenerRutaPDF(int id)
     {
         using var con = Abrir();
         using var cmd = con.CreateCommand();
 
-        cmd.CommandText = "SELECT pdf FROM req_vs_oc WHERE id=@id";
+        cmd.CommandText = "SELECT pdf FROM req_vs_oc WHERE id = @id";
         cmd.Parameters.AddWithValue("id", id);
 
         var r = cmd.ExecuteScalar();
-
-        return r is DBNull or null ? null : (byte[])r;
+        return r is DBNull or null ? null : (string)r;
     }
 
+    // ── PDF: eliminar ruta ────────────────────────────
     public void EliminarPDF(int id)
     {
         using var con = Abrir();
         using var cmd = con.CreateCommand();
 
-        cmd.CommandText = "UPDATE req_vs_oc SET pdf=NULL WHERE id=@id";
+        cmd.CommandText = "UPDATE req_vs_oc SET pdf = NULL WHERE id = @id";
         cmd.Parameters.AddWithValue("id", id);
 
         cmd.ExecuteNonQuery();
@@ -232,7 +235,7 @@ public class PresupuestosReqVsOcService
 
         string[] headers =
         {
-            "ID","No Requisicion","Orden Compra","Fecha Compra",
+            "No Requisicion","Orden Compra","Fecha Compra",
             "PO Subtotal","Moneda","OC Subtotal","Registrada en OC"
         };
 
@@ -243,17 +246,15 @@ public class PresupuestosReqVsOcService
         }
 
         int row = 2;
-
         foreach (var r in rows)
         {
-            ws.Cell(row, 1).Value = r.ID;
-            ws.Cell(row, 2).Value = r.NO_REQUISICION;
-            ws.Cell(row, 3).Value = r.ORDEN_COMPRA;
-            ws.Cell(row, 4).Value = r.FECHA_COMPRA;
-            ws.Cell(row, 5).Value = r.PO_SUBTOTAL;
-            ws.Cell(row, 6).Value = r.MONEDA;
-            ws.Cell(row, 7).Value = r.OC_SUBTOTAL;
-            ws.Cell(row, 8).Value = r.REGISTRADA_EN_OC;
+            ws.Cell(row, 1).Value = r.NO_REQUISICION;
+            ws.Cell(row, 2).Value = r.ORDEN_COMPRA;
+            ws.Cell(row, 3).Value = r.FECHA_COMPRA;
+            ws.Cell(row, 4).Value = r.PO_SUBTOTAL;
+            ws.Cell(row, 5).Value = r.MONEDA;
+            ws.Cell(row, 6).Value = r.OC_SUBTOTAL;
+            ws.Cell(row, 7).Value = r.REGISTRADA_EN_OC;
             row++;
         }
 
@@ -274,7 +275,7 @@ public class PresupuestosReqVsOcService
         cmd.CommandText = """
             SELECT id, no_requisicion, orden_compra, fecha_compra,
                    po_subtotal, moneda, oc_subtotal, registrada_en_oc,
-                   CASE WHEN pdf IS NOT NULL THEN 1 ELSE 0 END
+                   pdf
             FROM req_vs_oc
             WHERE EXTRACT(YEAR FROM fecha_compra) = @anio
             ORDER BY id DESC
@@ -283,11 +284,11 @@ public class PresupuestosReqVsOcService
         cmd.Parameters.AddWithValue("anio", anio);
 
         var list = new List<ReqVsOcRow>();
-
         using var dr = cmd.ExecuteReader();
 
         while (dr.Read())
         {
+            var ruta = dr.IsDBNull(8) ? null : dr.GetString(8);
             list.Add(new ReqVsOcRow
             {
                 ID = dr.GetInt32(0),
@@ -298,7 +299,8 @@ public class PresupuestosReqVsOcService
                 MONEDA = dr.IsDBNull(5) ? null : dr.GetString(5),
                 OC_SUBTOTAL = dr.IsDBNull(6) ? null : dr.GetString(6),
                 REGISTRADA_EN_OC = dr.IsDBNull(7) ? null : dr.GetString(7),
-                TIENE_PDF = dr.GetInt32(8) == 1
+                PDF_RUTA = ruta,
+                TIENE_PDF = ruta != null
             });
         }
 
