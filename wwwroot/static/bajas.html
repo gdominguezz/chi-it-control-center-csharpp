@@ -1033,16 +1033,17 @@
             color: #ef4444;
         }
         /*colores por estado en las rows*/
-        tr.estado-pendiente td {
-            background: rgba(245,158,11,0.15) !important;
+
+        tr.estado-pendiente td:first-child {
+            border-left: 4px solid #f59e0b;
         }
 
-        tr.estado-cerrado td {
-            background: rgba(34,197,94,0.15) !important;
+        tr.estado-cerrado td:first-child {
+            border-left: 4px solid #22c55e;
         }
 
-        tr.estado-cancelado td {
-            background: rgba(239,68,68,0.15) !important;
+        tr.estado-cancelado td:first-child {
+            border-left: 4px solid #ef4444;
         }
     </style>
 </head>
@@ -1453,8 +1454,8 @@
 
             if (!datosActuales.length) {
                 tbody.innerHTML = `<tr><td colspan="17"
-                                    style="text-align:center;padding:40px;color:var(--muted)">
-                                    📭 Sin registros</td></tr>`;
+        style="text-align:center;padding:40px;color:var(--muted)">
+        📭 Sin registros</td></tr>`;
                 return;
             }
 
@@ -1471,37 +1472,37 @@
                 }
 
                 tbody.innerHTML += `
-                                <tr>
-                                    <td class="mono">${row.ID}</td>
-                                    <td class="mono">${row.FOLIO ?? ''}</td>
-                                    <td>${estadoPill(row.ESTADO)}</td>
-                                    <td>${row.PLANTA ?? ''}</td>
-                                    <td class="mono">${row.FECHA ?? ''}</td>
-                                    <td>${row.EQUIPO ?? ''}</td>
-                                    <td>${row.MARCA ?? ''}</td>
-                                    <td>${row.MODELO ?? ''}</td>
-                                    <td class="mono">${row.NO_SERIE ?? ''}</td>
-                                    <td class="mono">${row.ACTIVO_FIJO ?? ''}</td>
-                                    <td>${row.UBICACION_PERSONA ?? ''}</td>
-                                    <td>${row.MOTIVO_DE_BAJA ?? ''}</td>
-                                    <td>${row.DIAGNOSTICO ?? ''}</td>
-                                    <td>${row.COMENTARIOS ?? ''}</td>
-                                    <td>${row.MOTIVO_DE_CANCELACION ?? ''}</td>
-                                    <td>
-                                        ${row.TIENE_PDF
+        <tr class="${estadoClase}">
+            <td class="mono">${row.ID}</td>
+            <td class="mono">${row.FOLIO ?? ''}</td>
+            <td>${estadoPill(row.ESTADO)}</td>
+            <td>${row.PLANTA ?? ''}</td>
+            <td class="mono">${row.FECHA ?? ''}</td>
+            <td>${row.EQUIPO ?? ''}</td>
+            <td>${row.MARCA ?? ''}</td>
+            <td>${row.MODELO ?? ''}</td>
+            <td class="mono">${row.NO_SERIE ?? ''}</td>
+            <td class="mono">${row.ACTIVO_FIJO ?? ''}</td>
+            <td>${row.UBICACION_PERSONA ?? ''}</td>
+            <td>${row.MOTIVO_DE_BAJA ?? ''}</td>
+            <td>${row.DIAGNOSTICO ?? ''}</td>
+            <td>${row.COMENTARIOS ?? ''}</td>
+            <td>${row.MOTIVO_DE_CANCELACION ?? ''}</td>
+            <td>
+                ${row.TIENE_PDF
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                                               <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
+                   <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
                         : `<label class="file-label">
-                                                   📎 Subir PDF
-                                                   <input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)">
-                                               </label>`}
-                                    </td>
-                                    <td style="white-space:nowrap;">
-                                        <button class="btn btn-amber btn-sm"   onclick="abrirEditar(${row.ID})">✏️</button>
-                                        <button class="btn btn-danger btn-sm"  onclick="eliminar(${row.ID})">🗑️</button>
-                                        <button class="btn btn-cyan btn-sm"    onclick="verHistorial(${row.ID})">📋</button>
-                                    </td>
-                                </tr>`;
+                       📎 Subir PDF
+                       <input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)">
+                   </label>`}
+            </td>
+            <td style="white-space:nowrap;">
+                <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑️</button>
+                <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+            </td>
+        </tr>`;
             });
 
             const totalPags = Math.ceil(totalRegistros / limite) || 1;
