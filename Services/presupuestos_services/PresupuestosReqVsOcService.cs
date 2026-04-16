@@ -255,4 +255,42 @@ public class PresupuestosReqVsOcService
 
         return ms.ToArray();
     }
+    public List<ReqVsOcRow> GetPorAnio(int anio)
+    {
+        using var con = Abrir();
+        using var cmd = con.CreateCommand();
+
+        cmd.CommandText = """
+    SELECT id, no_requisicion, orden_compra, fecha_compra,
+           po_subtotal, moneda, oc_subtotal, registrada_en_oc,
+           CASE WHEN pdf IS NOT NULL THEN 1 ELSE 0 END
+    FROM req_vs_oc
+    WHERE EXTRACT(YEAR FROM fecha_compra) = @anio
+    ORDER BY id DESC
+    """;
+
+        cmd.Parameters.AddWithValue("anio", anio);
+
+        var list = new List<ReqVsOcRow>();
+
+        using var dr = cmd.ExecuteReader();
+
+        while (dr.Read())
+        {
+            list.Add(new ReqVsOcRow
+            {
+                ID = dr.GetInt32(0),
+                NO_REQUISICION = dr.IsDBNull(1) ? null : dr.GetString(1),
+                ORDEN_COMPRA = dr.IsDBNull(2) ? null : dr.GetString(2),
+                FECHA_COMPRA = dr.IsDBNull(3) ? null : dr.GetDateTime(3).ToString("yyyy-MM-dd"),
+                PO_SUBTOTAL = dr.IsDBNull(4) ? null : dr.GetDecimal(4),
+                MONEDA = dr.IsDBNull(5) ? null : dr.GetString(5),
+                OC_SUBTOTAL = dr.IsDBNull(6) ? null : dr.GetString(6),
+                REGISTRADA_EN_OC = dr.IsDBNull(7) ? null : dr.GetString(7),
+                TIENE_PDF = dr.GetInt32(8) == 1
+            });
+        }
+
+        return list;
+    }
 }
