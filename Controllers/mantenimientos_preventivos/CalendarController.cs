@@ -1,7 +1,7 @@
 ﻿using ChiIT.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-
+using System.Text.Json.Serialization;
 namespace ChiIT.Controllers;
 
 /// <summary>
@@ -681,13 +681,30 @@ public class CalendarioEstadoRow
 
 public class SemanaDistribucion
 {
+    [JsonPropertyName("semana_rel")]
     public int SemanaRelativa { get; set; }
+
+    [JsonPropertyName("semana_real")]
     public int SemanaReal { get; set; }
+
+    [JsonPropertyName("anio_real")]
     public int AnioReal { get; set; }
+
+    [JsonPropertyName("lunes_iso")]
     public string LunesISO { get; set; } = "";
+
+    [JsonPropertyName("viernes_iso")]
     public string ViernesISO { get; set; } = "";
+
+    [JsonPropertyName("total_equipos")]
     public int TotalEquipos { get; set; }
-    public int TotalComputo { get; set; }   // CPU + Impresora Térmica + UPS
+
+    [JsonPropertyName("total_computo")]
+    public int TotalComputo { get; set; }
+
+    [JsonPropertyName("total_laptops")]
     public int TotalLaptops { get; set; }
+
+    [JsonPropertyName("periodo")]
     public int Periodo { get; set; }
 }

@@ -3396,13 +3396,27 @@
             panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
             try {
-                const res = await fetch(`/CALENDARIO/EQUIPOS_SEMANA?planta=${planta}&periodo=${periodo}&semana_rel=${semRel}`);
-                const data = await res.json();
 
-                if (data.error) {
-                    body.innerHTML = `<p style="color:var(--red);font-size:12px">${data.error}</p>`;
+                const res = await fetch(`/CALENDARIO/EQUIPOS_SEMANA?planta=${planta}&periodo=${periodo}&semana_rel=${semRel}`);
+
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.error("Error servidor:", text);
+                    body.innerHTML = `<p style="color:var(--red);font-size:12px">
+            Error ${res.status} consultando equipos.
+        </p>`;
                     return;
                 }
+
+                const data = await res.json();
+
+                if (!data || data.error) {
+                    body.innerHTML = `<p style="color:var(--red);font-size:12px">
+            ${data?.error || "Respuesta inválida del servidor"}
+        </p>`;
+                    return;
+                }
+
 
                 const computoTotal = data.computo_por_semana ?? 0;
                 const laptopsTotal = data.laptops_por_semana ?? 0;
