@@ -2347,7 +2347,7 @@
             const tbody = document.getElementById('tabla');
             tbody.innerHTML = '';
             if (!datosActuales.length) {
-                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
                 return;
             }
             const esAdmin = rolActual === "ADMIN";
@@ -2371,13 +2371,6 @@
                                                                              <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
                         : `<input type="file" onchange="subirPDF(${row.id},this)"
                                                                                style="font-size:11px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`}
-                                                                      </td>
-                                                                      <td ${tdStyle} style="text-align:center;">
-                                                                        <img src="/QR_EQUIPO/${row.id}"
-                                                                             style="width:70px;height:70px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.1);"
-                                                                             title="QR: ${row.id_equipo ?? row.id}"
-                                                                             onclick="window.open('/QR_EQUIPO/${row.id}','_blank')"
-                                                                             loading="lazy">
                                                                       </td>
                                                                       <td ${tdStyle} style="white-space:nowrap;">
                                                                         ${esAdmin ? `
