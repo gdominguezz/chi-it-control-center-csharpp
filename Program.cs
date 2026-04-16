@@ -11,12 +11,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddJsonOptions(o =>
         o.JsonSerializerOptions.PropertyNamingPolicy = null); // mantiene mayúsculas tal cual
-builder.Services.AddSingleton<DbConnectionPool>();
-builder.Services.AddScoped<AuditoriaServicepreventivos>();
-builder.Services.AddSingleton<AuditoriaServiceCorrectivos>();
-builder.Services.AddScoped<ExcelService>();
-builder.Services.AddScoped<QrService>();
-builder.Services.AddScoped<BajasService>();          // ← BAJAS
+builder.Services.AddSingleton<DbConnectionPool>();                         // SERVICIO DE METODO DE CONEXION A LA DB
+builder.Services.AddScoped<AuditoriaServicepreventivos>();                // AUDITORIA DE PREVENTIVOS
+builder.Services.AddSingleton<AuditoriaServiceCorrectivos>();            // AUDITORIA DE CORRECTIVOS
+builder.Services.AddScoped<ExcelService>();                             // SERVICIOS DE EXCEL
+builder.Services.AddScoped<QrService>();                               // QRS
+builder.Services.AddScoped<BajasService>();                           // BAJAS
+///////////////////////////////////////////////////////// PRESUPUESTO //////////////////////////////////////
+builder.Services.AddScoped<PresupuestosReqVsOcService>();           //SERVICIO DEL MODULO REQ VS OC
 
 // CORS
 builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
@@ -37,10 +39,10 @@ app.MapControllers();
 
 // ── Crear directorios necesarios al iniciar ──
 Directory.CreateDirectory("PDF_DATABASE/PREVENTIVOS");
-Directory.CreateDirectory("PDF_DATABASE/BAJAS");         // ← BAJAS
+Directory.CreateDirectory("PDF_DATABASE/BAJAS");         //  BAJAS
 Directory.CreateDirectory("QR_CODES/MESAS");
 
 
-// ── Puerto dinámico para Render ──
+// ── Puerto dinámico para NORTFLANK ──
 var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 app.Run($"http://0.0.0.0:{port}");

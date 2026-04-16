@@ -1,418 +1,640 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>REQ vs ORDEN DE COMPRA</title>
+    <meta charset="UTF-8">
+    <title>REQ vs ORDEN DE COMPRA</title>
 
-<style>
-body{
-    font-family:Arial;
-    margin:0;
-    background:#f1f5f9;
-}
+    <style>
+        /* ── Reset & base ────────────────────────────────────────────── */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-.header{
-    background:#1e293b;
-    color:white;
-    padding:15px;
-    font-size:20px;
-    font-weight:bold;
-}
+        body {
+            font-family: Arial,sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+        }
 
-.container{
-    padding:15px;
-}
-.back{
-    background:#dc2626;
-    font-style: italic; color:#ffffff;
-}
+        /* ── Header ──────────────────────────────────────────────────── */
+        .header {
+            background: #1e293b;
+            color: #fff;
+            padding: 14px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: .4px;
+        }
 
-.form-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-    gap:12px;
-    margin-bottom:15px;
-}
+            .header span.sub {
+                font-size: 12px;
+                font-weight: normal;
+                color: #94a3b8;
+                margin-left: auto;
+            }
 
-.field{
-    display:flex;
-    flex-direction:column;
-}
+        /* ── Container ───────────────────────────────────────────────── */
+        .container {
+            padding: 15px 18px;
+        }
 
-.field label{
-    font-size:11px;
-    font-weight:bold;
-    color:#1e293b;
-    margin-bottom:4px;
-    text-transform:uppercase;
-    letter-spacing:0.3px;
-}
+        /* ── Card form ───────────────────────────────────────────────── */
+        .card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+        }
 
-.field input{
-    padding:7px;
-    border:1px solid #cbd5e1;
-    border-radius:5px;
-    font-size:12px;
-    background:#f8fafc;
-    transition:border-color 0.2s;
-}
+        .card-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e2e8f0;
+        }
 
-.field input:focus{
-    outline:none;
-    border-color:#2563eb;
-    background:white;
-    box-shadow:0 0 0 2px rgba(37,99,235,0.15);
-}
+        /* ── Form grid ───────────────────────────────────────────────── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(210px,1fr));
+            gap: 10px;
+        }
 
-button{
-    padding:6px 12px;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-    font-size:12px;
-    font-weight:bold;
-    margin-right:5px;
-}
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
 
-.save{background:#16a34a;color:white;}
-.cancel{background:#64748b;color:white;}
-.delete{background:#dc2626;color:white;}
-.edit{background:#f59e0b;color:white;}
-.pdf{background:#2563eb;color:white;}
-.export{background:#7c3aed;color:white;}
+            .field label {
+                font-size: 10.5px;
+                font-weight: bold;
+                color: #334155;
+                margin-bottom: 3px;
+                text-transform: uppercase;
+                letter-spacing: .3px;
+            }
 
-.btn-bar{
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:8px;
-    margin-bottom:12px;
-}
+            .field input, .field select {
+                padding: 7px 9px;
+                border: 1px solid #cbd5e1;
+                border-radius: 5px;
+                font-size: 12px;
+                background: #f8fafc;
+                color: #1e293b;
+                transition: border-color .15s,box-shadow .15s;
+            }
 
-.btn-bar input[type="number"]{
-    padding:6px;
-    border:1px solid #ccc;
-    border-radius:5px;
-    font-size:12px;
-    width:110px;
-}
+                .field input:focus, .field select:focus {
+                    outline: none;
+                    border-color: #2563eb;
+                    background: #fff;
+                    box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+                }
 
-.table-container{
-    width:100%;
-    height:500px;
-    overflow:auto;
-    border:1px solid #ccc;
-    background:white;
-}
+        /* ── Botones ─────────────────────────────────────────────────── */
+        button {
+            padding: 6px 13px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: filter .15s,transform .1s;
+            white-space: nowrap;
+        }
 
-table{
-    border-collapse:collapse;
-    min-width:2000px;
-    font-size:11px;
-}
+            button:hover {
+                filter: brightness(1.1);
+            }
 
-th,td{
-    border:1px solid #ccc;
-    padding:6px;
-    white-space:nowrap;
-    text-align:center;
-}
+            button:active {
+                transform: scale(.97);
+            }
 
-th{
-    background:#1e293b;
-    color:white;
-    position:sticky;
-    top:0;
-    z-index:2;
-}
+        .btn-save {
+            background: #16a34a;
+            color: #fff;
+        }
 
-.filter-row input{
-    width:100%;
-    font-size:11px;
-}
+        .btn-cancel {
+            background: #64748b;
+            color: #fff;
+        }
 
-.pagination{
-    margin-top:10px;
-}
-</style>
+        .btn-delete {
+            background: #dc2626;
+            color: #fff;
+        }
+
+        .btn-edit {
+            background: #f59e0b;
+            color: #fff;
+        }
+
+        .btn-pdf {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .btn-export {
+            background: #7c3aed;
+            color: #fff;
+        }
+
+        .btn-back {
+            background: #dc2626;
+            color: #fff;
+            font-style: italic;
+        }
+
+        /* ── Barra de botones ────────────────────────────────────────── */
+        .btn-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 10px;
+        }
+
+            .btn-bar input[type="number"] {
+                padding: 6px 8px;
+                border: 1px solid #cbd5e1;
+                border-radius: 5px;
+                font-size: 12px;
+                width: 120px;
+                background: #fff;
+            }
+
+        /* ── Tabla ───────────────────────────────────────────────────── */
+        .table-wrap {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            margin-bottom: 10px;
+        }
+
+        .table-container {
+            width: 100%;
+            height: 490px;
+            overflow: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            min-width: 1800px;
+            font-size: 11px;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 6px 8px;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        thead th {
+            background: #1e293b;
+            color: #fff;
+            font-size: 10.5px;
+            letter-spacing: .3px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .filter-row th {
+            background: #f1f5f9;
+            padding: 4px 5px;
+            position: sticky;
+            top: 28px;
+            z-index: 2;
+        }
+
+        .filter-row input {
+            width: 100%;
+            padding: 4px 6px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 11px;
+            background: #fff;
+        }
+
+            .filter-row input:focus {
+                outline: none;
+                border-color: #2563eb;
+            }
+
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tbody tr:hover {
+            background: #eff6ff;
+        }
+
+        /* ── Paginación ──────────────────────────────────────────────── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+            .pagination button {
+                padding: 5px 12px;
+            }
+
+        #paginaInfo {
+            font-size: 12px;
+            color: #475569;
+            font-weight: bold;
+        }
+
+        /* ── Badge estado ────────────────────────────────────────────── */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: .3px;
+        }
+
+        .badge-si {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-no {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .badge-otro {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        /* ── Modo edición ────────────────────────────────────────────── */
+        .editing-banner {
+            display: none;
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 12px;
+            color: #92400e;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+            .editing-banner.visible {
+                display: block;
+            }
+    </style>
 </head>
 
 <body>
 
-<div class="header">REQ vs ORDEN DE COMPRA</div>
-
-<div class="container">
-
-<div class="form-grid">
-
-    <div class="field">
-        <label>No. Requisición</label>
-        <input id="NO_REQUISICION" placeholder="Ej: REQ-001">
+    <div class="header">
+        📋 REQ vs ORDEN DE COMPRA
+        <span class="sub">Módulo de Presupuestos</span>
     </div>
 
-    <div class="field">
-        <label>Orden de Compra</label>
-        <input id="ORDEN_COMPRA" placeholder="Ej: OC-2024-001">
-    </div>
+    <div class="container">
 
-    <div class="field">
-        <label>Fecha de Compra</label>
-        <input id="FECHA_COMPRA" type="date">
-    </div>
+        <!-- Banner modo edición -->
+        <div class="editing-banner" id="editingBanner">
+            ✏️ Modo edición — modifica los campos y presiona GUARDAR / ACTUALIZAR
+        </div>
 
-    <div class="field">
-        <label>PO Subtotal</label>
-        <input id="PO_SUBTOTAL" placeholder="Ej: 1500.00">
-    </div>
+        <!-- Formulario -->
+        <div class="card">
+            <div class="card-title">📝 Registro de Requisición vs Orden de Compra</div>
+            <div class="form-grid">
 
-    <div class="field">
-        <label>Moneda</label>
-        <input id="MONEDA" placeholder="Ej: MXN / USD">
-    </div>
+                <div class="field">
+                    <label>No. Requisición</label>
+                    <input id="NO_REQUISICION" placeholder="Ej: REQ-001">
+                </div>
 
-    <div class="field">
-        <label>OC Subtotal</label>
-        <input id="OC_SUBTOTAL" placeholder="Ej: 1500.00">
-    </div>
+                <div class="field">
+                    <label>Orden de Compra</label>
+                    <input id="ORDEN_COMPRA" placeholder="Ej: OC-2024-001">
+                </div>
 
-    <div class="field">
-        <label>Registrada en OC</label>
-        <input id="REGISTRADA_EN_OC" placeholder="Ej: SI / NO">
-    </div>
+                <div class="field">
+                    <label>Fecha de Compra</label>
+                    <input id="FECHA_COMPRA" type="date">
+                </div>
 
-</div>
+                <div class="field">
+                    <label>PO Subtotal</label>
+                    <input id="PO_SUBTOTAL" type="number" step="0.01" placeholder="Ej: 1500.00">
+                </div>
 
-<div class="btn-bar">
-    <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
-    <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
-</div>
+                <div class="field">
+                    <label>Moneda</label>
+                    <select id="MONEDA">
+                        <option value="">— Selecciona —</option>
+                        <option value="MXN">MXN</option>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                    </select>
+                </div>
 
-<div class="btn-bar">
-    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
-    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
-    <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
-    <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
-</div>
+                <div class="field">
+                    <label>OC Subtotal</label>
+                    <input id="OC_SUBTOTAL" placeholder="Ej: 1500.00">
+                </div>
 
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>No. Requisición</th>
-<th>Orden Compra</th>
-<th>Fecha Compra</th>
-<th>PO Subtotal</th>
-<th>Moneda</th>
-<th>OC Subtotal</th>
-<th>Registrada en OC</th>
-<th>PDF</th>
-<th>ACCIONES</th>
-</tr>
+                <div class="field">
+                    <label>Registrada en OC</label>
+                    <select id="REGISTRADA_EN_OC">
+                        <option value="">— Selecciona —</option>
+                        <option value="SI">SI</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </div>
 
-<tr class="filter-row">
-<th></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
+            </div>
 
-<tbody id="tabla"></tbody>
-</table>
-</div>
+            <div class="btn-bar" style="margin-top:12px;">
+                <button class="btn-save" onclick="guardar()">💾 GUARDAR / ACTUALIZAR</button>
+                <button class="btn-cancel" onclick="cancelarEdicion()">✖ CANCELAR</button>
+            </div>
+        </div>
 
-<div class="pagination">
-<button onclick="anterior()">Anterior</button>
-<span id="paginaInfo"></span>
-<button onclick="siguiente()">Siguiente</button>
-<button class="back" onclick="window.location.href='presupuestos_menu.html'">
-REGRESAR A PRESUPUESTOS
-</button>
-</div>
+        <!-- Exportaciones -->
+        <div class="card">
+            <div class="card-title">📤 Exportaciones</div>
+            <div class="btn-bar">
+                <button class="btn-export" onclick="exportarFiltrado()">⬇ Exportar Filtrado</button>
+                <button class="btn-export" onclick="exportarTodo()">⬇ Exportar Todo</button>
+                <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
+                <button class="btn-export" onclick="exportarPorAnio()">📅 Exportar por Año</button>
+            </div>
+        </div>
 
-</div>
+        <!-- Tabla -->
+        <div class="table-wrap">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>No. Requisición</th>
+                            <th>Orden Compra</th>
+                            <th>Fecha Compra</th>
+                            <th>PO Subtotal</th>
+                            <th>Moneda</th>
+                            <th>OC Subtotal</th>
+                            <th>Registrada en OC</th>
+                            <th>PDF</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th></th>
+                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla"></tbody>
+                </table>
+            </div>
+        </div>
 
-<script>
+        <!-- Paginación -->
+        <div class="pagination">
+            <button onclick="anterior()">◀ Anterior</button>
+            <span id="paginaInfo">—</span>
+            <button onclick="siguiente()">Siguiente ▶</button>
+            <button class="btn-back" onclick="window.location.href='presupuestos_menu.html'">
+                ↩ REGRESAR A PRESUPUESTOS
+            </button>
+        </div>
 
-let paginaActual = 1;
-let limite = 10;
-let totalRegistros = 0;
-let editandoID = null;
-let datosOriginales = [];
-let datosFiltrados = [];
+    </div><!-- /container -->
 
-function guardar(){
-    let data = {
-        NO_REQUISICION:   NO_REQUISICION.value  || null,
-        ORDEN_COMPRA:     ORDEN_COMPRA.value     || null,
-        FECHA_COMPRA:     FECHA_COMPRA.value     || null,
-        PO_SUBTOTAL:      PO_SUBTOTAL.value      || null,
-        MONEDA:           MONEDA.value           || null,
-        OC_SUBTOTAL:      OC_SUBTOTAL.value      || null,
-        REGISTRADA_EN_OC: REGISTRADA_EN_OC.value || null
-    };
+    <script>
+        let paginaActual = 1;
+        const limite = 10;
+        let totalRegistros = 0;
+        let editandoID = null;
+        let datosOriginales = [];
+        let datosFiltrados = [];
 
-    if(editandoID){
-        fetch(`/PRESUPUESTOS_REQ_VS_OC/${editandoID}`,{
-            method:"PUT",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(data)
-        }).then(()=>{ editandoID=null; limpiar(); cargar(); });
-    } else {
-        fetch("/PRESUPUESTOS_REQ_VS_OC",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(data)
-        }).then(()=>{ limpiar(); cargar(); });
-    }
-}
-
-function limpiar(){
-    document.querySelectorAll(".form-grid input").forEach(i=>i.value="");
-}
-
-function cancelarEdicion(){
-    editandoID = null;
-    limpiar();
-}
-
-function obtenerParametros(){
-    let filtros = document.querySelectorAll(".filter-row input");
-    return new URLSearchParams({
-        page:             paginaActual,
-        limit:            limite,
-        NO_REQUISICION:   filtros[0].value,
-        ORDEN_COMPRA:     filtros[1].value,
-        FECHA_COMPRA:     filtros[2].value,
-        PO_SUBTOTAL:      filtros[3].value,
-        MONEDA:           filtros[4].value,
-        OC_SUBTOTAL:      filtros[5].value,
-        REGISTRADA_EN_OC: filtros[6].value
-    });
-}
-
-function cargar(){
-    let params = obtenerParametros();
-    fetch(`/PRESUPUESTOS_REQ_VS_OC?${params.toString()}`)
-    .then(res=>res.json())
-    .then(resp=>{
-        totalRegistros = resp.total;
-        datosOriginales = resp.data;
-        datosFiltrados = [...datosOriginales];
-        renderizar();
-    });
-}
-
-function renderizar(){
-    tabla.innerHTML="";
-    datosFiltrados.forEach(row=>{
-        tabla.innerHTML+=`
-        <tr>
-        <td>${row.ID}</td>
-        <td>${row.NO_REQUISICION??""}</td>
-        <td>${row.ORDEN_COMPRA??""}</td>
-        <td>${row.FECHA_COMPRA??""}</td>
-        <td>${row.PO_SUBTOTAL??""}</td>
-        <td>${row.MONEDA??""}</td>
-        <td>${row.OC_SUBTOTAL??""}</td>
-        <td>${row.REGISTRADA_EN_OC??""}</td>
-        <td>
-        ${row.TIENE_PDF
-        ? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button>
-           <button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
-        : `<input type="file" onchange="subirPDF(${row.ID},this)">`
+        // ── Badge Registrada en OC ─────────────────────────────────────────────────
+        function badge(val) {
+            if (!val) return '<span class="badge badge-otro">—</span>';
+            const v = val.toString().toUpperCase();
+            if (v === "SI") return `<span class="badge badge-si">SI</span>`;
+            if (v === "NO") return `<span class="badge badge-no">NO</span>`;
+            return `<span class="badge badge-otro">${val}</span>`;
         }
-        </td>
-        <td>
-        <button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
-        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button>
-        </td>
-        </tr>`;
-    });
-    paginaInfo.innerText=`Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
-}
 
-function editar(row){
-    editandoID = row.ID;
-    Object.keys(row).forEach(key=>{
-        if(document.getElementById(key)){
-            document.getElementById(key).value = row[key] ?? "";
+        // ── Guardar / Actualizar ───────────────────────────────────────────────────
+        function guardar() {
+            const data = {
+                NO_REQUISICION: document.getElementById("NO_REQUISICION").value || null,
+                ORDEN_COMPRA: document.getElementById("ORDEN_COMPRA").value || null,
+                FECHA_COMPRA: document.getElementById("FECHA_COMPRA").value || null,
+                PO_SUBTOTAL: document.getElementById("PO_SUBTOTAL").value || null,
+                MONEDA: document.getElementById("MONEDA").value || null,
+                OC_SUBTOTAL: document.getElementById("OC_SUBTOTAL").value || null,
+                REGISTRADA_EN_OC: document.getElementById("REGISTRADA_EN_OC").value || null
+            };
+
+            if (editandoID) {
+                fetch(`/PRESUPUESTOS_REQ_VS_OC/${editandoID}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                }).then(() => { editandoID = null; limpiar(); cargar(); });
+            } else {
+                fetch("/PRESUPUESTOS_REQ_VS_OC", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                }).then(() => { limpiar(); cargar(); });
+            }
         }
-    });
-    window.scrollTo({top:0, behavior:"smooth"});
-}
 
-function eliminar(id){
-    if(!confirm("¿Eliminar este registro?")) return;
-    fetch(`/PRESUPUESTOS_REQ_VS_OC/${id}`,{method:"DELETE"}).then(()=>cargar());
-}
+        function limpiar() {
+            ["NO_REQUISICION", "ORDEN_COMPRA", "FECHA_COMPRA",
+                "PO_SUBTOTAL", "MONEDA", "OC_SUBTOTAL", "REGISTRADA_EN_OC"]
+                .forEach(id => document.getElementById(id).value = "");
+            document.getElementById("editingBanner").classList.remove("visible");
+        }
 
-function subirPDF(id, input){
-    let file = input.files[0];
-    if(!file) return;
-    let formData = new FormData();
-    formData.append("file", file);
-    fetch(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`,{method:"POST", body:formData})
-    .then(()=>cargar());
-}
+        function cancelarEdicion() {
+            editandoID = null;
+            limpiar();
+        }
 
-function verPDF(id){
-    window.open(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`,"_blank");
-}
+        // ── Cargar ─────────────────────────────────────────────────────────────────
+        function obtenerParametros() {
+            const filtros = document.querySelectorAll(".filter-row input");
+            return new URLSearchParams({
+                page: paginaActual,
+                limit: limite,
+                NO_REQUISICION: filtros[0].value,
+                ORDEN_COMPRA: filtros[1].value,
+                FECHA_COMPRA: filtros[2].value,
+                PO_SUBTOTAL: filtros[3].value,
+                MONEDA: filtros[4].value,
+                OC_SUBTOTAL: filtros[5].value,
+                REGISTRADA_EN_OC: filtros[6].value
+            });
+        }
 
-function eliminarPDF(id){
-    if(!confirm("¿Seguro que deseas eliminar el PDF?")) return;
-    fetch(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`,{method:"DELETE"})
-    .then(()=>cargar());
-}
+        function cargar() {
+            fetch(`/PRESUPUESTOS_REQ_VS_OC?${obtenerParametros().toString()}`)
+                .then(r => r.json())
+                .then(resp => {
+                    totalRegistros = resp.total;
+                    datosOriginales = resp.data;
+                    datosFiltrados = [...datosOriginales];
+                    renderizar();
+                });
+        }
 
-function filtrar(){
-    paginaActual = 1;
-    cargar();
-}
+        // ── Renderizar ─────────────────────────────────────────────────────────────
+        function renderizar() {
+            const tbody = document.getElementById("tabla");
+            tbody.innerHTML = "";
 
-function exportarFiltrado(){
-    let filtros = document.querySelectorAll(".filter-row input");
-    let params = new URLSearchParams({
-        NO_REQUISICION:   filtros[0].value,
-        ORDEN_COMPRA:     filtros[1].value,
-        FECHA_COMPRA:     filtros[2].value,
-        PO_SUBTOTAL:      filtros[3].value,
-        MONEDA:           filtros[4].value,
-        OC_SUBTOTAL:      filtros[5].value,
-        REGISTRADA_EN_OC: filtros[6].value
-    });
-    window.open(`/PRESUPUESTOS_REQ_VS_OC/EXPORTAR?${params.toString()}`);
-}
+            datosFiltrados.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                <td>${row.ID}</td>
+                <td>${row.NO_REQUISICION ?? ""}</td>
+                <td>${row.ORDEN_COMPRA ?? ""}</td>
+                <td>${row.FECHA_COMPRA ?? ""}</td>
+                <td>${row.PO_SUBTOTAL != null
+                        ? Number(row.PO_SUBTOTAL).toLocaleString("es-MX", { minimumFractionDigits: 2 })
+                        : ""}</td>
+                <td>${row.MONEDA ?? ""}</td>
+                <td>${row.OC_SUBTOTAL ?? ""}</td>
+                <td>${badge(row.REGISTRADA_EN_OC)}</td>
+                <td>
+                ${row.TIENE_PDF
+                        ? `<button class="btn-pdf"    onclick="verPDF(${row.ID})">📄 Ver PDF</button>
+                     <button class="btn-delete" onclick="eliminarPDF(${row.ID})">🗑 Quitar</button>`
+                        : `<input type="file" accept="application/pdf"
+                            onchange="subirPDF(${row.ID},this)">`
+                    }
+                </td>
+                <td>
+                <button class="btn-edit"   onclick='editar(${JSON.stringify(row)})'>✏️ Editar</button>
+                <button class="btn-delete" onclick="eliminar(${row.ID})">🗑 Eliminar</button>
+                </td>`;
+                tbody.appendChild(tr);
+            });
 
-function exportarTodo(){
-    window.open(`/PRESUPUESTOS_REQ_VS_OC/EXPORTAR_TODO`);
-}
+            const total = Math.max(1, Math.ceil(totalRegistros / limite));
+            document.getElementById("paginaInfo").textContent =
+                `Página ${paginaActual} de ${total}  (${totalRegistros} registros)`;
+        }
 
-function exportarPorAnio(){
-    let anio = document.getElementById("anioExportar").value;
-    if(!anio){ alert("Ingresa un año"); return; }
-    window.open(`/PRESUPUESTOS_REQ_VS_OC/EXPORTAR_ANIO?anio=${anio}`);
-}
+        // ── Editar ─────────────────────────────────────────────────────────────────
+        function editar(row) {
+            editandoID = row.ID;
+            const map = {
+                NO_REQUISICION: row.NO_REQUISICION,
+                ORDEN_COMPRA: row.ORDEN_COMPRA,
+                FECHA_COMPRA: row.FECHA_COMPRA,
+                PO_SUBTOTAL: row.PO_SUBTOTAL,
+                MONEDA: row.MONEDA,
+                OC_SUBTOTAL: row.OC_SUBTOTAL,
+                REGISTRADA_EN_OC: row.REGISTRADA_EN_OC
+            };
+            Object.entries(map).forEach(([k, v]) => {
+                const el = document.getElementById(k);
+                if (el) el.value = v ?? "";
+            });
+            document.getElementById("editingBanner").classList.add("visible");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
 
-function siguiente(){
-    if(paginaActual*limite<totalRegistros){ paginaActual++; cargar(); }
-}
+        // ── Eliminar ───────────────────────────────────────────────────────────────
+        function eliminar(id) {
+            if (!confirm("¿Eliminar este registro?")) return;
+            fetch(`/PRESUPUESTOS_REQ_VS_OC/${id}`, { method: "DELETE" }).then(() => cargar());
+        }
 
-function anterior(){
-    if(paginaActual>1){ paginaActual--; cargar(); }
-}
+        // ── PDF ────────────────────────────────────────────────────────────────────
+        function subirPDF(id, input) {
+            const file = input.files[0];
+            if (!file) return;
+            const fd = new FormData();
+            fd.append("file", file);
+            fetch(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, { method: "POST", body: fd })
+                .then(() => cargar());
+        }
 
-cargar();
+        function verPDF(id) {
+            window.open(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, "_blank");
+        }
 
-</script>
+        function eliminarPDF(id) {
+            if (!confirm("¿Seguro que deseas eliminar el PDF?")) return;
+            fetch(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, { method: "DELETE" }).then(() => cargar());
+        }
 
+        // ── Filtrar / Paginación ───────────────────────────────────────────────────
+        function filtrar() { paginaActual = 1; cargar(); }
+        function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
+        function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
+
+        // ── Exportar ───────────────────────────────────────────────────────────────
+        function exportarFiltrado() {
+            const filtros = document.querySelectorAll(".filter-row input");
+            const p = new URLSearchParams({
+                NO_REQUISICION: filtros[0].value,
+                ORDEN_COMPRA: filtros[1].value,
+                FECHA_COMPRA: filtros[2].value,
+                PO_SUBTOTAL: filtros[3].value,
+                MONEDA: filtros[4].value,
+                OC_SUBTOTAL: filtros[5].value,
+                REGISTRADA_EN_OC: filtros[6].value
+            });
+            window.open(`/PRESUPUESTOS_REQ_VS_OC/EXPORTAR?${p.toString()}`);
+        }
+
+        function exportarTodo() {
+            window.open(`/PRESUPUESTOS_REQ_VS_OC/EXPORTAR_TODO`);
+        }
+
+        function exportarPorAnio() {
+            const anio = document.getElementById("anioExportar").value;
+            if (!anio) { alert("Ingresa un año"); return; }
+            window.open(`/PRESUPUESTOS_REQ_VS_OC/EXPORTAR_ANIO?anio=${anio}`);
+        }
+
+        // ── Init ───────────────────────────────────────────────────────────────────
+        cargar();
+    </script>
 </body>
 </html>
