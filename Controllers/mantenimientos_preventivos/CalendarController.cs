@@ -1,7 +1,6 @@
 ﻿using ChiIT.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace ChiIT.Controllers;
 
@@ -327,6 +326,7 @@ public class CalendarioController : ControllerBase
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
             WHERE planta = @p
               AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
+              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
             """;
         cntComp.Parameters.AddWithValue("p", nombreDB);
         var totalComputo = Convert.ToInt64(cntComp.ExecuteScalar()!);
@@ -335,6 +335,7 @@ public class CalendarioController : ControllerBase
         cntLap.CommandText = """
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
             WHERE planta = @p AND nombre_dispositivo = 'LAPTOP'
+              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
             """;
         cntLap.Parameters.AddWithValue("p", nombreDB);
         var totalLaptops = Convert.ToInt64(cntLap.ExecuteScalar() ?? 0);
@@ -373,6 +374,7 @@ public class CalendarioController : ControllerBase
             FROM public.mantenimientos_preventivos
             WHERE planta = @p
               AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
+              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
             ORDER BY ubicacion, id
             LIMIT @lim OFFSET @off
             """;
@@ -409,6 +411,7 @@ public class CalendarioController : ControllerBase
             FROM public.mantenimientos_preventivos
             WHERE planta = @p
               AND nombre_dispositivo = 'LAPTOP'
+              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
             ORDER BY ubicacion, id
             LIMIT @lim OFFSET @off
             """;
@@ -526,6 +529,7 @@ public class CalendarioController : ControllerBase
         cntLap.CommandText = """
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
             WHERE planta = @p AND nombre_dispositivo = 'LAPTOP'
+              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
             """;
         cntLap.Parameters.AddWithValue("p", nombreDB);
         var totalLaptops = Convert.ToInt64(cntLap.ExecuteScalar()!);
@@ -536,6 +540,7 @@ public class CalendarioController : ControllerBase
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
             WHERE planta = @p
               AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
+              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
             """;
         cntComp.Parameters.AddWithValue("p", nombreDB);
         var totalComputo = Convert.ToInt64(cntComp.ExecuteScalar() ?? 0);
@@ -586,6 +591,7 @@ public class CalendarioController : ControllerBase
         cntLap.CommandText = """
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
             WHERE planta = @p AND nombre_dispositivo = 'LAPTOP'
+              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
             """;
         cntLap.Parameters.AddWithValue("p", nombreDB);
         var totalLaptops = Convert.ToInt32(cntLap.ExecuteScalar() ?? 0);
@@ -596,6 +602,7 @@ public class CalendarioController : ControllerBase
             SELECT COUNT(*) FROM public.mantenimientos_preventivos
             WHERE planta = @p
               AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
+              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
             """;
         cntComp.Parameters.AddWithValue("p", nombreDB);
         var totalComputo = Convert.ToInt32(cntComp.ExecuteScalar() ?? 0);
@@ -674,30 +681,13 @@ public class CalendarioEstadoRow
 
 public class SemanaDistribucion
 {
-    [JsonPropertyName("semana_rel")]
     public int SemanaRelativa { get; set; }
-
-    [JsonPropertyName("semana_real")]
     public int SemanaReal { get; set; }
-
-    [JsonPropertyName("anio_real")]
     public int AnioReal { get; set; }
-
-    [JsonPropertyName("lunes_iso")]
     public string LunesISO { get; set; } = "";
-
-    [JsonPropertyName("viernes_iso")]
     public string ViernesISO { get; set; } = "";
-
-    [JsonPropertyName("total_equipos")]
     public int TotalEquipos { get; set; }
-
-    [JsonPropertyName("total_computo")]
     public int TotalComputo { get; set; }   // CPU + Impresora Térmica + UPS
-
-    [JsonPropertyName("total_laptops")]
     public int TotalLaptops { get; set; }
-
-    [JsonPropertyName("periodo")]
     public int Periodo { get; set; }
 }
