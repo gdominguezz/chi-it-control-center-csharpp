@@ -3144,9 +3144,12 @@
 
         // ── Generar periodo (llama al backend) ───────────────────────────────────
         async function generarPeriodo(planta, periodo) {
+
             const semEl = document.getElementById(`cal-sem-p${periodo}-${planta}`);
             const anioEl = document.getElementById(`cal-anio-p${periodo}-${planta}`);
+
             if (!semEl) return;
+
             const sem = parseInt(semEl.value);
             const anio = parseInt(anioEl?.value || new Date().getFullYear());
 
@@ -3159,33 +3162,63 @@
                 alert(`Planta Satélite solo puede iniciar desde la semana ${SEMANA_MIN_SATELITE}.`);
                 return;
             }
+
             if (planta === 'MIXING' && sem < SEMANA_MIN_MIXING) {
                 alert(`Planta Mixing solo puede iniciar desde la semana ${SEMANA_MIN_MIXING}.`);
                 return;
             }
 
             try {
+
                 const res = await fetch('/CALENDARIO/GENERAR', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ Planta: planta, Periodo: periodo, SemanaInicio: sem, AnioInicio: anio }),
+                    body: JSON.stringify({
+                        Planta: planta,
+                        Periodo: periodo,
+                        SemanaInicio: sem,
+                        AnioInicio: anio
+                    })
                 });
+
+                if (!res.ok) {
+                    throw new Error(`Error HTTP ${res.status}`);
+                }
+
                 const data = await res.json();
-                if (!data.ok) { alert('Error: ' + data.error); return; }
+
+                if (!data || !data.ok) {
+                    alert('Error: ' + (data?.error || 'Respuesta inválida del servidor'));
+                    return;
+                }
+
+                if (!data.distribucion) {
+                    console.error("Distribución no recibida:", data);
+                    alert("Error: el servidor no devolvió la distribución.");
+                    return;
+                }
 
                 const key = `${planta}_P${periodo}`;
                 calDistribucion[key] = data.distribucion;
 
-                if (data.auto_activadas?.length) {
+                // plantas auto activadas
+                if (Array.isArray(data.auto_activadas) && data.auto_activadas.length > 0) {
                     data.auto_activadas.forEach(a => {
-                        calDistribucion[`${a.planta}_P${periodo}`] = a.distribucion;
+                        if (a && a.planta && a.distribucion) {
+                            calDistribucion[`${a.planta}_P${periodo}`] = a.distribucion;
+                        }
                     });
                 }
 
                 await renderPlantaPanel();
+
                 _periodoActivo[planta] = periodo;
+
                 renderCalendarioActual();
-            } catch (e) {
+
+            }
+            catch (e) {
+                console.error("Error calendario:", e);
                 alert('Error de red: ' + e.message);
             }
         }

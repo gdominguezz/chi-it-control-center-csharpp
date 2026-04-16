@@ -336,8 +336,7 @@ public class CalendarioController : ControllerBase
             WHERE planta = @p AND nombre_dispositivo = 'LAPTOP'
             """;
         cntLap.Parameters.AddWithValue("p", nombreDB);
-        var totalLaptops = Convert.ToInt64(cntLap.ExecuteScalar()!);
-
+        var totalLaptops = Convert.ToInt64(cntLap.ExecuteScalar() ?? 0);
         int totalSemanas;
         int computoPorSemana;
         int laptopsPorSemana;
@@ -538,7 +537,7 @@ public class CalendarioController : ControllerBase
               AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
             """;
         cntComp.Parameters.AddWithValue("p", nombreDB);
-        var totalComputo = Convert.ToInt64(cntComp.ExecuteScalar()!);
+        var totalComputo = Convert.ToInt64(cntComp.ExecuteScalar() ?? 0);
 
         // Laptops y cómputo tienen su propia distribución independiente en 24 semanas.
         // TotalEquipos = suma de ambos para mostrar en la UI, pero cada tipo
@@ -588,7 +587,7 @@ public class CalendarioController : ControllerBase
             WHERE planta = @p AND nombre_dispositivo = 'LAPTOP'
             """;
         cntLap.Parameters.AddWithValue("p", nombreDB);
-        var totalLaptops = Convert.ToInt32(cntLap.ExecuteScalar()!);
+        var totalLaptops = Convert.ToInt32(cntLap.ExecuteScalar() ?? 0);
 
         // Cómputo: calendario independiente (semana fija, todos en una semana)
         using var cntComp = conn.CreateCommand();
@@ -598,7 +597,7 @@ public class CalendarioController : ControllerBase
               AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
             """;
         cntComp.Parameters.AddWithValue("p", nombreDB);
-        var totalComputo = Convert.ToInt32(cntComp.ExecuteScalar()!);
+        var totalComputo = Convert.ToInt32(cntComp.ExecuteScalar() ?? 0);
 
         var (semReal, anioReal, lunes, viernes) = FechasDeSemana(anio, semIni, 1);
 
