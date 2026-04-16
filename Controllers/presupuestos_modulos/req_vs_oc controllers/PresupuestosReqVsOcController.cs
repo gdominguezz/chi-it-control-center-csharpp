@@ -160,4 +160,10 @@ public class PresupuestosReqVsOcController : ControllerBase
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             $"REQ_VS_OC_{anio}.xlsx");
     }
+    [HttpGet("{id}/HISTORIAL")]
+    public IActionResult GetHistorial(int id)
+    {
+        var historial = _service.GetHistorial(id);
+        return Ok(new { historial });
+    }
 }

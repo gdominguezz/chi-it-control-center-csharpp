@@ -306,4 +306,36 @@ public class PresupuestosReqVsOcService
 
         return list;
     }
+    public List<object> GetHistorial(int id)
+    {
+        using var con = Abrir();
+        using var cmd = con.CreateCommand();
+
+        cmd.CommandText = """
+    SELECT id, fecha_cambio, usuario, registro_anterior, registro_nuevo
+    FROM auditoria_req_vs_oc
+    WHERE registro_id=@id
+    ORDER BY fecha_cambio DESC
+    """;
+
+        cmd.Parameters.AddWithValue("id", id);
+
+        var list = new List<object>();
+
+        using var dr = cmd.ExecuteReader();
+
+        while (dr.Read())
+        {
+            list.Add(new
+            {
+                id = dr.GetInt32(0),
+                fecha = dr.IsDBNull(1) ? null : dr.GetDateTime(1).ToString("yyyy-MM-dd HH:mm:ss"),
+                usuario = dr.IsDBNull(2) ? null : dr.GetString(2),
+                registro_anterior = dr.IsDBNull(3) ? null : dr.GetString(3),
+                registro_nuevo = dr.IsDBNull(4) ? null : dr.GetString(4)
+            });
+        }
+
+        return list;
+    }
 }

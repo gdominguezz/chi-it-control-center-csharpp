@@ -22,6 +22,7 @@
             --amber: #F59E0B;
             --purple: #8B5CF6;
             --cyan: #06B6D4;
+            --blue: #3B82F6;
         }
 
         * {
@@ -80,10 +81,18 @@
                 font-family: 'DM Mono', monospace;
             }
 
-        .topbar-back {
-            display: inline-flex;
+        /* ── USER CHIP / DROPDOWN ── */
+        .topbar-actions {
+            display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            position: relative;
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             padding: 7px 14px;
             border-radius: 999px;
             background: rgba(255,255,255,.06);
@@ -91,16 +100,119 @@
             font-size: 12px;
             font-weight: 500;
             cursor: pointer;
-            color: var(--muted2);
-            text-decoration: none;
-            transition: background .2s, border-color .2s, color .2s;
+            position: relative;
+            user-select: none;
+            transition: background .2s, border-color .2s;
         }
 
-            .topbar-back:hover {
-                background: rgba(239,68,68,.12);
-                border-color: var(--red);
-                color: #fca5a5;
+            .user-chip:hover {
+                background: rgba(255,255,255,.1);
+                border-color: var(--accent);
             }
+
+            .user-chip span {
+                color: var(--muted2);
+            }
+
+            .user-chip .chip-arrow {
+                font-size: 9px;
+                color: var(--muted);
+                transition: transform .2s;
+            }
+
+            .user-chip.open .chip-arrow {
+                transform: rotate(180deg);
+            }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
+
+            .dropdown-header .d-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            .dropdown-header .d-role {
+                font-size: 10px;
+                color: var(--muted);
+                font-family: 'DM Mono', monospace;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                margin-top: 2px;
+            }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: background .15s, color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: var(--text);
+            }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        .dropdown-sep {
+            height: 1px;
+            background: var(--border);
+            margin: 6px 0;
+        }
 
         /* ── MAIN ── */
         .main {
@@ -256,6 +368,15 @@
                 background: #7C3AED;
             }
 
+        .btn-cyan {
+            background: var(--cyan);
+            color: #001a1f;
+        }
+
+            .btn-cyan:hover {
+                background: #0891B2;
+            }
+
         .btn-ghost {
             background: var(--surface2);
             color: var(--muted2);
@@ -359,6 +480,10 @@
                 .table-scroll::-webkit-scrollbar-thumb:hover {
                     background: var(--accent);
                 }
+
+            .table-scroll::-webkit-scrollbar-corner {
+                background: var(--surface2);
+            }
 
         table {
             border-collapse: collapse;
@@ -482,28 +607,30 @@
             margin-left: auto;
         }
 
-        /* ── FILE INPUT ── */
-        input[type="file"] {
-            font-size: 11px;
-            color: var(--muted2);
-            font-family: 'DM Sans', sans-serif;
-            background: var(--surface2);
-            border: 1px solid var(--border2);
-            border-radius: 6px;
-            padding: 4px 8px;
+        /* ── FILE LABEL (estilo bajas.html) ── */
+        .file-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 7px;
             cursor: pointer;
-            max-width: 180px;
+            background: rgba(59,130,246,.1);
+            color: #93C5FD;
+            border: 1px solid rgba(59,130,246,.25);
+            font-size: 11px;
+            font-weight: 600;
+            transition: all .2s;
+            white-space: nowrap;
         }
 
-            input[type="file"]::-webkit-file-upload-button {
-                background: var(--surface3);
-                color: var(--muted2);
-                border: 1px solid var(--border2);
-                border-radius: 5px;
-                padding: 3px 8px;
-                font-size: 10px;
-                cursor: pointer;
-                font-family: 'DM Sans', sans-serif;
+            .file-label:hover {
+                background: rgba(59,130,246,.2);
+                border-color: #3B82F6;
+            }
+
+            .file-label input[type=file] {
+                display: none;
             }
 
         /* ── ACCIONES TD ── */
@@ -513,20 +640,263 @@
             align-items: center;
             flex-wrap: wrap;
         }
+
+        /* ── MODAL ── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 800;
+            background: rgba(0,0,0,.65);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+
+            .modal.show {
+                display: flex;
+            }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 28px;
+            width: min(580px,95vw);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,.55);
+        }
+
+            .modal-box.hist-box {
+                width: min(980px,95vw);
+            }
+
+            .modal-box::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .modal-box::-webkit-scrollbar-track {
+                background: var(--surface2);
+                border-radius: 999px;
+            }
+
+            .modal-box::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 999px;
+            }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+            .modal-header h3 {
+                margin: 0;
+                color: var(--text);
+                font-size: 15px;
+                font-weight: 700;
+            }
+
+        .close-btn {
+            background: rgba(239,68,68,.15);
+            color: #FCA5A5;
+            border: 1px solid rgba(239,68,68,.3);
+            padding: 5px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all .2s;
+        }
+
+            .close-btn:hover {
+                background: var(--red);
+                color: white;
+            }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 10px;
+        }
+
+        .form-field {
+            margin-bottom: 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .form-field label {
+                font-size: 9px;
+                font-weight: 700;
+                color: var(--muted);
+                margin-bottom: 5px;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+            }
+
+            .form-field input, .form-field select {
+                padding: 9px 11px;
+                border: 1px solid var(--border2);
+                border-radius: 7px;
+                font-size: 12px;
+                background: var(--surface2);
+                color: var(--text);
+                font-family: 'DM Mono', monospace;
+                transition: border-color .2s, box-shadow .2s;
+            }
+
+                .form-field input:focus, .form-field select:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+                }
+
+            .form-field select {
+                cursor: pointer;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 10px center;
+                padding-right: 28px;
+            }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media(max-width:500px) {
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── HISTORIAL ── */
+        .ev-wrap {
+            margin-bottom: 18px;
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .ev-header {
+            background: var(--surface3);
+            padding: 11px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+            .ev-header span {
+                font-size: 12px;
+                color: var(--muted2);
+            }
+
+            .ev-header strong {
+                color: #7dd3fc;
+            }
+
+        .badge-cambio {
+            background: var(--amber);
+            color: #111;
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+            margin-left: 6px;
+        }
+
+        .ev-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+            .ev-table th, .ev-table td {
+                border: 1px solid var(--border2);
+                padding: 8px 10px;
+                text-align: left;
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+            .ev-table thead th {
+                background: var(--surface3);
+                color: var(--muted2);
+                font-weight: 700;
+            }
+
+            .ev-table th:first-child {
+                width: 22%;
+            }
+
+        .row-changed td:nth-child(2) {
+            background: rgba(239,68,68,.1);
+            color: #FCA5A5;
+        }
+
+        .row-changed td:nth-child(3) {
+            background: rgba(16,185,129,.1);
+            color: #6EE7B7;
+        }
+
+        .empty-val {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .sin-hist {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- TOP BAR -->
+    <!-- ══════════════════════════════════════════════════════════════════
+         TOP BAR
+    ══════════════════════════════════════════════════════════════════════ -->
     <div class="topbar">
         <div class="topbar-icon">🛒</div>
         <div class="topbar-title">
             <h1>REQ vs Orden de Compra</h1>
             <p>Módulo de Presupuestos · PRESUPUESTOS_REQ_VS_OC</p>
         </div>
-        <a class="topbar-back" href="presupuestos_menu.html">↩ Regresar a Presupuestos</a>
+        <div class="topbar-actions">
+            <div class="user-chip" id="userChip" onclick="toggleChip()">
+                👤 <span id="nombreUsuario">Cargando...</span>
+                <span class="chip-arrow">▼</span>
+                <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name" id="dropNombre">—</div>
+                        <div class="d-role" id="dropRol">—</div>
+                    </div>
+                    <button class="dropdown-item" onclick="window.location.href='presupuestos_menu.html'">↩ &nbsp;Regresar a Presupuestos</button>
+                    <div class="dropdown-sep"></div>
+                    <button class="dropdown-item danger" onclick="cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- ══════════════════════════════════════════════════════════════════
+         MAIN
+    ══════════════════════════════════════════════════════════════════════ -->
     <div class="main">
 
         <!-- Banner modo edición -->
@@ -534,9 +904,9 @@
             ✏️ Modo edición — modifica los campos y presiona GUARDAR / ACTUALIZAR
         </div>
 
-        <!-- Formulario -->
+        <!-- Formulario NUEVO REGISTRO -->
         <div class="panel">
-            <div class="panel-title">Registro de Requisición vs Orden de Compra</div>
+            <div class="panel-title">➕ Registro de Requisición vs Orden de Compra</div>
             <div class="form-grid">
                 <div class="field">
                     <label>No. Requisición</label>
@@ -558,9 +928,8 @@
                     <label>Moneda</label>
                     <select id="MONEDA">
                         <option value="">— Selecciona —</option>
-                        <option value="MXN">MXN</option>
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
+                        <option value="Pesos">Pesos</option>
+                        <option value="Dolares">Dolares</option>
                     </select>
                 </div>
                 <div class="field">
@@ -569,11 +938,7 @@
                 </div>
                 <div class="field">
                     <label>Registrada en OC</label>
-                    <select id="REGISTRADA_EN_OC">
-                        <option value="">— Selecciona —</option>
-                        <option value="SI">SI</option>
-                        <option value="NO">NO</option>
-                    </select>
+                    <input id="REGISTRADA_EN_OC" placeholder="Ej: SI, NO, Parcial...">
                 </div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -582,7 +947,7 @@
             </div>
         </div>
 
-        <!-- Exportaciones -->
+        <!-- Toolbar exportar -->
         <div class="toolbar">
             <button class="btn btn-purple btn-sm" onclick="exportarFiltrado()">⬇ Exportar Filtrado</button>
             <button class="btn btn-purple btn-sm" onclick="exportarTodo()">⬇ Exportar Todo</button>
@@ -610,13 +975,13 @@
                         </tr>
                         <tr class="filter-row">
                             <th></th>
-                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
-                            <th><input oninput="filtrar()" placeholder="Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="🔍 Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="🔍 Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="🔍 Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="🔍 Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="🔍 Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="🔍 Filtrar..."></th>
+                            <th><input oninput="filtrar()" placeholder="🔍 Filtrar..."></th>
                             <th></th>
                             <th></th>
                         </tr>
@@ -634,7 +999,81 @@
         </div>
 
     </div><!-- /main -->
+    <!-- ══════════════════════════════════════════════════════════════════
+         MODAL EDITAR
+    ══════════════════════════════════════════════════════════════════════ -->
+    <div id="modalEditar" class="modal">
+        <div class="modal-box form-box">
+            <div class="modal-header">
+                <h3>✏️ Editar Registro &nbsp;<span id="editarIdLabel" style="color:#93C5FD;">#</span></h3>
+                <button class="close-btn" onclick="cerrarEditar()">✕</button>
+            </div>
 
+            <div class="form-grid-2">
+                <div class="form-field">
+                    <label>No. Requisición</label>
+                    <input id="e_NO_REQUISICION" placeholder="Ej: REQ-001">
+                </div>
+                <div class="form-field">
+                    <label>Orden de Compra</label>
+                    <input id="e_ORDEN_COMPRA" placeholder="Ej: OC-2024-001">
+                </div>
+                <div class="form-field">
+                    <label>Fecha de Compra</label>
+                    <input type="date" id="e_FECHA_COMPRA">
+                </div>
+                <div class="form-field">
+                    <label>PO Subtotal</label>
+                    <input type="number" step="0.01" id="e_PO_SUBTOTAL" placeholder="Ej: 1500.00">
+                </div>
+                <div class="form-field">
+                    <label>Moneda</label>
+                    <select id="e_MONEDA">
+                        <option value="">— Selecciona —</option>
+                        <option value="Pesos">Pesos</option>
+                        <option value="Dolares">Dolares</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>OC Subtotal</label>
+                    <input id="e_OC_SUBTOTAL" placeholder="Ej: 1500.00">
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label>Registrada en OC</label>
+                <input id="e_REGISTRADA_EN_OC" placeholder="Ej: SI, NO, Parcial...">
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
+                <button class="btn btn-success" onclick="guardarCambios()">💾 Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         MODAL HISTORIAL
+    ══════════════════════════════════════════════════════════════════════ -->
+    <div id="modalHistorial" class="modal">
+        <div class="modal-box hist-box">
+            <div class="modal-header">
+                <h3>
+                    📋 Historial de Cambios — REQ vs OC
+                    <span id="histIdLabel" style="color:var(--cyan);">#</span>
+                </h3>
+                <button class="close-btn" onclick="cerrarHistorial()">✕</button>
+            </div>
+            <div id="contenidoHistorial"></div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="cerrarHistorial()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         SCRIPT
+    ══════════════════════════════════════════════════════════════════════ -->
     <script>
         let paginaActual = 1;
         const limite = 10;
@@ -642,6 +1081,55 @@
         let editandoID = null;
         let datosOriginales = [];
         let datosFiltrados = [];
+        let usuarioActual = 'SISTEMA';
+
+        const CAMPOS = [
+            { key: 'NO_REQUISICION', label: 'No. Requisición' },
+            { key: 'ORDEN_COMPRA', label: 'Orden de Compra' },
+            { key: 'FECHA_COMPRA', label: 'Fecha de Compra' },
+            { key: 'PO_SUBTOTAL', label: 'PO Subtotal' },
+            { key: 'MONEDA', label: 'Moneda' },
+            { key: 'OC_SUBTOTAL', label: 'OC Subtotal' },
+            { key: 'REGISTRADA_EN_OC', label: 'Registrada en OC' },
+        ];
+
+        // ── Init ───────────────────────────────────────────────────────────
+        window.addEventListener('DOMContentLoaded', () => {
+            verificarSesion();
+            cargar();
+        });
+
+        // ── Sesión ─────────────────────────────────────────────────────────
+        async function verificarSesion() {
+            try {
+                const res = await fetch('/obtener-usuario', { credentials: 'include' });
+                if (!res.ok) { window.location.href = '/static/login.html'; return; }
+                const data = await res.json();
+                if (!data.usuario) { window.location.href = '/static/login.html'; return; }
+
+                usuarioActual = data.usuario;
+                const nombre = data.nombre || data.usuario;
+                document.getElementById('nombreUsuario').textContent = nombre;
+                document.getElementById('dropNombre').textContent = nombre;
+                document.getElementById('dropRol').textContent = data.rol || 'USER';
+            } catch {
+                window.location.href = '/static/login.html';
+            }
+        }
+
+        async function cerrarSesion() {
+            try { await fetch('/LOGOUT', { method: 'POST', credentials: 'include' }); } catch { }
+            sessionStorage.clear();
+            window.location.href = '/static/login.html';
+        }
+
+        function toggleChip() {
+            document.getElementById('userChip').classList.toggle('open');
+        }
+        document.addEventListener('click', e => {
+            const c = document.getElementById('userChip');
+            if (c && !c.contains(e.target)) c.classList.remove('open');
+        });
 
         // ── Badge ──────────────────────────────────────────────────────────
         function badge(val) {
@@ -649,40 +1137,30 @@
             const v = val.toString().toUpperCase();
             if (v === 'SI') return `<span class="badge badge-si">SI</span>`;
             if (v === 'NO') return `<span class="badge badge-no">NO</span>`;
-            return `<span class="badge badge-otro">${val}</span>`;
+            return `<span class="badge badge-otro">${esc(val)}</span>`;
         }
 
-        // ── Guardar / Actualizar ───────────────────────────────────────────
+        // ── Guardar nuevo ──────────────────────────────────────────────────
         function guardar() {
-            const data = {
-                NO_REQUISICION: document.getElementById('NO_REQUISICION').value || null,
-                ORDEN_COMPRA: document.getElementById('ORDEN_COMPRA').value || null,
-                FECHA_COMPRA: document.getElementById('FECHA_COMPRA').value || null,
-                PO_SUBTOTAL: document.getElementById('PO_SUBTOTAL').value || null,
-                MONEDA: document.getElementById('MONEDA').value || null,
-                OC_SUBTOTAL: document.getElementById('OC_SUBTOTAL').value || null,
-                REGISTRADA_EN_OC: document.getElementById('REGISTRADA_EN_OC').value || null
-            };
+            const data = {};
+            CAMPOS.forEach(({ key }) => {
+                const el = document.getElementById(key);
+                data[key] = el ? (el.value || null) : null;
+            });
 
-            if (editandoID) {
-                fetch(`/PRESUPUESTOS_REQ_VS_OC/${editandoID}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                }).then(() => { editandoID = null; limpiar(); cargar(); });
-            } else {
-                fetch('/PRESUPUESTOS_REQ_VS_OC', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                }).then(() => { limpiar(); cargar(); });
-            }
+            fetch('/PRESUPUESTOS_REQ_VS_OC', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                body: JSON.stringify(data)
+            }).then(() => { limpiar(); cargar(); })
+                .catch(e => alert('Error al guardar: ' + e.message));
         }
 
         function limpiar() {
-            ['NO_REQUISICION', 'ORDEN_COMPRA', 'FECHA_COMPRA',
-                'PO_SUBTOTAL', 'MONEDA', 'OC_SUBTOTAL', 'REGISTRADA_EN_OC']
-                .forEach(id => document.getElementById(id).value = '');
+            CAMPOS.forEach(({ key }) => {
+                const el = document.getElementById(key);
+                if (el) el.value = '';
+            });
             document.getElementById('editingBanner').classList.remove('visible');
         }
 
@@ -692,8 +1170,7 @@
         function obtenerParametros() {
             const filtros = document.querySelectorAll('.filter-row input');
             return new URLSearchParams({
-                page: paginaActual,
-                limit: limite,
+                page: paginaActual, limit: limite,
                 NO_REQUISICION: filtros[0].value,
                 ORDEN_COMPRA: filtros[1].value,
                 FECHA_COMPRA: filtros[2].value,
@@ -720,32 +1197,42 @@
             const tbody = document.getElementById('tabla');
             tbody.innerHTML = '';
 
+            if (!datosFiltrados.length) {
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">
+                        📭 Sin registros</td></tr>`;
+                return;
+            }
+
             datosFiltrados.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                         <td class="mono">${row.ID}</td>
-                        <td>${row.NO_REQUISICION ?? ''}</td>
-                        <td>${row.ORDEN_COMPRA ?? ''}</td>
-                        <td class="mono">${row.FECHA_COMPRA ?? ''}</td>
+                        <td>${esc(row.NO_REQUISICION ?? '')}</td>
+                        <td>${esc(row.ORDEN_COMPRA ?? '')}</td>
+                        <td class="mono">${esc(row.FECHA_COMPRA ?? '')}</td>
                         <td class="mono">${row.PO_SUBTOTAL != null
                         ? Number(row.PO_SUBTOTAL).toLocaleString('es-MX', { minimumFractionDigits: 2 })
                         : ''}</td>
-                        <td>${row.MONEDA ?? ''}</td>
-                        <td class="mono">${row.OC_SUBTOTAL ?? ''}</td>
+                        <td>${esc(row.MONEDA ?? '')}</td>
+                        <td class="mono">${esc(row.OC_SUBTOTAL ?? '')}</td>
                         <td>${badge(row.REGISTRADA_EN_OC)}</td>
                         <td>
                             <div class="td-actions">
                             ${row.TIENE_PDF
-                        ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver PDF</button>
-                                   <button class="btn btn-danger  btn-sm" onclick="eliminarPDF(${row.ID})">🗑</button>`
-                        : `<input type="file" accept="application/pdf" onchange="subirPDF(${row.ID},this)">`
+                        ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
+                                   <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
+                        : `<label class="file-label">
+                                       📎 Subir PDF
+                                       <input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)">
+                                   </label>`
                     }
                             </div>
                         </td>
-                        <td>
+                        <td style="white-space:nowrap;">
                             <div class="td-actions">
-                                <button class="btn btn-amber  btn-sm" onclick='editar(${JSON.stringify(row)})'>✏️ Editar</button>
+                                <button class="btn btn-amber btn-sm"  onclick="abrirEditar(${row.ID})">✏️ Editar</button>
                                 <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑 Eliminar</button>
+                                <button class="btn btn-cyan btn-sm"   onclick="verHistorial(${row.ID})">📋 Historial</button>
                             </div>
                         </td>`;
                 tbody.appendChild(tr);
@@ -756,47 +1243,76 @@
                 `Página ${paginaActual} de ${total}  (${totalRegistros} registros)`;
         }
 
-        // ── Editar ─────────────────────────────────────────────────────────
-        function editar(row) {
-            editandoID = row.ID;
-            const map = {
-                NO_REQUISICION: row.NO_REQUISICION,
-                ORDEN_COMPRA: row.ORDEN_COMPRA,
-                FECHA_COMPRA: row.FECHA_COMPRA,
-                PO_SUBTOTAL: row.PO_SUBTOTAL,
-                MONEDA: row.MONEDA,
-                OC_SUBTOTAL: row.OC_SUBTOTAL,
-                REGISTRADA_EN_OC: row.REGISTRADA_EN_OC
-            };
-            Object.entries(map).forEach(([k, v]) => {
-                const el = document.getElementById(k);
-                if (el) el.value = v ?? '';
+        // ── Modal Editar ───────────────────────────────────────────────────
+        function abrirEditar(id) {
+            editandoID = id;
+            document.getElementById('editarIdLabel').textContent = id;
+            const row = datosFiltrados.find(r => r.ID === id);
+            if (row) {
+                CAMPOS.forEach(({ key }) => {
+                    const el = document.getElementById('e_' + key);
+                    if (!el) return;
+                    let val = row[key] ?? '';
+                    if (key === 'FECHA_COMPRA' && val) {
+                        const d = new Date(val);
+                        if (!isNaN(d)) val = d.toISOString().slice(0, 10);
+                    }
+                    el.value = val;
+                });
+            }
+            document.getElementById('modalEditar').classList.add('show');
+            document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+        }
+
+        function cerrarEditar() {
+            document.getElementById('modalEditar').classList.remove('show');
+            editandoID = null;
+        }
+
+        async function guardarCambios() {
+            const datos = {};
+            CAMPOS.forEach(({ key }) => {
+                const el = document.getElementById('e_' + key);
+                datos[key] = el ? (el.value || null) : null;
             });
-            document.getElementById('editingBanner').classList.add('visible');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            try {
+                const res = await fetch(`/PRESUPUESTOS_REQ_VS_OC/${editandoID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(datos)
+                });
+                if (res.ok) {
+                    cerrarEditar();
+                    cargar();
+                } else {
+                    const result = await res.json().catch(() => ({}));
+                    alert('Error: ' + (result.error || 'No se pudo guardar'));
+                }
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
         }
 
         // ── Eliminar ───────────────────────────────────────────────────────
         function eliminar(id) {
             if (!confirm('¿Eliminar este registro?')) return;
-            fetch(`/PRESUPUESTOS_REQ_VS_OC/${id}`, { method: 'DELETE' }).then(() => cargar());
+            fetch(`/PRESUPUESTOS_REQ_VS_OC/${id}`, { method: 'DELETE' })
+                .then(() => cargar());
         }
 
         // ── PDF ────────────────────────────────────────────────────────────
         function subirPDF(id, input) {
-            const file = input.files[0];
-            if (!file) return;
             const fd = new FormData();
-            fd.append('file', file);
+            fd.append('file', input.files[0]);
             fetch(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, { method: 'POST', body: fd })
                 .then(() => cargar());
         }
-
         function verPDF(id) { window.open(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, '_blank'); }
-
         function eliminarPDF(id) {
-            if (!confirm('¿Eliminar el PDF de este registro?')) return;
-            fetch(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, { method: 'DELETE' }).then(() => cargar());
+            if (!confirm('¿Eliminar el PDF adjunto?')) return;
+            fetch(`/PRESUPUESTOS_REQ_VS_OC/PDF/${id}`, { method: 'DELETE' })
+                .then(() => cargar());
         }
 
         // ── Filtrar / Paginación ───────────────────────────────────────────
@@ -806,29 +1322,119 @@
 
         // ── Exportar ───────────────────────────────────────────────────────
         function exportarFiltrado() {
-            const filtros = document.querySelectorAll('.filter-row input');
-            const p = new URLSearchParams({
-                NO_REQUISICION: filtros[0].value,
-                ORDEN_COMPRA: filtros[1].value,
-                FECHA_COMPRA: filtros[2].value,
-                PO_SUBTOTAL: filtros[3].value,
-                MONEDA: filtros[4].value,
-                OC_SUBTOTAL: filtros[5].value,
-                REGISTRADA_EN_OC: filtros[6].value
-            });
-            window.open(`/PRESUPUESTOS_REQ_VS_OC/EXPORTAR?${p.toString()}`);
+            window.open(`/PRESUPUESTOS_REQ_VS_OC/EXPORTAR?${obtenerParametros().toString()}`);
         }
-
         function exportarTodo() { window.open('/PRESUPUESTOS_REQ_VS_OC/EXPORTAR_TODO'); }
-
         function exportarPorAnio() {
             const anio = document.getElementById('anioExportar').value;
             if (!anio) { alert('Ingresa un año'); return; }
             window.open(`/PRESUPUESTOS_REQ_VS_OC/EXPORTAR_ANIO?anio=${anio}`);
         }
 
-        // ── Init ───────────────────────────────────────────────────────────
-        cargar();
+        // ── Modal Historial ────────────────────────────────────────────────
+        function esc(v) {
+            if (v == null) return '';
+            return String(v)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function formatFecha(f) {
+            try {
+                const d = new Date(f);
+                if (!isNaN(d)) return d.toLocaleString('es-MX', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+            } catch { }
+            return f ?? '';
+        }
+
+        function renderEvento(ev) {
+            let antes = ev.registro_anterior;
+            let despues = ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch { }
+
+            const cambios = new Set();
+            CAMPOS.forEach(({ key }) => {
+                if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? ''))
+                    cambios.add(key);
+            });
+
+            let filas = '';
+            CAMPOS.forEach(({ key, label }) => {
+                const vA = antes && key in antes ? antes[key] : '';
+                const vD = despues && key in despues ? despues[key] : '';
+                const cambiado = cambios.has(key);
+                const mA = (vA === null || vA === '') ? '<span class="empty-val">vacío</span>' : esc(vA);
+                const mD = (vD === null || vD === '') ? '<span class="empty-val">vacío</span>' : esc(vD);
+                filas += `
+                        <tr class="${cambiado ? 'row-changed' : ''}">
+                            <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                            <td>${mA}</td>
+                            <td>${mD}</td>
+                        </tr>`;
+            });
+
+            return `
+                    <div class="ev-wrap">
+                        <div class="ev-header">
+                            <span>🕒 <strong>${formatFecha(ev.fecha_cambio || ev.fecha)}</strong></span>
+                            <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                            <span style="margin-left:auto;background:var(--amber);color:#111;
+                                padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                                ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                        <table class="ev-table">
+                            <thead><tr>
+                                <th>Campo</th>
+                                <th style="color:#FCA5A5">⬅ Antes</th>
+                                <th style="color:#6EE7B7">➡ Después</th>
+                            </tr></thead>
+                            <tbody>${filas}</tbody>
+                        </table>
+                    </div>`;
+        }
+
+        function verHistorial(id) {
+            document.getElementById('histIdLabel').textContent = id;
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="text-align:center;padding:30px;color:var(--muted)">Cargando historial...</p>';
+            document.getElementById('modalHistorial').classList.add('show');
+            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+
+            fetch(`/PRESUPUESTOS_REQ_VS_OC/${id}/HISTORIAL`)
+                .then(r => r.json())
+                .then(data => {
+                    const lista = (data.historial || []).sort(
+                        (a, b) => new Date(b.fecha_cambio || b.fecha || 0) - new Date(a.fecha_cambio || a.fecha || 0)
+                    );
+                    if (!lista.length) {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            '<p class="sin-hist">📭 Este registro no tiene ediciones registradas.</p>';
+                    } else {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
+                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                </p>` + lista.map(renderEvento).join('');
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        '<p style="color:var(--red);text-align:center;padding:30px">Error al cargar historial.</p>';
+                });
+        }
+
+        function cerrarHistorial() {
+            document.getElementById('modalHistorial').classList.remove('show');
+        }
+
+        // Cerrar con ESC
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
+        });
     </script>
 </body>
 </html>
