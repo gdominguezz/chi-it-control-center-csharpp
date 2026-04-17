@@ -184,6 +184,66 @@ public class CorrectivoController : ControllerBase
     }
 
     // ══════════════════════════════════════════════════════════════════════
+    // GET /CORRECTIVO/{id}  — obtener un registro por ID
+    // ══════════════════════════════════════════════════════════════════════
+    [HttpGet("CORRECTIVO/{id:int}")]
+    public IActionResult ObtenerPorId(int id)
+    {
+        try
+        {
+            using var conn = _db.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                SELECT
+                    id                        AS "ID",
+                    status                    AS "STATUS",
+                    folio                     AS "FOLIO",
+                    planta                    AS "PLANTA",
+                    linea_persona             AS "LINEA_PERSONA",
+                    equipo                    AS "EQUIPO",
+                    marca                     AS "MARCA",
+                    modelo                    AS "MODELO",
+                    numero_serie              AS "NUMERO_SERIE",
+                    descripcion_falla         AS "DESCRIPCION_FALLA",
+                    accesorio_solicitado      AS "ACCESORIO_SOLICITADO",
+                    fecha_solicitud           AS "FECHA_SOLICITUD",
+                    reporte_elaborado_por     AS "REPORTE_ELABORADO_POR",
+                    tipo_observacion          AS "TIPO_OBSERVACION",
+                    vencimiento_dias          AS "VENCIMIENTO_DIAS",
+                    fecha_conteo_actual       AS "FECHA_CONTEO_ACTUAL",
+                    fecha_limite_cierre       AS "FECHA_LIMITE_CIERRE",
+                    categoria_correctivo      AS "CATEGORIA_CORRECTIVO",
+                    refaccion_accesorio_compra AS "REFACCION_ACCESORIO_COMPRA",
+                    fecha_llegada_refaccion   AS "FECHA_LLEGADA_REFACCION",
+                    fecha_reparacion          AS "FECHA_REPARACION",
+                    quien_realizo_reparacion  AS "QUIEN_REALIZO_REPARACION",
+                    validacion_funcionamiento AS "VALIDACION_FUNCIONAMIENTO",
+                    descripcion_reparacion    AS "DESCRIPCION_REPARACION",
+                    observaciones             AS "OBSERVACIONES",
+                    oc_factura                AS "OC_FACTURA"
+                FROM public.mantenimientos_correctivos
+                WHERE id = @id
+                """;
+            cmd.Parameters.AddWithValue("id", id);
+
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
+                return NotFound(new { error = "Registro no encontrado" });
+
+            var row = new Dictionary<string, object?>();
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                var name = reader.GetName(i);
+                var val = reader.IsDBNull(i) ? null : reader.GetValue(i);
+                if (val is DateTime dt) val = dt.ToString("yyyy-MM-dd");
+                row[name] = val;
+            }
+            return Ok(row);
+        }
+        catch (Exception ex) { return Ok(new { error = ex.Message }); }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
     // POST /CORRECTIVO  — crear nuevo registro
     // ══════════════════════════════════════════════════════════════════════
     [HttpPost("CORRECTIVO")]
