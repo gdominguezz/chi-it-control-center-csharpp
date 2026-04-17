@@ -264,7 +264,7 @@ public class QrPageController : ControllerBase
                 cards.Append("    <div class=\"mini-form\" id=\"form2_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px\">📋 Período 2 — Actividades</div>\n");
                 cards.Append("      <div class=\"acts-list\">" + actsHtml + "</div>\n");
-                cards.Append("<button class=\"btn btn-danger btn-sm\" onclick=\"abrirModalCorrectivo(" + row.id + ",'" + row.planta + "','" + row.id_equipo + "')\">⚠️ Requiere Correctivo</button>");
+                cards.Append("<button class=\"btn btn-danger btn-sm\" onclick=\"abrirModalCorrectivo(" + row.id + ",'" + row.planta + "','" + row.idEquipo + "')\">⚠️ Requiere Correctivo</button>");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
                 cards.Append("      <input type=\"date\" class=\"date-input\" id=\"fecha2_" + row.id + "\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
