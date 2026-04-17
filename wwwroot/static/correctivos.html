@@ -2421,7 +2421,12 @@
         async function cargarPendientes() {
 
             const res = await fetch("/CORRECTIVOS/PENDIENTES");
-            const data = await res.json();
+            if (!res.ok) {
+                console.error("Error backend", await res.text());
+                return;
+            }
+
+            
 
             const tbody = document.getElementById("tablaPendientes");
 
