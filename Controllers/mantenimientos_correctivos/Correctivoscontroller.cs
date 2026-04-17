@@ -652,6 +652,8 @@ public class CorrectivoController : ControllerBase
 
 
 
+
+
     //endpoint que guarda los datos del modal de qrpage controller "requiere correctivo"
     [HttpPost("MANTENIMIENTOS_CORRECTIVOS")]
     public IActionResult CrearCorrectivo([FromBody] CorrectivoQR dto)
@@ -717,16 +719,60 @@ public class CorrectivoController : ControllerBase
         }
     }
 
+
+
+    // end point correctivos pendientes 
+    [HttpGet("CORRECTIVOS/PENDIENTES")]
+    public IActionResult ObtenerPendientes()
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+
+        cmd.CommandText = @"
+    SELECT
+        id,
+        planta,
+        linea_persona,
+        equipo,
+        descripcion_falla,
+        fecha_solicitud,
+        reporte_elaborado_por
+    FROM mantenimientos_correctivos
+    WHERE folio IS NULL
+    ORDER BY fecha_solicitud DESC
+    ";
+
+        var lista = new List<object>();
+
+        using var r = cmd.ExecuteReader();
+
+        while (r.Read())
+        {
+            lista.Add(new
+            {
+                id = r.GetInt32(0),
+                planta = r.GetString(1),
+                linea_persona = r.GetString(2),
+                equipo = r.GetString(3),
+                descripcion_falla = r.GetString(4),
+                fecha_solicitud = r.GetDateTime(5).ToString("yyyy-MM-dd"),
+                reporte_elaborado_por = r.GetString(6)
+            });
+        }
+
+        return Ok(lista);
+    }
+
 }
 
 // ══════════════════════════════════════════════════════════════════════════
 // MODELOS
 // ══════════════════════════════════════════════════════════════════════════
 
-/// <summary>
-/// Parámetros de filtro + paginación para GET /CORRECTIVOS.
-/// Todos los campos de filtro son opcionales.
-/// </summary>
+    /// <summary>
+    /// Parámetros de filtro + paginación para GET /CORRECTIVOS.
+    /// Todos los campos de filtro son opcionales.
+    /// </summary>
 public class FiltrosCorrectivo
 {
     // Paginación
