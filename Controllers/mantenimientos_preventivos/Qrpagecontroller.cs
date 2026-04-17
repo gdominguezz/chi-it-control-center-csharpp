@@ -219,7 +219,18 @@ public class QrPageController : ControllerBase
                 cards.Append("    <div class=\"mini-form\" id=\"form1_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px\">📋 Período 1 — Actividades</div>\n");
                 cards.Append("      <div class=\"acts-list\">" + actsHtml + "</div>\n");
-                cards.Append("      <label class=\"act-item act-correctivo\"><input type=\"checkbox\" id=\"req_correctivo1_" + row.id + "\"><span class=\"act-check\"></span><span class=\"act-text\">⚠️ Requiere Correctivo</span></label>\n");
+                cards.Append(
+                "<label class=\"act-item act-correctivo\">" +
+                "<button class=\"btn btn-danger btn-sm\" " +
+                "onclick=\"abrirModalCorrectivo(" +
+                row.id + ",'" +
+                Esc(row.planta) + "','" +
+                Esc(row.idEquipo) + "','" +
+                Esc(row.dispositivo) +
+                "')\">" +
+                "⚠️ Requiere Correctivo" +
+                "</button>" +
+                "</label>\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
                 cards.Append("      <input type=\"date\" class=\"date-input\" id=\"fecha1_" + row.id + "\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
@@ -242,7 +253,7 @@ public class QrPageController : ControllerBase
                 cards.Append("    <div class=\"mini-form\" id=\"edit_pm1_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 1</div>\n");
                 cards.Append("      <div class=\"acts-list\" id=\"edit_acts1_" + row.id + "\">" + actsHtml + "</div>\n");
-                cards.Append("      <label class=\"act-item act-correctivo\"><input type=\"checkbox\" id=\"req_correctivo_edit1_" + row.id + "\"><span class=\"act-check\"></span><span class=\"act-text\">⚠️ Requiere Correctivo</span></label>\n");
+                cards.Append("<button class=\"btn btn-danger btn-sm\" onclick=\"abrirModalCorrectivo(" + row.id + ",'" + row.planta + "','" + row.idEquipo + "')\">⚠️ Requiere Correctivo</button>");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
                 cards.Append("      <input type=\"date\" class=\"date-input\" id=\"edit_fecha1_" + row.id + "\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
@@ -253,7 +264,7 @@ public class QrPageController : ControllerBase
                 cards.Append("    <div class=\"mini-form\" id=\"form2_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px\">📋 Período 2 — Actividades</div>\n");
                 cards.Append("      <div class=\"acts-list\">" + actsHtml + "</div>\n");
-                cards.Append("      <label class=\"act-item act-correctivo\"><input type=\"checkbox\" id=\"req_correctivo2_" + row.id + "\"><span class=\"act-check\"></span><span class=\"act-text\">⚠️ Requiere Correctivo</span></label>\n");
+                cards.Append("<button class=\"btn btn-danger btn-sm\" onclick=\"abrirModalCorrectivo(" + row.id + ",'" + row.planta + "','" + row.id_equipo + "')\">⚠️ Requiere Correctivo</button>");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
                 cards.Append("      <input type=\"date\" class=\"date-input\" id=\"fecha2_" + row.id + "\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
@@ -658,6 +669,48 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  }else toast('Error al guardar',false);");
         sb.AppendLine("}");
         sb.AppendLine("function toast(msg,ok){const t=document.createElement('div');t.className='toast '+(ok?'toast-ok':'toast-err');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}");
+
+        //modal de correctivos
+
+
+        sb.AppendLine("let correctivoTemp={};");
+
+        sb.AppendLine("function abrirModalCorrectivo(id,planta,equipo){");
+        sb.AppendLine(" correctivoTemp={id:id};");
+        sb.AppendLine(" document.getElementById('c_planta').value=planta||'';");
+        sb.AppendLine(" document.getElementById('c_equipo').value=equipo||'';");
+        sb.AppendLine(" document.getElementById('modalCorrectivo').classList.add('show');");
+        sb.AppendLine("}");
+
+        sb.AppendLine("function cerrarModalCorrectivo(){");
+        sb.AppendLine(" document.getElementById('modalCorrectivo').classList.remove('show');");
+        sb.AppendLine("}");
+
+        sb.AppendLine("async function guardarCorrectivo(){");
+        sb.AppendLine(" const body={");
+        sb.AppendLine(" planta:document.getElementById('c_planta').value,");
+        sb.AppendLine(" fecha_solicitud:document.getElementById('c_fecha').value,");
+        sb.AppendLine(" linea_persona:document.getElementById('c_linea').value,");
+        sb.AppendLine(" equipo:document.getElementById('c_equipo').value,");
+        sb.AppendLine(" marca:document.getElementById('c_marca').value,");
+        sb.AppendLine(" modelo:document.getElementById('c_modelo').value,");
+        sb.AppendLine(" numero_serie:document.getElementById('c_serie').value,");
+        sb.AppendLine(" reporte_elaborado_por:document.getElementById('c_reporte').value,");
+        sb.AppendLine(" descripcion_falla:document.getElementById('c_falla').value,");
+        sb.AppendLine(" accesorio_solicitado:document.getElementById('c_accesorios').value");
+        sb.AppendLine(" };");
+
+        sb.AppendLine(" await fetch('/MANTENIMIENTOS_CORRECTIVOS',{");
+        sb.AppendLine(" method:'POST',");
+        sb.AppendLine(" headers:{'Content-Type':'application/json'},");
+        sb.AppendLine(" body:JSON.stringify(body)");
+        sb.AppendLine(" });");
+
+        sb.AppendLine(" cerrarModalCorrectivo();");
+        sb.AppendLine(" toast('Correctivo registrado',true);");
+        sb.AppendLine("}");
+
+
         // ── Recalendarización JS ──
         sb.AppendLine("let recalIdDispositivo=null,recalIdOcupante=null;");
         sb.AppendLine("let todasUbicaciones=[];");
