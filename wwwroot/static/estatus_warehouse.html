@@ -1,0 +1,177 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Estatus Warehouse</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#0B0F1A;
+color:white;
+padding:20px;
+}
+
+h1{
+margin-bottom:20px;
+}
+
+.toolbar{
+margin-bottom:15px;
+}
+
+input{
+padding:8px;
+border-radius:6px;
+border:none;
+width:250px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:#111827;
+border-radius:10px;
+overflow:hidden;
+}
+
+th{
+background:#1e293b;
+padding:10px;
+text-align:left;
+font-size:12px;
+}
+
+td{
+padding:10px;
+border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+tr:hover{
+background:#1a2235;
+}
+
+.badge{
+background:linear-gradient(135deg,#0f766e,#14b8a6);
+padding:4px 10px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<h1>📦 Estatus Warehouse</h1>
+
+<div class="toolbar">
+
+<input 
+type="text" 
+id="buscar"
+placeholder="Buscar estatus..."
+onkeyup="filtrar()">
+
+</div>
+
+<table>
+
+<thead>
+<tr>
+
+<th>ID</th>
+<th>ESTATUS ID</th>
+<th>DESCRIPCIÓN</th>
+
+</tr>
+</thead>
+
+<tbody id="tablaEstatus"></tbody>
+
+</table>
+
+
+<script>
+
+let datos=[];
+
+async function cargar(){
+
+try{
+
+const res = await fetch("/estatus_warehouse");
+
+if(!res.ok){
+throw new Error("Error backend");
+}
+
+datos = await res.json();
+
+render(datos);
+
+}catch(e){
+
+console.error("Error cargando estatus",e);
+
+}
+
+}
+
+
+function render(lista){
+
+const tabla=document.getElementById("tablaEstatus");
+
+tabla.innerHTML="";
+
+lista.forEach(e=>{
+
+tabla.innerHTML+=`
+
+<tr>
+
+<td>${e.id}</td>
+
+<td>
+<span class="badge">
+${e.estatus_id}
+</span>
+</td>
+
+<td>${e.descripcion}</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+
+function filtrar(){
+
+const txt=document.getElementById("buscar").value.toLowerCase();
+
+const filtrados=datos.filter(e=>
+
+e.descripcion.toLowerCase().includes(txt)
+||
+String(e.estatus_id).includes(txt)
+
+);
+
+render(filtrados);
+
+}
+
+cargar();
+
+</script>
+
+</body>
+</html>s
