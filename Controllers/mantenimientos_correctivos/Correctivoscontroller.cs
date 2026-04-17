@@ -346,7 +346,7 @@ public class CorrectivoController : ControllerBase
             var nuevo = LeerRegistro(conn, id)!;
 
             // ── Registrar auditoría mediante AuditoriaService ──
-            _auditoria.RegistrarCorrectivo(id, usr, anterior, nuevo);
+            _auditoria.RegistrarCorrectivo((long)id, usr, anterior, nuevo);
 
             return Ok(new { mensaje = "ACTUALIZADO" });
         }
@@ -389,39 +389,45 @@ public class CorrectivoController : ControllerBase
     [HttpGet("CORRECTIVOS/{id:int}/HISTORIAL")]
     public IActionResult ObtenerHistorial(int id)
     {
-        using var conn = _db.Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
+        try
+        {
+            using var conn = _db.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
             SELECT id, fecha_cambio, usuario, registro_anterior, registro_nuevo
             FROM public.auditoria_correctivos
             WHERE registro_id = @id
             ORDER BY fecha_cambio DESC
             """;
-        cmd.Parameters.AddWithValue("id", id);
+            cmd.Parameters.AddWithValue("id", (long)id);  // ← cast a long para match con bigint
 
-        static object SafeJson(string? raw)
-        {
-            if (string.IsNullOrWhiteSpace(raw)) return new { };
-            try { return JsonSerializer.Deserialize<object>(raw)!; }
-            catch { return new { _raw = raw }; }
-        }
-
-        var historial = new List<object>();
-        using var r = cmd.ExecuteReader();
-        while (r.Read())
-        {
-            historial.Add(new
+            static object SafeJson(string? raw)
             {
-                id = r.GetInt32(0),
-                fecha = r.IsDBNull(1) ? null : r.GetDateTime(1).ToString("o"),
-                usuario = r.IsDBNull(2) ? null : r.GetString(2),
-                registro_anterior = SafeJson(r.IsDBNull(3) ? null : r.GetString(3)),
-                registro_nuevo = SafeJson(r.IsDBNull(4) ? null : r.GetString(4)),
-            });
-        }
-        return Ok(new { historial });
-    }
+                if (string.IsNullOrWhiteSpace(raw)) return new { };
+                try { return JsonSerializer.Deserialize<object>(raw)!; }
+                catch { return new { _raw = raw }; }
+            }
 
+            var historial = new List<object>();
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                historial.Add(new
+                {
+                    id = r.GetInt64(0),   // ← era GetInt32
+                    fecha = r.IsDBNull(1) ? null : r.GetDateTime(1).ToString("o"),
+                    usuario = r.IsDBNull(2) ? null : r.GetString(2),
+                    registro_anterior = SafeJson(r.IsDBNull(3) ? null : r.GetString(3)),
+                    registro_nuevo = SafeJson(r.IsDBNull(4) ? null : r.GetString(4)),
+                });
+            }
+            return Ok(new { historial });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message, tipo = ex.GetType().Name });
+        }
+    }
     // ══════════════════════════════════════════════════════════════════════
     // PDF  — subir / ver / eliminar
     // ══════════════════════════════════════════════════════════════════════

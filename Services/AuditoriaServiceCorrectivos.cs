@@ -10,7 +10,7 @@ public class AuditoriaServiceCorrectivos
     public AuditoriaServiceCorrectivos(DbConnectionPool db) => _db = db;
 
     public void RegistrarCorrectivo(
-        int registroId,
+        long registroId,   // como long no rompe en error 500
         string usuario,
         object anterior,
         object nuevo)
@@ -20,12 +20,12 @@ public class AuditoriaServiceCorrectivos
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-                INSERT INTO public.auditoria_correctivos
-                    (registro_id, usuario, registro_anterior, registro_nuevo, fecha_cambio)
-                VALUES
-                    (@rid, @usr, @ant::jsonb, @nue::jsonb, NOW())
-                """;
-            cmd.Parameters.AddWithValue("rid", registroId);
+            INSERT INTO public.auditoria_correctivos
+                (registro_id, usuario, registro_anterior, registro_nuevo, fecha_cambio)
+            VALUES
+                (@rid, @usr, @ant::jsonb, @nue::jsonb, NOW())
+            """;
+            cmd.Parameters.AddWithValue("rid", registroId);  // ahora long
             cmd.Parameters.AddWithValue("usr", (object?)usuario ?? DBNull.Value);
             cmd.Parameters.AddWithValue("ant", JsonSerializer.Serialize(anterior,
                 new JsonSerializerOptions { WriteIndented = false }));
