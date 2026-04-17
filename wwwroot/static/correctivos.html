@@ -2503,7 +2503,46 @@
                 }
 
             }
+            async function cargarPendientes() {
 
+                try {
+
+                    const res = await fetch("/CORRECTIVOS/PENDIENTES");
+                    const data = await res.json();
+
+                    const tabla = document.getElementById("tablaPendientes");
+
+                    tabla.innerHTML = "";
+
+                    data.forEach(c => {
+
+                        tabla.innerHTML += `
+                        <tr>
+                        <td>${c.id}</td>
+                        <td>${c.planta}</td>
+                        <td>${c.linea_persona}</td>
+                        <td>${c.equipo}</td>
+                        <td>${c.descripcion_falla}</td>
+                        <td>${c.fecha_solicitud}</td>
+                        <td>${c.reporte_elaborado_por}</td>
+
+                        <td>
+                        <button class="btn btn-amber btn-sm"
+                        onclick="gestionar(${c.id})">
+                        Gestionar
+                        </button>
+                        </td>
+
+                        </tr>
+                        `;
+
+                    });
+
+                } catch (e) {
+                    console.error("Error cargando pendientes", e);
+                }
+
+            }
         
 
         }
