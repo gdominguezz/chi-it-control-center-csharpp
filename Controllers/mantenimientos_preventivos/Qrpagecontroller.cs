@@ -226,7 +226,7 @@ public class QrPageController : ControllerBase
                 row.id + ",'" +
                 Esc(row.planta) + "','" +
                 Esc(row.idEquipo) + "','" +
-                Esc(row.dispositivo) +
+                Esc(ubicacion) +
                 "')\">" +
                 "⚠️ Requiere Correctivo" +
                 "</button>" +
@@ -253,7 +253,7 @@ public class QrPageController : ControllerBase
                 cards.Append("    <div class=\"mini-form\" id=\"edit_pm1_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 1</div>\n");
                 cards.Append("      <div class=\"acts-list\" id=\"edit_acts1_" + row.id + "\">" + actsHtml + "</div>\n");
-                cards.Append("<button class=\"btn btn-danger btn-sm\" onclick=\"abrirModalCorrectivo(" + row.id + ",'" + row.planta + "','" + row.idEquipo + "')\">⚠️ Requiere Correctivo</button>");
+                cards.Append("<button class=\"btn btn-danger btn-sm\" onclick=\"abrirModalCorrectivo(" + row.id + ",'" + row.planta + "','" + row.idEquipo + "','" + Esc(ubicacion) + "')\">⚠️ Requiere Correctivo</button>");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
                 cards.Append("      <input type=\"date\" class=\"date-input\" id=\"edit_fecha1_" + row.id + "\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
@@ -264,7 +264,7 @@ public class QrPageController : ControllerBase
                 cards.Append("    <div class=\"mini-form\" id=\"form2_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px\">📋 Período 2 — Actividades</div>\n");
                 cards.Append("      <div class=\"acts-list\">" + actsHtml + "</div>\n");
-                cards.Append("<button class=\"btn btn-danger btn-sm\" onclick=\"abrirModalCorrectivo(" + row.id + ",'" + row.planta + "','" + row.idEquipo + "')\">⚠️ Requiere Correctivo</button>");
+                cards.Append("<button class=\"btn btn-danger btn-sm\" onclick=\"abrirModalCorrectivo(" + row.id + ",'" + row.planta + "','" + row.idEquipo + "','" + Esc(ubicacion) + "')\">⚠️ Requiere Correctivo</button>");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
                 cards.Append("      <input type=\"date\" class=\"date-input\" id=\"fecha2_" + row.id + "\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
@@ -434,6 +434,8 @@ public class QrPageController : ControllerBase
         sb.AppendLine(".act-correctivo input:checked ~ .act-text{color:#ff8080 !important;}");
         sb.AppendLine(".qr-section{border-top:1px solid var(--border);padding-top:10px;margin-top:4px;}");
         sb.AppendLine(".qr-section .form-sep{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:6px;}");
+        sb.AppendLine(".auto-tag{font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(59,130,246,.18);color:#60a5fa;letter-spacing:.06em;vertical-align:middle;margin-left:4px;}");
+        sb.AppendLine(".input-auto{background:rgba(59,130,246,.06)!important;border-color:rgba(59,130,246,.3)!important;color:var(--muted2)!important;cursor:not-allowed!important;}");
         sb.AppendLine("</style></head><body>");
         sb.AppendLine("<div class=\"top-bar\">");
         sb.AppendLine("  <div class=\"top-icon\">🔧</div>");
@@ -676,10 +678,14 @@ public class QrPageController : ControllerBase
 
         sb.AppendLine("let correctivoTemp={};");
 
-        sb.AppendLine("function abrirModalCorrectivo(id,planta,equipo){");
+        sb.AppendLine("function abrirModalCorrectivo(id,planta,equipo,ubicacion){");
         sb.AppendLine(" correctivoTemp={id:id};");
         sb.AppendLine(" document.getElementById('c_planta').value=planta||'';");
         sb.AppendLine(" document.getElementById('c_equipo').value=equipo||'';");
+        sb.AppendLine(" document.getElementById('c_linea').value=ubicacion||'';");
+        sb.AppendLine(" document.getElementById('c_reporte').value=nombreActual||'';");
+        sb.AppendLine(" document.getElementById('c_fecha').value=new Date().toISOString().split('T')[0];");
+        sb.AppendLine(" ['c_marca','c_modelo','c_serie','c_falla','c_accesorios'].forEach(id=>document.getElementById(id).value='');");
         sb.AppendLine(" document.getElementById('modalCorrectivo').classList.add('show');");
         sb.AppendLine("}");
 
@@ -889,26 +895,27 @@ public class QrPageController : ControllerBase
         // ── Close the main <script> block ──
         sb.AppendLine("</script>");
         // ── Modal Correctivo (HTML outside <script>) ──
+        sb.AppendLine("<style>.auto-tag{font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(59,130,246,.18);color:#60a5fa;letter-spacing:.06em;vertical-align:middle;margin-left:4px;}.input-auto{background:rgba(59,130,246,.06)!important;border-color:rgba(59,130,246,.3)!important;color:var(--muted2)!important;cursor:not-allowed!important;}</style>");
         sb.AppendLine("<div class=\"modal\" id=\"modalCorrectivo\">");
-        sb.AppendLine("<div class=\"modal-box\" style=\"width:min(520px,95vw);\">");
+        sb.AppendLine("<div class=\"modal-box\" style=\"width:min(520px,95vw);max-height:90vh;overflow-y:auto;\">");
         sb.AppendLine("<h3>⚠️ Registrar Correctivo</h3>");
         sb.AppendLine("<p>Completa los datos del correctivo</p>");
-        sb.AppendLine("<div class=\"modal-field\"><label>Planta</label>");
-        sb.AppendLine("<input id=\"c_planta\" type=\"text\"></div>");
+        sb.AppendLine("<div class=\"modal-field\"><label>Planta <span class=\"auto-tag\">AUTO</span></label>");
+        sb.AppendLine("<input id=\"c_planta\" type=\"text\" readonly class=\"input-auto\"></div>");
         sb.AppendLine("<div class=\"modal-field\"><label>Fecha</label>");
         sb.AppendLine("<input id=\"c_fecha\" type=\"date\"></div>");
-        sb.AppendLine("<div class=\"modal-field\"><label>Línea / Persona</label>");
-        sb.AppendLine("<input id=\"c_linea\" type=\"text\"></div>");
-        sb.AppendLine("<div class=\"modal-field\"><label>Equipo</label>");
-        sb.AppendLine("<input id=\"c_equipo\" type=\"text\"></div>");
+        sb.AppendLine("<div class=\"modal-field\"><label>Línea / Persona <span class=\"auto-tag\">AUTO</span></label>");
+        sb.AppendLine("<input id=\"c_linea\" type=\"text\" readonly class=\"input-auto\"></div>");
+        sb.AppendLine("<div class=\"modal-field\"><label>Equipo <span class=\"auto-tag\">AUTO</span></label>");
+        sb.AppendLine("<input id=\"c_equipo\" type=\"text\" readonly class=\"input-auto\"></div>");
         sb.AppendLine("<div class=\"modal-field\"><label>Marca</label>");
         sb.AppendLine("<input id=\"c_marca\" type=\"text\"></div>");
         sb.AppendLine("<div class=\"modal-field\"><label>Modelo</label>");
         sb.AppendLine("<input id=\"c_modelo\" type=\"text\"></div>");
         sb.AppendLine("<div class=\"modal-field\"><label>No Serie</label>");
         sb.AppendLine("<input id=\"c_serie\" type=\"text\"></div>");
-        sb.AppendLine("<div class=\"modal-field\"><label>Reporte elaborado por</label>");
-        sb.AppendLine("<input id=\"c_reporte\" type=\"text\"></div>");
+        sb.AppendLine("<div class=\"modal-field\"><label>Reporte elaborado por <span class=\"auto-tag\">AUTO</span></label>");
+        sb.AppendLine("<input id=\"c_reporte\" type=\"text\" readonly class=\"input-auto\"></div>");
         sb.AppendLine("<div class=\"modal-field\"><label>Descripción de la falla</label>");
         sb.AppendLine("<input id=\"c_falla\" type=\"text\"></div>");
         sb.AppendLine("<div class=\"modal-field\"><label>Accesorios solicitados</label>");
