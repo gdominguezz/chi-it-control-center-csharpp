@@ -2367,6 +2367,7 @@
         }
 
         function renderizar() {
+
             const tbody = document.getElementById('tabla');
             tbody.innerHTML = '';
 
@@ -2385,81 +2386,83 @@
                 const tdStyle = bg ? `style="background:${bg}"` : '';
 
                 tbody.innerHTML += `
-        <tr>
+                                <tr>
 
-            <td class="mono" ${tdStyle}>${row.id}</td>
+                                <td class="mono" ${tdStyle}>${row.id}</td>
 
-            <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
+                                <td class="mono" ${tdStyle}>${row.id_equipo ?? '—'}</td>
 
-            <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
+                                <td ${tdStyle}>${row.ubicacion ?? '—'}</td>
 
-            <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
+                                <td ${tdStyle}>${row.nombre_dispositivo ?? '—'}</td>
 
-            <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
+                                <td class="mono" ${tdStyle}>${row.planta ?? '—'}</td>
 
-            <td ${tdStyle}>
-                <span class="color-pill"
-                style="background:${pill.bg};color:${pill.color}">
-                ${pill.label || '—'}
-                </span>
-            </td>
+                                <td ${tdStyle}>
+                                    <span class="color-pill"
+                                    style="background:${pill.bg};color:${pill.color}">
+                                    ${pill.label || '—'}
+                                    </span>
+                                </td>
 
-            <td ${tdStyle}
-                style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-                title="${row.observaciones ?? ''}">
-                ${row.observaciones ?? '—'}
-            </td>
+                                <td ${tdStyle}
+                                    style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                                    title="${row.observaciones ?? ''}">
+                                    ${row.observaciones ?? '—'}
+                                </td>
 
-            <td class="mono" ${tdStyle}>
-                ${row.anio_creacion ?? '—'}
-            </td>
+                                <td class="mono" ${tdStyle}>
+                                    ${row.anio_creacion ?? '—'}
+                                </td>
 
-            <td ${tdStyle}>
-                ${row.tiene_pdf
-                        ? `
-                    <button class="btn btn-primary btn-sm"
-                        onclick="verPDF(${row.id})">
-                        📄 Ver
-                    </button>
+                                <td ${tdStyle} style="white-space:nowrap">
 
-                    <button class="btn btn-danger btn-sm"
-                        onclick="eliminarPDF(${row.id})">
-                        ✕
-                    </button>
-                  `
-                        : `
-                    <label class="file-label">
-                        📎 Subir PDF
-                        <input type="file"
-                               accept=".pdf"
-                               onchange="subirPDF(${row.id},this)">
-                    </label>
-                  `
-                    }
-            </td>
+                                ${row.tiene_pdf
+                                                        ? `
+                                <button class="btn btn-primary btn-sm"
+                                onclick="verPDF(${row.id})">
+                                📄 Ver
+                                </button>
 
-            <td ${tdStyle} style="white-space:nowrap;">
-
-                ${esAdmin ? `
-                    <button class="btn btn-amber btn-sm"
-                        onclick="abrirEditar(${row.id})">
-                        ✏️ Editar
-                    </button>
-
-                    <button class="btn btn-danger btn-sm"
-                        onclick="eliminar(${row.id})">
-                        🗑
-                    </button>
-                ` : ''}
-
-                <button class="btn btn-ghost btn-sm"
-                    onclick="verHistorial(${row.id})">
-                    📋
-                </button>
+                                <button class="btn btn-danger btn-sm"
+                                onclick="eliminarPDF(${row.id})">
+                                ✕
+                                </button>
+                                `
+                                                        : `
+                                <label class="file-label">
+                                📎 Subir PDF
+                                <input type="file"
+                                accept=".pdf"
+                                onchange="subirPDF(${row.id},this)">
+                                </label>
+                                `
+                            }
 
             </td>
 
-        </tr>`;
+            <td ${tdStyle} style="white-space:nowrap">
+
+            ${esAdmin ? `
+            <button class="btn btn-amber btn-sm"
+            onclick="abrirEditar(${row.id})">
+            ✏️
+            </button>
+
+            <button class="btn btn-danger btn-sm"
+            onclick="eliminar(${row.id})">
+            🗑
+            </button>
+            ` : ''}
+
+            <button class="btn btn-ghost btn-sm"
+            onclick="verHistorial(${row.id})">
+            📋
+            </button>
+
+            </td>
+
+            </tr>`;
             });
 
             document.getElementById('paginaInfo').textContent =
