@@ -751,12 +751,12 @@ public class CorrectivoController : ControllerBase
             lista.Add(new
             {
                 id = r.GetInt32(0),
-                planta = r.GetString(1),
-                linea_persona = r.GetString(2),
-                equipo = r.GetString(3),
-                descripcion_falla = r.GetString(4),
-                fecha_solicitud = r.GetDateTime(5).ToString("yyyy-MM-dd"),
-                reporte_elaborado_por = r.GetString(6)
+                planta = r.IsDBNull(1) ? "" : r.GetString(1),
+                linea_persona = r.IsDBNull(2) ? "" : r.GetString(2),
+                equipo = r.IsDBNull(3) ? "" : r.GetString(3),
+                descripcion_falla = r.IsDBNull(4) ? "" : r.GetString(4),
+                fecha_solicitud = r.IsDBNull(5) ? "" : r.GetDateTime(5).ToString("yyyy-MM-dd"),
+                reporte_elaborado_por = r.IsDBNull(6) ? "" : r.GetString(6)
             });
         }
 
