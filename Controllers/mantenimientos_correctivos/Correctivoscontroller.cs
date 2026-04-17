@@ -725,55 +725,63 @@ public class CorrectivoController : ControllerBase
     [HttpGet("CORRECTIVOS/PENDIENTES")]
     public IActionResult ObtenerPendientes()
     {
-        using var conn = _db.Open();
-        using var cmd = conn.CreateCommand();
-
-        cmd.CommandText = @"
-    SELECT
-        id,
-        planta,
-        linea_persona,
-        equipo,
-        descripcion_falla,
-        fecha_solicitud,
-        reporte_elaborado_por
-    FROM mantenimientos_correctivos
-    WHERE folio IS NULL
-    ORDER BY fecha_solicitud DESC
-    ";
-
-        var lista = new List<object>();
-
-        using var r = cmd.ExecuteReader();
-
-        while (r.Read())
+        try
         {
-            lista.Add(new
-            {
-                id = r.GetInt32(0),
-                planta = r.IsDBNull(1) ? "" : r.GetString(1),
-                linea_persona = r.IsDBNull(2) ? "" : r.GetString(2),
-                equipo = r.IsDBNull(3) ? "" : r.GetString(3),
-                descripcion_falla = r.IsDBNull(4) ? "" : r.GetString(4),
-                fecha_solicitud = r.IsDBNull(5) ? "" : r.GetDateTime(5).ToString("yyyy-MM-dd"),
-                reporte_elaborado_por = r.IsDBNull(6) ? "" : r.GetString(6)
-            });
-        }
+            using var conn = _db.Open();
+            using var cmd = conn.CreateCommand();
 
-        return Ok(lista);
+            cmd.CommandText = @"
+        SELECT
+            id,
+            planta,
+            linea_persona,
+            equipo,
+            descripcion_falla,
+            fecha_solicitud,
+            reporte_elaborado_por
+        FROM mantenimientos_correctivos
+        WHERE folio IS NULL
+        ORDER BY id DESC";
+
+            var lista = new List<object>();
+
+            using var r = cmd.ExecuteReader();
+
+            while (r.Read())
+            {
+                lista.Add(new
+                {
+                    id = r.GetInt32(0),
+                    planta = r.IsDBNull(1) ? "" : r.GetString(1),
+                    linea_persona = r.IsDBNull(2) ? "" : r.GetString(2),
+                    equipo = r.IsDBNull(3) ? "" : r.GetString(3),
+                    descripcion_falla = r.IsDBNull(4) ? "" : r.GetString(4),
+
+                    fecha_solicitud = r.IsDBNull(5)
+                        ? ""
+                        : r.GetDateTime(5).ToString("yyyy-MM-dd"),
+
+                    reporte_elaborado_por = r.IsDBNull(6) ? "" : r.GetString(6)
+                });
+            }
+
+            return Ok(lista);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 
-}
-
-// ══════════════════════════════════════════════════════════════════════════
-// MODELOS
-// ══════════════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════════════
+    // MODELOS
+    // ══════════════════════════════════════════════════════════════════════════
 
     /// <summary>
     /// Parámetros de filtro + paginación para GET /CORRECTIVOS.
     /// Todos los campos de filtro son opcionales.
     /// </summary>
-public class FiltrosCorrectivo
+    public class FiltrosCorrectivo
 {
     // Paginación
     public int Page { get; set; } = 1;
