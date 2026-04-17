@@ -701,12 +701,15 @@ public class CorrectivoController : ControllerBase
             cmd.Parameters.AddWithValue("numero_serie", dto.numero_serie ?? "");
             cmd.Parameters.AddWithValue("descripcion_falla", dto.descripcion_falla ?? "");
             cmd.Parameters.AddWithValue("accesorio_solicitado", dto.accesorio_solicitado ?? "");
-            cmd.Parameters.AddWithValue("fecha_solicitud", DateTime.Parse(dto.fecha_solicitud));
+            cmd.Parameters.AddWithValue(
+                "fecha_solicitud",
+                DateTime.TryParse(dto.fecha_solicitud, out var f) ? f : DateTime.Now
+            );
             cmd.Parameters.AddWithValue("reporte_elaborado_por", dto.reporte_elaborado_por ?? "");
 
             cmd.ExecuteNonQuery();
 
-            return Ok(new { ok = true });
+            return Ok(new { ok = true, mensaje = "INSERT EJECUTADO" });
         }
         catch (Exception ex)
         {
