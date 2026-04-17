@@ -1549,6 +1549,7 @@
     <div class="tabs-bar">
         <button class="tab-btn active" id="tab-registros-btn" onclick="cambiarTab('registros')">📋 Registros</button>
         <button class="tab-btn tab-dash" id="tab-dashboard-btn" onclick="cambiarTab('dashboard')">📊 Dashboard <span id="dash-year-tab" style="font-family:'DM Mono',monospace;font-size:10px;opacity:.7;"></span></button>
+        <button class="tab-btn active" id="tab-registros-btn" onclick="cambiarTab('registros')">⚠️ Correctivos Pendientes</button>
     </div>
 
     <!-- TAB: REGISTROS -->
@@ -1799,6 +1800,38 @@
             </div>
         </div>
     </div><!-- /tab-dashboard -->
+    <div id="tab-pendientes" class="tab-content">
+
+        <div class="main">
+
+            <div class="table-wrap">
+
+                <div class="table-scroll">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>PLANTA</th>
+                                <th>LINEA / PERSONA</th>
+                                <th>EQUIPO</th>
+                                <th>DESCRIPCIÓN FALLA</th>
+                                <th>FECHA</th>
+                                <th>REPORTE</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="tablaPendientes"></tbody>
+
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
     <!-- MODAL EDITAR -->
     <div id="modalEditar" class="modal">
         <div class="modal-box form-box">
@@ -1986,16 +2019,16 @@
                 });
                 tds += `<td>${row.TIENE_PDF
                     ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                                      <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
+                                          <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
                     : `<input type="file" onchange="subirPDF(${row.ID},this)"
-                                       style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
+                                           style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
                     }</td>`;
                 tds += `<td style="white-space:nowrap;">
-                                    ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
-                                               <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
-                                    <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
-                                    <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-                                </td>`;
+                                        ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                                   <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
+                                        <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
+                                        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                                    </td>`;
                 tbody.innerHTML += `<tr class="${cls}">${tds}</tr>`;
             });
             document.getElementById('paginaInfo').textContent =
@@ -2083,26 +2116,26 @@
                 const va = esc(antes?.[dk] ?? ''), vd = esc(despues?.[dk] ?? '');
                 const chg = cambiados.has(key);
                 filas += `<tr class="${chg ? 'row-changed' : ''}">
-                                    <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                                    <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                                    <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                                </tr>`;
+                                        <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                        <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                        <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                                    </tr>`;
             });
             const n = cambiados.size;
             return `<div class="ev-wrap">
-                                <div class="ev-header">
-                                    <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                    <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                                    <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
-                                        color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                        ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                                    </span>
-                                </div>
-                                <table class="ev-table">
-                                    <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                                    <tbody>${filas}</tbody>
-                                </table>
-                            </div>`;
+                                    <div class="ev-header">
+                                        <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                        <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                                        <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                                            color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                            ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                        </span>
+                                    </div>
+                                    <table class="ev-table">
+                                        <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                        <tbody>${filas}</tbody>
+                                    </table>
+                                </div>`;
         }
         function verHistorial(id) {
             document.getElementById('histIdLabel').textContent = id;
@@ -2117,8 +2150,8 @@
                 } else {
                     document.getElementById('contenidoHistorial').innerHTML =
                         `<p style="color:var(--muted);font-size:12px;margin-bottom:14px;">
-                                            ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                        </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                                                ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                            </p>`+ lista.map(ev => renderEvento(ev)).join('');
                 }
             }).catch(err => {
                 document.getElementById('contenidoHistorial').innerHTML =
@@ -2144,6 +2177,9 @@
             document.getElementById('tab-' + tab).classList.add('active');
             document.getElementById('tab-' + tab + '-btn').classList.add('active');
             if (tab === 'dashboard') cargarDashboard();
+            if (tab === "pendientes") {
+                cargarPendientes();
+            }
         }
 
         /* ══════════════════════════════════════════════════════
@@ -2252,135 +2288,170 @@
             ], total);
 
             document.getElementById('dash-body').innerHTML = `
-                        <div class="kpi-grid">
-                            <div class="kpi-card k-total">
-                                <div class="kpi-label">Total registros ${ANIO_ACTUAL}</div>
-                                <div class="kpi-value">${total}</div>
-                                <div class="kpi-sub">correctivos registrados</div>
+                            <div class="kpi-grid">
+                                <div class="kpi-card k-total">
+                                    <div class="kpi-label">Total registros ${ANIO_ACTUAL}</div>
+                                    <div class="kpi-value">${total}</div>
+                                    <div class="kpi-sub">correctivos registrados</div>
+                                </div>
+                                <div class="kpi-card k-open">
+                                    <div class="kpi-label">Abiertos</div>
+                                    <div class="kpi-value">${abierto}</div>
+                                    <div class="kpi-sub">${total ? ((abierto / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
+                                </div>
+                                <div class="kpi-card k-closed">
+                                    <div class="kpi-label">Cerrados</div>
+                                    <div class="kpi-value">${cerrado}</div>
+                                    <div class="kpi-sub">${total ? ((cerrado / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
+                                </div>
+                                <div class="kpi-card k-cancel">
+                                    <div class="kpi-label">Cancelados</div>
+                                    <div class="kpi-value">${cancel}</div>
+                                    <div class="kpi-sub">${total ? ((cancel / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
+                                </div>
+                                <div class="kpi-card k-alta">
+                                    <div class="kpi-label">Nivel Alto</div>
+                                    <div class="kpi-value">${alta}</div>
+                                    <div class="kpi-sub">categoría crítica</div>
+                                </div>
+                                <div class="kpi-card k-baja">
+                                    <div class="kpi-label">Días prom. cierre</div>
+                                    <div class="kpi-value" style="font-size:26px">${promDias}</div>
+                                    <div class="kpi-sub">de solicitud a reparación</div>
+                                </div>
                             </div>
-                            <div class="kpi-card k-open">
-                                <div class="kpi-label">Abiertos</div>
-                                <div class="kpi-value">${abierto}</div>
-                                <div class="kpi-sub">${total ? ((abierto / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
-                            </div>
-                            <div class="kpi-card k-closed">
-                                <div class="kpi-label">Cerrados</div>
-                                <div class="kpi-value">${cerrado}</div>
-                                <div class="kpi-sub">${total ? ((cerrado / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
-                            </div>
-                            <div class="kpi-card k-cancel">
-                                <div class="kpi-label">Cancelados</div>
-                                <div class="kpi-value">${cancel}</div>
-                                <div class="kpi-sub">${total ? ((cancel / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
-                            </div>
-                            <div class="kpi-card k-alta">
-                                <div class="kpi-label">Nivel Alto</div>
-                                <div class="kpi-value">${alta}</div>
-                                <div class="kpi-sub">categoría crítica</div>
-                            </div>
-                            <div class="kpi-card k-baja">
-                                <div class="kpi-label">Días prom. cierre</div>
-                                <div class="kpi-value" style="font-size:26px">${promDias}</div>
-                                <div class="kpi-sub">de solicitud a reparación</div>
-                            </div>
-                        </div>
 
-                        <div class="dash-row">
-                            <!-- Estatus donut -->
-                            <div class="dash-card">
-                                <div class="dash-card-title">Distribución por Status</div>
-                                <div class="donut-wrap">
-                                    ${donutSVG}
-                                    <div class="donut-legend">
-                                        ${[{ l: 'Abierto', v: abierto, c: '#F59E0B' }, { l: 'Cerrado', v: cerrado, c: '#10B981' }, { l: 'Cancelado', v: cancel, c: '#64748B' }]
+                            <div class="dash-row">
+                                <!-- Estatus donut -->
+                                <div class="dash-card">
+                                    <div class="dash-card-title">Distribución por Status</div>
+                                    <div class="donut-wrap">
+                                        ${donutSVG}
+                                        <div class="donut-legend">
+                                            ${[{ l: 'Abierto', v: abierto, c: '#F59E0B' }, { l: 'Cerrado', v: cerrado, c: '#10B981' }, { l: 'Cancelado', v: cancel, c: '#64748B' }]
                     .map(x => `<div class="legend-item">
-                                                <div class="legend-dot" style="background:${x.c}"></div>
-                                                <span class="legend-name">${x.l}</span>
-                                                <span class="legend-num">${x.v}</span>
+                                                    <div class="legend-dot" style="background:${x.c}"></div>
+                                                    <span class="legend-name">${x.l}</span>
+                                                    <span class="legend-num">${x.v}</span>
+                                                </div>`).join('')}
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Por categoría -->
+                                <div class="dash-card">
+                                    <div class="dash-card-title">Por Categoría</div>
+                                    <div class="bar-list">
+                                        ${cats.slice(0, 6).map(([cat, cnt]) => `
+                                            <div class="bar-item">
+                                                <div class="bar-label-row">
+                                                    <span class="bar-label">${cat}</span>
+                                                    <span class="bar-val">${cnt}</span>
+                                                </div>
+                                                <div class="bar-track">
+                                                    <div class="bar-fill" style="width:${(cnt / maxCat * 100).toFixed(1)}%;background:${CAT_COLORS[cat] || '#3B82F6'}"></div>
+                                                </div>
                                             </div>`).join('')}
                                     </div>
                                 </div>
                             </div>
-                            <!-- Por categoría -->
-                            <div class="dash-card">
-                                <div class="dash-card-title">Por Categoría</div>
-                                <div class="bar-list">
-                                    ${cats.slice(0, 6).map(([cat, cnt]) => `
-                                        <div class="bar-item">
-                                            <div class="bar-label-row">
-                                                <span class="bar-label">${cat}</span>
-                                                <span class="bar-val">${cnt}</span>
-                                            </div>
-                                            <div class="bar-track">
-                                                <div class="bar-fill" style="width:${(cnt / maxCat * 100).toFixed(1)}%;background:${CAT_COLORS[cat] || '#3B82F6'}"></div>
-                                            </div>
-                                        </div>`).join('')}
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="dash-row">
-                            <!-- Por planta -->
-                            <div class="dash-card">
-                                <div class="dash-card-title">Por Planta</div>
-                                <div class="bar-list">
-                                    ${plantas.map(([p, cnt], i) => `
-                                        <div class="bar-item">
-                                            <div class="bar-label-row">
-                                                <span class="bar-label">${p}</span>
-                                                <span class="bar-val">${cnt}</span>
-                                            </div>
-                                            <div class="bar-track">
-                                                <div class="bar-fill" style="width:${(cnt / maxPlanta * 100).toFixed(1)}%;background:${PLANTA_COLORS[i % PLANTA_COLORS.length]}"></div>
-                                            </div>
-                                        </div>`).join('')}
+                            <div class="dash-row">
+                                <!-- Por planta -->
+                                <div class="dash-card">
+                                    <div class="dash-card-title">Por Planta</div>
+                                    <div class="bar-list">
+                                        ${plantas.map(([p, cnt], i) => `
+                                            <div class="bar-item">
+                                                <div class="bar-label-row">
+                                                    <span class="bar-label">${p}</span>
+                                                    <span class="bar-val">${cnt}</span>
+                                                </div>
+                                                <div class="bar-track">
+                                                    <div class="bar-fill" style="width:${(cnt / maxPlanta * 100).toFixed(1)}%;background:${PLANTA_COLORS[i % PLANTA_COLORS.length]}"></div>
+                                                </div>
+                                            </div>`).join('')}
+                                    </div>
                                 </div>
-                            </div>
-                            <!-- Por mes -->
-                            <div class="dash-card">
-                                <div class="dash-card-title">Registros por Mes — ${ANIO_ACTUAL}</div>
-                                <div style="overflow-x:auto">
-                                <table class="mes-table">
-                                    <thead><tr><th>Mes</th><th>Total</th><th>Abiertos</th><th>Cerrados</th></tr></thead>
-                                    <tbody>
-                                        ${mesFiltrados.map(m => `<tr>
-                                            <td>${m.label}</td>
-                                            <td class="c-total">${m.total}</td>
-                                            <td class="c-open">${m.abierto}</td>
-                                            <td class="c-closed">${m.cerrado}</td>
-                                        </tr>`).join('')}
-                                    </tbody>
-                                </table>
+                                <!-- Por mes -->
+                                <div class="dash-card">
+                                    <div class="dash-card-title">Registros por Mes — ${ANIO_ACTUAL}</div>
+                                    <div style="overflow-x:auto">
+                                    <table class="mes-table">
+                                        <thead><tr><th>Mes</th><th>Total</th><th>Abiertos</th><th>Cerrados</th></tr></thead>
+                                        <tbody>
+                                            ${mesFiltrados.map(m => `<tr>
+                                                <td>${m.label}</td>
+                                                <td class="c-total">${m.total}</td>
+                                                <td class="c-open">${m.abierto}</td>
+                                                <td class="c-closed">${m.cerrado}</td>
+                                            </tr>`).join('')}
+                                        </tbody>
+                                    </table>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>`;
+                            </div>`;
         }
 
         function buildDonut(items, total) {
             const R = 54, cx = 64, cy = 64, stroke = 18;
             const circ = 2 * Math.PI * R;
             if (!total) return `<svg width="128" height="128" viewBox="0 0 128 128">
-                        <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
-                        <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="13" font-family="DM Mono,monospace">0</text></svg>`;
+                            <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
+                            <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="13" font-family="DM Mono,monospace">0</text></svg>`;
             let offset = 0;
             const segs = items.map(item => {
                 const pct = item.val / total;
                 const dash = (pct * circ).toFixed(2);
                 const gap = (circ - pct * circ).toFixed(2);
                 const seg = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none"
-                            stroke="${item.color}" stroke-width="${stroke}"
-                            stroke-dasharray="${dash} ${gap}"
-                            stroke-dashoffset="${(-offset * circ / total + circ / 4).toFixed(2)}"
-                            transform="rotate(-90 ${cx} ${cy})"/>`;
+                                stroke="${item.color}" stroke-width="${stroke}"
+                                stroke-dasharray="${dash} ${gap}"
+                                stroke-dashoffset="${(-offset * circ / total + circ / 4).toFixed(2)}"
+                                transform="rotate(-90 ${cx} ${cy})"/>`;
                 offset += item.val;
                 return seg;
             });
             return `<svg width="128" height="128" viewBox="0 0 128 128" style="flex-shrink:0">
-                        <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
-                        ${segs.join('')}
-                        <text x="${cx}" y="${cy - 8}" text-anchor="middle" dominant-baseline="middle" fill="#F1F5F9" font-size="18" font-weight="700" font-family="DM Mono,monospace">${total}</text>
-                        <text x="${cx}" y="${cy + 10}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="9" font-family="DM Sans,sans-serif">TOTAL</text>
-                    </svg>`;
+                            <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
+                            ${segs.join('')}
+                            <text x="${cx}" y="${cy - 8}" text-anchor="middle" dominant-baseline="middle" fill="#F1F5F9" font-size="18" font-weight="700" font-family="DM Mono,monospace">${total}</text>
+                            <text x="${cx}" y="${cy + 10}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="9" font-family="DM Sans,sans-serif">TOTAL</text>
+                        </svg>`;
+        }
+        async function cargarPendientes() {
+
+            const res = await fetch("/CORRECTIVOS/PENDIENTES");
+            const data = await res.json();
+
+            const tbody = document.getElementById("tablaPendientes");
+
+            tbody.innerHTML = "";
+
+            data.forEach(c => {
+
+                tbody.innerHTML += `
+                            <tr>
+
+                            <td>${c.id}</td>
+                            <td>${c.planta}</td>
+                            <td>${c.linea_persona}</td>
+                            <td>${c.equipo}</td>
+                            <td>${c.descripcion_falla}</td>
+                            <td>${c.fecha_solicitud}</td>
+                            <td>${c.reporte_elaborado_por}</td>
+
+                            <td>
+                            <button class="btn btn-amber btn-sm"
+                            onclick="gestionar(${c.id})">
+                            Gestionar
+                            </button>
+                            </td>
+
+                            </tr>
+                            `;
+
+            });
+
         }
         document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarEditar(); cerrarDetalle(); cerrarHistorial(); } });
     </script>
