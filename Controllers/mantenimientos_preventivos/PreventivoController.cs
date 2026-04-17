@@ -172,51 +172,74 @@ public class PreventivoController : ControllerBase
         });
     }
 
-    // ── GET /PREVENTIVOS/{id}/HISTORIAL ──────────────────
     [HttpGet("PREVENTIVOS/{id:int}/HISTORIAL")]
     public IActionResult ObtenerHistorial(int id)
     {
-        using var conn = _db.Open();
+        try
+        {
+            using var conn = _db.Open();
 
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
             SELECT id,id_equipo,ubicacion,plazo,realizado_por,
                    fecha_realizacion,observaciones,nombre_dispositivo,planta,categoria_color,anio_creacion
             FROM public.mantenimientos_preventivos WHERE id=@id
             """;
-        cmd.Parameters.AddWithValue("id", id);
+            cmd.Parameters.AddWithValue("id", id);
 
-        using var r = cmd.ExecuteReader();
-        if (!r.Read()) return Ok(new { success = false, error = "Registro no encontrado" });
+            using var r = cmd.ExecuteReader();
+            if (!r.Read()) return Ok(new { success = false, error = "Registro no encontrado" });
 
-        var actual = new Dictionary<string, object?>();
-        for (int i = 0; i < r.FieldCount; i++)
-            actual[r.GetName(i)] = r.IsDBNull(i) ? null : r.GetValue(i);
-        r.Close();
+            var actual = new Dictionary<string, object?>();
+            for (int i = 0; i < r.FieldCount; i++)
+            {
+                var val = r.IsDBNull(i) ? null : r.GetValue(i);
+                // Convertir tipos que System.Text.Json no serializa bien
+                actual[r.GetName(i)] = val switch
+                {
+                    DateTime dt => dt.ToString("o"),
+                    DateTimeOffset dto => dto.ToString("o"),
+                    _ => val?.ToString() is string s && val is not string ? (object?)val : val
+                };
+            }
+            r.Close();
 
-        using var cmd2 = conn.CreateCommand();
-        cmd2.CommandText = """
+            using var cmd2 = conn.CreateCommand();
+            cmd2.CommandText = """
             SELECT id, fecha_cambio, usuario, registro_anterior, registro_nuevo
             FROM public.auditoria_preventivos
             WHERE registro_id=@id ORDER BY fecha_cambio DESC
             """;
-        cmd2.Parameters.AddWithValue("id", id);
+            cmd2.Parameters.AddWithValue("id", id);
 
-        var historial = new List<object>();
-        using var r2 = cmd2.ExecuteReader();
-        while (r2.Read())
-        {
-            historial.Add(new
+            var historial = new List<object>();
+            using var r2 = cmd2.ExecuteReader();
+            while (r2.Read())
             {
-                id = r2.GetInt64(0),
-                fecha = r2.IsDBNull(1) ? null : r2.GetDateTime(1).ToString("o"),
-                usuario = r2.IsDBNull(2) ? null : r2.GetString(2),
-                registro_anterior = r2.IsDBNull(3) ? (object)new { } : JsonSerializer.Deserialize<object>(r2.GetString(3))!,
-                registro_nuevo = r2.IsDBNull(4) ? (object)new { } : JsonSerializer.Deserialize<object>(r2.GetString(4))!,
-            });
-        }
+                static object ParseJson(string? raw)
+                {
+                    if (string.IsNullOrWhiteSpace(raw)) return new { };
+                    try { return JsonSerializer.Deserialize<object>(raw)!; }
+                    catch { return new { raw_value = raw }; } // si no es JSON válido, devuelve el string
+                }
 
-        return Ok(new { success = true, registro_actual = actual, historial });
+                historial.Add(new
+                {
+                    id = r2.GetInt64(0),   // ← fix GetInt32 → GetInt64
+                    fecha = r2.IsDBNull(1) ? null : r2.GetDateTime(1).ToString("o"),
+                    usuario = r2.IsDBNull(2) ? null : r2.GetString(2),
+                    registro_anterior = r2.IsDBNull(3) ? (object)new { } : ParseJson(r2.GetString(3)),
+                    registro_nuevo = r2.IsDBNull(4) ? (object)new { } : ParseJson(r2.GetString(4)),
+                });
+            }
+
+            return Ok(new { success = true, registro_actual = actual, historial });
+        }
+        catch (Exception ex)
+        {
+            // Temporalmente devuelve el mensaje para diagnosticar — quita `error` en producción
+            return StatusCode(500, new { success = false, error = ex.Message, tipo = ex.GetType().Name });
+        }
     }
 
     // ── POST /PREVENTIVO ─────────────────────────────────
