@@ -652,51 +652,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  // Cancelar modo edición si está activo");
         sb.AppendLine("  cancelarEditar(id);");
         sb.AppendLine("}");
-        sb.AppendLine(@"
-                        <script>
-
-                        async function guardarCorrectivo(){
-
-                            const data = {
-                                planta: document.getElementById('corr_planta').value,
-                                linea_persona: document.getElementById('corr_linea').value,
-                                equipo: document.getElementById('corr_equipo').value,
-                                marca: document.getElementById('corr_marca').value,
-                                modelo: document.getElementById('corr_modelo').value,
-                                numero_serie: document.getElementById('corr_serie').value,
-                                descripcion_falla: document.getElementById('corr_falla').value,
-                                accesorio_solicitado: document.getElementById('corr_accesorio').value,
-                                fecha_solicitud: document.getElementById('corr_fecha').value,
-                                reporte_elaborado_por: document.getElementById('corr_reporte').value
-                            };
-
-                            try{
-
-                                const res = await fetch('/MANTENIMIENTOS_CORRECTIVOS', {
-                                    method:'POST',
-                                    headers:{
-                                        'Content-Type':'application/json'
-                                    },
-                                    body: JSON.stringify(data)
-                                });
-
-                                const r = await res.json();
-
-                                if(r.ok){
-                                    alert('Correctivo registrado');
-                                    cerrarModalCorrectivo();
-                                }else{
-                                    alert('Error: ' + r.error);
-                                }
-
-                            }catch(e){
-                                alert('Error de red: ' + e.message);
-                            }
-
-                        }
-
-                        </script>
-                        ");
+        // (guardarCorrectivo is defined below in the main script block)
         sb.AppendLine("async function guardarCambios(id){");
         sb.AppendLine("  const anioVal=document.getElementById('anio_vis_'+id)?.value;  const datos={ID_EQUIPO:document.getElementById('equipo_'+id).value,UBICACION:document.getElementById('ubicacion_'+id).value,nombre_dispositivo:document.getElementById('disp_'+id).value,PLANTA:document.getElementById('planta_'+id).value,CATEGORIA_COLOR:document.getElementById('color_'+id).value,OBSERVACIONES:document.getElementById('obs_'+id).value,ANIO_CREACION:anioVal?parseInt(anioVal):null};");
         sb.AppendLine("  const usuario=usuarioTarjeta[id]||usuarioActual||'SISTEMA';");
@@ -930,49 +886,39 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  w.document.write(html);");
         sb.AppendLine("  w.document.close();");
         sb.AppendLine("}");
+        // ── Close the main <script> block ──
+        sb.AppendLine("</script>");
+        // ── Modal Correctivo (HTML outside <script>) ──
         sb.AppendLine("<div class=\"modal\" id=\"modalCorrectivo\">");
         sb.AppendLine("<div class=\"modal-box\" style=\"width:min(520px,95vw);\">");
-
         sb.AppendLine("<h3>⚠️ Registrar Correctivo</h3>");
         sb.AppendLine("<p>Completa los datos del correctivo</p>");
-
         sb.AppendLine("<div class=\"modal-field\"><label>Planta</label>");
         sb.AppendLine("<input id=\"c_planta\" type=\"text\"></div>");
-
         sb.AppendLine("<div class=\"modal-field\"><label>Fecha</label>");
         sb.AppendLine("<input id=\"c_fecha\" type=\"date\"></div>");
-
         sb.AppendLine("<div class=\"modal-field\"><label>Línea / Persona</label>");
         sb.AppendLine("<input id=\"c_linea\" type=\"text\"></div>");
-
         sb.AppendLine("<div class=\"modal-field\"><label>Equipo</label>");
         sb.AppendLine("<input id=\"c_equipo\" type=\"text\"></div>");
-
         sb.AppendLine("<div class=\"modal-field\"><label>Marca</label>");
         sb.AppendLine("<input id=\"c_marca\" type=\"text\"></div>");
-
         sb.AppendLine("<div class=\"modal-field\"><label>Modelo</label>");
         sb.AppendLine("<input id=\"c_modelo\" type=\"text\"></div>");
-
         sb.AppendLine("<div class=\"modal-field\"><label>No Serie</label>");
         sb.AppendLine("<input id=\"c_serie\" type=\"text\"></div>");
-
         sb.AppendLine("<div class=\"modal-field\"><label>Reporte elaborado por</label>");
         sb.AppendLine("<input id=\"c_reporte\" type=\"text\"></div>");
-
         sb.AppendLine("<div class=\"modal-field\"><label>Descripción de la falla</label>");
         sb.AppendLine("<input id=\"c_falla\" type=\"text\"></div>");
-
         sb.AppendLine("<div class=\"modal-field\"><label>Accesorios solicitados</label>");
         sb.AppendLine("<input id=\"c_accesorios\" type=\"text\"></div>");
-
         sb.AppendLine("<div class=\"modal-footer\">");
         sb.AppendLine("<button class=\"btn btn-ghost\" onclick=\"cerrarModalCorrectivo()\">Cancelar</button>");
         sb.AppendLine("<button class=\"btn btn-danger\" onclick=\"guardarCorrectivo()\">Guardar Correctivo</button>");
         sb.AppendLine("</div>");
-
         sb.AppendLine("</div></div>");
-        sb.AppendLine("</script></body></html>");
+        sb.AppendLine("</body></html>");
         return sb.ToString();
     }
 
