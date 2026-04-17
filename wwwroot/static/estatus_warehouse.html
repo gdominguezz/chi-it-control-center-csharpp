@@ -1,4 +1,5 @@
 ﻿<!DOCTYPE html>
+
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -61,8 +62,8 @@ font-weight:bold;
 }
 
 </style>
-</head>
 
+</head>
 
 <body>
 
@@ -71,7 +72,7 @@ font-weight:bold;
 <div class="toolbar">
 
 <input 
-type="text" 
+type="text"
 id="buscar"
 placeholder="Buscar estatus..."
 onkeyup="filtrar()">
@@ -82,11 +83,9 @@ onkeyup="filtrar()">
 
 <thead>
 <tr>
-
 <th>ID</th>
 <th>ESTATUS ID</th>
 <th>DESCRIPCIÓN</th>
-
 </tr>
 </thead>
 
@@ -94,22 +93,19 @@ onkeyup="filtrar()">
 
 </table>
 
-
 <script>
 
-let datos=[];
-
-async function cargar(){
+async function cargar(buscar=""){
 
 try{
 
-const res = await fetch("/estatus_warehouse");
+const res = await fetch(`/estatus_warehouse?buscar=${encodeURIComponent(buscar)}`);
 
 if(!res.ok){
 throw new Error("Error backend");
 }
 
-datos = await res.json();
+const datos = await res.json();
 
 render(datos);
 
@@ -131,9 +127,7 @@ tabla.innerHTML="";
 lista.forEach(e=>{
 
 tabla.innerHTML+=`
-
 <tr>
-
 <td>${e.id}</td>
 
 <td>
@@ -143,9 +137,7 @@ ${e.estatus_id}
 </td>
 
 <td>${e.descripcion}</td>
-
 </tr>
-
 `;
 
 });
@@ -155,19 +147,12 @@ ${e.estatus_id}
 
 function filtrar(){
 
-const txt=document.getElementById("buscar").value.toLowerCase();
+const texto=document.getElementById("buscar").value;
 
-const filtrados=datos.filter(e=>
-
-e.descripcion.toLowerCase().includes(txt)
-||
-String(e.estatus_id).includes(txt)
-
-);
-
-render(filtrados);
+cargar(texto);
 
 }
+
 
 cargar();
 
