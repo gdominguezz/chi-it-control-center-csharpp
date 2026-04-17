@@ -19,21 +19,32 @@ public class EstatusWarehouseController : ControllerBase
         try
         {
             using var conn = pool.OpenConnection();
-            using var cmd = new NpgsqlCommand(@"
+
+            string sql = @"
                 SELECT
                     id,
                     estatus_id,
                     descripcion
                 FROM estatus_warehouse
-                WHERE
-                    @buscar = ''
-                    OR descripcion ILIKE @texto
-                    OR CAST(estatus_id AS TEXT) ILIKE @texto
-                ORDER BY estatus_id
-            ", conn);
+            ";
 
-            cmd.Parameters.AddWithValue("@buscar", buscar ?? "");
-            cmd.Parameters.AddWithValue("@texto", "%" + (buscar ?? "") + "%");
+            if (!string.IsNullOrEmpty(buscar))
+            {
+                sql += @"
+                WHERE
+                    descripcion ILIKE @texto
+                    OR CAST(estatus_id AS TEXT) ILIKE @texto
+                ";
+            }
+
+            sql += " ORDER BY estatus_id";
+
+            using var cmd = new NpgsqlCommand(sql, conn);
+
+            if (!string.IsNullOrEmpty(buscar))
+            {
+                cmd.Parameters.AddWithValue("@texto", "%" + buscar + "%");
+            }
 
             using var r = cmd.ExecuteReader();
 
