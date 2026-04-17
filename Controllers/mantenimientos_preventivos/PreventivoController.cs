@@ -173,7 +173,7 @@ public class PreventivoController : ControllerBase
     }
 
     [HttpGet("PREVENTIVOS/{id:int}/HISTORIAL")]
-    public IActionResult ObtenerHistorial(int id)
+    public IActionResult ObtenerHistorial(long id)
     {
         try
         {

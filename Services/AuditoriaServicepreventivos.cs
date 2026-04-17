@@ -10,19 +10,19 @@ public class AuditoriaServicepreventivos
 
     public AuditoriaServicepreventivos(DbConnectionPool db) => _db = db;
 
-    public void Registrar(int registroId, string usuario, object anterior, object nuevo)
+    public void Registrar(long registroId, string usuario, object anterior, object nuevo)
     {
         try
         {
             using var conn = _db.Open();
-            using var cmd  = conn.CreateCommand();
+            using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-                INSERT INTO public.auditoria_preventivos
-                (registro_id, usuario, registro_anterior, registro_nuevo, fecha_cambio)
-                VALUES (@rid, @usr, @ant, @nvo, NOW())
-                """;
-            cmd.Parameters.AddWithValue("rid", registroId);
-            cmd.Parameters.AddWithValue("usr", usuario);
+            INSERT INTO public.auditoria_preventivos
+            (registro_id, usuario, registro_anterior, registro_nuevo, fecha_cambio)
+            VALUES (@rid, @usr, @ant::jsonb, @nvo::jsonb, NOW())
+            """;
+            cmd.Parameters.AddWithValue("rid", registroId);          // ahora long
+            cmd.Parameters.AddWithValue("usr", (object?)usuario ?? DBNull.Value);
             cmd.Parameters.AddWithValue("ant", JsonSerializer.Serialize(anterior));
             cmd.Parameters.AddWithValue("nvo", JsonSerializer.Serialize(nuevo));
             cmd.ExecuteNonQuery();
