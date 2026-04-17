@@ -648,6 +648,72 @@ public class CorrectivoController : ControllerBase
 
         return Ok(new { ubicaciones = lista });
     }
+
+
+
+
+    //endpoint que guarda los datos del modal de qrpage controller "requiere correctivo"
+    [HttpPost("MANTENIMIENTOS_CORRECTIVOS")]
+    public IActionResult CrearCorrectivo([FromBody] CorrectivoQR dto)
+    {
+        try
+        {
+            using var conn = _db.Open();
+
+            var sql = @"
+        INSERT INTO mantenimientos_correctivos
+        (
+            status,
+            planta,
+            linea_persona,
+            equipo,
+            marca,
+            modelo,
+            numero_serie,
+            descripcion_falla,
+            accesorio_solicitado,
+            fecha_solicitud,
+            reporte_elaborado_por
+        )
+        VALUES
+        (
+            'PENDIENTE',
+            @planta,
+            @linea_persona,
+            @equipo,
+            @marca,
+            @modelo,
+            @numero_serie,
+            @descripcion_falla,
+            @accesorio_solicitado,
+            @fecha_solicitud,
+            @reporte_elaborado_por
+        )";
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+
+            cmd.Parameters.AddWithValue("planta", dto.planta ?? "");
+            cmd.Parameters.AddWithValue("linea_persona", dto.linea_persona ?? "");
+            cmd.Parameters.AddWithValue("equipo", dto.equipo ?? "");
+            cmd.Parameters.AddWithValue("marca", dto.marca ?? "");
+            cmd.Parameters.AddWithValue("modelo", dto.modelo ?? "");
+            cmd.Parameters.AddWithValue("numero_serie", dto.numero_serie ?? "");
+            cmd.Parameters.AddWithValue("descripcion_falla", dto.descripcion_falla ?? "");
+            cmd.Parameters.AddWithValue("accesorio_solicitado", dto.accesorio_solicitado ?? "");
+            cmd.Parameters.AddWithValue("fecha_solicitud", DateTime.Parse(dto.fecha_solicitud));
+            cmd.Parameters.AddWithValue("reporte_elaborado_por", dto.reporte_elaborado_por ?? "");
+
+            cmd.ExecuteNonQuery();
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return Ok(new { error = ex.Message });
+        }
+    }
+
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -724,4 +790,19 @@ public class CorrectivoRequest
     public string? DESCRIPCION_REPARACION { get; set; }
     public string? OBSERVACIONES { get; set; }
     public string? OC_FACTURA { get; set; }
+}
+//modelo del modal "requiere correctivo"
+
+public class CorrectivoQR
+{
+    public string planta { get; set; } = "";
+    public string linea_persona { get; set; } = "";
+    public string equipo { get; set; } = "";
+    public string marca { get; set; } = "";
+    public string modelo { get; set; } = "";
+    public string numero_serie { get; set; } = "";
+    public string descripcion_falla { get; set; } = "";
+    public string accesorio_solicitado { get; set; } = "";
+    public string fecha_solicitud { get; set; } = "";
+    public string reporte_elaborado_por { get; set; } = "";
 }
