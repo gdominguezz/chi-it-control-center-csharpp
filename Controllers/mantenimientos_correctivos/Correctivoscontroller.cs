@@ -772,7 +772,7 @@ public class CorrectivoController : ControllerBase
             return StatusCode(500, ex.Message);
         }
 
-     
+
     }
     [HttpGet("CORRECTIVOS/{id}")]
     public IActionResult ObtenerCorrectivo(int id)
@@ -861,84 +861,85 @@ public class CorrectivoController : ControllerBase
     /// Todos los campos de filtro son opcionales.
     /// </summary>
     public class FiltrosCorrectivo
-{
-    // Paginación
-    public int Page { get; set; } = 1;
-    public int Limit { get; set; } = 10;
+    {
+        // Paginación
+        public int Page { get; set; } = 1;
+        public int Limit { get; set; } = 10;
 
-    // Filtros de texto
-    public string? STATUS { get; set; }
-    public string? FOLIO { get; set; }
-    public string? PLANTA { get; set; }
-    public string? LINEA_PERSONA { get; set; }
-    public string? EQUIPO { get; set; }
-    public string? MARCA { get; set; }
-    public string? MODELO { get; set; }
-    public string? NUMERO_SERIE { get; set; }
-    public string? DESCRIPCION_FALLA { get; set; }
-    public string? ACCESORIO_SOLICITADO { get; set; }
-    public string? REPORTE_ELABORADO_POR { get; set; }
-    public string? TIPO_OBSERVACION { get; set; }
-    public int? VENCIMIENTO_DIAS { get; set; }   // INTEGER en la BD
-    public string? CATEGORIA_CORRECTIVO { get; set; }
-    public string? REFACCION_ACCESORIO_COMPRA { get; set; }
-    public string? QUIEN_REALIZO_REPARACION { get; set; }
-    public string? VALIDACION_FUNCIONAMIENTO { get; set; }
-    public string? DESCRIPCION_REPARACION { get; set; }
-    public string? OBSERVACIONES { get; set; }
-    public string? OC_FACTURA { get; set; }
+        // Filtros de texto
+        public string? STATUS { get; set; }
+        public string? FOLIO { get; set; }
+        public string? PLANTA { get; set; }
+        public string? LINEA_PERSONA { get; set; }
+        public string? EQUIPO { get; set; }
+        public string? MARCA { get; set; }
+        public string? MODELO { get; set; }
+        public string? NUMERO_SERIE { get; set; }
+        public string? DESCRIPCION_FALLA { get; set; }
+        public string? ACCESORIO_SOLICITADO { get; set; }
+        public string? REPORTE_ELABORADO_POR { get; set; }
+        public string? TIPO_OBSERVACION { get; set; }
+        public int? VENCIMIENTO_DIAS { get; set; }   // INTEGER en la BD
+        public string? CATEGORIA_CORRECTIVO { get; set; }
+        public string? REFACCION_ACCESORIO_COMPRA { get; set; }
+        public string? QUIEN_REALIZO_REPARACION { get; set; }
+        public string? VALIDACION_FUNCIONAMIENTO { get; set; }
+        public string? DESCRIPCION_REPARACION { get; set; }
+        public string? OBSERVACIONES { get; set; }
+        public string? OC_FACTURA { get; set; }
 
-    // Filtros de fecha (enviados como string "yyyy-MM-dd" desde el HTML)
-    public string? FECHA_SOLICITUD { get; set; }
-    public string? FECHA_CONTEO_ACTUAL { get; set; }
-    public string? FECHA_LIMITE_CIERRE { get; set; }
-    public string? FECHA_LLEGADA_REFACCION { get; set; }
-    public string? FECHA_REPARACION { get; set; }
-}
+        // Filtros de fecha (enviados como string "yyyy-MM-dd" desde el HTML)
+        public string? FECHA_SOLICITUD { get; set; }
+        public string? FECHA_CONTEO_ACTUAL { get; set; }
+        public string? FECHA_LIMITE_CIERRE { get; set; }
+        public string? FECHA_LLEGADA_REFACCION { get; set; }
+        public string? FECHA_REPARACION { get; set; }
+    }
 
-/// <summary>
-/// Cuerpo del POST (nuevo) y PUT (edición) de un correctivo.
-/// </summary>
-public class CorrectivoRequest
-{
-    public string? STATUS { get; set; }
-    public string? FOLIO { get; set; }
-    public string? PLANTA { get; set; }
-    public string? LINEA_PERSONA { get; set; }
-    public string? EQUIPO { get; set; }
-    public string? MARCA { get; set; }
-    public string? MODELO { get; set; }
-    public string? NUMERO_SERIE { get; set; }
-    public string? DESCRIPCION_FALLA { get; set; }
-    public string? ACCESORIO_SOLICITADO { get; set; }
-    public string? FECHA_SOLICITUD { get; set; }
-    public string? REPORTE_ELABORADO_POR { get; set; }
-    public string? TIPO_OBSERVACION { get; set; }
-    public int? VENCIMIENTO_DIAS { get; set; }   // INTEGER en la BD
-    public string? FECHA_CONTEO_ACTUAL { get; set; }
-    public string? FECHA_LIMITE_CIERRE { get; set; }
-    public string? CATEGORIA_CORRECTIVO { get; set; }
-    public string? REFACCION_ACCESORIO_COMPRA { get; set; }
-    public string? FECHA_LLEGADA_REFACCION { get; set; }
-    public string? FECHA_REPARACION { get; set; }
-    public string? QUIEN_REALIZO_REPARACION { get; set; }
-    public string? VALIDACION_FUNCIONAMIENTO { get; set; }
-    public string? DESCRIPCION_REPARACION { get; set; }
-    public string? OBSERVACIONES { get; set; }
-    public string? OC_FACTURA { get; set; }
-}
-//modelo del modal "requiere correctivo"
+    /// <summary>
+    /// Cuerpo del POST (nuevo) y PUT (edición) de un correctivo.
+    /// </summary>
+    public class CorrectivoRequest
+    {
+        public string? STATUS { get; set; }
+        public string? FOLIO { get; set; }
+        public string? PLANTA { get; set; }
+        public string? LINEA_PERSONA { get; set; }
+        public string? EQUIPO { get; set; }
+        public string? MARCA { get; set; }
+        public string? MODELO { get; set; }
+        public string? NUMERO_SERIE { get; set; }
+        public string? DESCRIPCION_FALLA { get; set; }
+        public string? ACCESORIO_SOLICITADO { get; set; }
+        public string? FECHA_SOLICITUD { get; set; }
+        public string? REPORTE_ELABORADO_POR { get; set; }
+        public string? TIPO_OBSERVACION { get; set; }
+        public int? VENCIMIENTO_DIAS { get; set; }   // INTEGER en la BD
+        public string? FECHA_CONTEO_ACTUAL { get; set; }
+        public string? FECHA_LIMITE_CIERRE { get; set; }
+        public string? CATEGORIA_CORRECTIVO { get; set; }
+        public string? REFACCION_ACCESORIO_COMPRA { get; set; }
+        public string? FECHA_LLEGADA_REFACCION { get; set; }
+        public string? FECHA_REPARACION { get; set; }
+        public string? QUIEN_REALIZO_REPARACION { get; set; }
+        public string? VALIDACION_FUNCIONAMIENTO { get; set; }
+        public string? DESCRIPCION_REPARACION { get; set; }
+        public string? OBSERVACIONES { get; set; }
+        public string? OC_FACTURA { get; set; }
+    }
+    //modelo del modal "requiere correctivo"
 
-public class CorrectivoQR
-{
-    public string planta { get; set; } = "";
-    public string linea_persona { get; set; } = "";
-    public string equipo { get; set; } = "";
-    public string marca { get; set; } = "";
-    public string modelo { get; set; } = "";
-    public string numero_serie { get; set; } = "";
-    public string descripcion_falla { get; set; } = "";
-    public string accesorio_solicitado { get; set; } = "";
-    public string fecha_solicitud { get; set; } = "";
-    public string reporte_elaborado_por { get; set; } = "";
+    public class CorrectivoQR
+    {
+        public string planta { get; set; } = "";
+        public string linea_persona { get; set; } = "";
+        public string equipo { get; set; } = "";
+        public string marca { get; set; } = "";
+        public string modelo { get; set; } = "";
+        public string numero_serie { get; set; } = "";
+        public string descripcion_falla { get; set; } = "";
+        public string accesorio_solicitado { get; set; } = "";
+        public string fecha_solicitud { get; set; } = "";
+        public string reporte_elaborado_por { get; set; } = "";
+    }
 }
