@@ -1549,7 +1549,7 @@
     <div class="tabs-bar">
         <button class="tab-btn active" id="tab-registros-btn" onclick="cambiarTab('registros')">📋 Registros</button>
         <button class="tab-btn tab-dash" id="tab-dashboard-btn" onclick="cambiarTab('dashboard')">📊 Dashboard <span id="dash-year-tab" style="font-family:'DM Mono',monospace;font-size:10px;opacity:.7;"></span></button>
-        <button class="tab-btn active" id="tab-registros-btn" onclick="cambiarTab('registros')">⚠️ Correctivos Pendientes</button>
+        <button class="tab-btn" id="tab-pendientes-btn" onclick="cambiarTab('pendientes')"> ⚠️ Correctivos Pendientes</button>
     </div>
 
     <!-- TAB: REGISTROS -->
@@ -2179,7 +2179,7 @@
             if (tab === 'dashboard') cargarDashboard();
             if (tab === "pendientes") {
                 cargarPendientes();
-            }
+            }   
         }
 
         /* ══════════════════════════════════════════════════════
