@@ -208,7 +208,7 @@ public class PreventivoController : ControllerBase
         {
             historial.Add(new
             {
-                id = r2.GetInt32(0),
+                id = r2.GetInt64(0),
                 fecha = r2.IsDBNull(1) ? null : r2.GetDateTime(1).ToString("o"),
                 usuario = r2.IsDBNull(2) ? null : r2.GetString(2),
                 registro_anterior = r2.IsDBNull(3) ? (object)new { } : JsonSerializer.Deserialize<object>(r2.GetString(3))!,
