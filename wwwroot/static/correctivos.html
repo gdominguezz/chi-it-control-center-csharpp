@@ -2457,6 +2457,53 @@
 
             });
 
+            async function gestionar(id) {
+
+                try {
+
+                    const res = await fetch(`/CORRECTIVOS/${id}`);
+                    const data = await res.json();
+
+                    editandoID = id;
+
+                    document.getElementById("editarIdLabel").textContent = "#" + id;
+
+                    document.getElementById("e_STATUS").value = data.STATUS || "";
+                    document.getElementById("e_FOLIO").value = data.FOLIO || "";
+                    document.getElementById("e_PLANTA").value = data.PLANTA || "";
+                    document.getElementById("e_LINEA_PERSONA").value = data.LINEA_PERSONA || "";
+                    document.getElementById("e_EQUIPO").value = data.EQUIPO || "";
+                    document.getElementById("e_MARCA").value = data.MARCA || "";
+                    document.getElementById("e_MODELO").value = data.MODELO || "";
+                    document.getElementById("e_NUMERO_SERIE").value = data.NUMERO_SERIE || "";
+                    document.getElementById("e_FECHA_SOLICITUD").value = data.FECHA_SOLICITUD || "";
+                    document.getElementById("e_REPORTE_ELABORADO_POR").value = data.REPORTE_ELABORADO_POR || "";
+                    document.getElementById("e_TIPO_OBSERVACION").value = data.TIPO_OBSERVACION || "";
+
+                    document.getElementById("e_VENCIMIENTO_DIAS").value = data.VENCIMIENTO_DIAS || "";
+                    document.getElementById("e_FECHA_CONTEO_ACTUAL").value = data.FECHA_CONTEO_ACTUAL || "";
+                    document.getElementById("e_FECHA_LIMITE_CIERRE").value = data.FECHA_LIMITE_CIERRE || "";
+                    document.getElementById("e_CATEGORIA_CORRECTIVO").value = data.CATEGORIA_CORRECTIVO || "";
+                    document.getElementById("e_FECHA_LLEGADA_REFACCION").value = data.FECHA_LLEGADA_REFACCION || "";
+                    document.getElementById("e_FECHA_REPARACION").value = data.FECHA_REPARACION || "";
+                    document.getElementById("e_QUIEN_REALIZO_REPARACION").value = data.QUIEN_REALIZO_REPARACION || "";
+                    document.getElementById("e_VALIDACION_FUNCIONAMIENTO").value = data.VALIDACION_FUNCIONAMIENTO || "";
+                    document.getElementById("e_OC_FACTURA").value = data.OC_FACTURA || "";
+
+                    document.getElementById("e_DESCRIPCION_FALLA").value = data.DESCRIPCION_FALLA || "";
+                    document.getElementById("e_ACCESORIO_SOLICITADO").value = data.ACCESORIO_SOLICITADO || "";
+                    document.getElementById("e_REFACCION_ACCESORIO_COMPRA").value = data.REFACCION_ACCESORIO_COMPRA || "";
+                    document.getElementById("e_DESCRIPCION_REPARACION").value = data.DESCRIPCION_REPARACION || "";
+                    document.getElementById("e_OBSERVACIONES").value = data.OBSERVACIONES || "";
+
+                    document.getElementById("modalEditar").classList.add("show");
+
+                } catch (err) {
+                    console.error("Error cargando correctivo", err);
+                }
+
+            }
+
         
 
         }

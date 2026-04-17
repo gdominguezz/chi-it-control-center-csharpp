@@ -771,8 +771,87 @@ public class CorrectivoController : ControllerBase
         {
             return StatusCode(500, ex.Message);
         }
+
+     
     }
-}
+    [HttpGet("CORRECTIVOS/{id}")]
+    public IActionResult ObtenerCorrectivo(int id)
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+
+        cmd.CommandText = @"
+                SELECT
+                    id,
+                    status,
+                    folio,
+                    planta,
+                    linea_persona,
+                    equipo,
+                    marca,
+                    modelo,
+                    numero_serie,
+                    descripcion_falla,
+                    accesorio_solicitado,
+                    fecha_solicitud,
+                    reporte_elaborado_por,
+                    tipo_observacion,
+                    vencimiento_dias,
+                    fecha_conteo_actual,
+                    fecha_limite_cierre,
+                    categoria_correctivo,
+                    refaccion_accesorio_compra,
+                    fecha_llegada_refaccion,
+                    fecha_reparacion,
+                    quien_realizo_reparacion,
+                    validacion_funcionamiento,
+                    descripcion_reparacion,
+                    observaciones,
+                    oc_factura
+                FROM mantenimientos_correctivos
+                WHERE id = @id
+                ";
+
+        cmd.Parameters.AddWithValue("@id", id);
+
+
+        using var r = cmd.ExecuteReader();
+
+        if (!r.Read())
+            return NotFound();
+
+        var data = new
+        {
+            ID = r.GetInt32(0),
+            STATUS = r.IsDBNull(1) ? "" : r.GetString(1),
+            FOLIO = r.IsDBNull(2) ? "" : r.GetString(2),
+            PLANTA = r.IsDBNull(3) ? "" : r.GetString(3),
+            LINEA_PERSONA = r.IsDBNull(4) ? "" : r.GetString(4),
+            EQUIPO = r.IsDBNull(5) ? "" : r.GetString(5),
+            MARCA = r.IsDBNull(6) ? "" : r.GetString(6),
+            MODELO = r.IsDBNull(7) ? "" : r.GetString(7),
+            NUMERO_SERIE = r.IsDBNull(8) ? "" : r.GetString(8),
+            DESCRIPCION_FALLA = r.IsDBNull(9) ? "" : r.GetString(9),
+            ACCESORIO_SOLICITADO = r.IsDBNull(10) ? "" : r.GetString(10),
+            FECHA_SOLICITUD = r.IsDBNull(11) ? "" : r.GetDateTime(11).ToString("yyyy-MM-dd"),
+            REPORTE_ELABORADO_POR = r.IsDBNull(12) ? "" : r.GetString(12),
+            TIPO_OBSERVACION = r.IsDBNull(13) ? "" : r.GetString(13),
+            VENCIMIENTO_DIAS = r.IsDBNull(14) ? 0 : r.GetInt32(14),
+            FECHA_CONTEO_ACTUAL = r.IsDBNull(15) ? "" : r.GetDateTime(15).ToString("yyyy-MM-dd"),
+            FECHA_LIMITE_CIERRE = r.IsDBNull(16) ? "" : r.GetDateTime(16).ToString("yyyy-MM-dd"),
+            CATEGORIA_CORRECTIVO = r.IsDBNull(17) ? "" : r.GetString(17),
+            REFACCION_ACCESORIO_COMPRA = r.IsDBNull(18) ? "" : r.GetString(18),
+            FECHA_LLEGADA_REFACCION = r.IsDBNull(19) ? "" : r.GetDateTime(19).ToString("yyyy-MM-dd"),
+            FECHA_REPARACION = r.IsDBNull(20) ? "" : r.GetDateTime(20).ToString("yyyy-MM-dd"),
+            QUIEN_REALIZO_REPARACION = r.IsDBNull(21) ? "" : r.GetString(21),
+            VALIDACION_FUNCIONAMIENTO = r.IsDBNull(22) ? "" : r.GetString(22),
+            DESCRIPCION_REPARACION = r.IsDBNull(23) ? "" : r.GetString(23),
+            OBSERVACIONES = r.IsDBNull(24) ? "" : r.GetString(24),
+            OC_FACTURA = r.IsDBNull(25) ? "" : r.GetString(25)
+        };
+
+        return Ok(data);
+    }
     // ══════════════════════════════════════════════════════════════════════════
     // MODELOS
     // ══════════════════════════════════════════════════════════════════════════
