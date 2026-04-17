@@ -2019,16 +2019,16 @@
                 });
                 tds += `<td>${row.TIENE_PDF
                     ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                                          <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
+                                              <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
                     : `<input type="file" onchange="subirPDF(${row.ID},this)"
-                                           style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
+                                               style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
                     }</td>`;
                 tds += `<td style="white-space:nowrap;">
-                                        ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
-                                                   <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
-                                        <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
-                                        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-                                    </td>`;
+                                            ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                                       <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
+                                            <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
+                                            <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                                        </td>`;
                 tbody.innerHTML += `<tr class="${cls}">${tds}</tr>`;
             });
             document.getElementById('paginaInfo').textContent =
@@ -2116,26 +2116,26 @@
                 const va = esc(antes?.[dk] ?? ''), vd = esc(despues?.[dk] ?? '');
                 const chg = cambiados.has(key);
                 filas += `<tr class="${chg ? 'row-changed' : ''}">
-                                        <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                                        <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                                        <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                                    </tr>`;
+                                            <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                            <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                            <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                                        </tr>`;
             });
             const n = cambiados.size;
             return `<div class="ev-wrap">
-                                    <div class="ev-header">
-                                        <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                        <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                                        <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
-                                            color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                            ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                                        </span>
-                                    </div>
-                                    <table class="ev-table">
-                                        <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                                        <tbody>${filas}</tbody>
-                                    </table>
-                                </div>`;
+                                        <div class="ev-header">
+                                            <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                            <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                                            <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                                                color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                                ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                            </span>
+                                        </div>
+                                        <table class="ev-table">
+                                            <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                            <tbody>${filas}</tbody>
+                                        </table>
+                                    </div>`;
         }
         function verHistorial(id) {
             document.getElementById('histIdLabel').textContent = id;
@@ -2150,8 +2150,8 @@
                 } else {
                     document.getElementById('contenidoHistorial').innerHTML =
                         `<p style="color:var(--muted);font-size:12px;margin-bottom:14px;">
-                                                ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                            </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                                </p>`+ lista.map(ev => renderEvento(ev)).join('');
                 }
             }).catch(err => {
                 document.getElementById('contenidoHistorial').innerHTML =
@@ -2179,7 +2179,7 @@
             if (tab === 'dashboard') cargarDashboard();
             if (tab === "pendientes") {
                 cargarPendientes();
-            }   
+            }
         }
 
         /* ══════════════════════════════════════════════════════
@@ -2288,264 +2288,194 @@
             ], total);
 
             document.getElementById('dash-body').innerHTML = `
-                            <div class="kpi-grid">
-                                <div class="kpi-card k-total">
-                                    <div class="kpi-label">Total registros ${ANIO_ACTUAL}</div>
-                                    <div class="kpi-value">${total}</div>
-                                    <div class="kpi-sub">correctivos registrados</div>
+                                <div class="kpi-grid">
+                                    <div class="kpi-card k-total">
+                                        <div class="kpi-label">Total registros ${ANIO_ACTUAL}</div>
+                                        <div class="kpi-value">${total}</div>
+                                        <div class="kpi-sub">correctivos registrados</div>
+                                    </div>
+                                    <div class="kpi-card k-open">
+                                        <div class="kpi-label">Abiertos</div>
+                                        <div class="kpi-value">${abierto}</div>
+                                        <div class="kpi-sub">${total ? ((abierto / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
+                                    </div>
+                                    <div class="kpi-card k-closed">
+                                        <div class="kpi-label">Cerrados</div>
+                                        <div class="kpi-value">${cerrado}</div>
+                                        <div class="kpi-sub">${total ? ((cerrado / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
+                                    </div>
+                                    <div class="kpi-card k-cancel">
+                                        <div class="kpi-label">Cancelados</div>
+                                        <div class="kpi-value">${cancel}</div>
+                                        <div class="kpi-sub">${total ? ((cancel / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
+                                    </div>
+                                    <div class="kpi-card k-alta">
+                                        <div class="kpi-label">Nivel Alto</div>
+                                        <div class="kpi-value">${alta}</div>
+                                        <div class="kpi-sub">categoría crítica</div>
+                                    </div>
+                                    <div class="kpi-card k-baja">
+                                        <div class="kpi-label">Días prom. cierre</div>
+                                        <div class="kpi-value" style="font-size:26px">${promDias}</div>
+                                        <div class="kpi-sub">de solicitud a reparación</div>
+                                    </div>
                                 </div>
-                                <div class="kpi-card k-open">
-                                    <div class="kpi-label">Abiertos</div>
-                                    <div class="kpi-value">${abierto}</div>
-                                    <div class="kpi-sub">${total ? ((abierto / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
-                                </div>
-                                <div class="kpi-card k-closed">
-                                    <div class="kpi-label">Cerrados</div>
-                                    <div class="kpi-value">${cerrado}</div>
-                                    <div class="kpi-sub">${total ? ((cerrado / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
-                                </div>
-                                <div class="kpi-card k-cancel">
-                                    <div class="kpi-label">Cancelados</div>
-                                    <div class="kpi-value">${cancel}</div>
-                                    <div class="kpi-sub">${total ? ((cancel / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
-                                </div>
-                                <div class="kpi-card k-alta">
-                                    <div class="kpi-label">Nivel Alto</div>
-                                    <div class="kpi-value">${alta}</div>
-                                    <div class="kpi-sub">categoría crítica</div>
-                                </div>
-                                <div class="kpi-card k-baja">
-                                    <div class="kpi-label">Días prom. cierre</div>
-                                    <div class="kpi-value" style="font-size:26px">${promDias}</div>
-                                    <div class="kpi-sub">de solicitud a reparación</div>
-                                </div>
-                            </div>
 
-                            <div class="dash-row">
-                                <!-- Estatus donut -->
-                                <div class="dash-card">
-                                    <div class="dash-card-title">Distribución por Status</div>
-                                    <div class="donut-wrap">
-                                        ${donutSVG}
-                                        <div class="donut-legend">
-                                            ${[{ l: 'Abierto', v: abierto, c: '#F59E0B' }, { l: 'Cerrado', v: cerrado, c: '#10B981' }, { l: 'Cancelado', v: cancel, c: '#64748B' }]
+                                <div class="dash-row">
+                                    <!-- Estatus donut -->
+                                    <div class="dash-card">
+                                        <div class="dash-card-title">Distribución por Status</div>
+                                        <div class="donut-wrap">
+                                            ${donutSVG}
+                                            <div class="donut-legend">
+                                                ${[{ l: 'Abierto', v: abierto, c: '#F59E0B' }, { l: 'Cerrado', v: cerrado, c: '#10B981' }, { l: 'Cancelado', v: cancel, c: '#64748B' }]
                     .map(x => `<div class="legend-item">
-                                                    <div class="legend-dot" style="background:${x.c}"></div>
-                                                    <span class="legend-name">${x.l}</span>
-                                                    <span class="legend-num">${x.v}</span>
+                                                        <div class="legend-dot" style="background:${x.c}"></div>
+                                                        <span class="legend-name">${x.l}</span>
+                                                        <span class="legend-num">${x.v}</span>
+                                                    </div>`).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Por categoría -->
+                                    <div class="dash-card">
+                                        <div class="dash-card-title">Por Categoría</div>
+                                        <div class="bar-list">
+                                            ${cats.slice(0, 6).map(([cat, cnt]) => `
+                                                <div class="bar-item">
+                                                    <div class="bar-label-row">
+                                                        <span class="bar-label">${cat}</span>
+                                                        <span class="bar-val">${cnt}</span>
+                                                    </div>
+                                                    <div class="bar-track">
+                                                        <div class="bar-fill" style="width:${(cnt / maxCat * 100).toFixed(1)}%;background:${CAT_COLORS[cat] || '#3B82F6'}"></div>
+                                                    </div>
                                                 </div>`).join('')}
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Por categoría -->
-                                <div class="dash-card">
-                                    <div class="dash-card-title">Por Categoría</div>
-                                    <div class="bar-list">
-                                        ${cats.slice(0, 6).map(([cat, cnt]) => `
-                                            <div class="bar-item">
-                                                <div class="bar-label-row">
-                                                    <span class="bar-label">${cat}</span>
-                                                    <span class="bar-val">${cnt}</span>
-                                                </div>
-                                                <div class="bar-track">
-                                                    <div class="bar-fill" style="width:${(cnt / maxCat * 100).toFixed(1)}%;background:${CAT_COLORS[cat] || '#3B82F6'}"></div>
-                                                </div>
-                                            </div>`).join('')}
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="dash-row">
-                                <!-- Por planta -->
-                                <div class="dash-card">
-                                    <div class="dash-card-title">Por Planta</div>
-                                    <div class="bar-list">
-                                        ${plantas.map(([p, cnt], i) => `
-                                            <div class="bar-item">
-                                                <div class="bar-label-row">
-                                                    <span class="bar-label">${p}</span>
-                                                    <span class="bar-val">${cnt}</span>
-                                                </div>
-                                                <div class="bar-track">
-                                                    <div class="bar-fill" style="width:${(cnt / maxPlanta * 100).toFixed(1)}%;background:${PLANTA_COLORS[i % PLANTA_COLORS.length]}"></div>
-                                                </div>
-                                            </div>`).join('')}
+                                <div class="dash-row">
+                                    <!-- Por planta -->
+                                    <div class="dash-card">
+                                        <div class="dash-card-title">Por Planta</div>
+                                        <div class="bar-list">
+                                            ${plantas.map(([p, cnt], i) => `
+                                                <div class="bar-item">
+                                                    <div class="bar-label-row">
+                                                        <span class="bar-label">${p}</span>
+                                                        <span class="bar-val">${cnt}</span>
+                                                    </div>
+                                                    <div class="bar-track">
+                                                        <div class="bar-fill" style="width:${(cnt / maxPlanta * 100).toFixed(1)}%;background:${PLANTA_COLORS[i % PLANTA_COLORS.length]}"></div>
+                                                    </div>
+                                                </div>`).join('')}
+                                        </div>
                                     </div>
-                                </div>
-                                <!-- Por mes -->
-                                <div class="dash-card">
-                                    <div class="dash-card-title">Registros por Mes — ${ANIO_ACTUAL}</div>
-                                    <div style="overflow-x:auto">
-                                    <table class="mes-table">
-                                        <thead><tr><th>Mes</th><th>Total</th><th>Abiertos</th><th>Cerrados</th></tr></thead>
-                                        <tbody>
-                                            ${mesFiltrados.map(m => `<tr>
-                                                <td>${m.label}</td>
-                                                <td class="c-total">${m.total}</td>
-                                                <td class="c-open">${m.abierto}</td>
-                                                <td class="c-closed">${m.cerrado}</td>
-                                            </tr>`).join('')}
-                                        </tbody>
-                                    </table>
+                                    <!-- Por mes -->
+                                    <div class="dash-card">
+                                        <div class="dash-card-title">Registros por Mes — ${ANIO_ACTUAL}</div>
+                                        <div style="overflow-x:auto">
+                                        <table class="mes-table">
+                                            <thead><tr><th>Mes</th><th>Total</th><th>Abiertos</th><th>Cerrados</th></tr></thead>
+                                            <tbody>
+                                                ${mesFiltrados.map(m => `<tr>
+                                                    <td>${m.label}</td>
+                                                    <td class="c-total">${m.total}</td>
+                                                    <td class="c-open">${m.abierto}</td>
+                                                    <td class="c-closed">${m.cerrado}</td>
+                                                </tr>`).join('')}
+                                            </tbody>
+                                        </table>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>`;
+                                </div>`;
         }
 
         function buildDonut(items, total) {
             const R = 54, cx = 64, cy = 64, stroke = 18;
             const circ = 2 * Math.PI * R;
             if (!total) return `<svg width="128" height="128" viewBox="0 0 128 128">
-                            <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
-                            <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="13" font-family="DM Mono,monospace">0</text></svg>`;
+                                <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
+                                <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="13" font-family="DM Mono,monospace">0</text></svg>`;
             let offset = 0;
             const segs = items.map(item => {
                 const pct = item.val / total;
                 const dash = (pct * circ).toFixed(2);
                 const gap = (circ - pct * circ).toFixed(2);
                 const seg = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none"
-                                stroke="${item.color}" stroke-width="${stroke}"
-                                stroke-dasharray="${dash} ${gap}"
-                                stroke-dashoffset="${(-offset * circ / total + circ / 4).toFixed(2)}"
-                                transform="rotate(-90 ${cx} ${cy})"/>`;
+                                    stroke="${item.color}" stroke-width="${stroke}"
+                                    stroke-dasharray="${dash} ${gap}"
+                                    stroke-dashoffset="${(-offset * circ / total + circ / 4).toFixed(2)}"
+                                    transform="rotate(-90 ${cx} ${cy})"/>`;
                 offset += item.val;
                 return seg;
             });
             return `<svg width="128" height="128" viewBox="0 0 128 128" style="flex-shrink:0">
-                            <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
-                            ${segs.join('')}
-                            <text x="${cx}" y="${cy - 8}" text-anchor="middle" dominant-baseline="middle" fill="#F1F5F9" font-size="18" font-weight="700" font-family="DM Mono,monospace">${total}</text>
-                            <text x="${cx}" y="${cy + 10}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="9" font-family="DM Sans,sans-serif">TOTAL</text>
-                        </svg>`;
+                                <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
+                                ${segs.join('')}
+                                <text x="${cx}" y="${cy - 8}" text-anchor="middle" dominant-baseline="middle" fill="#F1F5F9" font-size="18" font-weight="700" font-family="DM Mono,monospace">${total}</text>
+                                <text x="${cx}" y="${cy + 10}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="9" font-family="DM Sans,sans-serif">TOTAL</text>
+                            </svg>`;
         }
+        // ── Pendientes: cargar tabla ──
         async function cargarPendientes() {
-
-            const res = await fetch("/CORRECTIVOS/PENDIENTES");
-
-            if (!res.ok) {
-                console.error("Error backend", await res.text());
-                return;
-            }
-
-            const data = await res.json();   // 👈 ESTA LINEA FALTA
-
             const tbody = document.getElementById("tablaPendientes");
-
-            tbody.innerHTML = "";
-
-            data.forEach(c => {
-
-                tbody.innerHTML += `
-                <tr>
-                <td>${c.id}</td>
-                <td>${c.planta}</td>
-                <td>${c.linea_persona}</td>
-                <td>${c.equipo}</td>
-                <td>${c.descripcion_falla}</td>
-                <td>${c.fecha_solicitud}</td>
-                <td>${c.reporte_elaborado_por}</td>
-
-                <td>
-                <button class="btn btn-amber btn-sm"
-                onclick="editar(${c.id})">
-                Gestionar
-                </button>
-                </td>
-
-                </tr>
-                `;
-
-            });
-
-            async function gestionar(id) {
-
-                try {
-
-                    const res = await fetch(`/CORRECTIVOS/${id}`);
-                    const data = await res.json();
-
-                    editandoID = id;
-
-                    document.getElementById("editarIdLabel").textContent = "#" + id;
-
-                    document.getElementById("e_STATUS").value = data.STATUS || "";
-                    document.getElementById("e_FOLIO").value = data.FOLIO || "";
-                    document.getElementById("e_PLANTA").value = data.PLANTA || "";
-                    document.getElementById("e_LINEA_PERSONA").value = data.LINEA_PERSONA || "";
-                    document.getElementById("e_EQUIPO").value = data.EQUIPO || "";
-                    document.getElementById("e_MARCA").value = data.MARCA || "";
-                    document.getElementById("e_MODELO").value = data.MODELO || "";
-                    document.getElementById("e_NUMERO_SERIE").value = data.NUMERO_SERIE || "";
-                    document.getElementById("e_FECHA_SOLICITUD").value = data.FECHA_SOLICITUD || "";
-                    document.getElementById("e_REPORTE_ELABORADO_POR").value = data.REPORTE_ELABORADO_POR || "";
-                    document.getElementById("e_TIPO_OBSERVACION").value = data.TIPO_OBSERVACION || "";
-
-                    document.getElementById("e_VENCIMIENTO_DIAS").value = data.VENCIMIENTO_DIAS || "";
-                    document.getElementById("e_FECHA_CONTEO_ACTUAL").value = data.FECHA_CONTEO_ACTUAL || "";
-                    document.getElementById("e_FECHA_LIMITE_CIERRE").value = data.FECHA_LIMITE_CIERRE || "";
-                    document.getElementById("e_CATEGORIA_CORRECTIVO").value = data.CATEGORIA_CORRECTIVO || "";
-                    document.getElementById("e_FECHA_LLEGADA_REFACCION").value = data.FECHA_LLEGADA_REFACCION || "";
-                    document.getElementById("e_FECHA_REPARACION").value = data.FECHA_REPARACION || "";
-                    document.getElementById("e_QUIEN_REALIZO_REPARACION").value = data.QUIEN_REALIZO_REPARACION || "";
-                    document.getElementById("e_VALIDACION_FUNCIONAMIENTO").value = data.VALIDACION_FUNCIONAMIENTO || "";
-                    document.getElementById("e_OC_FACTURA").value = data.OC_FACTURA || "";
-
-                    document.getElementById("e_DESCRIPCION_FALLA").value = data.DESCRIPCION_FALLA || "";
-                    document.getElementById("e_ACCESORIO_SOLICITADO").value = data.ACCESORIO_SOLICITADO || "";
-                    document.getElementById("e_REFACCION_ACCESORIO_COMPRA").value = data.REFACCION_ACCESORIO_COMPRA || "";
-                    document.getElementById("e_DESCRIPCION_REPARACION").value = data.DESCRIPCION_REPARACION || "";
-                    document.getElementById("e_OBSERVACIONES").value = data.OBSERVACIONES || "";
-
-                    document.getElementById("modalEditar").classList.add("show");
-
-                } catch (err) {
-                    console.error("Error cargando correctivo", err);
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted)"><div class="spin" style="display:inline-block;margin-right:8px"></div>Cargando...</td></tr>`;
+            try {
+                const res = await fetch("/CORRECTIVOS/PENDIENTES");
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                const data = await res.json();
+                tbody.innerHTML = "";
+                if (!data.length) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">✅ Sin correctivos pendientes</td></tr>`;
+                    return;
                 }
-
+                data.forEach(c => {
+                    tbody.innerHTML += `
+                        <tr class="s-abierto">
+                            <td class="mono">${c.id}</td>
+                            <td>${esc(c.planta ?? "—")}</td>
+                            <td>${esc(c.linea_persona ?? "—")}</td>
+                            <td>${esc(c.equipo ?? "—")}</td>
+                            <td class="wrap" style="max-width:220px;" title="${esc(c.descripcion_falla ?? "")}">${esc(c.descripcion_falla ?? "—")}</td>
+                            <td class="mono">${esc(c.fecha_solicitud ?? "—")}</td>
+                            <td>${esc(c.reporte_elaborado_por ?? "—")}</td>
+                            <td>
+                                <button class="btn btn-amber btn-sm" onclick="gestionar(${c.id})">✏️ Gestionar</button>
+                            </td>
+                        </tr>`;
+                });
+            } catch (e) {
+                console.error("Error cargando pendientes", e);
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--red)">⚠️ Error al cargar pendientes</td></tr>`;
             }
-            async function cargarPendientes() {
-
-                try {
-
-                    const res = await fetch("/CORRECTIVOS/PENDIENTES");
-                    const data = await res.json();
-
-                    const tabla = document.getElementById("tablaPendientes");
-
-                    tabla.innerHTML = "";
-
-                    data.forEach(c => {
-
-                        tabla.innerHTML += `
-                        <tr>
-                        <td>${c.id}</td>
-                        <td>${c.planta}</td>
-                        <td>${c.linea_persona}</td>
-                        <td>${c.equipo}</td>
-                        <td>${c.descripcion_falla}</td>
-                        <td>${c.fecha_solicitud}</td>
-                        <td>${c.reporte_elaborado_por}</td>
-
-                        <td>
-                        <button class="btn btn-amber btn-sm"
-                        onclick="gestionar(${c.id})">
-                        Gestionar
-                        </button>
-                        </td>
-
-                        </tr>
-                        `;
-
-                    });
-
-                } catch (e) {
-                    console.error("Error cargando pendientes", e);
-                }
-
-            }
-        
-
         }
+
+        // ── Gestionar: abre modal editar cargando datos frescos del servidor ──
+        async function gestionar(id) {
+            try {
+                const res = await fetch(`/CORRECTIVO/${id}`);
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+
+                editandoID = id;
+                document.getElementById("editarIdLabel").textContent = "#" + id;
+
+                CAMPOS.forEach(({ key }) => {
+                    const el = document.getElementById("e_" + key);
+                    if (el) el.value = data[key] ?? "";
+                });
+
+                document.getElementById("modalEditar").classList.add("show");
+                document.querySelector("#modalEditar .modal-box").scrollTop = 0;
+            } catch (err) {
+                console.error("Error cargando correctivo", err);
+                alert("No se pudo cargar el correctivo #" + id);
+            }
+        }
+
         document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarEditar(); cerrarDetalle(); cerrarHistorial(); } });
     </script>
 </body>
