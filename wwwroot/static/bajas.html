@@ -1045,6 +1045,37 @@
         tr.estado-cancelado td:first-child {
             border-left: 4px solid #ef4444;
         }
+        /* ── Columna Acciones fija a la derecha ── */
+        table th:last-child,
+        table td:last-child {
+            position: sticky;
+            right: 0;
+            z-index: 2;
+            background: var(--surface);
+            box-shadow: -2px 0 6px rgba(0,0,0,0.3);
+        }
+
+        table thead th:last-child {
+            z-index: 3;
+        }
+
+        /* ── Scrollbar arriba y abajo ── */
+        .table-scroll {
+            overflow-x: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scroll-top {
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 8px;
+            margin-bottom: 2px;
+        }
+
+        .scroll-top-inner {
+            height: 1px;
+        }
     </style>
 </head>
 <body>
@@ -1146,8 +1177,14 @@
             </div>
 
             <!-- Tabla -->
+            <!-- Tabla -->
             <div class="table-wrap">
-                <div class="table-scroll">
+                <!-- Scrollbar superior -->
+                <div class="scroll-top" id="scrollTop">
+                    <div class="scroll-top-inner" id="scrollTopInner"></div>
+                </div>
+
+                <div class="table-scroll" id="tableScroll">
                     <table>
                         <thead>
                             <tr>
@@ -2053,6 +2090,26 @@
                     }
                 }
             };
+            // ── Sincronizar scrollbar superior con la tabla ──
+            (function () {
+                const top = document.getElementById('scrollTop');
+                const inner = document.getElementById('scrollTopInner');
+                const scroll = document.getElementById('tableScroll');
+
+                function syncInnerWidth() {
+                    inner.style.width = scroll.scrollWidth + 'px';
+                }
+
+                // Sincronizar anchos cuando carga o cambia el contenido
+                const observer = new MutationObserver(syncInnerWidth);
+                observer.observe(document.getElementById('tabla'), { childList: true, subtree: true });
+                window.addEventListener('resize', syncInnerWidth);
+                syncInnerWidth();
+
+                // Sincronizar scroll entre ambas barras
+                top.addEventListener('scroll', () => { scroll.scrollLeft = top.scrollLeft; });
+                scroll.addEventListener('scroll', () => { top.scrollLeft = scroll.scrollLeft; });
+            })();
         }
     </script>
 </body>
