@@ -2024,8 +2024,8 @@
                                                style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
                     }</td>`;
                 tds += `<td style="white-space:nowrap;">
-                                            ${esAdmin ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
-                                                       <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
+                                            <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                            ${esAdmin ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
                                             <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
                                             <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
                                         </td>`;
