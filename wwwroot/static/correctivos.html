@@ -1587,7 +1587,7 @@
         <div class="main">
 
             <!-- NUEVO REGISTRO -->
-            <div class="panel">
+            <div class="panel" id="panelNuevoRegistro">
                 <div class="panel-title">Nuevo registro correctivo</div>
                 <div class="form-grid">
                     <div class="field">
@@ -1638,129 +1638,129 @@
                 <button class="btn btn-ghost" onclick="limpiarForm()" style="margin-left:8px;">✕ Limpiar</button>
             </div>
 
-            <!-- TOOLBAR -->
-            <div class="toolbar">
-                <button class="btn btn-purple" onclick="exportarFiltrado()">📊 Exportar Filtrado</button>
-                <button class="btn btn-purple" onclick="exportarTodo()">📦 Exportar Todo</button>
-                <input class="anio-input" id="anioExportar" type="number" placeholder="Año (ej: 2026)">
-                <button class="btn btn-purple" onclick="exportarAnio()">📅 Por Año</button>
-            </div>
-
-            <!-- TABLA -->
-            <!-- TABLA -->
-            <div class="table-wrap">
-                <!-- Scrollbar superior -->
-                <div class="scroll-top" id="scrollTop">
-                    <div class="scroll-top-inner" id="scrollTopInner"></div>
+                <!-- TOOLBAR -->
+                <div class="toolbar">
+                    <button class="btn btn-purple" onclick="exportarFiltrado()">📊 Exportar Filtrado</button>
+                    <button class="btn btn-purple" onclick="exportarTodo()">📦 Exportar Todo</button>
+                    <input class="anio-input" id="anioExportar" type="number" placeholder="Año (ej: 2026)">
+                    <button class="btn btn-purple" onclick="exportarAnio()">📅 Por Año</button>
                 </div>
 
-                <div class="table-scroll" id="tableScroll">
-                    <table>
-                        <colgroup>
-                            <col style="width:52px">
-                            <col style="width:112px">
-                            <col style="width:122px">
-                            <col style="width:88px">
-                            <col style="width:145px">
-                            <col style="width:130px">
-                            <col style="width:100px">
-                            <col style="width:100px">
-                            <col style="width:122px">
-                            <col style="width:220px">
-                            <col style="width:180px">
-                            <col style="width:108px">
-                            <col style="width:152px">
-                            <col style="width:140px">
-                            <col style="width:88px">
-                            <col style="width:108px">
-                            <col style="width:108px">
-                            <col style="width:140px">
-                            <col style="width:200px">
-                            <col style="width:108px">
-                            <col style="width:108px">
-                            <col style="width:160px">
-                            <col style="width:140px">
-                            <col style="width:200px">
-                            <col style="width:180px">
-                            <col style="width:120px">
-                            <col style="width:170px">
-                            <col style="width:130px">
-                        </colgroup>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Status</th>
-                                <th>Folio</th>
-                                <th>Planta</th>
-                                <th>Línea / Persona</th>
-                                <th>Equipo</th>
-                                <th>Marca</th>
-                                <th>Modelo</th>
-                                <th>N. Serie</th>
-                                <th>Desc. Falla</th>
-                                <th>Accesorio Sol.</th>
-                                <th>Fecha Sol.</th>
-                                <th>Reporte Elab. Por</th>
-                                <th>Tipo Obs.</th>
-                                <th>Venc. Días</th>
-                                <th>F. Conteo</th>
-                                <th>F. Límite Cierre</th>
-                                <th>Categoría</th>
-                                <th>Refacción / Acc. Compra</th>
-                                <th>F. Llegada Ref.</th>
-                                <th>F. Reparación</th>
-                                <th>Quién Realizó Rep.</th>
-                                <th>Validación</th>
-                                <th>Desc. Reparación</th>
-                                <th>Observaciones</th>
-                                <th>OC / Factura</th>
-                                <th>PDF</th>
-                                <th>Acciones</th>
-                            </tr>
-                            <tr class="filter-row">
-                                <th></th>
-                                <th><input id="f_STATUS" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_FOLIO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_PLANTA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_LINEA_PERSONA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_EQUIPO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_MARCA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_MODELO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_NUMERO_SERIE" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_DESCRIPCION_FALLA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_ACCESORIO_SOLICITADO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_FECHA_SOLICITUD" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                                <th><input id="f_REPORTE_ELABORADO_POR" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_TIPO_OBSERVACION" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_VENCIMIENTO_DIAS" oninput="filtrar()" placeholder="Días" type="number" style="width:70px"></th>
-                                <th><input id="f_FECHA_CONTEO_ACTUAL" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                                <th><input id="f_FECHA_LIMITE_CIERRE" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                                <th><input id="f_CATEGORIA_CORRECTIVO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_REFACCION_ACCESORIO_COMPRA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_FECHA_LLEGADA_REFACCION" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                                <th><input id="f_FECHA_REPARACION" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                                <th><input id="f_QUIEN_REALIZO_REPARACION" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_VALIDACION_FUNCIONAMIENTO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_DESCRIPCION_REPARACION" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_OBSERVACIONES" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th><input id="f_OC_FACTURA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                <th></th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla"></tbody>
-                    </table>
+                <!-- TABLA -->
+                <!-- TABLA -->
+                <div class="table-wrap">
+                    <!-- Scrollbar superior -->
+                    <div class="scroll-top" id="scrollTop">
+                        <div class="scroll-top-inner" id="scrollTopInner"></div>
+                    </div>
+
+                    <div class="table-scroll" id="tableScroll">
+                        <table>
+                            <colgroup>
+                                <col style="width:52px">
+                                <col style="width:112px">
+                                <col style="width:122px">
+                                <col style="width:88px">
+                                <col style="width:145px">
+                                <col style="width:130px">
+                                <col style="width:100px">
+                                <col style="width:100px">
+                                <col style="width:122px">
+                                <col style="width:220px">
+                                <col style="width:180px">
+                                <col style="width:108px">
+                                <col style="width:152px">
+                                <col style="width:140px">
+                                <col style="width:88px">
+                                <col style="width:108px">
+                                <col style="width:108px">
+                                <col style="width:140px">
+                                <col style="width:200px">
+                                <col style="width:108px">
+                                <col style="width:108px">
+                                <col style="width:160px">
+                                <col style="width:140px">
+                                <col style="width:200px">
+                                <col style="width:180px">
+                                <col style="width:120px">
+                                <col style="width:170px">
+                                <col style="width:130px">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Status</th>
+                                    <th>Folio</th>
+                                    <th>Planta</th>
+                                    <th>Línea / Persona</th>
+                                    <th>Equipo</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>N. Serie</th>
+                                    <th>Desc. Falla</th>
+                                    <th>Accesorio Sol.</th>
+                                    <th>Fecha Sol.</th>
+                                    <th>Reporte Elab. Por</th>
+                                    <th>Tipo Obs.</th>
+                                    <th>Venc. Días</th>
+                                    <th>F. Conteo</th>
+                                    <th>F. Límite Cierre</th>
+                                    <th>Categoría</th>
+                                    <th>Refacción / Acc. Compra</th>
+                                    <th>F. Llegada Ref.</th>
+                                    <th>F. Reparación</th>
+                                    <th>Quién Realizó Rep.</th>
+                                    <th>Validación</th>
+                                    <th>Desc. Reparación</th>
+                                    <th>Observaciones</th>
+                                    <th>OC / Factura</th>
+                                    <th>PDF</th>
+                                    <th>Acciones</th>
+                                </tr>
+                                <tr class="filter-row">
+                                    <th></th>
+                                    <th><input id="f_STATUS" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_FOLIO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_PLANTA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_LINEA_PERSONA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_EQUIPO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_MARCA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_MODELO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_NUMERO_SERIE" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_DESCRIPCION_FALLA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_ACCESORIO_SOLICITADO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_FECHA_SOLICITUD" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                                    <th><input id="f_REPORTE_ELABORADO_POR" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_TIPO_OBSERVACION" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_VENCIMIENTO_DIAS" oninput="filtrar()" placeholder="Días" type="number" style="width:70px"></th>
+                                    <th><input id="f_FECHA_CONTEO_ACTUAL" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                                    <th><input id="f_FECHA_LIMITE_CIERRE" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                                    <th><input id="f_CATEGORIA_CORRECTIVO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_REFACCION_ACCESORIO_COMPRA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_FECHA_LLEGADA_REFACCION" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                                    <th><input id="f_FECHA_REPARACION" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                                    <th><input id="f_QUIEN_REALIZO_REPARACION" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_VALIDACION_FUNCIONAMIENTO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_DESCRIPCION_REPARACION" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_OBSERVACIONES" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th><input id="f_OC_FACTURA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla"></tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
-            <!-- PAGINACIÓN -->
-            <div class="pagination">
-                <button class="btn btn-ghost" onclick="anterior()">◀ Anterior</button>
-                <span class="page-info" id="paginaInfo"></span>
-                <button class="btn btn-ghost" onclick="siguiente()">Siguiente ▶</button>
-            </div>
+                <!-- PAGINACIÓN -->
+                <div class="pagination">
+                    <button class="btn btn-ghost" onclick="anterior()">◀ Anterior</button>
+                    <span class="page-info" id="paginaInfo"></span>
+                    <button class="btn btn-ghost" onclick="siguiente()">Siguiente ▶</button>
+                </div>
 
-        </div>
+            </div>
 
         <!-- TIEMPOS DE RESPUESTA -->
         <div class="sla-section">
@@ -1980,16 +1980,19 @@
             'FECHA_LIMITE_CIERRE', 'FECHA_LLEGADA_REFACCION', 'FECHA_REPARACION', 'FOLIO', 'NUMERO_SERIE', 'OC_FACTURA']);
 
         /* ── Init ── */
+        // REEMPLAZAR POR:
         window.addEventListener('DOMContentLoaded', () => {
             fetch('/obtener-usuario').then(r => r.json()).then(d => {
                 usuarioActual = d.usuario || 'SISTEMA'; rolActual = d.rol || 'USER';
                 document.getElementById('usuarioDisplay').textContent = usuarioActual;
                 document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
                 document.getElementById('dropdownRol').textContent = rolActual;
+                // Ocultar panel de nuevo registro a usuarios con rol USER
+                if (rolActual === 'USER') {
+                    const panelNuevo = document.getElementById('panelNuevoRegistro');
+                    if (panelNuevo) panelNuevo.style.display = 'none';
+                }
             }).catch(() => { document.getElementById('usuarioDisplay').textContent = 'Sin sesión'; });
-            cargar();
-            cargarUbicaciones();
-        });
 
         async function cargarUbicaciones() {
             try {
@@ -2072,9 +2075,14 @@
         }
 
         /* ── Guardar nuevo ── */
-        function guardar() {
-            const data = {};
-            CAMPOS.forEach(({ key }) => {
+            // REEMPLAZAR POR:
+            function guardar() {
+                if (rolActual === 'USER') {
+                    alert('No tienes permisos para crear nuevos registros.');
+                    return;
+                }
+                const data = {};
+                CAMPOS.forEach(({ key }) => {
                 const el = document.getElementById('n_' + key); if (!el) return;
                 data[key] = (key === 'VENCIMIENTO_DIAS') ? (el.value !== '' ? parseInt(el.value) : null) : (el.value || null);
             });
