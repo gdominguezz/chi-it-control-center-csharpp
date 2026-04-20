@@ -1986,7 +1986,7 @@
                 document.getElementById('usuarioDisplay').textContent = usuarioActual;
                 document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
                 document.getElementById('dropdownRol').textContent = rolActual;
-                if (rolActual === 'USER') {
+                if (rolActual !== 'ADMIN' && rolActual !== 'ENCARGADO_CORRECTIVOS') {
                     const panelNuevo = document.getElementById('panelNuevoRegistro');
                     if (panelNuevo) panelNuevo.style.display = 'none';
                 }
@@ -2048,6 +2048,7 @@
                 document.getElementById('paginaInfo').textContent = 'Sin resultados'; return;
             }
             const esAdmin = rolActual === 'ADMIN';
+            const puedeEditar = rolActual === 'ADMIN' || rolActual === 'ENCARGADO_CORRECTIVOS';
             datosActuales.forEach(row => {
                 const cls = statusClass(row.STATUS);
                 let tds = `<td class="mono">${row.ID}</td><td>${statusPill(row.STATUS)}</td>`;
@@ -2059,16 +2060,16 @@
                 });
                 tds += `<td>${row.TIENE_PDF
                     ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                                              <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
+               <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
                     : `<input type="file" onchange="subirPDF(${row.ID},this)"
-                                               style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
+               style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
                     }</td>`;
                 tds += `<td style="white-space:nowrap;">
-                            ${!esAdmin ? '' : `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>`}
-                            ${esAdmin ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
-                            <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
-                            <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-                        </td>`;
+                    ${puedeEditar ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
+                    ${esAdmin ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
+                    <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
+                    <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                </td>`;
                 tbody.innerHTML += `<tr class="${cls}">${tds}</tr>`;
             });
             document.getElementById('paginaInfo').textContent =
@@ -2078,7 +2079,7 @@
         /* ── Guardar nuevo ── */
             // REEMPLAZAR POR:
             function guardar() {
-                if (rolActual === 'USER') {
+                if (rolActual !== 'ADMIN' && rolActual !== 'ENCARGADO_CORRECTIVOS') {
                     alert('No tienes permisos para crear nuevos registros.');
                     return;
                 }
@@ -2105,7 +2106,7 @@
 
         /* ── Modal Editar ── */
         function abrirEditar(id) {
-            if (rolActual === 'USER') return;
+            if (rolActual !== 'ADMIN' && rolActual !== 'ENCARGADO_CORRECTIVOS') return;
             editandoID = id; document.getElementById('editarIdLabel').textContent = id;
             const row = datosActuales.find(r => r.ID === id);
             if (row) CAMPOS.forEach(({ key }) => { const el = document.getElementById('e_' + key); if (el) el.value = row[key] ?? ''; });
