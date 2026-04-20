@@ -221,6 +221,8 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("      <option value=\"ADMIN\">ADMIN</option>");
         sb.AppendLine("      <option value=\"AUDITOR\">AUDITOR</option>");
         sb.AppendLine("      <option value=\"USER\">USER</option>");
+        sb.AppendLine("      <option value=\"ENCARGADO_CORRECTIVOS\">ENCARGADO_CORRECTIVOS</option>");
+        sb.AppendLine("      <option value=\"ENCARGADO_BAJAS\">ENCARGADO_BAJAS</option>");
         sb.AppendLine("    </select>");
         sb.AppendLine("    <select class=\"filter-sel\" id=\"filtroActivo\" onchange=\"filtrar()\">");
         sb.AppendLine("      <option value=\"\">Todos los estados</option>");
