@@ -1980,19 +1980,20 @@
             'FECHA_LIMITE_CIERRE', 'FECHA_LLEGADA_REFACCION', 'FECHA_REPARACION', 'FOLIO', 'NUMERO_SERIE', 'OC_FACTURA']);
 
         /* ── Init ── */
-        // REEMPLAZAR POR:
         window.addEventListener('DOMContentLoaded', () => {
             fetch('/obtener-usuario').then(r => r.json()).then(d => {
                 usuarioActual = d.usuario || 'SISTEMA'; rolActual = d.rol || 'USER';
                 document.getElementById('usuarioDisplay').textContent = usuarioActual;
                 document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
                 document.getElementById('dropdownRol').textContent = rolActual;
-                // Ocultar panel de nuevo registro a usuarios con rol USER
                 if (rolActual === 'USER') {
                     const panelNuevo = document.getElementById('panelNuevoRegistro');
                     if (panelNuevo) panelNuevo.style.display = 'none';
                 }
             }).catch(() => { document.getElementById('usuarioDisplay').textContent = 'Sin sesión'; });
+            cargar();
+            cargarUbicaciones();
+        });
 
         async function cargarUbicaciones() {
             try {
