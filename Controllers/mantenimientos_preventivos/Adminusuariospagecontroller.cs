@@ -263,7 +263,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("      </div>");
         sb.AppendLine("      <div class=\"field-row\">");
         sb.AppendLine("        <div class=\"field\"><label>Contraseña</label><input id=\"mPassword\" type=\"password\" placeholder=\"Mínimo 6 caracteres\"><div class=\"field-hint\" id=\"pwdHint\">Dejar vacío para no cambiar</div></div>");
-        sb.AppendLine("        <div class=\"field\"><label>Rol</label><select id=\"mRol\"><option value=\"USER\">USER</option><option value=\"AUDITOR\">AUDITOR</option><option value=\"ADMIN\">ADMIN</option></select></div>");
+        sb.AppendLine("        <div class=\"field\"><label>Rol</label><select id=\"mRol\"><option value=\"USER\">USER</option><option value=\"AUDITOR\">AUDITOR</option><option value=\"ADMIN\">ADMIN</option><option value=\"ENCARGADO_CORRECTIVOS\">ENCARGADO_CORRECTIVOS</option><option value=\"ENCARGADO_BAJAS\">ENCARGADO_BAJAS</option></select></div>");
         sb.AppendLine("      </div>");
         sb.AppendLine("      <div class=\"field-row\">");
         sb.AppendLine("        <div class=\"field\"><label>Estado de cuenta</label>");
