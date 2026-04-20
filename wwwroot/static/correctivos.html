@@ -2064,11 +2064,11 @@
                                                style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
                     }</td>`;
                 tds += `<td style="white-space:nowrap;">
-                                            <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
-                                            ${esAdmin ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
-                                            <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
-                                            <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-                                        </td>`;
+                            ${!esAdmin ? '' : `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>`}
+                            ${esAdmin ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
+                            <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
+                            <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                        </td>`;
                 tbody.innerHTML += `<tr class="${cls}">${tds}</tr>`;
             });
             document.getElementById('paginaInfo').textContent =
@@ -2105,6 +2105,7 @@
 
         /* ── Modal Editar ── */
         function abrirEditar(id) {
+            if (rolActual === 'USER') return;
             editandoID = id; document.getElementById('editarIdLabel').textContent = id;
             const row = datosActuales.find(r => r.ID === id);
             if (row) CAMPOS.forEach(({ key }) => { const el = document.getElementById('e_' + key); if (el) el.value = row[key] ?? ''; });
