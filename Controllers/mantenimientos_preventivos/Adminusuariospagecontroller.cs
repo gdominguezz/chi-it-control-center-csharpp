@@ -114,9 +114,13 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine(".badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}");
         sb.AppendLine(".badge-admin{background:rgba(139,92,246,.18);border:1px solid rgba(139,92,246,.4);color:#c4b5fd;}");
         sb.AppendLine(".badge-user{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);color:#93c5fd;}");
+        sb.AppendLine(".badge-correctivos{background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.4);color:#fcd34d;}");
+        sb.AppendLine(".badge-bajas{background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.4);color:#fca5a5;}");
         sb.AppendLine(".badge-on{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.35);color:#6ee7b7;}");
         sb.AppendLine(".badge-off{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}");
         sb.AppendLine(".badge-temp{background:rgba(245,158,11,.13);border:1px solid rgba(245,158,11,.35);color:#fcd34d;}");
+
+
 
         // ── Avatar ─────────────────────────────────────────────────────────
         sb.AppendLine(".avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;border:2px solid var(--border2);}");
@@ -372,7 +376,7 @@ public class AdminUsuariosPageController : ControllerBase
         sb.AppendLine("    const ac=u.activo===true||u.activo==='true'||u.activo===1;");
         sb.AppendLine("    const col=avatarColor(u.usuario);");
         sb.AppendLine("    const av=`<div class=\"avatar\" style=\"background:${col}22;border-color:${col}44;color:${col}\">${u.nombre.charAt(0).toUpperCase()}</div>`;");
-        sb.AppendLine("    const rolBadge=u.rol==='ADMIN'?'<span class=\"badge badge-admin\">⚡ Admin</span>':u.rol==='AUDITOR'?'<span class=\"badge badge-auditor\">🔍 Auditor</span>':'<span class=\"badge badge-user\">👤 User</span>';");
+        sb.AppendLine("    const rolBadge=u.rol==='ADMIN'?'<span class=\"badge badge-admin\">⚡ Admin</span>':u.rol==='AUDITOR'?'<span class=\"badge badge-auditor\">🔍 Auditor</span>':u.rol==='ENCARGADO_CORRECTIVOS'?'<span class=\"badge badge-correctivos\">🛠 Correctivos</span>':u.rol==='ENCARGADO_BAJAS'?'<span class=\"badge badge-bajas\">📦 Bajas</span>':'<span class=\"badge badge-user\">👤 User</span>';");
         sb.AppendLine("    const estadoBadge=ac?'<span class=\"badge badge-on\">● Activo</span>':'<span class=\"badge badge-off\">○ Inactivo</span>';");
         sb.AppendLine("    const pt=u.password_temporal===true||u.password_temporal==='true';const tmpBadge=pt?'<span class=\"badge badge-temp\">⚠ Temporal</span>':'<span class=\"badge badge-on\">✓ Fija</span>';");
         sb.AppendLine("    const acceso=u.ultimo_acceso?fmtFecha(u.ultimo_acceso):'<span style=\"color:var(--muted)\">Nunca</span>';");
