@@ -1,202 +1,1989 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>PANTALLAS NF</title>
-<style>
-body{ font-family:Arial; margin:0; background:#f1f5f9; }
-.header{ background:#1e293b; color:white; padding:15px; font-size:20px; font-weight:bold; }
-.container{ padding:15px; }
-.form-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-bottom:15px; }
-.field{ display:flex; flex-direction:column; }
-.field label{ font-size:11px; font-weight:bold; color:#1e293b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.3px; }
-.field input{ padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:12px; background:#f8fafc; transition:border-color 0.2s; }
-.field input:focus{ outline:none; border-color:#2563eb; background:white; box-shadow:0 0 0 2px rgba(37,99,235,0.15); }
-button{ padding:6px 12px; border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; margin-right:5px; }
-.save{background:#16a34a;color:white;} .cancel{background:#64748b;color:white;} .delete{background:#dc2626;color:white;}
-.edit{background:#f59e0b;color:white;} .pdf{background:#2563eb;color:white;} .export{background:#7c3aed;color:white;}
-.btn-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:12px; }
-.btn-bar input[type="number"]{ padding:6px; border:1px solid #ccc; border-radius:5px; font-size:12px; width:110px; }
-.table-container{ width:100%; height:500px; overflow:auto; border:1px solid #ccc; background:white; }
-table{ border-collapse:collapse; min-width:3600px; font-size:11px; }
-th,td{ border:1px solid #ccc; padding:6px; white-space:nowrap; text-align:center; }
-th{ background:#1e293b; color:white; position:sticky; top:0; z-index:2; }
-.filter-row input{ width:100%; font-size:11px; }
-.pagination{ margin-top:10px; }
-.back{
-    background:#dc2626;
-    font-style: italic; color:#ffffff;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Pantallas NF</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0F1A;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --surface3: #1e293b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --accent: #2563EB;
+            --text: #F1F5F9;
+            --muted: #64748B;
+            --muted2: #94A3B8;
+            --green: #10B981;
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --purple: #8B5CF6;
+            --cyan: #06B6D4;
+            --blue: #2563EB;
+            --teal: #14B8A6;
+            /* colores de encabezado por grupo */
+            --col-identificacion: #06B6D4;
+            --col-dispositivo: #8B5CF6;
+            --col-asignacion: #F59E0B;
+            --col-identificacion-bg: rgba(6,182,212,.12);
+            --col-dispositivo-bg: rgba(139,92,246,.12);
+            --col-asignacion-bg: rgba(245,158,11,.12);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            background: linear-gradient(135deg,#05091a,#0B0F1A);
+            border-bottom: 1px solid var(--border2);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+
+        .topbar-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: linear-gradient(135deg,#0e7490,#06B6D4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px rgba(6,182,212,.45);
+            flex-shrink: 0;
+        }
+
+        .topbar-title {
+            flex: 1;
+        }
+
+            .topbar-title h1 {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: -.01em;
+            }
+
+            .topbar-title p {
+                font-size: 11px;
+                color: var(--muted2);
+                margin-top: 1px;
+                font-family: 'DM Mono',monospace;
+            }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        /* ── USER CHIP ── */
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background .2s, border-color .2s;
+        }
+
+            .user-chip:hover {
+                background: rgba(255,255,255,.1);
+                border-color: var(--accent);
+            }
+
+            .user-chip span {
+                color: var(--muted2);
+            }
+
+            .user-chip .chip-arrow {
+                font-size: 9px;
+                color: var(--muted);
+                transition: transform .2s;
+            }
+
+            .user-chip.open .chip-arrow {
+                transform: rotate(180deg);
+            }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
+
+            .dropdown-header .d-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            .dropdown-header .d-role {
+                font-size: 10px;
+                color: var(--muted);
+                font-family: 'DM Mono',monospace;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                margin-top: 2px;
+            }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: background .15s, color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans',sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: var(--text);
+            }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        .dropdown-sep {
+            height: 1px;
+            background: var(--border);
+            margin: 6px 0;
+        }
+
+        /* ── MAIN ── */
+        .main {
+            max-width: 100%;
+            padding: 20px 24px;
+        }
+
+        /* ── PANEL ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .panel-title::before {
+                content: '';
+                width: 3px;
+                height: 14px;
+                background: var(--cyan);
+                border-radius: 2px;
+                display: inline-block;
+            }
+
+        /* ── FORM SECTIONS ── */
+        .form-section {
+            margin-bottom: 18px;
+        }
+
+        .form-section-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            padding: 4px 10px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .lbl-identificacion {
+            background: var(--col-identificacion-bg);
+            color: var(--col-identificacion);
+            border: 1px solid rgba(6,182,212,.3);
+        }
+
+        .lbl-dispositivo {
+            background: var(--col-dispositivo-bg);
+            color: var(--col-dispositivo);
+            border: 1px solid rgba(139,92,246,.3);
+        }
+
+        .lbl-asignacion {
+            background: var(--col-asignacion-bg);
+            color: var(--col-asignacion);
+            border: 1px solid rgba(245,158,11,.3);
+        }
+
+        /* ── FORM GRID ── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+            gap: 12px;
+        }
+
+        .field label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .field input, .field select, .field textarea {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field textarea {
+            resize: vertical;
+            min-height: 58px;
+        }
+
+            .field input:focus, .field select:focus, .field textarea:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+            }
+
+        .field select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 9px center;
+            padding-right: 26px;
+        }
+
+            .field select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+        .field-wide {
+            grid-column: 1/-1;
+        }
+
+        .field input[readonly] {
+            background: rgba(37,99,235,.08);
+            border-color: rgba(37,99,235,.25);
+            color: #93C5FD;
+            cursor: default;
+        }
+
+        /* ── BOTONES ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans',sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--blue);
+            color: white;
+            box-shadow: 0 3px 10px rgba(37,99,235,.3);
+        }
+
+            .btn-primary:hover {
+                background: #1d4ed8;
+                transform: translateY(-1px);
+            }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+            box-shadow: 0 3px 10px rgba(16,185,129,.25);
+        }
+
+            .btn-success:hover {
+                background: #059669;
+                transform: translateY(-1px);
+            }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+        }
+
+            .btn-danger:hover {
+                background: #DC2626;
+            }
+
+        .btn-amber {
+            background: var(--amber);
+            color: #1c1400;
+        }
+
+            .btn-amber:hover {
+                background: #D97706;
+            }
+
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+
+            .btn-purple:hover {
+                background: #7C3AED;
+            }
+
+        .btn-cyan {
+            background: var(--cyan);
+            color: #001a1f;
+        }
+
+            .btn-cyan:hover {
+                background: #0891B2;
+            }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
+        }
+
+            .btn-ghost:hover {
+                color: var(--text);
+                border-color: var(--accent);
+            }
+
+        .btn-sm {
+            padding: 6px 11px;
+            font-size: 11px;
+        }
+
+        /* ── TOOLBAR ── */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .toolbar-sep {
+            width: 1px;
+            height: 24px;
+            background: var(--border2);
+            margin: 0 4px;
+        }
+
+        .anio-input {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            width: 110px;
+        }
+
+            .anio-input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        /* ── TABLA ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 380px);
+            min-height: 380px;
+            overflow-y: auto;
+        }
+
+            .table-scroll::-webkit-scrollbar {
+                width: 7px;
+                height: 7px;
+            }
+
+            .table-scroll::-webkit-scrollbar-track {
+                background: var(--surface2);
+                border-radius: 999px;
+            }
+
+            .table-scroll::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 999px;
+            }
+
+                .table-scroll::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent);
+                }
+
+        .scroll-top {
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 8px;
+            margin-bottom: 2px;
+        }
+
+        .scroll-top-inner {
+            height: 1px;
+        }
+
+        table {
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* fila 1: grupos */
+        .group-row th {
+            padding: 5px 10px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            text-align: center;
+            border-bottom: none;
+            white-space: nowrap;
+        }
+
+        .gh-identificacion {
+            background: var(--col-identificacion-bg);
+            color: var(--col-identificacion);
+            border-bottom: 2px solid var(--col-identificacion) !important;
+        }
+
+        .gh-dispositivo {
+            background: var(--col-dispositivo-bg);
+            color: var(--col-dispositivo);
+            border-bottom: 2px solid var(--col-dispositivo) !important;
+        }
+
+        .gh-asignacion {
+            background: var(--col-asignacion-bg);
+            color: var(--col-asignacion);
+            border-bottom: 2px solid var(--col-asignacion) !important;
+        }
+
+        .gh-neutral {
+            background: var(--surface3);
+            color: var(--muted2);
+        }
+
+        /* fila 2: columnas */
+        .col-row th {
+            background: var(--surface3);
+            color: var(--muted2);
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            padding: 9px 10px;
+            border-bottom: 1px solid var(--border2);
+            white-space: nowrap;
+            text-align: left;
+        }
+
+        .col-identificacion {
+            border-top: 2px solid var(--col-identificacion) !important;
+        }
+
+        .col-dispositivo {
+            border-top: 2px solid var(--col-dispositivo) !important;
+        }
+
+        .col-asignacion {
+            border-top: 2px solid var(--col-asignacion) !important;
+        }
+
+        /* fila 3: filtros */
+        .filter-row th {
+            background: var(--surface2);
+            padding: 5px 6px;
+            border-bottom: 1px solid var(--border2);
+        }
+
+        .filter-row input, .filter-row select {
+            width: 100%;
+            background: rgba(255,255,255,.04);
+            border: 1px solid var(--border2);
+            border-radius: 5px;
+            padding: 4px 6px;
+            font-size: 10px;
+            color: var(--text);
+            font-family: 'DM Mono',monospace;
+        }
+
+            .filter-row input:focus, .filter-row select:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+            .filter-row select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+
+            tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            tbody tr:hover td {
+                filter: brightness(1.12);
+            }
+
+        td {
+            padding: 8px 10px;
+            color: var(--text);
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 11px;
+        }
+
+            td.mono {
+                font-family: 'DM Mono',monospace;
+                color: var(--muted2);
+            }
+
+            td.wrap {
+                white-space: normal;
+                word-break: break-word;
+                max-width: 180px;
+            }
+
+            td.num {
+                font-family: 'DM Mono',monospace;
+                text-align: right;
+            }
+
+        /* columna acciones fija */
+        table th:last-child, table td:last-child {
+            position: sticky;
+            right: 0;
+            z-index: 2;
+            background: var(--surface);
+            box-shadow: -2px 0 6px rgba(0,0,0,.3);
+        }
+
+        table thead th:last-child {
+            z-index: 3;
+        }
+
+        /* pills */
+        .pill {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .pill-green {
+            background: rgba(16,185,129,.15);
+            color: #6EE7B7;
+        }
+
+        .pill-amber {
+            background: rgba(245,158,11,.15);
+            color: #FDE68A;
+        }
+
+        .pill-red {
+            background: rgba(239,68,68,.15);
+            color: #FCA5A5;
+        }
+
+        .pill-gray {
+            background: rgba(100,116,139,.15);
+            color: var(--muted2);
+        }
+
+        .pill-blue {
+            background: rgba(37,99,235,.15);
+            color: #93C5FD;
+        }
+
+        .pill-cyan {
+            background: rgba(6,182,212,.15);
+            color: #67E8F9;
+        }
+
+        .pill-purple {
+            background: rgba(139,92,246,.15);
+            color: #C4B5FD;
+        }
+
+        /* ── PAGINACIÓN ── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .page-info {
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--muted2);
+        }
+
+        /* ── MODALES ── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.68);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+            .modal.show {
+                display: flex;
+            }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 26px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,.55);
+            animation: modalIn .2s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.96)
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1)
+            }
+        }
+
+        .modal-box.form-box {
+            width: min(820px,96vw);
+        }
+
+        .modal-box.hist-box {
+            width: min(960px,96vw);
+        }
+
+        .modal-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-box::-webkit-scrollbar-track {
+            background: var(--surface2);
+            border-radius: 999px;
+        }
+
+        .modal-box::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 999px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+            .modal-header h3 {
+                margin: 0;
+                color: var(--text);
+                font-size: 15px;
+                font-weight: 700;
+            }
+
+        .close-btn {
+            background: rgba(6,182,212,.15);
+            color: #67E8F9;
+            border: 1px solid rgba(6,182,212,.3);
+            padding: 5px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all .2s;
+        }
+
+            .close-btn:hover {
+                background: var(--cyan);
+                color: #001a1f;
+            }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 10px;
+        }
+
+        .form-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-field {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .form-field label {
+                font-size: 9px;
+                font-weight: 700;
+                color: var(--muted);
+                margin-bottom: 5px;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+            }
+
+            .form-field input, .form-field textarea, .form-field select {
+                padding: 9px 11px;
+                border: 1px solid var(--border2);
+                border-radius: 7px;
+                font-size: 12px;
+                background: var(--surface2);
+                color: var(--text);
+                font-family: 'DM Mono',monospace;
+                transition: border-color .2s, box-shadow .2s;
+            }
+
+            .form-field textarea {
+                resize: vertical;
+                min-height: 68px;
+            }
+
+                .form-field input:focus, .form-field textarea:focus, .form-field select:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+                }
+
+            .form-field select {
+                cursor: pointer;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 9px center;
+                padding-right: 26px;
+            }
+
+            .form-field input[readonly] {
+                background: rgba(6,182,212,.08);
+                border-color: rgba(6,182,212,.25);
+                color: #67E8F9;
+                cursor: default;
+            }
+
+            .form-field.full {
+                grid-column: 1/-1;
+            }
+
+        /* ── HISTORIAL ── */
+        .ev-wrap {
+            margin-bottom: 18px;
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .ev-header {
+            background: var(--surface3);
+            padding: 11px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+            .ev-header span {
+                font-size: 12px;
+                color: var(--muted2);
+            }
+
+            .ev-header strong {
+                color: #7dd3fc;
+            }
+
+        .ev-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+            .ev-table th {
+                padding: 8px 12px;
+                background: var(--surface2);
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .07em;
+                border-bottom: 1px solid var(--border2);
+            }
+
+            .ev-table td {
+                padding: 8px 12px;
+                border-bottom: 1px solid var(--border);
+                color: var(--muted2);
+            }
+
+            .ev-table tr.row-changed td {
+                background: rgba(245,158,11,.04);
+            }
+
+        .badge-cambio {
+            margin-left: 6px;
+            background: rgba(245,158,11,.2);
+            color: var(--amber);
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+        .empty-val {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .sin-hist {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .spin {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        /* ── TOGGLE DISPONIBLE ── */
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .toggle-switch input[type=checkbox] {
+                width: 36px;
+                height: 20px;
+                appearance: none;
+                background: var(--surface3);
+                border-radius: 999px;
+                cursor: pointer;
+                transition: background .2s;
+                position: relative;
+                border: 1px solid var(--border2);
+            }
+
+                .toggle-switch input[type=checkbox]::after {
+                    content: '';
+                    position: absolute;
+                    width: 14px;
+                    height: 14px;
+                    border-radius: 50%;
+                    background: var(--muted);
+                    top: 2px;
+                    left: 2px;
+                    transition: transform .2s, background .2s;
+                }
+
+                .toggle-switch input[type=checkbox]:checked {
+                    background: rgba(16,185,129,.2);
+                    border-color: var(--green);
+                }
+
+                    .toggle-switch input[type=checkbox]:checked::after {
+                        transform: translateX(16px);
+                        background: var(--green);
+                    }
+
+        /* ── STATS BAR ── */
+        .stats-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 20px;
+            flex: 1;
+            min-width: 130px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'DM Mono',monospace;
+        }
+
+            .stat-value.cyan {
+                color: var(--cyan);
+            }
+
+            .stat-value.green {
+                color: var(--green);
+            }
+
+            .stat-value.amber {
+                color: var(--amber);
+            }
+
+            .stat-value.purple {
+                color: var(--purple);
+            }
+
+            .stat-value.red {
+                color: var(--red);
+            }
+    </style>
 </head>
 <body>
-<div class="header">PANTALLAS NF</div>
-<div class="container">
-<div class="form-grid">
-<div class="field"><label>ID Unico</label><input id="ID_UNICO"></div>
-<div class="field"><label>Subcategoria</label><input id="SUBCATEGORIA"></div>
-<div class="field"><label>Marca</label><input id="MARCA"></div>
-<div class="field"><label>Modelo</label><input id="MODELO"></div>
-<div class="field"><label>No. Serie</label><input id="NO_SERIE"></div>
-<div class="field"><label>Cantidad</label><input id="CANTIDAD"></div>
-<div class="field"><label>Tamaño Pulgadas</label><input id="TAMANO_PULGADAS"></div>
-<div class="field"><label>Accesorios</label><input id="ACCESORIOS"></div>
-<div class="field"><label>MAC WIFI</label><input id="MAC_WIFI"></div>
-<div class="field"><label>MAC Ethernet</label><input id="MAC_ETHERNET"></div>
-<div class="field"><label>Proveedor</label><input id="PROVEEDOR"></div>
-<div class="field"><label>Costo USD</label><input id="COSTO_USD"></div>
-<div class="field"><label>Vida Util (Meses)</label><input id="VIDA_UTIL_MESES"></div>
-<div class="field"><label>Estado</label><input id="ESTADO"></div>
-<div class="field"><label>Disponible</label><input id="DISPONIBLE"></div>
-<div class="field"><label>Fecha Salida</label><input id="FECHA_SALIDA" type="date"></div>
-<div class="field"><label>Destino Planta</label><input id="DESTINO_PLANTA"></div>
-<div class="field"><label>Asignado A</label><input id="ASIGNADO_A"></div>
-<div class="field"><label>Personal IT que Asigna</label><input id="PERSONAL_IT_ASIGNA"></div>
-</div>
 
-<div class="btn-bar">
-    <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
-    <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
-</div>
-<div class="btn-bar">
-    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
-    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
-    <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
-    <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
-</div>
+    <!-- ── TOPBAR ── -->
+    <div class="topbar">
+        <div class="topbar-icon">🖥️</div>
+        <div class="topbar-title">
+            <h1>PANTALLAS NF</h1>
+            <p>Inventario de pantallas · CHI-IT</p>
+        </div>
+        <div class="topbar-actions">
+            <div class="user-chip" id="userChip" onclick="toggleChip()">
+                👤 <span id="nombreUsuario">Cargando...</span>
+                <span class="chip-arrow">▼</span>
+                <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name" id="dropNombre">—</div>
+                        <div class="d-role" id="dropRol">—</div>
+                    </div>
+                    <button class="dropdown-item" onclick="window.location.href='/static/menu.html'">☰ &nbsp;Menú principal</button>
+                    <div class="dropdown-sep"></div>
+                    <button class="dropdown-item danger" onclick="cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>ID</th><th>ID UNICO</th><th>SUBCATEGORIA</th><th>MARCA</th><th>MODELO</th>
-<th>NO SERIE</th><th>CANTIDAD</th><th>PULGADAS</th><th>ACCESORIOS</th>
-<th>MAC WIFI</th><th>MAC ETH</th><th>PROVEEDOR</th><th>COSTO USD</th>
-<th>VIDA UTIL</th><th>ESTADO</th><th>DISPONIBLE</th><th>FECHA SALIDA</th>
-<th>DESTINO</th><th>ASIGNADO A</th><th>PERSONAL IT</th><th>PDF</th><th>ACCIONES</th>
-</tr>
-<tr class="filter-row">
-<th></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th></th><th></th>
-</tr>
-</thead>
-<tbody id="tabla"></tbody>
-</table>
-</div>
-<div class="pagination">
-<button onclick="anterior()">Anterior</button>
-<span id="paginaInfo"></span>
-<button onclick="siguiente()">Siguiente</button>
-<button class="back" onclick="window.location.href='presupuestos_menu.html'">
-REGRESAR A PRESUPUESTOS
-</button>
-</div>
-</div>
+    <!-- ── MAIN ── -->
+    <div class="main">
 
-<script>
-let paginaActual=1, limite=10, totalRegistros=0, editandoID=null;
+        <!-- STATS -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <span class="stat-label">Total Registros</span>
+                <span class="stat-value cyan" id="statTotal">—</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Disponibles</span>
+                <span class="stat-value green" id="statDisponibles">—</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Asignadas</span>
+                <span class="stat-value amber" id="statAsignadas">—</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Marcas</span>
+                <span class="stat-value purple" id="statMarcas">—</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Costo Total USD</span>
+                <span class="stat-value cyan" id="statCosto">—</span>
+            </div>
+        </div>
 
-function guardar(){
-    let data={
-        ID_UNICO: ID_UNICO.value||null,
-        SUBCATEGORIA: SUBCATEGORIA.value||null, MARCA: MARCA.value||null,
-        MODELO: MODELO.value||null, NO_SERIE: NO_SERIE.value||null,
-        CANTIDAD: CANTIDAD.value||null, TAMANO_PULGADAS: TAMANO_PULGADAS.value||null,
-        ACCESORIOS: ACCESORIOS.value||null, MAC_WIFI: MAC_WIFI.value||null,
-        MAC_ETHERNET: MAC_ETHERNET.value||null, PROVEEDOR: PROVEEDOR.value||null,
-        COSTO_USD: COSTO_USD.value||null, VIDA_UTIL_MESES: VIDA_UTIL_MESES.value||null,
-        ESTADO: ESTADO.value||null, DISPONIBLE: DISPONIBLE.value||null,
-        FECHA_SALIDA: FECHA_SALIDA.value||null, DESTINO_PLANTA: DESTINO_PLANTA.value||null,
-        ASIGNADO_A: ASIGNADO_A.value||null, PERSONAL_IT_ASIGNA: PERSONAL_IT_ASIGNA.value||null
-    };
-    if(editandoID){
-        fetch(`/PANTALLAS_NF/${editandoID}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
-        .then(()=>{ editandoID=null; limpiarFormulario(); cargar(); });
-    } else {
-        fetch("/PANTALLAS_NF",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
-        .then(()=>{ limpiarFormulario(); cargar(); });
-    }
-}
+        <!-- ══ PANEL NUEVO REGISTRO ══ -->
+        <div class="panel" id="panelNuevoRegistro">
+            <div class="panel-title">➕ Nueva Pantalla NF</div>
 
-function limpiarFormulario(){ document.querySelectorAll(".form-grid input").forEach(i=>i.value=""); }
-function cancelarEdicion(){ editandoID=null; limpiarFormulario(); }
+            <!-- IDENTIFICACIÓN -->
+            <div class="form-section">
+                <span class="form-section-label lbl-identificacion">🔗 Identificación</span>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>ID Único</label>
+                        <input id="n_id_unico" placeholder="Auto-generado" readonly tabindex="-1">
+                    </div>
+                    <div class="field">
+                        <label>OC</label>
+                        <input id="n_oc" placeholder="Orden de compra">
+                    </div>
+                    <div class="field">
+                        <label>Folio</label>
+                        <input id="n_folio" placeholder="Folio de referencia">
+                    </div>
+                    <div class="field">
+                        <label>Fecha Registro</label>
+                        <input id="n_fecha_registro" type="date">
+                    </div>
+                    <div class="field">
+                        <label>Recibido Por</label>
+                        <input id="n_recibido_por" placeholder="Nombre de quien recibe">
+                    </div>
+                    <div class="field">
+                        <label>Subcategoría</label>
+                        <select id="n_subcategoria">
+                            <option value="">— Seleccionar —</option>
+                            <option>MONITOR</option>
+                            <option>TV COMERCIAL</option>
+                            <option>PANTALLA INDUSTRIAL</option>
+                            <option>DISPLAY INTERACTIVO</option>
+                            <option>PANTALLA OUTDOOR</option>
+                            <option>VIDEOWALL</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Proveedor</label>
+                        <input id="n_proveedor" placeholder="Nombre del proveedor">
+                    </div>
+                    <div class="field">
+                        <label>Costo USD</label>
+                        <input id="n_costo_usd" type="number" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                    <div class="field">
+                        <label>Vida Útil (meses)</label>
+                        <input id="n_vida_util_meses" type="number" step="1" min="0" placeholder="36">
+                    </div>
+                    <div class="field">
+                        <label>Estado</label>
+                        <select id="n_estado">
+                            <option value="">— Seleccionar —</option>
+                            <option>NUEVO</option>
+                            <option>BUENO</option>
+                            <option>REGULAR</option>
+                            <option>DAÑADO</option>
+                            <option>BAJA</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
 
-function obtenerParametros(){
-    let f=document.querySelectorAll(".filter-row input");
-    return new URLSearchParams({
-        page:paginaActual, limit:limite,
-        ID_UNICO:f[0].value, SUBCATEGORIA:f[1].value, MARCA:f[2].value,
-        MODELO:f[3].value, NO_SERIE:f[4].value, CANTIDAD:f[5].value,
-        TAMANO_PULGADAS:f[6].value, ACCESORIOS:f[7].value, MAC_WIFI:f[8].value,
-        MAC_ETHERNET:f[9].value, PROVEEDOR:f[10].value, COSTO_USD:f[11].value,
-        VIDA_UTIL_MESES:f[12].value, ESTADO:f[13].value, DISPONIBLE:f[14].value,
-        FECHA_SALIDA:f[15].value, DESTINO_PLANTA:f[16].value, ASIGNADO_A:f[17].value,
-        PERSONAL_IT_ASIGNA:f[18].value
-    });
-}
+            <!-- DISPOSITIVO -->
+            <div class="form-section">
+                <span class="form-section-label lbl-dispositivo">🖥️ Dispositivo</span>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Marca</label>
+                        <input id="n_marca" placeholder="Samsung, LG, Sony…">
+                    </div>
+                    <div class="field">
+                        <label>Modelo</label>
+                        <input id="n_modelo" placeholder="Modelo del equipo">
+                    </div>
+                    <div class="field">
+                        <label>No. Serie</label>
+                        <input id="n_no_serie" placeholder="Número de serie">
+                    </div>
+                    <div class="field">
+                        <label>Cantidad</label>
+                        <input id="n_cantidad" type="number" step="1" min="1" placeholder="1">
+                    </div>
+                    <div class="field">
+                        <label>Tamaño (pulgadas)</label>
+                        <input id="n_tamano_pulgadas" type="number" step="0.1" min="0" placeholder='55.0'>
+                    </div>
+                    <div class="field field-wide">
+                        <label>Accesorios</label>
+                        <input id="n_accesorios" placeholder="Control, base, cables…">
+                    </div>
+                    <div class="field">
+                        <label>MAC WiFi</label>
+                        <input id="n_mac_wifi" placeholder="AA:BB:CC:DD:EE:FF">
+                    </div>
+                    <div class="field">
+                        <label>MAC Ethernet</label>
+                        <input id="n_mac_ethernet" placeholder="AA:BB:CC:DD:EE:FF">
+                    </div>
+                </div>
+            </div>
 
-function cargar(){
-    fetch(`/PANTALLAS_NF?${obtenerParametros().toString()}`)
-    .then(r=>r.json()).then(resp=>{ totalRegistros=resp.total; renderizar(resp.data); });
-}
+            <!-- ASIGNACIÓN -->
+            <div class="form-section">
+                <span class="form-section-label lbl-asignacion">📍 Asignación</span>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Disponible</label>
+                        <div class="toggle-switch" style="margin-top:8px;">
+                            <input type="checkbox" id="n_disponible" checked>
+                            <label for="n_disponible" style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted2);text-transform:none;letter-spacing:0;">Disponible</label>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Fecha Salida</label>
+                        <input id="n_fecha_salida" type="date">
+                    </div>
+                    <div class="field">
+                        <label>Destino / Planta</label>
+                        <input id="n_destino_planta" placeholder="Planta o área de destino">
+                    </div>
+                    <div class="field">
+                        <label>Asignado A</label>
+                        <input id="n_asignado_a" placeholder="Nombre del responsable">
+                    </div>
+                    <div class="field">
+                        <label>Personal IT que Asigna</label>
+                        <input id="n_personal_it_que_asigna" placeholder="Técnico IT">
+                    </div>
+                </div>
+            </div>
 
-function renderizar(datos){
-    tabla.innerHTML="";
-    datos.forEach(row=>{
-        tabla.innerHTML+=`<tr>
-        <td>${row.ID}</td><td>${row.ID_UNICO??""}</td><td>${row.SUBCATEGORIA??""}</td>
-        <td>${row.MARCA??""}</td><td>${row.MODELO??""}</td><td>${row.NO_SERIE??""}</td>
-        <td>${row.CANTIDAD??""}</td><td>${row.TAMANO_PULGADAS??""}</td><td>${row.ACCESORIOS??""}</td>
-        <td>${row.MAC_WIFI??""}</td><td>${row.MAC_ETHERNET??""}</td><td>${row.PROVEEDOR??""}</td>
-        <td>${row.COSTO_USD??""}</td><td>${row.VIDA_UTIL_MESES??""}</td><td>${row.ESTADO??""}</td>
-        <td>${row.DISPONIBLE??""}</td><td>${row.FECHA_SALIDA??""}</td><td>${row.DESTINO_PLANTA??""}</td>
-        <td>${row.ASIGNADO_A??""}</td><td>${row.PERSONAL_IT_ASIGNA??""}</td>
-        <td>${row.TIENE_PDF
-            ? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button><button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
-            : `<input type="file" onchange="subirPDF(${row.ID},this)">`}</td>
-        <td><button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
-        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button></td>
-        </tr>`;
-    });
-    paginaInfo.innerText=`Pagina ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
-}
+            <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:6px;border-top:1px solid var(--border);">
+                <button class="btn btn-ghost btn-sm" onclick="limpiarFormulario()">🗑 Limpiar</button>
+                <button class="btn btn-cyan" onclick="guardarNuevo()">💾 Guardar Pantalla</button>
+            </div>
+        </div>
 
-function editar(row){
-    editandoID=row.ID;
-    Object.keys(row).forEach(key=>{ let el=document.getElementById(key); if(el) el.value=row[key]??""; });
-    window.scrollTo({top:0,behavior:"smooth"});
-}
-function eliminar(id){ if(!confirm("Eliminar este registro?")) return; fetch(`/PANTALLAS_NF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
-function subirPDF(id,input){ let file=input.files[0]; if(!file) return; let fd=new FormData(); fd.append("file",file); fetch(`/PANTALLAS_NF/PDF/${id}`,{method:"POST",body:fd}).then(()=>cargar()); }
-function verPDF(id){ window.open(`/PANTALLAS_NF/PDF/${id}`,"_blank"); }
-function eliminarPDF(id){ if(!confirm("Eliminar el PDF?")) return; fetch(`/PANTALLAS_NF/PDF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
-function filtrar(){ paginaActual=1; cargar(); }
-function exportarFiltrado(){ window.open(`/PANTALLAS_NF/EXPORTAR?${obtenerParametros().toString()}`); }
-function exportarTodo(){ window.open(`/PANTALLAS_NF/EXPORTAR_TODO`); }
-function exportarPorAnio(){ let a=document.getElementById("anioExportar").value; if(!a){alert("Ingresa un año");return;} window.open(`/PANTALLAS_NF/EXPORTAR_ANIO?anio=${a}`); }
-function siguiente(){ if(paginaActual*limite<totalRegistros){ paginaActual++; cargar(); } }
-function anterior(){ if(paginaActual>1){ paginaActual--; cargar(); } }
+        <!-- ══ TOOLBAR ══ -->
+        <div class="toolbar">
+            <button class="btn btn-ghost btn-sm" onclick="cargar()">🔄 Recargar</button>
+            <div class="toolbar-sep"></div>
+            <input class="anio-input" id="busquedaGlobal" placeholder="🔍 Buscar…" oninput="aplicarFiltros()">
+            <div class="toolbar-sep"></div>
+            <span style="font-size:11px;color:var(--muted);">Filas por página:</span>
+            <select class="anio-input" id="porPagina" style="width:80px;" onchange="paginaActual=1;renderTabla()">
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="9999">Todo</option>
+            </select>
+            <div class="toolbar-sep"></div>
+            <button class="btn btn-ghost btn-sm" onclick="exportarCSV()">📥 Exportar CSV</button>
+        </div>
 
-cargar();
-</script>
+        <!-- ══ TABLA ══ -->
+        <div class="table-wrap">
+            <div class="scroll-top" id="scrollTop"><div class="scroll-top-inner" id="scrollTopInner"></div></div>
+            <div class="table-scroll" id="tableScroll">
+                <table id="tabla">
+                    <thead>
+                        <!-- fila 1: grupos -->
+                        <tr class="group-row">
+                            <th class="gh-neutral" colspan="1">Acciones</th>
+                            <th class="gh-identificacion" colspan="9">Identificación</th>
+                            <th class="gh-dispositivo" colspan="8">Dispositivo</th>
+                            <th class="gh-asignacion" colspan="5">Asignación</th>
+                        </tr>
+                        <!-- fila 2: columnas -->
+                        <tr class="col-row">
+                            <th class="gh-neutral">Acción</th>
+                            <!-- identificacion -->
+                            <th class="col-identificacion">ID Único</th>
+                            <th class="col-identificacion">OC</th>
+                            <th class="col-identificacion">Folio</th>
+                            <th class="col-identificacion">Fecha Registro</th>
+                            <th class="col-identificacion">Recibido Por</th>
+                            <th class="col-identificacion">Subcategoría</th>
+                            <th class="col-identificacion">Proveedor</th>
+                            <th class="col-identificacion">Costo USD</th>
+                            <th class="col-identificacion">Vida Útil (m)</th>
+                            <!-- dispositivo -->
+                            <th class="col-dispositivo">Marca</th>
+                            <th class="col-dispositivo">Modelo</th>
+                            <th class="col-dispositivo">No. Serie</th>
+                            <th class="col-dispositivo">Cantidad</th>
+                            <th class="col-dispositivo">Tamaño"</th>
+                            <th class="col-dispositivo">Accesorios</th>
+                            <th class="col-dispositivo">MAC WiFi</th>
+                            <th class="col-dispositivo">MAC Ethernet</th>
+                            <!-- asignacion -->
+                            <th class="col-asignacion">Estado</th>
+                            <th class="col-asignacion">Disponible</th>
+                            <th class="col-asignacion">Fecha Salida</th>
+                            <th class="col-asignacion">Destino / Planta</th>
+                            <th class="col-asignacion">Asignado A</th>
+                            <th class="col-asignacion">Personal IT</th>
+                        </tr>
+                        <!-- fila 3: filtros -->
+                        <tr class="filter-row" id="filterRow">
+                            <th></th>
+                            <th><input id="f_id_unico" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_oc" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_folio" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_fecha_registro" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_recibido_por" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th>
+                                <select id="f_subcategoria" onchange="aplicarFiltros()">
+                                    <option value="">— Todas —</option>
+                                    <option>MONITOR</option>
+                                    <option>TV COMERCIAL</option>
+                                    <option>PANTALLA INDUSTRIAL</option>
+                                    <option>DISPLAY INTERACTIVO</option>
+                                    <option>PANTALLA OUTDOOR</option>
+                                    <option>VIDEOWALL</option>
+                                </select>
+                            </th>
+                            <th><input id="f_proveedor" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_costo_usd" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_vida_util" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_marca" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_modelo" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_no_serie" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_cantidad" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_tamano" placeholder='Filtrar' oninput="aplicarFiltros()"></th>
+                            <th><input id="f_accesorios" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_mac_wifi" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_mac_ethernet" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th>
+                                <select id="f_estado" onchange="aplicarFiltros()">
+                                    <option value="">— Todos —</option>
+                                    <option>NUEVO</option>
+                                    <option>BUENO</option>
+                                    <option>REGULAR</option>
+                                    <option>DAÑADO</option>
+                                    <option>BAJA</option>
+                                </select>
+                            </th>
+                            <th>
+                                <select id="f_disponible" onchange="aplicarFiltros()">
+                                    <option value="">— Todos —</option>
+                                    <option value="1">Sí</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </th>
+                            <th><input id="f_fecha_salida" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_destino" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_asignado_a" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th><input id="f_personal_it" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpo">
+                        <tr>
+                            <td colspan="24" style="text-align:center;padding:48px;color:var(--muted);">
+                                <span class="spin"></span>&nbsp; Cargando datos…
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGINACIÓN -->
+        <div class="pagination">
+            <button class="btn btn-ghost btn-sm" onclick="irPagina(paginaActual-1)">← Ant</button>
+            <button class="btn btn-ghost btn-sm" onclick="irPagina(paginaActual+1)">Sig →</button>
+            <span class="page-info" id="pageInfo">—</span>
+            <span style="flex:1"></span>
+            <span class="page-info" id="totalInfo">—</span>
+        </div>
+
+    </div><!-- /main -->
+    <!-- ══ MODAL EDITAR ══ -->
+    <div class="modal" id="modalEditar">
+        <div class="modal-box form-box">
+            <div class="modal-header">
+                <h3>✏️ Editar Pantalla — <span id="editIdLabel" style="color:var(--cyan);font-family:'DM Mono',monospace;font-size:13px;"></span></h3>
+                <button class="close-btn" onclick="cerrarEditar()">✕ Cerrar</button>
+            </div>
+
+            <!-- Identificación -->
+            <div class="form-section">
+                <span class="form-section-label lbl-identificacion">🔗 Identificación</span>
+                <div class="form-cols">
+                    <div class="form-field"><label>OC</label><input id="e_oc" placeholder="Orden de compra"></div>
+                    <div class="form-field"><label>Folio</label><input id="e_folio" placeholder="Folio"></div>
+                    <div class="form-field"><label>Fecha Registro</label><input id="e_fecha_registro" type="date"></div>
+                    <div class="form-field"><label>Recibido Por</label><input id="e_recibido_por" placeholder="Nombre"></div>
+                    <div class="form-field">
+                        <label>Subcategoría</label>
+                        <select id="e_subcategoria">
+                            <option value="">— Seleccionar —</option>
+                            <option>MONITOR</option>
+                            <option>TV COMERCIAL</option>
+                            <option>PANTALLA INDUSTRIAL</option>
+                            <option>DISPLAY INTERACTIVO</option>
+                            <option>PANTALLA OUTDOOR</option>
+                            <option>VIDEOWALL</option>
+                        </select>
+                    </div>
+                    <div class="form-field"><label>Proveedor</label><input id="e_proveedor" placeholder="Proveedor"></div>
+                    <div class="form-field"><label>Costo USD</label><input id="e_costo_usd" type="number" step="0.01"></div>
+                    <div class="form-field"><label>Vida Útil (meses)</label><input id="e_vida_util_meses" type="number" step="1"></div>
+                </div>
+            </div>
+
+            <!-- Dispositivo -->
+            <div class="form-section">
+                <span class="form-section-label lbl-dispositivo">🖥️ Dispositivo</span>
+                <div class="form-cols">
+                    <div class="form-field"><label>Marca</label><input id="e_marca" placeholder="Marca"></div>
+                    <div class="form-field"><label>Modelo</label><input id="e_modelo" placeholder="Modelo"></div>
+                    <div class="form-field"><label>No. Serie</label><input id="e_no_serie" placeholder="No. Serie"></div>
+                    <div class="form-field"><label>Cantidad</label><input id="e_cantidad" type="number" step="1" min="1"></div>
+                    <div class="form-field"><label>Tamaño (pulgadas)</label><input id="e_tamano_pulgadas" type="number" step="0.1"></div>
+                    <div class="form-field full"><label>Accesorios</label><input id="e_accesorios" placeholder="Accesorios incluidos"></div>
+                    <div class="form-field"><label>MAC WiFi</label><input id="e_mac_wifi" placeholder="AA:BB:CC:DD:EE:FF"></div>
+                    <div class="form-field"><label>MAC Ethernet</label><input id="e_mac_ethernet" placeholder="AA:BB:CC:DD:EE:FF"></div>
+                </div>
+            </div>
+
+            <!-- Asignación -->
+            <div class="form-section">
+                <span class="form-section-label lbl-asignacion">📍 Asignación</span>
+                <div class="form-cols">
+                    <div class="form-field">
+                        <label>Estado</label>
+                        <select id="e_estado">
+                            <option value="">— Seleccionar —</option>
+                            <option>NUEVO</option>
+                            <option>BUENO</option>
+                            <option>REGULAR</option>
+                            <option>DAÑADO</option>
+                            <option>BAJA</option>
+                        </select>
+                    </div>
+                    <div class="form-field" style="justify-content:flex-end;padding-top:16px;">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="e_disponible">
+                            <label for="e_disponible" style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted2);text-transform:none;letter-spacing:0;">Disponible</label>
+                        </div>
+                    </div>
+                    <div class="form-field"><label>Fecha Salida</label><input id="e_fecha_salida" type="date"></div>
+                    <div class="form-field"><label>Destino / Planta</label><input id="e_destino_planta" placeholder="Planta o área"></div>
+                    <div class="form-field"><label>Asignado A</label><input id="e_asignado_a" placeholder="Nombre del responsable"></div>
+                    <div class="form-field"><label>Personal IT que Asigna</label><input id="e_personal_it_que_asigna" placeholder="Técnico IT"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-ghost btn-sm" onclick="cerrarEditar()">Cancelar</button>
+                <button class="btn btn-cyan" onclick="guardarCambios()">💾 Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ MODAL HISTORIAL ══ -->
+    <div class="modal" id="modalHistorial">
+        <div class="modal-box hist-box">
+            <div class="modal-header">
+                <h3>🕒 Historial — <span id="histIdLabel" style="color:var(--cyan);font-family:'DM Mono',monospace;font-size:13px;"></span></h3>
+                <button class="close-btn" onclick="cerrarHistorial()">✕ Cerrar</button>
+            </div>
+            <div id="contenidoHistorial">
+                <p style="text-align:center;padding:30px;color:var(--muted)"><span class="spin"></span> Cargando…</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── Estado global ──────────────────────────────────────────────────────────────
+        let datosActuales = [];
+        let datosFiltrados = [];
+        let paginaActual = 1;
+        let editandoID = null;
+        let usuarioActual = 'USUARIO';
+
+        const CAMPOS = [
+            { key: 'oc', label: 'OC' },
+            { key: 'folio', label: 'Folio' },
+            { key: 'fecha_registro', label: 'Fecha Registro' },
+            { key: 'recibido_por', label: 'Recibido Por' },
+            { key: 'subcategoria', label: 'Subcategoría' },
+            { key: 'marca', label: 'Marca' },
+            { key: 'modelo', label: 'Modelo' },
+            { key: 'no_serie', label: 'No. Serie' },
+            { key: 'cantidad', label: 'Cantidad' },
+            { key: 'tamano_pulgadas', label: 'Tamaño (pulgadas)' },
+            { key: 'accesorios', label: 'Accesorios' },
+            { key: 'mac_wifi', label: 'MAC WiFi' },
+            { key: 'mac_ethernet', label: 'MAC Ethernet' },
+            { key: 'proveedor', label: 'Proveedor' },
+            { key: 'costo_usd', label: 'Costo USD' },
+            { key: 'vida_util_meses', label: 'Vida Útil (meses)' },
+            { key: 'estado', label: 'Estado' },
+            { key: 'disponible', label: 'Disponible' },
+            { key: 'fecha_salida', label: 'Fecha Salida' },
+            { key: 'destino_planta', label: 'Destino / Planta' },
+            { key: 'asignado_a', label: 'Asignado A' },
+            { key: 'personal_it_que_asigna', label: 'Personal IT que Asigna' },
+        ];
+
+        // ── User chip ──────────────────────────────────────────────────────────────────
+        function toggleChip() {
+            document.getElementById('userChip').classList.toggle('open');
+        }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#userChip')) document.getElementById('userChip').classList.remove('open');
+        });
+        async function cerrarSesion() {
+            try { await fetch('/logout', { method: 'POST' }); } catch { }
+            window.location.href = '/static/login.html';
+        }
+
+        // ── Cargar usuario ─────────────────────────────────────────────────────────────
+        async function cargarUsuario() {
+            try {
+                const r = await fetch('/ME');
+                const d = await r.json();
+                usuarioActual = d.usuario || 'USUARIO';
+                document.getElementById('nombreUsuario').textContent = usuarioActual;
+                document.getElementById('dropNombre').textContent = d.nombre || usuarioActual;
+                document.getElementById('dropRol').textContent = d.rol || '—';
+            } catch { document.getElementById('nombreUsuario').textContent = 'USUARIO'; }
+        }
+
+        // ── Cargar tabla ───────────────────────────────────────────────────────────────
+        async function cargar() {
+            try {
+                const r = await fetch('/PANTALLAS_NF');
+                const d = await r.json();
+                datosActuales = d.registros || d || [];
+                aplicarFiltros();
+                actualizarStats();
+            } catch (e) {
+                document.getElementById('cuerpo').innerHTML =
+                    `<tr><td colspan="24" style="text-align:center;padding:48px;color:var(--red)">⚠ Error al cargar datos: ${e.message}</td></tr>`;
+            }
+        }
+
+        function actualizarStats() {
+            const total = datosActuales.length;
+            const disponibles = datosActuales.filter(r => r.disponible === true || r.disponible === 1 || r.disponible === 't').length;
+            const asignadas = total - disponibles;
+            const marcas = new Set(datosActuales.map(r => r.marca).filter(Boolean)).size;
+            const costo = datosActuales.reduce((s, r) => s + (parseFloat(r.costo_usd) || 0), 0);
+
+            document.getElementById('statTotal').textContent = total.toLocaleString('es-MX');
+            document.getElementById('statDisponibles').textContent = disponibles.toLocaleString('es-MX');
+            document.getElementById('statAsignadas').textContent = asignadas.toLocaleString('es-MX');
+            document.getElementById('statMarcas').textContent = marcas.toLocaleString('es-MX');
+            document.getElementById('statCosto').textContent = '$' + costo.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // ── Filtros ────────────────────────────────────────────────────────────────────
+        function v(id) { return (document.getElementById(id)?.value || '').toLowerCase().trim(); }
+
+        function aplicarFiltros() {
+            const global = v('busquedaGlobal');
+            datosFiltrados = datosActuales.filter(r => {
+                // Global search
+                if (global) {
+                    const concat = Object.values(r).join(' ').toLowerCase();
+                    if (!concat.includes(global)) return false;
+                }
+                // Column filters
+                const checks = [
+                    [v('f_id_unico'), String(r.id_unico ?? '')],
+                    [v('f_oc'), String(r.oc ?? '')],
+                    [v('f_folio'), String(r.folio ?? '')],
+                    [v('f_fecha_registro'), String(r.fecha_registro ?? '')],
+                    [v('f_recibido_por'), String(r.recibido_por ?? '')],
+                    [v('f_subcategoria'), String(r.subcategoria ?? '')],
+                    [v('f_proveedor'), String(r.proveedor ?? '')],
+                    [v('f_costo_usd'), String(r.costo_usd ?? '')],
+                    [v('f_vida_util'), String(r.vida_util_meses ?? '')],
+                    [v('f_marca'), String(r.marca ?? '')],
+                    [v('f_modelo'), String(r.modelo ?? '')],
+                    [v('f_no_serie'), String(r.no_serie ?? '')],
+                    [v('f_cantidad'), String(r.cantidad ?? '')],
+                    [v('f_tamano'), String(r.tamano_pulgadas ?? '')],
+                    [v('f_accesorios'), String(r.accesorios ?? '')],
+                    [v('f_mac_wifi'), String(r.mac_wifi ?? '')],
+                    [v('f_mac_ethernet'), String(r.mac_ethernet ?? '')],
+                    [v('f_estado'), String(r.estado ?? '')],
+                    [v('f_fecha_salida'), String(r.fecha_salida ?? '')],
+                    [v('f_destino'), String(r.destino_planta ?? '')],
+                    [v('f_asignado_a'), String(r.asignado_a ?? '')],
+                    [v('f_personal_it'), String(r.personal_it_que_asigna ?? '')],
+                ];
+                for (const [q, val] of checks) {
+                    if (q && !val.toLowerCase().includes(q)) return false;
+                }
+                // Disponible filter
+                const fd = v('f_disponible');
+                if (fd !== '') {
+                    const disp = (r.disponible === true || r.disponible === 1 || r.disponible === 't') ? '1' : '0';
+                    if (disp !== fd) return false;
+                }
+                return true;
+            });
+            paginaActual = 1;
+            renderTabla();
+        }
+
+        // ── Render ─────────────────────────────────────────────────────────────────────
+        function renderTabla() {
+            const por = parseInt(document.getElementById('porPagina').value) || 25;
+            const total = datosFiltrados.length;
+            const totalPaginas = Math.max(1, Math.ceil(total / por));
+            paginaActual = Math.min(paginaActual, totalPaginas);
+            const inicio = (paginaActual - 1) * por;
+            const fin = Math.min(inicio + por, total);
+            const pagina = datosFiltrados.slice(inicio, fin);
+
+            document.getElementById('pageInfo').textContent = `Pág. ${paginaActual} / ${totalPaginas}`;
+            document.getElementById('totalInfo').textContent = `${total.toLocaleString('es-MX')} registros`;
+
+            if (!pagina.length) {
+                document.getElementById('cuerpo').innerHTML =
+                    '<tr><td colspan="24" style="text-align:center;padding:48px;color:var(--muted)">📭 Sin resultados.</td></tr>';
+                return;
+            }
+
+            document.getElementById('cuerpo').innerHTML = pagina.map(r => {
+                const disp = r.disponible === true || r.disponible === 1 || r.disponible === 't';
+                const dispPill = disp
+                    ? '<span class="pill pill-green">Sí</span>'
+                    : '<span class="pill pill-red">No</span>';
+
+                const estadoPill = (e => {
+                    if (!e) return '—';
+                    const map = { NUEVO: 'pill-cyan', BUENO: 'pill-green', REGULAR: 'pill-amber', 'DAÑADO': 'pill-red', BAJA: 'pill-gray' };
+                    return `<span class="pill ${map[e] || 'pill-gray'}">${e}</span>`;
+                })(r.estado);
+
+                const subPill = (s => {
+                    if (!s) return '—';
+                    return `<span class="pill pill-purple">${s}</span>`;
+                })(r.subcategoria);
+
+                const fmtDate = d => {
+                    if (!d) return '—';
+                    try { return new Date(d).toLocaleDateString('es-MX'); } catch { return d; }
+                };
+
+                const fmtUSD = v => {
+                    if (v == null || v === '') return '—';
+                    return '$' + parseFloat(v).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                };
+
+                return `<tr>
+                <td style="display:flex;gap:5px;padding:6px 10px;">
+                    <button class="btn btn-ghost btn-sm" title="Editar" onclick="abrirEditar(${r.id})">✏️</button>
+                    <button class="btn btn-ghost btn-sm" title="Historial" onclick="verHistorial(${r.id})">🕒</button>
+                </td>
+                <td class="mono">${esc(r.id_unico) || '—'}</td>
+                <td class="mono">${esc(r.oc) || '—'}</td>
+                <td class="mono">${esc(r.folio) || '—'}</td>
+                <td class="mono">${fmtDate(r.fecha_registro)}</td>
+                <td>${esc(r.recibido_por) || '—'}</td>
+                <td>${subPill}</td>
+                <td>${esc(r.proveedor) || '—'}</td>
+                <td class="num">${fmtUSD(r.costo_usd)}</td>
+                <td class="num">${r.vida_util_meses != null ? r.vida_util_meses : '—'}</td>
+                <td><strong>${esc(r.marca) || '—'}</strong></td>
+                <td>${esc(r.modelo) || '—'}</td>
+                <td class="mono">${esc(r.no_serie) || '—'}</td>
+                <td class="num">${r.cantidad != null ? r.cantidad : '—'}</td>
+                <td class="num">${r.tamano_pulgadas != null ? r.tamano_pulgadas + '"' : '—'}</td>
+                <td class="wrap">${esc(r.accesorios) || '—'}</td>
+                <td class="mono">${esc(r.mac_wifi) || '—'}</td>
+                <td class="mono">${esc(r.mac_ethernet) || '—'}</td>
+                <td>${estadoPill}</td>
+                <td>${dispPill}</td>
+                <td class="mono">${fmtDate(r.fecha_salida)}</td>
+                <td>${esc(r.destino_planta) || '—'}</td>
+                <td>${esc(r.asignado_a) || '—'}</td>
+                <td>${esc(r.personal_it_que_asigna) || '—'}</td>
+            </tr>`;
+            }).join('');
+        }
+
+        function irPagina(p) { paginaActual = p; renderTabla(); }
+
+        // ── Guardar nuevo ──────────────────────────────────────────────────────────────
+        async function guardarNuevo() {
+            const numFields = ['cantidad', 'tamano_pulgadas', 'costo_usd', 'vida_util_meses'];
+            const datos = {
+                oc: document.getElementById('n_oc').value || null,
+                folio: document.getElementById('n_folio').value || null,
+                fecha_registro: document.getElementById('n_fecha_registro').value || null,
+                recibido_por: document.getElementById('n_recibido_por').value || null,
+                subcategoria: document.getElementById('n_subcategoria').value || null,
+                marca: document.getElementById('n_marca').value || null,
+                modelo: document.getElementById('n_modelo').value || null,
+                no_serie: document.getElementById('n_no_serie').value || null,
+                cantidad: document.getElementById('n_cantidad').value !== '' ? parseInt(document.getElementById('n_cantidad').value) : null,
+                tamano_pulgadas: document.getElementById('n_tamano_pulgadas').value !== '' ? parseFloat(document.getElementById('n_tamano_pulgadas').value) : null,
+                accesorios: document.getElementById('n_accesorios').value || null,
+                mac_wifi: document.getElementById('n_mac_wifi').value || null,
+                mac_ethernet: document.getElementById('n_mac_ethernet').value || null,
+                proveedor: document.getElementById('n_proveedor').value || null,
+                costo_usd: document.getElementById('n_costo_usd').value !== '' ? parseFloat(document.getElementById('n_costo_usd').value) : null,
+                vida_util_meses: document.getElementById('n_vida_util_meses').value !== '' ? parseInt(document.getElementById('n_vida_util_meses').value) : null,
+                estado: document.getElementById('n_estado').value || null,
+                disponible: document.getElementById('n_disponible').checked,
+                fecha_salida: document.getElementById('n_fecha_salida').value || null,
+                destino_planta: document.getElementById('n_destino_planta').value || null,
+                asignado_a: document.getElementById('n_asignado_a').value || null,
+                personal_it_que_asigna: document.getElementById('n_personal_it_que_asigna').value || null,
+            };
+
+            try {
+                const res = await fetch('/PANTALLAS_NF', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(datos)
+                });
+                const text = await res.text();
+                const result = text ? JSON.parse(text) : {};
+                if (res.ok && !result.error) { limpiarFormulario(); cargar(); }
+                else alert('Error: ' + (result.error || 'No se pudo guardar'));
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        function limpiarFormulario() {
+            ['n_oc', 'n_folio', 'n_fecha_registro', 'n_recibido_por', 'n_subcategoria', 'n_marca', 'n_modelo',
+                'n_no_serie', 'n_cantidad', 'n_tamano_pulgadas', 'n_accesorios', 'n_mac_wifi', 'n_mac_ethernet',
+                'n_proveedor', 'n_costo_usd', 'n_vida_util_meses', 'n_estado', 'n_fecha_salida',
+                'n_destino_planta', 'n_asignado_a', 'n_personal_it_que_asigna'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+            document.getElementById('n_disponible').checked = true;
+        }
+
+        // ── Editar ─────────────────────────────────────────────────────────────────────
+        function abrirEditar(id) {
+            editandoID = id;
+            document.getElementById('editIdLabel').textContent = id;
+            const r = datosActuales.find(x => x.id === id);
+            if (!r) return;
+
+            const fmtDateInput = d => {
+                if (!d) return '';
+                try { const dt = new Date(d); if (!isNaN(dt)) return dt.toISOString().slice(0, 10); } catch { }
+                return d;
+            };
+
+            document.getElementById('e_oc').value = r.oc ?? '';
+            document.getElementById('e_folio').value = r.folio ?? '';
+            document.getElementById('e_fecha_registro').value = fmtDateInput(r.fecha_registro);
+            document.getElementById('e_recibido_por').value = r.recibido_por ?? '';
+            document.getElementById('e_subcategoria').value = r.subcategoria ?? '';
+            document.getElementById('e_marca').value = r.marca ?? '';
+            document.getElementById('e_modelo').value = r.modelo ?? '';
+            document.getElementById('e_no_serie').value = r.no_serie ?? '';
+            document.getElementById('e_cantidad').value = r.cantidad ?? '';
+            document.getElementById('e_tamano_pulgadas').value = r.tamano_pulgadas ?? '';
+            document.getElementById('e_accesorios').value = r.accesorios ?? '';
+            document.getElementById('e_mac_wifi').value = r.mac_wifi ?? '';
+            document.getElementById('e_mac_ethernet').value = r.mac_ethernet ?? '';
+            document.getElementById('e_proveedor').value = r.proveedor ?? '';
+            document.getElementById('e_costo_usd').value = r.costo_usd ?? '';
+            document.getElementById('e_vida_util_meses').value = r.vida_util_meses ?? '';
+            document.getElementById('e_estado').value = r.estado ?? '';
+            document.getElementById('e_disponible').checked = r.disponible === true || r.disponible === 1 || r.disponible === 't';
+            document.getElementById('e_fecha_salida').value = fmtDateInput(r.fecha_salida);
+            document.getElementById('e_destino_planta').value = r.destino_planta ?? '';
+            document.getElementById('e_asignado_a').value = r.asignado_a ?? '';
+            document.getElementById('e_personal_it_que_asigna').value = r.personal_it_que_asigna ?? '';
+
+            document.getElementById('modalEditar').classList.add('show');
+            document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+        }
+
+        function cerrarEditar() {
+            document.getElementById('modalEditar').classList.remove('show');
+            editandoID = null;
+        }
+
+        async function guardarCambios() {
+            const datos = {
+                oc: document.getElementById('e_oc').value || null,
+                folio: document.getElementById('e_folio').value || null,
+                fecha_registro: document.getElementById('e_fecha_registro').value || null,
+                recibido_por: document.getElementById('e_recibido_por').value || null,
+                subcategoria: document.getElementById('e_subcategoria').value || null,
+                marca: document.getElementById('e_marca').value || null,
+                modelo: document.getElementById('e_modelo').value || null,
+                no_serie: document.getElementById('e_no_serie').value || null,
+                cantidad: document.getElementById('e_cantidad').value !== '' ? parseInt(document.getElementById('e_cantidad').value) : null,
+                tamano_pulgadas: document.getElementById('e_tamano_pulgadas').value !== '' ? parseFloat(document.getElementById('e_tamano_pulgadas').value) : null,
+                accesorios: document.getElementById('e_accesorios').value || null,
+                mac_wifi: document.getElementById('e_mac_wifi').value || null,
+                mac_ethernet: document.getElementById('e_mac_ethernet').value || null,
+                proveedor: document.getElementById('e_proveedor').value || null,
+                costo_usd: document.getElementById('e_costo_usd').value !== '' ? parseFloat(document.getElementById('e_costo_usd').value) : null,
+                vida_util_meses: document.getElementById('e_vida_util_meses').value !== '' ? parseInt(document.getElementById('e_vida_util_meses').value) : null,
+                estado: document.getElementById('e_estado').value || null,
+                disponible: document.getElementById('e_disponible').checked,
+                fecha_salida: document.getElementById('e_fecha_salida').value || null,
+                destino_planta: document.getElementById('e_destino_planta').value || null,
+                asignado_a: document.getElementById('e_asignado_a').value || null,
+                personal_it_que_asigna: document.getElementById('e_personal_it_que_asigna').value || null,
+            };
+
+            try {
+                const res = await fetch(`/PANTALLAS_NF/${editandoID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(datos)
+                });
+                const text = await res.text();
+                const result = text ? JSON.parse(text) : {};
+                if (res.ok && !result.error) { cerrarEditar(); cargar(); }
+                else alert('Error: ' + (result.error || 'No se pudo guardar'));
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // ── Historial ──────────────────────────────────────────────────────────────────
+        function esc(v) {
+            if (v == null) return '';
+            return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function formatFecha(f) {
+            try { const d = new Date(f); if (!isNaN(d)) return d.toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch { }
+            return f ?? '';
+        }
+
+        function renderEvento(ev) {
+            let antes = ev.registro_anterior, despues = ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch { }
+
+            const cambios = new Set();
+            CAMPOS.forEach(({ key }) => { if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? '')) cambios.add(key); });
+
+            let filas = '';
+            CAMPOS.forEach(({ key, label }) => {
+                const vA = antes && key in antes ? antes[key] : '';
+                const vD = despues && key in despues ? despues[key] : '';
+                const cambiado = cambios.has(key);
+                filas += `<tr class="${cambiado ? 'row-changed' : ''}">
+                <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
+                <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
+            </tr>`;
+            });
+
+            return `<div class="ev-wrap">
+            <div class="ev-header">
+                <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                    ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                </span>
+            </div>
+            <table class="ev-table">
+                <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
+                <tbody>${filas}</tbody>
+            </table>
+        </div>`;
+        }
+
+        function verHistorial(id) {
+            document.getElementById('histIdLabel').textContent = id;
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="text-align:center;padding:30px;color:var(--muted)"><span class="spin"></span> Cargando…</p>';
+            document.getElementById('modalHistorial').classList.add('show');
+            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+
+            fetch(`/PANTALLAS_NF/${id}/HISTORIAL`)
+                .then(r => r.json())
+                .then(data => {
+                    const lista = (data.historial || []).sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+                    document.getElementById('contenidoHistorial').innerHTML = !lista.length
+                        ? '<p class="sin-hist">📭 Sin ediciones registradas.</p>'
+                        : `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}</p>`
+                        + lista.map(renderEvento).join('');
+                })
+                .catch(() => {
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        '<p style="color:var(--red);text-align:center;padding:30px">Error al cargar historial.</p>';
+                });
+        }
+
+        function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
+
+        // ── Exportar CSV ───────────────────────────────────────────────────────────────
+        function exportarCSV() {
+            if (!datosFiltrados.length) return;
+            const headers = ['id', 'id_unico', 'oc', 'folio', 'fecha_registro', 'recibido_por', 'subcategoria',
+                'marca', 'modelo', 'no_serie', 'cantidad', 'tamano_pulgadas', 'accesorios', 'mac_wifi', 'mac_ethernet',
+                'proveedor', 'costo_usd', 'vida_util_meses', 'estado', 'disponible', 'fecha_salida', 'destino_planta',
+                'asignado_a', 'personal_it_que_asigna'];
+            const rows = [headers.join(',')];
+            datosFiltrados.forEach(r => {
+                rows.push(headers.map(h => {
+                    const val = r[h] ?? '';
+                    return `"${String(val).replace(/"/g, '""')}"`;
+                }).join(','));
+            });
+            const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `pantallas_nf_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+        }
+
+        // ── Scrollbar sincronizado ─────────────────────────────────────────────────────
+        (function () {
+            const top = document.getElementById('scrollTop');
+            const inner = document.getElementById('scrollTopInner');
+            const scroll = document.getElementById('tableScroll');
+            function syncWidth() { inner.style.width = scroll.scrollWidth + 'px'; }
+            new MutationObserver(syncWidth).observe(document.getElementById('tabla'), { childList: true, subtree: true });
+            window.addEventListener('resize', syncWidth);
+            syncWidth();
+            top.addEventListener('scroll', () => { scroll.scrollLeft = top.scrollLeft; });
+            scroll.addEventListener('scroll', () => { top.scrollLeft = scroll.scrollLeft; });
+        })();
+
+        // ── Escape ─────────────────────────────────────────────────────────────────────
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); } });
+
+        // ── Init ───────────────────────────────────────────────────────────────────────
+        cargarUsuario();
+        cargar();
+    </script>
 </body>
 </html>

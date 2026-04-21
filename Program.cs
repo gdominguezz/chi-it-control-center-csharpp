@@ -19,9 +19,11 @@ builder.Services.AddScoped<QrService>();                               // QRS
 builder.Services.AddScoped<BajasService>();  // BAJAS
 
 ///////////////////////////////////////////////////////// PRESUPUESTO //////////////////////////////////////
-builder.Services.AddScoped<PresupuestosReqVsOcService>();           //SERVICIO DEL MODULO REQ VS OC
-builder.Services.AddScoped<RegistroEntradasTemporalService>(); // REGISTRO ENTRADAS TEMPORAL
-builder.Services.AddScoped<OrdenesDeCompraService>(); // ORDENES DE COMPRA
+builder.Services.AddScoped<PresupuestosReqVsOcService>();            //SERVICIO DEL MODULO REQ VS OC
+builder.Services.AddScoped<RegistroEntradasTemporalService>();      // REGISTRO ENTRADAS TEMPORAL
+builder.Services.AddScoped<OrdenesDeCompraService>();              // ORDENES DE COMPRA
+builder.Services.AddScoped<PantallasNfService>();                 // PANTALLAS_NF
+               
 
 // CORS
 builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
