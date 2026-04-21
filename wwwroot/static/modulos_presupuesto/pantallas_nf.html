@@ -1570,14 +1570,13 @@
 
         // ── Cargar usuario ─────────────────────────────────────────────────────────────
         async function cargarUsuario() {
-            try {
-                const r = await fetch('/ME');
-                const d = await r.json();
-                usuarioActual = d.usuario || 'USUARIO';
-                document.getElementById('nombreUsuario').textContent = usuarioActual;
-                document.getElementById('dropNombre').textContent = d.nombre || usuarioActual;
-                document.getElementById('dropRol').textContent = d.rol || '—';
-            } catch { document.getElementById('nombreUsuario').textContent = 'USUARIO'; }
+
+            usuarioActual = localStorage.getItem('usuario') || 'USUARIO';
+
+            document.getElementById('nombreUsuario').textContent = usuarioActual;
+            document.getElementById('dropNombre').textContent = usuarioActual;
+            document.getElementById('dropRol').textContent = localStorage.getItem('rol') || 'USER';
+
         }
 
         // ── Cargar tabla ───────────────────────────────────────────────────────────────
