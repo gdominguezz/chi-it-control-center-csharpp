@@ -189,40 +189,50 @@ public class PantallasNfService
     {
         await using var conn = await _pool.OpenAsync();
 
+        // Obtener registro anterior para historial
         var anterior = await SnapshotAsync(conn, id);
         if (anterior == null) return false;
 
-        await using var cmd = new NpgsqlCommand("""
-            UPDATE pantallas_nf SET
-                oc                      = @oc,
-                folio                   = @folio,
-                fecha_registro          = @fecha_registro,
-                recibido_por            = @recibido_por,
-                subcategoria            = @subcategoria,
-                marca                   = @marca,
-                modelo                  = @modelo,
-                no_serie                = @no_serie,
-                cantidad                = @cantidad,
-                tamano_pulgadas         = @tamano_pulgadas,
-                accesorios              = @accesorios,
-                mac_wifi                = @mac_wifi,
-                mac_ethernet            = @mac_ethernet,
-                proveedor               = @proveedor,
-                costo_usd               = @costo_usd,
-                vida_util_meses         = @vida_util_meses,
-                estado                  = @estado,
-                disponible              = @disponible,
-                fecha_salida            = @fecha_salida,
-                destino_planta          = @destino_planta,
-                asignado_a              = @asignado_a,
-                personal_it_que_asigna  = @personal_it_que_asigna
-            WHERE id = @id
-            """, conn);
+        // Recalcular ID_UNICO = OC + FOLIO
+        var idUnico = (!string.IsNullOrWhiteSpace(dto.oc) && !string.IsNullOrWhiteSpace(dto.folio))
+            ? $"{dto.oc}{dto.folio}"
+            : dto.id_unico;
 
-        AgregarParametros(cmd, dto, dto.id_unico);
+        await using var cmd = new NpgsqlCommand("""
+        UPDATE pantallas_nf SET
+            id_unico                = @id_unico,
+            oc                      = @oc,
+            folio                   = @folio,
+            fecha_registro          = @fecha_registro,
+            recibido_por            = @recibido_por,
+            subcategoria            = @subcategoria,
+            marca                   = @marca,
+            modelo                  = @modelo,
+            no_serie                = @no_serie,
+            cantidad                = @cantidad,
+            tamano_pulgadas         = @tamano_pulgadas,
+            accesorios              = @accesorios,
+            mac_wifi                = @mac_wifi,
+            mac_ethernet            = @mac_ethernet,
+            proveedor               = @proveedor,
+            costo_usd               = @costo_usd,
+            vida_util_meses         = @vida_util_meses,
+            estado                  = @estado,
+            disponible              = @disponible,
+            fecha_salida            = @fecha_salida,
+            destino_planta          = @destino_planta,
+            asignado_a              = @asignado_a,
+            personal_it_que_asigna  = @personal_it_que_asigna
+        WHERE id = @id
+        """, conn);
+
+        // Agregar parámetros
+        AgregarParametros(cmd, dto, idUnico);
         cmd.Parameters.AddWithValue("id", id);
+
         await cmd.ExecuteNonQueryAsync();
 
+        // Obtener registro nuevo para historial
         var nuevo = await SnapshotAsync(conn, id);
         if (nuevo != null)
             await RegistrarHistorialAsync(conn, id, usuario ?? "sistema", anterior, nuevo);
@@ -324,29 +334,32 @@ public class PantallasNfService
 
     private static void AgregarParametros(NpgsqlCommand cmd, PantallaNfDto dto, string? idUnico)
     {
-        cmd.Parameters.AddWithValue("id_unico",               (object?)idUnico                   ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("oc",                     (object?)dto.oc                    ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("folio",                  (object?)dto.folio                 ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("fecha_registro",         (object?)dto.fecha_registro        ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("recibido_por",           (object?)dto.recibido_por          ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("subcategoria",           (object?)dto.subcategoria          ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("marca",                  (object?)dto.marca                 ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("modelo",                 (object?)dto.modelo                ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("no_serie",               (object?)dto.no_serie              ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("cantidad",               (object?)dto.cantidad              ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("tamano_pulgadas",        (object?)dto.tamano_pulgadas       ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("accesorios",             (object?)dto.accesorios            ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("mac_wifi",               (object?)dto.mac_wifi              ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("mac_ethernet",           (object?)dto.mac_ethernet          ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("proveedor",              (object?)dto.proveedor             ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("costo_usd",              (object?)dto.costo_usd             ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("vida_util_meses",        (object?)dto.vida_util_meses       ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("estado",                 (object?)dto.estado                ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("disponible",             (object?)dto.disponible            ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("fecha_salida",           (object?)dto.fecha_salida          ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("destino_planta",         (object?)dto.destino_planta        ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("asignado_a",             (object?)dto.asignado_a            ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("personal_it_que_asigna", (object?)dto.personal_it_que_asigna?? DBNull.Value);
+        DateTime? fr = DateTime.TryParse(dto.fecha_registro, out var frTmp) ? frTmp : null;
+        DateTime? fs = DateTime.TryParse(dto.fecha_salida, out var fsTmp) ? fsTmp : null;
+
+        cmd.Parameters.AddWithValue("id_unico", (object?)idUnico ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("oc", (object?)dto.oc ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("folio", (object?)dto.folio ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("fecha_registro", (object?)fr ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("recibido_por", (object?)dto.recibido_por ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("subcategoria", (object?)dto.subcategoria ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("marca", (object?)dto.marca ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("modelo", (object?)dto.modelo ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("no_serie", (object?)dto.no_serie ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("cantidad", (object?)dto.cantidad ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("tamano_pulgadas", (object?)dto.tamano_pulgadas ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("accesorios", (object?)dto.accesorios ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("mac_wifi", (object?)dto.mac_wifi ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("mac_ethernet", (object?)dto.mac_ethernet ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("proveedor", (object?)dto.proveedor ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("costo_usd", (object?)dto.costo_usd ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("vida_util_meses", (object?)dto.vida_util_meses ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("estado", (object?)dto.estado ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("disponible", (object?)dto.disponible ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("fecha_salida", (object?)fs ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("destino_planta", (object?)dto.destino_planta ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("asignado_a", (object?)dto.asignado_a ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("personal_it_que_asigna", (object?)dto.personal_it_que_asigna ?? DBNull.Value);
     }
 
     private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
