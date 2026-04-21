@@ -1086,7 +1086,14 @@
                     </div>
                     <div class="field">
                         <label>Estatus OC</label>
-                        <input id="n_ESTATUS_OC" placeholder="Se calcula automáticamente">
+                        <select id="n_ESTATUS_OC">
+                            <option value="">— Seleccionar —</option>
+                            <option>COMPLETA</option>
+                            <option>FALSO</option>
+                            <option>PARCIAL</option>
+                            <option>PENDIENTE</option>
+                            <option>VERDADERO</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -1264,7 +1271,17 @@
                             <th><input oninput="filtrar()" id="f_REQUISICION" placeholder="🔍"></th>
                             <th></th>
                             <th></th>
-                            <th><input oninput="filtrar()" id="f_ESTATUS_OC" placeholder="🔍"></th>
+                            <th><select onchange="filtrar()" id="f_ESTATUS_OC"
+                                        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:5px;padding:4px 6px;font-size:10px;color:var(--text);font-family:'DM Mono',monospace;">
+
+                                <option value="">— Todos —</option>
+                                <option>COMPLETA</option>
+                                <option>FALSO</option>
+                                <option>PARCIAL</option>
+                                <option>PENDIENTE</option>
+                                <option>VERDADERO</option>
+
+                            </select></th>
                             <th></th>
                             <th></th>
                         </tr>
@@ -1280,82 +1297,78 @@
             <span class="page-info" id="paginaInfo">—</span>
             <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
         </div>
+
         <div class="panel" id="leyendaSolicitantes" style="display:none;">
             <div class="panel-title">🎨 Solicitantes</div>
             <div id="leyendaContenido" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
         </div>
-    </div><!-- /main -->
+
+    </div> <!-- /main -->
     <!-- MODAL EDITAR -->
     <div id="modalEditar" class="modal">
         <div class="modal-box form-box">
+
             <div class="modal-header">
-                <h3>✏️ Editar Orden &nbsp;<span id="editarIdLabel" style="color:var(--cyan);font-family:'DM Mono',monospace;">#</span></h3>
+                <h3>
+                    ✏️ Editar Orden
+                    <span id="editarIdLabel" style="color:var(--cyan);font-family:'DM Mono',monospace;">#</span>
+                </h3>
                 <button class="close-btn" onclick="cerrarEditar()">✕</button>
             </div>
 
-            <div style="margin-bottom:10px;"><span class="form-section-label lbl-formula">🔗 Llenado por Fórmula</span></div>
-            <div class="form-cols">
-                <div class="form-field"><label>Orden de Compra</label><input id="e_ORDEN_DE_COMPRA"></div>
-                <div class="form-field"><label>Fecha OC</label><input type="date" id="e_FECHA_OC"></div>
-                <div class="form-field"><label>OC</label><input id="e_OC"></div>
-                <div class="form-field"><label>Fecha Entrada</label><input type="date" id="e_FECHA_ENTRADA"></div>
-                <div class="form-field"><label>Total (Sin IVA) — calculado</label><input type="number" step="0.01" id="e_TOTAL_SIN_IVA" readonly tabindex="-1"></div>
-                <div class="form-field"><label>Estatus OC</label><input id="e_ESTATUS_OC"></div>
+            <div style="margin-bottom:10px;">
+                <span class="form-section-label lbl-formula">🔗 Llenado por Fórmula</span>
             </div>
 
-            <div style="margin:10px 0;"><span class="form-section-label lbl-requisitor">✏️ Llenado por Requisitor</span></div>
             <div class="form-cols">
-                <div class="form-field"><label>Folio</label><input id="e_FOLIO"></div>
-                <div class="form-field"><label>Solicitante</label><select id="e_SOLICITANTE"><option value="">— Seleccionar —</option></select></div>
-                <div class="form-field">
-                    <label>Presupuesto (Mes)</label>
-                    <select id="e_PRESUPUESTO_MES">
-                        <option value="">— Seleccionar —</option>
-                        <option>ENERO</option>
-                        <option>FEBRERO</option>
-                        <option>MARZO</option>
-                        <option>ABRIL</option>
-                        <option>MAYO</option>
-                        <option>JUNIO</option>
-                        <option>JULIO</option>
-                        <option>AGOSTO</option>
-                        <option>SEPTIEMBRE</option>
-                        <option>OCTUBRE</option>
-                        <option>NOVIEMBRE</option>
-                        <option>DICIEMBRE</option>
-                    </select>
-                </div>
-                <div class="form-field"><label>Serie / Ubicación / No. Empleado</label><input id="e_SERIE_UBICACION_NO_EMPLEADO"></div>
-                <div class="form-field full"><label>Accesorio Solicitado</label><input id="e_ACCESORIO_SOLICITADO"></div>
-                <div class="form-field"><label>Proveedor Elegido</label><input id="e_PROVEEDOR_ELEGIDO"></div>
-                <div class="form-field"><label>Pieza / Servicio</label><input id="e_PIEZA_SERVICIO"></div>
-                <div class="form-field"><label>Cantidad</label><input type="number" step="1" min="0" id="e_CANTIDAD" oninput="calcularTotal('e')"></div>
-                <div class="form-field"><label>Precio Unitario</label><input type="number" step="0.01" min="0" id="e_PRECIO_UNITARIO" oninput="calcularTotal('e')"></div>
-                <div class="form-field">
-                    <label>Moneda</label>
-                    <select id="e_MONEDA">
-                        <option value="">— Seleccionar —</option>
-                        <option>PESOS</option>
-                        <option>DOLARES</option>
-                        <option>EUROS</option>
-                    </select>
-                </div>
-                <div class="form-field full"><label>Comentarios</label><textarea id="e_COMENTARIOS"></textarea></div>
-                <div class="form-field"><label>Hoja Control</label><input id="e_HOJA_CONTROL"></div>
-            </div>
 
-            <div style="margin:10px 0;"><span class="form-section-label lbl-autorizador">🔐 Llenado por Autorizador</span></div>
-            <div class="form-cols">
-                <div class="form-field"><label>Requisición</label><input id="e_REQUISICION"></div>
-                <div class="form-field"><label>Cantidad Registrada</label><input type="number" step="1" min="0" id="e_CANTIDAD_REGISTRADA"></div>
+                <div class="form-field">
+                    <label>Orden de Compra</label>
+                    <input id="e_ORDEN_DE_COMPRA">
+                </div>
+
+                <div class="form-field">
+                    <label>Fecha OC</label>
+                    <input type="date" id="e_FECHA_OC">
+                </div>
+
+                <div class="form-field">
+                    <label>OC</label>
+                    <input id="e_OC">
+                </div>
+
+                <div class="form-field">
+                    <label>Fecha Entrada</label>
+                    <input type="date" id="e_FECHA_ENTRADA">
+                </div>
+
+                <div class="form-field">
+                    <label>Total (Sin IVA) — calculado</label>
+                    <input type="number" step="0.01" id="e_TOTAL_SIN_IVA" readonly tabindex="-1">
+                </div>
+
+                <div class="form-field">
+                    <label>Estatus OC</label>
+                    <select id="e_ESTATUS_OC">
+                        <option value="">— Seleccionar —</option>
+                        <option>COMPLETA</option>
+                        <option>FALSO</option>
+                        <option>PARCIAL</option>
+                        <option>PENDIENTE</option>
+                        <option>VERDADERO</option>
+                    </select>
+                </div>
+
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
                 <button class="btn btn-success" onclick="guardarCambios()">💾 Guardar Cambios</button>
+                <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
             </div>
+
         </div>
     </div>
+
 
     <!-- MODAL HISTORIAL -->
     <div id="modalHistorial" class="modal">
@@ -1431,7 +1444,7 @@
             cargarLeyendaSolicitantes();
         });
 
-       
+
         // ── Sesión ─────────────────────────────────────────────────────────────
         async function verificarSesion() {
             try {
@@ -1555,46 +1568,46 @@
 
                 const solCell = row.SOLICITANTE
                     ? `<span style="display:inline-flex;align-items:center;gap:5px;">
-                 <span style="width:8px;height:8px;border-radius:50%;background:${colorSolicitante(row.SOLICITANTE)};flex-shrink:0;"></span>
-                 ${row.SOLICITANTE}
-               </span>`
+                                                             <span style="width:8px;height:8px;border-radius:50%;background:${colorSolicitante(row.SOLICITANTE)};flex-shrink:0;"></span>
+                                                             ${row.SOLICITANTE}
+                                                           </span>`
                     : '';
 
                 tbody.innerHTML += `
-        <tr style="${rowStyle}">
-            <td class="mono">${row.ID}</td>
-            <td class="auto">${row.ORDEN_DE_COMPRA ?? ''}</td>
-            <td class="auto mono">${row.FECHA_OC ?? ''}</td>
-            <td class="auto mono">${row.OC ?? ''}</td>
-            <td>${row.FOLIO ?? ''}</td>
-            <td>${solCell}</td>
-            <td>${row.PRESUPUESTO_MES ?? ''}</td>
-            <td>${row.SERIE_UBICACION_NO_EMPLEADO ?? ''}</td>
-            <td class="wrap">${row.ACCESORIO_SOLICITADO ?? ''}</td>
-            <td>${row.PROVEEDOR_ELEGIDO ?? ''}</td>
-            <td>${row.PIEZA_SERVICIO ?? ''}</td>
-            <td class="num">${row.CANTIDAD ?? ''}</td>
-            <td class="num">${row.PRECIO_UNITARIO ?? ''}</td>
-            <td class="num auto">${row.TOTAL_SIN_IVA ?? ''}</td>
-            <td>${row.MONEDA ?? ''}</td>
-            <td class="wrap">${row.COMENTARIOS ?? ''}</td>
-            <td>${row.HOJA_CONTROL ?? ''}</td>
-            <td class="mono">${row.REQUISICION ?? ''}</td>
-            <td class="auto mono">${row.FECHA_ENTRADA ?? ''}</td>
-            <td class="num">${row.CANTIDAD_REGISTRADA ?? ''}</td>
-            <td>${estatusPill(row.ESTATUS_OC)}</td>
-            <td>
-                ${row.TIENE_PDF
+                                                    <tr style="${rowStyle}">
+                                                        <td class="mono">${row.ID}</td>
+                                                        <td class="auto">${row.ORDEN_DE_COMPRA ?? ''}</td>
+                                                        <td class="auto mono">${row.FECHA_OC ?? ''}</td>
+                                                        <td class="auto mono">${row.OC ?? ''}</td>
+                                                        <td>${row.FOLIO ?? ''}</td>
+                                                        <td>${solCell}</td>
+                                                        <td>${row.PRESUPUESTO_MES ?? ''}</td>
+                                                        <td>${row.SERIE_UBICACION_NO_EMPLEADO ?? ''}</td>
+                                                        <td class="wrap">${row.ACCESORIO_SOLICITADO ?? ''}</td>
+                                                        <td>${row.PROVEEDOR_ELEGIDO ?? ''}</td>
+                                                        <td>${row.PIEZA_SERVICIO ?? ''}</td>
+                                                        <td class="num">${row.CANTIDAD ?? ''}</td>
+                                                        <td class="num">${row.PRECIO_UNITARIO ?? ''}</td>
+                                                        <td class="num auto">${row.TOTAL_SIN_IVA ?? ''}</td>
+                                                        <td>${row.MONEDA ?? ''}</td>
+                                                        <td class="wrap">${row.COMENTARIOS ?? ''}</td>
+                                                        <td>${row.HOJA_CONTROL ?? ''}</td>
+                                                        <td class="mono">${row.REQUISICION ?? ''}</td>
+                                                        <td class="auto mono">${row.FECHA_ENTRADA ?? ''}</td>
+                                                        <td class="num">${row.CANTIDAD_REGISTRADA ?? ''}</td>
+                                                        <td>${estatusPill(row.ESTATUS_OC)}</td>
+                                                        <td>
+                                                            ${row.TIENE_PDF
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                       <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
+                                                                   <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
                         : `<label class="file-label">📎 Subir PDF<input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)"></label>`}
-            </td>
-            <td style="white-space:nowrap;">
-                ${puedeEditar ? `<button class="btn btn-amber  btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
-                ${puedeEliminar ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑️</button>` : ''}
-                <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-            </td>
-        </tr>`;
+                                                        </td>
+                                                        <td style="white-space:nowrap;">
+                                                            ${puedeEditar ? `<button class="btn btn-amber  btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
+                                                            ${puedeEliminar ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑️</button>` : ''}
+                                                            <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                                                        </td>
+                                                    </tr>`;
             });
 
             const totalPags = Math.ceil(totalRegistros / limite) || 1;
@@ -1610,24 +1623,24 @@
                 leyenda.style.display = 'block';
 
                 contenido.innerHTML += `
-            <div style="display:inline-flex;align-items:center;gap:8px;
-                padding:6px 14px;border-radius:999px;
-                background:rgba(16,185,129,0.13);
-                border:1px solid rgba(16,185,129,0.4);">
-                <span style="width:10px;height:10px;border-radius:50%;background:#10B981;flex-shrink:0;"></span>
-                <span style="font-size:11px;font-weight:600;color:#6EE7B7;font-family:'DM Mono',monospace;">COMPLETA</span>
-            </div>`;
+                                                        <div style="display:inline-flex;align-items:center;gap:8px;
+                                                            padding:6px 14px;border-radius:999px;
+                                                            background:rgba(16,185,129,0.13);
+                                                            border:1px solid rgba(16,185,129,0.4);">
+                                                            <span style="width:10px;height:10px;border-radius:50%;background:#10B981;flex-shrink:0;"></span>
+                                                            <span style="font-size:11px;font-weight:600;color:#6EE7B7;font-family:'DM Mono',monospace;">COMPLETA</span>
+                                                        </div>`;
 
                 unicos.forEach(s => {
                     const c = colorSolicitante(s);
                     contenido.innerHTML += `
-                <div style="display:inline-flex;align-items:center;gap:8px;
-                    padding:6px 14px;border-radius:999px;
-                    background:${hexToRgba(c, 0.13)};
-                    border:1px solid ${hexToRgba(c, 0.4)};">
-                    <span style="width:10px;height:10px;border-radius:50%;background:${c};flex-shrink:0;"></span>
-                    <span style="font-size:11px;font-weight:600;color:${c};font-family:'DM Mono',monospace;">${s}</span>
-                </div>`;
+                                                            <div style="display:inline-flex;align-items:center;gap:8px;
+                                                                padding:6px 14px;border-radius:999px;
+                                                                background:${hexToRgba(c, 0.13)};
+                                                                border:1px solid ${hexToRgba(c, 0.4)};">
+                                                                <span style="width:10px;height:10px;border-radius:50%;background:${c};flex-shrink:0;"></span>
+                                                                <span style="font-size:11px;font-weight:600;color:${c};font-family:'DM Mono',monospace;">${s}</span>
+                                                            </div>`;
                 });
             } else {
                 leyenda.style.display = 'none';
@@ -1760,25 +1773,25 @@
                 const vD = despues && key in despues ? despues[key] : '';
                 const cambiado = cambios.has(key);
                 filas += `<tr class="${cambiado ? 'row-changed' : ''}">
-                        <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                        <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
-                        <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
-                    </tr>`;
+                                                                    <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                                                                    <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
+                                                                    <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
+                                                                </tr>`;
             });
 
             return `<div class="ev-wrap">
-                    <div class="ev-header">
-                        <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                        <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                        <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-                            ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-                        </span>
-                    </div>
-                    <table class="ev-table">
-                        <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
-                        <tbody>${filas}</tbody>
-                    </table>
-                </div>`;
+                                                                <div class="ev-header">
+                                                                    <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                                                    <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                                                                    <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                                                                        ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                                                                    </span>
+                                                                </div>
+                                                                <table class="ev-table">
+                                                                    <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
+                                                                    <tbody>${filas}</tbody>
+                                                                </table>
+                                                            </div>`;
         }
 
         function verHistorial(id) {
@@ -1865,13 +1878,13 @@
                 const c = colorSolicitante(s);
 
                 contenido.innerHTML += `
-        <div style="display:inline-flex;align-items:center;gap:8px;
-            padding:6px 14px;border-radius:999px;
-            background:${hexToRgba(c, 0.13)};
-            border:1px solid ${hexToRgba(c, 0.4)};">
-            <span style="width:10px;height:10px;border-radius:50%;background:${c};"></span>
-            <span style="font-size:11px;font-weight:600;color:${c};font-family:'DM Mono',monospace;">${s}</span>
-        </div>`;
+                                                    <div style="display:inline-flex;align-items:center;gap:8px;
+                                                        padding:6px 14px;border-radius:999px;
+                                                        background:${hexToRgba(c, 0.13)};
+                                                        border:1px solid ${hexToRgba(c, 0.4)};">
+                                                        <span style="width:10px;height:10px;border-radius:50%;background:${c};"></span>
+                                                        <span style="font-size:11px;font-weight:600;color:${c};font-family:'DM Mono',monospace;">${s}</span>
+                                                    </div>`;
             });
 
             leyenda.style.display = lista.length ? 'block' : 'none';
