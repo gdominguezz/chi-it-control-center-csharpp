@@ -151,9 +151,9 @@ public class PantallasNfService
     {
         await using var conn = await _pool.OpenAsync();
 
-        // Auto-generar id_unico si no viene
-        var idUnico = string.IsNullOrWhiteSpace(dto.id_unico)
-            ? $"PNF-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString("N")[..6].ToUpper()}"
+        // Generar ID_UNICO = OC + FOLIO
+        var idUnico = (!string.IsNullOrWhiteSpace(dto.oc) && !string.IsNullOrWhiteSpace(dto.folio))
+            ? $"{dto.oc}{dto.folio}"
             : dto.id_unico;
 
         await using var cmd = new NpgsqlCommand("""
