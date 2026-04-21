@@ -1730,8 +1730,9 @@
                 <td>${esc(r.asignado_a) || '—'}</td>
                 <td>${esc(r.personal_it_que_asigna) || '—'}</td>
                 <td class="td-acciones" style="display:flex;gap:5px;padding:6px 10px;">
-                    <button class="btn btn-ghost btn-sm" title="Editar" onclick="abrirEditar(${r.id})">✏️</button>
-                    <button class="btn btn-ghost btn-sm" title="Historial" onclick="verHistorial(${r.id})">🕒</button>
+                    <button class="btn btn-amber btn-sm" title="Editar" onclick="abrirEditar(${r.id})">✏️</button>
+                    <button class="btn btn-primary btn-sm" title="Historial" onclick="verHistorial(${r.id})">📄</button>
+                    <button class="btn btn-danger btn-sm" title="Eliminar" onclick="eliminarRegistro(${r.id})">🗑</button>
                 </td>
             </tr>`;
             }).join('');
@@ -1873,6 +1874,28 @@
                 if (res.ok && !result.error) { cerrarEditar(); cargar(); }
                 else alert('Error: ' + (result.error || 'No se pudo guardar'));
             } catch (e) { alert('Error: ' + e.message); }
+        }
+        async function eliminarRegistro(id) {
+
+            if (!confirm('¿Eliminar este registro de pantalla?')) return;
+
+            try {
+
+                const r = await fetch('/PANTALLAS_NF/' + id, {
+                    method: 'DELETE',
+                    headers: { 'X-Usuario': usuarioActual }
+                });
+
+                if (!r.ok) {
+                    const txt = await r.text();
+                    throw new Error(txt || 'No se pudo eliminar');
+                }
+
+                cargar();
+
+            } catch (e) {
+                alert('Error al eliminar: ' + e.message);
+            }
         }
 
         // ── Historial ──────────────────────────────────────────────────────────────────
