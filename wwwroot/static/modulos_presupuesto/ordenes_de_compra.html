@@ -1519,7 +1519,6 @@
             return `<span class="pill pill-gray">${s}</span>`;
         }
 
-        // ── Renderizar ─────────────────────────────────────────────────────────────
         function renderizar() {
             const tbody = document.getElementById('tabla');
             tbody.innerHTML = '';
@@ -1531,29 +1530,12 @@
                 return;
             }
 
-            // ── Extraer únicos y poblar selects ───────────────────────────────────
+            // ── Solo para colores de fila y leyenda ───────────────────────────────
             const unicos = [...new Set(
                 datosActuales.map(r => r.SOLICITANTE).filter(Boolean)
             )].sort();
 
             unicos.forEach(s => colorSolicitante(s));
-
-            ['n_SOLICITANTE', 'e_SOLICITANTE', 'f_SOLICITANTE'].forEach(id => {
-                const sel = document.getElementById(id);
-                if (!sel) return;
-                const esFilter = id === 'f_SOLICITANTE';
-                const valActual = sel.value;
-                sel.innerHTML = esFilter
-                    ? '<option value="">— Todos —</option>'
-                    : '<option value="">— Seleccionar —</option>';
-                unicos.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s;
-                    opt.textContent = s;
-                    sel.appendChild(opt);
-                });
-                sel.value = valActual;
-            });
 
             // ── Renderizar filas ──────────────────────────────────────────────────
             const puedeEditar = rolActual === 'ADMIN' || rolActual === 'ENCARGADO_CORRECTIVOS';
