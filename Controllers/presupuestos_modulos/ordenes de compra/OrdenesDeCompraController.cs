@@ -44,10 +44,7 @@ public class OrdenesDeCompraController : ControllerBase
         return Ok(new { data, total });
     }
 
-    // ── GET por ID ────────────────────────────────────────────────────────
-    [HttpGet("{id}")]
-
-    // ── GET solicitantes únicos ───────────────────────────────────────────────
+    // ── GET solicitantes únicos ────────────────────────────────────────────
     [HttpGet("SOLICITANTES")]
     public IActionResult GetSolicitantes()
     {
@@ -55,6 +52,8 @@ public class OrdenesDeCompraController : ControllerBase
         return Ok(new { solicitantes });
     }
 
+    // ── GET por ID ────────────────────────────────────────────────────────
+    [HttpGet("{id}")]
     public IActionResult GetById(int id)
     {
         var row = _service.GetById(id);
