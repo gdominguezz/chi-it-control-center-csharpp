@@ -1282,6 +1282,11 @@
         </div>
 
     </div><!-- /main -->
+    <!-- LEYENDA DE SOLICITANTES -->
+    <div class="panel" id="leyendaSolicitantes" style="display:none;">
+        <div class="panel-title">🎨 Solicitantes</div>
+        <div id="leyendaContenido" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+    </div>
     <!-- MODAL EDITAR -->
     <div id="modalEditar" class="modal">
         <div class="modal-box form-box">
@@ -1424,7 +1429,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             verificarSesion();
             cargar();
-            cargarSolicitantes(); 
+            cargarSolicitantes();
         });
 
         // ── Cargar solicitantes únicos ─────────────────────────────────────────────
@@ -1561,10 +1566,11 @@
             if (!datosActuales.length) {
                 tbody.innerHTML = `<tr><td colspan="23" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>`;
                 document.getElementById('paginaInfo').textContent = 'Sin resultados';
+                document.getElementById('leyendaSolicitantes').style.display = 'none';
                 return;
             }
 
-            // Extraer únicos y poblar selects
+            // ── Extraer únicos y poblar selects ───────────────────────────────────
             const unicos = [...new Set(
                 datosActuales.map(r => r.SOLICITANTE).filter(Boolean)
             )].sort();
@@ -1588,6 +1594,7 @@
                 sel.value = valActual;
             });
 
+            // ── Renderizar filas ──────────────────────────────────────────────────
             const puedeEditar = rolActual === 'ADMIN' || rolActual === 'ENCARGADO_CORRECTIVOS';
             const puedeEliminar = rolActual === 'ADMIN';
 
@@ -1649,8 +1656,39 @@
             const totalPags = Math.ceil(totalRegistros / limite) || 1;
             document.getElementById('paginaInfo').textContent =
                 `Página ${paginaActual} / ${totalPags} · Total: ${totalRegistros} registros`;
-        }
 
+            // ── Leyenda de solicitantes ───────────────────────────────────────────
+            const leyenda = document.getElementById('leyendaSolicitantes');
+            const contenido = document.getElementById('leyendaContenido');
+            contenido.innerHTML = '';
+
+            if (unicos.length) {
+                leyenda.style.display = 'block';
+
+                contenido.innerHTML += `
+            <div style="display:inline-flex;align-items:center;gap:8px;
+                padding:6px 14px;border-radius:999px;
+                background:rgba(16,185,129,0.13);
+                border:1px solid rgba(16,185,129,0.4);">
+                <span style="width:10px;height:10px;border-radius:50%;background:#10B981;flex-shrink:0;"></span>
+                <span style="font-size:11px;font-weight:600;color:#6EE7B7;font-family:'DM Mono',monospace;">COMPLETA</span>
+            </div>`;
+
+                unicos.forEach(s => {
+                    const c = colorSolicitante(s);
+                    contenido.innerHTML += `
+                <div style="display:inline-flex;align-items:center;gap:8px;
+                    padding:6px 14px;border-radius:999px;
+                    background:${hexToRgba(c, 0.13)};
+                    border:1px solid ${hexToRgba(c, 0.4)};">
+                    <span style="width:10px;height:10px;border-radius:50%;background:${c};flex-shrink:0;"></span>
+                    <span style="font-size:11px;font-weight:600;color:${c};font-family:'DM Mono',monospace;">${s}</span>
+                </div>`;
+                });
+            } else {
+                leyenda.style.display = 'none';
+            }
+        }
         // ── Guardar nuevo ──────────────────────────────────────────────────────
         function guardar() {
             if (rolActual !== 'ADMIN' && rolActual !== 'ENCARGADO_CORRECTIVOS') {
@@ -1778,25 +1816,25 @@
                 const vD = despues && key in despues ? despues[key] : '';
                 const cambiado = cambios.has(key);
                 filas += `<tr class="${cambiado ? 'row-changed' : ''}">
-                    <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                    <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
-                    <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
-                </tr>`;
+                        <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                        <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
+                        <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
+                    </tr>`;
             });
 
             return `<div class="ev-wrap">
-                <div class="ev-header">
-                    <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                    <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                    <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-                        ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-                    </span>
-                </div>
-                <table class="ev-table">
-                    <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
-                    <tbody>${filas}</tbody>
-                </table>
-            </div>`;
+                    <div class="ev-header">
+                        <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                        <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                        <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                            ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                    <table class="ev-table">
+                        <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
+                        <tbody>${filas}</tbody>
+                    </table>
+                </div>`;
         }
 
         function verHistorial(id) {
