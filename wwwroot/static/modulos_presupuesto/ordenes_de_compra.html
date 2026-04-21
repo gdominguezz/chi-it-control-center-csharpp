@@ -1,539 +1,1733 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>ORDENES DE COMPRA</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Órdenes de Compra</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0F1A;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --surface3: #1e293b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --accent: #2563EB;
+            --text: #F1F5F9;
+            --muted: #64748B;
+            --muted2: #94A3B8;
+            --green: #10B981;
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --purple: #8B5CF6;
+            --cyan: #06B6D4;
+            --blue: #2563EB;
+            /* colores de encabezado por grupo */
+            --col-formula: #06B6D4;
+            --col-requisitor: #8B5CF6;
+            --col-autorizador: #F59E0B;
+            --col-formula-bg: rgba(6,182,212,.12);
+            --col-requisitor-bg: rgba(139,92,246,.12);
+            --col-autorizador-bg: rgba(245,158,11,.12);
+        }
 
-<style>
-body{
-    font-family:Arial;
-    margin:0;
-    background:#f1f5f9;
-}
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-.header{
-    background:#1e293b;
-    color:white;
-    padding:15px;
-    font-size:20px;
-    font-weight:bold;
-}
+        body {
+            font-family: 'DM Sans',sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
 
+        /* ── TOPBAR ── */
+        .topbar {
+            background: linear-gradient(135deg,#05091a,#0B0F1A);
+            border-bottom: 1px solid var(--border2);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
 
-.container{
-    padding:15px;
-}
-.back{
-    background:#dc2626;
-    font-style: italic; color:#ffffff;
-}
+        .topbar-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: linear-gradient(135deg,#1d4ed8,#2563EB);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px rgba(37,99,235,.45);
+            flex-shrink: 0;
+        }
 
-.form-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-    gap:12px;
-    margin-bottom:15px;
-}
+        .topbar-title {
+            flex: 1;
+        }
 
-.field{
-    display:flex;
-    flex-direction:column;
-}
+            .topbar-title h1 {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: -.01em;
+            }
 
-.field label{
-    font-size:11px;
-    font-weight:bold;
-    color:#1e293b;
-    margin-bottom:4px;
-    text-transform:uppercase;
-    letter-spacing:0.3px;
-}
+            .topbar-title p {
+                font-size: 11px;
+                color: var(--muted2);
+                margin-top: 1px;
+                font-family: 'DM Mono',monospace;
+            }
 
-.field input{
-    padding:7px;
-    border:1px solid #cbd5e1;
-    border-radius:5px;
-    font-size:12px;
-    background:#f8fafc;
-    transition:border-color 0.2s;
-}
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
 
-.field input:focus{
-    outline:none;
-    border-color:#2563eb;
-    background:white;
-    box-shadow:0 0 0 2px rgba(37,99,235,0.15);
-}
+        /* ── USER CHIP ── */
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background .2s, border-color .2s;
+        }
 
-button{
-    padding:6px 12px;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-    font-size:12px;
-    font-weight:bold;
-    margin-right:5px;
-}
+            .user-chip:hover {
+                background: rgba(255,255,255,.1);
+                border-color: var(--accent);
+            }
 
-.save{background:#16a34a;color:white;}
-.cancel{background:#64748b;color:white;}
-.delete{background:#dc2626;color:white;}
-.edit{background:#f59e0b;color:white;}
-.pdf{background:#2563eb;color:white;}
-.export{background:#7c3aed;color:white;}
+            .user-chip span {
+                color: var(--muted2);
+            }
 
-.btn-bar{
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:8px;
-    margin-bottom:12px;
-}
+            .user-chip .chip-arrow {
+                font-size: 9px;
+                color: var(--muted);
+                transition: transform .2s;
+            }
 
-.btn-bar input[type="number"]{
-    padding:6px;
-    border:1px solid #ccc;
-    border-radius:5px;
-    font-size:12px;
-    width:110px;
-}
+            .user-chip.open .chip-arrow {
+                transform: rotate(180deg);
+            }
 
-.table-container{
-    width:100%;
-    height:500px;
-    overflow:auto;
-    border:1px solid #ccc;
-    background:white;
-}
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
 
-table{
-    border-collapse:collapse;
-    min-width:5000px;
-    font-size:11px;
-}
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px)
+            }
 
-th,td{
-    border:1px solid #ccc;
-    padding:6px;
-    white-space:nowrap;
-    text-align:center;
-}
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
 
-th{
-    background:#1e293b;
-    color:white;
-    position:sticky;
-    top:0;
-    z-index:2;
-}
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
 
-.filter-row input{
-    width:100%;
-    font-size:11px;
-}
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
 
-.pagination{
-    margin-top:10px;
-}
-</style>
+            .dropdown-header .d-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            .dropdown-header .d-role {
+                font-size: 10px;
+                color: var(--muted);
+                font-family: 'DM Mono',monospace;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                margin-top: 2px;
+            }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: background .15s,color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans',sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: var(--text);
+            }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        .dropdown-sep {
+            height: 1px;
+            background: var(--border);
+            margin: 6px 0;
+        }
+
+        /* ── MAIN ── */
+        .main {
+            max-width: 100%;
+            padding: 20px 24px;
+        }
+
+        /* ── PANEL ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .panel-title::before {
+                content: '';
+                width: 3px;
+                height: 14px;
+                background: var(--accent);
+                border-radius: 2px;
+                display: inline-block;
+            }
+
+        /* ── SECCIÓN GRUPOS ── */
+        .form-section {
+            margin-bottom: 18px;
+        }
+
+        .form-section-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            padding: 4px 10px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .lbl-formula {
+            background: var(--col-formula-bg);
+            color: var(--col-formula);
+            border: 1px solid rgba(6,182,212,.3);
+        }
+
+        .lbl-requisitor {
+            background: var(--col-requisitor-bg);
+            color: var(--col-requisitor);
+            border: 1px solid rgba(139,92,246,.3);
+        }
+
+        .lbl-autorizador {
+            background: var(--col-autorizador-bg);
+            color: var(--col-autorizador);
+            border: 1px solid rgba(245,158,11,.3);
+        }
+
+        /* ── FORM GRID ── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+            gap: 12px;
+        }
+
+        .field label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .field input, .field select, .field textarea {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field textarea {
+            resize: vertical;
+            min-height: 58px;
+        }
+
+            .field input:focus, .field select:focus, .field textarea:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+            }
+
+        .field select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 9px center;
+            padding-right: 26px;
+        }
+
+            .field select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+        .field-wide {
+            grid-column: 1/-1;
+        }
+
+        /* campo calculado (readonly visual) */
+        .field input[readonly] {
+            background: rgba(37,99,235,.08);
+            border-color: rgba(37,99,235,.25);
+            color: #93C5FD;
+            cursor: default;
+        }
+
+        /* ── BOTONES ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans',sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--blue);
+            color: white;
+            box-shadow: 0 3px 10px rgba(37,99,235,.3);
+        }
+
+            .btn-primary:hover {
+                background: #1d4ed8;
+                transform: translateY(-1px);
+            }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+            box-shadow: 0 3px 10px rgba(16,185,129,.25);
+        }
+
+            .btn-success:hover {
+                background: #059669;
+                transform: translateY(-1px);
+            }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+        }
+
+            .btn-danger:hover {
+                background: #DC2626;
+            }
+
+        .btn-amber {
+            background: var(--amber);
+            color: #1c1400;
+        }
+
+            .btn-amber:hover {
+                background: #D97706;
+            }
+
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+
+            .btn-purple:hover {
+                background: #7C3AED;
+            }
+
+        .btn-cyan {
+            background: var(--cyan);
+            color: #001a1f;
+        }
+
+            .btn-cyan:hover {
+                background: #0891B2;
+            }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
+        }
+
+            .btn-ghost:hover {
+                color: var(--text);
+                border-color: var(--accent);
+            }
+
+        .btn-sm {
+            padding: 6px 11px;
+            font-size: 11px;
+        }
+
+        /* ── TOOLBAR ── */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .toolbar-sep {
+            width: 1px;
+            height: 24px;
+            background: var(--border2);
+            margin: 0 4px;
+        }
+
+        .anio-input {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            width: 110px;
+        }
+
+            .anio-input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        /* ── TABLA ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 380px);
+            min-height: 380px;
+            overflow-y: auto;
+        }
+
+            .table-scroll::-webkit-scrollbar {
+                width: 7px;
+                height: 7px;
+            }
+
+            .table-scroll::-webkit-scrollbar-track {
+                background: var(--surface2);
+                border-radius: 999px;
+            }
+
+            .table-scroll::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 999px;
+            }
+
+                .table-scroll::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent);
+                }
+
+        .scroll-top {
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 8px;
+            margin-bottom: 2px;
+        }
+
+        .scroll-top-inner {
+            height: 1px;
+        }
+
+        table {
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* fila 1: grupos de encabezado con color */
+        .group-row th {
+            padding: 5px 10px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            text-align: center;
+            border-bottom: none;
+            white-space: nowrap;
+        }
+
+        .gh-formula {
+            background: var(--col-formula-bg);
+            color: var(--col-formula);
+            border-bottom: 2px solid var(--col-formula) !important;
+        }
+
+        .gh-requisitor {
+            background: var(--col-requisitor-bg);
+            color: var(--col-requisitor);
+            border-bottom: 2px solid var(--col-requisitor) !important;
+        }
+
+        .gh-autorizador {
+            background: var(--col-autorizador-bg);
+            color: var(--col-autorizador);
+            border-bottom: 2px solid var(--col-autorizador) !important;
+        }
+
+        .gh-neutral {
+            background: var(--surface3);
+            color: var(--muted2);
+        }
+
+        /* fila 2: nombres de columnas */
+        .col-row th {
+            background: var(--surface3);
+            color: var(--muted2);
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            padding: 9px 10px;
+            border-bottom: 1px solid var(--border2);
+            white-space: nowrap;
+            text-align: left;
+        }
+        /* tinte sutil por grupo */
+        .col-formula {
+            border-top: 2px solid var(--col-formula) !important;
+        }
+
+        .col-requisitor {
+            border-top: 2px solid var(--col-requisitor) !important;
+        }
+
+        .col-autorizador {
+            border-top: 2px solid var(--col-autorizador) !important;
+        }
+
+        /* fila 3: filtros */
+        .filter-row th {
+            background: var(--surface2);
+            padding: 5px 6px;
+            border-bottom: 1px solid var(--border2);
+        }
+
+        .filter-row input {
+            width: 100%;
+            background: rgba(255,255,255,.04);
+            border: 1px solid var(--border2);
+            border-radius: 5px;
+            padding: 4px 6px;
+            font-size: 10px;
+            color: var(--text);
+            font-family: 'DM Mono',monospace;
+        }
+
+            .filter-row input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+
+            tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            tbody tr:hover td {
+                filter: brightness(1.12);
+            }
+
+        td {
+            padding: 8px 10px;
+            color: var(--text);
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 11px;
+        }
+
+            td.mono {
+                font-family: 'DM Mono',monospace;
+                color: var(--muted2);
+            }
+
+            td.wrap {
+                white-space: normal;
+                word-break: break-word;
+                max-width: 180px;
+            }
+
+            td.num {
+                font-family: 'DM Mono',monospace;
+                text-align: right;
+            }
+
+            td.auto {
+                color: #93C5FD;
+                font-family: 'DM Mono',monospace;
+            }
+
+        /* columna acciones fija */
+        table th:last-child, table td:last-child {
+            position: sticky;
+            right: 0;
+            z-index: 2;
+            background: var(--surface);
+            box-shadow: -2px 0 6px rgba(0,0,0,.3);
+        }
+
+        table thead th:last-child {
+            z-index: 3;
+        }
+
+        /* pills estatus */
+        .pill {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .pill-green {
+            background: rgba(16,185,129,.15);
+            color: #6EE7B7;
+        }
+
+        .pill-amber {
+            background: rgba(245,158,11,.15);
+            color: #FDE68A;
+        }
+
+        .pill-red {
+            background: rgba(239,68,68,.15);
+            color: #FCA5A5;
+        }
+
+        .pill-gray {
+            background: rgba(100,116,139,.15);
+            color: var(--muted2);
+        }
+
+        .pill-blue {
+            background: rgba(37,99,235,.15);
+            color: #93C5FD;
+        }
+
+        /* ── PAGINACIÓN ── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .page-info {
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--muted2);
+        }
+
+        /* ── MODALES ── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.68);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+            .modal.show {
+                display: flex;
+            }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 26px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,.55);
+            animation: modalIn .2s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.96)
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1)
+            }
+        }
+
+        .modal-box.form-box {
+            width: min(820px,96vw);
+        }
+
+        .modal-box.hist-box {
+            width: min(960px,96vw);
+        }
+
+        .modal-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-box::-webkit-scrollbar-track {
+            background: var(--surface2);
+            border-radius: 999px;
+        }
+
+        .modal-box::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 999px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+            .modal-header h3 {
+                margin: 0;
+                color: var(--text);
+                font-size: 15px;
+                font-weight: 700;
+            }
+
+        .close-btn {
+            background: rgba(37,99,235,.15);
+            color: #93C5FD;
+            border: 1px solid rgba(37,99,235,.3);
+            padding: 5px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all .2s;
+        }
+
+            .close-btn:hover {
+                background: var(--blue);
+                color: white;
+            }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 10px;
+        }
+
+        .form-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-field {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .form-field label {
+                font-size: 9px;
+                font-weight: 700;
+                color: var(--muted);
+                margin-bottom: 5px;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+            }
+
+            .form-field input, .form-field textarea, .form-field select {
+                padding: 9px 11px;
+                border: 1px solid var(--border2);
+                border-radius: 7px;
+                font-size: 12px;
+                background: var(--surface2);
+                color: var(--text);
+                font-family: 'DM Mono',monospace;
+                transition: border-color .2s, box-shadow .2s;
+            }
+
+            .form-field textarea {
+                resize: vertical;
+                min-height: 68px;
+            }
+
+                .form-field input:focus, .form-field textarea:focus, .form-field select:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+                }
+
+            .form-field select {
+                cursor: pointer;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 9px center;
+                padding-right: 26px;
+            }
+
+            .form-field input[readonly] {
+                background: rgba(37,99,235,.08);
+                border-color: rgba(37,99,235,.25);
+                color: #93C5FD;
+                cursor: default;
+            }
+
+            .form-field.full {
+                grid-column: 1/-1;
+            }
+
+        /* ── HISTORIAL ── */
+        .ev-wrap {
+            margin-bottom: 18px;
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .ev-header {
+            background: var(--surface3);
+            padding: 11px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+            .ev-header span {
+                font-size: 12px;
+                color: var(--muted2);
+            }
+
+            .ev-header strong {
+                color: #7dd3fc;
+            }
+
+        .badge-cambio {
+            background: var(--amber);
+            color: #111;
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-left: 6px;
+        }
+
+        .ev-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+            .ev-table th, .ev-table td {
+                border: 1px solid var(--border2);
+                padding: 8px 10px;
+                text-align: left;
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+            .ev-table thead th {
+                background: var(--surface3);
+                color: var(--muted2);
+                font-weight: 700;
+            }
+
+            .ev-table th:first-child {
+                width: 22%;
+            }
+
+        .row-changed td:nth-child(2) {
+            background: rgba(239,68,68,.1);
+            color: #FCA5A5;
+        }
+
+        .row-changed td:nth-child(3) {
+            background: rgba(16,185,129,.1);
+            color: #6EE7B7;
+        }
+
+        .empty-val {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .sin-hist {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* ── FILE ── */
+        .file-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 7px;
+            cursor: pointer;
+            background: rgba(37,99,235,.1);
+            color: #93C5FD;
+            border: 1px solid rgba(37,99,235,.25);
+            font-size: 11px;
+            font-weight: 600;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+            .file-label:hover {
+                background: rgba(37,99,235,.2);
+                border-color: var(--blue);
+            }
+
+            .file-label input[type=file] {
+                display: none;
+            }
+
+        .spin {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border2);
+            border-top-color: var(--blue);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="header">ORDENES DE COMPRA</div>
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="topbar-icon">📋</div>
+        <div class="topbar-title">
+            <h1>ÓRDENES DE COMPRA</h1>
+            <p>Módulo de presupuesto · CHI-IT</p>
+        </div>
+        <div class="topbar-actions">
+            <div class="user-chip" id="userChip" onclick="toggleChip()">
+                👤 <span id="nombreUsuario">Cargando...</span>
+                <span class="chip-arrow">▼</span>
+                <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name" id="dropNombre">—</div>
+                        <div class="d-role" id="dropRol">—</div>
+                    </div>
+                    <button class="dropdown-item" onclick="window.location.href='/static/menu.html'">☰ &nbsp;Menú principal</button>
+                    <div class="dropdown-sep"></div>
+                    <button class="dropdown-item danger" onclick="cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="container">
+    <!-- MAIN -->
+    <div class="main">
 
-<div class="form-grid">
+        <!-- ══ PANEL NUEVO REGISTRO ══ -->
+        <div class="panel" id="panelNuevoRegistro">
+            <div class="panel-title">➕ Nueva Orden de Compra</div>
 
-<div class="field">
-    <label>Orden de Compra</label>
-    <input id="ORDEN_DE_COMPRA">
-</div>
+            <!-- LLENADO POR FÓRMULA -->
+            <div class="form-section">
+                <span class="form-section-label lbl-formula">🔗 Llenado por Fórmula</span>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Orden de Compra</label>
+                        <input id="n_ORDEN_DE_COMPRA" placeholder="Se obtiene de Req vs OC">
+                    </div>
+                    <div class="field">
+                        <label>Fecha OC</label>
+                        <input id="n_FECHA_OC" type="date">
+                    </div>
+                    <div class="field">
+                        <label>OC</label>
+                        <input id="n_OC" placeholder="Se obtiene de Req vs OC">
+                    </div>
+                    <div class="field">
+                        <label>Fecha Entrada</label>
+                        <input id="n_FECHA_ENTRADA" type="date">
+                    </div>
+                    <div class="field">
+                        <label>Total (Sin IVA) — calculado</label>
+                        <input id="n_TOTAL_SIN_IVA" type="number" step="0.01" placeholder="Cantidad × Precio Unitario" readonly tabindex="-1">
+                    </div>
+                    <div class="field">
+                        <label>Estatus OC</label>
+                        <input id="n_ESTATUS_OC" placeholder="Se calcula automáticamente">
+                    </div>
+                </div>
+            </div>
 
-<div class="field">
-    <label>Folio (Correctivo / Solicitud / Inventario)</label>
-    <input id="FOLIO_CORRECTIVO_SOLICITUD_INVENTARIO">
-</div>
+            <!-- LLENADO POR REQUISITOR -->
+            <div class="form-section">
+                <span class="form-section-label lbl-requisitor">✏️ Llenado por Requisitor</span>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Folio (Correctivo / Solicitud / Inv.)</label>
+                        <input id="n_FOLIO" placeholder="Folio del correctivo o solicitud">
+                    </div>
+                    <div class="field">
+                        <label>Solicitante</label>
+                        <input id="n_SOLICITANTE" placeholder="Nombre del solicitante">
+                    </div>
+                    <div class="field">
+                        <label>Presupuesto (Mes)</label>
+                        <select id="n_PRESUPUESTO_MES">
+                            <option value="">— Seleccionar —</option>
+                            <option>ENERO</option>
+                            <option>FEBRERO</option>
+                            <option>MARZO</option>
+                            <option>ABRIL</option>
+                            <option>MAYO</option>
+                            <option>JUNIO</option>
+                            <option>JULIO</option>
+                            <option>AGOSTO</option>
+                            <option>SEPTIEMBRE</option>
+                            <option>OCTUBRE</option>
+                            <option>NOVIEMBRE</option>
+                            <option>DICIEMBRE</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Serie / Ubicación / No. Empleado</label>
+                        <input id="n_SERIE_UBICACION_NO_EMPLEADO" placeholder="Serie, ubicación o núm. empleado">
+                    </div>
+                    <div class="field field-wide">
+                        <label>Accesorio Solicitado</label>
+                        <input id="n_ACCESORIO_SOLICITADO" placeholder="Descripción del accesorio o equipo solicitado">
+                    </div>
+                    <div class="field">
+                        <label>Proveedor Elegido</label>
+                        <input id="n_PROVEEDOR_ELEGIDO" placeholder="Nombre del proveedor">
+                    </div>
+                    <div class="field">
+                        <label>Pieza / Servicio</label>
+                        <input id="n_PIEZA_SERVICIO" placeholder="PIEZA o SERVICIO">
+                    </div>
+                    <div class="field">
+                        <label>Cantidad</label>
+                        <input id="n_CANTIDAD" type="number" step="1" min="0" placeholder="0" oninput="calcularTotal('n')">
+                    </div>
+                    <div class="field">
+                        <label>Precio Unitario</label>
+                        <input id="n_PRECIO_UNITARIO" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcularTotal('n')">
+                    </div>
+                    <div class="field">
+                        <label>Moneda</label>
+                        <select id="n_MONEDA">
+                            <option value="">— Seleccionar —</option>
+                            <option>PESOS</option>
+                            <option>DOLARES</option>
+                            <option>EUROS</option>
+                        </select>
+                    </div>
+                    <div class="field field-wide">
+                        <label>Comentarios</label>
+                        <textarea id="n_COMENTARIOS" rows="2" placeholder="Observaciones adicionales"></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Hoja Control</label>
+                        <input id="n_HOJA_CONTROL" placeholder="Núm. hoja de control">
+                    </div>
+                </div>
+            </div>
 
-<div class="field">
-    <label>Solicitante</label>
-    <input id="SOLICITANTE">
-</div>
+            <!-- LLENADO POR AUTORIZADOR -->
+            <div class="form-section">
+                <span class="form-section-label lbl-autorizador">🔐 Llenado por Autorizador</span>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Requisición</label>
+                        <input id="n_REQUISICION" placeholder="Núm. de requisición">
+                    </div>
+                    <div class="field">
+                        <label>Cantidad Registrada</label>
+                        <input id="n_CANTIDAD_REGISTRADA" type="number" step="1" min="0" placeholder="0">
+                    </div>
+                </div>
+            </div>
 
-<div class="field">
-    <label>Presupuesto (Mes)</label>
-    <input id="PRESUPUESTO_MES">
-</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="guardar()">💾 Guardar</button>
+                <button class="btn btn-ghost" onclick="limpiarForm()">✕ Limpiar</button>
+            </div>
+        </div>
 
-<div class="field">
-    <label>Serie / Ubicación / No. Empleado</label>
-    <input id="SERIE_UBICACION_NO_EMPLEADO">
-</div>
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <button class="btn btn-purple btn-sm" onclick="exportarFiltrado()">⬇ Exportar Filtrado</button>
+            <button class="btn btn-purple btn-sm" onclick="exportarTodo()">⬇ Exportar Todo</button>
+            <div class="toolbar-sep"></div>
+            <input class="anio-input" id="anioExportar" type="number" placeholder="Año (ej: 2026)">
+            <button class="btn btn-purple btn-sm" onclick="exportarPorAnio()">⬇ Por Año</button>
+        </div>
 
-<div class="field">
-    <label>Accesorio Solicitado</label>
-    <input id="ACCESORIO_SOLICITADO">
-</div>
+        <!-- TABLA -->
+        <div class="table-wrap">
+            <div class="scroll-top" id="scrollTop"><div class="scroll-top-inner" id="scrollTopInner"></div></div>
+            <div class="table-scroll" id="tableScroll">
+                <table>
+                    <thead>
+                        <!-- FILA 1: grupos de encabezado -->
+                        <tr class="group-row">
+                            <th class="gh-neutral" rowspan="1"></th>
+                            <th class="gh-formula" colspan="3">🔗 Llenado por Fórmula</th>
+                            <th class="gh-requisitor" colspan="11">✏️ Llenado por Requisitor</th>
+                            <th class="gh-autorizador" colspan="2">🔐 Llenado por Autorizador</th>
+                            <th class="gh-formula" colspan="3">🔗 Llenado por Fórmula</th>
+                            <th class="gh-neutral" colspan="2"></th>
+                        </tr>
+                        <!-- FILA 2: nombres de columna -->
+                        <tr class="col-row">
+                            <th>ID</th>
+                            <th class="col-formula">ORDEN DE COMPRA</th>
+                            <th class="col-formula">FECHA OC</th>
+                            <th class="col-formula">OC</th>
+                            <th class="col-requisitor">FOLIO</th>
+                            <th class="col-requisitor">SOLICITANTE</th>
+                            <th class="col-requisitor">PRESUPUESTO (MES)</th>
+                            <th class="col-requisitor">SERIE / UBIC. / NO. EMP.</th>
+                            <th class="col-requisitor">ACCESORIO SOLICITADO</th>
+                            <th class="col-requisitor">PROVEEDOR</th>
+                            <th class="col-requisitor">PIEZA / SERVICIO</th>
+                            <th class="col-requisitor">CANTIDAD</th>
+                            <th class="col-requisitor">PRECIO UNIT.</th>
+                            <th class="col-requisitor">TOTAL (SIN IVA)</th>
+                            <th class="col-requisitor">MONEDA</th>
+                            <th class="col-requisitor">COMENTARIOS</th>
+                            <th class="col-autorizador">HOJA CONTROL</th>
+                            <th class="col-autorizador">REQUISICIÓN</th>
+                            <th class="col-formula">FECHA ENTRADA</th>
+                            <th class="col-formula">CANT. REGISTRADA</th>
+                            <th class="col-formula">ESTATUS OC</th>
+                            <th class="gh-neutral">PDF</th>
+                            <th class="gh-neutral">ACCIONES</th>
+                        </tr>
+                        <!-- FILA 3: filtros -->
+                        <tr class="filter-row">
+                            <th></th>
+                            <th><input oninput="filtrar()" id="f_ORDEN_DE_COMPRA" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" id="f_FECHA_OC" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" id="f_OC" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" id="f_FOLIO" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" id="f_SOLICITANTE" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" id="f_PRESUPUESTO_MES" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" id="f_SERIE_UBICACION_NO_EMPLEADO" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" id="f_ACCESORIO_SOLICITADO" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" id="f_PROVEEDOR_ELEGIDO" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" id="f_PIEZA_SERVICIO" placeholder="🔍"></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th><input oninput="filtrar()" id="f_MONEDA" placeholder="🔍"></th>
+                            <th></th>
+                            <th></th>
+                            <th><input oninput="filtrar()" id="f_REQUISICION" placeholder="🔍"></th>
+                            <th></th>
+                            <th></th>
+                            <th><input oninput="filtrar()" id="f_ESTATUS_OC" placeholder="🔍"></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla"></tbody>
+                </table>
+            </div>
+        </div>
 
-<div class="field">
-    <label>Proveedor Elegido</label>
-    <input id="PROVEEDOR_ELEGIDO">
-</div>
+        <!-- PAGINACIÓN -->
+        <div class="pagination">
+            <button class="btn btn-ghost btn-sm" onclick="anterior()">◀ Anterior</button>
+            <span class="page-info" id="paginaInfo">—</span>
+            <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
+        </div>
 
-<div class="field">
-    <label>Pieza / Servicio</label>
-    <input id="PIEZA_SERVICIO">
-</div>
+    </div><!-- /main -->
+    <!-- MODAL EDITAR -->
+    <div id="modalEditar" class="modal">
+        <div class="modal-box form-box">
+            <div class="modal-header">
+                <h3>✏️ Editar Orden &nbsp;<span id="editarIdLabel" style="color:var(--cyan);font-family:'DM Mono',monospace;">#</span></h3>
+                <button class="close-btn" onclick="cerrarEditar()">✕</button>
+            </div>
 
-<div class="field">
-    <label>Cantidad</label>
-    <input id="CANTIDAD" type="number">
-</div>
+            <div style="margin-bottom:10px;"><span class="form-section-label lbl-formula">🔗 Llenado por Fórmula</span></div>
+            <div class="form-cols">
+                <div class="form-field"><label>Orden de Compra</label><input id="e_ORDEN_DE_COMPRA"></div>
+                <div class="form-field"><label>Fecha OC</label><input type="date" id="e_FECHA_OC"></div>
+                <div class="form-field"><label>OC</label><input id="e_OC"></div>
+                <div class="form-field"><label>Fecha Entrada</label><input type="date" id="e_FECHA_ENTRADA"></div>
+                <div class="form-field"><label>Total (Sin IVA) — calculado</label><input type="number" step="0.01" id="e_TOTAL_SIN_IVA" readonly tabindex="-1"></div>
+                <div class="form-field"><label>Estatus OC</label><input id="e_ESTATUS_OC"></div>
+            </div>
 
-<div class="field">
-    <label>Precio Unitario</label>
-    <input id="PRECIO_UNITARIO" type="number" step="0.01">
-</div>
+            <div style="margin:10px 0;"><span class="form-section-label lbl-requisitor">✏️ Llenado por Requisitor</span></div>
+            <div class="form-cols">
+                <div class="form-field"><label>Folio</label><input id="e_FOLIO"></div>
+                <div class="form-field"><label>Solicitante</label><input id="e_SOLICITANTE"></div>
+                <div class="form-field">
+                    <label>Presupuesto (Mes)</label>
+                    <select id="e_PRESUPUESTO_MES">
+                        <option value="">— Seleccionar —</option>
+                        <option>ENERO</option>
+                        <option>FEBRERO</option>
+                        <option>MARZO</option>
+                        <option>ABRIL</option>
+                        <option>MAYO</option>
+                        <option>JUNIO</option>
+                        <option>JULIO</option>
+                        <option>AGOSTO</option>
+                        <option>SEPTIEMBRE</option>
+                        <option>OCTUBRE</option>
+                        <option>NOVIEMBRE</option>
+                        <option>DICIEMBRE</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Serie / Ubicación / No. Empleado</label><input id="e_SERIE_UBICACION_NO_EMPLEADO"></div>
+                <div class="form-field full"><label>Accesorio Solicitado</label><input id="e_ACCESORIO_SOLICITADO"></div>
+                <div class="form-field"><label>Proveedor Elegido</label><input id="e_PROVEEDOR_ELEGIDO"></div>
+                <div class="form-field"><label>Pieza / Servicio</label><input id="e_PIEZA_SERVICIO"></div>
+                <div class="form-field"><label>Cantidad</label><input type="number" step="1" min="0" id="e_CANTIDAD" oninput="calcularTotal('e')"></div>
+                <div class="form-field"><label>Precio Unitario</label><input type="number" step="0.01" min="0" id="e_PRECIO_UNITARIO" oninput="calcularTotal('e')"></div>
+                <div class="form-field">
+                    <label>Moneda</label>
+                    <select id="e_MONEDA">
+                        <option value="">— Seleccionar —</option>
+                        <option>PESOS</option>
+                        <option>DOLARES</option>
+                        <option>EUROS</option>
+                    </select>
+                </div>
+                <div class="form-field full"><label>Comentarios</label><textarea id="e_COMENTARIOS"></textarea></div>
+                <div class="form-field"><label>Hoja Control</label><input id="e_HOJA_CONTROL"></div>
+            </div>
 
-<div class="field">
-    <label>Total (No incluye IVA)</label>
-    <input id="TOTAL_NO_INCLUYE_IVA" type="number" step="0.01">
-</div>
+            <div style="margin:10px 0;"><span class="form-section-label lbl-autorizador">🔐 Llenado por Autorizador</span></div>
+            <div class="form-cols">
+                <div class="form-field"><label>Requisición</label><input id="e_REQUISICION"></div>
+                <div class="form-field"><label>Cantidad Registrada</label><input type="number" step="1" min="0" id="e_CANTIDAD_REGISTRADA"></div>
+            </div>
 
-<div class="field">
-    <label>Moneda</label>
-    <input id="MONEDA">
-</div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
+                <button class="btn btn-success" onclick="guardarCambios()">💾 Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
 
-<div class="field">
-    <label>Comentarios</label>
-    <input id="COMENTARIOS">
-</div>
+    <!-- MODAL HISTORIAL -->
+    <div id="modalHistorial" class="modal">
+        <div class="modal-box hist-box">
+            <div class="modal-header">
+                <h3>📋 Historial — OC <span id="histIdLabel" style="color:var(--cyan);">#</span></h3>
+                <button class="close-btn" onclick="cerrarHistorial()">✕</button>
+            </div>
+            <div id="contenidoHistorial"></div>
+            <div class="modal-footer"><button class="btn btn-ghost" onclick="cerrarHistorial()">Cerrar</button></div>
+        </div>
+    </div>
 
-<div class="field">
-    <label>Requisición</label>
-    <input id="REQUISICION">
-</div>
+    <script>
+        // ── Estado global ──────────────────────────────────────────────────────
+        let paginaActual = 1, limite = 15, totalRegistros = 0;
+        let datosActuales = [], editandoID = null;
+        let usuarioActual = 'SISTEMA', rolActual = 'USER';
 
-<div class="field">
-    <label>Fecha OC</label>
-    <input id="FECHA_OC" type="date">
-</div>
+        const CAMPOS = [
+            { key: 'ORDEN_DE_COMPRA', label: 'Orden de Compra' },
+            { key: 'FOLIO', label: 'Folio' },
+            { key: 'SOLICITANTE', label: 'Solicitante' },
+            { key: 'PRESUPUESTO_MES', label: 'Presupuesto (Mes)' },
+            { key: 'SERIE_UBICACION_NO_EMPLEADO', label: 'Serie/Ubicación/No. Empleado' },
+            { key: 'ACCESORIO_SOLICITADO', label: 'Accesorio Solicitado' },
+            { key: 'PROVEEDOR_ELEGIDO', label: 'Proveedor Elegido' },
+            { key: 'PIEZA_SERVICIO', label: 'Pieza/Servicio' },
+            { key: 'CANTIDAD', label: 'Cantidad' },
+            { key: 'PRECIO_UNITARIO', label: 'Precio Unitario' },
+            { key: 'TOTAL_SIN_IVA', label: 'Total (Sin IVA)' },
+            { key: 'MONEDA', label: 'Moneda' },
+            { key: 'COMENTARIOS', label: 'Comentarios' },
+            { key: 'HOJA_CONTROL', label: 'Hoja Control' },
+            { key: 'REQUISICION', label: 'Requisición' },
+            { key: 'FECHA_OC', label: 'Fecha OC' },
+            { key: 'OC', label: 'OC' },
+            { key: 'FECHA_ENTRADA', label: 'Fecha Entrada' },
+            { key: 'CANTIDAD_REGISTRADA', label: 'Cantidad Registrada' },
+            { key: 'ESTATUS_OC', label: 'Estatus OC' },
+        ];
 
-<div class="field">
-    <label>OC</label>
-    <input id="OC">
-</div>
+        // ── Init ───────────────────────────────────────────────────────────────
+        window.addEventListener('DOMContentLoaded', () => {
+            verificarSesion();
+            cargar();
+        });
 
-<div class="field">
-    <label>Fecha Entrada</label>
-    <input id="FECHA_ENTRADA" type="date">
-</div>
+        // ── Sesión ─────────────────────────────────────────────────────────────
+        async function verificarSesion() {
+            try {
+                const res = await fetch('/obtener-usuario', { credentials: 'include' });
+                if (!res.ok) { window.location.href = '/static/login.html'; return; }
+                const data = await res.json();
+                if (!data.usuario) { window.location.href = '/static/login.html'; return; }
 
-<div class="field">
-    <label>Cantidad Registrada</label>
-    <input id="CANTIDAD_REGISTRADA" type="number">
-</div>
+                usuarioActual = data.usuario;
+                rolActual = data.rol || 'USER';
+                const nombre = data.nombre || data.usuario;
 
-<div class="field">
-    <label>Estatus OC</label>
-    <input id="ESTATUS_OC">
-</div>
+                document.getElementById('nombreUsuario').textContent = nombre;
+                document.getElementById('dropNombre').textContent = nombre;
+                document.getElementById('dropRol').textContent = rolActual;
 
-<div class="field">
-    <label>Hoja Control</label>
-    <input id="HOJA_CONTROL">
-</div>
-
-</div>
-
-<div class="btn-bar">
-    <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
-    <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
-</div>
-
-<div class="btn-bar">
-    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
-    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
-    <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
-    <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
-</div>
-
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>ORDEN DE COMPRA</th>
-<th>FOLIO</th>
-<th>SOLICITANTE</th>
-<th>PRESUPUESTO</th>
-<th>SERIE/UBICACION</th>
-<th>ACCESORIO</th>
-<th>PROVEEDOR</th>
-<th>PIEZA/SERVICIO</th>
-<th>CANTIDAD</th>
-<th>PRECIO UNITARIO</th>
-<th>TOTAL SIN IVA</th>
-<th>MONEDA</th>
-<th>COMENTARIOS</th>
-<th>REQUISICION</th>
-<th>FECHA OC</th>
-<th>OC</th>
-<th>FECHA ENTRADA</th>
-<th>CANTIDAD REG</th>
-<th>ESTATUS</th>
-<th>HOJA CONTROL</th>
-<th>PDF</th>
-<th>ACCIONES</th>
-</tr>
-
-<tr class="filter-row">
-<th></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody id="tabla"></tbody>
-</table>
-</div>
-
-<div class="pagination">
-<button onclick="anterior()">Anterior</button>
-<span id="paginaInfo"></span>
-<button onclick="siguiente()">Siguiente</button>
-<button class="back" onclick="window.location.href='presupuestos_menu.html'">
-REGRESAR A PRESUPUESTOS
-</button>
-</div>
-
-</div>
-
-<script>
-
-let paginaActual = 1;
-let limite = 10;
-let totalRegistros = 0;
-let editandoID = null;
-let datosOriginales = [];
-let datosFiltrados = [];
-
-function guardar(){
-    let data = {
-        ORDEN_DE_COMPRA:                      ORDEN_DE_COMPRA.value                      || null,
-        FOLIO_CORRECTIVO_SOLICITUD_INVENTARIO: FOLIO_CORRECTIVO_SOLICITUD_INVENTARIO.value || null,
-        SOLICITANTE:                           SOLICITANTE.value                           || null,
-        PRESUPUESTO_MES:                       PRESUPUESTO_MES.value                       || null,
-        SERIE_UBICACION_NO_EMPLEADO:           SERIE_UBICACION_NO_EMPLEADO.value           || null,
-        ACCESORIO_SOLICITADO:                  ACCESORIO_SOLICITADO.value                  || null,
-        PROVEEDOR_ELEGIDO:                     PROVEEDOR_ELEGIDO.value                     || null,
-        PIEZA_SERVICIO:                        PIEZA_SERVICIO.value                        || null,
-        CANTIDAD:                              CANTIDAD.value                              || null,
-        PRECIO_UNITARIO:                       PRECIO_UNITARIO.value                       || null,
-        TOTAL_NO_INCLUYE_IVA:                  TOTAL_NO_INCLUYE_IVA.value                  || null,
-        MONEDA:                                MONEDA.value                                || null,
-        COMENTARIOS:                           COMENTARIOS.value                           || null,
-        REQUISICION:                           REQUISICION.value                           || null,
-        FECHA_OC:                              FECHA_OC.value                              || null,
-        OC:                                    OC.value                                    || null,
-        FECHA_ENTRADA:                         FECHA_ENTRADA.value                         || null,
-        CANTIDAD_REGISTRADA:                   CANTIDAD_REGISTRADA.value                   || null,
-        ESTATUS_OC:                            ESTATUS_OC.value                            || null,
-        HOJA_CONTROL:                          HOJA_CONTROL.value                          || null
-    };
-
-    if(editandoID){
-        fetch(`/ORDENES_DE_COMPRA/${editandoID}`,{
-            method:"PUT",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(data)
-        }).then(()=>{ editandoID=null; limpiarFormulario(); cargar(); });
-    } else {
-        fetch("/ORDENES_DE_COMPRA",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(data)
-        }).then(()=>{ limpiarFormulario(); cargar(); });
-    }
-}
-
-function limpiarFormulario(){
-    document.querySelectorAll(".form-grid input").forEach(i=>i.value="");
-}
-
-function cancelarEdicion(){
-    editandoID = null;
-    limpiarFormulario();
-}
-
-function obtenerParametros(){
-    let f = document.querySelectorAll(".filter-row input");
-    return new URLSearchParams({
-        page:                                  paginaActual,
-        limit:                                 limite,
-        ORDEN_DE_COMPRA:                       f[0].value,
-        FOLIO_CORRECTIVO_SOLICITUD_INVENTARIO: f[1].value,
-        SOLICITANTE:                           f[2].value,
-        PRESUPUESTO_MES:                       f[3].value,
-        SERIE_UBICACION_NO_EMPLEADO:           f[4].value,
-        ACCESORIO_SOLICITADO:                  f[5].value,
-        PROVEEDOR_ELEGIDO:                     f[6].value,
-        PIEZA_SERVICIO:                        f[7].value,
-        CANTIDAD:                              f[8].value,
-        PRECIO_UNITARIO:                       f[9].value,
-        TOTAL_NO_INCLUYE_IVA:                  f[10].value,
-        MONEDA:                                f[11].value,
-        COMENTARIOS:                           f[12].value,
-        REQUISICION:                           f[13].value,
-        FECHA_OC:                              f[14].value,
-        OC:                                    f[15].value,
-        FECHA_ENTRADA:                         f[16].value,
-        CANTIDAD_REGISTRADA:                   f[17].value,
-        ESTATUS_OC:                            f[18].value,
-        HOJA_CONTROL:                          f[19].value
-    });
-}
-
-function cargar(){
-    let params = obtenerParametros();
-    fetch(`/ORDENES_DE_COMPRA?${params.toString()}`)
-    .then(res=>res.json())
-    .then(resp=>{
-        totalRegistros = resp.total;
-        datosOriginales = resp.data;
-        datosFiltrados = [...datosOriginales];
-        renderizar();
-    });
-}
-
-function renderizar(){
-    tabla.innerHTML="";
-    datosFiltrados.forEach(row=>{
-        tabla.innerHTML+=`
-        <tr>
-        <td>${row.ID}</td>
-        <td>${row.ORDEN_DE_COMPRA??""}</td>
-        <td>${row.FOLIO_CORRECTIVO_SOLICITUD_INVENTARIO??""}</td>
-        <td>${row.SOLICITANTE??""}</td>
-        <td>${row.PRESUPUESTO_MES??""}</td>
-        <td>${row.SERIE_UBICACION_NO_EMPLEADO??""}</td>
-        <td>${row.ACCESORIO_SOLICITADO??""}</td>
-        <td>${row.PROVEEDOR_ELEGIDO??""}</td>
-        <td>${row.PIEZA_SERVICIO??""}</td>
-        <td>${row.CANTIDAD??""}</td>
-        <td>${row.PRECIO_UNITARIO??""}</td>
-        <td>${row.TOTAL_NO_INCLUYE_IVA??""}</td>
-        <td>${row.MONEDA??""}</td>
-        <td>${row.COMENTARIOS??""}</td>
-        <td>${row.REQUISICION??""}</td>
-        <td>${row.FECHA_OC??""}</td>
-        <td>${row.OC??""}</td>
-        <td>${row.FECHA_ENTRADA??""}</td>
-        <td>${row.CANTIDAD_REGISTRADA??""}</td>
-        <td>${row.ESTATUS_OC??""}</td>
-        <td>${row.HOJA_CONTROL??""}</td>
-        <td>
-        ${row.TIENE_PDF
-        ? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button>
-           <button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
-        : `<input type="file" onchange="subirPDF(${row.ID},this)">`
+                if (rolActual !== 'ADMIN' && rolActual !== 'ENCARGADO_CORRECTIVOS') {
+                    const p = document.getElementById('panelNuevoRegistro');
+                    if (p) p.style.display = 'none';
+                }
+            } catch { window.location.href = '/static/login.html'; }
         }
-        </td>
-        <td>
-        <button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
-        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button>
-        </td>
-        </tr>`;
-    });
-    paginaInfo.innerText=`Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
-}
 
-function editar(row){
-    editandoID = row.ID;
-    Object.keys(row).forEach(key=>{
-        if(document.getElementById(key)){
-            document.getElementById(key).value = row[key] ?? "";
+        async function cerrarSesion() {
+            try { await fetch('/LOGOUT', { method: 'POST', credentials: 'include' }); } catch { }
+            sessionStorage.clear();
+            window.location.href = '/static/login.html';
         }
-    });
-    window.scrollTo({top:0, behavior:"smooth"});
-}
 
-function eliminar(id){
-    if(!confirm("¿Eliminar este registro?")) return;
-    fetch(`/ORDENES_DE_COMPRA/${id}`,{method:"DELETE"}).then(()=>cargar());
-}
+        function toggleChip() { document.getElementById('userChip').classList.toggle('open'); }
+        document.addEventListener('click', e => {
+            const c = document.getElementById('userChip');
+            if (c && !c.contains(e.target)) c.classList.remove('open');
+        });
 
-function subirPDF(id, input){
-    let file = input.files[0];
-    if(!file) return;
-    let formData = new FormData();
-    formData.append("file", file);
-    fetch(`/ORDENES_DE_COMPRA/PDF/${id}`,{method:"POST", body:formData})
-    .then(()=>cargar());
-}
+        // ── Calcular total en vivo ─────────────────────────────────────────────
+        function calcularTotal(prefix) {
+            const cant = parseFloat(document.getElementById(prefix + '_CANTIDAD')?.value) || 0;
+            const precio = parseFloat(document.getElementById(prefix + '_PRECIO_UNITARIO')?.value) || 0;
+            const total = cant * precio;
+            const el = document.getElementById(prefix + '_TOTAL_SIN_IVA');
+            if (el) el.value = total > 0 ? total.toFixed(2) : '';
+        }
 
-function verPDF(id){
-    window.open(`/ORDENES_DE_COMPRA/PDF/${id}`,"_blank");
-}
+        // ── Parámetros ─────────────────────────────────────────────────────────
+        function obtenerParametros() {
+            return new URLSearchParams({
+                page: paginaActual, limit: limite,
+                ORDEN_DE_COMPRA: document.getElementById('f_ORDEN_DE_COMPRA').value,
+                FOLIO: document.getElementById('f_FOLIO').value,
+                SOLICITANTE: document.getElementById('f_SOLICITANTE').value,
+                PRESUPUESTO_MES: document.getElementById('f_PRESUPUESTO_MES').value,
+                SERIE_UBICACION_NO_EMPLEADO: document.getElementById('f_SERIE_UBICACION_NO_EMPLEADO').value,
+                ACCESORIO_SOLICITADO: document.getElementById('f_ACCESORIO_SOLICITADO').value,
+                PROVEEDOR_ELEGIDO: document.getElementById('f_PROVEEDOR_ELEGIDO').value,
+                PIEZA_SERVICIO: document.getElementById('f_PIEZA_SERVICIO').value,
+                MONEDA: document.getElementById('f_MONEDA').value,
+                REQUISICION: document.getElementById('f_REQUISICION').value,
+                OC: document.getElementById('f_OC').value,
+                ESTATUS_OC: document.getElementById('f_ESTATUS_OC').value,
+            });
+        }
 
-function eliminarPDF(id){
-    if(!confirm("¿Seguro que deseas eliminar el PDF?")) return;
-    fetch(`/ORDENES_DE_COMPRA/PDF/${id}`,{method:"DELETE"})
-    .then(()=>cargar());
-}
+        // ── Cargar ─────────────────────────────────────────────────────────────
+        function cargar() {
+            fetch(`/ORDENES_DE_COMPRA?${obtenerParametros()}`)
+                .then(r => r.json())
+                .then(resp => { totalRegistros = resp.total; datosActuales = resp.data; renderizar(); })
+                .catch(() => {
+                    document.getElementById('tabla').innerHTML =
+                        `<tr><td colspan="23" style="text-align:center;padding:30px;color:var(--muted)">⚠️ Error al cargar datos</td></tr>`;
+                });
+        }
 
-function filtrar(){
-    paginaActual = 1;
-    cargar();
-}
+        function filtrar() { paginaActual = 1; cargar(); }
+        function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
+        function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
 
-function exportarFiltrado(){
-    let params = obtenerParametros();
-    window.open(`/ORDENES_DE_COMPRA/EXPORTAR?${params.toString()}`);
-}
+        // ── Pills estatus ──────────────────────────────────────────────────────
+        function estatusPill(s) {
+            if (!s) return '';
+            const v = s.toUpperCase();
+            if (v === 'COMPLETA' || v === 'TRUE') return `<span class="pill pill-green">${s}</span>`;
+            if (v === 'PENDIENTE' || v === 'FALSE') return `<span class="pill pill-amber">${s}</span>`;
+            if (v === 'CANCELADA') return `<span class="pill pill-red">${s}</span>`;
+            return `<span class="pill pill-gray">${s}</span>`;
+        }
 
-function exportarTodo(){
-    window.open(`/ORDENES_DE_COMPRA/EXPORTAR_TODO`);
-}
+        // ── Renderizar ─────────────────────────────────────────────────────────
+        function renderizar() {
+            const tbody = document.getElementById('tabla');
+            tbody.innerHTML = '';
 
-function exportarPorAnio(){
-    let anio = document.getElementById("anioExportar").value;
-    if(!anio){ alert("Ingresa un año"); return; }
-    window.open(`/ORDENES_DE_COMPRA/EXPORTAR_ANIO?anio=${anio}`);
-}
+            if (!datosActuales.length) {
+                tbody.innerHTML = `<tr><td colspan="23" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>`;
+                document.getElementById('paginaInfo').textContent = 'Sin resultados';
+                return;
+            }
 
-function siguiente(){
-    if(paginaActual*limite<totalRegistros){ paginaActual++; cargar(); }
-}
+            const puedeEditar = rolActual === 'ADMIN' || rolActual === 'ENCARGADO_CORRECTIVOS';
+            const puedeEliminar = rolActual === 'ADMIN';
 
-function anterior(){
-    if(paginaActual>1){ paginaActual--; cargar(); }
-}
+            datosActuales.forEach(row => {
+                tbody.innerHTML += `
+                <tr>
+                    <td class="mono">${row.ID}</td>
+                    <td class="auto">${row.ORDEN_DE_COMPRA ?? ''}</td>
+                    <td class="auto mono">${row.FECHA_OC ?? ''}</td>
+                    <td class="auto mono">${row.OC ?? ''}</td>
+                    <td>${row.FOLIO ?? ''}</td>
+                    <td>${row.SOLICITANTE ?? ''}</td>
+                    <td>${row.PRESUPUESTO_MES ?? ''}</td>
+                    <td>${row.SERIE_UBICACION_NO_EMPLEADO ?? ''}</td>
+                    <td class="wrap">${row.ACCESORIO_SOLICITADO ?? ''}</td>
+                    <td>${row.PROVEEDOR_ELEGIDO ?? ''}</td>
+                    <td>${row.PIEZA_SERVICIO ?? ''}</td>
+                    <td class="num">${row.CANTIDAD ?? ''}</td>
+                    <td class="num">${row.PRECIO_UNITARIO ?? ''}</td>
+                    <td class="num auto">${row.TOTAL_SIN_IVA ?? ''}</td>
+                    <td>${row.MONEDA ?? ''}</td>
+                    <td class="wrap">${row.COMENTARIOS ?? ''}</td>
+                    <td>${row.HOJA_CONTROL ?? ''}</td>
+                    <td class="mono">${row.REQUISICION ?? ''}</td>
+                    <td class="auto mono">${row.FECHA_ENTRADA ?? ''}</td>
+                    <td class="num">${row.CANTIDAD_REGISTRADA ?? ''}</td>
+                    <td>${estatusPill(row.ESTATUS_OC)}</td>
+                    <td>
+                        ${row.TIENE_PDF
+                        ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
+                               <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
+                        : `<label class="file-label">📎 Subir PDF<input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)"></label>`}
+                    </td>
+                    <td style="white-space:nowrap;">
+                        ${puedeEditar ? `<button class="btn btn-amber  btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
+                        ${puedeEliminar ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑️</button>` : ''}
+                        <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                    </td>
+                </tr>`;
+            });
 
-cargar();
+            const totalPags = Math.ceil(totalRegistros / limite) || 1;
+            document.getElementById('paginaInfo').textContent =
+                `Página ${paginaActual} / ${totalPags} · Total: ${totalRegistros} registros`;
+        }
 
-</script>
+        // ── Guardar nuevo ──────────────────────────────────────────────────────
+        function guardar() {
+            if (rolActual !== 'ADMIN' && rolActual !== 'ENCARGADO_CORRECTIVOS') {
+                alert('No tienes permisos para crear nuevos registros.');
+                return;
+            }
+            const data = {};
+            CAMPOS.forEach(({ key }) => {
+                const el = document.getElementById('n_' + key);
+                if (!el) return;
+                const isNum = ['CANTIDAD', 'PRECIO_UNITARIO', 'TOTAL_SIN_IVA', 'CANTIDAD_REGISTRADA'].includes(key);
+                data[key] = el.value !== '' ? (isNum ? parseFloat(el.value) : el.value) : null;
+            });
 
+            fetch('/ORDENES_DE_COMPRA', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                body: JSON.stringify(data)
+            }).then(r => r.json())
+                .then(() => { limpiarForm(); cargar(); })
+                .catch(e => alert('Error al guardar: ' + e.message));
+        }
+
+        function limpiarForm() {
+            CAMPOS.forEach(({ key }) => {
+                const el = document.getElementById('n_' + key);
+                if (el) el.value = '';
+            });
+        }
+
+        // ── Eliminar / PDF ─────────────────────────────────────────────────────
+        function eliminar(id) {
+            if (!confirm('¿Eliminar esta orden de compra?')) return;
+            fetch(`/ORDENES_DE_COMPRA/${id}`, { method: 'DELETE' }).then(() => cargar());
+        }
+        function subirPDF(id, input) {
+            const fd = new FormData();
+            fd.append('file', input.files[0]);
+            fetch(`/ORDENES_DE_COMPRA/PDF/${id}`, { method: 'POST', body: fd }).then(() => cargar());
+        }
+        function verPDF(id) { window.open(`/ORDENES_DE_COMPRA/PDF/${id}`, '_blank'); }
+        function eliminarPDF(id) {
+            if (!confirm('¿Eliminar el PDF adjunto?')) return;
+            fetch(`/ORDENES_DE_COMPRA/PDF/${id}`, { method: 'DELETE' }).then(() => cargar());
+        }
+
+        // ── Exportar ───────────────────────────────────────────────────────────
+        function exportarFiltrado() { window.open(`/ORDENES_DE_COMPRA/EXPORTAR?${obtenerParametros()}`); }
+        function exportarTodo() { window.open('/ORDENES_DE_COMPRA/EXPORTAR_TODO'); }
+        function exportarPorAnio() {
+            const a = document.getElementById('anioExportar').value;
+            if (!a) { alert('Ingresa un año'); return; }
+            window.open(`/ORDENES_DE_COMPRA/EXPORTAR_ANIO?anio=${a}`);
+        }
+
+        // ── Modal Editar ───────────────────────────────────────────────────────
+        function abrirEditar(id) {
+            if (rolActual !== 'ADMIN' && rolActual !== 'ENCARGADO_CORRECTIVOS') return;
+            editandoID = id;
+            document.getElementById('editarIdLabel').textContent = id;
+            const row = datosActuales.find(r => r.ID === id);
+            if (row) {
+                CAMPOS.forEach(({ key }) => {
+                    const el = document.getElementById('e_' + key);
+                    if (!el) return;
+                    let val = row[key] ?? '';
+                    if ((key === 'FECHA_OC' || key === 'FECHA_ENTRADA') && val) {
+                        const d = new Date(val);
+                        if (!isNaN(d)) val = d.toISOString().slice(0, 10);
+                    }
+                    el.value = val;
+                });
+            }
+            document.getElementById('modalEditar').classList.add('show');
+            document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+        }
+
+        function cerrarEditar() {
+            document.getElementById('modalEditar').classList.remove('show');
+            editandoID = null;
+        }
+
+        async function guardarCambios() {
+            const datos = {};
+            CAMPOS.forEach(({ key }) => {
+                const el = document.getElementById('e_' + key);
+                if (!el) return;
+                const isNum = ['CANTIDAD', 'PRECIO_UNITARIO', 'TOTAL_SIN_IVA', 'CANTIDAD_REGISTRADA'].includes(key);
+                datos[key] = el.value !== '' ? (isNum ? parseFloat(el.value) : el.value) : null;
+            });
+
+            try {
+                const res = await fetch(`/ORDENES_DE_COMPRA/${editandoID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(datos)
+                });
+                const text = await res.text();
+                const result = text ? JSON.parse(text) : {};
+                if (res.ok && !result.error) { cerrarEditar(); cargar(); }
+                else alert('Error: ' + (result.error || 'No se pudo guardar'));
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // ── Historial ──────────────────────────────────────────────────────────
+        function esc(v) {
+            if (v == null) return '';
+            return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function formatFecha(f) {
+            try { const d = new Date(f); if (!isNaN(d)) return d.toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch { }
+            return f ?? '';
+        }
+        function renderEvento(ev) {
+            let antes = ev.registro_anterior, despues = ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch { }
+
+            const cambios = new Set();
+            CAMPOS.forEach(({ key }) => { if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? '')) cambios.add(key); });
+
+            let filas = '';
+            CAMPOS.forEach(({ key, label }) => {
+                const vA = antes && key in antes ? antes[key] : '';
+                const vD = despues && key in despues ? despues[key] : '';
+                const cambiado = cambios.has(key);
+                filas += `<tr class="${cambiado ? 'row-changed' : ''}">
+                    <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                    <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
+                    <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
+                </tr>`;
+            });
+
+            return `<div class="ev-wrap">
+                <div class="ev-header">
+                    <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                    <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                    <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                        ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                    </span>
+                </div>
+                <table class="ev-table">
+                    <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
+                    <tbody>${filas}</tbody>
+                </table>
+            </div>`;
+        }
+
+        function verHistorial(id) {
+            document.getElementById('histIdLabel').textContent = id;
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="text-align:center;padding:30px;color:var(--muted)"><span class="spin"></span> Cargando...</p>';
+            document.getElementById('modalHistorial').classList.add('show');
+            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+
+            fetch(`/ORDENES_DE_COMPRA/${id}/HISTORIAL`)
+                .then(r => r.json())
+                .then(data => {
+                    const lista = (data.historial || []).sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+                    document.getElementById('contenidoHistorial').innerHTML = !lista.length
+                        ? '<p class="sin-hist">📭 Sin ediciones registradas.</p>'
+                        : `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}</p>`
+                        + lista.map(renderEvento).join('');
+                })
+                .catch(() => {
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        '<p style="color:var(--red);text-align:center;padding:30px">Error al cargar historial.</p>';
+                });
+        }
+
+        function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); } });
+
+        // ── Scrollbar sincronizado ─────────────────────────────────────────────
+        (function () {
+            const top = document.getElementById('scrollTop');
+            const inner = document.getElementById('scrollTopInner');
+            const scroll = document.getElementById('tableScroll');
+
+            function syncWidth() { inner.style.width = scroll.scrollWidth + 'px'; }
+            new MutationObserver(syncWidth).observe(document.getElementById('tabla'), { childList: true, subtree: true });
+            window.addEventListener('resize', syncWidth);
+            syncWidth();
+
+            top.addEventListener('scroll', () => { scroll.scrollLeft = top.scrollLeft; });
+            scroll.addEventListener('scroll', () => { top.scrollLeft = scroll.scrollLeft; });
+        })();
+    </script>
 </body>
 </html>

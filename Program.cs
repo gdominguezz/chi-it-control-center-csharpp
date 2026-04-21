@@ -21,6 +21,7 @@ builder.Services.AddScoped<BajasService>();  // BAJAS
 ///////////////////////////////////////////////////////// PRESUPUESTO //////////////////////////////////////
 builder.Services.AddScoped<PresupuestosReqVsOcService>();           //SERVICIO DEL MODULO REQ VS OC
 builder.Services.AddScoped<RegistroEntradasTemporalService>(); // REGISTRO ENTRADAS TEMPORAL
+builder.Services.AddScoped<OrdenesDeCompraService>(); // ORDENES DE COMPRA
 
 // CORS
 builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
