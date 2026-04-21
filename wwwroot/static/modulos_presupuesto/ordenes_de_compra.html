@@ -1280,13 +1280,11 @@
             <span class="page-info" id="paginaInfo">—</span>
             <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
         </div>
-
+        <div class="panel" id="leyendaSolicitantes" style="display:none;">
+            <div class="panel-title">🎨 Solicitantes</div>
+            <div id="leyendaContenido" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+        </div>
     </div><!-- /main -->
-    <!-- LEYENDA DE SOLICITANTES -->
-    <div class="panel" id="leyendaSolicitantes" style="display:none;">
-        <div class="panel-title">🎨 Solicitantes</div>
-        <div id="leyendaContenido" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
-    </div>
     <!-- MODAL EDITAR -->
     <div id="modalEditar" class="modal">
         <div class="modal-box form-box">
@@ -1429,47 +1427,9 @@
         window.addEventListener('DOMContentLoaded', () => {
             verificarSesion();
             cargar();
-            cargarSolicitantes();
         });
 
-        // ── Cargar solicitantes únicos ─────────────────────────────────────────────
-        async function cargarSolicitantes() {
-            try {
-                const res = await fetch('/ORDENES_DE_COMPRA/SOLICITANTES_UNICOS');
-                const data = await res.json();
-                const lista = data.solicitantes || [];
-
-                // Pre-asignar colores para mantener orden consistente
-                lista.forEach(s => colorSolicitante(s));
-
-                // Llenar el <select> del filtro de la tabla
-                const fSelect = document.getElementById('f_SOLICITANTE');
-                if (fSelect) {
-                    fSelect.innerHTML = '<option value="">— Todos —</option>';
-                    lista.forEach(s => {
-                        const opt = document.createElement('option');
-                        opt.value = s;
-                        opt.textContent = s;
-                        fSelect.appendChild(opt);
-                    });
-                }
-
-                // Llenar los <select> de los formularios (nuevo y editar)
-                ['n_SOLICITANTE', 'e_SOLICITANTE'].forEach(id => {
-                    const sel = document.getElementById(id);
-                    if (!sel) return;
-                    sel.innerHTML = '<option value="">— Seleccionar —</option>';
-                    lista.forEach(s => {
-                        const opt = document.createElement('option');
-                        opt.value = s;
-                        opt.textContent = s;
-                        sel.appendChild(opt);
-                    });
-                });
-            } catch (e) {
-                console.warn('No se pudieron cargar solicitantes:', e);
-            }
-        }
+       
         // ── Sesión ─────────────────────────────────────────────────────────────
         async function verificarSesion() {
             try {
