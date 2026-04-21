@@ -1427,7 +1427,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             verificarSesion();
             cargar();
-            cargarSolicitantes()
+            cargarSolicitantes();
         });
 
        
@@ -1847,6 +1847,33 @@
             } catch (e) {
                 console.warn('No se pudieron cargar solicitantes:', e);
             }
+        }
+        async function cargarLeyendaSolicitantes() {
+
+            const res = await fetch('/ORDENES_DE_COMPRA/SOLICITANTES');
+            const data = await res.json();
+
+            const lista = data.solicitantes || [];
+
+            const leyenda = document.getElementById('leyendaSolicitantes');
+            const contenido = document.getElementById('leyendaContenido');
+
+            contenido.innerHTML = '';
+
+            lista.forEach(s => {
+                const c = colorSolicitante(s);
+
+                contenido.innerHTML += `
+        <div style="display:inline-flex;align-items:center;gap:8px;
+            padding:6px 14px;border-radius:999px;
+            background:${hexToRgba(c, 0.13)};
+            border:1px solid ${hexToRgba(c, 0.4)};">
+            <span style="width:10px;height:10px;border-radius:50%;background:${c};"></span>
+            <span style="font-size:11px;font-weight:600;color:${c};font-family:'DM Mono',monospace;">${s}</span>
+        </div>`;
+            });
+
+            leyenda.style.display = lista.length ? 'block' : 'none';
         }
     </script>
 </body>
