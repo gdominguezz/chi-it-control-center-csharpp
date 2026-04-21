@@ -670,8 +670,8 @@
                 text-align: right;
             }
 
-        /* columna acciones fija */
-        table th:last-child, table td:last-child {
+        /* columna acciones fija — derecha */
+        table th.th-acciones, table td.td-acciones {
             position: sticky;
             right: 0;
             z-index: 2;
@@ -679,7 +679,7 @@
             box-shadow: -2px 0 6px rgba(0,0,0,.3);
         }
 
-        table thead th:last-child {
+        table thead th.th-acciones {
             z-index: 3;
         }
 
@@ -1316,14 +1316,13 @@
                     <thead>
                         <!-- fila 1: grupos -->
                         <tr class="group-row">
-                            <th class="gh-neutral" colspan="1">Acciones</th>
                             <th class="gh-identificacion" colspan="9">Identificación</th>
                             <th class="gh-dispositivo" colspan="8">Dispositivo</th>
                             <th class="gh-asignacion" colspan="5">Asignación</th>
+                            <th class="gh-neutral th-acciones" colspan="1">Acciones</th>
                         </tr>
                         <!-- fila 2: columnas -->
                         <tr class="col-row">
-                            <th class="gh-neutral">Acción</th>
                             <!-- identificacion -->
                             <th class="col-identificacion">ID Único</th>
                             <th class="col-identificacion">OC</th>
@@ -1350,10 +1349,11 @@
                             <th class="col-asignacion">Destino / Planta</th>
                             <th class="col-asignacion">Asignado A</th>
                             <th class="col-asignacion">Personal IT</th>
+                            <!-- acciones fija derecha -->
+                            <th class="gh-neutral th-acciones">Acción</th>
                         </tr>
                         <!-- fila 3: filtros -->
                         <tr class="filter-row" id="filterRow">
-                            <th></th>
                             <th><input id="f_id_unico" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
                             <th><input id="f_oc" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
                             <th><input id="f_folio" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
@@ -1402,6 +1402,7 @@
                             <th><input id="f_destino" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
                             <th><input id="f_asignado_a" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
                             <th><input id="f_personal_it" placeholder="Filtrar" oninput="aplicarFiltros()"></th>
+                            <th class="th-acciones"></th>
                         </tr>
                     </thead>
                     <tbody id="cuerpo">
@@ -1705,10 +1706,6 @@
                 };
 
                 return `<tr>
-                <td style="display:flex;gap:5px;padding:6px 10px;">
-                    <button class="btn btn-ghost btn-sm" title="Editar" onclick="abrirEditar(${r.id})">✏️</button>
-                    <button class="btn btn-ghost btn-sm" title="Historial" onclick="verHistorial(${r.id})">🕒</button>
-                </td>
                 <td class="mono">${esc(r.id_unico) || '—'}</td>
                 <td class="mono">${esc(r.oc) || '—'}</td>
                 <td class="mono">${esc(r.folio) || '—'}</td>
@@ -1732,6 +1729,10 @@
                 <td>${esc(r.destino_planta) || '—'}</td>
                 <td>${esc(r.asignado_a) || '—'}</td>
                 <td>${esc(r.personal_it_que_asigna) || '—'}</td>
+                <td class="td-acciones" style="display:flex;gap:5px;padding:6px 10px;">
+                    <button class="btn btn-ghost btn-sm" title="Editar" onclick="abrirEditar(${r.id})">✏️</button>
+                    <button class="btn btn-ghost btn-sm" title="Historial" onclick="verHistorial(${r.id})">🕒</button>
+                </td>
             </tr>`;
             }).join('');
         }
