@@ -1362,6 +1362,82 @@
                     <label>Total (Sin IVA) — calculado</label>
                     <input type="number" step="0.01" id="e_TOTAL_SIN_IVA" readonly tabindex="-1">
                 </div>
+                <div class="form-field">
+                    <label>Folio</label>
+                    <input id="e_FOLIO">
+                </div>
+
+                <div class="form-field">
+                    <label>Solicitante</label>
+                    <select id="e_SOLICITANTE">
+                        <option value="">— Seleccionar —</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label>Presupuesto Mes</label>
+                    <input id="e_PRESUPUESTO_MES">
+                </div>
+
+                <div class="form-field">
+                    <label>Serie / Ubicación</label>
+                    <input id="e_SERIE_UBICACION_NO_EMPLEADO">
+                </div>
+
+                <div class="form-field">
+                    <label>Accesorio Solicitado</label>
+                    <input id="e_ACCESORIO_SOLICITADO">
+                </div>
+
+                <div class="form-field">
+                    <label>Proveedor</label>
+                    <input id="e_PROVEEDOR_ELEGIDO">
+                </div>
+
+                <div class="form-field">
+                    <label>Pieza / Servicio</label>
+                    <input id="e_PIEZA_SERVICIO">
+                </div>
+
+                <div class="form-field">
+                    <label>Cantidad</label>
+                    <input id="e_CANTIDAD" type="number" step="1" min="0" oninput="calcularTotal('e')">
+                </div>
+
+                <div class="form-field">
+                    <label>Precio Unitario</label>
+                    <input id="e_PRECIO_UNITARIO" type="number" step="0.01" min="0" oninput="calcularTotal('e')">
+                </div>
+
+                <div class="form-field">
+                    <label>Moneda</label>
+                    <select id="e_MONEDA">
+                        <option value="">— Seleccionar —</option>
+                        <option>PESOS</option>
+                        <option>DOLARES</option>
+                        <option>EUROS</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label>Comentarios</label>
+                    <textarea id="e_COMENTARIOS"></textarea>
+                </div>
+
+                <div class="form-field">
+                    <label>Hoja Control</label>
+                    <input id="e_HOJA_CONTROL">
+                </div>
+
+                <div class="form-field">
+                    <label>Requisición</label>
+                    <input id="e_REQUISICION">
+                </div>
+
+                <div class="form-field">
+                    <label>Cantidad Registrada</label>
+                    <input id="e_CANTIDAD_REGISTRADA">
+                </div>
 
                 <div class="form-field">
                     <label>Estatus OC</label>
@@ -1429,9 +1505,16 @@
 
         // ── Colores por Solicitante ────────────────────────────────────────────────
         const SOLICITANTE_COLORES = [
-            '#2563EB', '#8B5CF6', '#06B6D4', '#F59E0B',
-            '#EC4899', '#10B981', '#EF4444', '#F97316',
-            '#6366F1', '#14B8A6', '#A855F7', '#84CC16'
+            '#2563EB', '#1D4ED8', '#3B82F6', '#60A5FA',
+            '#8B5CF6', '#7C3AED', '#A78BFA', '#C4B5FD',
+            '#06B6D4', '#0891B2', '#22D3EE', '#67E8F9',
+            '#10B981', '#059669', '#34D399', '#6EE7B7',
+            '#F59E0B', '#D97706', '#FBBF24', '#FCD34D',
+            '#EF4444', '#DC2626', '#F87171', '#FCA5A5',
+            '#EC4899', '#DB2777', '#F472B6', '#F9A8D4',
+            '#6366F1', '#4F46E5', '#818CF8', '#A5B4FC',
+            '#14B8A6', '#0D9488', '#5EEAD4', '#99F6E4',
+            '#A855F7', '#9333EA', '#C084FC', '#E9D5FF'
         ];
         const _solicitanteColorMap = {};
 
@@ -1680,8 +1763,15 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
                 body: JSON.stringify(data)
-            }).then(r => r.json())
-                .then(() => { limpiarForm(); cargar(); })
+            })
+                .then(async r => {
+                    const text = await r.text();
+                    return text ? JSON.parse(text) : {};
+                })
+                .then(() => {
+                    limpiarForm();
+                    cargar();
+                })
                 .catch(e => alert('Error al guardar: ' + e.message));
         }
 
