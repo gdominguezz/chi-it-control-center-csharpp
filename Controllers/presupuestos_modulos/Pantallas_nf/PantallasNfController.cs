@@ -18,6 +18,21 @@ public class PantallasNfController : ControllerBase
         return Ok(new { registros });
     }
 
+    [ApiController]
+    public class UsuarioController : ControllerBase
+    {
+        [HttpGet("/ME")]
+        public IActionResult Me([FromHeader(Name = "X-Usuario")] string? usuario)
+        {
+            return Ok(new
+            {
+                usuario = usuario ?? "USUARIO",
+                nombre = usuario ?? "USUARIO",
+                rol = "USER"
+            });
+        }
+    }
+
     // ── GET por ID ────────────────────────────────────────────────────────
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
