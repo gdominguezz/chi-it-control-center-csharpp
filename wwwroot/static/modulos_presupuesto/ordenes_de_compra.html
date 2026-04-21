@@ -1019,11 +1019,27 @@
             animation: spin .7s linear infinite;
             display: inline-block;
         }
+        .filter-row select {
+            width: 100%;
+            background: rgba(255,255,255,.04);
+            border: 1px solid var(--border2);
+            border-radius: 5px;
+            padding: 4px 6px;
+            font-size: 10px;
+            color: var(--text);
+            font-family: 'DM Mono',monospace;
+        }
+
+            .filter-row select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
 
         @keyframes spin {
             to {
                 transform: rotate(360deg)
             }
+
         }
     </style>
 </head>
