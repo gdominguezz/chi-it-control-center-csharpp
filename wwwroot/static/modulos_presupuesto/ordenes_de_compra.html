@@ -1427,6 +1427,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             verificarSesion();
             cargar();
+            cargarSolicitantes()
         });
 
        
@@ -1837,6 +1838,34 @@
             top.addEventListener('scroll', () => { scroll.scrollLeft = top.scrollLeft; });
             scroll.addEventListener('scroll', () => { top.scrollLeft = scroll.scrollLeft; });
         })();
+        async function cargarSolicitantes() {
+            try {
+                const res = await fetch('/ORDENES_DE_COMPRA/SOLICITANTES'); // ← URL sin _UNICOS
+                const data = await res.json();
+                const lista = data.solicitantes || [];
+
+                lista.forEach(s => colorSolicitante(s));
+
+                ['n_SOLICITANTE', 'e_SOLICITANTE', 'f_SOLICITANTE'].forEach(id => {
+                    const sel = document.getElementById(id);
+                    if (!sel) return;
+                    const esFilter = id === 'f_SOLICITANTE';
+                    const valActual = sel.value;
+                    sel.innerHTML = esFilter
+                        ? '<option value="">— Todos —</option>'
+                        : '<option value="">— Seleccionar —</option>';
+                    lista.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s;
+                        opt.textContent = s;
+                        sel.appendChild(opt);
+                    });
+                    sel.value = valActual;
+                });
+            } catch (e) {
+                console.warn('No se pudieron cargar solicitantes:', e);
+            }
+        }
     </script>
 </body>
 </html>

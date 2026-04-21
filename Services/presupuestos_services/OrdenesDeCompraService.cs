@@ -483,4 +483,21 @@ public class OrdenesDeCompraService
 
         cmd.ExecuteNonQuery();
     }
+    public List<string> GetSolicitantesUnicos()
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = @"
+        SELECT DISTINCT SOLICITANTE 
+        FROM ORDENES_DE_COMPRA 
+        WHERE SOLICITANTE IS NOT NULL AND SOLICITANTE <> ''
+        ORDER BY SOLICITANTE";
+
+        var lista = new List<string>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            lista.Add(reader.GetString(0));
+
+        return lista;
+    }
 }
