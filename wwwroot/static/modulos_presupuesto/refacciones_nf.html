@@ -1568,70 +1568,75 @@
             return f ?? '';
         }
 
+        // Normaliza un objeto de historial a keys en MAYÚSCULAS
+        function normalizarKeys(obj) {
+            if (!obj || typeof obj !== 'object') return {};
+            const out = {};
+            Object.keys(obj).forEach(k => { out[k.toUpperCase()] = obj[k]; });
+            return out;
+        }
+
         function renderEvento(ev) {
-            let antes = ev.registro_anterior;
-            let despues = ev.registro_nuevo;
-            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch { }
-            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch { }
+            let antesRaw = ev.registro_anterior;
+            let despuesRaw = ev.registro_nuevo;
+            try { if (typeof antesRaw === 'string') antesRaw = JSON.parse(antesRaw); } catch { }
+            try { if (typeof despuesRaw === 'string') despuesRaw = JSON.parse(despuesRaw); } catch { }
 
-            // Si no hay "antes", es una creación — mostrar solo columna "Valor"
-            const esCreacion = (antes === null || antes === undefined || (typeof antes === 'object' && Object.keys(antes).length === 0));
+            // Normalizar todas las keys a MAYÚSCULAS para que coincidan con CAMPOS
+            const antes = normalizarKeys(antesRaw);
+            const despues = normalizarKeys(despuesRaw);
 
+            const esCreacion = (antesRaw === null || antesRaw === undefined);
+
+            // Detectar campos que cambiaron
             const cambios = new Set();
-            if (!esCreacion) {
-                CAMPOS.forEach(({ key }) => {
-                    if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? ''))
-                        cambios.add(key);
-                });
-            } else {
-                // En creación, marcar como "cambio" todo campo con valor
-                CAMPOS.forEach(({ key }) => {
-                    if (despues?.[key] != null && despues[key] !== '') cambios.add(key);
-                });
-            }
-
-            // En creación solo mostrar filas con valor; en edición mostrar todas
-            const filasFiltradas = esCreacion
-                ? CAMPOS.filter(({ key }) => despues?.[key] != null && despues[key] !== '')
-                : CAMPOS;
+            CAMPOS.forEach(({ key }) => {
+                const vA = String(antes[key] ?? '');
+                const vD = String(despues[key] ?? '');
+                if (vA !== vD) cambios.add(key);
+            });
 
             let filas = '';
-            filasFiltradas.forEach(({ key, label }) => {
-                const vA = (!esCreacion && antes && key in antes) ? antes[key] : null;
-                const vD = (despues && key in despues) ? despues[key] : null;
-                const cambiado = cambios.has(key);
 
-                const mA = (vA === null || vA === undefined || vA === '')
-                    ? '<span class="empty-val">vacío</span>' : esc(String(vA));
-                const mD = (vD === null || vD === undefined || vD === '')
-                    ? '<span class="empty-val">vacío</span>' : esc(String(vD));
-
-                if (esCreacion) {
+            if (esCreacion) {
+                // Creación: 2 columnas, solo filas con valor
+                CAMPOS.forEach(({ key, label }) => {
+                    const vD = despues[key];
+                    if (vD === null || vD === undefined || vD === '') return;
+                    const mD = esc(String(vD));
                     filas += `
                         <tr>
-                            <td style="width:30%"><strong>${label}</strong></td>
+                            <td style="width:32%"><strong>${label}</strong></td>
                             <td style="background:rgba(16,185,129,.08);color:#6EE7B7">${mD}</td>
                         </tr>`;
-                } else {
+                });
+            } else {
+                // Edición: 3 columnas, todas las filas
+                CAMPOS.forEach(({ key, label }) => {
+                    const vA = antes[key];
+                    const vD = despues[key];
+                    const cambiado = cambios.has(key);
+                    const mA = (vA === null || vA === undefined || vA === '')
+                        ? '<span class="empty-val">vacío</span>' : esc(String(vA));
+                    const mD = (vD === null || vD === undefined || vD === '')
+                        ? '<span class="empty-val">vacío</span>' : esc(String(vD));
                     filas += `
                         <tr class="${cambiado ? 'row-changed' : ''}">
                             <td style="width:22%"><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
                             <td>${mA}</td>
                             <td>${mD}</td>
                         </tr>`;
-                }
-            });
+                });
+            }
 
-            const badgeColor = esCreacion
-                ? 'background:#10B981;color:#fff'
-                : 'background:var(--amber);color:#111';
+            const badgeStyle = esCreacion ? 'background:#10B981;color:#fff' : 'background:var(--amber);color:#111';
             const badgeTexto = esCreacion
-                ? '✨ Creación'
+                ? '✨ Creación inicial'
                 : `${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}`;
 
-            const theadHtml = esCreacion
+            const thead = esCreacion
                 ? `<thead><tr>
-                           <th style="width:30%">Campo</th>
+                           <th style="width:32%">Campo</th>
                            <th style="color:#6EE7B7">➡ Valor registrado</th>
                        </tr></thead>`
                 : `<thead><tr>
@@ -1645,13 +1650,12 @@
                     <div class="ev-header">
                         <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
                         <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                        <span style="margin-left:auto;${badgeColor};
-                            padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                        <span style="margin-left:auto;${badgeStyle};padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
                             ${badgeTexto}
                         </span>
                     </div>
                     <table class="ev-table">
-                        ${theadHtml}
+                        ${thead}
                         <tbody>${filas}</tbody>
                     </table>
                 </div>`;
