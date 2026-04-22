@@ -1576,93 +1576,56 @@
             return out;
         }
 
-        function renderEvento(ev) {
-
-            const antes = normalizarKeys(JSON.parse(ev.registro_anterior || '{}'));
-            const despues = normalizarKeys(JSON.parse(ev.registro_nuevo || '{}'));
-
-            const cambios = new Set();
-
-            CAMPOS.forEach(({ key }) => {
-                if ((antes[key] ?? '') !== (despues[key] ?? '')) {
-                    cambios.add(key);
-                }
-            });
-
-            const esCreacion = !ev.registro_anterior;
-
-            let filas = '';
-
-            CAMPOS.forEach(({ key, label }) => {
-
-                const vA = antes[key];
-                const vD = despues[key];
-
-                const cambiado = cambios.has(key);
-
-                const mA = (vA === null || vA === undefined || vA === '')
-                    ? '<span class="empty-val">vacío</span>'
-                    : esc(String(vA));
-
-                const mD = (vD === null || vD === undefined || vD === '')
-                    ? '<span class="empty-val">vacío</span>'
-                    : esc(String(vD));
-
-                filas += `
-        <tr class="${cambiado ? 'row-changed' : ''}">
-            <td style="width:22%">
-                <strong>${label}</strong>
-                ${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}
-            </td>
-            <td>${mA}</td>
-            <td>${mD}</td>
-        </tr>`;
-            });
-
-            const fecha = formatFecha(ev.fecha);
-
-            const badgeTexto = `${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}`;
-
-            return `
-    <div class="ev-wrap">
-
-        <div class="ev-header">
-            <span>🕒 <strong>${fecha}</strong></span>
-            <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-
-            <span class="n-cambios-badge"
-                  style="background:rgba(245,158,11,.18);
-                         color:var(--amber);
-                         border:1px solid rgba(245,158,11,.3);">
-                ${badgeTexto}
-            </span>
-        </div>
-
-        <table class="ev-table">
-
-            <thead>
-                <tr>
-                    <th>Campo</th>
-                    <th>Antes</th>
-                    <th>Después</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                ${filas}
-            </tbody>
-
-        </table>
-
-    </div>`;
+        // ── Historial ──────────────────────────────────────────────────────────────────
+        function esc(v) {
+            if (v == null) return '';
+            return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-            
+        function formatFecha(f) {
+            try { const d = new Date(f); if (!isNaN(d)) return d.toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch { }
+            return f ?? '';
+        }
+
+        function renderEvento(ev) {
+            let antes = ev.registro_anterior, despues = ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch { }
+
+            const cambios = new Set();
+            CAMPOS.forEach(({ key }) => { if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? '')) cambios.add(key); });
+
+            let filas = '';
+            CAMPOS.forEach(({ key, label }) => {
+                const vA = antes && key in antes ? antes[key] : '';
+                const vD = despues && key in despues ? despues[key] : '';
+                const cambiado = cambios.has(key);
+                filas += `<tr class="${cambiado ? 'row-changed' : ''}">
+         <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+         <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
+         <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
+     </tr>`;
+            });
+
+            return `<div class="ev-wrap">
+     <div class="ev-header">
+         <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+         <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+         <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+             ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+         </span>
+     </div>
+     <table class="ev-table">
+         <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
+         <tbody>${filas}</tbody>
+     </table>
+ </div>`;
+        }
 
         function verHistorial(id) {
             document.getElementById('histIdLabel').textContent = id;
             document.getElementById('contenidoHistorial').innerHTML =
-                '<p style="text-align:center;padding:30px;color:var(--muted)">Cargando historial...</p>';
+                '<p style="text-align:center;padding:30px;color:var(--muted)"><span class="spin"></span> Cargando…</p>';
             document.getElementById('modalHistorial').classList.add('show');
             document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
 
