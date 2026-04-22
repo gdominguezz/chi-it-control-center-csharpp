@@ -1565,26 +1565,35 @@
         }
 
         // ── Modal Historial ────────────────────────────────────────────────
+
         function esc(v) {
             if (v == null) return '';
-            return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            return String(v)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
         }
 
         function formatFecha(f) {
             try {
                 const d = new Date(f);
-                if (!isNaN(d)) return d.toLocaleString('es-MX', {
-                    year: 'numeric', month: '2-digit', day: '2-digit',
-                    hour: '2-digit', minute: '2-digit', second: '2-digit'
-                });
+                if (!isNaN(d)) {
+                    return d.toLocaleString('es-MX', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                }
             } catch { }
             return f ?? '';
         }
 
-        // Normaliza un objeto de historial a keys en MAYÚSCULAS
         function normalizarKeys(obj) {
-            if (!obj || typeof obj !== 'object') return null;
+            if (!obj || typeof obj !== 'object') return {};
             const out = {};
             Object.keys(obj).forEach(k => {
                 out[k.toLowerCase()] = obj[k];
@@ -1592,38 +1601,40 @@
             return out;
         }
 
-        // ── Historial ──────────────────────────────────────────────────────────────────
-        function esc(v) {
-            if (v == null) return '';
-            return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
-
-        function formatFecha(f) {
-            try { const d = new Date(f); if (!isNaN(d)) return d.toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch { }
-            return f ?? '';
-        }
-
         function renderEvento(ev) {
-            let antesRaw = ev.registro_anterior, despuesRaw = ev.registro_nuevo;
-            try { if (typeof antesRaw === 'string') antesRaw = JSON.parse(antesRaw); } catch { antesRaw = null; }
-            try { if (typeof despuesRaw === 'string') despuesRaw = JSON.parse(despuesRaw); } catch { despuesRaw = null; }
+
+            let antesRaw = ev.registro_anterior;
+            let despuesRaw = ev.registro_nuevo;
+
+            try {
+                if (typeof antesRaw === 'string') antesRaw = JSON.parse(antesRaw);
+            } catch { antesRaw = null; }
+
+            try {
+                if (typeof despuesRaw === 'string') despuesRaw = JSON.parse(despuesRaw);
+            } catch { despuesRaw = null; }
+
             const antes = normalizarKeys(antesRaw);
             const despues = normalizarKeys(despuesRaw);
 
             const esCreacion = !antes || Object.keys(antes).length === 0;
 
             const cambios = new Set();
+
             if (!esCreacion) {
                 CAMPOS.forEach(({ key }) => {
-                    if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? '')) cambios.add(key);
+                    if ((antes?.[key] ?? '') != (despues?.[key] ?? '')) {
+                        cambios.add(key);
+                    }
                 });
             }
 
             let filas = '';
+
             CAMPOS.forEach(({ key, label }) => {
 
-                const vA = antes ? antes[key] : null;
-                const vD = despues ? despues[key] : null;
+                const vA = antes?.[key] ?? null;
+                const vD = despues?.[key] ?? null;
 
                 const cambiado = esCreacion
                     ? vD !== null && vD !== ''
@@ -1631,66 +1642,90 @@
 
                 const celdaAntes = esCreacion
                     ? '<span class="empty-val">—</span>'
-                    : (vA === null || vA === undefined || vA === ''
+                    : (vA === null || vA === ''
                         ? '<span class="empty-val">vacío</span>'
-                        : esc(String(vA)));
+                        : esc(vA));
 
                 const celdaDespues =
-                    vD === null || vD === undefined || vD === ''
+                    vD === null || vD === ''
                         ? '<span class="empty-val">vacío</span>'
-                        : esc(String(vD));
+                        : esc(vD);
 
                 filas += `
-    <tr class="${cambiado ? 'row-changed' : ''}">
-        <td><strong>${label}</strong></td>
-        <td>${celdaAntes}</td>
-        <td>${celdaDespues}</td>
-    </tr>`;
+<tr class="${cambiado ? 'row-changed' : ''}">
+<td><strong>${label}</strong></td>
+<td>${celdaAntes}</td>
+<td>${celdaDespues}</td>
+</tr>`;
             });
 
             const badgeLabel = esCreacion
                 ? '<span style="margin-left:auto;background:var(--green);color:#fff;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">✦ Creación</span>'
                 : `<span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}</span>`;
 
-            return `<div class="ev-wrap">
-                    <div class="ev-header">
-                        <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                        <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                        ${badgeLabel}
-                    </div>
-                    <table class="ev-table">
-                        <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
-                        <tbody>${filas}</tbody>
-                    </table>
-                </div>`;
+            return `
+<div class="ev-wrap">
+
+<div class="ev-header">
+<span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+<span>👤 <strong>${esc(ev.usuario)}</strong></span>
+${badgeLabel}
+</div>
+
+<table class="ev-table">
+<thead>
+<tr>
+<th>Campo</th>
+<th style="color:#FCA5A5">⬅ Antes</th>
+<th style="color:#6EE7B7">➡ Después</th>
+</tr>
+</thead>
+
+<tbody>
+${filas}
+</tbody>
+
+</table>
+</div>`;
         }
 
         function verHistorial(id) {
+
             document.getElementById('histIdLabel').textContent = id;
+
             document.getElementById('contenidoHistorial').innerHTML =
-                '<p style="text-align:center;padding:30px;color:var(--muted)"><span class="spin"></span> Cargando…</p>';
+                '<p style="text-align:center;padding:30px;color:var(--muted)">Cargando…</p>';
+
             document.getElementById('modalHistorial').classList.add('show');
+
             document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
 
             fetch(`/REFACCIONES_NF/${id}/HISTORIAL`)
                 .then(r => r.json())
                 .then(data => {
-                    const lista = (data.historial || []).sort(
-                        (a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0)
-                    );
+
+                    const lista = (data.historial || [])
+                        .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+
                     if (!lista.length) {
+
                         document.getElementById('contenidoHistorial').innerHTML =
                             '<p class="sin-hist">📭 Este registro no tiene ediciones registradas.</p>';
-                    } else {
-                        document.getElementById('contenidoHistorial').innerHTML =
-                            `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                        ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                    </p>` + lista.map(renderEvento).join('');
+
+                        return;
                     }
+
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
+        ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+        </p>` + lista.map(renderEvento).join('');
+
                 })
                 .catch(() => {
+
                     document.getElementById('contenidoHistorial').innerHTML =
                         '<p style="color:var(--red);text-align:center;padding:30px">Error al cargar historial.</p>';
+
                 });
         }
 
@@ -1699,7 +1734,10 @@
         }
 
         document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
+            if (e.key === 'Escape') {
+                cerrarEditar();
+                cerrarHistorial();
+            }
         });
     </script>
 
