@@ -1599,35 +1599,25 @@
             let filas = '';
 
             if (esCreacion) {
-                // Creación: 2 columnas, solo filas con valor
+
+                // Creación: mostrar todos los campos registrados
                 CAMPOS.forEach(({ key, label }) => {
+
                     const vD = despues[key];
-                    if (vD === null || vD === undefined || vD === '') return;
-                    const mD = esc(String(vD));
-                    filas += `
-                        <tr>
-                            <td style="width:32%"><strong>${label}</strong></td>
-                            <td style="background:rgba(16,185,129,.08);color:#6EE7B7">${mD}</td>
-                        </tr>`;
-                });
-            } else {
-                // Edición: 3 columnas, todas las filas
-                CAMPOS.forEach(({ key, label }) => {
-                    const vA = antes[key];
-                    const vD = despues[key];
-                    if (!cambios.has(key)) return;
-                    const cambiado = true;
-                    const mA = (vA === null || vA === undefined || vA === '')
-                        ? '<span class="empty-val">vacío</span>' : esc(String(vA));
+
                     const mD = (vD === null || vD === undefined || vD === '')
-                        ? '<span class="empty-val">vacío</span>' : esc(String(vD));
+                        ? '<span class="empty-val">vacío</span>'
+                        : esc(String(vD));
+
                     filas += `
-                        <tr class="row-changed">
-                            <td style="width:22%"><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                            <td>${mA}</td>
-                            <td>${mD}</td>
-                        </tr>`;
+                            <tr>
+                                <td style="width:30%">
+                                    <strong>${label}</strong>
+                                </td>
+                                <td>${mD}</td>
+                            </tr>`;
                 });
+
             }
 
             const badgeStyle = esCreacion ? 'background:#10B981;color:#fff' : 'background:var(--amber);color:#111';
