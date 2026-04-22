@@ -1481,8 +1481,9 @@
             }
             const data = {};
             CAMPOS.forEach(({ key }) => {
-                const el = document.getElementById(key);
-                data[key] = el ? (el.value || null) : null;
+                // Los IDs del formulario nuevo están en MAYÚSCULAS (OC, MARCA, etc.)
+                const el = document.getElementById(key.toUpperCase());
+                data[key.toUpperCase()] = el ? (el.value || null) : null;
             });
 
             fetch('/REFACCION_NF', {
@@ -1526,10 +1527,13 @@
             const row = datosActuales.find(r => r.ID === id);
             if (row) {
                 CAMPOS.forEach(({ key }) => {
-                    const el = document.getElementById('e_' + key);
+                    // Los IDs del modal están en MAYÚSCULAS (e_OC, e_MARCA, etc.)
+                    const elId = 'e_' + key.toUpperCase();
+                    const el = document.getElementById(elId);
                     if (!el) return;
-                    let val = row[key] ?? '';
-                    if (key === 'FECHA_REGISTRO' && val) {
+                    // La API devuelve los datos en MAYÚSCULAS
+                    let val = row[key.toUpperCase()] ?? '';
+                    if (key === 'fecha_registro' && val) {
                         const d = new Date(val);
                         if (!isNaN(d)) val = d.toISOString().slice(0, 10);
                     }
@@ -1548,8 +1552,9 @@
         async function guardarCambios() {
             const datos = {};
             CAMPOS.forEach(({ key }) => {
-                const el = document.getElementById('e_' + key);
-                datos[key] = el ? (el.value || null) : null;
+                // Los IDs del modal están en MAYÚSCULAS (e_OC, e_MARCA, etc.)
+                const el = document.getElementById('e_' + key.toUpperCase());
+                datos[key.toUpperCase()] = el ? (el.value || null) : null;
             });
 
             try {
@@ -1578,7 +1583,7 @@
             return f ?? '';
         }
 
-        // Normaliza un objeto de historial a keys en minúsculas (igual que CAMPOS)
+        // Normaliza keys del historial a minúsculas para comparar con CAMPOS
         function normalizarKeys(obj) {
             if (!obj || typeof obj !== 'object') return {};
             const out = {};
@@ -1605,8 +1610,8 @@
                 const cambiado = cambios.has(key);
                 filas += `<tr class="${cambiado ? 'row-changed' : ''}">
                     <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                    <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
-                    <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
+                    <td>${(!vA && vA !== 0) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
+                    <td>${(!vD && vD !== 0) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
                 </tr>`;
             });
 
