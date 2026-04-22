@@ -1668,7 +1668,7 @@
 
         // ── Render ─────────────────────────────────────────────────────────────────────
         function renderTabla() {
-            const por = parseInt(document.getElementById('porPagina').value) || 25;
+            const por = parseInt(document.getElementById('porPagina')?.value || 25);
             const total = datosFiltrados.length;
             const totalPaginas = Math.max(1, Math.ceil(total / por));
             paginaActual = Math.min(paginaActual, totalPaginas);
