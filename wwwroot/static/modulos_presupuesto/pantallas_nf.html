@@ -1977,8 +1977,58 @@
         }
 
         function exportarFiltrado() {
-            const q = document.getElementById('busquedaGlobal')?.value || '';
-            window.open('/PANTALLAS_NF/EXPORTAR?q=' + encodeURIComponent(q));
+
+            if (!datosFiltrados.length) {
+                alert("No hay datos para exportar");
+                return;
+            }
+
+            const encabezados = [
+                "ID_UNICO", "OC", "FOLIO", "FECHA_REGISTRO", "RECIBIDO_POR", "SUBCATEGORIA",
+                "PROVEEDOR", "COSTO_USD", "VIDA_UTIL_MESES", "MARCA", "MODELO", "NO_SERIE",
+                "CANTIDAD", "TAMANO_PULGADAS", "ACCESORIOS", "MAC_WIFI", "MAC_ETHERNET",
+                "ESTADO", "DISPONIBLE", "FECHA_SALIDA", "DESTINO_PLANTA", "ASIGNADO_A", "PERSONAL_IT"
+            ];
+
+            let csv = encabezados.join(",") + "\n";
+
+            datosFiltrados.forEach(r => {
+                csv += [
+                    r.id_unico,
+                    r.oc,
+                    r.folio,
+                    r.fecha_registro,
+                    r.recibido_por,
+                    r.subcategoria,
+                    r.proveedor,
+                    r.costo_usd,
+                    r.vida_util_meses,
+                    r.marca,
+                    r.modelo,
+                    r.no_serie,
+                    r.cantidad,
+                    r.tamano_pulgadas,
+                    r.accesorios,
+                    r.mac_wifi,
+                    r.mac_ethernet,
+                    r.estado,
+                    r.disponible,
+                    r.fecha_salida,
+                    r.destino_planta,
+                    r.asignado_a,
+                    r.personal_it_que_asigna
+                ].map(v => `"${v ?? ""}"`).join(",") + "\n";
+            });
+
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "pantallas_nf_filtrado.csv";
+            a.click();
+
+            URL.revokeObjectURL(url);
         }
 
         function exportarPorAnio() {
