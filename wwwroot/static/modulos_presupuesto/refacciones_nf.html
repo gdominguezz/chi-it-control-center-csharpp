@@ -1571,7 +1571,9 @@
         function normalizarKeys(obj) {
             if (!obj || typeof obj !== 'object') return {};
             const out = {};
-            Object.keys(obj).forEach(k => { out[k.toUpperCase()] = obj[k]; });
+            Object.keys(obj).forEach(k => {
+                out[k.toLowerCase()] = obj[k];
+            });
             return out;
         }
 
