@@ -1621,23 +1621,31 @@
 
             let filas = '';
             CAMPOS.forEach(({ key, label }) => {
-                const vA = antes ? (key in antes ? antes[key] : '') : null;
-                const vD = despues && key in despues ? despues[key] : '';
-                const cambiado = esCreacion ? !(!vD && vD !== 0) : cambios.has(key);
+
+                const vA = antes ? antes[key] : null;
+                const vD = despues ? despues[key] : null;
+
+                const cambiado = esCreacion
+                    ? vD !== null && vD !== ''
+                    : cambios.has(key);
 
                 const celdaAntes = esCreacion
                     ? '<span class="empty-val">—</span>'
-                    : ((!vA && vA !== 0) ? '<span class="empty-val">vacío</span>' : esc(vA));
+                    : (vA === null || vA === undefined || vA === ''
+                        ? '<span class="empty-val">vacío</span>'
+                        : esc(String(vA)));
 
-                const celdaDespues = (!vD && vD !== 0)
-                    ? '<span class="empty-val">vacío</span>'
-                    : esc(vD);
+                const celdaDespues =
+                    vD === null || vD === undefined || vD === ''
+                        ? '<span class="empty-val">vacío</span>'
+                        : esc(String(vD));
 
-                filas += `<tr class="${cambiado ? 'row-changed' : ''}">
-                        <td><strong>${label}</strong>${cambiado && !esCreacion ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                        <td>${celdaAntes}</td>
-                        <td>${celdaDespues}</td>
-                    </tr>`;
+                filas += `
+    <tr class="${cambiado ? 'row-changed' : ''}">
+        <td><strong>${label}</strong></td>
+        <td>${celdaAntes}</td>
+        <td>${celdaDespues}</td>
+    </tr>`;
             });
 
             const badgeLabel = esCreacion
