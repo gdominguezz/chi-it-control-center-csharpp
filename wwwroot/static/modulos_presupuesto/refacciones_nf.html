@@ -563,6 +563,14 @@
             z-index: 3;
         }
 
+        /* Neutralizar sticky en el modal de historial */
+        .ev-table th, .ev-table td,
+        .ev-table th:last-child, .ev-table td:last-child,
+        .ev-table thead th:last-child {
+            position: static !important;
+            box-shadow: none !important;
+        }
+
         /* ── PILLS ── */
         .pill {
             display: inline-block;
