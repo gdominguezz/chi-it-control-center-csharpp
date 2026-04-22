@@ -1293,19 +1293,21 @@
 
         <!-- ══ TOOLBAR ══ -->
         <div class="toolbar">
-            <button class="btn btn-ghost btn-sm" onclick="cargar()">🔄 Recargar</button>
-            <div class="toolbar-sep"></div>
-            <input class="anio-input" id="busquedaGlobal" placeholder="🔍 Buscar…" oninput="aplicarFiltros()">
-            <div class="toolbar-sep"></div>
-            <span style="font-size:11px;color:var(--muted);">Filas por página:</span>
-            <select class="anio-input" id="porPagina" style="width:80px;" onchange="paginaActual=1;renderTabla()">
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="9999">Todo</option>
-            </select>
-            <div class="toolbar-sep"></div>
-            <button class="btn btn-ghost btn-sm" onclick="exportarCSV()">📥 Exportar CSV</button>
+
+            <button class="btn btn-purple btn-sm" onclick="exportarFiltrado()">
+                ⬇ Exportar Filtrado
+            </button>
+
+            <button class="btn btn-purple btn-sm" onclick="exportarTodo()">
+                ⬇ Exportar Todo
+            </button>
+
+            <input class="anio-input" id="anioExport" placeholder="Año (ej: 2025)">
+
+            <button class="btn btn-purple btn-sm" onclick="exportarPorAnio()">
+                📊 Exportar por Año
+            </button>
+
         </div>
 
         <!-- ══ TABLA ══ -->
@@ -1969,6 +1971,25 @@
                     document.getElementById('contenidoHistorial').innerHTML =
                         '<p style="color:var(--red);text-align:center;padding:30px">Error al cargar historial.</p>';
                 });
+        }
+        function exportarTodo() {
+            window.open('/PANTALLAS_NF/EXPORTAR');
+        }
+
+        function exportarFiltrado() {
+            const q = document.getElementById('busquedaGlobal')?.value || '';
+            window.open('/PANTALLAS_NF/EXPORTAR?q=' + encodeURIComponent(q));
+        }
+
+        function exportarPorAnio() {
+            const anio = document.getElementById('anioExport').value;
+
+            if (!anio) {
+                alert('Ingrese un año');
+                return;
+            }
+
+            window.open('/PANTALLAS_NF/EXPORTAR?anio=' + anio);
         }
 
         function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
