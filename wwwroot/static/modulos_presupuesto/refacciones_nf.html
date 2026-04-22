@@ -844,6 +844,24 @@
             font-size: 14px;
         }
 
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spin {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
         /* ── TABS ── */
         .tabs-bar {
             display: flex;
@@ -1377,7 +1395,7 @@
                 .catch(() => {
                     document.getElementById('tabla').innerHTML =
                         `<tr><td colspan="18" style="text-align:center;padding:30px;color:var(--muted)">
-                                ⚠️ Error al cargar datos</td></tr>`;
+                                    ⚠️ Error al cargar datos</td></tr>`;
                 });
         }
 
@@ -1410,8 +1428,8 @@
 
             if (!datosActuales.length) {
                 tbody.innerHTML = `<tr><td colspan="18"
-                        style="text-align:center;padding:40px;color:var(--muted)">
-                        📭 Sin registros</td></tr>`;
+                            style="text-align:center;padding:40px;color:var(--muted)">
+                            📭 Sin registros</td></tr>`;
                 return;
             }
 
@@ -1420,30 +1438,30 @@
 
             datosActuales.forEach(row => {
                 tbody.innerHTML += `
-                    <tr>
-                        <td class="mono">${row.ID}</td>
-                        <td class="mono">${row.ID_UNICO ?? ''}</td>
-                        <td class="mono">${row.OC ?? ''}</td>
-                        <td class="mono">${row.FOLIO_CORRECTIVO ?? ''}</td>
-                        <td class="mono">${row.FECHA_REGISTRO ?? ''}</td>
-                        <td>${row.RECIBIDO_POR ?? ''}</td>
-                        <td>${row.SUBCATEGORIA ?? ''}</td>
-                        <td>${row.MARCA ?? ''}</td>
-                        <td>${row.MODELO ?? ''}</td>
-                        <td class="mono">${row.SERIE ?? ''}</td>
-                        <td class="mono" style="text-align:right;">${row.CANTIDAD ?? ''}</td>
-                        <td class="mono">${row.NUM_PARTE ?? ''}</td>
-                        <td class="mono" style="text-align:right;">${formatCosto(row.COSTO)}</td>
-                        <td>${monedaPill(row.MONEDA)}</td>
-                        <td>${row.PROVEEDOR ?? ''}</td>
-                        <td>${disponiblePill(row.DISPONIBLE)}</td>
-                        <td>${row.COMENTARIOS ?? ''}</td>
-                        <td style="white-space:nowrap;">
-                            ${puedeEditar ? `<button class="btn btn-amber  btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
-                            ${esAdmin ? `<button class="btn btn-danger  btn-sm" onclick="eliminar(${row.ID})">🗑️</button>` : ''}
-                            <button class="btn btn-primary btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-                        </td>
-                    </tr>`;
+                        <tr>
+                            <td class="mono">${row.ID}</td>
+                            <td class="mono">${row.ID_UNICO ?? ''}</td>
+                            <td class="mono">${row.OC ?? ''}</td>
+                            <td class="mono">${row.FOLIO_CORRECTIVO ?? ''}</td>
+                            <td class="mono">${row.FECHA_REGISTRO ?? ''}</td>
+                            <td>${row.RECIBIDO_POR ?? ''}</td>
+                            <td>${row.SUBCATEGORIA ?? ''}</td>
+                            <td>${row.MARCA ?? ''}</td>
+                            <td>${row.MODELO ?? ''}</td>
+                            <td class="mono">${row.SERIE ?? ''}</td>
+                            <td class="mono" style="text-align:right;">${row.CANTIDAD ?? ''}</td>
+                            <td class="mono">${row.NUM_PARTE ?? ''}</td>
+                            <td class="mono" style="text-align:right;">${formatCosto(row.COSTO)}</td>
+                            <td>${monedaPill(row.MONEDA)}</td>
+                            <td>${row.PROVEEDOR ?? ''}</td>
+                            <td>${disponiblePill(row.DISPONIBLE)}</td>
+                            <td>${row.COMENTARIOS ?? ''}</td>
+                            <td style="white-space:nowrap;">
+                                ${puedeEditar ? `<button class="btn btn-amber  btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
+                                ${esAdmin ? `<button class="btn btn-danger  btn-sm" onclick="eliminar(${row.ID})">🗑️</button>` : ''}
+                                <button class="btn btn-primary btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                            </td>
+                        </tr>`;
             });
 
             const totalPags = Math.ceil(totalRegistros / limite) || 1;
@@ -1552,34 +1570,6 @@
         // ── Modal Historial ────────────────────────────────────────────────
         function esc(v) {
             if (v == null) return '';
-            return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
-
-        function formatFecha(f) {
-            try {
-                const d = new Date(f);
-                if (!isNaN(d)) return d.toLocaleString('es-MX', {
-                    year: 'numeric', month: '2-digit', day: '2-digit',
-                    hour: '2-digit', minute: '2-digit', second: '2-digit'
-                });
-            } catch { }
-            return f ?? '';
-        }
-
-        // Normaliza un objeto de historial a keys en MAYÚSCULAS
-        function normalizarKeys(obj) {
-            if (!obj || typeof obj !== 'object') return {};
-            const out = {};
-            Object.keys(obj).forEach(k => {
-                out[k.toLowerCase()] = obj[k];
-            });
-            return out;
-        }
-
-        // ── Historial ──────────────────────────────────────────────────────────────────
-        function esc(v) {
-            if (v == null) return '';
             return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
@@ -1588,76 +1578,51 @@
             return f ?? '';
         }
 
-        function renderEvento(ev) {
+        // Normaliza un objeto de historial a keys en minúsculas (igual que CAMPOS)
+        function normalizarKeys(obj) {
+            if (!obj || typeof obj !== 'object') return {};
+            const out = {};
+            Object.keys(obj).forEach(k => { out[k.toLowerCase()] = obj[k]; });
+            return out;
+        }
 
-            const antes = normalizarKeys(JSON.parse(ev.registro_anterior || '{}'));
-            const despues = normalizarKeys(JSON.parse(ev.registro_nuevo || '{}'));
+        function renderEvento(ev) {
+            let antes = ev.registro_anterior, despues = ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch { }
+            antes = normalizarKeys(antes);
+            despues = normalizarKeys(despues);
 
             const cambios = new Set();
-
             CAMPOS.forEach(({ key }) => {
-                if ((antes[key] ?? '') !== (despues[key] ?? '')) {
-                    cambios.add(key);
-                }
+                if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? '')) cambios.add(key);
             });
 
             let filas = '';
-
             CAMPOS.forEach(({ key, label }) => {
-
-                const vA = antes[key];
-                const vD = despues[key];
-
+                const vA = antes && key in antes ? antes[key] : '';
+                const vD = despues && key in despues ? despues[key] : '';
                 const cambiado = cambios.has(key);
-
-                if (!cambiado) return;
-
-                const mA = (vA === null || vA === undefined || vA === '')
-                    ? '<span class="empty-val">vacío</span>'
-                    : esc(String(vA));
-
-                const mD = (vD === null || vD === undefined || vD === '')
-                    ? '<span class="empty-val">vacío</span>'
-                    : esc(String(vD));
-
-                filas += `
-        <tr class="row-changed">
-            <td style="width:22%">
-                <strong>${label}</strong>
-                <span class="badge-cambio">cambio</span>
-            </td>
-            <td>${mA}</td>
-            <td>${mD}</td>
-        </tr>`;
+                filas += `<tr class="${cambiado ? 'row-changed' : ''}">
+                    <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                    <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
+                    <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
+                </tr>`;
             });
 
-            const fecha = formatFecha(ev.fecha);
-
-            return `
-    <div class="ev-wrap">
-
-        <div class="ev-header">
-            <span>🕒 <strong>${fecha}</strong></span>
-            <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-        </div>
-
-        <table class="ev-table">
-
-            <thead>
-                <tr>
-                    <th>Campo</th>
-                    <th>Antes</th>
-                    <th>Después</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                ${filas}
-            </tbody>
-
-        </table>
-
-    </div>`;
+            return `<div class="ev-wrap">
+                <div class="ev-header">
+                    <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                    <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                    <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                        ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                    </span>
+                </div>
+                <table class="ev-table">
+                    <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
+                    <tbody>${filas}</tbody>
+                </table>
+            </div>`;
         }
 
         function verHistorial(id) {
@@ -1679,8 +1644,8 @@
                     } else {
                         document.getElementById('contenidoHistorial').innerHTML =
                             `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                </p>` + lista.map(renderEvento).join('');
+                                        ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                    </p>` + lista.map(renderEvento).join('');
                     }
                 })
                 .catch(() => {
