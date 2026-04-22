@@ -24,6 +24,7 @@ builder.Services.AddScoped<RegistroEntradasTemporalService>();      // REGISTRO 
 builder.Services.AddScoped<OrdenesDeCompraService>();              // ORDENES DE COMPRA
 builder.Services.AddScoped<PantallasNfService>();                 // PANTALLAS_NF
 builder.Services.AddScoped<RefaccionesNFService>();              // REFACCIONES NF
+builder.Services.AddScoped<BuscarGlobalService>();              // BUSCADOR GLOBAL DE PRESUPUESTOS
 
 
 // CORS

@@ -1,0 +1,107 @@
+﻿using ChiIT.Data;
+using Npgsql;
+
+namespace ChiIT.Services;
+
+public class BuscarGlobalService
+{
+    private readonly DbConnectionPool _pool;
+
+    public BuscarGlobalService(DbConnectionPool pool) => _pool = pool;
+
+    private static readonly List<(string Modulo, string Tabla, string[] Columnas)> MODULOS =
+    [
+        ("REFACCIONES NF",   "refacciones_nf",   ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("PANTALLAS NF",     "pantallas_nf",      ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("ACCESORIOS NF",    "accesorios_nf",     ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("DISPOSITIVOS NF",  "dispositivos_nf",   ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("PERIFERICOS NF",   "perifericos_nf",    ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("IMPRESORAS NF",    "impresoras_nf",     ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("TELEFONIA NF",     "telefonia_nf",      ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("CONSUMIBLES NF",   "consumibles_nf",    ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("RADIOS NF",        "radio_nf",          ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("HERRAMIENTA NF",   "herramientas_nf",   ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("EQUIPO DE RED NF", "refacciones_red_nf",["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("TINTAS TONER RIBON","tintas_toner_ribon_nf",["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("INVENTARIOS",      "inventarios",       ["id_unico","oc","marca","modelo","serie","num_parte","proveedor","comentarios"]),
+        ("ORDENES DE COMPRA","ordenes_de_compra", ["oc","proveedor","descripcion","solicitado_por","comentarios"]),
+    ];
+
+    public async Task<object> BuscarAsync(string termino, int limite = 20)
+    {
+        var resultados = new List<object>();
+
+        await using var conn = await _pool.OpenAsync();
+
+        foreach (var (modulo, tabla, columnas) in MODULOS)
+        {
+            // Verificar que la tabla existe antes de consultar
+            await using var chk = new NpgsqlCommand(
+                "SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name=@t)", conn);
+            chk.Parameters.AddWithValue("t", tabla);
+            var existe = (bool)(await chk.ExecuteScalarAsync() ?? false);
+            if (!existe) continue;
+
+            // Filtrar solo columnas que existen en esa tabla
+            var colsExistentes = await ColumnasExistentesAsync(conn, tabla, columnas);
+            if (!colsExistentes.Any()) continue;
+
+            var condiciones = colsExistentes
+                .Select((c, i) => $"LOWER({c}::TEXT) LIKE LOWER(@p{i})")
+                .ToList();
+
+            var where = "WHERE " + string.Join(" OR ", condiciones);
+
+            // Total
+            await using var cmdCount = new NpgsqlCommand(
+                $"SELECT COUNT(*) FROM {tabla} {where}", conn);
+            for (int i = 0; i < colsExistentes.Count; i++)
+                cmdCount.Parameters.AddWithValue($"p{i}", $"%{termino}%");
+            var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
+            if (total == 0) continue;
+
+            // Registros (limitado)
+            var selectCols = string.Join(", ", colsExistentes);
+            await using var cmdData = new NpgsqlCommand(
+                $"SELECT id, {selectCols} FROM {tabla} {where} ORDER BY id DESC LIMIT @lim", conn);
+            for (int i = 0; i < colsExistentes.Count; i++)
+                cmdData.Parameters.AddWithValue($"p{i}", $"%{termino}%");
+            cmdData.Parameters.AddWithValue("lim", limite);
+
+            var registros = new List<Dictionary<string, string?>>();
+            await using var r = await cmdData.ExecuteReaderAsync();
+            var fields = Enumerable.Range(0, r.FieldCount).Select(r.GetName).ToList();
+            while (await r.ReadAsync())
+            {
+                var row = new Dictionary<string, string?>();
+                foreach (var f in fields)
+                    row[f.ToUpper()] = r[f] is DBNull ? null : r[f]?.ToString();
+                registros.Add(row);
+            }
+
+            resultados.Add(new { modulo, total, registros });
+        }
+
+        return new
+        {
+            modulos_con_resultados = resultados.Count,
+            resultados
+        };
+    }
+
+    private static async Task<List<string>> ColumnasExistentesAsync(
+        NpgsqlConnection conn, string tabla, string[] columnas)
+    {
+        await using var cmd = new NpgsqlCommand(
+            @"SELECT column_name FROM information_schema.columns
+              WHERE table_name = @t AND column_name = ANY(@cols)", conn);
+        cmd.Parameters.AddWithValue("t", tabla);
+        cmd.Parameters.AddWithValue("cols", columnas);
+
+        var result = new List<string>();
+        await using var r = await cmd.ExecuteReaderAsync();
+        while (await r.ReadAsync())
+            result.Add(r.GetString(0));
+        return result;
+    }
+}
