@@ -23,7 +23,8 @@ builder.Services.AddScoped<PresupuestosReqVsOcService>();            //SERVICIO 
 builder.Services.AddScoped<RegistroEntradasTemporalService>();      // REGISTRO ENTRADAS TEMPORAL
 builder.Services.AddScoped<OrdenesDeCompraService>();              // ORDENES DE COMPRA
 builder.Services.AddScoped<PantallasNfService>();                 // PANTALLAS_NF
-               
+builder.Services.AddScoped<RefaccionesNFService>();              // REFACCIONES NF
+
 
 // CORS
 builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
