@@ -1577,48 +1577,85 @@
         }
 
         function renderEvento(ev) {
-            let antesRaw = ev.registro_anterior;
-            let despuesRaw = ev.registro_nuevo;
-            try { if (typeof antesRaw === 'string') antesRaw = JSON.parse(antesRaw); } catch { }
-            try { if (typeof despuesRaw === 'string') despuesRaw = JSON.parse(despuesRaw); } catch { }
 
-            // Normalizar todas las keys a MAYÚSCULAS para que coincidan con CAMPOS
-            const antes = normalizarKeys(antesRaw);
-            const despues = normalizarKeys(despuesRaw);
+            const antes = normalizarKeys(JSON.parse(ev.registro_anterior || '{}'));
+            const despues = normalizarKeys(JSON.parse(ev.registro_nuevo || '{}'));
 
-            const esCreacion = (antesRaw === null || antesRaw === undefined);
-
-            // Detectar campos que cambiaron
             const cambios = new Set();
+
             CAMPOS.forEach(({ key }) => {
-                const vA = String(antes[key] ?? '');
-                const vD = String(despues[key] ?? '');
-                if (vA !== vD) cambios.add(key);
+                if ((antes[key] ?? '') !== (despues[key] ?? '')) {
+                    cambios.add(key);
+                }
             });
+
+            const esCreacion = !ev.registro_anterior;
 
             let filas = '';
 
-            if (esCreacion) {
+            CAMPOS.forEach(({ key, label }) => {
 
-                // Creación: mostrar todos los campos registrados
-                CAMPOS.forEach(({ key, label }) => {
+                const vA = antes[key];
+                const vD = despues[key];
 
-                    const vD = despues[key];
+                const cambiado = cambios.has(key);
 
-                    const mD = (vD === null || vD === undefined || vD === '')
-                        ? '<span class="empty-val">vacío</span>'
-                        : esc(String(vD));
+                const mA = (vA === null || vA === undefined || vA === '')
+                    ? '<span class="empty-val">vacío</span>'
+                    : esc(String(vA));
 
-                    filas += `
-                            <tr>
-                                <td style="width:30%">
-                                    <strong>${label}</strong>
-                                </td>
-                                <td>${mD}</td>
-                            </tr>`;
-                });
+                const mD = (vD === null || vD === undefined || vD === '')
+                    ? '<span class="empty-val">vacío</span>'
+                    : esc(String(vD));
 
-            }
+                filas += `
+        <tr class="${cambiado ? 'row-changed' : ''}">
+            <td style="width:22%">
+                <strong>${label}</strong>
+                ${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}
+            </td>
+            <td>${mA}</td>
+            <td>${mD}</td>
+        </tr>`;
+            });
+
+            const fecha = formatFecha(ev.fecha);
+
+            const badgeTexto = `${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}`;
+
+            return `
+    <div class="ev-wrap">
+
+        <div class="ev-header">
+            <span>🕒 <strong>${fecha}</strong></span>
+            <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+
+            <span class="n-cambios-badge"
+                  style="background:rgba(245,158,11,.18);
+                         color:var(--amber);
+                         border:1px solid rgba(245,158,11,.3);">
+                ${badgeTexto}
+            </span>
+        </div>
+
+        <table class="ev-table">
+
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Antes</th>
+                    <th>Después</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                ${filas}
+            </tbody>
+
+        </table>
+
+    </div>`;
+        }
 
             const badgeStyle = esCreacion ? 'background:#10B981;color:#fff' : 'background:var(--amber);color:#111';
             const badgeTexto = esCreacion
