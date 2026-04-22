@@ -1615,13 +1615,14 @@
                 CAMPOS.forEach(({ key, label }) => {
                     const vA = antes[key];
                     const vD = despues[key];
-                    const cambiado = cambios.has(key);
+                    if (!cambios.has(key)) return;
+                    const cambiado = true;
                     const mA = (vA === null || vA === undefined || vA === '')
                         ? '<span class="empty-val">vacío</span>' : esc(String(vA));
                     const mD = (vD === null || vD === undefined || vD === '')
                         ? '<span class="empty-val">vacío</span>' : esc(String(vD));
                     filas += `
-                        <tr class="${cambiado ? 'row-changed' : ''}">
+                        <tr class="row-changed">
                             <td style="width:22%"><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
                             <td>${mA}</td>
                             <td>${mD}</td>
