@@ -549,9 +549,9 @@
                 font-size: 12px;
             }
 
-        /* ── Columna Acciones fija a la derecha ── */
-        table th:last-child,
-        table td:last-child {
+        /* ── Columna Acciones fija a la derecha (solo tabla principal) ── */
+        .table-scroll table th:last-child,
+        .table-scroll table td:last-child {
             position: sticky;
             right: 0;
             z-index: 2;
@@ -559,7 +559,7 @@
             box-shadow: -2px 0 6px rgba(0,0,0,0.3);
         }
 
-        table thead th:last-child {
+        .table-scroll table thead th:last-child {
             z-index: 3;
         }
 
@@ -1592,7 +1592,6 @@
             const antes = normalizarKeys(antesRaw);
             const despues = normalizarKeys(despuesRaw);
 
-            // Si no hay "antes" es un registro de creación
             const esCreacion = !antes || Object.keys(antes).length === 0;
 
             const cambios = new Set();
