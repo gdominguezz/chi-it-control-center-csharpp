@@ -1481,7 +1481,6 @@
             }
             const data = {};
             CAMPOS.forEach(({ key }) => {
-                // Los IDs del formulario nuevo están en MAYÚSCULAS (OC, MARCA, etc.)
                 const el = document.getElementById(key.toUpperCase());
                 data[key.toUpperCase()] = el ? (el.value || null) : null;
             });
@@ -1527,11 +1526,8 @@
             const row = datosActuales.find(r => r.ID === id);
             if (row) {
                 CAMPOS.forEach(({ key }) => {
-                    // Los IDs del modal están en MAYÚSCULAS (e_OC, e_MARCA, etc.)
-                    const elId = 'e_' + key.toUpperCase();
-                    const el = document.getElementById(elId);
+                    const el = document.getElementById('e_' + key.toUpperCase());
                     if (!el) return;
-                    // La API devuelve los datos en MAYÚSCULAS
                     let val = row[key.toUpperCase()] ?? '';
                     if (key === 'fecha_registro' && val) {
                         const d = new Date(val);
@@ -1552,7 +1548,6 @@
         async function guardarCambios() {
             const datos = {};
             CAMPOS.forEach(({ key }) => {
-                // Los IDs del modal están en MAYÚSCULAS (e_OC, e_MARCA, etc.)
                 const el = document.getElementById('e_' + key.toUpperCase());
                 datos[key.toUpperCase()] = el ? (el.value || null) : null;
             });
@@ -1583,45 +1578,60 @@
             return f ?? '';
         }
 
-        // Normaliza keys del historial a minúsculas para comparar con CAMPOS
         function normalizarKeys(obj) {
-            if (!obj || typeof obj !== 'object') return {};
+            if (!obj || typeof obj !== 'object') return null;
             const out = {};
             Object.keys(obj).forEach(k => { out[k.toLowerCase()] = obj[k]; });
             return out;
         }
 
         function renderEvento(ev) {
-            let antes = ev.registro_anterior, despues = ev.registro_nuevo;
-            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch { }
-            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch { }
-            antes = normalizarKeys(antes);
-            despues = normalizarKeys(despues);
+            let antesRaw = ev.registro_anterior, despuesRaw = ev.registro_nuevo;
+            try { if (typeof antesRaw === 'string') antesRaw = JSON.parse(antesRaw); } catch { antesRaw = null; }
+            try { if (typeof despuesRaw === 'string') despuesRaw = JSON.parse(despuesRaw); } catch { despuesRaw = null; }
+            const antes = normalizarKeys(antesRaw);
+            const despues = normalizarKeys(despuesRaw);
+
+            // Si no hay "antes" es un registro de creación
+            const esCreacion = !antes || Object.keys(antes).length === 0;
 
             const cambios = new Set();
-            CAMPOS.forEach(({ key }) => {
-                if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? '')) cambios.add(key);
-            });
+            if (!esCreacion) {
+                CAMPOS.forEach(({ key }) => {
+                    if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? '')) cambios.add(key);
+                });
+            }
 
             let filas = '';
             CAMPOS.forEach(({ key, label }) => {
-                const vA = antes && key in antes ? antes[key] : '';
+                const vA = antes ? (key in antes ? antes[key] : '') : null;
                 const vD = despues && key in despues ? despues[key] : '';
-                const cambiado = cambios.has(key);
+                const cambiado = esCreacion ? !(!vD && vD !== 0) : cambios.has(key);
+
+                const celdaAntes = esCreacion
+                    ? '<span class="empty-val">—</span>'
+                    : ((!vA && vA !== 0) ? '<span class="empty-val">vacío</span>' : esc(vA));
+
+                const celdaDespues = (!vD && vD !== 0)
+                    ? '<span class="empty-val">vacío</span>'
+                    : esc(vD);
+
                 filas += `<tr class="${cambiado ? 'row-changed' : ''}">
-                    <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                    <td>${(!vA && vA !== 0) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
-                    <td>${(!vD && vD !== 0) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
-                </tr>`;
+                        <td><strong>${label}</strong>${cambiado && !esCreacion ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                        <td>${celdaAntes}</td>
+                        <td>${celdaDespues}</td>
+                    </tr>`;
             });
+
+            const badgeLabel = esCreacion
+                ? '<span style="margin-left:auto;background:var(--green);color:#fff;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">✦ Creación</span>'
+                : `<span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}</span>`;
 
             return `<div class="ev-wrap">
                 <div class="ev-header">
                     <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
                     <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                    <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-                        ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-                    </span>
+                    ${badgeLabel}
                 </div>
                 <table class="ev-table">
                     <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
