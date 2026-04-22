@@ -1281,22 +1281,21 @@
         let rolActual = 'USER';
 
         const CAMPOS = [
-            { key: 'ID_UNICO', label: 'ID Único' },
-            { key: 'OC', label: 'OC' },
-            { key: 'FOLIO_CORRECTIVO', label: 'Folio Correctivo' },
-            { key: 'FECHA_REGISTRO', label: 'Fecha Registro' },
-            { key: 'RECIBIDO_POR', label: 'Recibido Por' },
-            { key: 'SUBCATEGORIA', label: 'Subcategoría' },
-            { key: 'MARCA', label: 'Marca' },
-            { key: 'MODELO', label: 'Modelo' },
-            { key: 'SERIE', label: 'Serie' },
-            { key: 'CANTIDAD', label: 'Cantidad' },
-            { key: 'NUM_PARTE', label: 'Núm. Parte' },
-            { key: 'COSTO', label: 'Costo' },
-            { key: 'MONEDA', label: 'Moneda' },
-            { key: 'PROVEEDOR', label: 'Proveedor' },
-            { key: 'DISPONIBLE', label: 'Disponible' },
-            { key: 'COMENTARIOS', label: 'Comentarios' },
+            { key: 'oc', label: 'OC' },
+            { key: 'folio_correctivo', label: 'Folio / Correctivo' },
+            { key: 'fecha_registro', label: 'Fecha Registro' },
+            { key: 'recibido_por', label: 'Recibido Por' },
+            { key: 'subcategoria', label: 'Subcategoría' },
+            { key: 'marca', label: 'Marca' },
+            { key: 'modelo', label: 'Modelo' },
+            { key: 'serie', label: 'Serie' },
+            { key: 'cantidad', label: 'Cantidad' },
+            { key: 'num_parte', label: 'Número de Parte' },
+            { key: 'costo', label: 'Costo' },
+            { key: 'moneda', label: 'Moneda' },
+            { key: 'proveedor', label: 'Proveedor' },
+            { key: 'disponible', label: 'Disponible' },
+            { key: 'comentarios', label: 'Comentarios' }
         ];
 
         // ── Init ───────────────────────────────────────────────────────────
@@ -1588,38 +1587,75 @@
         }
 
         function renderEvento(ev) {
-            let antes = ev.registro_anterior, despues = ev.registro_nuevo;
-            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch { }
-            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch { }
+
+            const antes = normalizarKeys(JSON.parse(ev.registro_anterior || '{}'));
+            const despues = normalizarKeys(JSON.parse(ev.registro_nuevo || '{}'));
 
             const cambios = new Set();
-            CAMPOS.forEach(({ key }) => { if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? '')) cambios.add(key); });
 
-            let filas = '';
-            CAMPOS.forEach(({ key, label }) => {
-                const vA = antes && key in antes ? antes[key] : '';
-                const vD = despues && key in despues ? despues[key] : '';
-                const cambiado = cambios.has(key);
-                filas += `<tr class="${cambiado ? 'row-changed' : ''}">
-         <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-         <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
-         <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
-     </tr>`;
+            CAMPOS.forEach(({ key }) => {
+                if ((antes[key] ?? '') !== (despues[key] ?? '')) {
+                    cambios.add(key);
+                }
             });
 
-            return `<div class="ev-wrap">
-     <div class="ev-header">
-         <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-         <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-         <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-             ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-         </span>
-     </div>
-     <table class="ev-table">
-         <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
-         <tbody>${filas}</tbody>
-     </table>
- </div>`;
+            let filas = '';
+
+            CAMPOS.forEach(({ key, label }) => {
+
+                const vA = antes[key];
+                const vD = despues[key];
+
+                const cambiado = cambios.has(key);
+
+                if (!cambiado) return;
+
+                const mA = (vA === null || vA === undefined || vA === '')
+                    ? '<span class="empty-val">vacío</span>'
+                    : esc(String(vA));
+
+                const mD = (vD === null || vD === undefined || vD === '')
+                    ? '<span class="empty-val">vacío</span>'
+                    : esc(String(vD));
+
+                filas += `
+        <tr class="row-changed">
+            <td style="width:22%">
+                <strong>${label}</strong>
+                <span class="badge-cambio">cambio</span>
+            </td>
+            <td>${mA}</td>
+            <td>${mD}</td>
+        </tr>`;
+            });
+
+            const fecha = formatFecha(ev.fecha);
+
+            return `
+    <div class="ev-wrap">
+
+        <div class="ev-header">
+            <span>🕒 <strong>${fecha}</strong></span>
+            <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+        </div>
+
+        <table class="ev-table">
+
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Antes</th>
+                    <th>Después</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                ${filas}
+            </tbody>
+
+        </table>
+
+    </div>`;
         }
 
         function verHistorial(id) {
