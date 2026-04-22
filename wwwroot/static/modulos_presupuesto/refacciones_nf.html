@@ -861,7 +861,52 @@
                         <option>EUR</option>
                     </select>
                 </div>
-                <div class="field"><label>Proveedor</label><input id="f_PROVEEDOR" placeholder="Proveedor"></div>
+                <div class="field">
+                    <label>Proveedor</label>
+                    <select id="f_PROVEEDOR">
+                        <option value="">— Selecciona —</option>
+                        <option>APC</option>
+                        <option>BRIGHT</option>
+                        <option>DELL</option>
+                        <option>HG COMUNICACIONES</option>
+                        <option>IPS</option>
+                        <option>PCTONER</option>
+                        <div class="field">
+                            <label>Moneda</label>
+                            <select id="f_MONEDA">
+                                <option value="">— Selecciona —</option>
+                                <option>MXN</option>
+                                <option>USD</option>
+                                <option>EUR</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Proveedor</label>
+                            <select id="f_PROVEEDOR">
+                                <option value="">— Selecciona —</option>
+                                <option>APC</option>
+                                <option>BRIGHT</option>
+                                <option>DELL</option>
+                                <option>HG COMUNICACIONES</option>
+                                <option>IPS</option>
+                                <option>PCTONER</option>
+                                <option>SLA</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Disponible</label>
+                            <select id="f_DISPONIBLE">
+                                <option value="">— Selecciona —</option>
+                                <option>SÍ</option>
+                                <option>NO</option>
+                                <option>PARCIAL</option>
+                            </select>
+                        </div>
+                        <div class="field"><label>Comentarios</label><input id="f_COMENTARIOS" placeholder="Comentarios"></div>
+                </div>
+                <option>SLA</option>
+                </select>
+            </div>
                 <div class="field">
                     <label>Disponible</label>
                     <select id="f_DISPONIBLE">
@@ -879,24 +924,13 @@
 
         <!-- ── Toolbar ── -->
         <div class="toolbar">
-            <button class="btn btn-primary btn-sm" onclick="exportarFiltrado()">📥 Exportar filtrado</button>
-            <button class="btn btn-ghost btn-sm" onclick="exportarTodo()">📦 Exportar todo</button>
+            <button class="btn btn-cyan btn-sm" onclick="exportarFiltrado()">📥 Exportar filtrado</button>
+            <button class="btn btn-cyan btn-sm" onclick="exportarTodo()">📦 Exportar todo</button>
             <div class="toolbar-sep"></div>
             <input class="anio-input" id="anioExportar" type="number" placeholder="Año" value="">
             <button class="btn btn-cyan btn-sm" onclick="exportarPorAnio()">📅 Exportar por año</button>
             <div class="toolbar-sep"></div>
             <button class="btn btn-ghost btn-sm" onclick="cargar()">🔄 Recargar</button>
-            <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-                <label style="font-size:11px;color:var(--muted);">Límite</label>
-                <select onchange="limite=parseInt(this.value);paginaActual=1;cargar()"
-                        style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;
-                       padding:6px 10px;font-size:11px;color:var(--text);font-family:'DM Mono',monospace;cursor:pointer;outline:none;">
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                </select>
-            </div>
         </div>
 
         <!-- ── Tabla ── -->
@@ -967,9 +1001,7 @@
                 <h3>✏️ Editar Refacción NF &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="editarIdLabel">#</span></h3>
                 <button class="btn btn-ghost btn-sm" onclick="cerrarEditar()">✕</button>
             </div>
-            <div class="form-grid-modal">
-                <div class="form-field"><label>ID Único</label><input id="e_ID_UNICO" placeholder="ID único"></div>
-                <div class="form-field"><label>OC</label><input id="e_OC" placeholder="Orden de compra"></div>
+            <div class="form-grid-modal"><div class="form-field"><label>ID Único</label><input id="e_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>                <div class="form-field"><label>OC</label><input id="e_OC" placeholder="Orden de compra"></div>
                 <div class="form-field"><label>Folio Correctivo</label><input id="e_FOLIO_CORRECTIVO" placeholder="Folio correctivo"></div>
                 <div class="form-field"><label>Fecha Registro</label><input id="e_FECHA_REGISTRO" type="date"></div>
                 <div class="form-field"><label>Recibido Por</label><input id="e_RECIBIDO_POR" placeholder="Nombre"></div>
@@ -1179,7 +1211,6 @@
         // ═══ GUARDAR NUEVO ═══
         async function guardar() {
             const dto = {
-                ID_UNICO: v('f_ID_UNICO'),
                 OC: v('f_OC'),
                 FOLIO_CORRECTIVO: v('f_FOLIO_CORRECTIVO'),
                 FECHA_REGISTRO: v('f_FECHA_REGISTRO'),
@@ -1196,6 +1227,12 @@
                 DISPONIBLE: v('f_DISPONIBLE'),
                 COMENTARIOS: v('f_COMENTARIOS'),
             };
+
+            // ID_UNICO se genera automáticamente desde OC + FOLIO_CORRECTIVO
+            const oc = (dto.OC || '').trim();
+            const folio = (dto.FOLIO_CORRECTIVO || '').trim();
+            dto.ID_UNICO = [oc, folio].filter(Boolean).join('+') || null;
+
             try {
                 const r = await fetch('/REFACCION_NF', {
                     method: 'POST',
@@ -1270,7 +1307,6 @@
 
         async function guardarCambios() {
             const dto = {
-                ID_UNICO: v('e_ID_UNICO'),
                 OC: v('e_OC'),
                 FOLIO_CORRECTIVO: v('e_FOLIO_CORRECTIVO'),
                 FECHA_REGISTRO: v('e_FECHA_REGISTRO'),
@@ -1287,6 +1323,12 @@
                 DISPONIBLE: v('e_DISPONIBLE'),
                 COMENTARIOS: v('e_COMENTARIOS'),
             };
+
+            // ID_UNICO se genera automáticamente desde OC + FOLIO_CORRECTIVO
+            const oc = (dto.OC || '').trim();
+            const folio = (dto.FOLIO_CORRECTIVO || '').trim();
+            dto.ID_UNICO = [oc, folio].filter(Boolean).join('+') || null;
+
             try {
                 const r = await fetch(`/REFACCION_NF/${editandoID}`, {
                     method: 'PUT',
