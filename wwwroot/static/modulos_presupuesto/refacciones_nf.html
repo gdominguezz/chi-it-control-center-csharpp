@@ -1657,37 +1657,7 @@
     </div>`;
         }
 
-            const badgeStyle = esCreacion ? 'background:#10B981;color:#fff' : 'background:var(--amber);color:#111';
-            const badgeTexto = esCreacion
-                ? '✨ Creación inicial'
-                : `${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}`;
-
-            const thead = esCreacion
-                ? `<thead><tr>
-                           <th style="width:32%">Campo</th>
-                           <th style="color:#6EE7B7">➡ Valor registrado</th>
-                       </tr></thead>`
-                : `<thead><tr>
-                           <th style="width:22%">Campo</th>
-                           <th style="color:#FCA5A5">⬅ Antes</th>
-                           <th style="color:#6EE7B7">➡ Después</th>
-                       </tr></thead>`;
-
-            return `
-                <div class="ev-wrap">
-                    <div class="ev-header">
-                        <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                        <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                        <span style="margin-left:auto;${badgeStyle};padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-                            ${badgeTexto}
-                        </span>
-                    </div>
-                    <table class="ev-table">
-                        ${thead}
-                        <tbody>${filas}</tbody>
-                    </table>
-                </div>`;
-        }
+            
 
         function verHistorial(id) {
             document.getElementById('histIdLabel').textContent = id;
