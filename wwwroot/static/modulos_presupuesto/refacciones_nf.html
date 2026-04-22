@@ -840,7 +840,7 @@
         <div class="panel" id="panelNuevo">
             <div class="panel-title">➕ Nuevo Registro</div>
             <div class="form-grid">
-                <div class="field"><label>ID Único</label><input id="f_ID_UNICO" placeholder="ID único"></div>
+                <div class="field"><label>ID Único</label><input id="f_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
                 <div class="field"><label>OC</label><input id="f_OC" placeholder="Orden de compra"></div>
                 <div class="field"><label>Folio Correctivo</label><input id="f_FOLIO_CORRECTIVO" placeholder="Folio correctivo"></div>
                 <div class="field"><label>Fecha Registro</label><input id="f_FECHA_REGISTRO" type="date"></div>
@@ -871,42 +871,9 @@
                         <option>HG COMUNICACIONES</option>
                         <option>IPS</option>
                         <option>PCTONER</option>
-                        <div class="field">
-                            <label>Moneda</label>
-                            <select id="f_MONEDA">
-                                <option value="">— Selecciona —</option>
-                                <option>MXN</option>
-                                <option>USD</option>
-                                <option>EUR</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label>Proveedor</label>
-                            <select id="f_PROVEEDOR">
-                                <option value="">— Selecciona —</option>
-                                <option>APC</option>
-                                <option>BRIGHT</option>
-                                <option>DELL</option>
-                                <option>HG COMUNICACIONES</option>
-                                <option>IPS</option>
-                                <option>PCTONER</option>
-                                <option>SLA</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label>Disponible</label>
-                            <select id="f_DISPONIBLE">
-                                <option value="">— Selecciona —</option>
-                                <option>SÍ</option>
-                                <option>NO</option>
-                                <option>PARCIAL</option>
-                            </select>
-                        </div>
-                        <div class="field"><label>Comentarios</label><input id="f_COMENTARIOS" placeholder="Comentarios"></div>
+                        <option>SLA</option>
+                    </select>
                 </div>
-                <option>SLA</option>
-                </select>
-            </div>
                 <div class="field">
                     <label>Disponible</label>
                     <select id="f_DISPONIBLE">
@@ -921,7 +888,6 @@
             <button class="btn btn-success" onclick="guardar()">💾 Guardar</button>
             <button class="btn btn-ghost" onclick="limpiarForm()" style="margin-left:8px;">✕ Limpiar</button>
         </div>
-
         <!-- ── Toolbar ── -->
         <div class="toolbar">
             <button class="btn btn-cyan btn-sm" onclick="exportarFiltrado()">📥 Exportar filtrado</button>
