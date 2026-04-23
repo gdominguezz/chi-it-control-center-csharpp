@@ -1220,7 +1220,7 @@
             // ID_UNICO auto generado desde OC + FOLIO_CORRECTIVO
             const oc = (dto.OC || '').trim();
             const folio = (dto.FOLIO_CORRECTIVO || '').trim();
-            dto.ID_UNICO = [oc, folio].filter(Boolean).join('+') || null;
+            dto.ID_UNICO = [oc, folio].filter(Boolean).join('') || null;
 
             try {
                 const r = await fetch('/HERRAMIENTA_NF', {
