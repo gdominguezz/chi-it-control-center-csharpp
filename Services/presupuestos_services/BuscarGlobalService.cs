@@ -31,7 +31,12 @@ public class BuscarGlobalService
             "marca", "modelo", "serie", "num_parte",
             "moneda", "proveedor", "disponible", "comentarios"
         ]),
-        ("ACCESORIOS NF",    "accesorios_nf",     ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("ACCESORIOS NF", "accesorios_nf", [
+            "id_unico", "oc", "folio", "recibido_por", "subcategoria",
+            "marca", "modelo", "no_serie", "tipo",
+            "accesorios", "moneda", "proveedor", "disponible",
+            "asignado_a", "destino_planta", "personal_it_que_asigna"
+        ]),
         ("DISPOSITIVOS NF",  "dispositivos_nf",   ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("PERIFERICOS NF",   "perifericos_nf",    ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("IMPRESORAS NF",    "impresoras_nf",     ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
