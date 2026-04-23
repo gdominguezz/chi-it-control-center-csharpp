@@ -426,6 +426,38 @@
             .mod-btn.danger:hover .arrow {
                 color: var(--danger);
             }
+            .btn-contactos {
+                padding: 7px 14px;
+                background: linear-gradient(135deg, #0EA5E9, #2563EB);
+                border: none;
+                border-radius: 6px;
+                color: white;
+                font-size: .82rem;
+                cursor: pointer;
+                margin-right: 10px;
+                transition: .2s;
+            }
+
+            .btn-contactos:hover {
+                background: linear-gradient(135deg, #0284C7, #1D4ED8);
+            }
+            .modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,.6);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 999;
+            }
+
+            .modal-box {
+                max-height: 85vh;
+                overflow: auto;
+            }
     </style>
 </head>
 <body>
@@ -435,8 +467,62 @@
         <span class="topbar-logo">CHI IT</span>
         <span style="color:var(--muted2);">/</span>
         <span class="topbar-title">PRESUPUESTOS</span>
+
         <div class="topbar-sep"></div>
+
+        <!-- 👇 NUEVO BOTÓN -->
+        <button class="btn-contactos" onclick="abrirContactos()">
+            📇 PROVEEDORES
+        </button>
+
         <a class="btn-back" href="/static/menu.html">← Menú principal</a>
+    </div>
+
+    <div id="modalContactos" class="modal" style="display:none;">
+        <div class="modal-box" style="max-width:1100px;background:#0f172a;padding:20px;border-radius:10px;">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <h3>📇 Contactos de Proveedores</h3>
+                <button onclick="cerrarContactos()" style="background:#ef4444;border:none;color:white;padding:5px 10px;border-radius:6px;">✕</button>
+            </div>
+
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                    <tr style="background:#1e293b;color:#38bdf8;">
+                        <th>Compañía</th>
+                        <th>RFC</th>
+                        <th>Contacto</th>
+                        <th>Cel</th>
+                        <th>Correo</th>
+                        <th>Notas</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr><td>SLA</td><td></td><td>PATRICIA GOMEZ</td><td>6623873763</td><td>patricia.gomez@slamexico.com</td><td></td></tr>
+
+                    <tr><td>PC TONER</td><td></td><td>MIRIAM</td><td>6144659591</td><td>rmiriamaguilarg@gmail.com, ejecutivo@toner-supply.com.mx</td><td>correo principal ejecutivo</td></tr>
+
+                    <tr><td>LASERTONN</td><td></td><td>SILVIA SILVA SAENZ</td><td>6141268879</td><td>administracion@lasertonn.mx</td><td></td></tr>
+
+                    <tr><td>REDCO</td><td></td><td>LORENZO MARISCAL</td><td>6145517899</td><td>lmariscal@redco.com.mx</td><td></td></tr>
+
+                    <tr><td>FIRECOM</td><td></td><td>ROBERTO</td><td></td><td>gerencia@firecom.mx</td><td></td></tr>
+
+                    <tr><td>GLOBTECH</td><td></td><td>DINA ESTRADA</td><td>6141494196</td><td>ventas3@globtech.com.mx</td><td></td></tr>
+
+                    <tr><td>SAMSARA</td><td></td><td>GABRIELA MADERA</td><td></td><td>gabriela.madera@samsarasoluciones.com</td><td></td></tr>
+
+                    <tr><td>RESQBIT</td><td>TISCO NETWORKS SA DE CV</td><td></td><td>6145332332</td><td></td><td></td></tr>
+
+                    <tr><td>EL ALMACEN</td><td></td><td></td><td>6141612542 Whats</td><td></td><td></td></tr>
+
+                    <tr><td>EL ALMACEN</td><td></td><td></td><td>6144138883 Fijo</td><td></td><td></td></tr>
+
+                </tbody>
+            </table>
+
+        </div>
     </div>
 
     <!-- BUSCADOR GLOBAL -->
@@ -585,22 +671,22 @@
                         const cardId = 'card_' + Math.random().toString(36).slice(2);
 
                         cont.innerHTML += `
-                        <div class="modulo-card">
-                            <div class="modulo-head" onclick="toggleCard('${cardId}')">
-                                <span class="modulo-icon">📦</span>
-                                <span class="modulo-name">${r.modulo}</span>
-                                <span class="badge">${r.total}</span>
-                                <button class="btn-ir" onclick="event.stopPropagation();window.location.href='${pagina}'">IR AL MÓDULO</button>
-                                <span class="chevron open" id="chev_${cardId}">▼</span>
-                            </div>
-                            <div class="modulo-body" id="${cardId}" style="max-height:260px;overflow-y:auto;">
-                                ${masReg}
-                                <table>
-                                    <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
-                                    <tbody>${filas}</tbody>
-                                </table>
-                            </div>
-                        </div>`;
+                                <div class="modulo-card">
+                                    <div class="modulo-head" onclick="toggleCard('${cardId}')">
+                                        <span class="modulo-icon">📦</span>
+                                        <span class="modulo-name">${r.modulo}</span>
+                                        <span class="badge">${r.total}</span>
+                                        <button class="btn-ir" onclick="event.stopPropagation();window.location.href='${pagina}'">IR AL MÓDULO</button>
+                                        <span class="chevron open" id="chev_${cardId}">▼</span>
+                                    </div>
+                                    <div class="modulo-body" id="${cardId}" style="max-height:260px;overflow-y:auto;">
+                                        ${masReg}
+                                        <table>
+                                            <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+                                            <tbody>${filas}</tbody>
+                                        </table>
+                                    </div>
+                                </div>`;
                     });
                 }
 
@@ -632,6 +718,14 @@
             document.getElementById('spinner').style.display = 'none';
             document.getElementById('resContent').innerHTML = '';
         }
+        function abrirContactos(){
+            document.getElementById("modalContactos").style.display = "block";
+        }
+
+        function cerrarContactos(){
+            document.getElementById("modalContactos").style.display = "none";
+        }
+
     </script>
 </body>
 </html>
