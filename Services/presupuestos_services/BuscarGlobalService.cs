@@ -11,8 +11,26 @@ public class BuscarGlobalService
 
     private static readonly List<(string Modulo, string Tabla, string[] Columnas)> MODULOS =
     [
-        ("REFACCIONES NF",   "refacciones_nf",   ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
-        ("PANTALLAS NF",     "pantallas_nf",      ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
+        ("ORDENES DE COMPRA", "ordenes_de_compra", [
+            "orden_de_compra", "folio", "solicitante", "presupuesto_mes",
+            "serie_ubicacion_no_empleado", "accesorio_solicitado", "proveedor_elegido",
+            "pieza_servicio", "moneda", "comentarios", "hoja_control",
+            "requisicion", "oc", "estatus_oc"
+        ]),
+        ("REQ VS OC", "req_vs_oc", [
+            "no_requisicion", "orden_compra", "moneda", "oc_subtotal", "registrada_en_oc"
+        ]),
+        ("PANTALLAS NF", "pantallas_nf", [
+            "id_unico", "oc", "folio", "recibido_por", "subcategoria",
+            "marca", "modelo", "no_serie", "accesorios",
+            "mac_wifi", "mac_ethernet", "proveedor",
+            "estado", "destino_planta", "asignado_a", "personal_it_que_asigna"
+        ]),
+        ("REFACCIONES NF", "refacciones_nf", [
+            "id_unico", "oc", "folio_correctivo", "recibido_por", "subcategoria",
+            "marca", "modelo", "serie", "num_parte",
+            "moneda", "proveedor", "disponible", "comentarios"
+        ]),
         ("ACCESORIOS NF",    "accesorios_nf",     ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("DISPOSITIVOS NF",  "dispositivos_nf",   ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("PERIFERICOS NF",   "perifericos_nf",    ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
@@ -24,7 +42,6 @@ public class BuscarGlobalService
         ("EQUIPO DE RED NF", "refacciones_red_nf",["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("TINTAS TONER RIBON","tintas_toner_ribon_nf",["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("INVENTARIOS",      "inventarios",       ["id_unico","oc","marca","modelo","serie","num_parte","proveedor","comentarios"]),
-        ("ORDENES DE COMPRA","ordenes_de_compra", ["oc","proveedor","descripcion","solicitado_por","comentarios"]),
     ];
 
     public async Task<object> BuscarAsync(string termino, int limite = 20)
