@@ -736,19 +736,20 @@
 
         /* ── HISTORIAL ────────────────────────────────────────────────────── */
         .ev-wrap {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             border: 1px solid var(--border2);
             border-radius: 10px;
-            overflow: hidden;
+            overflow-x: auto;
         }
 
         .ev-header {
-            background: var(--surface3);
-            padding: 11px 16px;
+            background: var(--surface2);
+            padding: 12px 16px;
             display: flex;
             flex-wrap: wrap;
             gap: 16px;
             align-items: center;
+            border-bottom: 1px solid var(--border);
         }
 
             .ev-header span {
@@ -757,57 +758,56 @@
             }
 
             .ev-header strong {
-                color: #7dd3fc;
+                color: var(--text);
             }
 
         .badge-cambio {
-            background: var(--amber);
-            color: #111;
+            background: rgba(245,158,11,.2);
+            color: var(--amber);
             font-size: 10px;
-            padding: 2px 7px;
+            padding: 2px 8px;
             border-radius: 999px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: .3px;
+            font-weight: 700;
+            letter-spacing: .05em;
             margin-left: 6px;
+            border: 1px solid rgba(245,158,11,.3);
         }
 
         .ev-table {
             width: 100%;
+            min-width: 600px;
             border-collapse: collapse;
             font-size: 12px;
         }
 
             .ev-table th, .ev-table td {
-                border: 1px solid var(--border2);
-                padding: 8px 10px;
+                border: 1px solid var(--border);
+                padding: 9px 12px;
                 text-align: left;
-                background: var(--surface2);
-                color: var(--text);
             }
 
             .ev-table thead th {
                 background: var(--surface3);
-                color: var(--muted2);
+                color: var(--muted);
+                font-size: 10px;
                 font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .08em;
             }
 
             .ev-table th:first-child {
                 width: 22%;
             }
 
-        .row-changed {
+        .row-changed td:nth-child(2) {
+            background: rgba(239,68,68,.08);
+            color: #fca5a5;
         }
 
-            .row-changed td:nth-child(2) {
-                background: rgba(239,68,68,.1);
-                color: #FCA5A5;
-            }
-
-            .row-changed td:nth-child(3) {
-                background: rgba(16,185,129,.1);
-                color: #6EE7B7;
-            }
+        .row-changed td:nth-child(3) {
+            background: rgba(16,185,129,.08);
+            color: #6ee7b7;
+        }
 
         .empty-val {
             color: var(--muted);
@@ -816,9 +816,17 @@
 
         .sin-hist {
             text-align: center;
-            padding: 40px;
+            padding: 50px;
             color: var(--muted);
             font-size: 14px;
+        }
+
+        .n-cambios-badge {
+            margin-left: auto;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
         }
 
         /* ── INPUT FILE CUSTOM ────────────────────────────────────────────── */
@@ -1488,7 +1496,7 @@
                 .catch(() => {
                     document.getElementById('tabla').innerHTML =
                         `<tr><td colspan="17" style="text-align:center;padding:30px;color:var(--muted)">
-                                                ⚠️ Error al cargar datos</td></tr>`;
+                                                    ⚠️ Error al cargar datos</td></tr>`;
                 });
         }
 
@@ -1498,8 +1506,8 @@
 
             if (!datosActuales.length) {
                 tbody.innerHTML = `<tr><td colspan="17"
-        style="text-align:center;padding:40px;color:var(--muted)">
-        📭 Sin registros</td></tr>`;
+            style="text-align:center;padding:40px;color:var(--muted)">
+            📭 Sin registros</td></tr>`;
                 return;
             }
 
@@ -1519,37 +1527,37 @@
                 }
 
                 tbody.innerHTML += `
-        <tr class="${estadoClase}">
-            <td class="mono">${row.ID}</td>
-            <td class="mono">${row.FOLIO ?? ''}</td>
-            <td>${estadoPill(row.ESTADO)}</td>
-            <td>${row.PLANTA ?? ''}</td>
-            <td class="mono">${row.FECHA ?? ''}</td>
-            <td>${row.EQUIPO ?? ''}</td>
-            <td>${row.MARCA ?? ''}</td>
-            <td>${row.MODELO ?? ''}</td>
-            <td class="mono">${row.NO_SERIE ?? ''}</td>
-            <td class="mono">${row.ACTIVO_FIJO ?? ''}</td>
-            <td>${row.UBICACION_PERSONA ?? ''}</td>
-            <td>${row.MOTIVO_DE_BAJA ?? ''}</td>
-            <td>${row.DIAGNOSTICO ?? ''}</td>
-            <td>${row.COMENTARIOS ?? ''}</td>
-            <td>${row.MOTIVO_DE_CANCELACION ?? ''}</td>
-            <td>
-                ${row.TIENE_PDF
+            <tr class="${estadoClase}">
+                <td class="mono">${row.ID}</td>
+                <td class="mono">${row.FOLIO ?? ''}</td>
+                <td>${estadoPill(row.ESTADO)}</td>
+                <td>${row.PLANTA ?? ''}</td>
+                <td class="mono">${row.FECHA ?? ''}</td>
+                <td>${row.EQUIPO ?? ''}</td>
+                <td>${row.MARCA ?? ''}</td>
+                <td>${row.MODELO ?? ''}</td>
+                <td class="mono">${row.NO_SERIE ?? ''}</td>
+                <td class="mono">${row.ACTIVO_FIJO ?? ''}</td>
+                <td>${row.UBICACION_PERSONA ?? ''}</td>
+                <td>${row.MOTIVO_DE_BAJA ?? ''}</td>
+                <td>${row.DIAGNOSTICO ?? ''}</td>
+                <td>${row.COMENTARIOS ?? ''}</td>
+                <td>${row.MOTIVO_DE_CANCELACION ?? ''}</td>
+                <td>
+                    ${row.TIENE_PDF
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                       <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
+                           <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
                         : `<label class="file-label">
-                           📎 Subir PDF
-                           <input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)">
-                       </label>`}
-            </td>
-            <td style="white-space:nowrap;">
-                ${puedeEditar ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
-                ${esAdmin ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑️</button>` : ''}
-                <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-            </td>
-        </tr>`;
+                               📎 Subir PDF
+                               <input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)">
+                           </label>`}
+                </td>
+                <td style="white-space:nowrap;">
+                    ${puedeEditar ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
+                    ${esAdmin ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑️</button>` : ''}
+                    <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                </td>
+            </tr>`;
             });
 
             const totalPags = Math.ceil(totalRegistros / limite) || 1;
@@ -1743,52 +1751,50 @@
             return f ?? '';
         }
 
-        function renderEvento(ev) {
-            let antes = ev.registro_anterior;
-            let despues = ev.registro_nuevo;
-            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch { }
-            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch { }
+        function norm(v) { return (v == null) ? '' : String(v).trim(); }
 
-            const cambios = new Set();
+        function renderEvento(ev) {
+            let antes = ev.REGISTRO_ANTERIOR || ev.registro_anterior;
+            let despues = ev.REGISTRO_NUEVO || ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (e) { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (e) { }
+
+            const cambiados = new Set();
             CAMPOS.forEach(({ key }) => {
-                if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? ''))
-                    cambios.add(key);
+                if (norm(antes?.[key]) !== norm(despues?.[key])) cambiados.add(key);
             });
 
             let filas = '';
             CAMPOS.forEach(({ key, label }) => {
-                const vA = antes && key in antes ? antes[key] : '';
-                const vD = despues && key in despues ? despues[key] : '';
-                const cambiado = cambios.has(key);
-                const mA = (vA === null || vA === '') ? '<span class="empty-val">vacío</span>' : esc(vA);
-                const mD = (vD === null || vD === '') ? '<span class="empty-val">vacío</span>' : esc(vD);
+                const va = esc(antes?.[key] ?? '');
+                const vd = esc(despues?.[key] ?? '');
+                const chg = cambiados.has(key);
                 filas += `
-                                    <tr class="${cambiado ? 'row-changed' : ''}">
-                                        <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                                        <td>${mA}</td>
-                                        <td>${mD}</td>
-                                    </tr>`;
+                        <tr class="${chg ? 'row-changed' : ''}">
+                            <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                            <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                            <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                        </tr>`;
             });
 
+            const n = cambiados.size;
             return `
-                                <div class="ev-wrap">
-                                    <div class="ev-header">
-                                        <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                        <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                                        <span style="margin-left:auto;background:var(--amber);color:#111;
-                                            padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-                                            ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-                                        </span>
-                                    </div>
-                                    <table class="ev-table">
-                                        <thead><tr>
-                                            <th>Campo</th>
-                                            <th style="color:#FCA5A5">⬅ Antes</th>
-                                            <th style="color:#6EE7B7">➡ Después</th>
-                                        </tr></thead>
-                                        <tbody>${filas}</tbody>
-                                    </table>
-                                </div>`;
+                    <div class="ev-wrap">
+                        <div class="ev-header">
+                            <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
+                            <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
+                            <span class="n-cambios-badge"
+                                style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                                       color:${n > 0 ? '#FCD34D' : '#94A3B8'};
+                                       border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                        <table class="ev-table">
+                            <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                            <tbody>${filas}</tbody>
+                        </table>
+                    </div>`;
         }
 
         function verHistorial(id) {
@@ -1810,8 +1816,8 @@
                     } else {
                         document.getElementById('contenidoHistorial').innerHTML =
                             `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                                </p>` + lista.map(renderEvento).join('');
+                                                        ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                                    </p>` + lista.map(renderEvento).join('');
                     }
                 })
                 .catch(() => {
