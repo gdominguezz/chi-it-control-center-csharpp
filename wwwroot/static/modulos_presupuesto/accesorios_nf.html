@@ -1,530 +1,1524 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>ACCESORIOS NF</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Accesorios NF</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0F1A;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --surface3: #1e293b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --accent: #3B82F6;
+            --text: #F1F5F9;
+            --muted: #64748B;
+            --muted2: #94A3B8;
+            --green: #10B981;
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --purple: #8B5CF6;
+            --cyan: #06B6D4;
+        }
 
-<style>
-body{
-    font-family:Arial;
-    margin:0;
-    background:#f1f5f9;
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-.header{
-    background:#1e293b;
-    color:white;
-    padding:15px;
-    font-size:20px;
-    font-weight:bold;
-}
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
 
-.container{
-    padding:15px;
-}
+        /* ── TOP BAR ── */
+        .topbar {
+            background: linear-gradient(135deg,#0f1e35,#0B0F1A);
+            border-bottom: 1px solid var(--border2);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
 
-.form-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-    gap:12px;
-    margin-bottom:15px;
-}
+        .topbar-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: linear-gradient(135deg,#1e3a8a,#3B82F6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px rgba(59,130,246,.4);
+            flex-shrink: 0;
+        }
 
-.field{
-    display:flex;
-    flex-direction:column;
-}
+        .topbar-title {
+            flex: 1;
+        }
 
-.field label{
-    font-size:11px;
-    font-weight:bold;
-    color:#1e293b;
-    margin-bottom:4px;
-    text-transform:uppercase;
-    letter-spacing:0.3px;
-}
+            .topbar-title h1 {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: -.01em;
+            }
 
-.field input{
-    padding:7px;
-    border:1px solid #cbd5e1;
-    border-radius:5px;
-    font-size:12px;
-    background:#f8fafc;
-    transition:border-color 0.2s;
-}
+            .topbar-title p {
+                font-size: 11px;
+                color: var(--muted2);
+                margin-top: 1px;
+                font-family: 'DM Mono',monospace;
+            }
 
-.field input:focus{
-    outline:none;
-    border-color:#2563eb;
-    background:white;
-    box-shadow:0 0 0 2px rgba(37,99,235,0.15);
-}
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background .2s, border-color .2s;
+        }
 
-button{
-    padding:6px 12px;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-    font-size:12px;
-    font-weight:bold;
-    margin-right:5px;
-}
+            .user-chip:hover {
+                background: rgba(255,255,255,.1);
+                border-color: var(--accent);
+            }
 
-.save{background:#16a34a;color:white;}
-.cancel{background:#64748b;color:white;}
-.delete{background:#dc2626;color:white;}
-.edit{background:#f59e0b;color:white;}
-.pdf{background:#2563eb;color:white;}
-.export{background:#7c3aed;color:white;}
+            .user-chip span {
+                color: var(--muted2);
+            }
 
-.btn-bar{
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:8px;
-    margin-bottom:12px;
-}
+            .user-chip .chip-arrow {
+                font-size: 9px;
+                color: var(--muted);
+                transition: transform .2s;
+            }
 
-.btn-bar input[type="number"]{
-    padding:6px;
-    border:1px solid #ccc;
-    border-radius:5px;
-    font-size:12px;
-    width:110px;
-}
+            .user-chip.open .chip-arrow {
+                transform: rotate(180deg);
+            }
 
-.table-container{
-    width:100%;
-    height:500px;
-    overflow:auto;
-    border:1px solid #ccc;
-    background:white;
-}
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
 
-.back{
-    background:#dc2626;
-    font-style: italic; color:#ffffff;
-}
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
 
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-table{
-    border-collapse:collapse;
-    min-width:3200px;
-    font-size:11px;
-}
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
 
-th,td{
-    border:1px solid #ccc;
-    padding:6px;
-    white-space:nowrap;
-    text-align:center;
-}
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
 
-th{
-    background:#1e293b;
-    color:white;
-    position:sticky;
-    top:0;
-    z-index:2;
-}
+            .dropdown-header .d-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text);
+            }
 
-.filter-row input{
-    width:100%;
-    font-size:11px;
-}
+            .dropdown-header .d-role {
+                font-size: 10px;
+                color: var(--muted);
+                font-family: 'DM Mono',monospace;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                margin-top: 2px;
+            }
 
-.pagination{
-    margin-top:10px;
-}
-</style>
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: background .15s, color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans',sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: var(--text);
+            }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        /* ── MAIN LAYOUT ── */
+        .main {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px 24px;
+        }
+
+        /* ── PANEL NUEVO REGISTRO ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .panel-title::before {
+                content: '';
+                width: 3px;
+                height: 14px;
+                background: var(--accent);
+                border-radius: 2px;
+                display: inline-block;
+            }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(190px,1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .field input, .field select {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 28px;
+        }
+
+            .field select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+            .field input:focus, .field select:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+            }
+
+        /* ── BOTONES ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans',sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 3px 10px rgba(59,130,246,.3);
+        }
+
+            .btn-primary:hover {
+                background: #2563EB;
+                transform: translateY(-1px);
+            }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+            box-shadow: 0 3px 10px rgba(16,185,129,.25);
+        }
+
+            .btn-success:hover {
+                background: #059669;
+                transform: translateY(-1px);
+            }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+            box-shadow: 0 3px 10px rgba(239,68,68,.25);
+        }
+
+            .btn-danger:hover {
+                background: #DC2626;
+                transform: translateY(-1px);
+            }
+
+        .btn-amber {
+            background: var(--amber);
+            color: #1c1400;
+        }
+
+            .btn-amber:hover {
+                background: #D97706;
+            }
+
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+
+            .btn-purple:hover {
+                background: #7C3AED;
+            }
+
+        .btn-cyan {
+            background: var(--cyan);
+            color: #001a1f;
+        }
+
+            .btn-cyan:hover {
+                background: #0891B2;
+            }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
+        }
+
+            .btn-ghost:hover {
+                color: var(--text);
+                border-color: var(--accent);
+            }
+
+        .btn-sm {
+            padding: 8px 13px;
+            font-size: 12px;
+        }
+
+        /* ── TOOLBAR ── */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .toolbar-sep {
+            width: 1px;
+            height: 24px;
+            background: var(--border2);
+            margin: 0 4px;
+        }
+
+        .anio-input {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            width: 110px;
+        }
+
+            .anio-input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        /* ── TABLA ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: calc(100vh - 380px);
+            min-height: 420px;
+            overflow-y: auto;
+        }
+
+            .table-scroll::-webkit-scrollbar {
+                width: 7px;
+                height: 7px;
+            }
+
+            .table-scroll::-webkit-scrollbar-track {
+                background: var(--surface2);
+                border-radius: 999px;
+            }
+
+            .table-scroll::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 999px;
+            }
+
+                .table-scroll::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent);
+                }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1800px;
+        }
+
+        thead th {
+            background: var(--surface3);
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+            thead th:last-child {
+                position: sticky;
+                right: 0;
+                z-index: 11;
+                background: var(--surface3);
+            }
+
+        tbody td:last-child {
+            position: sticky;
+            right: 0;
+            background: var(--surface);
+            z-index: 1;
+        }
+
+        tbody tr:hover td:last-child {
+            filter: brightness(1.15);
+        }
+
+        .filter-row td input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 5px 8px;
+            font-size: 11px;
+            color: var(--text);
+            font-family: 'DM Mono',monospace;
+        }
+
+            .filter-row td input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+
+            tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            tbody tr:hover td {
+                filter: brightness(1.15);
+            }
+
+        td {
+            padding: 10px 12px;
+            color: var(--text);
+            vertical-align: middle;
+            line-height: 1.4;
+        }
+
+            td.mono {
+                font-family: 'DM Sans',sans-serif;
+                font-size: 12px;
+                color: var(--text);
+            }
+
+        .disponible-pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .04em;
+        }
+
+        .pill-si {
+            background: rgba(16,185,129,.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(16,185,129,.35);
+        }
+
+        .pill-no {
+            background: rgba(239,68,68,.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239,68,68,.3);
+        }
+
+        .pill-otro {
+            background: rgba(100,116,139,.15);
+            color: #94A3B8;
+            border: 1px solid rgba(100,116,139,.3);
+        }
+
+        /* ── PAGINACIÓN ── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .page-info {
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--muted2);
+        }
+
+        /* ── MODALES ── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.7);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+            .modal.show {
+                display: flex;
+            }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 24px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,.6);
+            position: relative;
+            animation: modalIn .2s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-box.form-box {
+            width: min(660px,95vw);
+        }
+
+        .modal-box.hist-box {
+            width: min(900px,95vw);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+            .modal-header h3 {
+                font-size: 15px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        /* ── FORM EDITAR ── */
+        .form-grid-modal {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media(max-width:500px) {
+            .form-grid-modal {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-field {
+            margin-bottom: 0;
+        }
+
+            .form-field label {
+                font-size: 9px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            .form-field input, .form-field select, .form-field textarea {
+                width: 100%;
+                background: var(--surface2);
+                border: 1px solid var(--border2);
+                border-radius: 7px;
+                padding: 9px 11px;
+                font-size: 12px;
+                font-family: 'DM Mono',monospace;
+                color: var(--text);
+                transition: border-color .2s;
+            }
+
+            .form-field select {
+                cursor: pointer;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 10px center;
+                padding-right: 28px;
+            }
+
+                .form-field select option {
+                    background: var(--surface2);
+                    color: var(--text);
+                }
+
+                .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+                }
+
+            .form-field textarea {
+                resize: vertical;
+                min-height: 70px;
+                font-family: 'DM Sans',sans-serif;
+            }
+
+            .form-field.full {
+                grid-column: 1 / -1;
+            }
+
+        /* ── HISTORIAL ── */
+        .ev-wrap {
+            margin-bottom: 16px;
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        .ev-header {
+            background: var(--surface2);
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+            .ev-header span {
+                font-size: 12px;
+                color: var(--muted2);
+            }
+
+            .ev-header strong {
+                color: var(--text);
+            }
+
+        .badge-cambio {
+            background: rgba(245,158,11,.2);
+            color: var(--amber);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            margin-left: 6px;
+            border: 1px solid rgba(245,158,11,.3);
+        }
+
+        .ev-table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+            .ev-table th, .ev-table td {
+                border: 1px solid var(--border);
+                padding: 9px 12px;
+                text-align: left;
+            }
+
+            .ev-table thead th {
+                background: var(--surface3);
+                color: var(--muted);
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+            }
+
+            .ev-table th:first-child {
+                width: 22%;
+            }
+
+        .row-changed td:nth-child(2) {
+            background: rgba(239,68,68,.08);
+            color: #fca5a5;
+        }
+
+        .row-changed td:nth-child(3) {
+            background: rgba(16,185,129,.08);
+            color: #6ee7b7;
+        }
+
+        .empty-val {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .sin-hist {
+            text-align: center;
+            padding: 50px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .n-cambios-badge {
+            margin-left: auto;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="header">ACCESORIOS NF</div>
+    <!-- ══ TOP BAR ══════════════════════════════════════════════════════════ -->
+    <div class="topbar">
+        <div class="topbar-icon">🖥️</div>
+        <div class="topbar-title">
+            <h1>Accesorios NF</h1>
+            <p>Gestión de accesorios no facturados</p>
+        </div>
+        <div class="topbar-actions">
+            <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
+                <span>👤</span>
+                <span id="usuarioDisplay">—</span>
+                <span class="chip-arrow">▼</span>
+                <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name" id="dropdownNombre">—</div>
+                        <div class="d-role" id="dropdownRol">—</div>
+                    </div>
+                    <button class="dropdown-item danger" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="container">
+    <!-- ══ MAIN ═════════════════════════════════════════════════════════════ -->
+    <div class="main">
 
-<div class="form-grid">
+        <!-- ── Panel nuevo registro ── -->
+        <div class="panel" id="panelNuevo">
+            <div class="panel-title">➕ Nuevo Registro</div>
+            <div class="form-grid">
+                <div class="field"><label>ID Único</label><input id="f_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
+                <div class="field"><label>OC</label><input id="f_OC" placeholder="Orden de compra"></div>
+                <div class="field"><label>Folio</label><input id="f_FOLIO" placeholder="Folio"></div>
+                <div class="field"><label>Fecha Entrada</label><input id="f_FECHA_ENTRADA" type="date"></div>
+                <div class="field"><label>Recibido Por</label><input id="f_RECIBIDO_POR" placeholder="Nombre"></div>
+                <div class="field"><label>Subcategoría</label><input id="f_SUBCATEGORIA" placeholder="Subcategoría"></div>
+                <div class="field"><label>Marca</label><input id="f_MARCA" placeholder="Marca"></div>
+                <div class="field"><label>Modelo</label><input id="f_MODELO" placeholder="Modelo"></div>
+                <div class="field"><label>No. Serie</label><input id="f_NO_SERIE" placeholder="Número de serie"></div>
+                <div class="field"><label>Cantidad</label><input id="f_CANTIDAD" type="number" min="0" placeholder="0"></div>
+                <div class="field">
+                    <label>Tipo</label>
+                    <select id="f_TIPO">
+                        <option value="">— Selecciona —</option>
+                        <option>TECLADO</option>
+                        <option>MOUSE</option>
+                        <option>DOCKING STATION</option>
+                        <option>AUDIFONO</option>
+                        <option>CÁMARA WEB</option>
+                        <option>HUB USB</option>
+                        <option>ADAPTADOR</option>
+                        <option>CABLE</option>
+                        <option>CARGADOR</option>
+                        <option>MEMORIA USB</option>
+                        <option>DISCO EXTERNO</option>
+                        <option>OTRO</option>
+                    </select>
+                </div>
+                <div class="field"><label>Accesorios</label><input id="f_ACCESORIOS" placeholder="Descripción de accesorios"></div>
+                <div class="field">
+                    <label>Proveedor</label>
+                    <select id="f_PROVEEDOR">
+                        <option value="">— Selecciona —</option>
+                        <option>APC</option>
+                        <option>BRIGHT</option>
+                        <option>DELL</option>
+                        <option>HG COMUNICACIONES</option>
+                        <option>IPS</option>
+                        <option>PCTONER</option>
+                        <option>SLA</option>
+                    </select>
+                </div>
+                <div class="field"><label>Costo</label><input id="f_COSTO" type="number" step="0.01" min="0" placeholder="0.00"></div>
+                <div class="field">
+                    <label>Moneda</label>
+                    <select id="f_MONEDA">
+                        <option value="">— Selecciona —</option>
+                        <option>MXN</option>
+                        <option>USD</option>
+                        <option>EUR</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Disponible</label>
+                    <select id="f_DISPONIBLE">
+                        <option value="">— Selecciona —</option>
+                        <option value="true">SÍ</option>
+                        <option value="false">NO</option>
+                    </select>
+                </div>
+                <div class="field"><label>Fecha Salida</label><input id="f_FECHA_SALIDA" type="date"></div>
+                <div class="field"><label>Asignado A</label><input id="f_ASIGNADO_A" placeholder="Persona asignada"></div>
+                <div class="field"><label>Destino Planta</label><input id="f_DESTINO_PLANTA" placeholder="Planta destino"></div>
+                <div class="field"><label>Personal IT que Asigna</label><input id="f_PERSONAL_IT_QUE_ASIGNA" placeholder="Nombre del IT"></div>
+            </div>
+            <button class="btn btn-success" onclick="guardar()">💾 Guardar</button>
+            <button class="btn btn-ghost" onclick="limpiarForm()" style="margin-left:8px;">✕ Limpiar</button>
+        </div>
 
-<div class="field">
-    <label>OC</label>
-    <input id="OC">
-</div>
+        <!-- ── Toolbar ── -->
+        <div class="toolbar">
+            <button class="btn btn-cyan btn-sm" onclick="exportarFiltrado()">📥 Exportar filtrado</button>
+            <button class="btn btn-cyan btn-sm" onclick="exportarTodo()">📦 Exportar todo</button>
+            <div class="toolbar-sep"></div>
+            <input class="anio-input" id="anioExportar" type="number" placeholder="Año" value="">
+            <button class="btn btn-cyan btn-sm" onclick="exportarPorAnio()">📅 Exportar por año</button>
+            <div class="toolbar-sep"></div>
+            <button class="btn btn-ghost btn-sm" onclick="cargar()">🔄 Recargar</button>
+        </div>
 
-<div class="field">
-    <label>Folio</label>
-    <input id="FOLIO">
-</div>
+        <!-- ── Tabla ── -->
+        <div class="table-wrap">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ID Único</th>
+                            <th>OC</th>
+                            <th>Folio</th>
+                            <th>Fecha Entrada</th>
+                            <th>Recibido Por</th>
+                            <th>Subcategoría</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>No. Serie</th>
+                            <th>Cantidad</th>
+                            <th>Tipo</th>
+                            <th>Accesorios</th>
+                            <th>Proveedor</th>
+                            <th>Costo</th>
+                            <th>Moneda</th>
+                            <th>Disponible</th>
+                            <th>Fecha Salida</th>
+                            <th>Asignado A</th>
+                            <th>Destino Planta</th>
+                            <th>Personal IT</th>
+                            <th>Acciones</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ID_UNICO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_OC"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FOLIO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FECHA_ENTRADA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_RECIBIDO_POR"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_SUBCATEGORIA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MARCA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MODELO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_NO_SERIE"></td>
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_TIPO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ACCESORIOS"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PROVEEDOR"></td>
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MONEDA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_DISPONIBLE"></td>
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ASIGNADO_A"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_DESTINO_PLANTA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PERSONAL_IT_QUE_ASIGNA"></td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla">
+                        <tr><td colspan="22" style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-<div class="field">
-    <label>Fecha Entrada</label>
-    <input id="FECHA_ENTRADA" type="date">
-</div>
+        <!-- ── Paginación ── -->
+        <div class="pagination">
+            <button class="btn btn-ghost btn-sm" onclick="anterior()">◀ Anterior</button>
+            <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
+            <span class="page-info" id="paginaInfo">—</span>
+        </div>
 
-<div class="field">
-    <label>Recibido Por</label>
-    <input id="RECIBIDO_POR">
-</div>
+    </div><!-- /main -->
+    <!-- ══ MODAL EDITAR ═════════════════════════════════════════════════════ -->
+    <div class="modal" id="modalEditar">
+        <div class="modal-box form-box">
+            <div class="modal-header">
+                <h3>✏️ Editar Accesorio NF &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="editarIdLabel">#</span></h3>
+                <button class="btn btn-ghost btn-sm" onclick="cerrarEditar()">✕</button>
+            </div>
+            <div class="form-grid-modal">
+                <div class="form-field"><label>ID Único</label><input id="e_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
+                <div class="form-field"><label>OC</label><input id="e_OC" placeholder="Orden de compra"></div>
+                <div class="form-field"><label>Folio</label><input id="e_FOLIO" placeholder="Folio"></div>
+                <div class="form-field"><label>Fecha Entrada</label><input id="e_FECHA_ENTRADA" type="date"></div>
+                <div class="form-field"><label>Recibido Por</label><input id="e_RECIBIDO_POR" placeholder="Nombre"></div>
+                <div class="form-field"><label>Subcategoría</label><input id="e_SUBCATEGORIA" placeholder="Subcategoría"></div>
+                <div class="form-field"><label>Marca</label><input id="e_MARCA" placeholder="Marca"></div>
+                <div class="form-field"><label>Modelo</label><input id="e_MODELO" placeholder="Modelo"></div>
+                <div class="form-field"><label>No. Serie</label><input id="e_NO_SERIE" placeholder="Número de serie"></div>
+                <div class="form-field"><label>Cantidad</label><input id="e_CANTIDAD" type="number" min="0" placeholder="0"></div>
+                <div class="form-field">
+                    <label>Tipo</label>
+                    <select id="e_TIPO">
+                        <option value="">— Selecciona —</option>
+                        <option>TECLADO</option>
+                        <option>MOUSE</option>
+                        <option>DOCKING STATION</option>
+                        <option>AUDIFONO</option>
+                        <option>CÁMARA WEB</option>
+                        <option>HUB USB</option>
+                        <option>ADAPTADOR</option>
+                        <option>CABLE</option>
+                        <option>CARGADOR</option>
+                        <option>MEMORIA USB</option>
+                        <option>DISCO EXTERNO</option>
+                        <option>OTRO</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Accesorios</label><input id="e_ACCESORIOS" placeholder="Descripción de accesorios"></div>
+                <div class="form-field">
+                    <label>Proveedor</label>
+                    <select id="e_PROVEEDOR">
+                        <option value="">— Selecciona —</option>
+                        <option>APC</option>
+                        <option>BRIGHT</option>
+                        <option>DELL</option>
+                        <option>HG COMUNICACIONES</option>
+                        <option>IPS</option>
+                        <option>PCTONER</option>
+                        <option>SLA</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Costo</label><input id="e_COSTO" type="number" step="0.01" min="0" placeholder="0.00"></div>
+                <div class="form-field">
+                    <label>Moneda</label>
+                    <select id="e_MONEDA">
+                        <option value="">— Selecciona —</option>
+                        <option>MXN</option>
+                        <option>USD</option>
+                        <option>EUR</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Disponible</label>
+                    <select id="e_DISPONIBLE">
+                        <option value="">— Selecciona —</option>
+                        <option value="true">SÍ</option>
+                        <option value="false">NO</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Fecha Salida</label><input id="e_FECHA_SALIDA" type="date"></div>
+                <div class="form-field"><label>Asignado A</label><input id="e_ASIGNADO_A" placeholder="Persona asignada"></div>
+                <div class="form-field"><label>Destino Planta</label><input id="e_DESTINO_PLANTA" placeholder="Planta destino"></div>
+                <div class="form-field full"><label>Personal IT que Asigna</label><input id="e_PERSONAL_IT_QUE_ASIGNA" placeholder="Nombre del IT"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarCambios()">💾 Guardar cambios</button>
+            </div>
+        </div>
+    </div>
 
-<div class="field">
-    <label>Subcategoría</label>
-    <input id="SUBCATEGORIA">
-</div>
+    <!-- ══ MODAL HISTORIAL ══════════════════════════════════════════════════ -->
+    <div class="modal" id="modalHistorial">
+        <div class="modal-box hist-box">
+            <div class="modal-header">
+                <h3>📋 Historial de cambios &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="histIdLabel">#</span></h3>
+                <button class="btn btn-ghost btn-sm" onclick="cerrarHistorial()">✕</button>
+            </div>
+            <div id="contenidoHistorial">
+                <p style="text-align:center;padding:40px;color:var(--muted)">Cargando...</p>
+            </div>
+        </div>
+    </div>
 
-<div class="field">
-    <label>Marca</label>
-    <input id="MARCA">
-</div>
+    <script>
+        // ═══ ESTADO GLOBAL ═══
+        let paginaActual = 1;
+        let limite = 10;
+        let totalRegistros = 0;
+        let datosActuales = [];
+        let editandoID = null;
+        let usuarioActual = 'SISTEMA';
+        let rolActual = '';
+        let _filtrarTimer = null;
 
-<div class="field">
-    <label>Modelo</label>
-    <input id="MODELO">
-</div>
+        // ═══ CAMPOS DEL HISTORIAL (coinciden con COLS del servicio) ═══
+        const CAMPOS_HIST = [
+            { key: 'ID_UNICO', label: 'ID Único' },
+            { key: 'OC', label: 'OC' },
+            { key: 'FOLIO', label: 'Folio' },
+            { key: 'FECHA_ENTRADA', label: 'Fecha Entrada' },
+            { key: 'RECIBIDO_POR', label: 'Recibido Por' },
+            { key: 'SUBCATEGORIA', label: 'Subcategoría' },
+            { key: 'MARCA', label: 'Marca' },
+            { key: 'MODELO', label: 'Modelo' },
+            { key: 'NO_SERIE', label: 'No. Serie' },
+            { key: 'CANTIDAD', label: 'Cantidad' },
+            { key: 'TIPO', label: 'Tipo' },
+            { key: 'ACCESORIOS', label: 'Accesorios' },
+            { key: 'PROVEEDOR', label: 'Proveedor' },
+            { key: 'COSTO', label: 'Costo' },
+            { key: 'MONEDA', label: 'Moneda' },
+            { key: 'DISPONIBLE', label: 'Disponible' },
+            { key: 'FECHA_SALIDA', label: 'Fecha Salida' },
+            { key: 'ASIGNADO_A', label: 'Asignado A' },
+            { key: 'DESTINO_PLANTA', label: 'Destino Planta' },
+            { key: 'PERSONAL_IT_QUE_ASIGNA', label: 'Personal IT que Asigna' },
+        ];
 
-<div class="field">
-    <label>No. Serie</label>
-    <input id="NO_SERIE">
-</div>
-
-<div class="field">
-    <label>Cantidad</label>
-    <input id="CANTIDAD">
-</div>
-
-<div class="field">
-    <label>Tipo</label>
-    <input id="TIPO">
-</div>
-
-<div class="field">
-    <label>Accesorios</label>
-    <input id="ACCESORIOS">
-</div>
-
-<div class="field">
-    <label>Proveedor</label>
-    <input id="PROVEEDOR">
-</div>
-
-<div class="field">
-    <label>Costo</label>
-    <input id="COSTO">
-</div>
-
-<div class="field">
-    <label>Moneda</label>
-    <input id="MONEDA">
-</div>
-
-<div class="field">
-    <label>Disponible</label>
-    <input id="DISPONIBLE">
-</div>
-
-<div class="field">
-    <label>Fecha Salida</label>
-    <input id="FECHA_SALIDA" type="date">
-</div>
-
-<div class="field">
-    <label>Asignado A</label>
-    <input id="ASIGNADO_A">
-</div>
-
-<div class="field">
-    <label>Destino / Planta</label>
-    <input id="DESTINO_PLANTA">
-</div>
-
-<div class="field">
-    <label>Personal IT que Asigna</label>
-    <input id="PERSONAL_IT_ASIGNA">
-</div>
-
-</div>
-
-<div class="btn-bar">
-    <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
-    <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
-</div>
-
-<div class="btn-bar">
-    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
-    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
-    <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
-    <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
-</div>
-
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>OC</th>
-<th>FOLIO</th>
-<th>FECHA ENTRADA</th>
-<th>RECIBIDO</th>
-<th>SUBCATEGORIA</th>
-<th>MARCA</th>
-<th>MODELO</th>
-<th>NO SERIE</th>
-<th>CANTIDAD</th>
-<th>TIPO</th>
-<th>ACCESORIOS</th>
-<th>PROVEEDOR</th>
-<th>COSTO</th>
-<th>MONEDA</th>
-<th>DISPONIBLE</th>
-<th>FECHA SALIDA</th>
-<th>ASIGNADO A</th>
-<th>DESTINO</th>
-<th>PERSONAL IT</th>
-<th>PDF</th>
-<th>ACCIONES</th>
-</tr>
-
-<tr class="filter-row">
-<th></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody id="tabla"></tbody>
-</table>
-</div>
-
-<div class="pagination">
-<button onclick="anterior()">Anterior</button>
-<span id="paginaInfo"></span>
-<button onclick="siguiente()">Siguiente</button>
-<button class="back" onclick="window.location.href='presupuestos_menu.html'">
-REGRESAR A PRESUPUESTOS
-</button>
-</div>
-</div>
-
-<script>
-
-let paginaActual = 1;
-let limite = 10;
-let totalRegistros = 0;
-let editandoID = null;
-let datosOriginales = [];
-let datosFiltrados = [];
-
-function guardar(){
-    let data = {
-        OC:                 OC.value                 || null,
-        FOLIO:              FOLIO.value              || null,
-        FECHA_ENTRADA:      FECHA_ENTRADA.value      || null,
-        RECIBIDO_POR:       RECIBIDO_POR.value       || null,
-        SUBCATEGORIA:       SUBCATEGORIA.value       || null,
-        MARCA:              MARCA.value              || null,
-        MODELO:             MODELO.value             || null,
-        NO_SERIE:           NO_SERIE.value           || null,
-        CANTIDAD:           CANTIDAD.value           || null,
-        TIPO:               TIPO.value               || null,
-        ACCESORIOS:         ACCESORIOS.value         || null,
-        PROVEEDOR:          PROVEEDOR.value          || null,
-        COSTO:              COSTO.value              || null,
-        MONEDA:             MONEDA.value             || null,
-        DISPONIBLE:         DISPONIBLE.value         || null,
-        FECHA_SALIDA:       FECHA_SALIDA.value       || null,
-        ASIGNADO_A:         ASIGNADO_A.value         || null,
-        DESTINO_PLANTA:     DESTINO_PLANTA.value     || null,
-        PERSONAL_IT_ASIGNA: PERSONAL_IT_ASIGNA.value || null
-    };
-
-    if(editandoID){
-        fetch(`/ACCESORIOS_NF/${editandoID}`,{
-            method:"PUT",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(data)
-        }).then(()=>{ editandoID=null; limpiarFormulario(); cargar(); });
-    } else {
-        fetch("/ACCESORIOS_NF",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(data)
-        }).then(()=>{ limpiarFormulario(); cargar(); });
-    }
-}
-
-function limpiarFormulario(){
-    document.querySelectorAll(".form-grid input").forEach(i=>i.value="");
-}
-
-function cancelarEdicion(){
-    editandoID = null;
-    limpiarFormulario();
-}
-
-function obtenerParametros(){
-    let f = document.querySelectorAll(".filter-row input");
-    return new URLSearchParams({
-        page:               paginaActual,
-        limit:              limite,
-        OC:                 f[0].value,
-        FOLIO:              f[1].value,
-        FECHA_ENTRADA:      f[2].value,
-        RECIBIDO_POR:       f[3].value,
-        SUBCATEGORIA:       f[4].value,
-        MARCA:              f[5].value,
-        MODELO:             f[6].value,
-        NO_SERIE:           f[7].value,
-        CANTIDAD:           f[8].value,
-        TIPO:               f[9].value,
-        ACCESORIOS:         f[10].value,
-        PROVEEDOR:          f[11].value,
-        COSTO:              f[12].value,
-        MONEDA:             f[13].value,
-        DISPONIBLE:         f[14].value,
-        FECHA_SALIDA:       f[15].value,
-        ASIGNADO_A:         f[16].value,
-        DESTINO_PLANTA:     f[17].value,
-        PERSONAL_IT_ASIGNA: f[18].value
-    });
-}
-
-function cargar(){
-    let params = obtenerParametros();
-    fetch(`/ACCESORIOS_NF?${params.toString()}`)
-    .then(res=>res.json())
-    .then(resp=>{
-        totalRegistros = resp.total;
-        datosOriginales = resp.data;
-        datosFiltrados = [...datosOriginales];
-        renderizar();
-    });
-}
-
-function renderizar(){
-    tabla.innerHTML="";
-    datosFiltrados.forEach(row=>{
-        tabla.innerHTML+=`
-        <tr>
-        <td>${row.ID}</td>
-        <td>${row.OC??""}</td>
-        <td>${row.FOLIO??""}</td>
-        <td>${row.FECHA_ENTRADA??""}</td>
-        <td>${row.RECIBIDO_POR??""}</td>
-        <td>${row.SUBCATEGORIA??""}</td>
-        <td>${row.MARCA??""}</td>
-        <td>${row.MODELO??""}</td>
-        <td>${row.NO_SERIE??""}</td>
-        <td>${row.CANTIDAD??""}</td>
-        <td>${row.TIPO??""}</td>
-        <td>${row.ACCESORIOS??""}</td>
-        <td>${row.PROVEEDOR??""}</td>
-        <td>${row.COSTO??""}</td>
-        <td>${row.MONEDA??""}</td>
-        <td>${row.DISPONIBLE??""}</td>
-        <td>${row.FECHA_SALIDA??""}</td>
-        <td>${row.ASIGNADO_A??""}</td>
-        <td>${row.DESTINO_PLANTA??""}</td>
-        <td>${row.PERSONAL_IT_ASIGNA??""}</td>
-        <td>
-        ${row.TIENE_PDF
-        ? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button>
-           <button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
-        : `<input type="file" onchange="subirPDF(${row.ID},this)">`
+        // ═══ INACTIVIDAD 30 min ═══
+        let _inacTimer = null;
+        function resetInactividad() {
+            clearTimeout(_inacTimer);
+            _inacTimer = setTimeout(async () => {
+                try { await fetch('/LOGOUT', { method: 'POST', credentials: 'include' }); } catch (e) { }
+                window.location.href = '/static/login.html?inactivo=1';
+            }, 30 * 60 * 1000);
         }
-        </td>
-        <td>
-        <button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
-        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button>
-        </td>
-        </tr>`;
-    });
-    paginaInfo.innerText=`Página ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
-}
+        ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(ev =>
+            document.addEventListener(ev, resetInactividad, { passive: true })
+        );
 
-function editar(row){
-    editandoID = row.ID;
-    Object.keys(row).forEach(key=>{
-        if(document.getElementById(key)){
-            document.getElementById(key).value = row[key] ?? "";
+        // ═══ INIT ═══
+        window.addEventListener('DOMContentLoaded', () => {
+            resetInactividad();
+
+            fetch('/obtener-usuario', { credentials: 'include' })
+                .then(r => { if (!r.ok) { window.location.href = '/static/login.html'; return null; } return r.json(); })
+                .then(d => {
+                    if (!d) return;
+                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
+                    usuarioActual = d.usuario || 'SISTEMA';
+                    rolActual = (d.rol || '').trim().toUpperCase();
+                    document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownRol').textContent = rolActual;
+                })
+                .catch(() => { window.location.href = '/static/login.html'; });
+
+            cargar();
+        });
+
+        // ═══ CARGAR TABLA ═══
+        async function cargar() {
+            const qs = obtenerParametros();
+            try {
+                const r = await fetch(`/ACCESORIOS_NF?page=${paginaActual}&limit=${limite}&${qs}`);
+                const d = await r.json();
+                totalRegistros = d.total || 0;
+                datosActuales = d.data || [];
+                renderizar();
+            } catch (e) {
+                document.getElementById('tabla').innerHTML =
+                    `<tr><td colspan="22" style="text-align:center;padding:40px;color:var(--red)">❌ Error al cargar: ${e.message}</td></tr>`;
+            }
         }
-    });
-    window.scrollTo({top:0, behavior:"smooth"});
-}
 
-function eliminar(id){
-    if(!confirm("¿Eliminar este registro?")) return;
-    fetch(`/ACCESORIOS_NF/${id}`,{method:"DELETE"}).then(()=>cargar());
-}
+        function obtenerParametros() {
+            const campos = ['ID_UNICO', 'OC', 'FOLIO', 'FECHA_ENTRADA', 'RECIBIDO_POR',
+                'SUBCATEGORIA', 'MARCA', 'MODELO', 'NO_SERIE', 'TIPO',
+                'ACCESORIOS', 'PROVEEDOR', 'MONEDA', 'DISPONIBLE',
+                'ASIGNADO_A', 'DESTINO_PLANTA', 'PERSONAL_IT_QUE_ASIGNA'];
+            const p = new URLSearchParams();
+            campos.forEach(c => {
+                const val = (document.getElementById('fil_' + c)?.value || '').trim();
+                if (val) p.set(c, val);
+            });
+            return p.toString();
+        }
 
-function subirPDF(id, input){
-    let file = input.files[0];
-    if(!file) return;
-    let formData = new FormData();
-    formData.append("file", file);
-    fetch(`/ACCESORIOS_NF/PDF/${id}`,{method:"POST", body:formData})
-    .then(()=>cargar());
-}
+        function filtrar() {
+            clearTimeout(_filtrarTimer);
+            _filtrarTimer = setTimeout(() => { paginaActual = 1; cargar(); }, 350);
+        }
 
-function verPDF(id){
-    window.open(`/ACCESORIOS_NF/PDF/${id}`,"_blank");
-}
+        function renderizar() {
+            const tbody = document.getElementById('tabla');
+            tbody.innerHTML = '';
 
-function eliminarPDF(id){
-    if(!confirm("¿Seguro que deseas eliminar el PDF?")) return;
-    fetch(`/ACCESORIOS_NF/PDF/${id}`,{method:"DELETE"})
-    .then(()=>cargar());
-}
+            if (!datosActuales.length) {
+                tbody.innerHTML = '<tr><td colspan="22" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
+                return;
+            }
 
-function filtrar(){
-    paginaActual = 1;
-    cargar();
-}
+            const esAdmin = rolActual === 'ADMIN';
 
-function exportarFiltrado(){
-    let params = obtenerParametros();
-    window.open(`/ACCESORIOS_NF/EXPORTAR?${params.toString()}`);
-}
+            datosActuales.forEach(row => {
+                const dispPill = disponiblePill(row.DISPONIBLE);
+                const dispLabel = row.DISPONIBLE === true ? 'SÍ' : row.DISPONIBLE === false ? 'NO' : '—';
+                const fechaEnt = row.FECHA_ENTRADA ? row.FECHA_ENTRADA.split('T')[0] : '—';
+                const fechaSal = row.FECHA_SALIDA ? row.FECHA_SALIDA.split('T')[0] : '—';
+                const costoStr = row.COSTO != null
+                    ? `$${parseFloat(row.COSTO).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
+                    : '—';
 
-function exportarTodo(){
-    window.open(`/ACCESORIOS_NF/EXPORTAR_TODO`);
-}
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${row.ID}</td>
+                        <td class="mono">${esc(row.ID_UNICO) || '—'}</td>
+                        <td class="mono">${esc(row.OC) || '—'}</td>
+                        <td class="mono">${esc(row.FOLIO) || '—'}</td>
+                        <td class="mono">${fechaEnt}</td>
+                        <td>${esc(row.RECIBIDO_POR) || '—'}</td>
+                        <td>${esc(row.SUBCATEGORIA) || '—'}</td>
+                        <td>${esc(row.MARCA) || '—'}</td>
+                        <td>${esc(row.MODELO) || '—'}</td>
+                        <td class="mono">${esc(row.NO_SERIE) || '—'}</td>
+                        <td class="mono" style="text-align:center">${row.CANTIDAD ?? '—'}</td>
+                        <td>${esc(row.TIPO) || '—'}</td>
+                        <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.ACCESORIOS) || ''}">${esc(row.ACCESORIOS) || '—'}</td>
+                        <td>${esc(row.PROVEEDOR) || '—'}</td>
+                        <td class="mono">${costoStr}</td>
+                        <td class="mono">${esc(row.MONEDA) || '—'}</td>
+                        <td><span class="disponible-pill ${dispPill}">${dispLabel}</span></td>
+                        <td class="mono">${fechaSal}</td>
+                        <td>${esc(row.ASIGNADO_A) || '—'}</td>
+                        <td>${esc(row.DESTINO_PLANTA) || '—'}</td>
+                        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.PERSONAL_IT_QUE_ASIGNA) || ''}">${esc(row.PERSONAL_IT_QUE_ASIGNA) || '—'}</td>
+                        <td style="white-space:nowrap">
+                            ${esAdmin ? `
+                            <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
+                            ` : ''}
+                            <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
+                        </td>
+                    </tr>`;
+            });
 
-function exportarPorAnio(){
-    let anio = document.getElementById("anioExportar").value;
-    if(!anio){ alert("Ingresa un año"); return; }
-    window.open(`/ACCESORIOS_NF/EXPORTAR_ANIO?anio=${anio}`);
-}
+            document.getElementById('paginaInfo').textContent =
+                `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite) || 1} | Total: ${totalRegistros}`;
+        }
 
-function siguiente(){
-    if(paginaActual*limite<totalRegistros){ paginaActual++; cargar(); }
-}
+        function disponiblePill(val) {
+            if (val === true || val === 'true') return 'pill-si';
+            if (val === false || val === 'false') return 'pill-no';
+            return 'pill-otro';
+        }
 
-function anterior(){
-    if(paginaActual>1){ paginaActual--; cargar(); }
-}
+        function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
+        function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
 
-cargar();
+        // ═══ GUARDAR NUEVO ═══
+        async function guardar() {
+            const dto = {
+                OC: v('f_OC'),
+                FOLIO: v('f_FOLIO'),
+                FECHA_ENTRADA: v('f_FECHA_ENTRADA'),
+                RECIBIDO_POR: v('f_RECIBIDO_POR'),
+                SUBCATEGORIA: v('f_SUBCATEGORIA'),
+                MARCA: v('f_MARCA'),
+                MODELO: v('f_MODELO'),
+                NO_SERIE: v('f_NO_SERIE'),
+                CANTIDAD: vInt('f_CANTIDAD'),
+                TIPO: v('f_TIPO'),
+                ACCESORIOS: v('f_ACCESORIOS'),
+                PROVEEDOR: v('f_PROVEEDOR'),
+                COSTO: vDec('f_COSTO'),
+                MONEDA: v('f_MONEDA'),
+                DISPONIBLE: vBool('f_DISPONIBLE'),
+                FECHA_SALIDA: v('f_FECHA_SALIDA'),
+                ASIGNADO_A: v('f_ASIGNADO_A'),
+                DESTINO_PLANTA: v('f_DESTINO_PLANTA'),
+                PERSONAL_IT_QUE_ASIGNA: v('f_PERSONAL_IT_QUE_ASIGNA'),
+            };
 
-</script>
+            // ID_UNICO auto generado desde OC + FOLIO
+            const oc = (dto.OC || '').trim();
+            const folio = (dto.FOLIO || '').trim();
+            dto.ID_UNICO = [oc, folio].filter(Boolean).join('+') || null;
 
+            try {
+                const r = await fetch('/ACCESORIO_NF', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(dto)
+                });
+                const d = await r.json();
+                if (d.error) { alert('Error: ' + d.error); return; }
+                limpiarForm();
+                cargar();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        function limpiarForm() {
+            ['f_ID_UNICO', 'f_OC', 'f_FOLIO', 'f_FECHA_ENTRADA', 'f_RECIBIDO_POR',
+                'f_SUBCATEGORIA', 'f_MARCA', 'f_MODELO', 'f_NO_SERIE', 'f_CANTIDAD',
+                'f_TIPO', 'f_ACCESORIOS', 'f_PROVEEDOR', 'f_COSTO', 'f_MONEDA',
+                'f_DISPONIBLE', 'f_FECHA_SALIDA', 'f_ASIGNADO_A', 'f_DESTINO_PLANTA',
+                'f_PERSONAL_IT_QUE_ASIGNA'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+        }
+
+        // ═══ ELIMINAR ═══
+        async function eliminar(id) {
+            if (!confirm('¿Eliminar este accesorio NF?')) return;
+            try {
+                await fetch(`/ACCESORIO_NF/${id}`, { method: 'DELETE' });
+                cargar();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // ═══ EXPORTAR ═══
+        function exportarFiltrado() { window.open('/ACCESORIOS_NF/EXPORTAR?' + obtenerParametros()); }
+        function exportarTodo() { window.open('/ACCESORIOS_NF/EXPORTAR_TODO'); }
+        function exportarPorAnio() {
+            const a = document.getElementById('anioExportar').value;
+            if (!a) { alert('Ingresa un año'); return; }
+            window.open('/ACCESORIOS_NF/EXPORTAR_ANIO?anio=' + a);
+        }
+
+        // ═══ MODAL EDITAR ═══
+        function abrirEditar(id) {
+            editandoID = id;
+            document.getElementById('editarIdLabel').textContent = '#' + id;
+            const row = datosActuales.find(r => r.ID === id);
+            if (row) {
+                setV('e_ID_UNICO', row.ID_UNICO);
+                setV('e_OC', row.OC);
+                setV('e_FOLIO', row.FOLIO);
+                setV('e_FECHA_ENTRADA', row.FECHA_ENTRADA ? row.FECHA_ENTRADA.split('T')[0] : '');
+                setV('e_RECIBIDO_POR', row.RECIBIDO_POR);
+                setV('e_SUBCATEGORIA', row.SUBCATEGORIA);
+                setV('e_MARCA', row.MARCA);
+                setV('e_MODELO', row.MODELO);
+                setV('e_NO_SERIE', row.NO_SERIE);
+                setV('e_CANTIDAD', row.CANTIDAD);
+                setV('e_TIPO', row.TIPO);
+                setV('e_ACCESORIOS', row.ACCESORIOS);
+                setV('e_PROVEEDOR', row.PROVEEDOR);
+                setV('e_COSTO', row.COSTO);
+                setV('e_MONEDA', row.MONEDA);
+                setV('e_DISPONIBLE', row.DISPONIBLE === true ? 'true' : row.DISPONIBLE === false ? 'false' : '');
+                setV('e_FECHA_SALIDA', row.FECHA_SALIDA ? row.FECHA_SALIDA.split('T')[0] : '');
+                setV('e_ASIGNADO_A', row.ASIGNADO_A);
+                setV('e_DESTINO_PLANTA', row.DESTINO_PLANTA);
+                setV('e_PERSONAL_IT_QUE_ASIGNA', row.PERSONAL_IT_QUE_ASIGNA);
+            }
+            document.getElementById('modalEditar').classList.add('show');
+            document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+        }
+
+        function cerrarEditar() {
+            document.getElementById('modalEditar').classList.remove('show');
+            editandoID = null;
+        }
+
+        async function guardarCambios() {
+            const dto = {
+                OC: v('e_OC'),
+                FOLIO: v('e_FOLIO'),
+                FECHA_ENTRADA: v('e_FECHA_ENTRADA'),
+                RECIBIDO_POR: v('e_RECIBIDO_POR'),
+                SUBCATEGORIA: v('e_SUBCATEGORIA'),
+                MARCA: v('e_MARCA'),
+                MODELO: v('e_MODELO'),
+                NO_SERIE: v('e_NO_SERIE'),
+                CANTIDAD: vInt('e_CANTIDAD'),
+                TIPO: v('e_TIPO'),
+                ACCESORIOS: v('e_ACCESORIOS'),
+                PROVEEDOR: v('e_PROVEEDOR'),
+                COSTO: vDec('e_COSTO'),
+                MONEDA: v('e_MONEDA'),
+                DISPONIBLE: vBool('e_DISPONIBLE'),
+                FECHA_SALIDA: v('e_FECHA_SALIDA'),
+                ASIGNADO_A: v('e_ASIGNADO_A'),
+                DESTINO_PLANTA: v('e_DESTINO_PLANTA'),
+                PERSONAL_IT_QUE_ASIGNA: v('e_PERSONAL_IT_QUE_ASIGNA'),
+            };
+
+            const oc = (dto.OC || '').trim();
+            const folio = (dto.FOLIO || '').trim();
+            dto.ID_UNICO = [oc, folio].filter(Boolean).join('+') || null;
+
+            try {
+                const r = await fetch(`/ACCESORIO_NF/${editandoID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(dto)
+                });
+                const result = await r.json();
+                if (r.ok && !result.error) { cerrarEditar(); cargar(); }
+                else alert('Error: ' + (result.error || 'No se pudo guardar'));
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // ═══ MODAL HISTORIAL ═══
+        function esc(val) {
+            if (val == null) return '';
+            return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function norm(v) { return (v == null) ? '' : String(v).trim(); }
+        function formatFecha(f) {
+            try {
+                const d = new Date(f);
+                if (!isNaN(d)) return d.toLocaleString('es-MX', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+            } catch (e) { }
+            return f ?? '';
+        }
+
+        function renderEvento(ev) {
+            let antes = ev.REGISTRO_ANTERIOR || ev.registro_anterior;
+            let despues = ev.REGISTRO_NUEVO || ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (e) { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (e) { }
+
+            const cambiados = new Set();
+            CAMPOS_HIST.forEach(({ key }) => {
+                if (norm(antes?.[key]) !== norm(despues?.[key])) cambiados.add(key);
+            });
+
+            let filas = '';
+            CAMPOS_HIST.forEach(({ key, label }) => {
+                const va = esc(antes?.[key] ?? '');
+                const vd = esc(despues?.[key] ?? '');
+                const chg = cambiados.has(key);
+                filas += `
+                    <tr class="${chg ? 'row-changed' : ''}">
+                        <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                        <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                        <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                    </tr>`;
+            });
+
+            const n = cambiados.size;
+            return `
+                <div class="ev-wrap">
+                    <div class="ev-header">
+                        <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
+                        <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
+                        <span class="n-cambios-badge"
+                            style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                                   color:${n > 0 ? '#FCD34D' : '#94A3B8'};
+                                   border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                            ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                    <table class="ev-table">
+                        <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                        <tbody>${filas}</tbody>
+                    </table>
+                </div>`;
+        }
+
+        function verHistorial(id) {
+            document.getElementById('histIdLabel').textContent = '#' + id;
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando...</p>';
+            document.getElementById('modalHistorial').classList.add('show');
+            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+
+            fetch(`/ACCESORIOS_NF/${id}/HISTORIAL`)
+                .then(r => r.json())
+                .then(data => {
+                    const lista = (data.historial || [])
+                        .sort((a, b) => new Date(b.FECHA || b.fecha || 0) - new Date(a.FECHA || a.fecha || 0));
+
+                    if (!lista.length) {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            '<p class="sin-hist">📭 Sin ediciones registradas</p>';
+                    } else {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
+                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                 </p>` + lista.map(ev => renderEvento(ev)).join('');
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        '<p style="color:var(--red);text-align:center;padding:30px">❌ Error al cargar historial</p>';
+                });
+        }
+
+        function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
+
+        // ═══ UI ═══
+        function toggleDropdown() { document.getElementById('userChipMain').classList.toggle('open'); }
+        document.addEventListener('click', e => {
+            const chip = document.getElementById('userChipMain');
+            if (chip && !chip.contains(e.target)) chip.classList.remove('open');
+        });
+        function cerrarSesion() {
+            fetch('/LOGOUT', { method: 'POST', credentials: 'include' })
+                .finally(() => { window.location.href = '/static/login.html'; });
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
+        });
+
+        // ═══ HELPERS ═══
+        function v(id) { const el = document.getElementById(id); return el ? (el.value.trim() || null) : null; }
+        function vInt(id) { const x = v(id); return x != null ? parseInt(x) || null : null; }
+        function vDec(id) { const x = v(id); return x != null ? parseFloat(x) || null : null; }
+        function vBool(id) { const x = v(id); if (x === 'true') return true; if (x === 'false') return false; return null; }
+        function setV(id, val) { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
+    </script>
 </body>
 </html>

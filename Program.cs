@@ -25,6 +25,7 @@ builder.Services.AddScoped<OrdenesDeCompraService>();              // ORDENES DE
 builder.Services.AddScoped<PantallasNfService>();                 // PANTALLAS_NF
 builder.Services.AddScoped<RefaccionesNFService>();              // REFACCIONES NF
 builder.Services.AddScoped<BuscarGlobalService>();              // BUSCADOR GLOBAL DE PRESUPUESTOS
+builder.Services.AddScoped<AccesoriosNFService>();             // ACCESORIOS NF
 
 
 // CORS
