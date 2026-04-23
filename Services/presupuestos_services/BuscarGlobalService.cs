@@ -37,13 +37,18 @@ public class BuscarGlobalService
             "accesorios", "moneda", "proveedor", "disponible",
             "asignado_a", "destino_planta", "personal_it_que_asigna"
         ]),
+        ("HERRAMIENTAS NF", "herramientas_nf", [
+            "id_unico", "oc", "folio_correctivo", "recibido_por", "subcategoria",
+            "marca", "modelo", "numero_serie", "tipo_uso",
+            "num_parte", "moneda", "proveedor", "ubicacion",
+            "comentarios"
+        ]),
         ("DISPOSITIVOS NF",  "dispositivos_nf",   ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("PERIFERICOS NF",   "perifericos_nf",    ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("IMPRESORAS NF",    "impresoras_nf",     ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("TELEFONIA NF",     "telefonia_nf",      ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("CONSUMIBLES NF",   "consumibles_nf",    ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("RADIOS NF",        "radio_nf",          ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
-        ("HERRAMIENTA NF",   "herramientas_nf",   ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("EQUIPO DE RED NF", "refacciones_red_nf",["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("TINTAS TONER RIBON","tintas_toner_ribon_nf",["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("INVENTARIOS",      "inventarios",       ["id_unico","oc","marca","modelo","serie","num_parte","proveedor","comentarios"]),
