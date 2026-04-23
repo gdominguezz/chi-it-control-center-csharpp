@@ -1,259 +1,1829 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>DISPOSITIVOS NF</title>
-<style>
-body{ font-family:Arial; margin:0; background:#f1f5f9; }
-.header{ background:#1e293b; color:white; padding:15px; font-size:20px; font-weight:bold; }
-.container{ padding:15px; }
-.form-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-bottom:15px; }
-.field{ display:flex; flex-direction:column; }
-.field label{ font-size:11px; font-weight:bold; color:#1e293b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.3px; }
-.field input{ padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:12px; background:#f8fafc; transition:border-color 0.2s; }
-.field input:focus{ outline:none; border-color:#2563eb; background:white; box-shadow:0 0 0 2px rgba(37,99,235,0.15); }
-button{ padding:6px 12px; border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; margin-right:5px; }
-.save{background:#16a34a;color:white;} .cancel{background:#64748b;color:white;} .delete{background:#dc2626;color:white;}
-.edit{background:#f59e0b;color:white;} .pdf{background:#2563eb;color:white;} .export{background:#7c3aed;color:white;}
-.btn-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:12px; }
-.btn-bar input[type="number"]{ padding:6px; border:1px solid #ccc; border-radius:5px; font-size:12px; width:110px; }
-.table-container{ width:100%; height:500px; overflow:auto; border:1px solid #ccc; background:white; }
-table{ border-collapse:collapse; min-width:6000px; font-size:11px; }
-th,td{ border:1px solid #ccc; padding:6px; white-space:nowrap; text-align:center; }
-th{ background:#1e293b; color:white; position:sticky; top:0; z-index:2; }
-.filter-row input{ width:100%; font-size:11px; }
-.pagination{ margin-top:10px; }
-.back{
-    background:#dc2626;
-    font-style: italic; color:#ffffff;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Dispositivos NF</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0F1A;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --surface3: #1e293b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --accent: #3B82F6;
+            --text: #F1F5F9;
+            --muted: #64748B;
+            --muted2: #94A3B8;
+            --green: #10B981;
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --purple: #8B5CF6;
+            --cyan: #06B6D4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── TOP BAR ── */
+        .topbar {
+            background: linear-gradient(135deg,#0f1e35,#0B0F1A);
+            border-bottom: 1px solid var(--border2);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+
+        .topbar-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: linear-gradient(135deg,#1e3a8a,#3B82F6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px rgba(59,130,246,.4);
+            flex-shrink: 0;
+        }
+
+        .topbar-title {
+            flex: 1;
+        }
+
+            .topbar-title h1 {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: -.01em;
+            }
+
+            .topbar-title p {
+                font-size: 11px;
+                color: var(--muted2);
+                margin-top: 1px;
+                font-family: 'DM Mono',monospace;
+            }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background .2s, border-color .2s;
+        }
+
+            .user-chip:hover {
+                background: rgba(255,255,255,.1);
+                border-color: var(--accent);
+            }
+
+            .user-chip span {
+                color: var(--muted2);
+            }
+
+            .user-chip .chip-arrow {
+                font-size: 9px;
+                color: var(--muted);
+                transition: transform .2s;
+            }
+
+            .user-chip.open .chip-arrow {
+                transform: rotate(180deg);
+            }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
+
+            .dropdown-header .d-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            .dropdown-header .d-role {
+                font-size: 10px;
+                color: var(--muted);
+                font-family: 'DM Mono',monospace;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                margin-top: 2px;
+            }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: background .15s, color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans',sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: var(--text);
+            }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        /* ── MAIN LAYOUT ── */
+        .main {
+            max-width: 1700px;
+            margin: 0 auto;
+            padding: 20px 24px;
+        }
+
+        /* ── PANEL NUEVO REGISTRO ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .panel-title::before {
+                content: '';
+                width: 3px;
+                height: 14px;
+                background: var(--accent);
+                border-radius: 2px;
+                display: inline-block;
+            }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(190px,1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+            .form-grid .field-full {
+                grid-column: 1 / -1;
+            }
+
+        .field label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .field input, .field select {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 28px;
+        }
+
+            .field select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+            .field input:focus, .field select:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+            }
+
+        /* separadores de sección dentro del form */
+        .form-section-label {
+            grid-column: 1 / -1;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 6px;
+            margin-top: 6px;
+        }
+
+        /* ── BOTONES ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans',sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 3px 10px rgba(59,130,246,.3);
+        }
+
+            .btn-primary:hover {
+                background: #2563EB;
+                transform: translateY(-1px);
+            }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+            box-shadow: 0 3px 10px rgba(16,185,129,.25);
+        }
+
+            .btn-success:hover {
+                background: #059669;
+                transform: translateY(-1px);
+            }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+            box-shadow: 0 3px 10px rgba(239,68,68,.25);
+        }
+
+            .btn-danger:hover {
+                background: #DC2626;
+                transform: translateY(-1px);
+            }
+
+        .btn-amber {
+            background: var(--amber);
+            color: #1c1400;
+        }
+
+            .btn-amber:hover {
+                background: #D97706;
+            }
+
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+
+            .btn-purple:hover {
+                background: #7C3AED;
+            }
+
+        .btn-cyan {
+            background: var(--cyan);
+            color: #001a1f;
+        }
+
+            .btn-cyan:hover {
+                background: #0891B2;
+            }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
+        }
+
+            .btn-ghost:hover {
+                color: var(--text);
+                border-color: var(--accent);
+            }
+
+        .btn-sm {
+            padding: 8px 13px;
+            font-size: 12px;
+        }
+
+        /* ── TOOLBAR ── */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .toolbar-sep {
+            width: 1px;
+            height: 24px;
+            background: var(--border2);
+            margin: 0 4px;
+        }
+
+        .anio-input {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            width: 110px;
+        }
+
+            .anio-input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        /* ── TABLA ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: calc(100vh - 380px);
+            min-height: 420px;
+            overflow-y: auto;
+        }
+
+            .table-scroll::-webkit-scrollbar {
+                width: 7px;
+                height: 7px;
+            }
+
+            .table-scroll::-webkit-scrollbar-track {
+                background: var(--surface2);
+                border-radius: 999px;
+            }
+
+            .table-scroll::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 999px;
+            }
+
+                .table-scroll::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent);
+                }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 3000px;
+        }
+
+        thead th {
+            background: var(--surface3);
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+            thead th:last-child {
+                position: sticky;
+                right: 0;
+                z-index: 11;
+                background: var(--surface3);
+            }
+
+        tbody td:last-child {
+            position: sticky;
+            right: 0;
+            background: var(--surface);
+            z-index: 1;
+        }
+
+        .filter-row td {
+            background: var(--surface2) !important;
+            padding: 6px 8px;
+            position: sticky;
+            top: 37px;
+            z-index: 9;
+        }
+
+            .filter-row td:last-child {
+                position: sticky;
+                right: 0;
+                top: 37px;
+                z-index: 10;
+                background: var(--surface2);
+            }
+
+        .filter-row input {
+            width: 100%;
+            background: var(--surface3);
+            border: 1px solid var(--border2);
+            border-radius: 5px;
+            padding: 5px 7px;
+            font-size: 11px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            min-width: 80px;
+        }
+
+            .filter-row input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+
+            tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            tbody tr:hover td {
+                filter: brightness(1.15);
+            }
+
+        td {
+            padding: 10px 12px;
+            color: var(--text);
+            vertical-align: middle;
+            line-height: 1.4;
+        }
+
+            td.mono {
+                font-family: 'DM Mono',sans-serif;
+                font-size: 12px;
+                color: var(--text);
+            }
+
+        .disponible-pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .04em;
+        }
+
+        .pill-si {
+            background: rgba(16,185,129,.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(16,185,129,.35);
+        }
+
+        .pill-no {
+            background: rgba(239,68,68,.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239,68,68,.3);
+        }
+
+        .pill-otro {
+            background: rgba(100,116,139,.15);
+            color: #94A3B8;
+            border: 1px solid rgba(100,116,139,.3);
+        }
+
+        /* ── PAGINACIÓN ── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .page-info {
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--muted2);
+        }
+
+        /* ── MODALES ── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.7);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+            .modal.show {
+                display: flex;
+            }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 24px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,.6);
+            position: relative;
+            animation: modalIn .2s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-box.form-box {
+            width: min(780px,95vw);
+        }
+
+        .modal-box.hist-box {
+            width: min(900px,95vw);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+            .modal-header h3 {
+                font-size: 15px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        /* ── FORM EDITAR ── */
+        .form-grid-modal {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media(max-width:500px) {
+            .form-grid-modal {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-field {
+            margin-bottom: 0;
+        }
+
+            .form-field label {
+                font-size: 9px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            .form-field input, .form-field select, .form-field textarea {
+                width: 100%;
+                background: var(--surface2);
+                border: 1px solid var(--border2);
+                border-radius: 7px;
+                padding: 9px 11px;
+                font-size: 12px;
+                font-family: 'DM Mono',monospace;
+                color: var(--text);
+                transition: border-color .2s;
+            }
+
+            .form-field select {
+                cursor: pointer;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 10px center;
+                padding-right: 28px;
+            }
+
+                .form-field select option {
+                    background: var(--surface2);
+                    color: var(--text);
+                }
+
+                .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+                }
+
+            .form-field textarea {
+                resize: vertical;
+                min-height: 70px;
+                font-family: 'DM Sans',sans-serif;
+            }
+
+            .form-field.full {
+                grid-column: 1 / -1;
+            }
+
+        .modal-section-label {
+            grid-column: 1 / -1;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 6px;
+            margin-top: 4px;
+        }
+
+        /* ── HISTORIAL ── */
+        .ev-wrap {
+            margin-bottom: 16px;
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        .ev-header {
+            background: var(--surface2);
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+            .ev-header span {
+                font-size: 12px;
+                color: var(--muted2);
+            }
+
+            .ev-header strong {
+                color: var(--text);
+            }
+
+        .badge-cambio {
+            background: rgba(245,158,11,.2);
+            color: var(--amber);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            margin-left: 6px;
+            border: 1px solid rgba(245,158,11,.3);
+        }
+
+        .ev-table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+            .ev-table th, .ev-table td {
+                border: 1px solid var(--border);
+                padding: 9px 12px;
+                text-align: left;
+            }
+
+            .ev-table thead th {
+                background: var(--surface3);
+                color: var(--muted);
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+            }
+
+            .ev-table th:first-child {
+                width: 22%;
+            }
+
+        .row-changed td:nth-child(2) {
+            background: rgba(239,68,68,.08);
+            color: #fca5a5;
+        }
+
+        .row-changed td:nth-child(3) {
+            background: rgba(16,185,129,.08);
+            color: #6ee7b7;
+        }
+
+        .empty-val {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .sin-hist {
+            text-align: center;
+            padding: 50px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .n-cambios-badge {
+            margin-left: auto;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+    </style>
 </head>
 <body>
-<div class="header">DISPOSITIVOS NF</div>
-<div class="container">
-<div class="form-grid">
-<div class="field"><label>ID Unico</label><input id="ID_UNICO"></div>
-<div class="field"><label>OC</label><input id="OC"></div>
-<div class="field"><label>Folio</label><input id="FOLIO"></div>
-<div class="field"><label>Fecha Registro</label><input id="FECHA_REGISTRO" type="date"></div>
-<div class="field"><label>Recibido Por</label><input id="RECIBIDO_POR"></div>
-<div class="field"><label>Subcategoria</label><input id="SUBCATEGORIA"></div>
-<div class="field"><label>Marca</label><input id="MARCA"></div>
-<div class="field"><label>Modelo</label><input id="MODELO"></div>
-<div class="field"><label>No. Serie</label><input id="NO_SERIE"></div>
-<div class="field"><label>Cantidad</label><input id="CANTIDAD"></div>
-<div class="field"><label>Costo</label><input id="COSTO"></div>
-<div class="field"><label>Proveedor</label><input id="PROVEEDOR"></div>
-<div class="field"><label>Activo Fijo</label><input id="ACTIVO_FIJO"></div>
-<div class="field"><label>Procesador</label><input id="PROCESADOR"></div>
-<div class="field"><label>Arquitectura</label><input id="ARQUITECTURA"></div>
-<div class="field"><label>Almacenamiento</label><input id="ALMACENAMIENTO"></div>
-<div class="field"><label>Tipo Disco</label><input id="TIPO_DISCO"></div>
-<div class="field"><label>Sistema Operativo</label><input id="SISTEMA_OPERATIVO"></div>
-<div class="field"><label>Licencia SO</label><input id="LICENCIA_SO"></div>
-<div class="field"><label>Memoria RAM</label><input id="MEMORIA_RAM"></div>
-<div class="field"><label>Velocidad Memoria</label><input id="VELOCIDAD_MEMORIA"></div>
-<div class="field"><label>Tipo Memoria</label><input id="TIPO_MEMORIA"></div>
-<div class="field"><label>Slot Memoria</label><input id="SLOT_MEMORIA"></div>
-<div class="field"><label>Max Memoria</label><input id="MAX_MEMORIA"></div>
-<div class="field"><label>Modelo Cargador</label><input id="MODELO_CARGADOR"></div>
-<div class="field"><label>No. Serie Eliminador</label><input id="NO_SERIE_ELIMINADOR"></div>
-<div class="field"><label>Bateria Laptop</label><input id="BATERIA_LAPTOP"></div>
-<div class="field"><label>WIFI MAC</label><input id="WIFI_MAC"></div>
-<div class="field"><label>ETH MAC</label><input id="ETH_MAC"></div>
-<div class="field"><label>Accesorios</label><input id="ACCESORIOS"></div>
-<div class="field"><label>Ubicacion</label><input id="UBICACION"></div>
-<div class="field"><label>Edificio</label><input id="EDIFICIO"></div>
-<div class="field"><label>Fecha Salida</label><input id="FECHA_SALIDA" type="date"></div>
-<div class="field"><label>Asignado A</label><input id="ASIGNADO_A"></div>
-<div class="field"><label>Destino Planta</label><input id="DESTINO_PLANTA"></div>
-<div class="field"><label>Disponible</label><input id="DISPONIBLE"></div>
-<div class="field"><label>Personal IT que Asigna</label><input id="PERSONAL_IT_ASIGNA"></div>
-<div class="field"><label>Formato de Baja</label><input id="FORMATO_BAJA"></div>
-</div>
 
-<div class="btn-bar">
-    <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
-    <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
-</div>
-<div class="btn-bar">
-    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
-    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
-    <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
-    <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
-</div>
+    <!-- ══ TOP BAR ══════════════════════════════════════════════════════════ -->
+    <div class="topbar">
+        <div class="topbar-icon">💻</div>
+        <div class="topbar-title">
+            <h1>Dispositivos NF</h1>
+            <p>Gestión de dispositivos no facturados</p>
+        </div>
+        <div class="topbar-actions">
+            <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
+                <span>👤</span>
+                <span id="usuarioDisplay">—</span>
+                <span class="chip-arrow">▼</span>
+                <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name" id="dropdownNombre">—</div>
+                        <div class="d-role" id="dropdownRol">—</div>
+                    </div>
+                    <button class="dropdown-item danger" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>ID</th><th>ID UNICO</th><th>OC</th><th>FOLIO</th><th>FECHA REG</th>
-<th>RECIBIDO</th><th>SUBCATEGORIA</th><th>MARCA</th><th>MODELO</th><th>NO SERIE</th>
-<th>CANTIDAD</th><th>COSTO</th><th>PROVEEDOR</th><th>ACTIVO FIJO</th>
-<th>PROCESADOR</th><th>ARQUITECTURA</th><th>ALMACENAMIENTO</th><th>TIPO DISCO</th>
-<th>SISTEMA OP</th><th>LICENCIA SO</th><th>MEMORIA RAM</th><th>VEL MEMORIA</th>
-<th>TIPO MEM</th><th>SLOT MEM</th><th>MAX MEM</th><th>MOD CARGADOR</th>
-<th>NO SERIE ELIM</th><th>BATERIA</th><th>WIFI MAC</th><th>ETH MAC</th>
-<th>ACCESORIOS</th><th>UBICACION</th><th>EDIFICIO</th><th>FECHA SALIDA</th>
-<th>ASIGNADO A</th><th>DESTINO</th><th>DISPONIBLE</th><th>PERSONAL IT</th>
-<th>FORMATO BAJA</th><th>PDF</th><th>ACCIONES</th>
-</tr>
-<tr class="filter-row">
-<th></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th></th><th></th>
-</tr>
-</thead>
-<tbody id="tabla"></tbody>
-</table>
-</div>
-<div class="pagination">
-<button onclick="anterior()">Anterior</button>
-<span id="paginaInfo"></span>
-<button onclick="siguiente()">Siguiente</button>
-<button class="back" onclick="window.location.href='presupuestos_menu.html'">
-REGRESAR A PRESUPUESTOS
-</button>
-</div>
-</div>
+    <!-- ══ MAIN ═════════════════════════════════════════════════════════════ -->
+    <div class="main">
 
-<script>
-let paginaActual=1, limite=10, totalRegistros=0, editandoID=null;
+        <!-- ── Panel nuevo registro ── -->
+        <div class="panel" id="panelNuevo">
+            <div class="panel-title">➕ Nuevo Registro</div>
+            <div class="form-grid">
 
-function guardar(){
-    let ids=['ID_UNICO','OC','FOLIO','FECHA_REGISTRO','RECIBIDO_POR','SUBCATEGORIA',
-             'MARCA','MODELO','NO_SERIE','CANTIDAD','COSTO','PROVEEDOR','ACTIVO_FIJO',
-             'PROCESADOR','ARQUITECTURA','ALMACENAMIENTO','TIPO_DISCO','SISTEMA_OPERATIVO',
-             'LICENCIA_SO','MEMORIA_RAM','VELOCIDAD_MEMORIA','TIPO_MEMORIA','SLOT_MEMORIA',
-             'MAX_MEMORIA','MODELO_CARGADOR','NO_SERIE_ELIMINADOR','BATERIA_LAPTOP',
-             'WIFI_MAC','ETH_MAC','ACCESORIOS','UBICACION','EDIFICIO','FECHA_SALIDA',
-             'ASIGNADO_A','DESTINO_PLANTA','DISPONIBLE','PERSONAL_IT_ASIGNA','FORMATO_BAJA'];
-    let data={};
-    ids.forEach(k=>{ let el=document.getElementById(k); data[k]=el&&el.value?el.value:null; });
-    if(editandoID){
-        fetch(`/DISPOSITIVOS_NF/${editandoID}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
-        .then(()=>{ editandoID=null; limpiarFormulario(); cargar(); });
-    } else {
-        fetch("/DISPOSITIVOS_NF",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
-        .then(()=>{ limpiarFormulario(); cargar(); });
-    }
-}
+                <!-- IDENTIFICACIÓN -->
+                <div class="form-section-label">📋 Identificación</div>
+                <div class="field"><label>ID Único</label><input id="f_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
+                <div class="field"><label>OC</label><input id="f_OC" placeholder="Orden de compra"></div>
+                <div class="field"><label>Folio</label><input id="f_FOLIO" placeholder="Folio"></div>
+                <div class="field"><label>Fecha Registro</label><input id="f_FECHA_REGISTRO" type="date"></div>
+                <div class="field"><label>Recibido Por</label><input id="f_RECIBIDO_POR" placeholder="Nombre"></div>
+                <div class="field">
+                    <label>Subcategoría</label>
+                    <select id="f_SUBCATEGORIA">
+                        <option value="">— Selecciona —</option>
+                        <option>LAPTOP</option>
+                        <option>DESKTOP</option>
+                        <option>SERVIDOR</option>
+                        <option>TABLET</option>
+                        <option>ALL-IN-ONE</option>
+                        <option>MINI PC</option>
+                        <option>WORKSTATION</option>
+                        <option>OTRO</option>
+                    </select>
+                </div>
 
-function limpiarFormulario(){ document.querySelectorAll(".form-grid input").forEach(i=>i.value=""); }
-function cancelarEdicion(){ editandoID=null; limpiarFormulario(); }
+                <!-- EQUIPO -->
+                <div class="form-section-label">🖥️ Equipo</div>
+                <div class="field"><label>Marca</label><input id="f_MARCA" placeholder="Marca"></div>
+                <div class="field"><label>Modelo</label><input id="f_MODELO" placeholder="Modelo"></div>
+                <div class="field"><label>No. Serie</label><input id="f_NUMERO_SERIE" placeholder="Número de serie"></div>
+                <div class="field"><label>Cantidad</label><input id="f_CANTIDAD" type="number" min="0" placeholder="0"></div>
+                <div class="field"><label>Costo</label><input id="f_COSTO" type="number" step="0.01" min="0" placeholder="0.00"></div>
+                <div class="field">
+                    <label>Proveedor</label>
+                    <select id="f_PROVEEDOR">
+                        <option value="">— Selecciona —</option>
+                        <option>APC</option>
+                        <option>BRIGHT</option>
+                        <option>DELL</option>
+                        <option>HG COMUNICACIONES</option>
+                        <option>IPS</option>
+                        <option>PCTONER</option>
+                        <option>SLA</option>
+                        <option>HP</option>
+                        <option>LENOVO</option>
+                        <option>APPLE</option>
+                    </select>
+                </div>
+                <div class="field"><label>Activo Fijo</label><input id="f_ACTIVO_FIJO" placeholder="No. activo fijo"></div>
 
-function obtenerParametros(){
-    let f=document.querySelectorAll(".filter-row input");
-    return new URLSearchParams({
-        page:paginaActual,limit:limite,
-        ID_UNICO:f[0].value,OC:f[1].value,FOLIO:f[2].value,
-        FECHA_REGISTRO:f[3].value,RECIBIDO_POR:f[4].value,SUBCATEGORIA:f[5].value,
-        MARCA:f[6].value,MODELO:f[7].value,NO_SERIE:f[8].value,
-        CANTIDAD:f[9].value,COSTO:f[10].value,PROVEEDOR:f[11].value,
-        ACTIVO_FIJO:f[12].value,PROCESADOR:f[13].value,ARQUITECTURA:f[14].value,
-        ALMACENAMIENTO:f[15].value,TIPO_DISCO:f[16].value,SISTEMA_OPERATIVO:f[17].value,
-        LICENCIA_SO:f[18].value,MEMORIA_RAM:f[19].value,VELOCIDAD_MEMORIA:f[20].value,
-        TIPO_MEMORIA:f[21].value,SLOT_MEMORIA:f[22].value,MAX_MEMORIA:f[23].value,
-        MODELO_CARGADOR:f[24].value,NO_SERIE_ELIMINADOR:f[25].value,BATERIA_LAPTOP:f[26].value,
-        WIFI_MAC:f[27].value,ETH_MAC:f[28].value,ACCESORIOS:f[29].value,
-        UBICACION:f[30].value,EDIFICIO:f[31].value,FECHA_SALIDA:f[32].value,
-        ASIGNADO_A:f[33].value,DESTINO_PLANTA:f[34].value,DISPONIBLE:f[35].value,
-        PERSONAL_IT_ASIGNA:f[36].value,FORMATO_BAJA:f[37].value
-    });
-}
+                <!-- ESPECIFICACIONES TÉCNICAS -->
+                <div class="form-section-label">⚙️ Especificaciones Técnicas</div>
+                <div class="field"><label>Procesador</label><input id="f_PROCESADOR" placeholder="Ej. Intel Core i7-1165G7"></div>
+                <div class="field">
+                    <label>Arquitectura</label>
+                    <select id="f_ARQUITECTURA">
+                        <option value="">— Selecciona —</option>
+                        <option>x64</option>
+                        <option>x86</option>
+                        <option>ARM64</option>
+                        <option>ARM</option>
+                    </select>
+                </div>
+                <div class="field"><label>Almacenamiento</label><input id="f_ALMACENAMIENTO" placeholder="Ej. 512 GB"></div>
+                <div class="field">
+                    <label>Tipo Disco Duro</label>
+                    <select id="f_TIPO_DISCO_DURO">
+                        <option value="">— Selecciona —</option>
+                        <option>SSD</option>
+                        <option>HDD</option>
+                        <option>NVMe</option>
+                        <option>eMMC</option>
+                        <option>SSD + HDD</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Sistema Operativo</label>
+                    <select id="f_SISTEMA_OPERATIVO">
+                        <option value="">— Selecciona —</option>
+                        <option>Windows 10</option>
+                        <option>Windows 11</option>
+                        <option>Windows 7</option>
+                        <option>macOS</option>
+                        <option>Linux</option>
+                        <option>Ubuntu</option>
+                        <option>Chrome OS</option>
+                        <option>Sin SO</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Lic. Sistema Operativo</label>
+                    <select id="f_LICENCIA_SISTEMA_OPERATIVO">
+                        <option value="">— Selecciona —</option>
+                        <option>OEM</option>
+                        <option>RETAIL</option>
+                        <option>VOLUMEN</option>
+                        <option>SIN LICENCIA</option>
+                    </select>
+                </div>
 
-function cargar(){
-    fetch(`/DISPOSITIVOS_NF?${obtenerParametros().toString()}`)
-    .then(r=>r.json()).then(resp=>{ totalRegistros=resp.total; renderizar(resp.data); });
-}
+                <!-- MEMORIA -->
+                <div class="form-section-label">🧠 Memoria RAM</div>
+                <div class="field"><label>Memoria RAM</label><input id="f_MEMORIA_RAM" placeholder="Ej. 16 GB"></div>
+                <div class="field"><label>Velocidad Memoria</label><input id="f_VELOCIDAD_MEMORIA" placeholder="Ej. 3200 MHz"></div>
+                <div class="field">
+                    <label>Tipo Memoria</label>
+                    <select id="f_TIPO_MEMORIA">
+                        <option value="">— Selecciona —</option>
+                        <option>DDR3</option>
+                        <option>DDR4</option>
+                        <option>DDR5</option>
+                        <option>LPDDR4</option>
+                        <option>LPDDR5</option>
+                    </select>
+                </div>
+                <div class="field"><label>Slot Memoria</label><input id="f_SLOT_MEMORIA" placeholder="Ej. 2 de 2 ocupados"></div>
+                <div class="field"><label>Máx. Memoria</label><input id="f_MAX_MEMORIA" placeholder="Ej. 32 GB"></div>
 
-function renderizar(datos){
-    tabla.innerHTML="";
-    datos.forEach(row=>{
-        tabla.innerHTML+=`<tr>
-        <td>${row.ID}</td><td>${row.ID_UNICO??""}</td><td>${row.OC??""}</td>
-        <td>${row.FOLIO??""}</td><td>${row.FECHA_REGISTRO??""}</td>
-        <td>${row.RECIBIDO_POR??""}</td><td>${row.SUBCATEGORIA??""}</td>
-        <td>${row.MARCA??""}</td><td>${row.MODELO??""}</td><td>${row.NO_SERIE??""}</td>
-        <td>${row.CANTIDAD??""}</td><td>${row.COSTO??""}</td><td>${row.PROVEEDOR??""}</td>
-        <td>${row.ACTIVO_FIJO??""}</td><td>${row.PROCESADOR??""}</td>
-        <td>${row.ARQUITECTURA??""}</td><td>${row.ALMACENAMIENTO??""}</td>
-        <td>${row.TIPO_DISCO??""}</td><td>${row.SISTEMA_OPERATIVO??""}</td>
-        <td>${row.LICENCIA_SO??""}</td><td>${row.MEMORIA_RAM??""}</td>
-        <td>${row.VELOCIDAD_MEMORIA??""}</td><td>${row.TIPO_MEMORIA??""}</td>
-        <td>${row.SLOT_MEMORIA??""}</td><td>${row.MAX_MEMORIA??""}</td>
-        <td>${row.MODELO_CARGADOR??""}</td><td>${row.NO_SERIE_ELIMINADOR??""}</td>
-        <td>${row.BATERIA_LAPTOP??""}</td><td>${row.WIFI_MAC??""}</td>
-        <td>${row.ETH_MAC??""}</td><td>${row.ACCESORIOS??""}</td>
-        <td>${row.UBICACION??""}</td><td>${row.EDIFICIO??""}</td>
-        <td>${row.FECHA_SALIDA??""}</td><td>${row.ASIGNADO_A??""}</td>
-        <td>${row.DESTINO_PLANTA??""}</td><td>${row.DISPONIBLE??""}</td>
-        <td>${row.PERSONAL_IT_ASIGNA??""}</td><td>${row.FORMATO_BAJA??""}</td>
-        <td>${row.TIENE_PDF
-            ? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button><button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
-            : `<input type="file" onchange="subirPDF(${row.ID},this)">`}</td>
-        <td><button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
-        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button></td>
-        </tr>`;
-    });
-    paginaInfo.innerText=`Pagina ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
-}
+                <!-- LAPTOP / ELIMINADOR -->
+                <div class="form-section-label">🔋 Laptop / Cargador</div>
+                <div class="field"><label>Modelo Cargador</label><input id="f_MODELO_CARGADOR" placeholder="Modelo del cargador"></div>
+                <div class="field"><label>No. Serie Eliminador</label><input id="f_NO_SERIE_ELIMINADOR" placeholder="No. serie del eliminador"></div>
+                <div class="field"><label>Batería Laptop</label><input id="f_BATERIA_LAPTOP" placeholder="Ej. 3 celdas / 45 Wh"></div>
 
-function editar(row){
-    editandoID=row.ID;
-    Object.keys(row).forEach(key=>{ let el=document.getElementById(key); if(el) el.value=row[key]??""; });
-    window.scrollTo({top:0,behavior:"smooth"});
-}
-function eliminar(id){ if(!confirm("Eliminar este registro?")) return; fetch(`/DISPOSITIVOS_NF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
-function subirPDF(id,input){ let file=input.files[0]; if(!file) return; let fd=new FormData(); fd.append("file",file); fetch(`/DISPOSITIVOS_NF/PDF/${id}`,{method:"POST",body:fd}).then(()=>cargar()); }
-function verPDF(id){ window.open(`/DISPOSITIVOS_NF/PDF/${id}`,"_blank"); }
-function eliminarPDF(id){ if(!confirm("Eliminar el PDF?")) return; fetch(`/DISPOSITIVOS_NF/PDF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
-function filtrar(){ paginaActual=1; cargar(); }
-function exportarFiltrado(){ window.open(`/DISPOSITIVOS_NF/EXPORTAR?${obtenerParametros().toString()}`); }
-function exportarTodo(){ window.open(`/DISPOSITIVOS_NF/EXPORTAR_TODO`); }
-function exportarPorAnio(){ let a=document.getElementById("anioExportar").value; if(!a){alert("Ingresa un año");return;} window.open(`/DISPOSITIVOS_NF/EXPORTAR_ANIO?anio=${a}`); }
-function siguiente(){ if(paginaActual*limite<totalRegistros){ paginaActual++; cargar(); } }
-function anterior(){ if(paginaActual>1){ paginaActual--; cargar(); } }
+                <!-- RED -->
+                <div class="form-section-label">🌐 Red</div>
+                <div class="field"><label>WiFi MAC</label><input id="f_WIFI_MAC" placeholder="XX:XX:XX:XX:XX:XX"></div>
+                <div class="field"><label>ETH MAC</label><input id="f_ETH_MAC" placeholder="XX:XX:XX:XX:XX:XX"></div>
 
-cargar();
-</script>
+                <!-- ACCESORIOS Y UBICACIÓN -->
+                <div class="form-section-label">📦 Accesorios y Ubicación</div>
+                <div class="field field-full"><label>Accesorios</label><input id="f_ACCESORIOS" placeholder="Descripción de accesorios incluidos"></div>
+                <div class="field"><label>Ubicación</label><input id="f_UBICACION" placeholder="Área / piso / cubículo"></div>
+                <div class="field"><label>Edificio</label><input id="f_EDIFICIO" placeholder="Edificio o planta"></div>
+
+                <!-- ASIGNACIÓN -->
+                <div class="form-section-label">👤 Asignación</div>
+                <div class="field">
+                    <label>Disponible</label>
+                    <select id="f_DISPONIBLE">
+                        <option value="">— Selecciona —</option>
+                        <option value="true">SÍ</option>
+                        <option value="false">NO</option>
+                    </select>
+                </div>
+                <div class="field"><label>Fecha Salida</label><input id="f_FECHA_SALIDA" type="date"></div>
+                <div class="field"><label>Asignado A</label><input id="f_ASIGNADO_A" placeholder="Persona asignada"></div>
+                <div class="field"><label>Destino Planta</label><input id="f_DESTINO_PLANTA" placeholder="Planta destino"></div>
+                <div class="field"><label>Personal IT que Asigna</label><input id="f_PERSONAL_IT_QUE_ASIGNA" placeholder="Nombre del IT"></div>
+                <div class="field"><label>Formato de Baja</label><input id="f_FORMATO_DE_BAJA" placeholder="No. formato de baja"></div>
+            </div>
+            <button class="btn btn-success" onclick="guardar()">💾 Guardar</button>
+            <button class="btn btn-ghost" onclick="limpiarForm()" style="margin-left:8px;">✕ Limpiar</button>
+        </div>
+
+        <!-- ── Toolbar ── -->
+        <div class="toolbar">
+            <button class="btn btn-cyan btn-sm" onclick="exportarFiltrado()">📥 Exportar filtrado</button>
+            <button class="btn btn-cyan btn-sm" onclick="exportarTodo()">📦 Exportar todo</button>
+            <div class="toolbar-sep"></div>
+            <input class="anio-input" id="anioExportar" type="number" placeholder="Año" value="">
+            <button class="btn btn-cyan btn-sm" onclick="exportarPorAnio()">📅 Exportar por año</button>
+            <div class="toolbar-sep"></div>
+            <button class="btn btn-ghost btn-sm" onclick="cargar()">🔄 Recargar</button>
+        </div>
+
+        <!-- ── Tabla ── -->
+        <div class="table-wrap">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ID Único</th>
+                            <th>OC</th>
+                            <th>Folio</th>
+                            <th>Fecha Registro</th>
+                            <th>Recibido Por</th>
+                            <th>Subcategoría</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>No. Serie</th>
+                            <th>Cantidad</th>
+                            <th>Costo</th>
+                            <th>Proveedor</th>
+                            <th>Activo Fijo</th>
+                            <th>Procesador</th>
+                            <th>Arquitectura</th>
+                            <th>Almacenamiento</th>
+                            <th>Tipo Disco</th>
+                            <th>Sistema Op.</th>
+                            <th>Lic. SO</th>
+                            <th>RAM</th>
+                            <th>Vel. Mem.</th>
+                            <th>Tipo Mem.</th>
+                            <th>Slots Mem.</th>
+                            <th>Máx. Mem.</th>
+                            <th>Mod. Cargador</th>
+                            <th>No. Serie Elim.</th>
+                            <th>Batería</th>
+                            <th>WiFi MAC</th>
+                            <th>ETH MAC</th>
+                            <th>Accesorios</th>
+                            <th>Ubicación</th>
+                            <th>Edificio</th>
+                            <th>Fecha Salida</th>
+                            <th>Asignado A</th>
+                            <th>Destino Planta</th>
+                            <th>Disponible</th>
+                            <th>Personal IT</th>
+                            <th>Formato Baja</th>
+                            <th>Acciones</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ID_UNICO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_OC"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FOLIO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FECHA_REGISTRO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_RECIBIDO_POR"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_SUBCATEGORIA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MARCA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MODELO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_NUMERO_SERIE"></td>
+                            <td></td>
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PROVEEDOR"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ACTIVO_FIJO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PROCESADOR"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ARQUITECTURA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ALMACENAMIENTO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_TIPO_DISCO_DURO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_SISTEMA_OPERATIVO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_LICENCIA_SISTEMA_OPERATIVO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MEMORIA_RAM"></td>
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_TIPO_MEMORIA"></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_UBICACION"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_EDIFICIO"></td>
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ASIGNADO_A"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_DESTINO_PLANTA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_DISPONIBLE"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PERSONAL_IT_QUE_ASIGNA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FORMATO_DE_BAJA"></td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla">
+                        <tr><td colspan="41" style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── Paginación ── -->
+        <div class="pagination">
+            <button class="btn btn-ghost btn-sm" onclick="anterior()">◀ Anterior</button>
+            <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
+            <span class="page-info" id="paginaInfo">—</span>
+        </div>
+
+    </div><!-- /main -->
+    <!-- ══ MODAL EDITAR ═════════════════════════════════════════════════════ -->
+    <div class="modal" id="modalEditar">
+        <div class="modal-box form-box">
+            <div class="modal-header">
+                <h3>✏️ Editar Dispositivo NF &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="editarIdLabel">#</span></h3>
+                <button class="btn btn-ghost btn-sm" onclick="cerrarEditar()">✕</button>
+            </div>
+            <div class="form-grid-modal">
+
+                <!-- IDENTIFICACIÓN -->
+                <div class="modal-section-label">📋 Identificación</div>
+                <div class="form-field"><label>ID Único</label><input id="e_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
+                <div class="form-field"><label>OC</label><input id="e_OC" placeholder="Orden de compra"></div>
+                <div class="form-field"><label>Folio</label><input id="e_FOLIO" placeholder="Folio"></div>
+                <div class="form-field"><label>Fecha Registro</label><input id="e_FECHA_REGISTRO" type="date"></div>
+                <div class="form-field"><label>Recibido Por</label><input id="e_RECIBIDO_POR" placeholder="Nombre"></div>
+                <div class="form-field">
+                    <label>Subcategoría</label>
+                    <select id="e_SUBCATEGORIA">
+                        <option value="">— Selecciona —</option>
+                        <option>LAPTOP</option>
+                        <option>DESKTOP</option>
+                        <option>SERVIDOR</option>
+                        <option>TABLET</option>
+                        <option>ALL-IN-ONE</option>
+                        <option>MINI PC</option>
+                        <option>WORKSTATION</option>
+                        <option>OTRO</option>
+                    </select>
+                </div>
+
+                <!-- EQUIPO -->
+                <div class="modal-section-label">🖥️ Equipo</div>
+                <div class="form-field"><label>Marca</label><input id="e_MARCA" placeholder="Marca"></div>
+                <div class="form-field"><label>Modelo</label><input id="e_MODELO" placeholder="Modelo"></div>
+                <div class="form-field"><label>No. Serie</label><input id="e_NUMERO_SERIE" placeholder="Número de serie"></div>
+                <div class="form-field"><label>Cantidad</label><input id="e_CANTIDAD" type="number" min="0" placeholder="0"></div>
+                <div class="form-field"><label>Costo</label><input id="e_COSTO" type="number" step="0.01" min="0" placeholder="0.00"></div>
+                <div class="form-field">
+                    <label>Proveedor</label>
+                    <select id="e_PROVEEDOR">
+                        <option value="">— Selecciona —</option>
+                        <option>APC</option>
+                        <option>BRIGHT</option>
+                        <option>DELL</option>
+                        <option>HG COMUNICACIONES</option>
+                        <option>IPS</option>
+                        <option>PCTONER</option>
+                        <option>SLA</option>
+                        <option>HP</option>
+                        <option>LENOVO</option>
+                        <option>APPLE</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Activo Fijo</label><input id="e_ACTIVO_FIJO" placeholder="No. activo fijo"></div>
+
+                <!-- SPECS TÉCNICAS -->
+                <div class="modal-section-label">⚙️ Especificaciones Técnicas</div>
+                <div class="form-field"><label>Procesador</label><input id="e_PROCESADOR" placeholder="Ej. Intel Core i7-1165G7"></div>
+                <div class="form-field">
+                    <label>Arquitectura</label>
+                    <select id="e_ARQUITECTURA">
+                        <option value="">— Selecciona —</option>
+                        <option>x64</option>
+                        <option>x86</option>
+                        <option>ARM64</option>
+                        <option>ARM</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Almacenamiento</label><input id="e_ALMACENAMIENTO" placeholder="Ej. 512 GB"></div>
+                <div class="form-field">
+                    <label>Tipo Disco Duro</label>
+                    <select id="e_TIPO_DISCO_DURO">
+                        <option value="">— Selecciona —</option>
+                        <option>SSD</option>
+                        <option>HDD</option>
+                        <option>NVMe</option>
+                        <option>eMMC</option>
+                        <option>SSD + HDD</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Sistema Operativo</label>
+                    <select id="e_SISTEMA_OPERATIVO">
+                        <option value="">— Selecciona —</option>
+                        <option>Windows 10</option>
+                        <option>Windows 11</option>
+                        <option>Windows 7</option>
+                        <option>macOS</option>
+                        <option>Linux</option>
+                        <option>Ubuntu</option>
+                        <option>Chrome OS</option>
+                        <option>Sin SO</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Lic. Sistema Operativo</label>
+                    <select id="e_LICENCIA_SISTEMA_OPERATIVO">
+                        <option value="">— Selecciona —</option>
+                        <option>OEM</option>
+                        <option>RETAIL</option>
+                        <option>VOLUMEN</option>
+                        <option>SIN LICENCIA</option>
+                    </select>
+                </div>
+
+                <!-- MEMORIA -->
+                <div class="modal-section-label">🧠 Memoria RAM</div>
+                <div class="form-field"><label>Memoria RAM</label><input id="e_MEMORIA_RAM" placeholder="Ej. 16 GB"></div>
+                <div class="form-field"><label>Velocidad Memoria</label><input id="e_VELOCIDAD_MEMORIA" placeholder="Ej. 3200 MHz"></div>
+                <div class="form-field">
+                    <label>Tipo Memoria</label>
+                    <select id="e_TIPO_MEMORIA">
+                        <option value="">— Selecciona —</option>
+                        <option>DDR3</option>
+                        <option>DDR4</option>
+                        <option>DDR5</option>
+                        <option>LPDDR4</option>
+                        <option>LPDDR5</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Slot Memoria</label><input id="e_SLOT_MEMORIA" placeholder="Ej. 2 de 2 ocupados"></div>
+                <div class="form-field"><label>Máx. Memoria</label><input id="e_MAX_MEMORIA" placeholder="Ej. 32 GB"></div>
+
+                <!-- LAPTOP / CARGADOR -->
+                <div class="modal-section-label">🔋 Laptop / Cargador</div>
+                <div class="form-field"><label>Modelo Cargador</label><input id="e_MODELO_CARGADOR" placeholder="Modelo del cargador"></div>
+                <div class="form-field"><label>No. Serie Eliminador</label><input id="e_NO_SERIE_ELIMINADOR" placeholder="No. serie del eliminador"></div>
+                <div class="form-field"><label>Batería Laptop</label><input id="e_BATERIA_LAPTOP" placeholder="Ej. 3 celdas / 45 Wh"></div>
+
+                <!-- RED -->
+                <div class="modal-section-label">🌐 Red</div>
+                <div class="form-field"><label>WiFi MAC</label><input id="e_WIFI_MAC" placeholder="XX:XX:XX:XX:XX:XX"></div>
+                <div class="form-field"><label>ETH MAC</label><input id="e_ETH_MAC" placeholder="XX:XX:XX:XX:XX:XX"></div>
+
+                <!-- ACCESORIOS Y UBICACIÓN -->
+                <div class="modal-section-label">📦 Accesorios y Ubicación</div>
+                <div class="form-field full"><label>Accesorios</label><input id="e_ACCESORIOS" placeholder="Descripción de accesorios incluidos"></div>
+                <div class="form-field"><label>Ubicación</label><input id="e_UBICACION" placeholder="Área / piso / cubículo"></div>
+                <div class="form-field"><label>Edificio</label><input id="e_EDIFICIO" placeholder="Edificio o planta"></div>
+
+                <!-- ASIGNACIÓN -->
+                <div class="modal-section-label">👤 Asignación</div>
+                <div class="form-field">
+                    <label>Disponible</label>
+                    <select id="e_DISPONIBLE">
+                        <option value="">— Selecciona —</option>
+                        <option value="true">SÍ</option>
+                        <option value="false">NO</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Fecha Salida</label><input id="e_FECHA_SALIDA" type="date"></div>
+                <div class="form-field"><label>Asignado A</label><input id="e_ASIGNADO_A" placeholder="Persona asignada"></div>
+                <div class="form-field"><label>Destino Planta</label><input id="e_DESTINO_PLANTA" placeholder="Planta destino"></div>
+                <div class="form-field"><label>Personal IT que Asigna</label><input id="e_PERSONAL_IT_QUE_ASIGNA" placeholder="Nombre del IT"></div>
+                <div class="form-field"><label>Formato de Baja</label><input id="e_FORMATO_DE_BAJA" placeholder="No. formato de baja"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarCambios()">💾 Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ MODAL HISTORIAL ══════════════════════════════════════════════════ -->
+    <div class="modal" id="modalHistorial">
+        <div class="modal-box hist-box">
+            <div class="modal-header">
+                <h3>📋 Historial de cambios &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="histIdLabel">#</span></h3>
+                <button class="btn btn-ghost btn-sm" onclick="cerrarHistorial()">✕</button>
+            </div>
+            <div id="contenidoHistorial">
+                <p style="text-align:center;padding:40px;color:var(--muted)">Cargando...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══ ESTADO GLOBAL ═══
+        let paginaActual = 1;
+        let limite = 10;
+        let totalRegistros = 0;
+        let datosActuales = [];
+        let editandoID = null;
+        let usuarioActual = 'SISTEMA';
+        let rolActual = '';
+        let _filtrarTimer = null;
+
+        // ═══ CAMPOS DEL HISTORIAL (coinciden con COLS del servicio) ═══
+        const CAMPOS_HIST = [
+            { key: 'ID_UNICO', label: 'ID Único' },
+            { key: 'OC', label: 'OC' },
+            { key: 'FOLIO', label: 'Folio' },
+            { key: 'FECHA_REGISTRO', label: 'Fecha Registro' },
+            { key: 'RECIBIDO_POR', label: 'Recibido Por' },
+            { key: 'SUBCATEGORIA', label: 'Subcategoría' },
+            { key: 'MARCA', label: 'Marca' },
+            { key: 'MODELO', label: 'Modelo' },
+            { key: 'NUMERO_SERIE', label: 'No. Serie' },
+            { key: 'CANTIDAD', label: 'Cantidad' },
+            { key: 'COSTO', label: 'Costo' },
+            { key: 'PROVEEDOR', label: 'Proveedor' },
+            { key: 'ACTIVO_FIJO', label: 'Activo Fijo' },
+            { key: 'PROCESADOR', label: 'Procesador' },
+            { key: 'ARQUITECTURA', label: 'Arquitectura' },
+            { key: 'ALMACENAMIENTO', label: 'Almacenamiento' },
+            { key: 'TIPO_DISCO_DURO', label: 'Tipo Disco Duro' },
+            { key: 'SISTEMA_OPERATIVO', label: 'Sistema Operativo' },
+            { key: 'LICENCIA_SISTEMA_OPERATIVO', label: 'Lic. Sistema Operativo' },
+            { key: 'MEMORIA_RAM', label: 'Memoria RAM' },
+            { key: 'VELOCIDAD_MEMORIA', label: 'Velocidad Memoria' },
+            { key: 'TIPO_MEMORIA', label: 'Tipo Memoria' },
+            { key: 'SLOT_MEMORIA', label: 'Slot Memoria' },
+            { key: 'MAX_MEMORIA', label: 'Máx. Memoria' },
+            { key: 'MODELO_CARGADOR', label: 'Modelo Cargador' },
+            { key: 'NO_SERIE_ELIMINADOR', label: 'No. Serie Eliminador' },
+            { key: 'BATERIA_LAPTOP', label: 'Batería Laptop' },
+            { key: 'WIFI_MAC', label: 'WiFi MAC' },
+            { key: 'ETH_MAC', label: 'ETH MAC' },
+            { key: 'ACCESORIOS', label: 'Accesorios' },
+            { key: 'UBICACION', label: 'Ubicación' },
+            { key: 'EDIFICIO', label: 'Edificio' },
+            { key: 'FECHA_SALIDA', label: 'Fecha Salida' },
+            { key: 'ASIGNADO_A', label: 'Asignado A' },
+            { key: 'DESTINO_PLANTA', label: 'Destino Planta' },
+            { key: 'DISPONIBLE', label: 'Disponible' },
+            { key: 'PERSONAL_IT_QUE_ASIGNA', label: 'Personal IT que Asigna' },
+            { key: 'FORMATO_DE_BAJA', label: 'Formato de Baja' },
+        ];
+
+        // ═══ INACTIVIDAD 30 min ═══
+        let _inacTimer = null;
+        function resetInactividad() {
+            clearTimeout(_inacTimer);
+            _inacTimer = setTimeout(async () => {
+                try { await fetch('/LOGOUT', { method: 'POST', credentials: 'include' }); } catch (e) { }
+                window.location.href = '/static/login.html?inactivo=1';
+            }, 30 * 60 * 1000);
+        }
+        ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(ev =>
+            document.addEventListener(ev, resetInactividad, { passive: true })
+        );
+
+        // ═══ INIT ═══
+        window.addEventListener('DOMContentLoaded', () => {
+            resetInactividad();
+            fetch('/obtener-usuario', { credentials: 'include' })
+                .then(r => { if (!r.ok) { window.location.href = '/static/login.html'; return null; } return r.json(); })
+                .then(d => {
+                    if (!d) return;
+                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
+                    usuarioActual = d.usuario || 'SISTEMA';
+                    rolActual = (d.rol || '').trim().toUpperCase();
+                    document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownRol').textContent = rolActual;
+                })
+                .catch(() => { window.location.href = '/static/login.html'; });
+            cargar();
+        });
+
+        // ═══ CARGAR TABLA ═══
+        async function cargar() {
+            const qs = obtenerParametros();
+            try {
+                const r = await fetch(`/DISPOSITIVOS_NF?page=${paginaActual}&limit=${limite}&${qs}`);
+                const d = await r.json();
+                totalRegistros = d.total || 0;
+                datosActuales = d.data || [];
+                renderizar();
+            } catch (e) {
+                document.getElementById('tabla').innerHTML =
+                    `<tr><td colspan="41" style="text-align:center;padding:40px;color:var(--red)">❌ Error al cargar: ${e.message}</td></tr>`;
+            }
+        }
+
+        function obtenerParametros() {
+            const campos = [
+                'ID_UNICO', 'OC', 'FOLIO', 'FECHA_REGISTRO', 'RECIBIDO_POR',
+                'SUBCATEGORIA', 'MARCA', 'MODELO', 'NUMERO_SERIE', 'PROVEEDOR',
+                'ACTIVO_FIJO', 'PROCESADOR', 'ARQUITECTURA', 'ALMACENAMIENTO', 'TIPO_DISCO_DURO',
+                'SISTEMA_OPERATIVO', 'LICENCIA_SISTEMA_OPERATIVO', 'MEMORIA_RAM', 'TIPO_MEMORIA',
+                'UBICACION', 'EDIFICIO', 'DISPONIBLE', 'ASIGNADO_A', 'DESTINO_PLANTA',
+                'PERSONAL_IT_QUE_ASIGNA', 'FORMATO_DE_BAJA'
+            ];
+            const p = new URLSearchParams();
+            campos.forEach(c => {
+                const val = (document.getElementById('fil_' + c)?.value || '').trim();
+                if (val) p.set(c, val);
+            });
+            return p.toString();
+        }
+
+        function filtrar() {
+            clearTimeout(_filtrarTimer);
+            _filtrarTimer = setTimeout(() => { paginaActual = 1; cargar(); }, 350);
+        }
+
+        function renderizar() {
+            const tbody = document.getElementById('tabla');
+            tbody.innerHTML = '';
+
+            if (!datosActuales.length) {
+                tbody.innerHTML = '<tr><td colspan="41" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
+                return;
+            }
+
+            const esAdmin = rolActual === 'ADMIN';
+
+            datosActuales.forEach(row => {
+                const dispPill = disponiblePill(row.DISPONIBLE);
+                const dispLabel = row.DISPONIBLE === true ? 'SÍ' : row.DISPONIBLE === false ? 'NO' : '—';
+                const fechaReg = row.FECHA_REGISTRO ? row.FECHA_REGISTRO.split('T')[0] : '—';
+                const fechaSal = row.FECHA_SALIDA ? row.FECHA_SALIDA.split('T')[0] : '—';
+                const costoStr = row.COSTO != null
+                    ? `$${parseFloat(row.COSTO).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
+                    : '—';
+
+                tbody.innerHTML += `
+                        <tr>
+                            <td>${row.ID}</td>
+                            <td class="mono">${esc(row.ID_UNICO) || '—'}</td>
+                            <td class="mono">${esc(row.OC) || '—'}</td>
+                            <td class="mono">${esc(row.FOLIO) || '—'}</td>
+                            <td class="mono">${fechaReg}</td>
+                            <td>${esc(row.RECIBIDO_POR) || '—'}</td>
+                            <td>${esc(row.SUBCATEGORIA) || '—'}</td>
+                            <td>${esc(row.MARCA) || '—'}</td>
+                            <td>${esc(row.MODELO) || '—'}</td>
+                            <td class="mono">${esc(row.NUMERO_SERIE) || '—'}</td>
+                            <td class="mono" style="text-align:center">${row.CANTIDAD ?? '—'}</td>
+                            <td class="mono">${costoStr}</td>
+                            <td>${esc(row.PROVEEDOR) || '—'}</td>
+                            <td class="mono">${esc(row.ACTIVO_FIJO) || '—'}</td>
+                            <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.PROCESADOR) || ''}">${esc(row.PROCESADOR) || '—'}</td>
+                            <td>${esc(row.ARQUITECTURA) || '—'}</td>
+                            <td class="mono">${esc(row.ALMACENAMIENTO) || '—'}</td>
+                            <td>${esc(row.TIPO_DISCO_DURO) || '—'}</td>
+                            <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.SISTEMA_OPERATIVO) || ''}">${esc(row.SISTEMA_OPERATIVO) || '—'}</td>
+                            <td>${esc(row.LICENCIA_SISTEMA_OPERATIVO) || '—'}</td>
+                            <td class="mono">${esc(row.MEMORIA_RAM) || '—'}</td>
+                            <td class="mono">${esc(row.VELOCIDAD_MEMORIA) || '—'}</td>
+                            <td>${esc(row.TIPO_MEMORIA) || '—'}</td>
+                            <td class="mono">${esc(row.SLOT_MEMORIA) || '—'}</td>
+                            <td class="mono">${esc(row.MAX_MEMORIA) || '—'}</td>
+                            <td>${esc(row.MODELO_CARGADOR) || '—'}</td>
+                            <td class="mono">${esc(row.NO_SERIE_ELIMINADOR) || '—'}</td>
+                            <td>${esc(row.BATERIA_LAPTOP) || '—'}</td>
+                            <td class="mono">${esc(row.WIFI_MAC) || '—'}</td>
+                            <td class="mono">${esc(row.ETH_MAC) || '—'}</td>
+                            <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.ACCESORIOS) || ''}">${esc(row.ACCESORIOS) || '—'}</td>
+                            <td>${esc(row.UBICACION) || '—'}</td>
+                            <td>${esc(row.EDIFICIO) || '—'}</td>
+                            <td class="mono">${fechaSal}</td>
+                            <td>${esc(row.ASIGNADO_A) || '—'}</td>
+                            <td>${esc(row.DESTINO_PLANTA) || '—'}</td>
+                            <td><span class="disponible-pill ${dispPill}">${dispLabel}</span></td>
+                            <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.PERSONAL_IT_QUE_ASIGNA) || ''}">${esc(row.PERSONAL_IT_QUE_ASIGNA) || '—'}</td>
+                            <td class="mono">${esc(row.FORMATO_DE_BAJA) || '—'}</td>
+                            <td style="white-space:nowrap">
+                                ${esAdmin ? `
+                                <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
+                                ` : ''}
+                                <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
+                            </td>
+                        </tr>`;
+            });
+
+            document.getElementById('paginaInfo').textContent =
+                `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite) || 1} | Total: ${totalRegistros}`;
+        }
+
+        function disponiblePill(val) {
+            if (val === true || val === 'true') return 'pill-si';
+            if (val === false || val === 'false') return 'pill-no';
+            return 'pill-otro';
+        }
+
+        function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
+        function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
+
+        // ═══ GUARDAR NUEVO ═══
+        async function guardar() {
+            const dto = buildDto('f_');
+            // ID_UNICO auto generado desde OC + FOLIO
+            const oc = (dto.OC || '').trim();
+            const folio = (dto.FOLIO || '').trim();
+            dto.ID_UNICO = [oc, folio].filter(Boolean).join('') || null;
+
+            try {
+                const r = await fetch('/DISPOSITIVO_NF', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(dto)
+                });
+                const d = await r.json();
+                if (d.error) { alert('Error: ' + d.error); return; }
+                limpiarForm();
+                cargar();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        function limpiarForm() {
+            const ids = [
+                'f_ID_UNICO', 'f_OC', 'f_FOLIO', 'f_FECHA_REGISTRO', 'f_RECIBIDO_POR',
+                'f_SUBCATEGORIA', 'f_MARCA', 'f_MODELO', 'f_NUMERO_SERIE', 'f_CANTIDAD',
+                'f_COSTO', 'f_PROVEEDOR', 'f_ACTIVO_FIJO', 'f_PROCESADOR', 'f_ARQUITECTURA',
+                'f_ALMACENAMIENTO', 'f_TIPO_DISCO_DURO', 'f_SISTEMA_OPERATIVO', 'f_LICENCIA_SISTEMA_OPERATIVO',
+                'f_MEMORIA_RAM', 'f_VELOCIDAD_MEMORIA', 'f_TIPO_MEMORIA', 'f_SLOT_MEMORIA', 'f_MAX_MEMORIA',
+                'f_MODELO_CARGADOR', 'f_NO_SERIE_ELIMINADOR', 'f_BATERIA_LAPTOP', 'f_WIFI_MAC', 'f_ETH_MAC',
+                'f_ACCESORIOS', 'f_UBICACION', 'f_EDIFICIO', 'f_FECHA_SALIDA', 'f_ASIGNADO_A',
+                'f_DESTINO_PLANTA', 'f_DISPONIBLE', 'f_PERSONAL_IT_QUE_ASIGNA', 'f_FORMATO_DE_BAJA'
+            ];
+            ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        }
+
+        // ═══ ELIMINAR ═══
+        async function eliminar(id) {
+            if (!confirm('¿Eliminar este dispositivo NF?')) return;
+            try {
+                await fetch(`/DISPOSITIVO_NF/${id}`, { method: 'DELETE' });
+                cargar();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // ═══ EXPORTAR ═══
+        function exportarFiltrado() { window.open('/DISPOSITIVOS_NF/EXPORTAR?' + obtenerParametros()); }
+        function exportarTodo() { window.open('/DISPOSITIVOS_NF/EXPORTAR_TODO'); }
+        function exportarPorAnio() {
+            const a = document.getElementById('anioExportar').value;
+            if (!a) { alert('Ingresa un año'); return; }
+            window.open('/DISPOSITIVOS_NF/EXPORTAR_ANIO?anio=' + a);
+        }
+
+        // ═══ MODAL EDITAR ═══
+        function abrirEditar(id) {
+            editandoID = id;
+            document.getElementById('editarIdLabel').textContent = '#' + id;
+            const row = datosActuales.find(r => r.ID === id);
+            if (row) {
+                setV('e_ID_UNICO', row.ID_UNICO);
+                setV('e_OC', row.OC);
+                setV('e_FOLIO', row.FOLIO);
+                setV('e_FECHA_REGISTRO', row.FECHA_REGISTRO ? row.FECHA_REGISTRO.split('T')[0] : '');
+                setV('e_RECIBIDO_POR', row.RECIBIDO_POR);
+                setV('e_SUBCATEGORIA', row.SUBCATEGORIA);
+                setV('e_MARCA', row.MARCA);
+                setV('e_MODELO', row.MODELO);
+                setV('e_NUMERO_SERIE', row.NUMERO_SERIE);
+                setV('e_CANTIDAD', row.CANTIDAD);
+                setV('e_COSTO', row.COSTO);
+                setV('e_PROVEEDOR', row.PROVEEDOR);
+                setV('e_ACTIVO_FIJO', row.ACTIVO_FIJO);
+                setV('e_PROCESADOR', row.PROCESADOR);
+                setV('e_ARQUITECTURA', row.ARQUITECTURA);
+                setV('e_ALMACENAMIENTO', row.ALMACENAMIENTO);
+                setV('e_TIPO_DISCO_DURO', row.TIPO_DISCO_DURO);
+                setV('e_SISTEMA_OPERATIVO', row.SISTEMA_OPERATIVO);
+                setV('e_LICENCIA_SISTEMA_OPERATIVO', row.LICENCIA_SISTEMA_OPERATIVO);
+                setV('e_MEMORIA_RAM', row.MEMORIA_RAM);
+                setV('e_VELOCIDAD_MEMORIA', row.VELOCIDAD_MEMORIA);
+                setV('e_TIPO_MEMORIA', row.TIPO_MEMORIA);
+                setV('e_SLOT_MEMORIA', row.SLOT_MEMORIA);
+                setV('e_MAX_MEMORIA', row.MAX_MEMORIA);
+                setV('e_MODELO_CARGADOR', row.MODELO_CARGADOR);
+                setV('e_NO_SERIE_ELIMINADOR', row.NO_SERIE_ELIMINADOR);
+                setV('e_BATERIA_LAPTOP', row.BATERIA_LAPTOP);
+                setV('e_WIFI_MAC', row.WIFI_MAC);
+                setV('e_ETH_MAC', row.ETH_MAC);
+                setV('e_ACCESORIOS', row.ACCESORIOS);
+                setV('e_UBICACION', row.UBICACION);
+                setV('e_EDIFICIO', row.EDIFICIO);
+                setV('e_FECHA_SALIDA', row.FECHA_SALIDA ? row.FECHA_SALIDA.split('T')[0] : '');
+                setV('e_ASIGNADO_A', row.ASIGNADO_A);
+                setV('e_DESTINO_PLANTA', row.DESTINO_PLANTA);
+                setV('e_DISPONIBLE', row.DISPONIBLE === true ? 'true' : row.DISPONIBLE === false ? 'false' : '');
+                setV('e_PERSONAL_IT_QUE_ASIGNA', row.PERSONAL_IT_QUE_ASIGNA);
+                setV('e_FORMATO_DE_BAJA', row.FORMATO_DE_BAJA);
+            }
+            document.getElementById('modalEditar').classList.add('show');
+            document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+        }
+
+        function cerrarEditar() {
+            document.getElementById('modalEditar').classList.remove('show');
+            editandoID = null;
+        }
+
+        async function guardarCambios() {
+            const dto = buildDto('e_');
+            const oc = (dto.OC || '').trim();
+            const folio = (dto.FOLIO || '').trim();
+            dto.ID_UNICO = [oc, folio].filter(Boolean).join('+') || null;
+
+            try {
+                const r = await fetch(`/DISPOSITIVO_NF/${editandoID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(dto)
+                });
+                const result = await r.json();
+                if (r.ok && !result.error) { cerrarEditar(); cargar(); }
+                else alert('Error: ' + (result.error || 'No se pudo guardar'));
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // Helper: construye el DTO desde los inputs con prefijo dado
+        function buildDto(pfx) {
+            return {
+                OC: v(pfx + 'OC'),
+                FOLIO: v(pfx + 'FOLIO'),
+                FECHA_REGISTRO: v(pfx + 'FECHA_REGISTRO'),
+                RECIBIDO_POR: v(pfx + 'RECIBIDO_POR'),
+                SUBCATEGORIA: v(pfx + 'SUBCATEGORIA'),
+                MARCA: v(pfx + 'MARCA'),
+                MODELO: v(pfx + 'MODELO'),
+                NUMERO_SERIE: v(pfx + 'NUMERO_SERIE'),
+                CANTIDAD: vInt(pfx + 'CANTIDAD'),
+                COSTO: vDec(pfx + 'COSTO'),
+                PROVEEDOR: v(pfx + 'PROVEEDOR'),
+                ACTIVO_FIJO: v(pfx + 'ACTIVO_FIJO'),
+                PROCESADOR: v(pfx + 'PROCESADOR'),
+                ARQUITECTURA: v(pfx + 'ARQUITECTURA'),
+                ALMACENAMIENTO: v(pfx + 'ALMACENAMIENTO'),
+                TIPO_DISCO_DURO: v(pfx + 'TIPO_DISCO_DURO'),
+                SISTEMA_OPERATIVO: v(pfx + 'SISTEMA_OPERATIVO'),
+                LICENCIA_SISTEMA_OPERATIVO: v(pfx + 'LICENCIA_SISTEMA_OPERATIVO'),
+                MEMORIA_RAM: v(pfx + 'MEMORIA_RAM'),
+                VELOCIDAD_MEMORIA: v(pfx + 'VELOCIDAD_MEMORIA'),
+                TIPO_MEMORIA: v(pfx + 'TIPO_MEMORIA'),
+                SLOT_MEMORIA: v(pfx + 'SLOT_MEMORIA'),
+                MAX_MEMORIA: v(pfx + 'MAX_MEMORIA'),
+                MODELO_CARGADOR: v(pfx + 'MODELO_CARGADOR'),
+                NO_SERIE_ELIMINADOR: v(pfx + 'NO_SERIE_ELIMINADOR'),
+                BATERIA_LAPTOP: v(pfx + 'BATERIA_LAPTOP'),
+                WIFI_MAC: v(pfx + 'WIFI_MAC'),
+                ETH_MAC: v(pfx + 'ETH_MAC'),
+                ACCESORIOS: v(pfx + 'ACCESORIOS'),
+                UBICACION: v(pfx + 'UBICACION'),
+                EDIFICIO: v(pfx + 'EDIFICIO'),
+                FECHA_SALIDA: v(pfx + 'FECHA_SALIDA'),
+                ASIGNADO_A: v(pfx + 'ASIGNADO_A'),
+                DESTINO_PLANTA: v(pfx + 'DESTINO_PLANTA'),
+                DISPONIBLE: vBool(pfx + 'DISPONIBLE'),
+                PERSONAL_IT_QUE_ASIGNA: v(pfx + 'PERSONAL_IT_QUE_ASIGNA'),
+                FORMATO_DE_BAJA: v(pfx + 'FORMATO_DE_BAJA'),
+            };
+        }
+
+        // ═══ MODAL HISTORIAL ═══
+        function esc(val) {
+            if (val == null) return '';
+            return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function norm(v) { return (v == null) ? '' : String(v).trim(); }
+        function formatFecha(f) {
+            try {
+                const d = new Date(f);
+                if (!isNaN(d)) return d.toLocaleString('es-MX', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+            } catch (e) { }
+            return f ?? '';
+        }
+
+        function renderEvento(ev) {
+            let antes = ev.REGISTRO_ANTERIOR || ev.registro_anterior;
+            let despues = ev.REGISTRO_NUEVO || ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (e) { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (e) { }
+
+            const cambiados = new Set();
+            CAMPOS_HIST.forEach(({ key }) => {
+                if (norm(antes?.[key]) !== norm(despues?.[key])) cambiados.add(key);
+            });
+
+            let filas = '';
+            CAMPOS_HIST.forEach(({ key, label }) => {
+                const va = esc(antes?.[key] ?? '');
+                const vd = esc(despues?.[key] ?? '');
+                const chg = cambiados.has(key);
+                filas += `
+                        <tr class="${chg ? 'row-changed' : ''}">
+                            <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                            <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                            <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                        </tr>`;
+            });
+
+            const n = cambiados.size;
+            return `
+                    <div class="ev-wrap">
+                        <div class="ev-header">
+                            <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
+                            <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
+                            <span class="n-cambios-badge"
+                                style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                                       color:${n > 0 ? '#FCD34D' : '#94A3B8'};
+                                       border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                        <table class="ev-table">
+                            <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                            <tbody>${filas}</tbody>
+                        </table>
+                    </div>`;
+        }
+
+        function verHistorial(id) {
+            document.getElementById('histIdLabel').textContent = '#' + id;
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando...</p>';
+            document.getElementById('modalHistorial').classList.add('show');
+            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+
+            fetch(`/DISPOSITIVOS_NF/${id}/HISTORIAL`)
+                .then(r => r.json())
+                .then(data => {
+                    const lista = (data.historial || [])
+                        .sort((a, b) => new Date(b.FECHA || b.fecha || 0) - new Date(a.FECHA || a.fecha || 0));
+                    if (!lista.length) {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            '<p class="sin-hist">📭 Sin ediciones registradas</p>';
+                    } else {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
+                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                 </p>` + lista.map(ev => renderEvento(ev)).join('');
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        '<p style="color:var(--red);text-align:center;padding:30px">❌ Error al cargar historial</p>';
+                });
+        }
+
+        function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
+
+        // ═══ UI ═══
+        function toggleDropdown() { document.getElementById('userChipMain').classList.toggle('open'); }
+        document.addEventListener('click', e => {
+            const chip = document.getElementById('userChipMain');
+            if (chip && !chip.contains(e.target)) chip.classList.remove('open');
+        });
+        function cerrarSesion() {
+            fetch('/LOGOUT', { method: 'POST', credentials: 'include' })
+                .finally(() => { window.location.href = '/static/login.html'; });
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
+        });
+
+        // ═══ HELPERS ═══
+        function v(id) { const el = document.getElementById(id); return el ? (el.value.trim() || null) : null; }
+        function vInt(id) { const x = v(id); return x != null ? parseInt(x) || null : null; }
+        function vDec(id) { const x = v(id); return x != null ? parseFloat(x) || null : null; }
+        function vBool(id) { const x = v(id); if (x === 'true') return true; if (x === 'false') return false; return null; }
+        function setV(id, val) { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
+    </script>
 </body>
 </html>
