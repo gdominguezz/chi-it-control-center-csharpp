@@ -1287,7 +1287,7 @@
             // ID_UNICO auto generado desde OC + FOLIO
             const oc = (dto.OC || '').trim();
             const folio = (dto.FOLIO || '').trim();
-            dto.ID_UNICO = [oc, folio].filter(Boolean).join('+') || null;
+            dto.ID_UNICO = [oc, folio].filter(Boolean).join('') || null;
 
             try {
                 const r = await fetch('/ACCESORIO_NF', {
