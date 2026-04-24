@@ -8,6 +8,7 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Servicios ──
+///////////////////////////////////////////////modulos principales//////////////////
 builder.Services.AddControllers()
     .AddJsonOptions(o =>
         o.JsonSerializerOptions.PropertyNamingPolicy = null); // mantiene mayúsculas tal cual
@@ -29,7 +30,7 @@ builder.Services.AddScoped<AccesoriosNFService>();             // ACCESORIOS NF
 builder.Services.AddScoped<HerramientasNFService>();          // HERRAMIENTAS NF
 builder.Services.AddScoped<DispositivosNFService>();         // DISPOSITIVOS NF
 builder.Services.AddScoped<InventariosNFService>();         // INVENTARIOS NF
-
+builder.Services.AddScoped<PerifeicosNFService>();         // PERIFÉRICOS NF
 
 // CORS
 builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
