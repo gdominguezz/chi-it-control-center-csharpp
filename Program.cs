@@ -27,7 +27,8 @@ builder.Services.AddScoped<RefaccionesNFService>();              // REFACCIONES 
 builder.Services.AddScoped<BuscarGlobalService>();              // BUSCADOR GLOBAL DE PRESUPUESTOS
 builder.Services.AddScoped<AccesoriosNFService>();             // ACCESORIOS NF
 builder.Services.AddScoped<HerramientasNFService>();          // HERRAMIENTAS NF
-builder.Services.AddScoped<DispositivosNFService>(); // DISPOSITIVOS NF
+builder.Services.AddScoped<DispositivosNFService>();         // DISPOSITIVOS NF
+builder.Services.AddScoped<InventariosNFService>();         // INVENTARIOS NF
 
 
 // CORS
