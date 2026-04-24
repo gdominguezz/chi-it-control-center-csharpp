@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Bitácora Firecom</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #080C10;
+            --surface:   #0D1117;
+            --surface2:  #161C26;
+            --surface3:  #1C2333;
+            --border:    rgba(255,255,255,0.06);
+            --border2:   rgba(255,255,255,0.11);
+            --accent:    #FF6B2B;
+            --accent2:   #FF9A4A;
+            --text:      #E8EDF5;
+            --muted:     #5A6882;
+            --muted2:    #8A9AB8;
+            --green:     #22C55E;
+            --red:       #EF4444;
+            --amber:     #F59E0B;
+            --blue:      #3B82F6;
+            --cyan:      #06B6D4;
+            --line-h:    56px;
+            --grid-color: rgba(255,107,43,0.04);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent calc(var(--line-h) - 1px), var(--grid-color) var(--line-h)),
+                repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,107,43,0.02) 80px);
+        }
+
+        /* ══════════════════════════════════════
+           TOP BAR
+        ══════════════════════════════════════ */
+        .topbar {
+            background: rgba(8,12,16,0.95);
+            border-bottom: 2px solid var(--accent);
+            padding: 0 24px;
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            height: 58px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 40px rgba(255,107,43,0.12);
+        }
+
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-right: 24px;
+            border-right: 1px solid rgba(255,107,43,0.2);
+            flex-shrink: 0;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #7f1d04, var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 16px rgba(255,107,43,0.5);
+            flex-shrink: 0;
+        }
+
+        .brand-text h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .brand-text p {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            color: var(--accent);
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        .topbar-stats {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding-left: 20px;
+            flex: 1;
+        }
+
+        .stat-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 18px;
+            height: 100%;
+            border-right: 1px solid var(--border2);
+        }
+
+        .stat-chip .stat-val {
+            font-family: 'Oswald', sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--accent);
+            line-height: 1;
+            min-width: 40px;
+        }
+
+        .stat-chip .stat-label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            line-height: 1.3;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        /* ── user chip ── */
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: all .2s;
+        }
+
+        .user-chip:hover { background: rgba(255,107,43,.1); border-color: var(--accent); }
+        .user-chip .chip-arrow { font-size: 9px; color: var(--muted); transition: transform .2s; }
+        .user-chip.open .chip-arrow { transform: rotate(180deg); }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.6);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
+
+        @keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+
+        .user-chip.open .user-dropdown { display: block; }
+
+        .dropdown-header { padding: 10px 12px 8px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+        .dropdown-header .d-name { font-size: 13px; font-weight: 700; }
+        .dropdown-header .d-role { font-size: 10px; color: var(--muted); font-family: 'Space Mono',monospace; text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
+
+        .dropdown-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; border-radius: 8px; font-size: 12px; font-weight: 500;
+            cursor: pointer; color: var(--muted2); transition: all .15s;
+            border: none; background: none; width: 100%; text-align: left; font-family: 'Space Grotesk',sans-serif;
+        }
+        .dropdown-item:hover { background: rgba(255,255,255,.06); color: var(--text); }
+        .dropdown-item.danger { color: #FCA5A5; }
+        .dropdown-item.danger:hover { background: rgba(239,68,68,.1); color: #fff; }
+
+        /* ══════════════════════════════════════
+           MAIN LAYOUT
+        ══════════════════════════════════════ */
+        .main { max-width: 1700px; margin: 0 auto; padding: 20px 24px; }
+
+        /* ══════════════════════════════════════
+           LOGBOOK HEADER SECTION
+        ══════════════════════════════════════ */
+        .logbook-header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 16px;
+            align-items: start;
+            margin-bottom: 18px;
+        }
+
+        .logbook-title-block {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logbook-divider {
+            width: 4px;
+            height: 48px;
+            background: linear-gradient(180deg, var(--accent), transparent);
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .logbook-title-block h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .logbook-title-block .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .logbook-timestamp {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+            text-align: right;
+            padding-top: 4px;
+        }
+
+        .logbook-timestamp .ts-date { color: var(--accent); font-weight: 700; font-size: 13px; }
+
+        /* ══════════════════════════════════════
+           PANEL NUEVO REGISTRO — LOGBOOK STYLE
+        ══════════════════════════════════════ */
+        .logbook-panel {
+            background: var(--surface);
+            border: 1px solid rgba(255,107,43,0.2);
+            border-top: 3px solid var(--accent);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .logbook-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: rgba(255,107,43,0.06);
+            border-bottom: 1px solid rgba(255,107,43,0.12);
+            cursor: pointer;
+            user-select: none;
+            transition: background .2s;
+        }
+
+        .logbook-panel-header:hover { background: rgba(255,107,43,0.1); }
+
+        .logbook-panel-header .ph-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .entry-num {
+            font-family: 'Oswald', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: rgba(255,107,43,0.25);
+            line-height: 1;
+            padding-right: 12px;
+            border-right: 1px solid rgba(255,107,43,0.2);
+        }
+
+        .ph-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .ph-sub {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            color: var(--muted);
+            letter-spacing: .1em;
+            margin-top: 2px;
+        }
+
+        .toggle-arrow {
+            font-size: 12px;
+            color: var(--muted);
+            transition: transform .25s;
+        }
+
+        .logbook-panel-body {
+            padding: 20px;
+            display: none;
+        }
+
+        .logbook-panel-body.open { display: block; }
+
+        /* ── section labels ── */
+        .form-section {
+            margin-bottom: 18px;
+        }
+
+        .section-label {
+            font-family: 'Oswald', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255,107,43,0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-label::before {
+            content: '';
+            width: 8px;
+            height: 2px;
+            background: var(--accent);
+            display: inline-block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 11px;
+        }
+
+        .form-grid.cols-2 { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+        .form-grid.cols-full { grid-template-columns: 1fr; }
+        .form-grid.cols-3 { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+
+        .field label {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .field input, .field select, .field textarea {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            padding: 8px 11px;
+            font-size: 12px;
+            font-family: 'Space Mono', monospace;
+            color: var(--text);
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field textarea {
+            resize: vertical;
+            min-height: 72px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px;
+        }
+
+        .field select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235A6882' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 28px;
+        }
+
+        .field select option { background: var(--surface2); color: var(--text); }
+        .field input:focus, .field select:focus, .field textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255,107,43,0.12);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ══════════════════════════════════════
+           BUTTONS
+        ══════════════════════════════════════ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border: none;
+            border-radius: 7px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+            letter-spacing: .02em;
+        }
+
+        .btn-primary  { background: var(--accent); color: white; box-shadow: 0 3px 12px rgba(255,107,43,.35); }
+        .btn-primary:hover  { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,107,43,.45); }
+        .btn-success  { background: var(--green); color: white; box-shadow: 0 3px 10px rgba(34,197,94,.25); }
+        .btn-success:hover  { background: #16A34A; transform: translateY(-1px); }
+        .btn-danger   { background: var(--red); color: white; box-shadow: 0 3px 10px rgba(239,68,68,.25); }
+        .btn-danger:hover   { background: #DC2626; transform: translateY(-1px); }
+        .btn-amber    { background: var(--amber); color: #1a0c00; }
+        .btn-amber:hover    { background: #D97706; }
+        .btn-blue     { background: var(--blue); color: white; }
+        .btn-blue:hover     { background: #2563EB; transform: translateY(-1px); }
+        .btn-ghost    { background: var(--surface2); color: var(--muted2); border: 1px solid var(--border2); }
+        .btn-ghost:hover    { color: var(--text); border-color: var(--accent); }
+        .btn-sm { padding: 7px 13px; font-size: 11px; }
+        .btn-xs { padding: 5px 10px; font-size: 10px; }
+
+        /* ══════════════════════════════════════
+           TOOLBAR
+        ══════════════════════════════════════ */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 12px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 14px;
+        }
+
+        .toolbar-sep { width: 1px; height: 24px; background: var(--border2); margin: 0 3px; }
+
+        .anio-input {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            padding: 7px 10px;
+            font-size: 12px;
+            font-family: 'Space Mono', monospace;
+            color: var(--text);
+            width: 100px;
+        }
+        .anio-input:focus { outline: none; border-color: var(--accent); }
+
+        /* ══════════════════════════════════════
+           TABLE — LOGBOOK STYLE
+        ══════════════════════════════════════ */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+
+        .table-cap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            background: var(--surface3);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table-cap-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .table-cap-left span {
+            font-family: 'Oswald', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--muted2);
+        }
+
+        .record-count {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            background: rgba(255,107,43,0.1);
+            border: 1px solid rgba(255,107,43,0.2);
+            padding: 2px 10px;
+            border-radius: 999px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: calc(100vh - 400px);
+            min-height: 380px;
+            overflow-y: auto;
+        }
+
+        .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .table-scroll::-webkit-scrollbar-track { background: var(--surface2); }
+        .table-scroll::-webkit-scrollbar-thumb { background: #2a3547; border-radius: 999px; }
+        .table-scroll::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        table { width: 100%; border-collapse: collapse; min-width: 2000px; }
+
+        thead th {
+            background: var(--surface3);
+            padding: 9px 12px;
+            text-align: left;
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 2px solid rgba(255,107,43,0.2);
+        }
+
+        thead th:last-child {
+            position: sticky;
+            right: 0;
+            z-index: 11;
+            background: var(--surface3);
+        }
+
+        tbody td:last-child {
+            position: sticky;
+            right: 0;
+            background: var(--surface);
+            z-index: 1;
+        }
+
+        tbody tr:hover td:last-child { filter: brightness(1.2); }
+
+        .filter-row td { padding: 5px 6px; background: var(--surface2); }
+        .filter-row td input {
+            width: 100%;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 4px 7px;
+            font-size: 10px;
+            color: var(--text);
+            font-family: 'Space Mono', monospace;
+        }
+        .filter-row td input:focus { outline: none; border-color: var(--accent); }
+
+        /* row number column */
+        .row-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: rgba(255,107,43,0.35);
+            font-weight: 700;
+            letter-spacing: .05em;
+            padding-right: 4px !important;
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .12s;
+        }
+
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover td { background: rgba(255,107,43,0.03); }
+        tbody tr:hover .row-num { color: var(--accent); }
+
+        td {
+            padding: 9px 12px;
+            font-size: 12px;
+            color: var(--text);
+            vertical-align: middle;
+            line-height: 1.4;
+        }
+
+        td.mono { font-family: 'Space Mono', monospace; font-size: 11px; }
+        td.muted { color: var(--muted2); }
+
+        /* pills */
+        .pill {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 999px;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            white-space: nowrap;
+        }
+
+        .pill-si    { background: rgba(34,197,94,.15);  color: #86efac; border: 1px solid rgba(34,197,94,.3); }
+        .pill-no    { background: rgba(239,68,68,.12);  color: #fca5a5; border: 1px solid rgba(239,68,68,.25); }
+        .pill-null  { background: rgba(90,104,130,.12); color: #8A9AB8; border: 1px solid rgba(90,104,130,.2); }
+        .pill-pagado { background: rgba(34,197,94,.15); color: #86efac; border: 1px solid rgba(34,197,94,.3); }
+        .pill-pendiente { background: rgba(245,158,11,.15); color: #fcd34d; border: 1px solid rgba(245,158,11,.3); }
+
+        /* ── acciones ── */
+        .actions-cell { display: flex; gap: 5px; align-items: center; padding: 8px 12px !important; }
+
+        /* ══════════════════════════════════════
+           PAGINATION
+        ══════════════════════════════════════ */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 12px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 14px;
+        }
+
+        .page-info { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted2); margin-left: auto; }
+
+        /* ══════════════════════════════════════
+           MODALES
+        ══════════════════════════════════════ */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.75);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal.show { display: flex; }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-top: 3px solid var(--accent);
+            border-radius: 14px;
+            padding: 24px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,.7), 0 0 60px rgba(255,107,43,.08);
+            position: relative;
+            animation: modalIn .2s ease;
+            width: min(680px, 95vw);
+        }
+
+        .modal-box.hist-box { width: min(940px, 96vw); }
+
+        @keyframes modalIn { from { opacity:0; transform:scale(.96); } to { opacity:1; transform:scale(1); } }
+
+        .modal-box::-webkit-scrollbar { width: 6px; }
+        .modal-box::-webkit-scrollbar-track { background: var(--surface2); }
+        .modal-box::-webkit-scrollbar-thumb { background: #2a3547; border-radius: 999px; }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+        .modal-header-left { display: flex; align-items: center; gap: 12px; }
+
+        .modal-header-left .mh-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: rgba(255,107,43,0.15);
+            border: 1px solid rgba(255,107,43,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .modal-header h3 { font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+        .modal-header .mh-id { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent); margin-top: 2px; }
+
+        .close-btn {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            border: 1px solid var(--border2);
+            background: var(--surface2);
+            color: var(--muted2);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .15s;
+            flex-shrink: 0;
+        }
+        .close-btn:hover { background: rgba(239,68,68,.15); border-color: var(--red); color: #fca5a5; }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 20px;
+        }
+
+        /* ── modal form grid ── */
+        .form-grid-modal {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 11px;
+        }
+
+        @media(max-width: 520px) { .form-grid-modal { grid-template-columns: 1fr; } }
+        .form-grid-modal.full { grid-template-columns: 1fr; }
+
+        .form-field { margin-bottom: 0; }
+
+        .form-field label {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-field input, .form-field select, .form-field textarea {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            padding: 8px 11px;
+            font-size: 12px;
+            font-family: 'Space Mono', monospace;
+            color: var(--text);
+            transition: border-color .2s;
+        }
+
+        .form-field textarea { resize: vertical; min-height: 60px; font-family: 'Space Grotesk', sans-serif; font-size: 12px; }
+        .form-field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235A6882' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+        .form-field select option { background: var(--surface2); color: var(--text); }
+        .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,107,43,.1); }
+
+        .modal-section-label {
+            grid-column: 1 / -1;
+            font-family: 'Oswald', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            padding-top: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255,107,43,0.12);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .span-full { grid-column: 1 / -1; }
+
+        /* ══════════════════════════════════════
+           HISTORIAL
+        ══════════════════════════════════════ */
+        .ev-wrap {
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        .ev-header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .ev-header strong { color: var(--accent2); }
+
+        .n-cambios-badge {
+            margin-left: auto;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-family: 'Space Mono', monospace;
+            letter-spacing: .05em;
+        }
+
+        .ev-table { width: 100%; border-collapse: collapse; }
+        .ev-table th { padding: 8px 14px; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); background: var(--surface3); font-family: 'Space Mono', monospace; }
+        .ev-table td { padding: 8px 14px; font-size: 11px; border-top: 1px solid var(--border); vertical-align: top; }
+        .ev-table td:first-child { font-family: 'Space Mono', monospace; font-size: 10px; white-space: nowrap; color: var(--muted2); }
+        .row-changed td { background: rgba(255,107,43,0.04); }
+        .row-changed td:first-child { color: var(--accent2); }
+        .badge-cambio { margin-left: 6px; font-size: 9px; color: var(--amber); font-family: 'Space Mono', monospace; }
+        .empty-val { color: var(--muted); font-style: italic; font-size: 10px; }
+        .sin-hist { text-align: center; padding: 40px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 12px; }
+
+        /* ══════════════════════════════════════
+           MODAL CONFIRMAR ELIMINAR
+        ══════════════════════════════════════ */
+        .modal-box.confirm-box { width: min(420px, 95vw); text-align: center; }
+        .confirm-icon { font-size: 48px; margin-bottom: 14px; }
+        .confirm-title { font-family: 'Oswald', sans-serif; font-size: 20px; letter-spacing: .08em; text-transform: uppercase; color: var(--red); margin-bottom: 8px; }
+        .confirm-msg { font-size: 13px; color: var(--muted2); line-height: 1.6; margin-bottom: 6px; }
+        .confirm-id { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent); }
+
+        /* ══════════════════════════════════════
+           EMPTY / LOADING STATES
+        ══════════════════════════════════════ */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state .es-icon { font-size: 48px; margin-bottom: 14px; opacity: .5; }
+        .empty-state .es-title { font-family: 'Oswald', sans-serif; font-size: 16px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; color: var(--muted2); }
+        .empty-state .es-sub { font-size: 12px; }
+
+        /* ══════════════════════════════════════
+           TOAST
+        ══════════════════════════════════════ */
+        #toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 99999;
+            transform: translateY(80px);
+            opacity: 0;
+            transition: all .3s cubic-bezier(.34,1.56,.64,1);
+            max-width: 320px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.5);
+            pointer-events: none;
+        }
+
+        #toast.show { transform: translateY(0); opacity: 1; }
+        #toast.success { background: var(--green); color: white; }
+        #toast.error   { background: var(--red);   color: white; }
+        #toast.info    { background: var(--blue);  color: white; }
+
+        /* ══════════════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════════════ */
+        @media(max-width: 768px) {
+            .topbar-stats { display: none; }
+            .main { padding: 12px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     TOP BAR
+════════════════════════════════════════ -->
+<header class="topbar">
+    <div class="topbar-brand">
+        <div class="brand-icon">🔥</div>
+        <div class="brand-text">
+            <h1>Bitácora Firecom</h1>
+            <p>Sistema de Control · Servicios</p>
+        </div>
+    </div>
+
+    <div class="topbar-stats">
+        <div class="stat-chip">
+            <div class="stat-val" id="statTotal">—</div>
+            <div class="stat-label">Registros<br>Totales</div>
+        </div>
+        <div class="stat-chip">
+            <div class="stat-val" id="statPagina">—</div>
+            <div class="stat-label">En esta<br>Página</div>
+        </div>
+        <div class="stat-chip">
+            <div class="stat-val" id="statPaginas">—</div>
+            <div class="stat-label">Páginas<br>Totales</div>
+        </div>
+    </div>
+
+    <div class="topbar-right">
+        <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
+            👤 <span id="usuarioLabel">SISTEMA</span>
+            <span class="chip-arrow">▼</span>
+            <div class="user-dropdown">
+                <div class="dropdown-header">
+                    <div class="d-name" id="ddName">SISTEMA</div>
+                    <div class="d-role">Operador Activo</div>
+                </div>
+                <button class="dropdown-item" onclick="cambiarUsuario()">✏️ Cambiar usuario</button>
+                <button class="dropdown-item danger" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ════════════════════════════════════════
+     MAIN
+════════════════════════════════════════ -->
+<main class="main">
+
+    <!-- ── LOGBOOK HEADER ── -->
+    <div class="logbook-header">
+        <div class="logbook-title-block">
+            <div class="logbook-divider"></div>
+            <div>
+                <h2>Registro de Servicios</h2>
+                <div class="subtitle">Módulo › Bitácora Firecom · Órdenes de Servicio</div>
+            </div>
+        </div>
+        <div class="logbook-timestamp">
+            <div class="ts-date" id="fechaHoy"></div>
+            <div id="horaActual" style="margin-top:3px;"></div>
+        </div>
+    </div>
+
+    <!-- ── PANEL NUEVO REGISTRO ── -->
+    <div class="logbook-panel">
+        <div class="logbook-panel-header" onclick="togglePanel()">
+            <div class="ph-left">
+                <div class="entry-num">#NVO</div>
+                <div>
+                    <div class="ph-title">+ Nuevo Registro en Bitácora</div>
+                    <div class="ph-sub">Capturar nueva orden de servicio Firecom</div>
+                </div>
+            </div>
+            <span class="toggle-arrow" id="panelArrow">▶</span>
+        </div>
+
+        <div class="logbook-panel-body" id="panelBody">
+
+            <!-- SECCIÓN: IDENTIFICACIÓN -->
+            <div class="form-section">
+                <div class="section-label">Identificación del Servicio</div>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>OC (Orden Compra)</label>
+                        <input type="text" id="n_OC" placeholder="Ej: OC-2025-001">
+                    </div>
+                    <div class="field">
+                        <label>Orden de Servicio</label>
+                        <input type="text" id="n_ORDEN_SERVICIO" placeholder="Ej: OS-7845">
+                    </div>
+                    <div class="field">
+                        <label>OC2 (Complementaria)</label>
+                        <input type="text" id="n_OC2" placeholder="Opcional">
+                    </div>
+                    <div class="field">
+                        <label>Fecha del Servicio</label>
+                        <input type="date" id="n_FECHA">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: SOLICITANTE -->
+            <div class="form-section">
+                <div class="section-label">Solicitante / Reporte</div>
+                <div class="form-grid cols-2">
+                    <div class="field">
+                        <label>Persona que Solicita / Reporta</label>
+                        <input type="text" id="n_PERSONA_QUE_SOLICITA_REPORTA" placeholder="Nombre completo">
+                    </div>
+                    <div class="field">
+                        <label>Personal que Recibió</label>
+                        <input type="text" id="n_PERSONAL_QUE_RECIBIO" placeholder="Técnico / encargado">
+                    </div>
+                    <div class="field">
+                        <label>Ubicación</label>
+                        <input type="text" id="n_UBICACION" placeholder="Ej: Planta Norte - Piso 2">
+                    </div>
+                    <div class="field">
+                        <label>Área</label>
+                        <input type="text" id="n_AREA" placeholder="Ej: Producción, Oficinas…">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: DETALLES DEL SERVICIO -->
+            <div class="form-section">
+                <div class="section-label">Detalles del Servicio</div>
+                <div class="form-grid cols-2">
+                    <div class="field">
+                        <label>Descripción del Servicio</label>
+                        <textarea id="n_DESCRIPCION_SERVICIO" placeholder="¿Qué servicio se solicitó?"></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Descripción del Trabajo Realizado</label>
+                        <textarea id="n_DESCRIPCION_TRABAJO" placeholder="¿Qué se realizó?"></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Material / Equipo</label>
+                        <textarea id="n_MATERIAL_EQUIPO" placeholder="Materiales o equipos utilizados"></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Observaciones</label>
+                        <textarea id="n_OBSERVACIONES" placeholder="Notas adicionales..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: TÉCNICO / FINANCIERO -->
+            <div class="form-section">
+                <div class="section-label">Técnico · Financiero</div>
+                <div class="form-grid cols-3">
+                    <div class="field">
+                        <label>Cantidad</label>
+                        <input type="number" id="n_CANTIDAD" placeholder="0" min="0">
+                    </div>
+                    <div class="field">
+                        <label>Proveedores</label>
+                        <input type="text" id="n_PROVEEDORES" placeholder="Ej: Firecom S.A.">
+                    </div>
+                    <div class="field">
+                        <label>Panel / Faceplate</label>
+                        <input type="text" id="n_PANEL_FACEPLATE" placeholder="Ej: Panel-A3">
+                    </div>
+                    <div class="field">
+                        <label>Switch / Red</label>
+                        <input type="text" id="n_SWITCH_RED" placeholder="Ej: SW-CORE-01">
+                    </div>
+                    <div class="field">
+                        <label>Cuenta con Póliza</label>
+                        <select id="n_CUENTA_CON_POLIZA">
+                            <option value="">— N/A —</option>
+                            <option value="true">✅ Sí</option>
+                            <option value="false">❌ No</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Servicio con Costo</label>
+                        <select id="n_SERVICIO_CON_COSTO">
+                            <option value="">— N/A —</option>
+                            <option value="true">✅ Sí</option>
+                            <option value="false">❌ No</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Pagado</label>
+                        <select id="n_PAGADO">
+                            <option value="">— Pendiente —</option>
+                            <option value="true">✅ Pagado</option>
+                            <option value="false">❌ No Pagado</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" onclick="crearRegistro()">
+                    📋 Registrar en Bitácora
+                </button>
+                <button class="btn btn-ghost" onclick="limpiarFormNuevo()">
+                    🗑️ Limpiar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── TOOLBAR EXPORTAR / FILTRAR ── -->
+    <div class="toolbar">
+        <button class="btn btn-ghost btn-sm" onclick="cargar()">🔄 Recargar</button>
+        <div class="toolbar-sep"></div>
+        <button class="btn btn-success btn-sm" onclick="exportarFiltrado()">📊 Exportar filtrado</button>
+        <button class="btn btn-blue btn-sm" onclick="exportarTodo()">📦 Exportar todo</button>
+        <div class="toolbar-sep"></div>
+        <input type="number" class="anio-input" id="anioExportar" placeholder="Año ej: 2025" min="2000" max="2099">
+        <button class="btn btn-amber btn-sm" onclick="exportarPorAnio()">📅 Exportar año</button>
+        <div class="toolbar-sep" style="margin-left:auto"></div>
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);">Límite por pág:</span>
+        <select id="limitSel" onchange="cambiarLimit()" style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--text);font-family:'Space Mono',monospace;">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select>
+    </div>
+
+    <!-- ── TABLA ── -->
+    <div class="table-wrap">
+        <div class="table-cap">
+            <div class="table-cap-left">
+                <span>Registros Bitácora</span>
+                <div class="record-count" id="countLabel">Cargando...</div>
+            </div>
+        </div>
+        <div class="table-scroll">
+            <table id="tablaBitacora">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>ID</th>
+                        <th>ID ÚNICO</th>
+                        <th>OC</th>
+                        <th>ORDEN SERVICIO</th>
+                        <th>FECHA</th>
+                        <th>SOLICITANTE / REPORTA</th>
+                        <th>PÓLIZA</th>
+                        <th>CON COSTO</th>
+                        <th>UBICACIÓN</th>
+                        <th>ÁREA</th>
+                        <th>CANT.</th>
+                        <th>DESC. SERVICIO</th>
+                        <th>DESC. TRABAJO</th>
+                        <th>MATERIAL / EQUIPO</th>
+                        <th>OBSERVACIONES</th>
+                        <th>PROVEEDORES</th>
+                        <th>PANEL / FACEPLATE</th>
+                        <th>SWITCH / RED</th>
+                        <th>PERSONAL RECIBIÓ</th>
+                        <th>PAGADO</th>
+                        <th>OC2</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                    <tr class="filter-row" id="filterRow">
+                        <td></td>
+                        <td><input type="text" id="f_ID_UNICO" placeholder="ID único…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_ID_UNICO2" placeholder="ID único…" oninput="filtroDebounce()" style="display:none"></td>
+                        <td><input type="text" id="f_OC" placeholder="OC…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_ORDEN_SERVICIO" placeholder="OS…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_FECHA" placeholder="AAAA-MM-DD" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_PERSONA" placeholder="Nombre…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_POLIZA" placeholder="true/false" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_COSTO" placeholder="true/false" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_UBICACION" placeholder="Ubic…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_AREA" placeholder="Área…" oninput="filtroDebounce()"></td>
+                        <td></td>
+                        <td><input type="text" id="f_DESC_S" placeholder="Desc…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_DESC_T" placeholder="Trabajo…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_MAT" placeholder="Material…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_OBS" placeholder="Obs…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_PROV" placeholder="Proveedor…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_PANEL" placeholder="Panel…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_SW" placeholder="Switch…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_PERSONAL" placeholder="Personal…" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_PAGADO" placeholder="true/false" oninput="filtroDebounce()"></td>
+                        <td><input type="text" id="f_OC2" placeholder="OC2…" oninput="filtroDebounce()"></td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody id="tablaBody">
+                    <tr><td colspan="23"><div class="empty-state"><div class="es-icon">🔄</div><div class="es-title">Cargando registros…</div></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ── PAGINACIÓN ── -->
+    <div class="pagination" id="paginacion">
+        <button class="btn btn-ghost btn-sm" onclick="irPag(1)">⏮ Primera</button>
+        <button class="btn btn-ghost btn-sm" onclick="irPag(paginaActual - 1)">◀ Ant.</button>
+        <div id="numsPagina" style="display:flex;gap:5px;"></div>
+        <button class="btn btn-ghost btn-sm" onclick="irPag(paginaActual + 1)">Sig. ▶</button>
+        <button class="btn btn-ghost btn-sm" onclick="irPag(totalPaginas)">Última ⏭</button>
+        <div class="page-info" id="pageInfo">—</div>
+    </div>
+
+</main>
+
+<!-- ════════════════════════════════════════
+     MODAL EDITAR
+════════════════════════════════════════ -->
+<div class="modal" id="modalEditar">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-header-left">
+                <div class="mh-icon">✏️</div>
+                <div>
+                    <h3>Editar Registro</h3>
+                    <div class="mh-id" id="editarIdLabel">#—</div>
+                </div>
+            </div>
+            <button class="close-btn" onclick="cerrarEditar()">✕</button>
+        </div>
+
+        <div class="form-grid-modal">
+            <div class="modal-section-label">Identificación</div>
+
+            <div class="form-field">
+                <label>OC</label>
+                <input type="text" id="e_OC" placeholder="Orden de Compra">
+            </div>
+            <div class="form-field">
+                <label>Orden de Servicio</label>
+                <input type="text" id="e_ORDEN_SERVICIO" placeholder="OS-XXXX">
+            </div>
+            <div class="form-field">
+                <label>OC2</label>
+                <input type="text" id="e_OC2">
+            </div>
+            <div class="form-field">
+                <label>Fecha</label>
+                <input type="date" id="e_FECHA">
+            </div>
+
+            <div class="modal-section-label">Solicitante</div>
+
+            <div class="form-field span-full">
+                <label>Persona que Solicita / Reporta</label>
+                <input type="text" id="e_PERSONA_QUE_SOLICITA_REPORTA">
+            </div>
+            <div class="form-field">
+                <label>Ubicación</label>
+                <input type="text" id="e_UBICACION">
+            </div>
+            <div class="form-field">
+                <label>Área</label>
+                <input type="text" id="e_AREA">
+            </div>
+            <div class="form-field span-full">
+                <label>Personal que Recibió</label>
+                <input type="text" id="e_PERSONAL_QUE_RECIBIO">
+            </div>
+
+            <div class="modal-section-label">Detalles del Servicio</div>
+
+            <div class="form-field span-full">
+                <label>Descripción del Servicio</label>
+                <textarea id="e_DESCRIPCION_SERVICIO" rows="2"></textarea>
+            </div>
+            <div class="form-field span-full">
+                <label>Descripción del Trabajo</label>
+                <textarea id="e_DESCRIPCION_TRABAJO" rows="2"></textarea>
+            </div>
+            <div class="form-field span-full">
+                <label>Material / Equipo</label>
+                <textarea id="e_MATERIAL_EQUIPO" rows="2"></textarea>
+            </div>
+            <div class="form-field span-full">
+                <label>Observaciones</label>
+                <textarea id="e_OBSERVACIONES" rows="2"></textarea>
+            </div>
+
+            <div class="modal-section-label">Técnico · Financiero</div>
+
+            <div class="form-field">
+                <label>Cantidad</label>
+                <input type="number" id="e_CANTIDAD" min="0">
+            </div>
+            <div class="form-field">
+                <label>Proveedores</label>
+                <input type="text" id="e_PROVEEDORES">
+            </div>
+            <div class="form-field">
+                <label>Panel / Faceplate</label>
+                <input type="text" id="e_PANEL_FACEPLATE">
+            </div>
+            <div class="form-field">
+                <label>Switch / Red</label>
+                <input type="text" id="e_SWITCH_RED">
+            </div>
+            <div class="form-field">
+                <label>Cuenta con Póliza</label>
+                <select id="e_CUENTA_CON_POLIZA">
+                    <option value="">— N/A —</option>
+                    <option value="true">✅ Sí</option>
+                    <option value="false">❌ No</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label>Servicio con Costo</label>
+                <select id="e_SERVICIO_CON_COSTO">
+                    <option value="">— N/A —</option>
+                    <option value="true">✅ Sí</option>
+                    <option value="false">❌ No</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label>Pagado</label>
+                <select id="e_PAGADO">
+                    <option value="">— Pendiente —</option>
+                    <option value="true">✅ Pagado</option>
+                    <option value="false">❌ No Pagado</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
+            <button class="btn btn-primary" onclick="guardarCambios()">💾 Guardar cambios</button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     MODAL CONFIRMAR ELIMINAR
+════════════════════════════════════════ -->
+<div class="modal" id="modalEliminar">
+    <div class="modal-box confirm-box">
+        <button class="close-btn" onclick="cerrarEliminar()" style="position:absolute;top:16px;right:16px;">✕</button>
+        <div class="confirm-icon">🗑️</div>
+        <div class="confirm-title">Eliminar Registro</div>
+        <p class="confirm-msg">Esta acción es <strong>permanente</strong> y no se puede deshacer.<br>¿Confirmas la eliminación del registro?</p>
+        <p class="confirm-id" id="eliminarIdLabel">#—</p>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+            <button class="btn btn-ghost" onclick="cerrarEliminar()">Cancelar</button>
+            <button class="btn btn-danger" onclick="confirmarEliminar()">🗑️ Sí, eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     MODAL HISTORIAL
+════════════════════════════════════════ -->
+<div class="modal" id="modalHistorial">
+    <div class="modal-box hist-box">
+        <div class="modal-header">
+            <div class="modal-header-left">
+                <div class="mh-icon">🕐</div>
+                <div>
+                    <h3>Historial de Cambios</h3>
+                    <div class="mh-id" id="histIdLabel">#—</div>
+                </div>
+            </div>
+            <button class="close-btn" onclick="cerrarHistorial()">✕</button>
+        </div>
+        <div id="contenidoHistorial">
+            <div class="empty-state">
+                <div class="es-icon">🔄</div>
+                <div class="es-title">Cargando historial…</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════ -->
+<script>
+    // ═══ CONFIG ═══
+    const BASE = '/BITACORA_FIRECOM';
+    let paginaActual = 1;
+    let limitActual  = 10;
+    let totalPaginas = 1;
+    let datosActuales = [];
+    let editandoID   = null;
+    let eliminandoID = null;
+    let debounceTimer = null;
+    let usuarioActual = localStorage.getItem('usuario_bitacora') || 'SISTEMA';
+
+    // ═══ CAMPOS HISTORIAL ═══
+    const CAMPOS_HIST = [
+        { key: 'ID_UNICO',                    label: 'ID Único' },
+        { key: 'OC',                           label: 'OC' },
+        { key: 'ORDEN_SERVICIO',               label: 'Orden de Servicio' },
+        { key: 'FECHA',                        label: 'Fecha' },
+        { key: 'PERSONA_QUE_SOLICITA_REPORTA', label: 'Persona que Solicita/Reporta' },
+        { key: 'CUENTA_CON_POLIZA',            label: 'Cuenta con Póliza' },
+        { key: 'SERVICIO_CON_COSTO',           label: 'Servicio con Costo' },
+        { key: 'UBICACION',                    label: 'Ubicación' },
+        { key: 'AREA',                         label: 'Área' },
+        { key: 'CANTIDAD',                     label: 'Cantidad' },
+        { key: 'DESCRIPCION_SERVICIO',         label: 'Descripción Servicio' },
+        { key: 'DESCRIPCION_TRABAJO',          label: 'Descripción Trabajo' },
+        { key: 'MATERIAL_EQUIPO',              label: 'Material / Equipo' },
+        { key: 'OBSERVACIONES',                label: 'Observaciones' },
+        { key: 'PROVEEDORES',                  label: 'Proveedores' },
+        { key: 'PANEL_FACEPLATE',              label: 'Panel / Faceplate' },
+        { key: 'SWITCH_RED',                   label: 'Switch / Red' },
+        { key: 'PERSONAL_QUE_RECIBIO',         label: 'Personal que Recibió' },
+        { key: 'PAGADO',                       label: 'Pagado' },
+        { key: 'OC2',                          label: 'OC2' },
+    ];
+
+    // ═══ INIT ═══
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('usuarioLabel').textContent = usuarioActual;
+        document.getElementById('ddName').textContent = usuarioActual;
+        actualizarReloj();
+        setInterval(actualizarReloj, 1000);
+        cargar();
+    });
+
+    function actualizarReloj() {
+        const ahora = new Date();
+        const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+        document.getElementById('fechaHoy').textContent = ahora.toLocaleDateString('es-MX', opts).toUpperCase();
+        document.getElementById('horaActual').textContent = ahora.toLocaleTimeString('es-MX');
+    }
+
+    // ═══ PANEL TOGGLE ═══
+    function togglePanel() {
+        const body  = document.getElementById('panelBody');
+        const arrow = document.getElementById('panelArrow');
+        const open  = body.classList.toggle('open');
+        arrow.textContent = open ? '▼' : '▶';
+        arrow.style.transform = '';
+    }
+
+    // ═══ CARGAR / FILTROS ═══
+    async function cargar(pagina = paginaActual) {
+        paginaActual = pagina;
+        try {
+            const r = await fetch(`${BASE}?${obtenerParametros()}&page=${pagina}&limit=${limitActual}`);
+            const data = await r.json();
+            datosActuales = data.data || data.items || data.registros || [];
+            const total  = data.total || 0;
+            totalPaginas = Math.max(1, Math.ceil(total / limitActual));
+
+            document.getElementById('statTotal').textContent   = total;
+            document.getElementById('statPagina').textContent  = datosActuales.length;
+            document.getElementById('statPaginas').textContent = totalPaginas;
+            document.getElementById('countLabel').textContent  = `${total} registros`;
+
+            renderTabla();
+            renderPaginacion();
+        } catch (e) {
+            console.error(e);
+            document.getElementById('tablaBody').innerHTML =
+                `<tr><td colspan="23"><div class="empty-state"><div class="es-icon">❌</div><div class="es-title">Error al cargar</div><div class="es-sub">${e.message}</div></div></td></tr>`;
+        }
+    }
+
+    function obtenerParametros() {
+        const p = new URLSearchParams();
+        const mp = {
+            'f_OC':             'OC',
+            'f_ORDEN_SERVICIO': 'ORDEN_SERVICIO',
+            'f_FECHA':          'FECHA',
+            'f_PERSONA':        'PERSONA_QUE_SOLICITA_REPORTA',
+            'f_POLIZA':         'CUENTA_CON_POLIZA',
+            'f_COSTO':          'SERVICIO_CON_COSTO',
+            'f_UBICACION':      'UBICACION',
+            'f_AREA':           'AREA',
+            'f_DESC_S':         'DESCRIPCION_SERVICIO',
+            'f_DESC_T':         'DESCRIPCION_TRABAJO',
+            'f_MAT':            'MATERIAL_EQUIPO',
+            'f_OBS':            'OBSERVACIONES',
+            'f_PROV':           'PROVEEDORES',
+            'f_PANEL':          'PANEL_FACEPLATE',
+            'f_SW':             'SWITCH_RED',
+            'f_PERSONAL':       'PERSONAL_QUE_RECIBIO',
+            'f_PAGADO':         'PAGADO',
+            'f_OC2':            'OC2',
+            'f_ID_UNICO':       'ID_UNICO',
+        };
+        for (const [id, param] of Object.entries(mp)) {
+            const el = document.getElementById(id);
+            if (el && el.value.trim()) p.append(param, el.value.trim());
+        }
+        return p.toString();
+    }
+
+    function filtroDebounce() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => cargar(1), 400);
+    }
+
+    function cambiarLimit() {
+        limitActual = parseInt(document.getElementById('limitSel').value);
+        cargar(1);
+    }
+
+    // ═══ RENDER TABLA ═══
+    function renderTabla() {
+        const tbody = document.getElementById('tablaBody');
+
+        if (!datosActuales.length) {
+            tbody.innerHTML = `<tr><td colspan="23"><div class="empty-state">
+                <div class="es-icon">📋</div>
+                <div class="es-title">Sin registros</div>
+                <div class="es-sub">No se encontraron registros con los filtros actuales</div>
+            </div></td></tr>`;
+            return;
+        }
+
+        const offset = (paginaActual - 1) * limitActual;
+
+        tbody.innerHTML = datosActuales.map((r, i) => {
+            const rowNum = offset + i + 1;
+            return `<tr>
+                <td class="row-num">${String(rowNum).padStart(3,'0')}</td>
+                <td class="mono" style="color:var(--accent);font-weight:700;">${r.ID}</td>
+                <td class="mono">${esc(r.ID_UNICO) || '<span style="color:var(--muted)">—</span>'}</td>
+                <td class="mono">${esc(r.OC) || '<span style="color:var(--muted)">—</span>'}</td>
+                <td class="mono">${esc(r.ORDEN_SERVICIO) || '<span style="color:var(--muted)">—</span>'}</td>
+                <td class="mono">${fmtFecha(r.FECHA)}</td>
+                <td>${esc(r.PERSONA_QUE_SOLICITA_REPORTA) || '<span style="color:var(--muted)">—</span>'}</td>
+                <td>${pillBool(r.CUENTA_CON_POLIZA)}</td>
+                <td>${pillBool(r.SERVICIO_CON_COSTO)}</td>
+                <td>${esc(r.UBICACION) || '<span style="color:var(--muted)">—</span>'}</td>
+                <td>${esc(r.AREA) || '<span style="color:var(--muted)">—</span>'}</td>
+                <td class="mono" style="text-align:center;">${r.CANTIDAD ?? '<span style="color:var(--muted)">—</span>'}</td>
+                <td style="max-width:180px;white-space:normal;font-size:11px;">${trunc(esc(r.DESCRIPCION_SERVICIO), 60)}</td>
+                <td style="max-width:180px;white-space:normal;font-size:11px;">${trunc(esc(r.DESCRIPCION_TRABAJO), 60)}</td>
+                <td style="max-width:150px;white-space:normal;font-size:11px;">${trunc(esc(r.MATERIAL_EQUIPO), 50)}</td>
+                <td style="max-width:150px;white-space:normal;font-size:11px;">${trunc(esc(r.OBSERVACIONES), 50)}</td>
+                <td>${esc(r.PROVEEDORES) || '<span style="color:var(--muted)">—</span>'}</td>
+                <td class="mono">${esc(r.PANEL_FACEPLATE) || '<span style="color:var(--muted)">—</span>'}</td>
+                <td class="mono">${esc(r.SWITCH_RED) || '<span style="color:var(--muted)">—</span>'}</td>
+                <td>${esc(r.PERSONAL_QUE_RECIBIO) || '<span style="color:var(--muted)">—</span>'}</td>
+                <td>${pillPagado(r.PAGADO)}</td>
+                <td class="mono">${esc(r.OC2) || '<span style="color:var(--muted)">—</span>'}</td>
+                <td>
+                    <div class="actions-cell">
+                        <button class="btn btn-primary btn-xs" title="Editar" onclick="abrirEditar(${r.ID})">✏️</button>
+                        <button class="btn btn-ghost btn-xs" title="Historial" onclick="verHistorial(${r.ID})">🕐</button>
+                        <button class="btn btn-danger btn-xs" title="Eliminar" onclick="abrirEliminar(${r.ID})">🗑️</button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ═══ HELPERS RENDER ═══
+    function esc(v) {
+        if (v == null) return '';
+        return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function trunc(s, n) {
+        if (!s) return '<span style="color:var(--muted)">—</span>';
+        return s.length > n ? s.slice(0, n) + '…' : s;
+    }
+
+    function fmtFecha(f) {
+        if (!f) return '<span style="color:var(--muted)">—</span>';
+        try {
+            const d = new Date(f);
+            if (!isNaN(d)) return `<span style="font-family:'Space Mono',monospace;font-size:11px;">${d.toLocaleDateString('es-MX',{year:'numeric',month:'2-digit',day:'2-digit'})}</span>`;
+        } catch(e) {}
+        return esc(f);
+    }
+
+    function pillBool(v) {
+        if (v === true  || v === 'true')  return '<span class="pill pill-si">SÍ</span>';
+        if (v === false || v === 'false') return '<span class="pill pill-no">NO</span>';
+        return '<span class="pill pill-null">N/A</span>';
+    }
+
+    function pillPagado(v) {
+        if (v === true  || v === 'true')  return '<span class="pill pill-pagado">PAGADO</span>';
+        if (v === false || v === 'false') return '<span class="pill pill-pendiente">PENDIENTE</span>';
+        return '<span class="pill pill-null">N/A</span>';
+    }
+
+    // ═══ PAGINACIÓN ═══
+    function renderPaginacion() {
+        const nums = document.getElementById('numsPagina');
+        let html = '';
+        const delta = 2;
+        for (let p = 1; p <= totalPaginas; p++) {
+            if (p === 1 || p === totalPaginas || (p >= paginaActual - delta && p <= paginaActual + delta)) {
+                html += `<button class="btn btn-sm ${p === paginaActual ? 'btn-primary' : 'btn-ghost'}" onclick="irPag(${p})">${p}</button>`;
+            } else if (p === paginaActual - delta - 1 || p === paginaActual + delta + 1) {
+                html += `<span style="color:var(--muted);padding:0 4px;align-self:center;">…</span>`;
+            }
+        }
+        nums.innerHTML = html;
+
+        const offset = (paginaActual - 1) * limitActual;
+        const hasta  = Math.min(offset + datosActuales.length, offset + limitActual);
+        document.getElementById('pageInfo').textContent =
+            `Mostrando ${offset + 1}–${hasta} · Página ${paginaActual}/${totalPaginas}`;
+    }
+
+    function irPag(p) {
+        if (p < 1 || p > totalPaginas) return;
+        cargar(p);
+    }
+
+    // ═══ CREAR ═══
+    async function crearRegistro() {
+        const oc      = vNuevo('n_OC');
+        const os      = vNuevo('n_ORDEN_SERVICIO');
+        const idUnico = [oc, os].filter(Boolean).join('+') || null;
+
+        const dto = {
+            ID_UNICO:                    idUnico,
+            OC:                          oc,
+            ORDEN_SERVICIO:              os,
+            FECHA:                       vNuevo('n_FECHA'),
+            PERSONA_QUE_SOLICITA_REPORTA: vNuevo('n_PERSONA_QUE_SOLICITA_REPORTA'),
+            CUENTA_CON_POLIZA:           vBoolNuevo('n_CUENTA_CON_POLIZA'),
+            SERVICIO_CON_COSTO:          vBoolNuevo('n_SERVICIO_CON_COSTO'),
+            UBICACION:                   vNuevo('n_UBICACION'),
+            AREA:                        vNuevo('n_AREA'),
+            CANTIDAD:                    vIntNuevo('n_CANTIDAD'),
+            DESCRIPCION_SERVICIO:        vNuevo('n_DESCRIPCION_SERVICIO'),
+            DESCRIPCION_TRABAJO:         vNuevo('n_DESCRIPCION_TRABAJO'),
+            MATERIAL_EQUIPO:             vNuevo('n_MATERIAL_EQUIPO'),
+            OBSERVACIONES:               vNuevo('n_OBSERVACIONES'),
+            PROVEEDORES:                 vNuevo('n_PROVEEDORES'),
+            PANEL_FACEPLATE:             vNuevo('n_PANEL_FACEPLATE'),
+            SWITCH_RED:                  vNuevo('n_SWITCH_RED'),
+            PERSONAL_QUE_RECIBIO:        vNuevo('n_PERSONAL_QUE_RECIBIO'),
+            PAGADO:                      vBoolNuevo('n_PAGADO'),
+            OC2:                         vNuevo('n_OC2'),
+        };
+
+        try {
+            const r = await fetch(BASE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                body: JSON.stringify(dto),
+            });
+            const res = await r.json();
+            if (r.ok && !res.error) {
+                limpiarFormNuevo();
+                toast('✅ Registro creado correctamente', 'success');
+                cargar(1);
+            } else {
+                toast('❌ Error: ' + (res.error || 'No se pudo crear'), 'error');
+            }
+        } catch(e) { toast('❌ Error: ' + e.message, 'error'); }
+    }
+
+    function limpiarFormNuevo() {
+        ['n_OC','n_ORDEN_SERVICIO','n_OC2','n_FECHA','n_PERSONA_QUE_SOLICITA_REPORTA',
+         'n_PERSONAL_QUE_RECIBIO','n_UBICACION','n_AREA','n_DESCRIPCION_SERVICIO',
+         'n_DESCRIPCION_TRABAJO','n_MATERIAL_EQUIPO','n_OBSERVACIONES','n_PROVEEDORES',
+         'n_PANEL_FACEPLATE','n_SWITCH_RED','n_CANTIDAD'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        ['n_CUENTA_CON_POLIZA','n_SERVICIO_CON_COSTO','n_PAGADO'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+    }
+
+    // ═══ EDITAR ═══
+    function abrirEditar(id) {
+        editandoID = id;
+        document.getElementById('editarIdLabel').textContent = '#' + id;
+        const row = datosActuales.find(r => r.ID === id);
+        if (row) {
+            setV('e_OC',                           row.OC);
+            setV('e_ORDEN_SERVICIO',               row.ORDEN_SERVICIO);
+            setV('e_OC2',                          row.OC2);
+            setV('e_FECHA',                        row.FECHA ? String(row.FECHA).split('T')[0] : '');
+            setV('e_PERSONA_QUE_SOLICITA_REPORTA', row.PERSONA_QUE_SOLICITA_REPORTA);
+            setV('e_UBICACION',                    row.UBICACION);
+            setV('e_AREA',                         row.AREA);
+            setV('e_PERSONAL_QUE_RECIBIO',         row.PERSONAL_QUE_RECIBIO);
+            setV('e_DESCRIPCION_SERVICIO',         row.DESCRIPCION_SERVICIO);
+            setV('e_DESCRIPCION_TRABAJO',          row.DESCRIPCION_TRABAJO);
+            setV('e_MATERIAL_EQUIPO',              row.MATERIAL_EQUIPO);
+            setV('e_OBSERVACIONES',                row.OBSERVACIONES);
+            setV('e_CANTIDAD',                     row.CANTIDAD);
+            setV('e_PROVEEDORES',                  row.PROVEEDORES);
+            setV('e_PANEL_FACEPLATE',              row.PANEL_FACEPLATE);
+            setV('e_SWITCH_RED',                   row.SWITCH_RED);
+            setV('e_CUENTA_CON_POLIZA',            row.CUENTA_CON_POLIZA === true ? 'true' : row.CUENTA_CON_POLIZA === false ? 'false' : '');
+            setV('e_SERVICIO_CON_COSTO',           row.SERVICIO_CON_COSTO === true ? 'true' : row.SERVICIO_CON_COSTO === false ? 'false' : '');
+            setV('e_PAGADO',                       row.PAGADO === true ? 'true' : row.PAGADO === false ? 'false' : '');
+        }
+        document.getElementById('modalEditar').classList.add('show');
+        document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+    }
+
+    function cerrarEditar() {
+        document.getElementById('modalEditar').classList.remove('show');
+        editandoID = null;
+    }
+
+    async function guardarCambios() {
+        const oc = vEdit('e_OC');
+        const os = vEdit('e_ORDEN_SERVICIO');
+        const dto = {
+            ID_UNICO:                    [oc, os].filter(Boolean).join('+') || null,
+            OC:                          oc,
+            ORDEN_SERVICIO:              os,
+            FECHA:                       vEdit('e_FECHA'),
+            PERSONA_QUE_SOLICITA_REPORTA: vEdit('e_PERSONA_QUE_SOLICITA_REPORTA'),
+            CUENTA_CON_POLIZA:           vBoolEdit('e_CUENTA_CON_POLIZA'),
+            SERVICIO_CON_COSTO:          vBoolEdit('e_SERVICIO_CON_COSTO'),
+            UBICACION:                   vEdit('e_UBICACION'),
+            AREA:                        vEdit('e_AREA'),
+            CANTIDAD:                    vIntEdit('e_CANTIDAD'),
+            DESCRIPCION_SERVICIO:        vEdit('e_DESCRIPCION_SERVICIO'),
+            DESCRIPCION_TRABAJO:         vEdit('e_DESCRIPCION_TRABAJO'),
+            MATERIAL_EQUIPO:             vEdit('e_MATERIAL_EQUIPO'),
+            OBSERVACIONES:               vEdit('e_OBSERVACIONES'),
+            PROVEEDORES:                 vEdit('e_PROVEEDORES'),
+            PANEL_FACEPLATE:             vEdit('e_PANEL_FACEPLATE'),
+            SWITCH_RED:                  vEdit('e_SWITCH_RED'),
+            PERSONAL_QUE_RECIBIO:        vEdit('e_PERSONAL_QUE_RECIBIO'),
+            PAGADO:                      vBoolEdit('e_PAGADO'),
+            OC2:                         vEdit('e_OC2'),
+        };
+
+        try {
+            const r = await fetch(`${BASE}/${editandoID}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                body: JSON.stringify(dto),
+            });
+            const res = await r.json();
+            if (r.ok && !res.error) {
+                cerrarEditar();
+                toast('✅ Cambios guardados', 'success');
+                cargar();
+            } else {
+                toast('❌ Error: ' + (res.error || 'No se pudo guardar'), 'error');
+            }
+        } catch(e) { toast('❌ Error: ' + e.message, 'error'); }
+    }
+
+    // ═══ ELIMINAR ═══
+    function abrirEliminar(id) {
+        eliminandoID = id;
+        document.getElementById('eliminarIdLabel').textContent = 'Registro #' + id;
+        document.getElementById('modalEliminar').classList.add('show');
+    }
+
+    function cerrarEliminar() {
+        document.getElementById('modalEliminar').classList.remove('show');
+        eliminandoID = null;
+    }
+
+    async function confirmarEliminar() {
+        if (!eliminandoID) return;
+        try {
+            const r = await fetch(`${BASE}/${eliminandoID}`, {
+                method: 'DELETE',
+                headers: { 'X-Usuario': usuarioActual },
+            });
+            const res = await r.json();
+            if (r.ok && !res.error) {
+                cerrarEliminar();
+                toast('🗑️ Registro eliminado', 'info');
+                cargar();
+            } else {
+                toast('❌ Error: ' + (res.error || 'No se pudo eliminar'), 'error');
+            }
+        } catch(e) { toast('❌ Error: ' + e.message, 'error'); }
+    }
+
+    // ═══ HISTORIAL ═══
+    function verHistorial(id) {
+        document.getElementById('histIdLabel').textContent = '#' + id;
+        document.getElementById('contenidoHistorial').innerHTML =
+            '<div class="empty-state"><div class="es-icon">🔄</div><div class="es-title">Cargando historial…</div></div>';
+        document.getElementById('modalHistorial').classList.add('show');
+
+        fetch(`${BASE}/${id}/HISTORIAL`)
+            .then(r => r.json())
+            .then(data => {
+                const lista = (data.historial || [])
+                    .sort((a,b) => new Date(b.FECHA || b.fecha || 0) - new Date(a.FECHA || a.fecha || 0));
+
+                if (!lista.length) {
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        '<p class="sin-hist">📭 Sin ediciones registradas para este registro</p>';
+                } else {
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        `<p style="color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;margin-bottom:14px">
+                            ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                        </p>` + lista.map(ev => renderEvento(ev)).join('');
+                }
+            })
+            .catch(() => {
+                document.getElementById('contenidoHistorial').innerHTML =
+                    '<p style="color:var(--red);text-align:center;padding:30px;font-family:\'Space Mono\',monospace;font-size:12px;">❌ Error al cargar el historial</p>';
+            });
+    }
+
+    function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
+
+    function renderEvento(ev) {
+        let antes   = ev.REGISTRO_ANTERIOR || ev.registro_anterior;
+        let despues = ev.REGISTRO_NUEVO    || ev.registro_nuevo;
+        try { if (typeof antes   === 'string') antes   = JSON.parse(antes);   } catch(e) {}
+        try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch(e) {}
+
+        const cambiados = new Set();
+        CAMPOS_HIST.forEach(({ key }) => {
+            if (norm(antes?.[key]) !== norm(despues?.[key])) cambiados.add(key);
+        });
+
+        let filas = '';
+        CAMPOS_HIST.forEach(({ key, label }) => {
+            const va  = esc(antes?.[key]   ?? '');
+            const vd  = esc(despues?.[key] ?? '');
+            const chg = cambiados.has(key);
+            filas += `<tr class="${chg ? 'row-changed' : ''}">
+                <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎</span>` : ''}</td>
+                <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+            </tr>`;
+        });
+
+        const n = cambiados.size;
+        const fecha = ev.FECHA || ev.fecha;
+        const usuario = ev.USUARIO || ev.usuario;
+
+        return `<div class="ev-wrap">
+            <div class="ev-header">
+                <span>🕐 <strong>${fmtFechaHist(fecha)}</strong></span>
+                <span>👤 <strong>${esc(usuario) || 'Desconocido'}</strong></span>
+                <span class="n-cambios-badge"
+                    style="background:${n > 0 ? 'rgba(245,158,11,.15)' : 'rgba(90,104,130,.15)'};
+                           color:${n > 0 ? '#FCD34D' : '#8A9AB8'};
+                           border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(90,104,130,.3)'}">
+                    ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                </span>
+            </div>
+            <table class="ev-table">
+                <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                <tbody>${filas}</tbody>
+            </table>
+        </div>`;
+    }
+
+    function fmtFechaHist(f) {
+        try {
+            const d = new Date(f);
+            if (!isNaN(d)) return d.toLocaleString('es-MX', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        } catch(e) {}
+        return f ?? '';
+    }
+
+    // ═══ EXPORTAR ═══
+    function exportarFiltrado() { window.open(`${BASE}/EXPORTAR?${obtenerParametros()}`); }
+    function exportarTodo()     { window.open(`${BASE}/EXPORTAR_TODO`); }
+    function exportarPorAnio()  {
+        const a = document.getElementById('anioExportar').value;
+        if (!a) { toast('⚠️ Ingresa un año', 'error'); return; }
+        window.open(`${BASE}/EXPORTAR_ANIO?anio=${a}`);
+    }
+
+    // ═══ UI ═══
+    function toggleDropdown() { document.getElementById('userChipMain').classList.toggle('open'); }
+    document.addEventListener('click', e => {
+        const chip = document.getElementById('userChipMain');
+        if (chip && !chip.contains(e.target)) chip.classList.remove('open');
+    });
+
+    function cerrarSesion() {
+        fetch('/LOGOUT', { method:'POST', credentials:'include' })
+            .finally(() => { window.location.href = '/static/login.html'; });
+    }
+
+    function cambiarUsuario() {
+        const nuevo = prompt('Nuevo nombre de usuario:', usuarioActual);
+        if (nuevo && nuevo.trim()) {
+            usuarioActual = nuevo.trim().toUpperCase();
+            localStorage.setItem('usuario_bitacora', usuarioActual);
+            document.getElementById('usuarioLabel').textContent = usuarioActual;
+            document.getElementById('ddName').textContent       = usuarioActual;
+            toast('👤 Usuario actualizado', 'info');
+        }
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); cerrarEliminar(); }
+    });
+
+    // ═══ TOAST ═══
+    let toastTimer;
+    function toast(msg, type = 'info') {
+        const el = document.getElementById('toast');
+        clearTimeout(toastTimer);
+        el.textContent = msg;
+        el.className = `show ${type}`;
+        toastTimer = setTimeout(() => el.className = '', 3500);
+    }
+
+    // ═══ HELPERS VALORES ═══
+    function vNuevo(id)     { const el = document.getElementById(id); return el ? (el.value.trim() || null) : null; }
+    function vIntNuevo(id)  { const x = vNuevo(id); return x != null ? (parseInt(x) || null) : null; }
+    function vBoolNuevo(id) { const el = document.getElementById(id); if (!el) return null; if (el.value === 'true') return true; if (el.value === 'false') return false; return null; }
+
+    function vEdit(id)     { const el = document.getElementById(id); return el ? (el.value.trim() || null) : null; }
+    function vIntEdit(id)  { const x = vEdit(id); return x != null ? (parseInt(x) || null) : null; }
+    function vBoolEdit(id) { const el = document.getElementById(id); if (!el) return null; if (el.value === 'true') return true; if (el.value === 'false') return false; return null; }
+
+    function setV(id, val)  { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
+    function norm(v)        { return (v == null) ? '' : String(v).trim(); }
+</script>
+</body>
+</html>
