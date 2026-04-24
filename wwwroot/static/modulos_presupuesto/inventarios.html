@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Periféricos NF</title>
+    <title>Inventarios NF</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -206,14 +206,14 @@
             position: relative;
         }
 
-        /* ── MAIN ── */
+        /* ── MAIN LAYOUT ── */
         .main {
-            max-width: 1700px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 20px 24px;
         }
 
-        /* ── PANEL ── */
+        /* ── PANEL NUEVO REGISTRO ── */
         .panel {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -350,6 +350,15 @@
                 background: #D97706;
             }
 
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+
+            .btn-purple:hover {
+                background: #7C3AED;
+            }
+
         .btn-cyan {
             background: var(--cyan);
             color: #001a1f;
@@ -446,7 +455,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 12px;
-            min-width: 1600px;
+            min-width: 1200px;
         }
 
         thead {
@@ -457,12 +466,13 @@
 
             thead tr:first-child th {
                 background: var(--surface3);
-                padding: 11px 14px;
+                padding: 11px 13px;
+                text-align: left;
                 font-size: 10px;
                 font-weight: 700;
                 text-transform: uppercase;
                 letter-spacing: .08em;
-                color: var(--muted2);
+                color: var(--muted);
                 border-bottom: 1px solid var(--border2);
                 white-space: nowrap;
             }
@@ -473,22 +483,21 @@
             border-bottom: 1px solid var(--border2);
         }
 
-            .filter-row td input {
-                width: 100%;
-                background: var(--surface3);
-                border: 1px solid var(--border);
-                border-radius: 5px;
-                padding: 5px 8px;
-                font-size: 11px;
-                font-family: 'DM Mono',monospace;
-                color: var(--text);
-                transition: border-color .2s;
-            }
+        .filter-row input {
+            width: 100%;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 5px 8px;
+            font-size: 11px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+        }
 
-                .filter-row td input:focus {
-                    outline: none;
-                    border-color: var(--accent);
-                }
+            .filter-row input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
 
         tbody tr {
             border-bottom: 1px solid var(--border);
@@ -496,23 +505,22 @@
         }
 
             tbody tr:hover {
-                background: var(--surface2);
+                background: rgba(255,255,255,.03);
             }
 
         tbody td {
-            padding: 10px 14px;
-            color: var(--text);
-            white-space: nowrap;
+            padding: 10px 13px;
             vertical-align: middle;
         }
 
-            tbody td.mono {
-                font-family: 'DM Mono',monospace;
-                font-size: 11px;
-            }
+        .mono {
+            font-family: 'DM Mono',monospace;
+            font-size: 11px;
+        }
 
-        .disponible-pill {
-            display: inline-block;
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
             padding: 3px 10px;
             border-radius: 999px;
             font-size: 10px;
@@ -520,22 +528,22 @@
             letter-spacing: .05em;
         }
 
-        .pill-si {
-            background: rgba(16,185,129,.18);
-            color: #34D399;
+        .pill-activo {
+            background: rgba(16,185,129,.15);
+            color: #6ee7b7;
             border: 1px solid rgba(16,185,129,.3);
         }
 
-        .pill-no {
-            background: rgba(239,68,68,.15);
-            color: #F87171;
-            border: 1px solid rgba(239,68,68,.25);
+        .pill-inactivo {
+            background: rgba(239,68,68,.12);
+            color: #fca5a5;
+            border: 1px solid rgba(239,68,68,.3);
         }
 
         .pill-otro {
             background: rgba(100,116,139,.15);
-            color: #94A3B8;
-            border: 1px solid rgba(100,116,139,.2);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
         }
 
         /* ── PAGINACIÓN ── */
@@ -543,8 +551,8 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            justify-content: center;
-            margin-bottom: 16px;
+            justify-content: flex-end;
+            margin-bottom: 20px;
         }
 
         .page-info {
@@ -558,11 +566,11 @@
             display: none;
             position: fixed;
             inset: 0;
-            z-index: 500;
             background: rgba(0,0,0,.65);
-            backdrop-filter: blur(4px);
+            z-index: 500;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
             .modal.show {
@@ -573,50 +581,28 @@
             background: var(--surface);
             border: 1px solid var(--border2);
             border-radius: 16px;
-            width: 90%;
-            max-width: 800px;
+            width: 100%;
+            max-width: 720px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 32px 80px rgba(0,0,0,.6);
-            animation: modalIn .2s ease;
-        }
-
-            .modal-box::-webkit-scrollbar {
-                width: 6px;
-            }
-
-            .modal-box::-webkit-scrollbar-track {
-                background: var(--surface2);
-                border-radius: 999px;
-            }
-
-            .modal-box::-webkit-scrollbar-thumb {
-                background: var(--border2);
-                border-radius: 999px;
-            }
-
-        @keyframes modalIn {
-            from {
-                opacity: 0;
-                transform: scale(.96) translateY(12px);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+            box-shadow: 0 24px 80px rgba(0,0,0,.6);
+            animation: dropIn .2s ease;
         }
 
         .hist-box {
-            max-width: 900px;
+            max-width: 880px;
+        }
+
+        .form-box {
+            max-width: 720px;
         }
 
         .modal-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 18px 24px;
-            border-bottom: 1px solid var(--border2);
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             background: var(--surface);
@@ -629,7 +615,18 @@
             }
 
         .modal-body {
-            padding: 20px 24px;
+            padding: 20px 22px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 16px 22px;
+            border-top: 1px solid var(--border);
+            position: sticky;
+            bottom: 0;
+            background: var(--surface);
         }
 
         /* ── FORM EDITAR ── */
@@ -637,6 +634,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
+            padding: 20px 22px;
         }
 
         @media(max-width:500px) {
@@ -694,17 +692,6 @@
             .form-field.full {
                 grid-column: 1 / -1;
             }
-
-        .modal-footer {
-            padding: 16px 24px;
-            border-top: 1px solid var(--border2);
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            position: sticky;
-            bottom: 0;
-            background: var(--surface);
-        }
 
         /* ── HISTORIAL ── */
         .ev-wrap {
@@ -804,12 +791,12 @@
 </head>
 <body>
 
-    <!-- ══ TOP BAR ══ -->
+    <!-- ══ TOP BAR ══════════════════════════════════════════════════════════ -->
     <div class="topbar">
-        <div class="topbar-icon">🖨️</div>
+        <div class="topbar-icon">📦</div>
         <div class="topbar-title">
-            <h1>Periféricos NF</h1>
-            <p>Gestión de periféricos no facturados</p>
+            <h1>Inventarios NF</h1>
+            <p>Gestión de inventario no facturado</p>
         </div>
         <div class="topbar-actions">
             <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
@@ -827,43 +814,29 @@
         </div>
     </div>
 
-    <!-- ══ MAIN ══ -->
+    <!-- ══ MAIN ═════════════════════════════════════════════════════════════ -->
     <div class="main">
 
         <!-- ── Panel nuevo registro ── -->
         <div class="panel" id="panelNuevo">
             <div class="panel-title">➕ Nuevo Registro</div>
             <div class="form-grid">
-                <div class="field"><label>ID Único</label><input id="f_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
-                <div class="field"><label>OC</label><input id="f_OC" placeholder="Orden de compra"></div>
-                <div class="field"><label>Folio Inventario</label><input id="f_FOLIO_INVENTARIO" placeholder="Folio de inventario"></div>
-                <div class="field"><label>Fecha Entrada</label><input id="f_FECHA_ENTRADA" type="date"></div>
-                <div class="field"><label>Recibido Por</label><input id="f_RECIBIDO_POR" placeholder="Nombre"></div>
-                <div class="field"><label>Subcategoría</label><input id="f_SUBCATEGORIA" placeholder="Subcategoría"></div>
-                <div class="field">
-                    <label>Tipo</label>
-                    <select id="f_TIPO">
-                        <option value="">— Selecciona —</option>
-                        <option>MONITOR</option>
-                        <option>TECLADO</option>
-                        <option>MOUSE</option>
-                        <option>IMPRESORA</option>
-                        <option>ESCÁNER</option>
-                        <option>PROYECTOR</option>
-                        <option>BOCINAS</option>
-                        <option>WEBCAM</option>
-                        <option>DOCKING STATION</option>
-                        <option>HEADSET</option>
-                        <option>UPS</option>
-                        <option>SWITCH</option>
-                        <option>ROUTER</option>
-                        <option>OTRO</option>
-                    </select>
-                </div>
+                <div class="field"><label>Folio Inv.</label><input id="f_INV_FOLIO" placeholder="Folio de inventario"></div>
+                <div class="field"><label>Equipo</label><input id="f_EQUIPO" placeholder="Nombre o descripción del equipo"></div>
                 <div class="field"><label>Marca</label><input id="f_MARCA" placeholder="Marca"></div>
                 <div class="field"><label>Modelo</label><input id="f_MODELO" placeholder="Modelo"></div>
                 <div class="field"><label>Cantidad</label><input id="f_CANTIDAD" type="number" min="0" placeholder="0"></div>
-                <div class="field"><label>Número de Serie</label><input id="f_NUMERO_SERIE" placeholder="No. de serie"></div>
+                <div class="field"><label>Precio Unitario</label><input id="f_PRECIO_UNITARIO" type="number" step="0.01" min="0" placeholder="0.00"></div>
+                <div class="field"><label>Precio con IVA</label><input id="f_PRECIO_CON_IVA" type="number" step="0.01" min="0" placeholder="0.00"></div>
+                <div class="field">
+                    <label>Moneda</label>
+                    <select id="f_MONEDA">
+                        <option value="">— Selecciona —</option>
+                        <option>MXN</option>
+                        <option>USD</option>
+                        <option>EUR</option>
+                    </select>
+                </div>
                 <div class="field">
                     <label>Proveedor</label>
                     <select id="f_PROVEEDOR">
@@ -871,41 +844,28 @@
                         <option>APC</option>
                         <option>BRIGHT</option>
                         <option>DELL</option>
-                        <option>HP</option>
-                        <option>EPSON</option>
                         <option>HG COMUNICACIONES</option>
                         <option>IPS</option>
-                        <option>LENOVO</option>
                         <option>PCTONER</option>
                         <option>SLA</option>
-                        <option>OTRO</option>
                     </select>
                 </div>
-                <div class="field"><label>Costo (Pesos)</label><input id="f_COSTO_PESOS" type="number" step="0.01" min="0" placeholder="0.00"></div>
+                <div class="field"><label>Presupuesto</label><input id="f_PRESUPUESTO" placeholder="Presupuesto asignado"></div>
                 <div class="field">
-                    <label>Estado</label>
-                    <select id="f_ESTADO">
+                    <label>Status</label>
+                    <select id="f_STATUS">
                         <option value="">— Selecciona —</option>
-                        <option>NUEVO</option>
-                        <option>BUENO</option>
-                        <option>REGULAR</option>
-                        <option>MALO</option>
-                        <option>DADO DE BAJA</option>
+                        <option>ACTIVO</option>
+                        <option>INACTIVO</option>
+                        <option>EN USO</option>
+                        <option>EN REPARACION</option>
+                        <option>BAJA</option>
                     </select>
                 </div>
-                <div class="field"><label>Destino</label><input id="f_DESTINO" placeholder="Destino"></div>
-                <div class="field">
-                    <label>Disponible</label>
-                    <select id="f_DISPONIBLE">
-                        <option value="">— Selecciona —</option>
-                        <option value="true">SÍ</option>
-                        <option value="false">NO</option>
-                    </select>
-                </div>
-                <div class="field"><label>Fecha Salida</label><input id="f_FECHA_SALIDA" type="date"></div>
-                <div class="field"><label>Destino Planta</label><input id="f_DESTINO_PLANTA" placeholder="Planta destino"></div>
-                <div class="field"><label>Asignado A</label><input id="f_ASIGNADO_A" placeholder="Persona asignada"></div>
-                <div class="field"><label>Personal IT que Asigna</label><input id="f_PERSONAL_IT_QUE_ASIGNA" placeholder="Nombre del IT"></div>
+                <div class="field"><label>Año</label><input id="f_ANIO" type="number" min="2000" max="2099" placeholder="2025"></div>
+                <div class="field"><label>OC</label><input id="f_OC" placeholder="Orden de compra"></div>
+                <div class="field"><label>Número de Serie</label><input id="f_NUMERO_SERIE" placeholder="No. serie"></div>
+                <div class="field"><label>Ubicación Actual</label><input id="f_UBICACION_ACTUAL" placeholder="Ubicación"></div>
             </div>
             <button class="btn btn-success" onclick="guardar()">💾 Guardar</button>
             <button class="btn btn-ghost" onclick="limpiarForm()" style="margin-left:8px;">✕ Limpiar</button>
@@ -929,55 +889,45 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>ID Único</th>
-                            <th>OC</th>
-                            <th>Folio Inventario</th>
-                            <th>Fecha Entrada</th>
-                            <th>Recibido Por</th>
-                            <th>Subcategoría</th>
-                            <th>Tipo</th>
+                            <th>Folio Inv.</th>
+                            <th>Equipo</th>
                             <th>Marca</th>
                             <th>Modelo</th>
                             <th>Cantidad</th>
-                            <th>No. Serie</th>
+                            <th>Precio Unit.</th>
+                            <th>Precio c/ IVA</th>
+                            <th>Moneda</th>
                             <th>Proveedor</th>
-                            <th>Costo Pesos</th>
-                            <th>Estado</th>
-                            <th>Destino</th>
-                            <th>Disponible</th>
-                            <th>Fecha Salida</th>
-                            <th>Destino Planta</th>
-                            <th>Asignado A</th>
-                            <th>Personal IT</th>
+                            <th>Presupuesto</th>
+                            <th>Status</th>
+                            <th>Año</th>
+                            <th>OC</th>
+                            <th>No. Serie</th>
+                            <th>Ubicación Actual</th>
                             <th>Acciones</th>
                         </tr>
                         <tr class="filter-row">
                             <td></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ID_UNICO"></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_OC"></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FOLIO_INVENTARIO"></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FECHA_ENTRADA"></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_RECIBIDO_POR"></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_SUBCATEGORIA"></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_TIPO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_INV_FOLIO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_EQUIPO"></td>
                             <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MARCA"></td>
                             <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MODELO"></td>
                             <td></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_NUMERO_SERIE"></td>
+                            <td></td>
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MONEDA"></td>
                             <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PROVEEDOR"></td>
-                            <td></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ESTADO"></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_DESTINO"></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_DISPONIBLE"></td>
-                            <td></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_DESTINO_PLANTA"></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ASIGNADO_A"></td>
-                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PERSONAL_IT_QUE_ASIGNA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PRESUPUESTO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_STATUS"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ANIO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_OC"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_NUMERO_SERIE"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_UBICACION_ACTUAL"></td>
                             <td></td>
                         </tr>
                     </thead>
                     <tbody id="tabla">
-                        <tr><td colspan="22" style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando…</td></tr>
+                        <tr><td colspan="17" style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando…</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -991,88 +941,59 @@
         </div>
 
     </div><!-- /main -->
-    <!-- ══ MODAL EDITAR ══ -->
+    <!-- ══ MODAL EDITAR ═════════════════════════════════════════════════════ -->
     <div class="modal" id="modalEditar">
         <div class="modal-box form-box">
             <div class="modal-header">
-                <h3>✏️ Editar Periférico NF &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="editarIdLabel">#</span></h3>
+                <h3>✏️ Editar Inventario NF &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="editarIdLabel">#</span></h3>
                 <button class="btn btn-ghost btn-sm" onclick="cerrarEditar()">✕</button>
             </div>
-            <div class="modal-body">
-                <div class="form-grid-modal">
-                    <div class="form-field"><label>ID Único</label><input id="e_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
-                    <div class="form-field"><label>OC</label><input id="e_OC" placeholder="Orden de compra"></div>
-                    <div class="form-field"><label>Folio Inventario</label><input id="e_FOLIO_INVENTARIO" placeholder="Folio de inventario"></div>
-                    <div class="form-field"><label>Fecha Entrada</label><input id="e_FECHA_ENTRADA" type="date"></div>
-                    <div class="form-field"><label>Recibido Por</label><input id="e_RECIBIDO_POR" placeholder="Nombre"></div>
-                    <div class="form-field"><label>Subcategoría</label><input id="e_SUBCATEGORIA" placeholder="Subcategoría"></div>
-                    <div class="form-field">
-                        <label>Tipo</label>
-                        <select id="e_TIPO">
-                            <option value="">— Selecciona —</option>
-                            <option>MONITOR</option>
-                            <option>TECLADO</option>
-                            <option>MOUSE</option>
-                            <option>IMPRESORA</option>
-                            <option>ESCÁNER</option>
-                            <option>PROYECTOR</option>
-                            <option>BOCINAS</option>
-                            <option>WEBCAM</option>
-                            <option>DOCKING STATION</option>
-                            <option>HEADSET</option>
-                            <option>UPS</option>
-                            <option>SWITCH</option>
-                            <option>ROUTER</option>
-                            <option>OTRO</option>
-                        </select>
-                    </div>
-                    <div class="form-field"><label>Marca</label><input id="e_MARCA" placeholder="Marca"></div>
-                    <div class="form-field"><label>Modelo</label><input id="e_MODELO" placeholder="Modelo"></div>
-                    <div class="form-field"><label>Cantidad</label><input id="e_CANTIDAD" type="number" min="0" placeholder="0"></div>
-                    <div class="form-field"><label>Número de Serie</label><input id="e_NUMERO_SERIE" placeholder="No. de serie"></div>
-                    <div class="form-field">
-                        <label>Proveedor</label>
-                        <select id="e_PROVEEDOR">
-                            <option value="">— Selecciona —</option>
-                            <option>APC</option>
-                            <option>BRIGHT</option>
-                            <option>DELL</option>
-                            <option>HP</option>
-                            <option>EPSON</option>
-                            <option>HG COMUNICACIONES</option>
-                            <option>IPS</option>
-                            <option>LENOVO</option>
-                            <option>PCTONER</option>
-                            <option>SLA</option>
-                            <option>OTRO</option>
-                        </select>
-                    </div>
-                    <div class="form-field"><label>Costo (Pesos)</label><input id="e_COSTO_PESOS" type="number" step="0.01" min="0" placeholder="0.00"></div>
-                    <div class="form-field">
-                        <label>Estado</label>
-                        <select id="e_ESTADO">
-                            <option value="">— Selecciona —</option>
-                            <option>NUEVO</option>
-                            <option>BUENO</option>
-                            <option>REGULAR</option>
-                            <option>MALO</option>
-                            <option>DADO DE BAJA</option>
-                        </select>
-                    </div>
-                    <div class="form-field"><label>Destino</label><input id="e_DESTINO" placeholder="Destino"></div>
-                    <div class="form-field">
-                        <label>Disponible</label>
-                        <select id="e_DISPONIBLE">
-                            <option value="">— Selecciona —</option>
-                            <option value="true">SÍ</option>
-                            <option value="false">NO</option>
-                        </select>
-                    </div>
-                    <div class="form-field"><label>Fecha Salida</label><input id="e_FECHA_SALIDA" type="date"></div>
-                    <div class="form-field"><label>Destino Planta</label><input id="e_DESTINO_PLANTA" placeholder="Planta destino"></div>
-                    <div class="form-field"><label>Asignado A</label><input id="e_ASIGNADO_A" placeholder="Persona asignada"></div>
-                    <div class="form-field"><label>Personal IT que Asigna</label><input id="e_PERSONAL_IT_QUE_ASIGNA" placeholder="Nombre del IT"></div>
+            <div class="form-grid-modal">
+                <div class="form-field"><label>Folio Inv.</label><input id="e_INV_FOLIO" placeholder="Folio de inventario"></div>
+                <div class="form-field"><label>Equipo</label><input id="e_EQUIPO" placeholder="Nombre o descripción del equipo"></div>
+                <div class="form-field"><label>Marca</label><input id="e_MARCA" placeholder="Marca"></div>
+                <div class="form-field"><label>Modelo</label><input id="e_MODELO" placeholder="Modelo"></div>
+                <div class="form-field"><label>Cantidad</label><input id="e_CANTIDAD" type="number" min="0" placeholder="0"></div>
+                <div class="form-field"><label>Precio Unitario</label><input id="e_PRECIO_UNITARIO" type="number" step="0.01" min="0" placeholder="0.00"></div>
+                <div class="form-field"><label>Precio con IVA</label><input id="e_PRECIO_CON_IVA" type="number" step="0.01" min="0" placeholder="0.00"></div>
+                <div class="form-field">
+                    <label>Moneda</label>
+                    <select id="e_MONEDA">
+                        <option value="">— Selecciona —</option>
+                        <option>MXN</option>
+                        <option>USD</option>
+                        <option>EUR</option>
+                    </select>
                 </div>
+                <div class="form-field">
+                    <label>Proveedor</label>
+                    <select id="e_PROVEEDOR">
+                        <option value="">— Selecciona —</option>
+                        <option>APC</option>
+                        <option>BRIGHT</option>
+                        <option>DELL</option>
+                        <option>HG COMUNICACIONES</option>
+                        <option>IPS</option>
+                        <option>PCTONER</option>
+                        <option>SLA</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Presupuesto</label><input id="e_PRESUPUESTO" placeholder="Presupuesto asignado"></div>
+                <div class="form-field">
+                    <label>Status</label>
+                    <select id="e_STATUS">
+                        <option value="">— Selecciona —</option>
+                        <option>ACTIVO</option>
+                        <option>INACTIVO</option>
+                        <option>EN USO</option>
+                        <option>EN REPARACION</option>
+                        <option>BAJA</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Año</label><input id="e_ANIO" type="number" min="2000" max="2099" placeholder="2025"></div>
+                <div class="form-field"><label>OC</label><input id="e_OC" placeholder="Orden de compra"></div>
+                <div class="form-field"><label>Número de Serie</label><input id="e_NUMERO_SERIE" placeholder="No. serie"></div>
+                <div class="form-field full"><label>Ubicación Actual</label><input id="e_UBICACION_ACTUAL" placeholder="Ubicación"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
@@ -1081,15 +1002,15 @@
         </div>
     </div>
 
-    <!-- ══ MODAL HISTORIAL ══ -->
+    <!-- ══ MODAL HISTORIAL ══════════════════════════════════════════════════ -->
     <div class="modal" id="modalHistorial">
         <div class="modal-box hist-box">
             <div class="modal-header">
-                <h3>📋 Historial Periférico NF &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="histIdLabel">#</span></h3>
+                <h3>📋 Historial de cambios &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="histIdLabel">#</span></h3>
                 <button class="btn btn-ghost btn-sm" onclick="cerrarHistorial()">✕</button>
             </div>
-            <div class="modal-body" id="contenidoHistorial">
-                <p style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando...</p>
+            <div id="contenidoHistorial" style="padding:20px 22px;">
+                <p style="text-align:center;padding:40px;color:var(--muted)">Cargando...</p>
             </div>
         </div>
     </div>
@@ -1097,75 +1018,85 @@
     <script>
         // ═══ ESTADO GLOBAL ═══
         let paginaActual = 1;
-        const limite = 10;
+        let limite = 10;
         let totalRegistros = 0;
         let datosActuales = [];
         let editandoID = null;
-        let _filtrarTimer = null;
         let usuarioActual = 'SISTEMA';
         let rolActual = '';
+        let _filtrarTimer = null;
 
-        // Campos para el historial — coinciden con COLS del service
+        // ═══ CAMPOS DEL HISTORIAL (deben coincidir con COLS del servicio) ═══
         const CAMPOS_HIST = [
-            { key: 'ID_UNICO', label: 'ID Único' },
-            { key: 'OC', label: 'OC' },
-            { key: 'FOLIO_INVENTARIO', label: 'Folio Inventario' },
-            { key: 'FECHA_ENTRADA', label: 'Fecha Entrada' },
-            { key: 'RECIBIDO_POR', label: 'Recibido Por' },
-            { key: 'SUBCATEGORIA', label: 'Subcategoría' },
-            { key: 'TIPO', label: 'Tipo' },
+            { key: 'INV_FOLIO', label: 'Folio Inv.' },
+            { key: 'EQUIPO', label: 'Equipo' },
             { key: 'MARCA', label: 'Marca' },
             { key: 'MODELO', label: 'Modelo' },
             { key: 'CANTIDAD', label: 'Cantidad' },
-            { key: 'NUMERO_SERIE', label: 'No. Serie' },
+            { key: 'PRECIO_UNITARIO', label: 'Precio Unitario' },
+            { key: 'PRECIO_CON_IVA', label: 'Precio con IVA' },
+            { key: 'MONEDA', label: 'Moneda' },
             { key: 'PROVEEDOR', label: 'Proveedor' },
-            { key: 'COSTO_PESOS', label: 'Costo Pesos' },
-            { key: 'ESTADO', label: 'Estado' },
-            { key: 'DESTINO', label: 'Destino' },
-            { key: 'DISPONIBLE', label: 'Disponible' },
-            { key: 'FECHA_SALIDA', label: 'Fecha Salida' },
-            { key: 'DESTINO_PLANTA', label: 'Destino Planta' },
-            { key: 'ASIGNADO_A', label: 'Asignado A' },
-            { key: 'PERSONAL_IT_QUE_ASIGNA', label: 'Personal IT que Asigna' },
+            { key: 'PRESUPUESTO', label: 'Presupuesto' },
+            { key: 'STATUS', label: 'Status' },
+            { key: 'ANIO', label: 'Año' },
+            { key: 'OC', label: 'OC' },
+            { key: 'NUMERO_SERIE', label: 'No. Serie' },
+            { key: 'UBICACION_ACTUAL', label: 'Ubicación Actual' },
         ];
 
-        // ═══ INICIO ═══
-        (async function init() {
-            try {
-                const r = await fetch('/ME', { credentials: 'include' });
-                if (r.ok) {
-                    const u = await r.json();
-                    usuarioActual = u.usuario || u.USUARIO || 'SISTEMA';
-                    rolActual = u.rol || u.ROL || '';
-                    document.getElementById('usuarioDisplay').textContent = usuarioActual;
-                    document.getElementById('dropdownNombre').textContent = usuarioActual;
-                    document.getElementById('dropdownRol').textContent = rolActual;
-                }
-            } catch (_) { }
-            cargar();
-        })();
+        // ═══ INACTIVIDAD 30 min ═══
+        let _inacTimer = null;
+        function resetInactividad() {
+            clearTimeout(_inacTimer);
+            _inacTimer = setTimeout(async () => {
+                try { await fetch('/LOGOUT', { method: 'POST', credentials: 'include' }); } catch (e) { }
+                window.location.href = '/static/login.html?inactivo=1';
+            }, 30 * 60 * 1000);
+        }
+        ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(ev =>
+            document.addEventListener(ev, resetInactividad, { passive: true })
+        );
 
-        // ═══ CARGAR DATOS ═══
+        // ═══ INIT ═══
+        window.addEventListener('DOMContentLoaded', () => {
+            resetInactividad();
+
+            fetch('/obtener-usuario', { credentials: 'include' })
+                .then(r => { if (!r.ok) { window.location.href = '/static/login.html'; return null; } return r.json(); })
+                .then(d => {
+                    if (!d) return;
+                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
+                    usuarioActual = d.usuario || 'SISTEMA';
+                    rolActual = (d.rol || '').trim().toUpperCase();
+                    document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownRol').textContent = rolActual;
+                })
+                .catch(() => { window.location.href = '/static/login.html'; });
+
+            cargar();
+        });
+
+        // ═══ CARGAR TABLA ═══
         async function cargar() {
+            const qs = obtenerParametros();
             try {
-                const url = `/PERIFERICOS_NF?page=${paginaActual}&limit=${limite}&${obtenerParametros()}`;
-                const r = await fetch(url);
+                const r = await fetch(`/INVENTARIOS_NF?page=${paginaActual}&limit=${limite}&${qs}`);
                 const d = await r.json();
-                datosActuales = d.data || d.registros || [];
-                totalRegistros = d.total || d.totalRegistros || 0;
+                totalRegistros = d.total || 0;
+                datosActuales = d.data || [];
                 renderizar();
             } catch (e) {
                 document.getElementById('tabla').innerHTML =
-                    `<tr><td colspan="22" style="text-align:center;padding:40px;color:var(--red)">❌ Error al cargar datos</td></tr>`;
+                    `<tr><td colspan="17" style="text-align:center;padding:40px;color:var(--red)">❌ Error al cargar: ${e.message}</td></tr>`;
             }
         }
 
-        // ═══ PARÁMETROS DE FILTRO ═══
         function obtenerParametros() {
-            const campos = ['ID_UNICO', 'OC', 'FOLIO_INVENTARIO', 'FECHA_ENTRADA',
-                'RECIBIDO_POR', 'SUBCATEGORIA', 'TIPO', 'MARCA', 'MODELO',
-                'NUMERO_SERIE', 'PROVEEDOR', 'ESTADO', 'DESTINO', 'DISPONIBLE',
-                'DESTINO_PLANTA', 'ASIGNADO_A', 'PERSONAL_IT_QUE_ASIGNA'];
+            const campos = ['INV_FOLIO', 'EQUIPO', 'MARCA', 'MODELO', 'MONEDA',
+                'PROVEEDOR', 'PRESUPUESTO', 'STATUS', 'ANIO', 'OC',
+                'NUMERO_SERIE', 'UBICACION_ACTUAL'];
             const p = new URLSearchParams();
             campos.forEach(c => {
                 const val = (document.getElementById('fil_' + c)?.value || '').trim();
@@ -1179,53 +1110,44 @@
             _filtrarTimer = setTimeout(() => { paginaActual = 1; cargar(); }, 350);
         }
 
-        // ═══ RENDERIZAR ═══
         function renderizar() {
             const tbody = document.getElementById('tabla');
             tbody.innerHTML = '';
 
             if (!datosActuales.length) {
-                tbody.innerHTML = '<tr><td colspan="22" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
-                document.getElementById('paginaInfo').textContent =
-                    `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite) || 1} | Total: ${totalRegistros}`;
+                tbody.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
                 return;
             }
 
             const esAdmin = rolActual === 'ADMIN';
 
             datosActuales.forEach(row => {
-                const dispPill = disponiblePill(row.DISPONIBLE);
-                const dispLabel = row.DISPONIBLE === true ? 'SÍ'
-                    : row.DISPONIBLE === false ? 'NO' : '—';
-                const fechaEnt = row.FECHA_ENTRADA ? row.FECHA_ENTRADA.split('T')[0] : '—';
-                const fechaSal = row.FECHA_SALIDA ? row.FECHA_SALIDA.split('T')[0] : '—';
-                const costoStr = row.COSTO_PESOS != null
-                    ? `$${parseFloat(row.COSTO_PESOS).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
+                const precioUnit = row.PRECIO_UNITARIO != null
+                    ? `$${parseFloat(row.PRECIO_UNITARIO).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
                     : '—';
+                const precioIva = row.PRECIO_CON_IVA != null
+                    ? `$${parseFloat(row.PRECIO_CON_IVA).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
+                    : '—';
+                const statusPill = statusClass(row.STATUS);
 
                 tbody.innerHTML += `
                         <tr>
                             <td>${row.ID}</td>
-                            <td class="mono">${esc(row.ID_UNICO) || '—'}</td>
-                            <td class="mono">${esc(row.OC) || '—'}</td>
-                            <td class="mono">${esc(row.FOLIO_INVENTARIO) || '—'}</td>
-                            <td class="mono">${fechaEnt}</td>
-                            <td>${esc(row.RECIBIDO_POR) || '—'}</td>
-                            <td>${esc(row.SUBCATEGORIA) || '—'}</td>
-                            <td>${esc(row.TIPO) || '—'}</td>
+                            <td class="mono">${esc(row.INV_FOLIO) || '—'}</td>
+                            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.EQUIPO) || ''}">${esc(row.EQUIPO) || '—'}</td>
                             <td>${esc(row.MARCA) || '—'}</td>
                             <td>${esc(row.MODELO) || '—'}</td>
                             <td class="mono" style="text-align:center">${row.CANTIDAD ?? '—'}</td>
-                            <td class="mono">${esc(row.NUMERO_SERIE) || '—'}</td>
+                            <td class="mono">${precioUnit}</td>
+                            <td class="mono">${precioIva}</td>
+                            <td class="mono">${esc(row.MONEDA) || '—'}</td>
                             <td>${esc(row.PROVEEDOR) || '—'}</td>
-                            <td class="mono">${costoStr}</td>
-                            <td>${esc(row.ESTADO) || '—'}</td>
-                            <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.DESTINO) || ''}">${esc(row.DESTINO) || '—'}</td>
-                            <td><span class="disponible-pill ${dispPill}">${dispLabel}</span></td>
-                            <td class="mono">${fechaSal}</td>
-                            <td>${esc(row.DESTINO_PLANTA) || '—'}</td>
-                            <td>${esc(row.ASIGNADO_A) || '—'}</td>
-                            <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.PERSONAL_IT_QUE_ASIGNA) || ''}">${esc(row.PERSONAL_IT_QUE_ASIGNA) || '—'}</td>
+                            <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.PRESUPUESTO) || ''}">${esc(row.PRESUPUESTO) || '—'}</td>
+                            <td><span class="status-pill ${statusPill}">${esc(row.STATUS) || '—'}</span></td>
+                            <td class="mono">${row.ANIO ?? '—'}</td>
+                            <td class="mono">${esc(row.OC) || '—'}</td>
+                            <td class="mono">${esc(row.NUMERO_SERIE) || '—'}</td>
+                            <td>${esc(row.UBICACION_ACTUAL) || '—'}</td>
                             <td style="white-space:nowrap">
                                 ${esAdmin ? `
                                 <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
@@ -1240,9 +1162,11 @@
                 `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite) || 1} | Total: ${totalRegistros}`;
         }
 
-        function disponiblePill(val) {
-            if (val === true || val === 'true') return 'pill-si';
-            if (val === false || val === 'false') return 'pill-no';
+        function statusClass(val) {
+            if (!val) return 'pill-otro';
+            const v = val.toUpperCase();
+            if (v === 'ACTIVO' || v === 'EN USO') return 'pill-activo';
+            if (v === 'INACTIVO' || v === 'BAJA') return 'pill-inactivo';
             return 'pill-otro';
         }
 
@@ -1252,34 +1176,25 @@
         // ═══ GUARDAR NUEVO ═══
         async function guardar() {
             const dto = {
-                OC: v('f_OC'),
-                FOLIO_INVENTARIO: v('f_FOLIO_INVENTARIO'),
-                FECHA_ENTRADA: v('f_FECHA_ENTRADA'),
-                RECIBIDO_POR: v('f_RECIBIDO_POR'),
-                SUBCATEGORIA: v('f_SUBCATEGORIA'),
-                TIPO: v('f_TIPO'),
+                INV_FOLIO: v('f_INV_FOLIO'),
+                EQUIPO: v('f_EQUIPO'),
                 MARCA: v('f_MARCA'),
                 MODELO: v('f_MODELO'),
                 CANTIDAD: vInt('f_CANTIDAD'),
-                NUMERO_SERIE: v('f_NUMERO_SERIE'),
+                PRECIO_UNITARIO: vDec('f_PRECIO_UNITARIO'),
+                PRECIO_CON_IVA: vDec('f_PRECIO_CON_IVA'),
+                MONEDA: v('f_MONEDA'),
                 PROVEEDOR: v('f_PROVEEDOR'),
-                COSTO_PESOS: vDec('f_COSTO_PESOS'),
-                ESTADO: v('f_ESTADO'),
-                DESTINO: v('f_DESTINO'),
-                DISPONIBLE: vBool('f_DISPONIBLE'),
-                FECHA_SALIDA: v('f_FECHA_SALIDA'),
-                DESTINO_PLANTA: v('f_DESTINO_PLANTA'),
-                ASIGNADO_A: v('f_ASIGNADO_A'),
-                PERSONAL_IT_QUE_ASIGNA: v('f_PERSONAL_IT_QUE_ASIGNA'),
+                PRESUPUESTO: v('f_PRESUPUESTO'),
+                STATUS: v('f_STATUS'),
+                ANIO: vInt('f_ANIO'),
+                OC: v('f_OC'),
+                NUMERO_SERIE: v('f_NUMERO_SERIE'),
+                UBICACION_ACTUAL: v('f_UBICACION_ACTUAL'),
             };
 
-            // ID_UNICO auto generado desde OC + FOLIO_INVENTARIO
-            const oc = (dto.OC || '').trim();
-            const folio = (dto.FOLIO_INVENTARIO || '').trim();
-            dto.ID_UNICO = [oc, folio].filter(Boolean).join('+') || null;
-
             try {
-                const r = await fetch('/PERIFERICO_NF', {
+                const r = await fetch('/INVENTARIO_NF', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
                     body: JSON.stringify(dto)
@@ -1292,11 +1207,10 @@
         }
 
         function limpiarForm() {
-            ['f_ID_UNICO', 'f_OC', 'f_FOLIO_INVENTARIO', 'f_FECHA_ENTRADA', 'f_RECIBIDO_POR',
-                'f_SUBCATEGORIA', 'f_TIPO', 'f_MARCA', 'f_MODELO', 'f_CANTIDAD',
-                'f_NUMERO_SERIE', 'f_PROVEEDOR', 'f_COSTO_PESOS', 'f_ESTADO', 'f_DESTINO',
-                'f_DISPONIBLE', 'f_FECHA_SALIDA', 'f_DESTINO_PLANTA', 'f_ASIGNADO_A',
-                'f_PERSONAL_IT_QUE_ASIGNA'].forEach(id => {
+            ['f_INV_FOLIO', 'f_EQUIPO', 'f_MARCA', 'f_MODELO', 'f_CANTIDAD',
+                'f_PRECIO_UNITARIO', 'f_PRECIO_CON_IVA', 'f_MONEDA', 'f_PROVEEDOR',
+                'f_PRESUPUESTO', 'f_STATUS', 'f_ANIO', 'f_OC', 'f_NUMERO_SERIE',
+                'f_UBICACION_ACTUAL'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.value = '';
                 });
@@ -1304,20 +1218,20 @@
 
         // ═══ ELIMINAR ═══
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este periférico NF?')) return;
+            if (!confirm('¿Eliminar este registro de inventario NF?')) return;
             try {
-                await fetch(`/PERIFERICO_NF/${id}`, { method: 'DELETE' });
+                await fetch(`/INVENTARIO_NF/${id}`, { method: 'DELETE' });
                 cargar();
             } catch (e) { alert('Error: ' + e.message); }
         }
 
         // ═══ EXPORTAR ═══
-        function exportarFiltrado() { window.open('/PERIFERICOS_NF/EXPORTAR?' + obtenerParametros()); }
-        function exportarTodo() { window.open('/PERIFERICOS_NF/EXPORTAR_TODO'); }
+        function exportarFiltrado() { window.open('/INVENTARIOS_NF/EXPORTAR?' + obtenerParametros()); }
+        function exportarTodo() { window.open('/INVENTARIOS_NF/EXPORTAR_TODO'); }
         function exportarPorAnio() {
             const a = document.getElementById('anioExportar').value;
             if (!a) { alert('Ingresa un año'); return; }
-            window.open('/PERIFERICOS_NF/EXPORTAR_ANIO?anio=' + a);
+            window.open('/INVENTARIOS_NF/EXPORTAR_ANIO?anio=' + a);
         }
 
         // ═══ MODAL EDITAR ═══
@@ -1326,26 +1240,21 @@
             document.getElementById('editarIdLabel').textContent = '#' + id;
             const row = datosActuales.find(r => r.ID === id);
             if (row) {
-                setV('e_ID_UNICO', row.ID_UNICO);
-                setV('e_OC', row.OC);
-                setV('e_FOLIO_INVENTARIO', row.FOLIO_INVENTARIO);
-                setV('e_FECHA_ENTRADA', row.FECHA_ENTRADA ? row.FECHA_ENTRADA.split('T')[0] : '');
-                setV('e_RECIBIDO_POR', row.RECIBIDO_POR);
-                setV('e_SUBCATEGORIA', row.SUBCATEGORIA);
-                setV('e_TIPO', row.TIPO);
+                setV('e_INV_FOLIO', row.INV_FOLIO);
+                setV('e_EQUIPO', row.EQUIPO);
                 setV('e_MARCA', row.MARCA);
                 setV('e_MODELO', row.MODELO);
                 setV('e_CANTIDAD', row.CANTIDAD);
-                setV('e_NUMERO_SERIE', row.NUMERO_SERIE);
+                setV('e_PRECIO_UNITARIO', row.PRECIO_UNITARIO);
+                setV('e_PRECIO_CON_IVA', row.PRECIO_CON_IVA);
+                setV('e_MONEDA', row.MONEDA);
                 setV('e_PROVEEDOR', row.PROVEEDOR);
-                setV('e_COSTO_PESOS', row.COSTO_PESOS);
-                setV('e_ESTADO', row.ESTADO);
-                setV('e_DESTINO', row.DESTINO);
-                setV('e_DISPONIBLE', row.DISPONIBLE === true ? 'true' : row.DISPONIBLE === false ? 'false' : '');
-                setV('e_FECHA_SALIDA', row.FECHA_SALIDA ? row.FECHA_SALIDA.split('T')[0] : '');
-                setV('e_DESTINO_PLANTA', row.DESTINO_PLANTA);
-                setV('e_ASIGNADO_A', row.ASIGNADO_A);
-                setV('e_PERSONAL_IT_QUE_ASIGNA', row.PERSONAL_IT_QUE_ASIGNA);
+                setV('e_PRESUPUESTO', row.PRESUPUESTO);
+                setV('e_STATUS', row.STATUS);
+                setV('e_ANIO', row.ANIO);
+                setV('e_OC', row.OC);
+                setV('e_NUMERO_SERIE', row.NUMERO_SERIE);
+                setV('e_UBICACION_ACTUAL', row.UBICACION_ACTUAL);
             }
             document.getElementById('modalEditar').classList.add('show');
             document.querySelector('#modalEditar .modal-box').scrollTop = 0;
@@ -1358,33 +1267,25 @@
 
         async function guardarCambios() {
             const dto = {
-                OC: v('e_OC'),
-                FOLIO_INVENTARIO: v('e_FOLIO_INVENTARIO'),
-                FECHA_ENTRADA: v('e_FECHA_ENTRADA'),
-                RECIBIDO_POR: v('e_RECIBIDO_POR'),
-                SUBCATEGORIA: v('e_SUBCATEGORIA'),
-                TIPO: v('e_TIPO'),
+                INV_FOLIO: v('e_INV_FOLIO'),
+                EQUIPO: v('e_EQUIPO'),
                 MARCA: v('e_MARCA'),
                 MODELO: v('e_MODELO'),
                 CANTIDAD: vInt('e_CANTIDAD'),
-                NUMERO_SERIE: v('e_NUMERO_SERIE'),
+                PRECIO_UNITARIO: vDec('e_PRECIO_UNITARIO'),
+                PRECIO_CON_IVA: vDec('e_PRECIO_CON_IVA'),
+                MONEDA: v('e_MONEDA'),
                 PROVEEDOR: v('e_PROVEEDOR'),
-                COSTO_PESOS: vDec('e_COSTO_PESOS'),
-                ESTADO: v('e_ESTADO'),
-                DESTINO: v('e_DESTINO'),
-                DISPONIBLE: vBool('e_DISPONIBLE'),
-                FECHA_SALIDA: v('e_FECHA_SALIDA'),
-                DESTINO_PLANTA: v('e_DESTINO_PLANTA'),
-                ASIGNADO_A: v('e_ASIGNADO_A'),
-                PERSONAL_IT_QUE_ASIGNA: v('e_PERSONAL_IT_QUE_ASIGNA'),
+                PRESUPUESTO: v('e_PRESUPUESTO'),
+                STATUS: v('e_STATUS'),
+                ANIO: vInt('e_ANIO'),
+                OC: v('e_OC'),
+                NUMERO_SERIE: v('e_NUMERO_SERIE'),
+                UBICACION_ACTUAL: v('e_UBICACION_ACTUAL'),
             };
 
-            const oc = (dto.OC || '').trim();
-            const folio = (dto.FOLIO_INVENTARIO || '').trim();
-            dto.ID_UNICO = [oc, folio].filter(Boolean).join('+') || null;
-
             try {
-                const r = await fetch(`/PERIFERICO_NF/${editandoID}`, {
+                const r = await fetch(`/INVENTARIO_NF/${editandoID}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
                     body: JSON.stringify(dto)
@@ -1398,11 +1299,9 @@
         // ═══ MODAL HISTORIAL ═══
         function esc(val) {
             if (val == null) return '';
-            return String(val)
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
-        function norm(val) { return (val == null) ? '' : String(val).trim(); }
+        function norm(v) { return (v == null) ? '' : String(v).trim(); }
         function formatFecha(f) {
             try {
                 const d = new Date(f);
@@ -1410,15 +1309,15 @@
                     year: 'numeric', month: '2-digit', day: '2-digit',
                     hour: '2-digit', minute: '2-digit', second: '2-digit'
                 });
-            } catch (_) { }
+            } catch (e) { }
             return f ?? '';
         }
 
         function renderEvento(ev) {
             let antes = ev.REGISTRO_ANTERIOR || ev.registro_anterior;
             let despues = ev.REGISTRO_NUEVO || ev.registro_nuevo;
-            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (_) { }
-            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (_) { }
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (e) { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (e) { }
 
             const cambiados = new Set();
             CAMPOS_HIST.forEach(({ key }) => {
@@ -1465,7 +1364,7 @@
             document.getElementById('modalHistorial').classList.add('show');
             document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
 
-            fetch(`/PERIFERICOS_NF/${id}/HISTORIAL`)
+            fetch(`/INVENTARIOS_NF/${id}/HISTORIAL`)
                 .then(r => r.json())
                 .then(data => {
                     const lista = (data.historial || [])
@@ -1508,7 +1407,6 @@
         function v(id) { const el = document.getElementById(id); return el ? (el.value.trim() || null) : null; }
         function vInt(id) { const x = v(id); return x != null ? parseInt(x) || null : null; }
         function vDec(id) { const x = v(id); return x != null ? parseFloat(x) || null : null; }
-        function vBool(id) { const x = v(id); if (x === 'true') return true; if (x === 'false') return false; return null; }
         function setV(id, val) { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
     </script>
 </body>
