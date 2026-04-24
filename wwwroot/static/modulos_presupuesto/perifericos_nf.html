@@ -1130,20 +1130,22 @@
         ];
 
         // ═══ INICIO ═══
-        (async function init() {
-            try {
-                const r = await fetch('/ME', { credentials: 'include' });
-                if (r.ok) {
-                    const u = await r.json();
-                    usuarioActual = u.usuario || u.USUARIO || 'SISTEMA';
-                    rolActual = u.rol || u.ROL || '';
-                    document.getElementById('usuarioDisplay').textContent = usuarioActual;
-                    document.getElementById('dropdownNombre').textContent = usuarioActual;
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch('/obtener-usuario', { credentials: 'include' })
+                .then(r => { if (!r.ok) { window.location.href = '/static/login.html'; return null; } return r.json(); })
+                .then(d => {
+                    if (!d) return;
+                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
+                    usuarioActual = d.usuario || 'SISTEMA';
+                    rolActual = (d.rol || '').trim().toUpperCase();
+                    document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
                     document.getElementById('dropdownRol').textContent = rolActual;
-                }
-            } catch (_) { }
+                })
+                .catch(() => { window.location.href = '/static/login.html'; });
+
             cargar();
-        })();
+        });
 
         // ═══ CARGAR DATOS ═══
         async function cargar() {
