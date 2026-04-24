@@ -1,205 +1,1680 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>CAMARAS DE AUDIO</title>
-<style>
-body{ font-family:Arial; margin:0; background:#f1f5f9; }
-.header{ background:#1e293b; color:white; padding:15px; font-size:20px; font-weight:bold; }
-.container{ padding:15px; }
-.form-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-bottom:15px; }
-.field{ display:flex; flex-direction:column; }
-.field label{ font-size:11px; font-weight:bold; color:#1e293b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.3px; }
-.field input{ padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:12px; background:#f8fafc; transition:border-color 0.2s; }
-.field input:focus{ outline:none; border-color:#2563eb; background:white; box-shadow:0 0 0 2px rgba(37,99,235,0.15); }
-button{ padding:6px 12px; border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; margin-right:5px; }
-.save{background:#16a34a;color:white;} .cancel{background:#64748b;color:white;} .delete{background:#dc2626;color:white;}
-.edit{background:#f59e0b;color:white;} .pdf{background:#2563eb;color:white;} .export{background:#7c3aed;color:white;}
-.btn-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:12px; }
-.btn-bar input[type="number"]{ padding:6px; border:1px solid #ccc; border-radius:5px; font-size:12px; width:110px; }
-.table-container{ width:100%; height:500px; overflow:auto; border:1px solid #ccc; background:white; }
-table{ border-collapse:collapse; min-width:3400px; font-size:11px; }
-th,td{ border:1px solid #ccc; padding:6px; white-space:nowrap; text-align:center; }
-th{ background:#1e293b; color:white; position:sticky; top:0; z-index:2; }
-.filter-row input{ width:100%; font-size:11px; }
-.pagination{ margin-top:10px; }
-.back{
-    background:#dc2626;
-    font-style: italic; color:#ffffff;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Cámaras & Audio</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060a10;
+            --surface: #0d1117;
+            --surface2: #111827;
+            --surface3: #161f2e;
+            --border: rgba(255,255,255,0.06);
+            --border2: rgba(255,255,255,0.11);
+            --accent: #3B82F6;
+            --cam: #00d4ff;
+            --cam2: #0090b8;
+            --text: #E2E8F0;
+            --muted: #4B5A6E;
+            --muted2: #7A8FA6;
+            --green: #10B981;
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --purple: #8B5CF6;
+            --cyan: #06B6D4;
+            --scan-color: rgba(0,212,255,0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            /* scanline overlay */
+            background-image: repeating-linear-gradient( 0deg, transparent, transparent 2px, var(--scan-color) 2px, var(--scan-color) 4px );
+            background-attachment: fixed;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            background: linear-gradient(135deg, #060d18, #0a1220);
+            border-bottom: 1px solid rgba(0,212,255,.2);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            box-shadow: 0 0 40px rgba(0,212,255,.08);
+        }
+
+        .topbar-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #003a4f, #006f8a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 18px rgba(0,212,255,.5), inset 0 1px 0 rgba(255,255,255,.1);
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+            /* Lens glare effect */
+            .topbar-icon::after {
+                content: '';
+                position: absolute;
+                top: 4px;
+                left: 4px;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: rgba(255,255,255,.25);
+            }
+
+        .topbar-title {
+            flex: 1;
+        }
+
+            .topbar-title h1 {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: .02em;
+                color: #fff;
+            }
+
+                .topbar-title h1 span {
+                    color: var(--cam);
+                }
+
+            .topbar-title p {
+                font-size: 10px;
+                color: var(--muted2);
+                margin-top: 1px;
+                font-family: 'DM Mono', monospace;
+                letter-spacing: .08em;
+                text-transform: uppercase;
+            }
+
+        /* REC badge */
+        .rec-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 6px;
+            background: rgba(239,68,68,.12);
+            border: 1px solid rgba(239,68,68,.3);
+            font-size: 10px;
+            font-weight: 700;
+            color: #fca5a5;
+            font-family: 'DM Mono', monospace;
+            letter-spacing: .1em;
+        }
+
+        .rec-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--red);
+            animation: blink 1.2s ease-in-out infinite;
+            box-shadow: 0 0 6px var(--red);
+        }
+
+        @keyframes blink {
+            0%,100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .2
+            }
+        }
+
+        /* live counter */
+        .live-counter {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--cam);
+            padding: 5px 12px;
+            background: rgba(0,212,255,.07);
+            border: 1px solid rgba(0,212,255,.2);
+            border-radius: 6px;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background .2s, border-color .2s;
+        }
+
+            .user-chip:hover {
+                background: rgba(255,255,255,.09);
+                border-color: var(--cam);
+            }
+
+            .user-chip span {
+                color: var(--muted2);
+            }
+
+            .user-chip .chip-arrow {
+                font-size: 9px;
+                color: var(--muted);
+                transition: transform .2s;
+            }
+
+            .user-chip.open .chip-arrow {
+                transform: rotate(180deg);
+            }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.6);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
+
+            .dropdown-header .d-name {
+                font-size: 13px;
+                font-weight: 700;
+            }
+
+            .dropdown-header .d-role {
+                font-size: 10px;
+                color: var(--muted);
+                font-family: 'DM Mono',monospace;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                margin-top: 2px;
+            }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: background .15s,color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans',sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: var(--text);
+            }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        /* ── MAIN ── */
+        .main {
+            max-width: 1700px;
+            margin: 0 auto;
+            padding: 20px 24px;
+        }
+
+        /* ── PANEL NUEVO REGISTRO ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid rgba(0,212,255,.12);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .panel::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, var(--cam), transparent);
+            }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--cam);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .panel-title::before {
+                content: '';
+                width: 3px;
+                height: 14px;
+                background: var(--cam);
+                border-radius: 2px;
+                display: inline-block;
+                box-shadow: 0 0 8px var(--cam);
+            }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted2);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .field input, .field select {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 28px;
+        }
+
+            .field select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+            .field input:focus, .field select:focus {
+                outline: none;
+                border-color: var(--cam);
+                box-shadow: 0 0 0 3px rgba(0,212,255,.1);
+            }
+
+        /* ── BOTONES ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans',sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(59,130,246,.3);
+        }
+
+            .btn-primary:hover {
+                background: #2563EB;
+                transform: translateY(-1px);
+            }
+
+        .btn-success {
+            background: var(--green);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(16,185,129,.25);
+        }
+
+            .btn-success:hover {
+                background: #059669;
+                transform: translateY(-1px);
+            }
+
+        .btn-danger {
+            background: var(--red);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(239,68,68,.25);
+        }
+
+            .btn-danger:hover {
+                background: #DC2626;
+                transform: translateY(-1px);
+            }
+
+        .btn-amber {
+            background: var(--amber);
+            color: #1c1400;
+        }
+
+            .btn-amber:hover {
+                background: #D97706;
+            }
+
+        .btn-cam {
+            background: linear-gradient(135deg,#004d66,#006f8a);
+            color: var(--cam);
+            border: 1px solid rgba(0,212,255,.3);
+            box-shadow: 0 3px 12px rgba(0,212,255,.2);
+        }
+
+            .btn-cam:hover {
+                background: linear-gradient(135deg,#006f8a,#009ab5);
+                transform: translateY(-1px);
+            }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
+        }
+
+            .btn-ghost:hover {
+                color: var(--text);
+                border-color: var(--cam);
+            }
+
+        .btn-sm {
+            padding: 7px 12px;
+            font-size: 11px;
+        }
+
+        /* ── TOOLBAR ── */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 12px 20px;
+            background: var(--surface);
+            border: 1px solid rgba(0,212,255,.1);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .toolbar-sep {
+            width: 1px;
+            height: 24px;
+            background: var(--border2);
+            margin: 0 4px;
+        }
+
+        .anio-input {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 7px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            width: 110px;
+        }
+
+            .anio-input:focus {
+                outline: none;
+                border-color: var(--cam);
+            }
+
+        /* ── TABLA ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid rgba(0,212,255,.1);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            position: relative;
+        }
+            /* top glow line */
+            .table-wrap::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: linear-gradient(90deg, transparent 5%, var(--cam) 30%, transparent 95%);
+                opacity: .4;
+            }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: calc(100vh - 390px);
+            min-height: 420px;
+            overflow-y: auto;
+        }
+
+            .table-scroll::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+
+            .table-scroll::-webkit-scrollbar-track {
+                background: var(--surface2);
+                border-radius: 999px;
+            }
+
+            .table-scroll::-webkit-scrollbar-thumb {
+                background: #1e3a4a;
+                border-radius: 999px;
+            }
+
+                .table-scroll::-webkit-scrollbar-thumb:hover {
+                    background: var(--cam2);
+                }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 2000px;
+        }
+
+        thead th {
+            background: var(--surface3);
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--cam2);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid rgba(0,212,255,.15);
+        }
+
+            thead th:last-child {
+                position: sticky;
+                right: 0;
+                z-index: 11;
+                background: var(--surface3);
+            }
+
+        tbody td:last-child {
+            position: sticky;
+            right: 0;
+            background: var(--surface);
+            z-index: 1;
+        }
+
+        .filter-row td {
+            background: #090f17;
+            padding: 5px 6px;
+            position: sticky;
+            top: 35px;
+            z-index: 9;
+        }
+
+            .filter-row td:last-child {
+                position: sticky;
+                right: 0;
+                z-index: 10;
+                background: #090f17;
+            }
+
+        .filter-row input {
+            width: 100%;
+            background: transparent;
+            border: 1px solid rgba(0,212,255,.15);
+            border-radius: 4px;
+            padding: 4px 7px;
+            font-size: 11px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            transition: border-color .2s;
+        }
+
+            .filter-row input:focus {
+                outline: none;
+                border-color: var(--cam);
+                box-shadow: 0 0 0 2px rgba(0,212,255,.08);
+            }
+
+            .filter-row input::placeholder {
+                color: var(--muted);
+            }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .12s;
+        }
+
+            tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            tbody tr:hover td {
+                background: rgba(0,212,255,.04) !important;
+            }
+
+        td {
+            padding: 9px 12px;
+            color: var(--text);
+            vertical-align: middle;
+            line-height: 1.4;
+            font-size: 12px;
+        }
+
+            td.mono {
+                font-family: 'DM Mono',monospace;
+                font-size: 11px;
+            }
+
+        /* subcategory / tipo badges */
+        .sub-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            background: rgba(0,212,255,.1);
+            color: var(--cam);
+            border: 1px solid rgba(0,212,255,.2);
+        }
+
+            .sub-badge.audio {
+                background: rgba(139,92,246,.12);
+                color: #c4b5fd;
+                border-color: rgba(139,92,246,.25);
+            }
+
+            .sub-badge.nvr {
+                background: rgba(245,158,11,.1);
+                color: #fcd34d;
+                border-color: rgba(245,158,11,.25);
+            }
+
+            .sub-badge.switch {
+                background: rgba(16,185,129,.1);
+                color: #6ee7b7;
+                border-color: rgba(16,185,129,.25);
+            }
+
+        /* ── PAGINACIÓN ── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 12px 20px;
+            background: var(--surface);
+            border: 1px solid rgba(0,212,255,.1);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .page-info {
+            font-size: 11px;
+            font-family: 'DM Mono',monospace;
+            color: var(--muted2);
+        }
+
+        /* ── MODALES ── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.8);
+            backdrop-filter: blur(6px);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+            .modal.show {
+                display: flex;
+            }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid rgba(0,212,255,.2);
+            border-radius: 16px;
+            padding: 24px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 60px rgba(0,212,255,.12), 0 30px 80px rgba(0,0,0,.7);
+            position: relative;
+            animation: modalIn .2s ease;
+        }
+
+            .modal-box::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, var(--cam), transparent);
+                border-radius: 16px 16px 0 0;
+            }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.96)
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1)
+            }
+        }
+
+        .modal-box.form-box {
+            width: min(700px,95vw);
+        }
+
+        .modal-box.hist-box {
+            width: min(940px,95vw);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,212,255,.15);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+            .modal-header h3 {
+                font-size: 15px;
+                font-weight: 700;
+                color: #fff;
+            }
+
+                .modal-header h3 span {
+                    color: var(--cam);
+                }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        /* ── FORM MODAL ── */
+        .form-grid-modal {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media(max-width:500px) {
+            .form-grid-modal {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-field label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted2);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-field input, .form-field select, .form-field textarea {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 9px 11px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            transition: border-color .2s;
+        }
+
+        .form-field select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 28px;
+        }
+
+            .form-field select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+            .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+                outline: none;
+                border-color: var(--cam);
+                box-shadow: 0 0 0 3px rgba(0,212,255,.1);
+            }
+
+        .form-field textarea {
+            resize: vertical;
+            min-height: 70px;
+            font-family: 'DM Sans',sans-serif;
+        }
+
+        .form-field.full {
+            grid-column: 1 / -1;
+        }
+
+        /* section divider inside modal */
+        .section-label {
+            grid-column: 1 / -1;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: var(--cam);
+            padding: 8px 0 4px;
+            border-bottom: 1px solid rgba(0,212,255,.12);
+            margin-bottom: 2px;
+        }
+
+        /* ── HISTORIAL ── */
+        .ev-wrap {
+            margin-bottom: 16px;
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        .ev-header {
+            background: var(--surface2);
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+            .ev-header span {
+                font-size: 12px;
+                color: var(--muted2);
+            }
+
+            .ev-header strong {
+                color: var(--text);
+            }
+
+        .badge-cambio {
+            background: rgba(245,158,11,.2);
+            color: var(--amber);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            margin-left: 6px;
+            border: 1px solid rgba(245,158,11,.3);
+        }
+
+        .ev-table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+            .ev-table th, .ev-table td {
+                border: 1px solid var(--border);
+                padding: 9px 12px;
+                text-align: left;
+            }
+
+            .ev-table thead th {
+                background: var(--surface3);
+                color: var(--muted);
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+            }
+
+            .ev-table th:first-child {
+                width: 22%;
+            }
+
+        .row-changed td:nth-child(2) {
+            background: rgba(239,68,68,.08);
+            color: #fca5a5;
+        }
+
+        .row-changed td:nth-child(3) {
+            background: rgba(16,185,129,.08);
+            color: #6ee7b7;
+        }
+
+        .empty-val {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .sin-hist {
+            text-align: center;
+            padding: 50px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .n-cambios-badge {
+            margin-left: auto;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* ── CORNER camera decorations ── */
+        .corner-cam {
+            position: fixed;
+            opacity: .04;
+            pointer-events: none;
+            z-index: 0;
+            font-size: 120px;
+            line-height: 1;
+        }
+
+            .corner-cam.tl {
+                top: 60px;
+                left: 10px;
+            }
+
+            .corner-cam.tr {
+                top: 60px;
+                right: 10px;
+                transform: scaleX(-1);
+            }
+
+            .corner-cam.bl {
+                bottom: 10px;
+                left: 10px;
+            }
+
+            .corner-cam.br {
+                bottom: 10px;
+                right: 10px;
+                transform: scaleX(-1);
+            }
+    </style>
 </head>
 <body>
-<div class="header">CAMARAS DE AUDIO</div>
-<div class="container">
-<div class="form-grid">
-<div class="field"><label>OC</label><input id="OC"></div>
-<div class="field"><label>Folio Inventario</label><input id="FOLIO_INVENTARIO"></div>
-<div class="field"><label>Fecha Registro</label><input id="FECHA_REGISTRO" type="date"></div>
-<div class="field"><label>Recibido Por</label><input id="RECIBIDO_POR"></div>
-<div class="field"><label>Subcategoria</label><input id="SUBCATEGORIA"></div>
-<div class="field"><label>Tipo</label><input id="TIPO"></div>
-<div class="field"><label>Marca</label><input id="MARCA"></div>
-<div class="field"><label>Modelo</label><input id="MODELO"></div>
-<div class="field"><label>Numero Serie</label><input id="NUMERO_SERIE"></div>
-<div class="field"><label>Proveedor</label><input id="PROVEEDOR"></div>
-<div class="field"><label>Cantidad</label><input id="CANTIDAD"></div>
-<div class="field"><label>Costo</label><input id="COSTO"></div>
-<div class="field"><label>Moneda</label><input id="MONEDA"></div>
-<div class="field"><label>Destino</label><input id="DESTINO"></div>
-<div class="field"><label>Accesorios</label><input id="ACCESORIOS"></div>
-<div class="field"><label>Fecha Salida</label><input id="FECHA_SALIDA" type="date"></div>
-<div class="field"><label>Planta</label><input id="PLANTA"></div>
-<div class="field"><label>Destino 2</label><input id="DESTINO2"></div>
-<div class="field"><label>Personal IT que Asigna</label><input id="PERSONAL_IT_ASIGNA"></div>
-<div class="field"><label>Folio Servicio</label><input id="FOLIO_SERVICIO"></div>
-</div>
 
-<div class="btn-bar">
-    <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
-    <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
-</div>
-<div class="btn-bar">
-    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
-    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
-    <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
-    <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
-</div>
+    <!-- decorative corners -->
+    <div class="corner-cam tl">📷</div>
+    <div class="corner-cam tr">📷</div>
+    <div class="corner-cam bl">📷</div>
+    <div class="corner-cam br">📷</div>
 
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>ID</th><th>OC</th><th>FOLIO INV</th><th>FECHA REG</th><th>RECIBIDO</th>
-<th>SUBCATEGORIA</th><th>TIPO</th><th>MARCA</th><th>MODELO</th><th>NO SERIE</th>
-<th>PROVEEDOR</th><th>CANTIDAD</th><th>COSTO</th><th>MONEDA</th><th>DESTINO</th>
-<th>ACCESORIOS</th><th>FECHA SALIDA</th><th>PLANTA</th><th>DESTINO 2</th>
-<th>PERSONAL IT</th><th>FOLIO SERVICIO</th><th>PDF</th><th>ACCIONES</th>
-</tr>
-<tr class="filter-row">
-<th></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th></th><th></th>
-</tr>
-</thead>
-<tbody id="tabla"></tbody>
-</table>
-</div>
-<div class="pagination">
-<button onclick="anterior()">Anterior</button>
-<span id="paginaInfo"></span>
-<button onclick="siguiente()">Siguiente</button>
-<button class="back" onclick="window.location.href='presupuestos_menu.html'">
-REGRESAR A PRESUPUESTOS
-</button>
-</div>
-</div>
+    <!-- ══ TOP BAR ════════════════════════════════════════════════════════════ -->
+    <div class="topbar">
+        <div class="topbar-icon">📷</div>
+        <div class="topbar-title">
+            <h1>Cámaras <span>&</span> Audio</h1>
+            <p>Sistema de gestión · Vigilancia &amp; sonido</p>
+        </div>
+        <div class="rec-badge"><div class="rec-dot"></div>REC</div>
+        <div class="live-counter">CAM-<span id="totalCounter">0</span></div>
+        <div class="topbar-actions">
+            <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
+                <span>👤</span>
+                <span id="usuarioDisplay">—</span>
+                <span class="chip-arrow">▼</span>
+                <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name" id="dropdownNombre">—</div>
+                        <div class="d-role" id="dropdownRol">—</div>
+                    </div>
+                    <button class="dropdown-item danger" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<script>
-let paginaActual=1, limite=10, totalRegistros=0, editandoID=null;
+    <!-- ══ MAIN ══════════════════════════════════════════════════════════════ -->
+    <div class="main">
 
-function guardar(){
-    let data={
-        OC: OC.value||null, FOLIO_INVENTARIO: FOLIO_INVENTARIO.value||null,
-        FECHA_REGISTRO: FECHA_REGISTRO.value||null, RECIBIDO_POR: RECIBIDO_POR.value||null,
-        SUBCATEGORIA: SUBCATEGORIA.value||null, TIPO: TIPO.value||null,
-        MARCA: MARCA.value||null, MODELO: MODELO.value||null,
-        NUMERO_SERIE: NUMERO_SERIE.value||null, PROVEEDOR: PROVEEDOR.value||null,
-        CANTIDAD: CANTIDAD.value||null, COSTO: COSTO.value||null,
-        MONEDA: MONEDA.value||null, DESTINO: DESTINO.value||null,
-        ACCESORIOS: ACCESORIOS.value||null, FECHA_SALIDA: FECHA_SALIDA.value||null,
-        PLANTA: PLANTA.value||null, DESTINO2: DESTINO2.value||null,
-        PERSONAL_IT_ASIGNA: PERSONAL_IT_ASIGNA.value||null, FOLIO_SERVICIO: FOLIO_SERVICIO.value||null
-    };
-    if(editandoID){
-        fetch(`/CAMARAS_DE_AUDIO/${editandoID}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
-        .then(()=>{ editandoID=null; limpiarFormulario(); cargar(); });
-    } else {
-        fetch("/CAMARAS_DE_AUDIO",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
-        .then(()=>{ limpiarFormulario(); cargar(); });
-    }
-}
+        <!-- ── Panel nuevo registro ── -->
+        <div class="panel" id="panelNuevo">
+            <div class="panel-title">📡 Nuevo Registro</div>
+            <div class="form-grid">
+                <div class="field"><label>OC</label><input id="f_OC" placeholder="Orden de compra"></div>
+                <div class="field"><label>Folio Inventario</label><input id="f_FOLIO_INVENTARIO" placeholder="Folio"></div>
+                <div class="field"><label>Fecha Registro</label><input id="f_FECHA_REGISTRO" type="date"></div>
+                <div class="field"><label>Recibido Por</label><input id="f_RECIBIDO_POR" placeholder="Nombre"></div>
+                <div class="field">
+                    <label>Subcategoría</label>
+                    <select id="f_SUBCATEGORIA">
+                        <option value="">— Selecciona —</option>
+                        <option>VIGILANCIA</option>
+                        <option>AUDIO</option>
+                        <option>NVR</option>
+                        <option>DVR</option>
+                        <option>INTERNO</option>
+                        <option>SWITCH</option>
+                        <option>SISTEMAS</option>
+                        <option>REPORTE</option>
+                        <option>NA</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Tipo</label>
+                    <select id="f_TIPO">
+                        <option value="">— Selecciona —</option>
+                        <option>CAMARA</option>
+                        <option>BALA</option>
+                        <option>PTZ</option>
+                        <option>GRABADOR</option>
+                        <option>DISCO DURO</option>
+                        <option>BOCINA</option>
+                        <option>ALTAVOZ COLGANTE</option>
+                        <option>MICROFONO</option>
+                        <option>BASE PARA CAMARA</option>
+                        <option>SWITCH</option>
+                        <option>CONTROL ACCESO</option>
+                        <option>JUMPER</option>
+                        <option>OTRO</option>
+                    </select>
+                </div>
+                <div class="field"><label>Marca</label><input id="f_MARCA" placeholder="Ej. HIKVISION"></div>
+                <div class="field"><label>Modelo</label><input id="f_MODELO" placeholder="Modelo"></div>
+                <div class="field"><label>Número de Serie</label><input id="f_NUMERO_DE_SERIE" placeholder="S/N"></div>
+                <div class="field">
+                    <label>Proveedor</label>
+                    <select id="f_PROVEEDOR">
+                        <option value="">— Selecciona —</option>
+                        <option>FIRECOM</option>
+                        <option>GLOBTECH</option>
+                        <option>SYSCOM</option>
+                        <option>OTRO</option>
+                    </select>
+                </div>
+                <div class="field"><label>Cantidad</label><input id="f_CANTIDAD" type="number" min="0" placeholder="0"></div>
+                <div class="field"><label>Costo</label><input id="f_COSTO" type="number" step="0.01" min="0" placeholder="0.00"></div>
+                <div class="field">
+                    <label>Moneda</label>
+                    <select id="f_MONEDA">
+                        <option value="">— Selecciona —</option>
+                        <option>PESOS</option>
+                        <option>USD</option>
+                        <option>EUR</option>
+                    </select>
+                </div>
+                <div class="field"><label>Destino</label><input id="f_DESTINO" placeholder="Destino inicial"></div>
+                <div class="field"><label>Accesorios</label><input id="f_ACCESORIOS" placeholder="Soporte, bracket…"></div>
+                <div class="field"><label>Fecha de Salida</label><input id="f_FECHA_DE_SALIDA" type="date"></div>
+                <div class="field"><label>Planta</label><input id="f_PLANTA" placeholder="B1 / B2 / B3…"></div>
+                <div class="field"><label>Destino 2</label><input id="f_DESTINO2" placeholder="Ubicación final"></div>
+                <div class="field"><label>Personal IT que Asigna</label><input id="f_PERSONAL_IT_QUE_ASIGNA" placeholder="Nombre del IT"></div>
+                <div class="field"><label>Folio de Servicio</label><input id="f_FOLIO_DE_SERVICIO" placeholder="# servicio"></div>
+            </div>
+            <button class="btn btn-success" onclick="guardar()">💾 Guardar</button>
+            <button class="btn btn-ghost" onclick="limpiarForm()" style="margin-left:8px">✕ Limpiar</button>
+        </div>
 
-function limpiarFormulario(){ document.querySelectorAll(".form-grid input").forEach(i=>i.value=""); }
-function cancelarEdicion(){ editandoID=null; limpiarFormulario(); }
+        <!-- ── Toolbar ── -->
+        <div class="toolbar">
+            <button class="btn btn-cam btn-sm" onclick="exportarFiltrado()">📥 Exportar filtrado</button>
+            <button class="btn btn-cam btn-sm" onclick="exportarTodo()">📦 Exportar todo</button>
+            <div class="toolbar-sep"></div>
+            <input class="anio-input" id="anioExportar" type="number" placeholder="Año">
+            <button class="btn btn-cam btn-sm" onclick="exportarPorAnio()">📅 Por año</button>
+            <div class="toolbar-sep"></div>
+            <button class="btn btn-ghost btn-sm" onclick="cargar()">🔄 Recargar</button>
+        </div>
 
-function obtenerParametros(){
-    let f=document.querySelectorAll(".filter-row input");
-    return new URLSearchParams({
-        page:paginaActual, limit:limite,
-        OC:f[0].value, FOLIO_INVENTARIO:f[1].value, FECHA_REGISTRO:f[2].value,
-        RECIBIDO_POR:f[3].value, SUBCATEGORIA:f[4].value, TIPO:f[5].value,
-        MARCA:f[6].value, MODELO:f[7].value, NUMERO_SERIE:f[8].value,
-        PROVEEDOR:f[9].value, CANTIDAD:f[10].value, COSTO:f[11].value,
-        MONEDA:f[12].value, DESTINO:f[13].value, ACCESORIOS:f[14].value,
-        FECHA_SALIDA:f[15].value, PLANTA:f[16].value, DESTINO2:f[17].value,
-        PERSONAL_IT_ASIGNA:f[18].value, FOLIO_SERVICIO:f[19].value
-    });
-}
+        <!-- ── Tabla ── -->
+        <div class="table-wrap">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>OC</th>
+                            <th>Folio</th>
+                            <th>Fecha Reg.</th>
+                            <th>Recibido Por</th>
+                            <th>Subcategoría</th>
+                            <th>Tipo</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>No. Serie</th>
+                            <th>Proveedor</th>
+                            <th>Cant.</th>
+                            <th>Costo</th>
+                            <th>Moneda</th>
+                            <th>Destino</th>
+                            <th>Accesorios</th>
+                            <th>Fecha Salida</th>
+                            <th>Planta</th>
+                            <th>Destino 2</th>
+                            <th>Personal IT</th>
+                            <th>Folio Serv.</th>
+                            <th>Acciones</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_OC"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FOLIO_INVENTARIO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FECHA_REGISTRO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_RECIBIDO_POR"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_SUBCATEGORIA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_TIPO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MARCA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MODELO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_NUMERO_DE_SERIE"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PROVEEDOR"></td>
+                            <td></td>
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MONEDA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_DESTINO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ACCESORIOS"></td>
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PLANTA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_DESTINO2"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PERSONAL_IT_QUE_ASIGNA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FOLIO_DE_SERVICIO"></td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla">
+                        <tr><td colspan="22" style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-function cargar(){
-    fetch(`/CAMARAS_DE_AUDIO?${obtenerParametros().toString()}`)
-    .then(r=>r.json()).then(resp=>{ totalRegistros=resp.total; renderizar(resp.data); });
-}
+        <!-- ── Paginación ── -->
+        <div class="pagination">
+            <button class="btn btn-ghost btn-sm" onclick="anterior()">◀ Anterior</button>
+            <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
+            <span class="page-info" id="paginaInfo">—</span>
+        </div>
 
-function renderizar(datos){
-    tabla.innerHTML="";
-    datos.forEach(row=>{
-        tabla.innerHTML+=`<tr>
-        <td>${row.ID}</td><td>${row.OC??""}</td><td>${row.FOLIO_INVENTARIO??""}</td>
-        <td>${row.FECHA_REGISTRO??""}</td><td>${row.RECIBIDO_POR??""}</td>
-        <td>${row.SUBCATEGORIA??""}</td><td>${row.TIPO??""}</td><td>${row.MARCA??""}</td>
-        <td>${row.MODELO??""}</td><td>${row.NUMERO_SERIE??""}</td><td>${row.PROVEEDOR??""}</td>
-        <td>${row.CANTIDAD??""}</td><td>${row.COSTO??""}</td><td>${row.MONEDA??""}</td>
-        <td>${row.DESTINO??""}</td><td>${row.ACCESORIOS??""}</td><td>${row.FECHA_SALIDA??""}</td>
-        <td>${row.PLANTA??""}</td><td>${row.DESTINO2??""}</td><td>${row.PERSONAL_IT_ASIGNA??""}</td>
-        <td>${row.FOLIO_SERVICIO??""}</td>
-        <td>${row.TIENE_PDF
-            ? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button><button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
-            : `<input type="file" onchange="subirPDF(${row.ID},this)">`}</td>
-        <td><button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
-        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button></td>
-        </tr>`;
-    });
-    paginaInfo.innerText=`Pagina ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
-}
+    </div><!-- /main -->
+    <!-- ══ MODAL EDITAR ══════════════════════════════════════════════════════ -->
+    <div class="modal" id="modalEditar">
+        <div class="modal-box form-box">
+            <div class="modal-header">
+                <h3>✏️ Editar <span>Cámara / Audio</span> &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="editarIdLabel">#</span></h3>
+                <button class="btn btn-ghost btn-sm" onclick="cerrarEditar()">✕</button>
+            </div>
+            <div class="form-grid-modal">
+                <div class="section-label">📋 Identificación</div>
+                <div class="form-field"><label>OC</label><input id="e_OC" placeholder="Orden de compra"></div>
+                <div class="form-field"><label>Folio Inventario</label><input id="e_FOLIO_INVENTARIO" placeholder="Folio"></div>
+                <div class="form-field"><label>Fecha Registro</label><input id="e_FECHA_REGISTRO" type="date"></div>
+                <div class="form-field"><label>Recibido Por</label><input id="e_RECIBIDO_POR" placeholder="Nombre"></div>
 
-function editar(row){
-    editandoID=row.ID;
-    Object.keys(row).forEach(key=>{ let el=document.getElementById(key); if(el) el.value=row[key]??""; });
-    window.scrollTo({top:0,behavior:"smooth"});
-}
-function eliminar(id){ if(!confirm("Eliminar este registro?")) return; fetch(`/CAMARAS_DE_AUDIO/${id}`,{method:"DELETE"}).then(()=>cargar()); }
-function subirPDF(id,input){ let file=input.files[0]; if(!file) return; let fd=new FormData(); fd.append("file",file); fetch(`/CAMARAS_DE_AUDIO/PDF/${id}`,{method:"POST",body:fd}).then(()=>cargar()); }
-function verPDF(id){ window.open(`/CAMARAS_DE_AUDIO/PDF/${id}`,"_blank"); }
-function eliminarPDF(id){ if(!confirm("Eliminar el PDF?")) return; fetch(`/CAMARAS_DE_AUDIO/PDF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
-function filtrar(){ paginaActual=1; cargar(); }
-function exportarFiltrado(){ window.open(`/CAMARAS_DE_AUDIO/EXPORTAR?${obtenerParametros().toString()}`); }
-function exportarTodo(){ window.open(`/CAMARAS_DE_AUDIO/EXPORTAR_TODO`); }
-function exportarPorAnio(){ let a=document.getElementById("anioExportar").value; if(!a){alert("Ingresa un año");return;} window.open(`/CAMARAS_DE_AUDIO/EXPORTAR_ANIO?anio=${a}`); }
-function siguiente(){ if(paginaActual*limite<totalRegistros){ paginaActual++; cargar(); } }
-function anterior(){ if(paginaActual>1){ paginaActual--; cargar(); } }
+                <div class="section-label">📷 Dispositivo</div>
+                <div class="form-field">
+                    <label>Subcategoría</label>
+                    <select id="e_SUBCATEGORIA">
+                        <option value="">— Selecciona —</option>
+                        <option>VIGILANCIA</option>
+                        <option>AUDIO</option>
+                        <option>NVR</option>
+                        <option>DVR</option>
+                        <option>INTERNO</option>
+                        <option>SWITCH</option>
+                        <option>SISTEMAS</option>
+                        <option>REPORTE</option>
+                        <option>NA</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Tipo</label>
+                    <select id="e_TIPO">
+                        <option value="">— Selecciona —</option>
+                        <option>CAMARA</option>
+                        <option>BALA</option>
+                        <option>PTZ</option>
+                        <option>GRABADOR</option>
+                        <option>DISCO DURO</option>
+                        <option>BOCINA</option>
+                        <option>ALTAVOZ COLGANTE</option>
+                        <option>MICROFONO</option>
+                        <option>BASE PARA CAMARA</option>
+                        <option>SWITCH</option>
+                        <option>CONTROL ACCESO</option>
+                        <option>JUMPER</option>
+                        <option>OTRO</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Marca</label><input id="e_MARCA" placeholder="Ej. HIKVISION"></div>
+                <div class="form-field"><label>Modelo</label><input id="e_MODELO" placeholder="Modelo"></div>
+                <div class="form-field full"><label>Número de Serie</label><input id="e_NUMERO_DE_SERIE" placeholder="S/N"></div>
 
-cargar();
-</script>
+                <div class="section-label">💰 Compra</div>
+                <div class="form-field">
+                    <label>Proveedor</label>
+                    <select id="e_PROVEEDOR">
+                        <option value="">— Selecciona —</option>
+                        <option>FIRECOM</option>
+                        <option>GLOBTECH</option>
+                        <option>SYSCOM</option>
+                        <option>OTRO</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Cantidad</label><input id="e_CANTIDAD" type="number" min="0" placeholder="0"></div>
+                <div class="form-field"><label>Costo</label><input id="e_COSTO" type="number" step="0.01" min="0" placeholder="0.00"></div>
+                <div class="form-field">
+                    <label>Moneda</label>
+                    <select id="e_MONEDA">
+                        <option value="">— Selecciona —</option>
+                        <option>PESOS</option>
+                        <option>USD</option>
+                        <option>EUR</option>
+                    </select>
+                </div>
+
+                <div class="section-label">📍 Destino</div>
+                <div class="form-field"><label>Destino</label><input id="e_DESTINO" placeholder="Destino inicial"></div>
+                <div class="form-field"><label>Accesorios</label><input id="e_ACCESORIOS" placeholder="Soporte, bracket…"></div>
+                <div class="form-field"><label>Fecha de Salida</label><input id="e_FECHA_DE_SALIDA" type="date"></div>
+                <div class="form-field"><label>Planta</label><input id="e_PLANTA" placeholder="B1 / B2 / B3…"></div>
+                <div class="form-field full"><label>Destino 2</label><input id="e_DESTINO2" placeholder="Ubicación final"></div>
+                <div class="form-field"><label>Personal IT que Asigna</label><input id="e_PERSONAL_IT_QUE_ASIGNA" placeholder="Nombre del IT"></div>
+                <div class="form-field"><label>Folio de Servicio</label><input id="e_FOLIO_DE_SERVICIO" placeholder="# servicio"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarCambios()">💾 Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ MODAL HISTORIAL ═══════════════════════════════════════════════════ -->
+    <div class="modal" id="modalHistorial">
+        <div class="modal-box hist-box">
+            <div class="modal-header">
+                <h3>📋 Historial de cambios &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="histIdLabel">#</span></h3>
+                <button class="btn btn-ghost btn-sm" onclick="cerrarHistorial()">✕</button>
+            </div>
+            <div id="contenidoHistorial">
+                <p style="text-align:center;padding:40px;color:var(--muted)">Cargando…</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══ ESTADO GLOBAL ═══
+        let paginaActual = 1;
+        let limite = 10;
+        let totalRegistros = 0;
+        let datosActuales = [];
+        let editandoID = null;
+        let usuarioActual = 'SISTEMA';
+        let rolActual = '';
+        let _filtrarTimer = null;
+
+        // ═══ CAMPOS HISTORIAL ═══
+        const CAMPOS_HIST = [
+            { key: 'OC', label: 'OC' },
+            { key: 'FOLIO_INVENTARIO', label: 'Folio Inventario' },
+            { key: 'FECHA_REGISTRO', label: 'Fecha Registro' },
+            { key: 'RECIBIDO_POR', label: 'Recibido Por' },
+            { key: 'SUBCATEGORIA', label: 'Subcategoría' },
+            { key: 'TIPO', label: 'Tipo' },
+            { key: 'MARCA', label: 'Marca' },
+            { key: 'MODELO', label: 'Modelo' },
+            { key: 'NUMERO_DE_SERIE', label: 'Número de Serie' },
+            { key: 'PROVEEDOR', label: 'Proveedor' },
+            { key: 'CANTIDAD', label: 'Cantidad' },
+            { key: 'COSTO', label: 'Costo' },
+            { key: 'MONEDA', label: 'Moneda' },
+            { key: 'DESTINO', label: 'Destino' },
+            { key: 'ACCESORIOS', label: 'Accesorios' },
+            { key: 'FECHA_DE_SALIDA', label: 'Fecha de Salida' },
+            { key: 'PLANTA', label: 'Planta' },
+            { key: 'DESTINO2', label: 'Destino 2' },
+            { key: 'PERSONAL_IT_QUE_ASIGNA', label: 'Personal IT que Asigna' },
+            { key: 'FOLIO_DE_SERVICIO', label: 'Folio de Servicio' },
+        ];
+
+        // ═══ INACTIVIDAD 30 min ═══
+        let _inacTimer = null;
+        function resetInactividad() {
+            clearTimeout(_inacTimer);
+            _inacTimer = setTimeout(async () => {
+                try { await fetch('/LOGOUT', { method: 'POST', credentials: 'include' }); } catch (e) { }
+                window.location.href = '/static/login.html?inactivo=1';
+            }, 30 * 60 * 1000);
+        }
+        ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(ev =>
+            document.addEventListener(ev, resetInactividad, { passive: true })
+        );
+
+        // ═══ INIT ═══
+        window.addEventListener('DOMContentLoaded', () => {
+            resetInactividad();
+            fetch('/obtener-usuario', { credentials: 'include' })
+                .then(r => { if (!r.ok) { window.location.href = '/static/login.html'; return null; } return r.json(); })
+                .then(d => {
+                    if (!d) return;
+                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
+                    usuarioActual = d.usuario || 'SISTEMA';
+                    rolActual = (d.rol || '').trim().toUpperCase();
+                    document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownRol').textContent = rolActual;
+                })
+                .catch(() => { window.location.href = '/static/login.html'; });
+            cargar();
+        });
+
+        // ═══ CARGAR TABLA ═══
+        async function cargar() {
+            const qs = obtenerParametros();
+            try {
+                const r = await fetch(`/CAMARAS_AUDIO?page=${paginaActual}&limit=${limite}&${qs}`);
+                const d = await r.json();
+                totalRegistros = d.total || 0;
+                datosActuales = d.data || [];
+                document.getElementById('totalCounter').textContent = totalRegistros;
+                renderizar();
+            } catch (e) {
+                document.getElementById('tabla').innerHTML =
+                    `<tr><td colspan="22" style="text-align:center;padding:40px;color:var(--red)">❌ Error: ${e.message}</td></tr>`;
+            }
+        }
+
+        function obtenerParametros() {
+            const campos = ['OC', 'FOLIO_INVENTARIO', 'FECHA_REGISTRO', 'RECIBIDO_POR',
+                'SUBCATEGORIA', 'TIPO', 'MARCA', 'MODELO', 'NUMERO_DE_SERIE', 'PROVEEDOR',
+                'MONEDA', 'DESTINO', 'ACCESORIOS', 'PLANTA', 'DESTINO2',
+                'PERSONAL_IT_QUE_ASIGNA', 'FOLIO_DE_SERVICIO'];
+            const p = new URLSearchParams();
+            campos.forEach(c => {
+                const val = (document.getElementById('fil_' + c)?.value || '').trim();
+                if (val) p.set(c, val);
+            });
+            return p.toString();
+        }
+
+        function filtrar() {
+            clearTimeout(_filtrarTimer);
+            _filtrarTimer = setTimeout(() => { paginaActual = 1; cargar(); }, 350);
+        }
+
+        function subBadgeClass(sub) {
+            if (!sub) return 'sub-badge';
+            const s = sub.toUpperCase();
+            if (s === 'AUDIO') return 'sub-badge audio';
+            if (s === 'NVR' || s === 'DVR') return 'sub-badge nvr';
+            if (s === 'SWITCH') return 'sub-badge switch';
+            return 'sub-badge';
+        }
+
+        function renderizar() {
+            const tbody = document.getElementById('tabla');
+            tbody.innerHTML = '';
+            if (!datosActuales.length) {
+                tbody.innerHTML = '<tr><td colspan="22" style="text-align:center;padding:40px;color:var(--muted)">📷 Sin registros</td></tr>';
+                return;
+            }
+            const esAdmin = rolActual === 'ADMIN';
+            datosActuales.forEach(row => {
+                const fReg = row.FECHA_REGISTRO ? row.FECHA_REGISTRO.split('T')[0] : '—';
+                const fSal = row.FECHA_DE_SALIDA ? row.FECHA_DE_SALIDA.split('T')[0] : '—';
+                const costo = row.COSTO != null
+                    ? `$${parseFloat(row.COSTO).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`
+                    : '—';
+                const badgeClass = subBadgeClass(row.SUBCATEGORIA);
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="mono">${row.ID}</td>
+                        <td class="mono">${esc(row.OC) || '—'}</td>
+                        <td class="mono">${esc(row.FOLIO_INVENTARIO) || '—'}</td>
+                        <td class="mono">${fReg}</td>
+                        <td>${esc(row.RECIBIDO_POR) || '—'}</td>
+                        <td><span class="${badgeClass}">${esc(row.SUBCATEGORIA) || '—'}</span></td>
+                        <td>${esc(row.TIPO) || '—'}</td>
+                        <td>${esc(row.MARCA) || '—'}</td>
+                        <td class="mono">${esc(row.MODELO) || '—'}</td>
+                        <td class="mono">${esc(row.NUMERO_DE_SERIE) || '—'}</td>
+                        <td>${esc(row.PROVEEDOR) || '—'}</td>
+                        <td class="mono" style="text-align:center">${row.CANTIDAD ?? '—'}</td>
+                        <td class="mono">${costo}</td>
+                        <td class="mono">${esc(row.MONEDA) || '—'}</td>
+                        <td>${esc(row.DESTINO) || '—'}</td>
+                        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(row.ACCESORIOS) || ''}">${esc(row.ACCESORIOS) || '—'}</td>
+                        <td class="mono">${fSal}</td>
+                        <td>${esc(row.PLANTA) || '—'}</td>
+                        <td>${esc(row.DESTINO2) || '—'}</td>
+                        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(row.PERSONAL_IT_QUE_ASIGNA) || ''}">${esc(row.PERSONAL_IT_QUE_ASIGNA) || '—'}</td>
+                        <td class="mono">${esc(row.FOLIO_DE_SERVICIO) || '—'}</td>
+                        <td style="white-space:nowrap">
+                            ${esAdmin ? `
+                            <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})" title="Editar">✏️</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})" title="Eliminar">🗑</button>
+                            ` : ''}
+                            <button class="btn btn-cam btn-sm" onclick="verHistorial(${row.ID})" title="Historial">📋</button>
+                        </td>
+                    </tr>`;
+            });
+
+            document.getElementById('paginaInfo').textContent =
+                `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite) || 1} | Total: ${totalRegistros}`;
+        }
+
+        function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
+        function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
+
+        // ═══ GUARDAR NUEVO ═══
+        async function guardar() {
+            const dto = buildDto('f_');
+            try {
+                const r = await fetch('/CAMARA_AUDIO', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(dto)
+                });
+                const d = await r.json();
+                if (d.error) { alert('Error: ' + d.error); return; }
+                limpiarForm(); cargar();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        function limpiarForm() {
+            ['f_OC', 'f_FOLIO_INVENTARIO', 'f_FECHA_REGISTRO', 'f_RECIBIDO_POR',
+                'f_SUBCATEGORIA', 'f_TIPO', 'f_MARCA', 'f_MODELO', 'f_NUMERO_DE_SERIE',
+                'f_PROVEEDOR', 'f_CANTIDAD', 'f_COSTO', 'f_MONEDA', 'f_DESTINO',
+                'f_ACCESORIOS', 'f_FECHA_DE_SALIDA', 'f_PLANTA', 'f_DESTINO2',
+                'f_PERSONAL_IT_QUE_ASIGNA', 'f_FOLIO_DE_SERVICIO'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+        }
+
+        // ═══ ELIMINAR ═══
+        async function eliminar(id) {
+            if (!confirm('¿Eliminar este registro de cámara/audio?')) return;
+            try {
+                await fetch(`/CAMARA_AUDIO/${id}`, { method: 'DELETE' });
+                cargar();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // ═══ EXPORTAR ═══
+        function exportarFiltrado() { window.open('/CAMARAS_AUDIO/EXPORTAR?' + obtenerParametros()); }
+        function exportarTodo() { window.open('/CAMARAS_AUDIO/EXPORTAR_TODO'); }
+        function exportarPorAnio() {
+            const a = document.getElementById('anioExportar').value;
+            if (!a) { alert('Ingresa un año'); return; }
+            window.open('/CAMARAS_AUDIO/EXPORTAR_ANIO?anio=' + a);
+        }
+
+        // ═══ MODAL EDITAR ═══
+        function abrirEditar(id) {
+            editandoID = id;
+            document.getElementById('editarIdLabel').textContent = '#' + id;
+            const row = datosActuales.find(r => r.ID === id);
+            if (row) {
+                setV('e_OC', row.OC);
+                setV('e_FOLIO_INVENTARIO', row.FOLIO_INVENTARIO);
+                setV('e_FECHA_REGISTRO', row.FECHA_REGISTRO ? row.FECHA_REGISTRO.split('T')[0] : '');
+                setV('e_RECIBIDO_POR', row.RECIBIDO_POR);
+                setV('e_SUBCATEGORIA', row.SUBCATEGORIA);
+                setV('e_TIPO', row.TIPO);
+                setV('e_MARCA', row.MARCA);
+                setV('e_MODELO', row.MODELO);
+                setV('e_NUMERO_DE_SERIE', row.NUMERO_DE_SERIE);
+                setV('e_PROVEEDOR', row.PROVEEDOR);
+                setV('e_CANTIDAD', row.CANTIDAD);
+                setV('e_COSTO', row.COSTO);
+                setV('e_MONEDA', row.MONEDA);
+                setV('e_DESTINO', row.DESTINO);
+                setV('e_ACCESORIOS', row.ACCESORIOS);
+                setV('e_FECHA_DE_SALIDA', row.FECHA_DE_SALIDA ? row.FECHA_DE_SALIDA.split('T')[0] : '');
+                setV('e_PLANTA', row.PLANTA);
+                setV('e_DESTINO2', row.DESTINO2);
+                setV('e_PERSONAL_IT_QUE_ASIGNA', row.PERSONAL_IT_QUE_ASIGNA);
+                setV('e_FOLIO_DE_SERVICIO', row.FOLIO_DE_SERVICIO);
+            }
+            document.getElementById('modalEditar').classList.add('show');
+            document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+        }
+
+        function cerrarEditar() {
+            document.getElementById('modalEditar').classList.remove('show');
+            editandoID = null;
+        }
+
+        async function guardarCambios() {
+            const dto = buildDto('e_');
+            try {
+                const r = await fetch(`/CAMARA_AUDIO/${editandoID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(dto)
+                });
+                const result = await r.json();
+                if (r.ok && !result.error) { cerrarEditar(); cargar(); }
+                else alert('Error: ' + (result.error || 'No se pudo guardar'));
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // ═══ MODAL HISTORIAL ═══
+        function esc(val) {
+            if (val == null) return '';
+            return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function norm(v) { return (v == null) ? '' : String(v).trim(); }
+        function formatFecha(f) {
+            try {
+                const d = new Date(f);
+                if (!isNaN(d)) return d.toLocaleString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            } catch (e) { }
+            return f ?? '';
+        }
+
+        function renderEvento(ev) {
+            let antes = ev.REGISTRO_ANTERIOR || ev.registro_anterior;
+            let despues = ev.REGISTRO_NUEVO || ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (e) { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (e) { }
+
+            const cambiados = new Set();
+            CAMPOS_HIST.forEach(({ key }) => { if (norm(antes?.[key]) !== norm(despues?.[key])) cambiados.add(key); });
+
+            let filas = '';
+            CAMPOS_HIST.forEach(({ key, label }) => {
+                const va = esc(antes?.[key] ?? '');
+                const vd = esc(despues?.[key] ?? '');
+                const chg = cambiados.has(key);
+                filas += `<tr class="${chg ? 'row-changed' : ''}">
+                    <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                    <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                    <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                </tr>`;
+            });
+
+            const n = cambiados.size;
+            return `<div class="ev-wrap">
+                <div class="ev-header">
+                    <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
+                    <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
+                    <span class="n-cambios-badge"
+                        style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                               color:${n > 0 ? '#FCD34D' : '#94A3B8'};
+                               border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                        ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                    </span>
+                </div>
+                <table class="ev-table">
+                    <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                    <tbody>${filas}</tbody>
+                </table>
+            </div>`;
+        }
+
+        function verHistorial(id) {
+            document.getElementById('histIdLabel').textContent = '#' + id;
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando…</p>';
+            document.getElementById('modalHistorial').classList.add('show');
+            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+
+            fetch(`/CAMARAS_AUDIO/${id}/HISTORIAL`)
+                .then(r => r.json())
+                .then(data => {
+                    const lista = (data.historial || [])
+                        .sort((a, b) => new Date(b.FECHA || b.fecha || 0) - new Date(a.FECHA || a.fecha || 0));
+                    if (!lista.length) {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            '<p class="sin-hist">📭 Sin ediciones registradas</p>';
+                    } else {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
+                                ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                             </p>` + lista.map(ev => renderEvento(ev)).join('');
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        '<p style="color:var(--red);text-align:center;padding:30px">❌ Error al cargar historial</p>';
+                });
+        }
+
+        function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
+
+        // ═══ UI ═══
+        function toggleDropdown() { document.getElementById('userChipMain').classList.toggle('open'); }
+        document.addEventListener('click', e => {
+            const chip = document.getElementById('userChipMain');
+            if (chip && !chip.contains(e.target)) chip.classList.remove('open');
+        });
+        function cerrarSesion() {
+            fetch('/LOGOUT', { method: 'POST', credentials: 'include' })
+                .finally(() => { window.location.href = '/static/login.html'; });
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
+        });
+
+        // ═══ HELPERS ═══
+        function v(id) { const el = document.getElementById(id); return el ? (el.value.trim() || null) : null; }
+        function vInt(id) { const x = v(id); return x != null ? parseInt(x) || null : null; }
+        function vDec(id) { const x = v(id); return x != null ? parseFloat(x) || null : null; }
+        function setV(id, val) { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
+
+        function buildDto(prefix) {
+            return {
+                OC: v(prefix + 'OC'),
+                FOLIO_INVENTARIO: v(prefix + 'FOLIO_INVENTARIO'),
+                FECHA_REGISTRO: v(prefix + 'FECHA_REGISTRO'),
+                RECIBIDO_POR: v(prefix + 'RECIBIDO_POR'),
+                SUBCATEGORIA: v(prefix + 'SUBCATEGORIA'),
+                TIPO: v(prefix + 'TIPO'),
+                MARCA: v(prefix + 'MARCA'),
+                MODELO: v(prefix + 'MODELO'),
+                NUMERO_DE_SERIE: v(prefix + 'NUMERO_DE_SERIE'),
+                PROVEEDOR: v(prefix + 'PROVEEDOR'),
+                CANTIDAD: vInt(prefix + 'CANTIDAD'),
+                COSTO: vDec(prefix + 'COSTO'),
+                MONEDA: v(prefix + 'MONEDA'),
+                DESTINO: v(prefix + 'DESTINO'),
+                ACCESORIOS: v(prefix + 'ACCESORIOS'),
+                FECHA_DE_SALIDA: v(prefix + 'FECHA_DE_SALIDA'),
+                PLANTA: v(prefix + 'PLANTA'),
+                DESTINO2: v(prefix + 'DESTINO2'),
+                PERSONAL_IT_QUE_ASIGNA: v(prefix + 'PERSONAL_IT_QUE_ASIGNA'),
+                FOLIO_DE_SERVICIO: v(prefix + 'FOLIO_DE_SERVICIO'),
+            };
+        }
+    </script>
 </body>
 </html>
