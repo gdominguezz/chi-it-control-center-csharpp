@@ -1,193 +1,1424 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>SERVICIOS PROVEEDORES NF</title>
-<style>
-body{font-family:Arial;margin:0;background:#f1f5f9;}
-.header{background:#1e293b;color:white;padding:15px;font-size:20px;font-weight:bold;}
-.container{padding:15px;}
-.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:15px;}
-.field{display:flex;flex-direction:column;}
-.field label{font-size:11px;font-weight:bold;color:#1e293b;margin-bottom:4px;text-transform:uppercase;}
-.field input,.field textarea{padding:7px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;background:#f8fafc;}
-.field textarea{resize:vertical;min-height:60px;}
-.field input:focus,.field textarea:focus{outline:none;border-color:#2563eb;background:white;}
-button{padding:6px 12px;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:bold;margin-right:5px;}
-.save{background:#16a34a;color:white;}.cancel{background:#64748b;color:white;}.delete{background:#dc2626;color:white;}
-.edit{background:#f59e0b;color:white;}.pdf{background:#2563eb;color:white;}.export{background:#7c3aed;color:white;}
-.btn-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px;}
-.table-container{width:100%;height:500px;overflow:auto;border:1px solid #ccc;background:white;}
-table{border-collapse:collapse;min-width:3600px;font-size:11px;}
-th,td{border:1px solid #ccc;padding:6px;white-space:nowrap;text-align:center;}
-th{background:#1e293b;color:white;position:sticky;top:0;z-index:2;}
-.filter-row input{width:100%;font-size:11px;}
-.pagination{margin-top:10px;}
-.back{
-    background:#dc2626;
-    font-style: italic; color:#ffffff;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Servicios Proveedores</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0F1A;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --surface3: #1e293b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --accent: #3B82F6;
+            --text: #F1F5F9;
+            --muted: #64748B;
+            --muted2: #94A3B8;
+            --green: #10B981;
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --purple: #8B5CF6;
+            --cyan: #06B6D4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── TOP BAR ── */
+        .topbar {
+            background: linear-gradient(135deg,#0f1e35,#0B0F1A);
+            border-bottom: 1px solid var(--border2);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+
+        .topbar-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: linear-gradient(135deg,#1e3a8a,#3B82F6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px rgba(59,130,246,.4);
+            flex-shrink: 0;
+        }
+
+        .topbar-title {
+            flex: 1;
+        }
+
+            .topbar-title h1 {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: -.01em;
+            }
+
+            .topbar-title p {
+                font-size: 11px;
+                color: var(--muted2);
+                margin-top: 1px;
+                font-family: 'DM Mono',monospace;
+            }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background .2s, border-color .2s;
+        }
+
+            .user-chip:hover {
+                background: rgba(255,255,255,.1);
+                border-color: var(--accent);
+            }
+
+            .user-chip span {
+                color: var(--muted2);
+            }
+
+            .user-chip .chip-arrow {
+                font-size: 9px;
+                color: var(--muted);
+                transition: transform .2s;
+            }
+
+            .user-chip.open .chip-arrow {
+                transform: rotate(180deg);
+            }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
+
+            .dropdown-header .d-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            .dropdown-header .d-role {
+                font-size: 10px;
+                color: var(--muted);
+                font-family: 'DM Mono',monospace;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                margin-top: 2px;
+            }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: background .15s, color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans',sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: var(--text);
+            }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        /* ── MAIN LAYOUT ── */
+        .main {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px 24px;
+        }
+
+        /* ── PANEL NUEVO REGISTRO ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .panel-title::before {
+                content: '';
+                width: 3px;
+                height: 14px;
+                background: var(--accent);
+                border-radius: 2px;
+                display: inline-block;
+            }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(190px,1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .field input, .field select {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 28px;
+        }
+
+            .field select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+            .field input:focus, .field select:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+            }
+
+        /* ── BOTONES ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans',sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 3px 10px rgba(59,130,246,.3);
+        }
+
+            .btn-primary:hover {
+                background: #2563EB;
+                transform: translateY(-1px);
+            }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+            box-shadow: 0 3px 10px rgba(16,185,129,.25);
+        }
+
+            .btn-success:hover {
+                background: #059669;
+                transform: translateY(-1px);
+            }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+            box-shadow: 0 3px 10px rgba(239,68,68,.25);
+        }
+
+            .btn-danger:hover {
+                background: #DC2626;
+                transform: translateY(-1px);
+            }
+
+        .btn-amber {
+            background: var(--amber);
+            color: #1c1400;
+        }
+
+            .btn-amber:hover {
+                background: #D97706;
+            }
+
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+
+            .btn-purple:hover {
+                background: #7C3AED;
+            }
+
+        .btn-cyan {
+            background: var(--cyan);
+            color: #001a1f;
+        }
+
+            .btn-cyan:hover {
+                background: #0891B2;
+            }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
+        }
+
+            .btn-ghost:hover {
+                color: var(--text);
+                border-color: var(--accent);
+            }
+
+        .btn-sm {
+            padding: 8px 13px;
+            font-size: 12px;
+        }
+
+        /* ── TOOLBAR ── */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .toolbar-sep {
+            width: 1px;
+            height: 24px;
+            background: var(--border2);
+            margin: 0 4px;
+        }
+
+        .anio-input {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            width: 110px;
+        }
+
+            .anio-input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        /* ── TABLA ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: calc(100vh - 380px);
+            min-height: 420px;
+            overflow-y: auto;
+        }
+
+            .table-scroll::-webkit-scrollbar {
+                width: 7px;
+                height: 7px;
+            }
+
+            .table-scroll::-webkit-scrollbar-track {
+                background: var(--surface2);
+                border-radius: 999px;
+            }
+
+            .table-scroll::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 999px;
+            }
+
+                .table-scroll::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent);
+                }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1800px;
+        }
+
+        thead th {
+            background: var(--surface3);
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+            thead th:last-child {
+                position: sticky;
+                right: 0;
+                z-index: 11;
+                background: var(--surface3);
+            }
+
+        tbody td:last-child {
+            position: sticky;
+            right: 0;
+            background: var(--surface);
+            z-index: 1;
+        }
+
+        tbody tr:hover td:last-child {
+            filter: brightness(1.15);
+        }
+
+        .filter-row td input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 5px 8px;
+            font-size: 11px;
+            color: var(--text);
+            font-family: 'DM Mono',monospace;
+        }
+
+            .filter-row td input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+
+            tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            tbody tr:hover td {
+                filter: brightness(1.15);
+            }
+
+        td {
+            padding: 10px 12px;
+            color: var(--text);
+            vertical-align: middle;
+            line-height: 1.4;
+        }
+
+            td.mono {
+                font-family: 'DM Sans',sans-serif;
+                font-size: 12px;
+                color: var(--text);
+            }
+
+        .disponible-pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .04em;
+        }
+
+        .pill-si {
+            background: rgba(16,185,129,.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(16,185,129,.35);
+        }
+
+        .pill-no {
+            background: rgba(239,68,68,.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239,68,68,.3);
+        }
+
+        .pill-otro {
+            background: rgba(100,116,139,.15);
+            color: #94A3B8;
+            border: 1px solid rgba(100,116,139,.3);
+        }
+
+        /* ── PAGINACIÓN ── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .page-info {
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--muted2);
+        }
+
+        /* ── MODALES ── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.7);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+            .modal.show {
+                display: flex;
+            }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 24px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,.6);
+            position: relative;
+            animation: modalIn .2s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-box.form-box {
+            width: min(660px,95vw);
+        }
+
+        .modal-box.hist-box {
+            width: min(900px,95vw);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+            .modal-header h3 {
+                font-size: 15px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        /* ── FORM EDITAR ── */
+        .form-grid-modal {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media(max-width:500px) {
+            .form-grid-modal {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-field {
+            margin-bottom: 0;
+        }
+
+            .form-field label {
+                font-size: 9px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            .form-field input, .form-field select, .form-field textarea {
+                width: 100%;
+                background: var(--surface2);
+                border: 1px solid var(--border2);
+                border-radius: 7px;
+                padding: 9px 11px;
+                font-size: 12px;
+                font-family: 'DM Mono',monospace;
+                color: var(--text);
+                transition: border-color .2s;
+            }
+
+            .form-field select {
+                cursor: pointer;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 10px center;
+                padding-right: 28px;
+            }
+
+                .form-field select option {
+                    background: var(--surface2);
+                    color: var(--text);
+                }
+
+                .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+                }
+
+            .form-field textarea {
+                resize: vertical;
+                min-height: 70px;
+                font-family: 'DM Sans',sans-serif;
+            }
+
+            .form-field.full {
+                grid-column: 1 / -1;
+            }
+
+        /* ── HISTORIAL ── */
+        .ev-wrap {
+            margin-bottom: 16px;
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        .ev-header {
+            background: var(--surface2);
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+            .ev-header span {
+                font-size: 12px;
+                color: var(--muted2);
+            }
+
+            .ev-header strong {
+                color: var(--text);
+            }
+
+        .badge-cambio {
+            background: rgba(245,158,11,.2);
+            color: var(--amber);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            margin-left: 6px;
+            border: 1px solid rgba(245,158,11,.3);
+        }
+
+        .ev-table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+            .ev-table th, .ev-table td {
+                border: 1px solid var(--border);
+                padding: 9px 12px;
+                text-align: left;
+            }
+
+            .ev-table thead th {
+                background: var(--surface3);
+                color: var(--muted);
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+            }
+
+            .ev-table th:first-child {
+                width: 22%;
+            }
+
+        .row-changed td:nth-child(2) {
+            background: rgba(239,68,68,.08);
+            color: #fca5a5;
+        }
+
+        .row-changed td:nth-child(3) {
+            background: rgba(16,185,129,.08);
+            color: #6ee7b7;
+        }
+
+        .empty-val {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .sin-hist {
+            text-align: center;
+            padding: 50px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .n-cambios-badge {
+            margin-left: auto;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+    </style>
 </head>
 <body>
-<div class="header">SERVICIOS PROVEEDORES NF</div>
-<div class="container">
 
-<div class="form-grid">
-  <div class="field"><label>ID Unico</label><input id="ID_UNICO"></div>
-  <div class="field"><label>OC</label><input id="OC"></div>
-  <div class="field"><label>Folio Cotizacion</label><input id="FOLIO_COTIZACION"></div>
-  <div class="field"><label>Folio Reporte</label><input id="FOLIO_REPORTE"></div>
-  <div class="field"><label>Fecha</label><input id="FECHA"></div>
-  <div class="field"><label>Requisitor</label><input id="REQUISITOR"></div>
-  <div class="field"><label>Cuenta Poliza</label><input id="CUENTA_POLIZA"></div>
-  <div class="field"><label>Servicio / Costo</label><input id="SERVICIO_COSTO"></div>
-  <div class="field"><label>Ubicacion / Planta</label><input id="UBICACION_PLANTA"></div>
-  <div class="field"><label>Area</label><input id="AREA"></div>
-  <div class="field"><label>Cantidad</label><input id="CANTIDAD"></div>
-  <div class="field"><label>Proveedor</label><input id="PROVEEDORES"></div>
-  <div class="field"><label>Panel Faceplate</label><input id="PANEL_FACEPLATE"></div>
-  <div class="field"><label>Switch</label><input id="SWITCH"></div>
-  <div class="field"><label>Personal que Recibio</label><input id="PERSONAL_RECIBIO"></div>
-  <div class="field"><label>Se Finalizo</label><input id="SE_FINALIZO"></div>
-  <div class="field"><label>Costo</label><input id="COSTO"></div>
-  <div class="field" style="grid-column:span 2"><label>Descripcion del Servicio</label><textarea id="DESC_SERVICIO"></textarea></div>
-  <div class="field" style="grid-column:span 2"><label>Descripcion del Trabajo</label><textarea id="DESC_TRABAJO"></textarea></div>
-  <div class="field" style="grid-column:span 2"><label>Material / Equipo</label><textarea id="MATERIAL_EQUIPO"></textarea></div>
-  <div class="field" style="grid-column:span 2"><label>Observaciones</label><textarea id="OBSERVACIONES"></textarea></div>
-</div>
+    <!-- ══ TOP BAR ══════════════════════════════════════════════════════════ -->
+    <div class="topbar">
+        <div class="topbar-icon">🏭</div>
+        <div class="topbar-title">
+            <h1>Servicios Proveedores</h1>
+            <p>Gestión de servicios por proveedor</p>
+        </div>
+        <div class="topbar-actions">
+            <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
+                <span>👤</span>
+                <span id="usuarioDisplay">—</span>
+                <span class="chip-arrow">▼</span>
+                <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name" id="dropdownNombre">—</div>
+                        <div class="d-role" id="dropdownRol">—</div>
+                    </div>
+                    <button class="dropdown-item danger" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="btn-bar">
-  <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
-  <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
-</div>
-<div class="btn-bar">
-  <button class="export" onclick="exportarTodo()">Exportar Todo</button>
-</div>
+    <!-- ══ MAIN ═════════════════════════════════════════════════════════════ -->
+    <div class="main">
 
-<div class="table-container">
-<table>
-<thead>
-<tr>
-  <th>ID</th><th>ID UNICO</th><th>OC</th><th>F.COTIZ</th><th>F.REPORTE</th>
-  <th>FECHA</th><th>REQUISITOR</th><th>POLIZA</th><th>SERV/COSTO</th>
-  <th>UBICACION</th><th>AREA</th><th>CANTIDAD</th><th>DESC SERVICIO</th>
-  <th>DESC TRABAJO</th><th>MATERIAL</th><th>OBSERVACIONES</th>
-  <th>PROVEEDOR</th><th>PANEL</th><th>SWITCH</th><th>PERSONAL</th>
-  <th>FINALIZADO</th><th>COSTO</th><th>PDF</th><th>ACCIONES</th>
-</tr>
-<tr class="filter-row">
-  <th></th>
-  <th><input oninput="filtrar()"></th><!-- f[0]  ID_UNICO -->
-  <th><input oninput="filtrar()"></th><!-- f[1]  OC -->
-  <th><input oninput="filtrar()"></th><!-- f[2]  FOLIO_COTIZACION -->
-  <th><input oninput="filtrar()"></th><!-- f[3]  FOLIO_REPORTE -->
-  <th><input oninput="filtrar()"></th><!-- f[4]  FECHA -->
-  <th><input oninput="filtrar()"></th><!-- f[5]  REQUISITOR -->
-  <th><input oninput="filtrar()"></th><!-- f[6]  CUENTA_POLIZA -->
-  <th><input oninput="filtrar()"></th><!-- f[7]  SERVICIO_COSTO -->
-  <th><input oninput="filtrar()"></th><!-- f[8]  UBICACION_PLANTA -->
-  <th><input oninput="filtrar()"></th><!-- f[9]  AREA -->
-  <th><input oninput="filtrar()"></th><!-- f[10] CANTIDAD -->
-  <th><input oninput="filtrar()"></th><!-- f[11] DESC_SERVICIO -->
-  <th><input oninput="filtrar()"></th><!-- f[12] DESC_TRABAJO -->
-  <th></th><th></th>
-  <th><input oninput="filtrar()"></th><!-- f[13] PROVEEDORES -->
-  <th></th><th></th><th></th>
-  <th><input oninput="filtrar()"></th><!-- f[14] SE_FINALIZO -->
-  <th><input oninput="filtrar()"></th><!-- f[15] COSTO -->
-  <th></th><th></th>
-</tr>
-</thead>
-<tbody id="tabla"></tbody>
-</table>
-</div>
+        <!-- ── Panel nuevo registro ── -->
+        <div class="panel" id="panelNuevo">
+            <div class="panel-title">➕ Nuevo Registro</div>
+            <div class="form-grid">
+                <div class="field"><label>ID Único</label><input id="f_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
+                <div class="field"><label>Folio Único</label><input id="f_FOLIO_UNICO" placeholder="Folio único"></div>
+                <div class="field"><label>Folio Cotización</label><input id="f_FOLIO_COTIZACION" placeholder="Folio de cotización"></div>
+                <div class="field"><label>Folio Reporte</label><input id="f_FOLIO_REPORTE" placeholder="Folio de reporte"></div>
+                <div class="field"><label>Fecha</label><input id="f_FECHA" type="date"></div>
+                <div class="field"><label>Requisitor</label><input id="f_REQUISITOR" placeholder="Nombre del requisitor"></div>
+                <div class="field">
+                    <label>Cuenta con Póliza</label>
+                    <select id="f_CUENTA_CON_POLIZA">
+                        <option value="">— Selecciona —</option>
+                        <option value="SI">SÍ</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Servicio con Costo</label>
+                    <select id="f_SERVICIO_CON_COSTO">
+                        <option value="">— Selecciona —</option>
+                        <option value="SI">SÍ</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </div>
+                <div class="field"><label>Ubicación Planta</label><input id="f_UBICACION_PLANTA" placeholder="Planta / ubicación"></div>
+                <div class="field"><label>Área</label><input id="f_AREA" placeholder="Área"></div>
+                <div class="field"><label>Descripción Servicio</label><input id="f_DESCRIPCION_SERVICIO" placeholder="Descripción del servicio"></div>
+                <div class="field"><label>Proveedores</label><input id="f_PROVEEDORES" placeholder="Nombre del proveedor"></div>
+                <div class="field"><label>Personal que Recibió</label><input id="f_PERSONAL_RECIBIO" placeholder="Nombre del personal"></div>
+                <div class="field">
+                    <label>Solicitud Finalizada</label>
+                    <select id="f_SOLICITUD_FINALIZADA">
+                        <option value="">— Selecciona —</option>
+                        <option value="SI">SÍ</option>
+                        <option value="NO">NO</option>
+                        <option value="EN PROCESO">EN PROCESO</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-success" onclick="guardar()">💾 Guardar</button>
+            <button class="btn btn-ghost" onclick="limpiarForm()" style="margin-left:8px;">✕ Limpiar</button>
+        </div>
 
-<div class="pagination">
-  <button onclick="anterior()">Anterior</button>
-  <span id="paginaInfo"></span>
-  <button onclick="siguiente()">Siguiente</button>
-  <button class="back" onclick="window.location.href='menu.html'">
-REGRESAR AL MENU PRINCIPAL
-</button>
-</div>
-</div>
+        <!-- ── Toolbar ── -->
+        <div class="toolbar">
+            <button class="btn btn-cyan btn-sm" onclick="exportarFiltrado()">📥 Exportar filtrado</button>
+            <button class="btn btn-cyan btn-sm" onclick="exportarTodo()">📦 Exportar todo</button>
+            <div class="toolbar-sep"></div>
+            <input class="anio-input" id="anioExportar" type="number" placeholder="Año" value="">
+            <button class="btn btn-cyan btn-sm" onclick="exportarPorAnio()">📅 Exportar por año</button>
+            <div class="toolbar-sep"></div>
+            <button class="btn btn-ghost btn-sm" onclick="cargar()">🔄 Recargar</button>
+        </div>
 
-<script>
-let paginaActual=1,limite=10,totalRegistros=0,editandoID=null;
+        <!-- ── Tabla ── -->
+        <div class="table-wrap">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ID Único</th>
+                            <th>Folio Único</th>
+                            <th>Folio Cotización</th>
+                            <th>Folio Reporte</th>
+                            <th>Fecha</th>
+                            <th>Requisitor</th>
+                            <th>Cuenta Póliza</th>
+                            <th>Servicio c/ Costo</th>
+                            <th>Ubicación Planta</th>
+                            <th>Área</th>
+                            <th>Descripción Servicio</th>
+                            <th>Proveedores</th>
+                            <th>Personal Recibió</th>
+                            <th>Solicitud Finalizada</th>
+                            <th>Acciones</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ID_UNICO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FOLIO_UNICO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FOLIO_COTIZACION"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FOLIO_REPORTE"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FECHA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_REQUISITOR"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_CUENTA_CON_POLIZA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_SERVICIO_CON_COSTO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_UBICACION_PLANTA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_AREA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_DESCRIPCION_SERVICIO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PROVEEDORES"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PERSONAL_RECIBIO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_SOLICITUD_FINALIZADA"></td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla">
+                        <tr><td colspan="16" style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-function guardar(){
-    let ids=['ID_UNICO','OC','FOLIO_COTIZACION','FOLIO_REPORTE','FECHA','REQUISITOR',
-             'CUENTA_POLIZA','SERVICIO_COSTO','UBICACION_PLANTA','AREA','CANTIDAD',
-             'DESC_SERVICIO','DESC_TRABAJO','MATERIAL_EQUIPO','OBSERVACIONES',
-             'PROVEEDORES','PANEL_FACEPLATE','SWITCH','PERSONAL_RECIBIO','SE_FINALIZO','COSTO'];
-    let data={};
-    ids.forEach(k=>{ let el=document.getElementById(k); data[k]=el&&el.value?el.value:null; });
-    if(editandoID){
-        fetch(`/SERVICIOS_PROVEEDORES_NF/${editandoID}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
-        .then(()=>{editandoID=null;limpiarFormulario();cargar();});
-    } else {
-        fetch("/SERVICIOS_PROVEEDORES_NF",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
-        .then(()=>{limpiarFormulario();cargar();});
-    }
-}
+        <!-- ── Paginación ── -->
+        <div class="pagination">
+            <button class="btn btn-ghost btn-sm" onclick="anterior()">◀ Anterior</button>
+            <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
+            <span class="page-info" id="paginaInfo">—</span>
+        </div>
 
-function limpiarFormulario(){ document.querySelectorAll(".form-grid input,.form-grid textarea").forEach(i=>i.value=""); }
-function cancelarEdicion(){ editandoID=null; limpiarFormulario(); }
+    </div><!-- /main -->
+    <!-- ══ MODAL EDITAR ═════════════════════════════════════════════════════ -->
+    <div class="modal" id="modalEditar">
+        <div class="modal-box form-box">
+            <div class="modal-header">
+                <h3>✏️ Editar Servicio Proveedor &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="editarIdLabel">#</span></h3>
+                <button class="btn btn-ghost btn-sm" onclick="cerrarEditar()">✕</button>
+            </div>
+            <div class="form-grid-modal">
+                <div class="form-field"><label>ID Único</label><input id="e_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
+                <div class="form-field"><label>Folio Único</label><input id="e_FOLIO_UNICO" placeholder="Folio único"></div>
+                <div class="form-field"><label>Folio Cotización</label><input id="e_FOLIO_COTIZACION" placeholder="Folio de cotización"></div>
+                <div class="form-field"><label>Folio Reporte</label><input id="e_FOLIO_REPORTE" placeholder="Folio de reporte"></div>
+                <div class="form-field"><label>Fecha</label><input id="e_FECHA" type="date"></div>
+                <div class="form-field"><label>Requisitor</label><input id="e_REQUISITOR" placeholder="Nombre del requisitor"></div>
+                <div class="form-field">
+                    <label>Cuenta con Póliza</label>
+                    <select id="e_CUENTA_CON_POLIZA">
+                        <option value="">— Selecciona —</option>
+                        <option value="SI">SÍ</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Servicio con Costo</label>
+                    <select id="e_SERVICIO_CON_COSTO">
+                        <option value="">— Selecciona —</option>
+                        <option value="SI">SÍ</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Ubicación Planta</label><input id="e_UBICACION_PLANTA" placeholder="Planta / ubicación"></div>
+                <div class="form-field"><label>Área</label><input id="e_AREA" placeholder="Área"></div>
+                <div class="form-field full"><label>Descripción Servicio</label><input id="e_DESCRIPCION_SERVICIO" placeholder="Descripción del servicio"></div>
+                <div class="form-field"><label>Proveedores</label><input id="e_PROVEEDORES" placeholder="Nombre del proveedor"></div>
+                <div class="form-field"><label>Personal que Recibió</label><input id="e_PERSONAL_RECIBIO" placeholder="Nombre del personal"></div>
+                <div class="form-field full">
+                    <label>Solicitud Finalizada</label>
+                    <select id="e_SOLICITUD_FINALIZADA">
+                        <option value="">— Selecciona —</option>
+                        <option value="SI">SÍ</option>
+                        <option value="NO">NO</option>
+                        <option value="EN PROCESO">EN PROCESO</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarCambios()">💾 Guardar cambios</button>
+            </div>
+        </div>
+    </div>
 
-function obtenerParametros(){
-    let f=document.querySelectorAll(".filter-row input");
-    return new URLSearchParams({
-        page:paginaActual,limit:limite,
-        ID_UNICO:f[0].value,OC:f[1].value,FOLIO_COTIZACION:f[2].value,
-        FOLIO_REPORTE:f[3].value,FECHA:f[4].value,REQUISITOR:f[5].value,
-        CUENTA_POLIZA:f[6].value,SERVICIO_COSTO:f[7].value,UBICACION_PLANTA:f[8].value,
-        AREA:f[9].value,CANTIDAD:f[10].value,DESC_SERVICIO:f[11].value,
-        DESC_TRABAJO:f[12].value,PROVEEDORES:f[13].value,
-        SE_FINALIZO:f[14].value,COSTO:f[15].value
-    });
-}
+    <!-- ══ MODAL HISTORIAL ══════════════════════════════════════════════════ -->
+    <div class="modal" id="modalHistorial">
+        <div class="modal-box hist-box">
+            <div class="modal-header">
+                <h3>📋 Historial de cambios &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="histIdLabel">#</span></h3>
+                <button class="btn btn-ghost btn-sm" onclick="cerrarHistorial()">✕</button>
+            </div>
+            <div id="contenidoHistorial">
+                <p style="text-align:center;padding:40px;color:var(--muted)">Cargando...</p>
+            </div>
+        </div>
+    </div>
 
-function cargar(){
-    fetch(`/SERVICIOS_PROVEEDORES_NF?${obtenerParametros().toString()}`)
-    .then(r=>r.json()).then(resp=>{totalRegistros=resp.total;renderizar(resp.data);});
-}
+    <script>
+        // ═══ ESTADO GLOBAL ═══
+        let paginaActual = 1;
+        let limite = 10;
+        let totalRegistros = 0;
+        let datosActuales = [];
+        let editandoID = null;
+        let usuarioActual = 'SISTEMA';
+        let rolActual = '';
+        let _filtrarTimer = null;
 
-function renderizar(datos){
-    tabla.innerHTML="";
-    datos.forEach(row=>{
-        tabla.innerHTML+=`<tr>
-        <td>${row.ID}</td><td>${row.ID_UNICO??""}</td><td>${row.OC??""}</td>
-        <td>${row.FOLIO_COTIZACION??""}</td><td>${row.FOLIO_REPORTE??""}</td>
-        <td>${row.FECHA??""}</td><td>${row.REQUISITOR??""}</td>
-        <td>${row.CUENTA_POLIZA??""}</td><td>${row.SERVICIO_COSTO??""}</td>
-        <td>${row.UBICACION_PLANTA??""}</td><td>${row.AREA??""}</td>
-        <td>${row.CANTIDAD??""}</td><td>${row.DESC_SERVICIO??""}</td>
-        <td>${row.DESC_TRABAJO??""}</td><td>${row.MATERIAL_EQUIPO??""}</td>
-        <td>${row.OBSERVACIONES??""}</td><td>${row.PROVEEDORES??""}</td>
-        <td>${row.PANEL_FACEPLATE??""}</td><td>${row.SWITCH??""}</td>
-        <td>${row.PERSONAL_RECIBIO??""}</td><td>${row.SE_FINALIZO??""}</td>
-        <td>${row.COSTO??""}</td>
-        <td>${row.TIENE_PDF
-            ?`<button class="pdf" onclick="verPDF(${row.ID})">Ver</button><button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
-            :`<input type="file" onchange="subirPDF(${row.ID},this)">`}</td>
-        <td><button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
-        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button></td>
-        </tr>`;
-    });
-    paginaInfo.innerText=`Pagina ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
-}
+        // ═══ CAMPOS DEL HISTORIAL ═══
+        const CAMPOS_HIST = [
+            { key: 'ID_UNICO', label: 'ID Único' },
+            { key: 'FOLIO_UNICO', label: 'Folio Único' },
+            { key: 'FOLIO_COTIZACION', label: 'Folio Cotización' },
+            { key: 'FOLIO_REPORTE', label: 'Folio Reporte' },
+            { key: 'FECHA', label: 'Fecha' },
+            { key: 'REQUISITOR', label: 'Requisitor' },
+            { key: 'CUENTA_CON_POLIZA', label: 'Cuenta con Póliza' },
+            { key: 'SERVICIO_CON_COSTO', label: 'Servicio con Costo' },
+            { key: 'UBICACION_PLANTA', label: 'Ubicación Planta' },
+            { key: 'AREA', label: 'Área' },
+            { key: 'DESCRIPCION_SERVICIO', label: 'Descripción Servicio' },
+            { key: 'PROVEEDORES', label: 'Proveedores' },
+            { key: 'PERSONAL_RECIBIO', label: 'Personal que Recibió' },
+            { key: 'SOLICITUD_FINALIZADA', label: 'Solicitud Finalizada' },
+        ];
 
-function editar(row){ editandoID=row.ID; Object.keys(row).forEach(k=>{let el=document.getElementById(k);if(el)el.value=row[k]??""}); window.scrollTo({top:0,behavior:"smooth"}); }
-function eliminar(id){ if(!confirm("Eliminar?")) return; fetch(`/SERVICIOS_PROVEEDORES_NF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
-function subirPDF(id,input){ let fd=new FormData(); fd.append("file",input.files[0]); fetch(`/SERVICIOS_PROVEEDORES_NF/PDF/${id}`,{method:"POST",body:fd}).then(()=>cargar()); }
-function verPDF(id){ window.open(`/SERVICIOS_PROVEEDORES_NF/PDF/${id}`,"_blank"); }
-function eliminarPDF(id){ if(!confirm("Eliminar PDF?")) return; fetch(`/SERVICIOS_PROVEEDORES_NF/PDF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
-function filtrar(){ paginaActual=1; cargar(); }
-function exportarTodo(){ window.open(`/SERVICIOS_PROVEEDORES_NF/EXPORTAR_TODO`); }
-function siguiente(){ if(paginaActual*limite<totalRegistros){paginaActual++;cargar();} }
-function anterior(){ if(paginaActual>1){paginaActual--;cargar();} }
-cargar();
-</script>
+        // ═══ INACTIVIDAD 30 min ═══
+        let _inacTimer = null;
+        function resetInactividad() {
+            clearTimeout(_inacTimer);
+            _inacTimer = setTimeout(async () => {
+                try { await fetch('/LOGOUT', { method: 'POST', credentials: 'include' }); } catch (e) { }
+                window.location.href = '/static/login.html?inactivo=1';
+            }, 30 * 60 * 1000);
+        }
+        ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(ev =>
+            document.addEventListener(ev, resetInactividad, { passive: true })
+        );
+
+        // ═══ INIT ═══
+        window.addEventListener('DOMContentLoaded', () => {
+            resetInactividad();
+
+            fetch('/obtener-usuario', { credentials: 'include' })
+                .then(r => { if (!r.ok) { window.location.href = '/static/login.html'; return null; } return r.json(); })
+                .then(d => {
+                    if (!d) return;
+                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
+                    usuarioActual = d.usuario || 'SISTEMA';
+                    rolActual = (d.rol || '').trim().toUpperCase();
+                    document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownRol').textContent = rolActual;
+                })
+                .catch(() => { window.location.href = '/static/login.html'; });
+
+            cargar();
+        });
+
+        // ═══ CARGAR TABLA ═══
+        async function cargar() {
+            const qs = obtenerParametros();
+            try {
+                const r = await fetch(`/SERVICIOS_PROVEEDORES?page=${paginaActual}&limit=${limite}&${qs}`);
+                const d = await r.json();
+                totalRegistros = d.total || 0;
+                datosActuales = d.data || [];
+                renderizar();
+            } catch (e) {
+                document.getElementById('tabla').innerHTML =
+                    `<tr><td colspan="16" style="text-align:center;padding:40px;color:var(--red)">❌ Error al cargar: ${e.message}</td></tr>`;
+            }
+        }
+
+        function obtenerParametros() {
+            const campos = ['ID_UNICO', 'FOLIO_UNICO', 'FOLIO_COTIZACION', 'FOLIO_REPORTE',
+                'FECHA', 'REQUISITOR', 'CUENTA_CON_POLIZA', 'SERVICIO_CON_COSTO',
+                'UBICACION_PLANTA', 'AREA', 'DESCRIPCION_SERVICIO',
+                'PROVEEDORES', 'PERSONAL_RECIBIO', 'SOLICITUD_FINALIZADA'];
+            const p = new URLSearchParams();
+            campos.forEach(c => {
+                const val = (document.getElementById('fil_' + c)?.value || '').trim();
+                if (val) p.set(c, val);
+            });
+            return p.toString();
+        }
+
+        function filtrar() {
+            clearTimeout(_filtrarTimer);
+            _filtrarTimer = setTimeout(() => { paginaActual = 1; cargar(); }, 350);
+        }
+
+        function statusPill(val) {
+            const v = (val || '').toString().toUpperCase().trim();
+            if (v === 'SI' || v === 'SÍ') return 'pill-si';
+            if (v === 'NO') return 'pill-no';
+            return 'pill-otro';
+        }
+
+        function renderizar() {
+            const tbody = document.getElementById('tabla');
+            tbody.innerHTML = '';
+
+            if (!datosActuales.length) {
+                tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
+                return;
+            }
+
+            const esAdmin = rolActual === 'ADMIN';
+
+            datosActuales.forEach(row => {
+                const fecha = row.FECHA ? row.FECHA.split('T')[0] : '—';
+                const polizaPill = statusPill(row.CUENTA_CON_POLIZA);
+                const costoPill = statusPill(row.SERVICIO_CON_COSTO);
+                const finPill = statusPill(row.SOLICITUD_FINALIZADA);
+
+                const polizaLabel = row.CUENTA_CON_POLIZA || '—';
+                const costoLabel = row.SERVICIO_CON_COSTO || '—';
+                const finLabel = row.SOLICITUD_FINALIZADA || '—';
+
+                tbody.innerHTML += `
+                        <tr>
+                            <td>${row.ID}</td>
+                            <td class="mono">${esc(row.ID_UNICO) || '—'}</td>
+                            <td class="mono">${esc(row.FOLIO_UNICO) || '—'}</td>
+                            <td class="mono">${esc(row.FOLIO_COTIZACION) || '—'}</td>
+                            <td class="mono">${esc(row.FOLIO_REPORTE) || '—'}</td>
+                            <td class="mono">${fecha}</td>
+                            <td>${esc(row.REQUISITOR) || '—'}</td>
+                            <td><span class="disponible-pill ${polizaPill}">${esc(polizaLabel)}</span></td>
+                            <td><span class="disponible-pill ${costoPill}">${esc(costoLabel)}</span></td>
+                            <td>${esc(row.UBICACION_PLANTA) || '—'}</td>
+                            <td>${esc(row.AREA) || '—'}</td>
+                            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.DESCRIPCION_SERVICIO) || ''}">${esc(row.DESCRIPCION_SERVICIO) || '—'}</td>
+                            <td>${esc(row.PROVEEDORES) || '—'}</td>
+                            <td>${esc(row.PERSONAL_RECIBIO) || '—'}</td>
+                            <td><span class="disponible-pill ${finPill}">${esc(finLabel)}</span></td>
+                            <td style="white-space:nowrap">
+                                ${esAdmin ? `
+                                <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
+                                ` : ''}
+                                <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
+                            </td>
+                        </tr>`;
+            });
+
+            document.getElementById('paginaInfo').textContent =
+                `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite) || 1} | Total: ${totalRegistros}`;
+        }
+
+        function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
+        function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
+
+        // ═══ GUARDAR NUEVO ═══
+        async function guardar() {
+            const dto = {
+                FOLIO_UNICO: v('f_FOLIO_UNICO'),
+                FOLIO_COTIZACION: v('f_FOLIO_COTIZACION'),
+                FOLIO_REPORTE: v('f_FOLIO_REPORTE'),
+                FECHA: v('f_FECHA'),
+                REQUISITOR: v('f_REQUISITOR'),
+                CUENTA_CON_POLIZA: v('f_CUENTA_CON_POLIZA'),
+                SERVICIO_CON_COSTO: v('f_SERVICIO_CON_COSTO'),
+                UBICACION_PLANTA: v('f_UBICACION_PLANTA'),
+                AREA: v('f_AREA'),
+                DESCRIPCION_SERVICIO: v('f_DESCRIPCION_SERVICIO'),
+                PROVEEDORES: v('f_PROVEEDORES'),
+                PERSONAL_RECIBIO: v('f_PERSONAL_RECIBIO'),
+                SOLICITUD_FINALIZADA: v('f_SOLICITUD_FINALIZADA'),
+            };
+
+            // ID_UNICO auto generado desde FOLIO_UNICO + FOLIO_REPORTE
+            const fu = (dto.FOLIO_UNICO || '').trim();
+            const fr = (dto.FOLIO_REPORTE || '').trim();
+            dto.ID_UNICO = [fu, fr].filter(Boolean).join('-') || null;
+
+            try {
+                const r = await fetch('/SERVICIO_PROVEEDOR', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(dto)
+                });
+                const d = await r.json();
+                if (d.error) { alert('Error: ' + d.error); return; }
+                limpiarForm();
+                cargar();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        function limpiarForm() {
+            ['f_ID_UNICO', 'f_FOLIO_UNICO', 'f_FOLIO_COTIZACION', 'f_FOLIO_REPORTE',
+                'f_FECHA', 'f_REQUISITOR', 'f_CUENTA_CON_POLIZA', 'f_SERVICIO_CON_COSTO',
+                'f_UBICACION_PLANTA', 'f_AREA', 'f_DESCRIPCION_SERVICIO',
+                'f_PROVEEDORES', 'f_PERSONAL_RECIBIO', 'f_SOLICITUD_FINALIZADA'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+        }
+
+        // ═══ ELIMINAR ═══
+        async function eliminar(id) {
+            if (!confirm('¿Eliminar este servicio de proveedor?')) return;
+            try {
+                await fetch(`/SERVICIO_PROVEEDOR/${id}`, { method: 'DELETE' });
+                cargar();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // ═══ EXPORTAR ═══
+        function exportarFiltrado() { window.open('/SERVICIOS_PROVEEDORES/EXPORTAR?' + obtenerParametros()); }
+        function exportarTodo() { window.open('/SERVICIOS_PROVEEDORES/EXPORTAR_TODO'); }
+        function exportarPorAnio() {
+            const a = document.getElementById('anioExportar').value;
+            if (!a) { alert('Ingresa un año'); return; }
+            window.open('/SERVICIOS_PROVEEDORES/EXPORTAR_ANIO?anio=' + a);
+        }
+
+        // ═══ MODAL EDITAR ═══
+        function abrirEditar(id) {
+            editandoID = id;
+            document.getElementById('editarIdLabel').textContent = '#' + id;
+            const row = datosActuales.find(r => r.ID === id);
+            if (row) {
+                setV('e_ID_UNICO', row.ID_UNICO);
+                setV('e_FOLIO_UNICO', row.FOLIO_UNICO);
+                setV('e_FOLIO_COTIZACION', row.FOLIO_COTIZACION);
+                setV('e_FOLIO_REPORTE', row.FOLIO_REPORTE);
+                setV('e_FECHA', row.FECHA ? row.FECHA.split('T')[0] : '');
+                setV('e_REQUISITOR', row.REQUISITOR);
+                setV('e_CUENTA_CON_POLIZA', row.CUENTA_CON_POLIZA);
+                setV('e_SERVICIO_CON_COSTO', row.SERVICIO_CON_COSTO);
+                setV('e_UBICACION_PLANTA', row.UBICACION_PLANTA);
+                setV('e_AREA', row.AREA);
+                setV('e_DESCRIPCION_SERVICIO', row.DESCRIPCION_SERVICIO);
+                setV('e_PROVEEDORES', row.PROVEEDORES);
+                setV('e_PERSONAL_RECIBIO', row.PERSONAL_RECIBIO);
+                setV('e_SOLICITUD_FINALIZADA', row.SOLICITUD_FINALIZADA);
+            }
+            document.getElementById('modalEditar').classList.add('show');
+            document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+        }
+
+        function cerrarEditar() {
+            document.getElementById('modalEditar').classList.remove('show');
+            editandoID = null;
+        }
+
+        async function guardarCambios() {
+            const dto = {
+                FOLIO_UNICO: v('e_FOLIO_UNICO'),
+                FOLIO_COTIZACION: v('e_FOLIO_COTIZACION'),
+                FOLIO_REPORTE: v('e_FOLIO_REPORTE'),
+                FECHA: v('e_FECHA'),
+                REQUISITOR: v('e_REQUISITOR'),
+                CUENTA_CON_POLIZA: v('e_CUENTA_CON_POLIZA'),
+                SERVICIO_CON_COSTO: v('e_SERVICIO_CON_COSTO'),
+                UBICACION_PLANTA: v('e_UBICACION_PLANTA'),
+                AREA: v('e_AREA'),
+                DESCRIPCION_SERVICIO: v('e_DESCRIPCION_SERVICIO'),
+                PROVEEDORES: v('e_PROVEEDORES'),
+                PERSONAL_RECIBIO: v('e_PERSONAL_RECIBIO'),
+                SOLICITUD_FINALIZADA: v('e_SOLICITUD_FINALIZADA'),
+            };
+
+            const fu = (dto.FOLIO_UNICO || '').trim();
+            const fr = (dto.FOLIO_REPORTE || '').trim();
+            dto.ID_UNICO = [fu, fr].filter(Boolean).join('-') || null;
+
+            try {
+                const r = await fetch(`/SERVICIO_PROVEEDOR/${editandoID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(dto)
+                });
+                const result = await r.json();
+                if (r.ok && !result.error) { cerrarEditar(); cargar(); }
+                else alert('Error: ' + (result.error || 'No se pudo guardar'));
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // ═══ MODAL HISTORIAL ═══
+        function esc(val) {
+            if (val == null) return '';
+            return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function norm(v) { return (v == null) ? '' : String(v).trim(); }
+        function formatFecha(f) {
+            try {
+                const d = new Date(f);
+                if (!isNaN(d)) return d.toLocaleString('es-MX', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+            } catch (e) { }
+            return f ?? '';
+        }
+
+        function renderEvento(ev) {
+            let antes = ev.REGISTRO_ANTERIOR || ev.registro_anterior;
+            let despues = ev.REGISTRO_NUEVO || ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (e) { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (e) { }
+
+            const cambiados = new Set();
+            CAMPOS_HIST.forEach(({ key }) => {
+                if (norm(antes?.[key]) !== norm(despues?.[key])) cambiados.add(key);
+            });
+
+            let filas = '';
+            CAMPOS_HIST.forEach(({ key, label }) => {
+                const va = esc(antes?.[key] ?? '');
+                const vd = esc(despues?.[key] ?? '');
+                const chg = cambiados.has(key);
+                filas += `
+                        <tr class="${chg ? 'row-changed' : ''}">
+                            <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                            <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                            <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                        </tr>`;
+            });
+
+            const n = cambiados.size;
+            return `
+                    <div class="ev-wrap">
+                        <div class="ev-header">
+                            <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
+                            <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
+                            <span class="n-cambios-badge"
+                                style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                                       color:${n > 0 ? '#FCD34D' : '#94A3B8'};
+                                       border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                        <table class="ev-table">
+                            <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                            <tbody>${filas}</tbody>
+                        </table>
+                    </div>`;
+        }
+
+        function verHistorial(id) {
+            document.getElementById('histIdLabel').textContent = '#' + id;
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando...</p>';
+            document.getElementById('modalHistorial').classList.add('show');
+            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+
+            fetch(`/SERVICIOS_PROVEEDORES/${id}/HISTORIAL`)
+                .then(r => r.json())
+                .then(data => {
+                    const lista = (data.historial || [])
+                        .sort((a, b) => new Date(b.FECHA || b.fecha || 0) - new Date(a.FECHA || a.fecha || 0));
+
+                    if (!lista.length) {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            '<p class="sin-hist">📭 Sin ediciones registradas</p>';
+                    } else {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
+                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                 </p>` + lista.map(ev => renderEvento(ev)).join('');
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        '<p style="color:var(--red);text-align:center;padding:30px">❌ Error al cargar historial</p>';
+                });
+        }
+
+        function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
+
+        // ═══ UI ═══
+        function toggleDropdown() { document.getElementById('userChipMain').classList.toggle('open'); }
+        document.addEventListener('click', e => {
+            const chip = document.getElementById('userChipMain');
+            if (chip && !chip.contains(e.target)) chip.classList.remove('open');
+        });
+        function cerrarSesion() {
+            fetch('/LOGOUT', { method: 'POST', credentials: 'include' })
+                .finally(() => { window.location.href = '/static/login.html'; });
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
+        });
+
+        // ═══ HELPERS ═══
+        function v(id) { const el = document.getElementById(id); return el ? (el.value.trim() || null) : null; }
+        function setV(id, val) { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
+    </script>
 </body>
 </html>

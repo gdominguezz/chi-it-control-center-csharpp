@@ -34,6 +34,7 @@ builder.Services.AddScoped<PerifeicosNFService>();         // PERIFÉRICOS NF
 builder.Services.AddScoped<BitacoraFirecomService>();     // BITACORA FIRECOM
 builder.Services.AddScoped<CamarasAudioService>();       // CAMARAS AUDIO
 builder.Services.AddScoped<ImpresorasNFService>();      // IMPRESORAS NF
+builder.Services.AddScoped<ServiciosProveedoresService>();//SERVICIOS POR PROVEEDORES 
 
 // CORS
 builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
