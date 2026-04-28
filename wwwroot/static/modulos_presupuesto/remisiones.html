@@ -876,7 +876,24 @@
         const limitePag   = 20;
         let totalRegistros = 0;
         let editandoId    = null;
-        let usuarioActual = 'SISTEMA';
+        let usuarioActual = localStorage.getItem("usuario");
+
+        if (!usuarioActual) {
+            window.location.href = "/login.html";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("usuarioDisplay").textContent = usuarioActual;
+            document.getElementById("dropdownNombre").textContent = usuarioActual;
+            document.getElementById("dropdownRol").textContent = "USUARIO";
+
+            cargar();
+        });
+
+        function cerrarSesion() {
+            localStorage.removeItem("usuario");
+            window.location.href = "/login.html";
+        }
         let importRows    = [];
 
         // Columnas de importación con aliases del Excel
@@ -903,25 +920,7 @@
             { key: 'OC',                       aliases: ['oc'] },
         ];
 
-        // ════════════════════════════════════════
-        //  INIT
-        // ════════════════════════════════════════
-        document.addEventListener('DOMContentLoaded', () => {
-            const u = sessionStorage.getItem('usuario');
-            if (!u) { window.location.href = '/static/login.html'; return; }
-            usuarioActual = u;
-            document.getElementById('usuarioDisplay').textContent = u;
-            document.getElementById('dropdownNombre').textContent = u;
-            document.getElementById('dropdownRol').textContent = 'OPERADOR';
-            cargar();
-        });
 
-        function cerrarSesion() { sessionStorage.clear(); window.location.href = '/static/login.html'; }
-        function toggleDropdown() { document.getElementById('userChipMain').classList.toggle('open'); }
-        document.addEventListener('click', e => {
-            const chip = document.getElementById('userChipMain');
-            if (!chip.contains(e.target)) chip.classList.remove('open');
-        });
 
         // ════════════════════════════════════════
         //  CARGA DE DATOS
