@@ -3,22 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>PRESUPUESTOS</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>PRESUPUESTOS — CHI IT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0B0F1A;
-            --surface: #111827;
-            --surface2: #1a2235;
-            --surface3: #1e293b;
-            --border: rgba(255,255,255,.08);
-            --text: #F1F5F9;
+            --bg: #080C14;
+            --bg2: #0B0F1A;
+            --surface: #0f1623;
+            --surface2: #141c2e;
+            --surface3: #1a2235;
+            --border: rgba(255,255,255,.06);
+            --border2: rgba(255,255,255,.11);
+            --text: #E8EEF8;
             --muted: #94A3B8;
             --muted2: #64748B;
             --accent: #2563EB;
             --accent2: #60A5FA;
+            --accent-glow: rgba(37,99,235,.25);
             --danger: #EF4444;
-            --green: #22C55E;
+            --green: #10B981;
+            --amber: #F59E0B;
+            --cyan: #06B6D4;
         }
 
         *, *::before, *::after {
@@ -32,7 +37,19 @@
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
         }
+
+            /* ── GRID BG ── */
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background-image: linear-gradient(rgba(37,99,235,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,.03) 1px, transparent 1px);
+                background-size: 48px 48px;
+                pointer-events: none;
+                z-index: 0;
+            }
 
         /* ── TOPBAR ── */
         .topbar {
@@ -41,56 +58,155 @@
             z-index: 100;
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 0 28px;
-            height: 58px;
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            padding: 0 32px;
+            height: 62px;
+            background: rgba(8,12,20,.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border2);
         }
 
         .topbar-logo {
-            font-family: 'DM Mono', monospace;
-            font-size: .78rem;
+            font-family: 'Syne', sans-serif;
+            font-size: .72rem;
+            font-weight: 700;
             color: var(--accent2);
-            letter-spacing: .08em;
-            white-space: nowrap;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--accent2), #93C5FD);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .topbar-divider {
+            width: 1px;
+            height: 18px;
+            background: var(--border2);
         }
 
         .topbar-title {
-            font-size: 1rem;
-            font-weight: 600;
-            letter-spacing: .04em;
+            font-family: 'Syne', sans-serif;
+            font-size: .95rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            color: var(--text);
         }
 
         .topbar-sep {
             flex: 1;
         }
 
-        .btn-back {
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-pill {
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 7px 16px;
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--muted);
-            font-size: .82rem;
+            padding: 7px 14px;
+            border: 1px solid var(--border2);
+            border-radius: 999px;
             font-family: 'DM Sans', sans-serif;
+            font-size: .75rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: .18s;
-            text-decoration: none;
+            transition: all .2s;
+            letter-spacing: .02em;
+            white-space: nowrap;
         }
 
-            .btn-back:hover {
-                border-color: var(--danger);
-                color: var(--danger);
+            .btn-pill.blue {
+                background: rgba(37,99,235,.12);
+                color: var(--accent2);
+                border-color: rgba(37,99,235,.3);
             }
+
+                .btn-pill.blue:hover {
+                    background: rgba(37,99,235,.25);
+                    border-color: var(--accent);
+                    transform: translateY(-1px);
+                }
+
+            .btn-pill.orange {
+                background: rgba(249,115,22,.1);
+                color: #FB923C;
+                border-color: rgba(249,115,22,.25);
+            }
+
+                .btn-pill.orange:hover {
+                    background: rgba(249,115,22,.2);
+                    border-color: #F97316;
+                    transform: translateY(-1px);
+                }
+
+            .btn-pill.teal {
+                background: rgba(16,185,129,.1);
+                color: #34D399;
+                border-color: rgba(16,185,129,.25);
+            }
+
+                .btn-pill.teal:hover {
+                    background: rgba(16,185,129,.2);
+                    border-color: var(--green);
+                    transform: translateY(-1px);
+                }
+
+            .btn-pill.back {
+                background: transparent;
+                color: var(--muted);
+                border-color: var(--border2);
+            }
+
+                .btn-pill.back:hover {
+                    border-color: var(--danger);
+                    color: var(--danger);
+                }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 52px 24px 36px;
+        }
+
+        .hero-eyebrow {
+            font-family: 'DM Mono', monospace;
+            font-size: .68rem;
+            letter-spacing: .22em;
+            color: var(--accent2);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            opacity: .8;
+        }
+
+        .hero h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            letter-spacing: -.02em;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #E8EEF8 0%, #60A5FA 50%, #2563EB 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .hero-sub {
+            font-size: .88rem;
+            color: var(--muted);
+            letter-spacing: .02em;
+        }
 
         /* ── SEARCH ── */
         .search-wrap {
-            max-width: 860px;
-            margin: 32px auto 0;
+            position: relative;
+            z-index: 1;
+            max-width: 680px;
+            margin: 0 auto 40px;
             padding: 0 24px;
         }
 
@@ -98,60 +214,70 @@
             display: flex;
             gap: 8px;
             background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 8px 10px;
-            transition: border-color .2s;
+            border: 1px solid var(--border2);
+            border-radius: 14px;
+            padding: 6px 6px 6px 18px;
+            transition: border-color .2s, box-shadow .2s;
         }
 
             .search-box:focus-within {
                 border-color: var(--accent);
+                box-shadow: 0 0 0 3px var(--accent-glow);
             }
 
-            .search-box input {
-                flex: 1;
-                background: transparent;
-                border: none;
-                outline: none;
-                color: var(--text);
-                font-family: 'DM Sans', sans-serif;
-                font-size: .95rem;
-                padding: 4px 8px;
-            }
+        .search-icon {
+            color: var(--muted2);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
 
-                .search-box input::placeholder {
-                    color: var(--muted2);
-                }
+        .search-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .9rem;
+            padding: 6px 8px;
+        }
+
+            .search-box input::placeholder {
+                color: var(--muted2);
+            }
 
         .btn-search {
-            padding: 8px 20px;
+            padding: 9px 22px;
             background: var(--accent);
             color: white;
             border: none;
-            border-radius: 7px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: .85rem;
-            font-weight: 600;
+            border-radius: 9px;
+            font-family: 'Syne', sans-serif;
+            font-size: .8rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: background .15s;
+            letter-spacing: .04em;
+            transition: background .15s, transform .15s;
             white-space: nowrap;
         }
 
             .btn-search:hover {
                 background: #1d4ed8;
+                transform: translateY(-1px);
             }
 
         .btn-clear {
-            padding: 8px 14px;
+            padding: 9px 14px;
             background: transparent;
-            color: var(--muted);
-            border: 1px solid var(--border);
-            border-radius: 7px;
+            color: var(--muted2);
+            border: 1px solid var(--border2);
+            border-radius: 9px;
             font-family: 'DM Sans', sans-serif;
-            font-size: .85rem;
+            font-size: .82rem;
             cursor: pointer;
             transition: .15s;
-            white-space: nowrap;
         }
 
             .btn-clear:hover {
@@ -163,16 +289,18 @@
         #spinner {
             display: none;
             text-align: center;
-            padding: 28px;
+            padding: 32px;
             color: var(--muted);
-            font-size: .9rem;
+            font-size: .85rem;
+            position: relative;
+            z-index: 1;
         }
 
         .spin {
             display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 2px solid var(--border);
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border2);
             border-top-color: var(--accent2);
             border-radius: 50%;
             animation: spin .7s linear infinite;
@@ -188,14 +316,16 @@
 
         /* ── RESULTADOS ── */
         #resultados {
-            max-width: 860px;
-            margin: 18px auto;
+            max-width: 900px;
+            margin: 0 auto 32px;
             padding: 0 24px;
             display: none;
+            position: relative;
+            z-index: 1;
         }
 
         .res-summary {
-            font-size: .85rem;
+            font-size: .82rem;
             color: var(--muted);
             margin-bottom: 14px;
             padding-bottom: 10px;
@@ -208,8 +338,8 @@
 
         .modulo-card {
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
+            border: 1px solid var(--border2);
+            border-radius: 12px;
             margin-bottom: 12px;
             overflow: hidden;
         }
@@ -218,24 +348,22 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 12px 16px;
+            padding: 13px 18px;
             background: var(--surface2);
             cursor: pointer;
             user-select: none;
+            transition: background .15s;
         }
 
             .modulo-head:hover {
                 background: var(--surface3);
             }
 
-        .modulo-icon {
-            font-size: 1rem;
-        }
-
         .modulo-name {
-            font-size: .9rem;
+            font-size: .88rem;
             font-weight: 600;
             flex: 1;
+            font-family: 'Syne', sans-serif;
         }
 
         .badge {
@@ -243,31 +371,32 @@
             color: white;
             border-radius: 20px;
             padding: 2px 10px;
-            font-size: .75rem;
-            font-weight: 600;
+            font-size: .72rem;
+            font-weight: 700;
             font-family: 'DM Mono', monospace;
         }
 
         .btn-ir {
-            padding: 4px 12px;
+            padding: 5px 13px;
             background: var(--green);
             color: white;
             border: none;
-            border-radius: 5px;
-            font-size: .75rem;
-            font-weight: 600;
+            border-radius: 6px;
+            font-size: .73rem;
+            font-weight: 700;
             cursor: pointer;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Syne', sans-serif;
+            letter-spacing: .04em;
             transition: background .15s;
         }
 
             .btn-ir:hover {
-                background: #16a34a;
+                background: #059669;
             }
 
         .chevron {
             color: var(--muted2);
-            font-size: .75rem;
+            font-size: .72rem;
             transition: transform .2s;
         }
 
@@ -283,7 +412,7 @@
             .modulo-body table {
                 width: 100%;
                 border-collapse: collapse;
-                font-size: .78rem;
+                font-size: .76rem;
                 font-family: 'DM Mono', monospace;
             }
 
@@ -294,9 +423,7 @@
                 text-align: left;
                 border-bottom: 1px solid var(--border);
                 white-space: nowrap;
-                position: sticky;
-                top: 0;
-                font-size: .72rem;
+                font-size: .7rem;
                 letter-spacing: .04em;
             }
 
@@ -317,7 +444,7 @@
 
         .highlight {
             background: #FBBF24;
-            color: #0B0F1A;
+            color: #080C14;
             border-radius: 2px;
             padding: 0 2px;
             font-weight: 700;
@@ -327,37 +454,57 @@
             padding: 8px 12px;
             background: rgba(245,158,11,.08);
             color: #FBBF24;
-            font-size: .78rem;
+            font-size: .76rem;
             border-bottom: 1px solid var(--border);
         }
 
         .no-results {
-            padding: 20px;
+            padding: 24px;
             text-align: center;
             color: var(--muted2);
-            font-size: .88rem;
+            font-size: .86rem;
             font-style: italic;
         }
 
-        /* ── MÓDULOS GRID ── */
+        /* ── SECTION LABEL ── */
         .section-label {
-            max-width: 1100px;
-            margin: 36px auto 12px;
-            padding: 0 24px;
-            font-size: .72rem;
-            font-weight: 600;
-            letter-spacing: .1em;
-            color: var(--muted2);
-            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 8px auto 16px;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
 
+            .section-label span {
+                font-family: 'DM Mono', monospace;
+                font-size: .65rem;
+                font-weight: 500;
+                letter-spacing: .18em;
+                color: var(--muted2);
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+            .section-label::after {
+                content: '';
+                flex: 1;
+                height: 1px;
+                background: var(--border2);
+            }
+
+        /* ── MODULES GRID ── */
         .modules-grid {
-            max-width: 1100px;
-            margin: 0 auto 40px;
-            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 0 auto 60px;
+            padding: 0 32px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 10px;
         }
 
         .mod-btn {
@@ -365,338 +512,464 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            gap: 6px;
-            padding: 18px 20px;
+            gap: 8px;
+            padding: 20px 18px 16px;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 12px;
             color: var(--text);
             font-family: 'DM Sans', sans-serif;
-            font-size: .88rem;
+            font-size: .84rem;
             font-weight: 500;
             cursor: pointer;
-            transition: border-color .18s, background .18s, transform .15s;
+            transition: border-color .2s, background .2s, transform .18s, box-shadow .2s;
             text-align: left;
-            line-height: 1.3;
+            line-height: 1.35;
+            overflow: hidden;
+            animation: fadeUp .4s ease both;
         }
 
-            .mod-btn .mod-icon {
-                font-size: 1.4rem;
-                margin-bottom: 2px;
+            .mod-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(135deg, var(--accent-glow), transparent);
+                opacity: 0;
+                transition: opacity .25s;
+            }
+
+            .mod-btn:hover::before {
+                opacity: 1;
             }
 
             .mod-btn:hover {
-                border-color: var(--accent);
-                background: rgba(37,99,235,.08);
-                transform: translateY(-2px);
+                border-color: rgba(37,99,235,.45);
+                background: var(--surface2);
+                transform: translateY(-3px);
+                box-shadow: 0 12px 32px rgba(0,0,0,.3), 0 0 0 1px rgba(37,99,235,.15);
             }
 
             .mod-btn:active {
-                transform: translateY(0);
+                transform: translateY(-1px);
             }
 
-            .mod-btn.danger {
-                border-color: rgba(239,68,68,.25);
-                background: rgba(239,68,68,.05);
+        .mod-icon {
+            font-size: 1.5rem;
+            margin-bottom: 2px;
+            display: block;
+            filter: drop-shadow(0 0 6px rgba(96,165,250,.3));
+        }
+
+        .mod-name {
+            font-family: 'Syne', sans-serif;
+            font-size: .8rem;
+            font-weight: 700;
+            letter-spacing: .03em;
+            line-height: 1.3;
+        }
+
+        .mod-arrow {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            color: var(--muted2);
+            font-size: .8rem;
+            transition: right .18s, color .18s;
+        }
+
+        .mod-btn:hover .mod-arrow {
+            right: 10px;
+            color: var(--accent2);
+        }
+
+        .mod-btn.danger {
+            border-color: rgba(239,68,68,.15);
+            background: rgba(239,68,68,.04);
+        }
+
+            .mod-btn.danger .mod-name {
                 color: var(--muted);
             }
 
-                .mod-btn.danger:hover {
-                    border-color: var(--danger);
-                    background: rgba(239,68,68,.1);
-                    color: var(--danger);
-                    transform: translateY(-2px);
-                }
-
-            .mod-btn .arrow {
-                position: absolute;
-                right: 16px;
-                top: 50%;
-                transform: translateY(-50%);
-                color: var(--muted2);
-                font-size: .85rem;
-                transition: right .15s;
+            .mod-btn.danger:hover {
+                border-color: rgba(239,68,68,.4);
+                background: rgba(239,68,68,.08);
+                box-shadow: 0 12px 32px rgba(239,68,68,.12);
             }
 
-            .mod-btn:hover .arrow {
-                right: 12px;
-                color: var(--accent2);
+            .mod-btn.danger::before {
+                background: linear-gradient(135deg, rgba(239,68,68,.12), transparent);
             }
 
-            .mod-btn.danger:hover .arrow {
+            .mod-btn.danger:hover .mod-arrow {
                 color: var(--danger);
             }
-            .btn-contactos {
-                padding: 7px 14px;
-                background: linear-gradient(135deg, #0EA5E9, #2563EB);
-                border: none;
-                border-radius: 6px;
+
+            .mod-btn.danger .mod-name {
+                color: var(--muted);
+            }
+
+            .mod-btn.danger:hover .mod-name {
+                color: var(--danger);
+            }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* stagger */
+        .mod-btn:nth-child(1) {
+            animation-delay: .03s;
+        }
+
+        .mod-btn:nth-child(2) {
+            animation-delay: .06s;
+        }
+
+        .mod-btn:nth-child(3) {
+            animation-delay: .09s;
+        }
+
+        .mod-btn:nth-child(4) {
+            animation-delay: .12s;
+        }
+
+        .mod-btn:nth-child(5) {
+            animation-delay: .15s;
+        }
+
+        .mod-btn:nth-child(6) {
+            animation-delay: .18s;
+        }
+
+        .mod-btn:nth-child(7) {
+            animation-delay: .21s;
+        }
+
+        .mod-btn:nth-child(8) {
+            animation-delay: .24s;
+        }
+
+        .mod-btn:nth-child(9) {
+            animation-delay: .27s;
+        }
+
+        .mod-btn:nth-child(10) {
+            animation-delay: .30s;
+        }
+
+        .mod-btn:nth-child(11) {
+            animation-delay: .33s;
+        }
+
+        .mod-btn:nth-child(12) {
+            animation-delay: .36s;
+        }
+
+        .mod-btn:nth-child(13) {
+            animation-delay: .39s;
+        }
+
+        .mod-btn:nth-child(14) {
+            animation-delay: .42s;
+        }
+
+        .mod-btn:nth-child(15) {
+            animation-delay: .45s;
+        }
+
+        .mod-btn:nth-child(16) {
+            animation-delay: .48s;
+        }
+
+        .mod-btn:nth-child(17) {
+            animation-delay: .51s;
+        }
+
+        .mod-btn:nth-child(18) {
+            animation-delay: .54s;
+        }
+
+        /* ── MODAL ── */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.72);
+            backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            animation: fadeIn .18s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 24px;
+            max-height: 85vh;
+            overflow: auto;
+            width: min(1100px, 95vw);
+            box-shadow: 0 32px 80px rgba(0,0,0,.6);
+            animation: slideUp .2s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(16px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border2);
+        }
+
+            .modal-header h3 {
+                font-family: 'Syne', sans-serif;
+                font-size: 1rem;
+                font-weight: 700;
+            }
+
+        .btn-close {
+            background: rgba(239,68,68,.15);
+            border: 1px solid rgba(239,68,68,.25);
+            color: #FCA5A5;
+            padding: 5px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: .8rem;
+            font-weight: 600;
+            transition: .15s;
+        }
+
+            .btn-close:hover {
+                background: rgba(239,68,68,.3);
                 color: white;
-                font-size: .82rem;
-                cursor: pointer;
-                margin-right: 10px;
-                transition: .2s;
             }
 
-            .btn-contactos:hover {
-                background: linear-gradient(135deg, #0284C7, #1D4ED8);
+        /* ── LEYENDA ── */
+        .leyenda {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .ley-chip {
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: .7rem;
+            font-weight: 600;
+            font-family: 'DM Mono', monospace;
+            letter-spacing: .04em;
+        }
+
+        /* ── CONTACT TABLE ── */
+        .contact-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .78rem;
+        }
+
+            .contact-table thead th {
+                background: var(--surface3);
+                color: var(--accent2);
+                padding: 9px 12px;
+                text-align: left;
+                border-bottom: 1px solid var(--border2);
+                font-family: 'Syne', sans-serif;
+                font-size: .72rem;
+                font-weight: 700;
+                letter-spacing: .06em;
+                text-transform: uppercase;
             }
 
-            .btn-firecom {
-                padding: 7px 14px;
-                background: linear-gradient(135deg, #F97316, #EA580C);
-                border: none;
-                border-radius: 6px;
-                color: white;
-                font-size: .82rem;
-                cursor: pointer;
-                margin-right: 10px;
-                transition: .2s;
+            .contact-table td {
+                padding: 9px 12px;
+                border-bottom: 1px solid var(--border);
+                font-family: 'DM Mono', monospace;
+                vertical-align: middle;
             }
 
-            .btn-firecom:hover {
-                background: linear-gradient(135deg, #FB923C, #F97316);
-                transform: translateY(-1px);
+            .contact-table tr:last-child td {
+                border-bottom: none;
             }
 
-            .btn-camaras-audio {
-                padding: 7px 14px;
-                background: linear-gradient(135deg, #10B981, #047857);
-                border: none;
-                border-radius: 6px;
-                color: white;
-                font-size: .82rem;
-                cursor: pointer;
-                margin-right: 10px;
-                transition: .2s;
-            }
-
-            .btn-camaras-audio:hover {
-                background: linear-gradient(135deg, #34D399, #059669);
-                transform: translateY(-1px);
-            }
-            .modal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,.6);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 999;
-            }
-
-            .modal-box {
-                max-height: 85vh;
-                overflow: auto;
-            }
-            /* colores por proveedor */
-            .row-sla {
-                background: rgba(14,165,233,.15);
-            }
-
-            .row-pc {
-                background: rgba(34,197,94,.15);
-            }
-
-            .row-laser {
-                background: rgba(168,85,247,.15);
-            }
-
-            .row-redco {
-                background: rgba(239,68,68,.15);
-            }
-
-            .row-firecom {
-                background: rgba(251,191,36,.15);
-            }
-
-            .row-globtech {
-                background: rgba(59,130,246,.15);
-            }
-
-            .row-samsara {
-                background: rgba(236,72,153,.15);
-            }
-
-            .row-resqbit {
-                background: rgba(20,184,166,.15);
-            }
-
-            .row-almacen {
-                background: rgba(148,163,184,.15);
-            }
-
-            /* hover elegante */
-            .modal table tr:hover {
+            .contact-table tr:hover td {
                 filter: brightness(1.15);
             }
     </style>
 </head>
 <body>
 
-    <!-- TOPBAR -->
+    <!-- ── TOPBAR ── -->
     <div class="topbar">
         <span class="topbar-logo">CHI IT</span>
-        <span style="color:var(--muted2);">/</span>
+        <div class="topbar-divider"></div>
         <span class="topbar-title">PRESUPUESTOS</span>
-
         <div class="topbar-sep"></div>
-
-        <!-- 👇 NUEVO BOTÓN -->
-        <button class="btn-contactos" onclick="abrirContactos()">
-            📇 PROVEEDORES
-        </button>
-        <button class="btn-firecom" onclick="window.location.href='/static/modulos_presupuesto/bitacora_firecom.html'">
-            📇 BITACORA FIRECOM
-        </button>
-        <button class="btn-camaras-audio" onclick="window.location.href='/static/modulos_presupuesto/camaras_audio.html'">
-            📹 CAMARAS DE AUDIO
-        </button>
-
-        <a class="btn-back" href="/static/menu.html">← Menú principal</a>
-    </div>
-
-    <div id="modalContactos" class="modal" style="display:none;">
-        <div class="modal-box" style="max-width:1100px;background:#0f172a;padding:20px;border-radius:10px;">
-
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                <h3>📇 Contactos de Proveedores</h3>
-                <button onclick="cerrarContactos()" style="background:#ef4444;border:none;color:white;padding:5px 10px;border-radius:6px;">✕</button>
-            </div>
-
-            <!-- 🔥 LEYENDA DE COLORES -->
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-size:11px;">
-                <span style="background:rgba(14,165,233,.3);padding:4px 8px;border-radius:5px;">SLA</span>
-                <span style="background:rgba(34,197,94,.3);padding:4px 8px;border-radius:5px;">PC TONER</span>
-                <span style="background:rgba(168,85,247,.3);padding:4px 8px;border-radius:5px;">LASERTONN</span>
-                <span style="background:rgba(239,68,68,.3);padding:4px 8px;border-radius:5px;">REDCO</span>
-                <span style="background:rgba(251,191,36,.3);padding:4px 8px;border-radius:5px;">FIRECOM</span>
-                <span style="background:rgba(59,130,246,.3);padding:4px 8px;border-radius:5px;">GLOBTECH</span>
-                <span style="background:rgba(236,72,153,.3);padding:4px 8px;border-radius:5px;">SAMSARA</span>
-                <span style="background:rgba(20,184,166,.3);padding:4px 8px;border-radius:5px;">RESQBIT</span>
-                <span style="background:rgba(148,163,184,.3);padding:4px 8px;border-radius:5px;">ALMACEN</span>
-            </div>
-
-            <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                <thead>
-                    <tr style="background:#1e293b;color:#38bdf8;">
-                        <th>Compañía</th>
-                        <th>RFC</th>
-                        <th>Contacto</th>
-                        <th>Cel</th>
-                        <th>Correo</th>
-                        <th>Notas</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr style="background:rgba(14,165,233,.12);">
-                        <td>SLA</td>
-                        <td></td>
-                        <td>PATRICIA GOMEZ</td>
-                        <td>6623873763</td>
-                        <td>patricia.gomez@slamexico.com</td>
-                        <td></td>
-                    </tr>
-
-                    <tr style="background:rgba(34,197,94,.12);">
-                        <td>PC TONER</td>
-                        <td></td>
-                        <td>MIRIAM</td>
-                        <td>6144659591</td>
-                        <td>rmiriamaguilarg@gmail.com, ejecutivo@toner-supply.com.mx</td>
-                        <td>correo principal ejecutivo</td>
-                    </tr>
-
-                    <tr style="background:rgba(168,85,247,.12);">
-                        <td>LASERTONN</td>
-                        <td></td>
-                        <td>SILVIA SILVA SAENZ</td>
-                        <td>6141268879</td>
-                        <td>administracion@lasertonn.mx</td>
-                        <td></td>
-                    </tr>
-
-                    <tr style="background:rgba(239,68,68,.12);">
-                        <td>REDCO</td>
-                        <td></td>
-                        <td>LORENZO MARISCAL</td>
-                        <td>6145517899</td>
-                        <td>lmariscal@redco.com.mx</td>
-                        <td></td>
-                    </tr>
-
-                    <tr style="background:rgba(251,191,36,.12);">
-                        <td>FIRECOM</td>
-                        <td></td>
-                        <td>ROBERTO</td>
-                        <td></td>
-                        <td>gerencia@firecom.mx</td>
-                        <td></td>
-                    </tr>
-
-                    <tr style="background:rgba(59,130,246,.12);">
-                        <td>GLOBTECH</td>
-                        <td></td>
-                        <td>DINA ESTRADA</td>
-                        <td>6141494196</td>
-                        <td>ventas3@globtech.com.mx</td>
-                        <td></td>
-                    </tr>
-
-                    <tr style="background:rgba(236,72,153,.12);">
-                        <td>SAMSARA</td>
-                        <td></td>
-                        <td>GABRIELA MADERA</td>
-                        <td></td>
-                        <td>gabriela.madera@samsarasoluciones.com</td>
-                        <td></td>
-                    </tr>
-
-                    <tr style="background:rgba(20,184,166,.12);">
-                        <td>RESQBIT</td>
-                        <td>TISCO NETWORKS SA DE CV</td>
-                        <td></td>
-                        <td>6145332332</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-
-                    <tr style="background:rgba(148,163,184,.12);">
-                        <td>EL ALMACEN</td>
-                        <td></td>
-                        <td></td>
-                        <td>6141612542 Whats</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-
-                    <tr style="background:rgba(148,163,184,.12);">
-                        <td>EL ALMACEN</td>
-                        <td></td>
-                        <td></td>
-                        <td>6144138883 Fijo</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-
-                </tbody>
-            </table>
-
+        <div class="topbar-actions">
+            <button class="btn-pill blue" onclick="abrirContactos()">📇 PROVEEDORES</button>
+            <button class="btn-pill orange" onclick="window.location.href='/static/modulos_presupuesto/bitacora_firecom.html'">📋 BITACORA FIRECOM</button>
+            <button class="btn-pill teal" onclick="window.location.href='/static/modulos_presupuesto/camaras_audio.html'">📹 CÁMARAS DE AUDIO</button>
+            <button class="btn-pill back" onclick="window.location.href='/static/menu.html'">← Menú principal</button>
         </div>
     </div>
 
-    <!-- BUSCADOR GLOBAL -->
+    <!-- ── MODAL CONTACTOS ── -->
+    <div id="modalContactos" class="modal" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>📇 Contactos de Proveedores</h3>
+                <button class="btn-close" onclick="cerrarContactos()">✕ Cerrar</button>
+            </div>
+            <div class="leyenda">
+                <span class="ley-chip" style="background:rgba(14,165,233,.2);color:#38BDF8;">SLA</span>
+                <span class="ley-chip" style="background:rgba(34,197,94,.2);color:#4ADE80;">PC TONER</span>
+                <span class="ley-chip" style="background:rgba(168,85,247,.2);color:#C084FC;">LASERTONN</span>
+                <span class="ley-chip" style="background:rgba(239,68,68,.2);color:#FCA5A5;">REDCO</span>
+                <span class="ley-chip" style="background:rgba(251,191,36,.2);color:#FCD34D;">FIRECOM</span>
+                <span class="ley-chip" style="background:rgba(59,130,246,.2);color:#93C5FD;">GLOBTECH</span>
+                <span class="ley-chip" style="background:rgba(236,72,153,.2);color:#F9A8D4;">SAMSARA</span>
+                <span class="ley-chip" style="background:rgba(20,184,166,.2);color:#5EEAD4;">RESQBIT</span>
+                <span class="ley-chip" style="background:rgba(148,163,184,.2);color:#CBD5E1;">ALMACEN</span>
+            </div>
+            <table class="contact-table">
+                <thead>
+                    <tr><th>Compañía</th><th>RFC</th><th>Contacto</th><th>Cel</th><th>Correo</th><th>Notas</th></tr>
+                </thead>
+                <tbody>
+                    <tr style="background:rgba(14,165,233,.08)">
+                        <td>SLA</td>
+                        <td>—</td>
+                        <td>PATRICIA GOMEZ</td>
+                        <td>6623873763</td>
+                        <td>patricia.gomez@slamexico.com</td>
+                        <td>—</td>
+                    </tr>
+                    <tr style="background:rgba(34,197,94,.08)">
+                        <td>PC TONER</td>
+                        <td>—</td>
+                        <td>MIRIAM</td>
+                        <td>6144659591</td>
+                        <td>rmiriamaguilarg@gmail.com · ejecutivo@toner-supply.com.mx</td>
+                        <td>correo principal ejecutivo</td>
+                    </tr>
+                    <tr style="background:rgba(168,85,247,.08)">
+                        <td>LASERTONN</td>
+                        <td>—</td>
+                        <td>SILVIA SILVA SAENZ</td>
+                        <td>6141268879</td>
+                        <td>administracion@lasertonn.mx</td>
+                        <td>—</td>
+                    </tr>
+                    <tr style="background:rgba(239,68,68,.08)">
+                        <td>REDCO</td>
+                        <td>—</td>
+                        <td>LORENZO MARISCAL</td>
+                        <td>6145517899</td>
+                        <td>lmariscal@redco.com.mx</td>
+                        <td>—</td>
+                    </tr>
+                    <tr style="background:rgba(251,191,36,.08)">
+                        <td>FIRECOM</td>
+                        <td>—</td>
+                        <td>ROBERTO</td>
+                        <td>—</td>
+                        <td>gerencia@firecom.mx</td>
+                        <td>—</td>
+                    </tr>
+                    <tr style="background:rgba(59,130,246,.08)">
+                        <td>GLOBTECH</td>
+                        <td>—</td>
+                        <td>DINA ESTRADA</td>
+                        <td>6141494196</td>
+                        <td>ventas3@globtech.com.mx</td>
+                        <td>—</td>
+                    </tr>
+                    <tr style="background:rgba(236,72,153,.08)">
+                        <td>SAMSARA</td>
+                        <td>—</td>
+                        <td>GABRIELA MADERA</td>
+                        <td>—</td>
+                        <td>gabriela.madera@samsarasoluciones.com</td>
+                        <td>—</td>
+                    </tr>
+                    <tr style="background:rgba(20,184,166,.08)">
+                        <td>RESQBIT</td>
+                        <td>TISCO NETWORKS SA DE CV</td>
+                        <td>—</td>
+                        <td>6145332332</td>
+                        <td>—</td>
+                        <td>—</td>
+                    </tr>
+                    <tr style="background:rgba(148,163,184,.08)">
+                        <td>EL ALMACEN</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>6141612542 (WhatsApp)</td>
+                        <td>—</td>
+                        <td>—</td>
+                    </tr>
+                    <tr style="background:rgba(148,163,184,.08)">
+                        <td>EL ALMACEN</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>6144138883 (Fijo)</td>
+                        <td>—</td>
+                        <td>—</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ── HERO ── -->
+    <div class="hero">
+        <p class="hero-eyebrow">CHI IT · Sistema de Control</p>
+        <h1>PRESUPUESTOS</h1>
+        <p class="hero-sub">Selecciona un módulo para gestionar registros</p>
+    </div>
+
+    <!-- ── BUSCADOR ── -->
     <div class="search-wrap">
         <div class="search-box">
+            <span class="search-icon">🔍</span>
             <input type="text" id="inputBusqueda"
-                   placeholder="🔍  Buscar en todos los módulos... (marca, modelo, serie, OC, proveedor…)"
+                   placeholder="Buscar en todos los módulos… marca, modelo, serie, OC, proveedor…"
                    onkeydown="if(event.key==='Enter') buscarGlobal()">
             <button class="btn-clear" onclick="limpiarBusqueda()">Limpiar</button>
-            <button class="btn-search" onclick="buscarGlobal()">Buscar</button>
+            <button class="btn-search" onclick="buscarGlobal()">BUSCAR</button>
         </div>
     </div>
 
@@ -707,94 +980,141 @@
         <div id="resContent"></div>
     </div>
 
-    <!-- MÓDULOS -->
-    <div class="section-label">Módulos disponibles</div>
+    <!-- ── MÓDULOS ── -->
+    <div class="section-label"><span>Módulos disponibles</span></div>
+
     <div class="modules-grid">
 
-        <button class="mod-btn" onclick="ir('req_oc.html')">
-            <span class="mod-icon">🔄</span>REQ vs ORDEN DE COMPRA<span class="arrow">›</span>
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/req_oc.html'">
+            <span class="mod-icon">🔄</span>
+            <span class="mod-name">REQ vs ORDEN DE COMPRA</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('ordenes_de_compra.html')">
-            <span class="mod-icon">📋</span>ORDENES DE COMPRA<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/ordenes_de_compra.html'">
+            <span class="mod-icon">📋</span>
+            <span class="mod-name">ORDENES DE COMPRA</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('pantallas_nf.html')">
-            <span class="mod-icon">🖥️</span>PANTALLAS NF<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/pantallas_nf.html'">
+            <span class="mod-icon">🖥️</span>
+            <span class="mod-name">PANTALLAS NF</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('refacciones_nf.html')">
-            <span class="mod-icon">🔧</span>REFACCIONES NF<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/refacciones_nf.html'">
+            <span class="mod-icon">🔧</span>
+            <span class="mod-name">REFACCIONES NF</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('accesorios_nf.html')">
-            <span class="mod-icon">🔌</span>ACCESORIOS NF<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/accesorios_nf.html'">
+            <span class="mod-icon">🔌</span>
+            <span class="mod-name">ACCESORIOS NF</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('dispositivos_nf.html')">
-            <span class="mod-icon">💾</span>DISPOSITIVOS NF<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/dispositivos_nf.html'">
+            <span class="mod-icon">💾</span>
+            <span class="mod-name">DISPOSITIVOS NF</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('inventarios.html')">
-            <span class="mod-icon">📦</span>INVENTARIOS<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/inventarios.html'">
+            <span class="mod-icon">📦</span>
+            <span class="mod-name">INVENTARIOS</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('perifericos_nf.html')">
-            <span class="mod-icon">🖱️</span>PERIFERICOS NF<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/perifericos_nf.html'">
+            <span class="mod-icon">🖱️</span>
+            <span class="mod-name">PERIFÉRICOS NF</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('herramientas_nf.html')">
-            <span class="mod-icon">🛠️</span>HERRAMIENTA NF<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/herramientas_nf.html'">
+            <span class="mod-icon">🛠️</span>
+            <span class="mod-name">HERRAMIENTA NF</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('impresoras_nf.html')">
-            <span class="mod-icon">🖨️</span>IMPRESORAS NF<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/impresoras_nf.html'">
+            <span class="mod-icon">🖨️</span>
+            <span class="mod-name">IMPRESORAS NF</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('telefonia_nf.html')">
-            <span class="mod-icon">📱</span>TELEFONIA NF<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/telefonia_nf.html'">
+            <span class="mod-icon">📱</span>
+            <span class="mod-name">TELEFONÍA NF</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('consumibles_nf.html')">
-            <span class="mod-icon">🖊️</span>CONSUMIBLES NF<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/consumibles_nf.html'">
+            <span class="mod-icon">🖊️</span>
+            <span class="mod-name">CONSUMIBLES NF</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('radio_nf.html')">
-            <span class="mod-icon">📻</span>RADIOS NF<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/radio_nf.html'">
+            <span class="mod-icon">📻</span>
+            <span class="mod-name">RADIOS NF</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('tintas_toner_ribon_nf.html')">
-            <span class="mod-icon">🖋️</span>TINTAS TONER RIBON NF<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/tintas_toner_ribon_nf.html'">
+            <span class="mod-icon">🖋️</span>
+            <span class="mod-name">TINTAS TONER RIBON NF</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('refacciones_red_nf.html')">
-            <span class="mod-icon">🌐</span>EQUIPO DE RED NF<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/refacciones_red_nf.html'">
+            <span class="mod-icon">🌐</span>
+            <span class="mod-name">EQUIPO DE RED NF</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('servicio_proveedores.html')">
-            <span class="mod-icon">🤝</span>SERVICIO POR PROVEEDORES<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/servicio_proveedores.html'">
+            <span class="mod-icon">🤝</span>
+            <span class="mod-name">SERVICIO POR PROVEEDORES</span>
+            <span class="mod-arrow">›</span>
         </button>
-        <button class="mod-btn" onclick="ir('registro_de_entradas_temporal.html')">
-            <span class="mod-icon">📝</span>REGISTRO DE ENTRADAS TEMPORAL<span class="arrow">›</span>
+
+        <button class="mod-btn" onclick="window.location.href='/static/modulos_presupuesto/registro_de_entradas_temporal.html'">
+            <span class="mod-icon">📝</span>
+            <span class="mod-name">REGISTRO DE ENTRADAS TEMPORAL</span>
+            <span class="mod-arrow">›</span>
         </button>
+
         <button class="mod-btn danger" onclick="window.location.href='/static/menu.html'">
-            <span class="mod-icon">←</span>REGRESAR AL MENÚ<span class="arrow">›</span>
+            <span class="mod-icon">←</span>
+            <span class="mod-name">REGRESAR AL MENÚ</span>
+            <span class="mod-arrow">›</span>
         </button>
+
     </div>
 
     <script>
-        const BASE = '/static/modulos_presupuesto/';
-
-        function ir(pagina) {
-            window.location.href = BASE + pagina;
-        }
-
         const PAGINA_MAP = {
-            "PREVENTIVOS": "/static/preventivos.html",
-            "CORRECTIVOS": "/static/correctivos.html",
-            "BAJAS": "/static/bajas.html",
-            "REQ VS OC": BASE + "req_oc.html",                          // era "REQ vs OC"
-            "ORDENES DE COMPRA": BASE + "ordenes_de_compra.html",
-            "PANTALLAS NF": BASE + "pantallas_nf.html",
-            "REFACCIONES NF": BASE + "refacciones_nf.html",
-            "ACCESORIOS NF": BASE + "accesorios_nf.html",
-            "DISPOSITIVOS NF": BASE + "dispositivos_nf.html",
-            "INVENTARIOS": BASE + "inventarios.html",
-            "CAMARAS AUDIO": BASE + "camaras_audio.html",
-            "PERIFERICOS NF": BASE + "perifericos_nf.html",
-            "HERRAMIENTAS NF": BASE + "herramientas_nf.html",           // era "HERRAMIENTA NF"
-            "IMPRESORAS NF": BASE + "impresoras_nf.html",
-            "TELEFONIA NF": BASE + "telefonia_nf.html",
-            "CONSUMIBLES NF": BASE + "consumibles_nf.html",
-            "RADIOS NF": BASE + "radio_nf.html",
-            "TINTAS TONER RIBON": BASE + "tintas_toner_ribon_nf.html",
-            "SERVICIO POR PROVEEDORES": BASE + "servicio_proveedores.html",
-            "EQUIPO DE RED NF": BASE + "refacciones_red_nf.html"
+            "REQ VS OC": "/static/modulos_presupuesto/req_oc.html",
+            "ORDENES DE COMPRA": "/static/modulos_presupuesto/ordenes_de_compra.html",
+            "PANTALLAS NF": "/static/modulos_presupuesto/pantallas_nf.html",
+            "REFACCIONES NF": "/static/modulos_presupuesto/refacciones_nf.html",
+            "ACCESORIOS NF": "/static/modulos_presupuesto/accesorios_nf.html",
+            "DISPOSITIVOS NF": "/static/modulos_presupuesto/dispositivos_nf.html",
+            "INVENTARIOS": "/static/modulos_presupuesto/inventarios.html",
+            "CAMARAS AUDIO": "/static/modulos_presupuesto/camaras_audio.html",
+            "PERIFERICOS NF": "/static/modulos_presupuesto/perifericos_nf.html",
+            "HERRAMIENTAS NF": "/static/modulos_presupuesto/herramientas_nf.html",
+            "IMPRESORAS NF": "/static/modulos_presupuesto/impresoras_nf.html",
+            "TELEFONIA NF": "/static/modulos_presupuesto/telefonia_nf.html",
+            "CONSUMIBLES NF": "/static/modulos_presupuesto/consumibles_nf.html",
+            "RADIOS NF": "/static/modulos_presupuesto/radio_nf.html",
+            "TINTAS TONER RIBON": "/static/modulos_presupuesto/tintas_toner_ribon_nf.html",
+            "SERVICIO POR PROVEEDORES": "/static/modulos_presupuesto/servicio_proveedores.html",
+            "EQUIPO DE RED NF": "/static/modulos_presupuesto/refacciones_red_nf.html",
+            "REGISTRO DE ENTRADAS TEMPORAL": "/static/modulos_presupuesto/registro_de_entradas_temporal.html"
         };
 
         async function buscarGlobal() {
@@ -883,14 +1203,13 @@
             document.getElementById('spinner').style.display = 'none';
             document.getElementById('resContent').innerHTML = '';
         }
-        function abrirContactos(){
-            document.getElementById("modalContactos").style.display = "block";
-        }
 
-        function cerrarContactos(){
-            document.getElementById("modalContactos").style.display = "none";
-        }
+        function abrirContactos() { document.getElementById('modalContactos').style.display = 'flex'; }
+        function cerrarContactos() { document.getElementById('modalContactos').style.display = 'none'; }
 
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') cerrarContactos();
+        });
     </script>
 </body>
 </html>
