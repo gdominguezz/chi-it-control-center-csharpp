@@ -7,13 +7,6 @@
     <RootNamespace>ChiIT</RootNamespace>
   </PropertyGroup>
 
-  <!-- 🔥 PUBLICAR TODO WWWROOT -->
-  <ItemGroup>
-    <Content Include="wwwroot\**\*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="8.5.1" />
     <PackageReference Include="Npgsql" Version="8.0.3" />
