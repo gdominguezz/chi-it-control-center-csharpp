@@ -36,6 +36,7 @@ builder.Services.AddScoped<CamarasAudioService>();       // CAMARAS AUDIO
 builder.Services.AddScoped<ImpresorasNFService>();      // IMPRESORAS NF
 builder.Services.AddScoped<ServiciosProveedoresService>();//SERVICIOS POR PROVEEDORES 
 builder.Services.AddScoped<ConsumiblesNFService>();      // CONSUMIBLES NF
+builder.Services.AddScoped<RemisionesService>();        // REMISIONES
 
 
 // CORS
