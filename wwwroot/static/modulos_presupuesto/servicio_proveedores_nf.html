@@ -876,7 +876,20 @@
                 <div class="field"><label>Ubicación Planta</label><input id="f_UBICACION_PLANTA" placeholder="Planta / ubicación"></div>
                 <div class="field"><label>Área</label><input id="f_AREA" placeholder="Área"></div>
                 <div class="field"><label>Descripción Servicio</label><input id="f_DESCRIPCION_SERVICIO" placeholder="Descripción del servicio"></div>
-                <div class="field"><label>Proveedores</label><input id="f_PROVEEDORES" placeholder="Nombre del proveedor"></div>
+                <div class="field">
+                    <label>Proveedores</label><select id="f_PROVEEDORES">
+                        <option value="">— Selecciona proveedor —</option>
+                        <option value="SLA">SLA</option>
+                        <option value="PC TONER">PC TONER</option>
+                        <option value="LASERTONN">LASERTONN</option>
+                        <option value="REDCO">REDCO</option>
+                        <option value="FIRECOM">FIRECOM</option>
+                        <option value="GLOBTECH">GLOBTECH</option>
+                        <option value="SAMSARA">SAMSARA</option>
+                        <option value="RESQBIT">RESQBIT</option>
+                        <option value="ALMACEN">ALMACEN</option>
+                    </select>
+                </div>
                 <div class="field"><label>Personal que Recibió</label><input id="f_PERSONAL_RECIBIO" placeholder="Nombre del personal"></div>
                 <div class="field">
                     <label>Solicitud Finalizada</label>
@@ -993,7 +1006,20 @@
                 <div class="form-field"><label>Ubicación Planta</label><input id="e_UBICACION_PLANTA" placeholder="Planta / ubicación"></div>
                 <div class="form-field"><label>Área</label><input id="e_AREA" placeholder="Área"></div>
                 <div class="form-field full"><label>Descripción Servicio</label><input id="e_DESCRIPCION_SERVICIO" placeholder="Descripción del servicio"></div>
-                <div class="form-field"><label>Proveedores</label><input id="e_PROVEEDORES" placeholder="Nombre del proveedor"></div>
+                <div class="form-field">
+                    <label>Proveedores</label><select id="e_PROVEEDORES">
+                        <option value="">— Selecciona proveedor —</option>
+                        <option value="SLA">SLA</option>
+                        <option value="PC TONER">PC TONER</option>
+                        <option value="LASERTONN">LASERTONN</option>
+                        <option value="REDCO">REDCO</option>
+                        <option value="FIRECOM">FIRECOM</option>
+                        <option value="GLOBTECH">GLOBTECH</option>
+                        <option value="SAMSARA">SAMSARA</option>
+                        <option value="RESQBIT">RESQBIT</option>
+                        <option value="ALMACEN">ALMACEN</option>
+                    </select>
+                </div>
                 <div class="form-field"><label>Personal que Recibió</label><input id="e_PERSONAL_RECIBIO" placeholder="Nombre del personal"></div>
                 <div class="form-field full">
                     <label>Solicitud Finalizada</label>
@@ -1132,6 +1158,24 @@
             return val || '—';
         }
 
+        const PROVEEDOR_COLORS = {
+            'SLA': { bg: 'rgba(14,165,233,.2)', color: '#38BDF8' },
+            'PC TONER': { bg: 'rgba(34,197,94,.2)', color: '#4ADE80' },
+            'LASERTONN': { bg: 'rgba(168,85,247,.2)', color: '#C084FC' },
+            'REDCO': { bg: 'rgba(239,68,68,.2)', color: '#FCA5A5' },
+            'FIRECOM': { bg: 'rgba(251,191,36,.2)', color: '#FCD34D' },
+            'GLOBTECH': { bg: 'rgba(59,130,246,.2)', color: '#93C5FD' },
+            'SAMSARA': { bg: 'rgba(236,72,153,.2)', color: '#F9A8D4' },
+            'RESQBIT': { bg: 'rgba(20,184,166,.2)', color: '#5EEAD4' },
+            'ALMACEN': { bg: 'rgba(148,163,184,.2)', color: '#CBD5E1' },
+        };
+        function proveedorChip(val) {
+            if (!val) return '—';
+            const c = PROVEEDOR_COLORS[val.toString().toUpperCase()];
+            if (!c) return esc(val);
+            return `<span class="ley-chip" style="background:${c.bg};color:${c.color};">${esc(val)}</span>`;
+        }
+
         function renderizar() {
             const tbody = document.getElementById('tabla');
             tbody.innerHTML = '';
@@ -1167,7 +1211,7 @@
                                 <td>${esc(row.UBICACION_PLANTA) || '—'}</td>
                                 <td>${esc(row.AREA) || '—'}</td>
                                 <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.DESCRIPCION_SERVICIO) || ''}">${esc(row.DESCRIPCION_SERVICIO) || '—'}</td>
-                                <td>${esc(row.PROVEEDORES) || '—'}</td>
+                                <td>${proveedorChip(row.PROVEEDORES)}</td>
                                 <td>${esc(row.PERSONAL_RECIBIO) || '—'}</td>
                                 <td><span class="disponible-pill ${finPill}">${esc(finLabel)}</span></td>
                                 <td style="white-space:nowrap">
