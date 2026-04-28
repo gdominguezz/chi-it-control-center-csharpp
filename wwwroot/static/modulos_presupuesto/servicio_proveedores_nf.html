@@ -1665,7 +1665,30 @@
                     const data = new Uint8Array(e.target.result);
                     const wb = XLSX.read(data, { type: 'array', cellDates: true });
                     const ws = wb.Sheets[wb.SheetNames[0]];
-                    const raw = XLSX.utils.sheet_to_json(ws, { defval: null, raw: false });
+
+                    // Detectar si es la plantilla oficial (fila 1 = título, encabezados en fila 3)
+                    // o un archivo genérico (encabezados en fila 1)
+                    const raw_default = XLSX.utils.sheet_to_json(ws, { defval: null, raw: false, header: 1 });
+                    const fila1 = (raw_default[0] || []).join('').toUpperCase();
+                    const esPlantilla = fila1.includes('PLANTILLA') || fila1.includes('IMPORTACI');
+
+                    let raw;
+                    if (esPlantilla) {
+                        // Encabezados en fila 3 (índice 2), datos desde fila 6 (índice 5)
+                        const headers = raw_default[2] || [];
+                        raw = raw_default.slice(5)
+                            .filter(r => r.some(c => c !== null && c !== '' && c !== undefined))
+                            .map(r => {
+                                const obj = {};
+                                headers.forEach((h, i) => { if (h) obj[h] = r[i] ?? null; });
+                                return obj;
+                            });
+                    } else {
+                        // Archivo genérico: encabezados en fila 1
+                        raw = XLSX.utils.sheet_to_json(ws, { defval: null, raw: false });
+                    }
+
+                    if (!raw.length) { alert('No se encontraron datos en el archivo.'); return; }
                     procesarFilas(raw);
                 } catch (err) {
                     alert('No se pudo leer el archivo: ' + err.message);
