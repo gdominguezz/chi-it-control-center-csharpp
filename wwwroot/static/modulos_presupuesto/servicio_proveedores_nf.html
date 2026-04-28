@@ -1206,10 +1206,7 @@
             const fr = (dto.FOLIO_REPORTE || '').trim();
             dto.ID_UNICO = [fu, fr].filter(Boolean).join('-') || null;
 
-            // 🔥 NORMALIZAR DATOS (AQUÍ ESTÁ LA CLAVE)
-            dto.CUENTA_CON_POLIZA = dto.CUENTA_CON_POLIZA === "true";
-            dto.SERVICIO_CON_COSTO = dto.SERVICIO_CON_COSTO === "true";
-            dto.SOLICITUD_FINALIZADA = dto.SOLICITUD_FINALIZADA === "true";
+            // Los valores vienen como "SI", "NO", "EN PROCESO" desde el select — se envían tal cual
 
             dto.CANTIDAD = Number(dto.CANTIDAD) || null;
             dto.COSTO = Number(dto.COSTO) || null;
@@ -1312,10 +1309,7 @@
             const fr = (dto.FOLIO_REPORTE || '').trim();
             dto.ID_UNICO = [fu, fr].filter(Boolean).join('-') || null;
 
-            // 🔥 AGREGA ESTO (CLAVE)
-            dto.CUENTA_CON_POLIZA = dto.CUENTA_CON_POLIZA === "true";
-            dto.SERVICIO_CON_COSTO = dto.SERVICIO_CON_COSTO === "true";
-            dto.SOLICITUD_FINALIZADA = dto.SOLICITUD_FINALIZADA === "true";
+            // Los valores vienen como "SI", "NO", "EN PROCESO" desde el select — se envían tal cual
 
             dto.CANTIDAD = Number(dto.CANTIDAD) || null;
             dto.COSTO = Number(dto.COSTO) || null;
