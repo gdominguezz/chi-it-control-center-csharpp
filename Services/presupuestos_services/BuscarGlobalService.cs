@@ -195,7 +195,30 @@ public class BuscarGlobalService
     "personal_it_que_asigna",
     "fecha_de_mantenimiento"
     ]),
-       
+    ("SERVICIOS PROVEEDORES","servicios_proveedores",[
+    "id_unico",
+    "folio_unico",
+    "folio_cotizacion",
+    "folio_reporte",
+    "fecha",
+    "requisitor",
+    "cuenta_con_poliza",
+    "servicio_con_costo",
+    "ubicacion_planta",
+    "area",
+    "cantidad",
+    "descripcion_servicio",
+    "descripcion_trabajo",
+    "material_equipo",
+    "observaciones",
+    "proveedores",
+    "panel_faceplate",
+    "switch",
+    "personal_recibio",
+    "solicitud_finalizada",
+    "costo"
+    ]),
+
         ("TELEFONIA NF",     "telefonia_nf",      ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("CONSUMIBLES NF",   "consumibles_nf",    ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
         ("RADIOS NF",        "radio_nf",          ["id_unico","oc","folio_correctivo","marca","modelo","serie","num_parte","proveedor","recibido_por","comentarios"]),
