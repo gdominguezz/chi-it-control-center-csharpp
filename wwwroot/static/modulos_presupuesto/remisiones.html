@@ -1287,19 +1287,18 @@
                     <thead>
                         <!-- FILA DE GRUPOS -->
                         <tr class="group-row">
-                            <th class="group-neutral" colspan="2">─</th>
-                            <!-- LLENADO POR FORMULA (cols 3-4: ID_OC, ID_REMISION) -->
+                            <th class="group-neutral" colspan="1">─</th>
+                            <!-- LLENADO POR FORMULA (cols 2-3: ID_OC, ID_REMISION) -->
                             <th class="group-formula" colspan="2">🔮 Llenado por Fórmula</th>
-                            <!-- LLENAR POR REQUISITOR (cols 5-16) -->
+                            <!-- LLENAR POR REQUISITOR (cols 4-15) -->
                             <th class="group-requisitor" colspan="12">✍️ Llenar por Requisitor</th>
-                            <!-- LLENADO POR FORMULA 2 (cols 17-22) -->
+                            <!-- LLENADO POR FORMULA 2 (cols 16-21) -->
                             <th class="group-formula" colspan="6">🔮 Llenado por Fórmula</th>
                             <th class="group-neutral" colspan="1">─</th>
                         </tr>
                         <!-- FILA DE COLUMNAS -->
                         <tr class="col-row">
                             <th>ID</th>
-                            <th>Acciones</th>
                             <th class="hd-formula">ID OC</th>
                             <th class="hd-formula">ID Remisión</th>
                             <th class="hd-requisitor">Folio</th>
@@ -1320,10 +1319,10 @@
                             <th class="hd-formula">Status</th>
                             <th class="hd-formula">Requisición</th>
                             <th class="hd-formula">OC</th>
+                            <th>Acciones</th>
                         </tr>
                         <!-- FILA DE FILTROS -->
                         <tr class="filter-row">
-                            <td></td>
                             <td></td>
                             <td class="fd-formula"><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ID_OC"></td>
                             <td class="fd-formula"><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ID_REMISION"></td>
@@ -1345,6 +1344,7 @@
                             <td class="fd-formula"><input placeholder="Filtrar…" oninput="filtrar()" id="fil_STATUS"></td>
                             <td class="fd-formula"><input placeholder="Filtrar…" oninput="filtrar()" id="fil_REQUISICION"></td>
                             <td class="fd-formula"><input placeholder="Filtrar…" oninput="filtrar()" id="fil_OC"></td>
+                            <td></td>
                         </tr>
                     </thead>
                     <tbody id="tabla">
@@ -1636,10 +1636,6 @@
             tbody.innerHTML = rows.map(r => `
                 <tr>
                     <td class="mono">${r.ID}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick='abrirEditar(${JSON.stringify(r)})'>✏️</button>
-                        <button class="btn btn-purple btn-sm" onclick="verHistorial(${r.ID})" style="margin-left:4px">📋</button>
-                    </td>
                     <td class="mono td-formula">${e(r.ID_OC)}</td>
                     <td class="mono td-formula">${e(r.ID_REMISION)}</td>
                     <td class="mono td-requisitor">${e(r.FOLIO)}</td>
@@ -1660,6 +1656,10 @@
                     <td class="td-formula">${fmtStatus(r.STATUS)}</td>
                     <td class="mono td-formula">${e(r.REQUISICION)}</td>
                     <td class="mono td-formula">${e(r.OC)}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick='abrirEditar(${JSON.stringify(r)})'>✏️</button>
+                        <button class="btn btn-purple btn-sm" onclick="verHistorial(${r.ID})" style="margin-left:4px">📋</button>
+                    </td>
                 </tr>`).join('');
         }
 
