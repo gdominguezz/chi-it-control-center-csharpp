@@ -1201,9 +1201,18 @@
             };
 
             // ID_UNICO auto generado desde FOLIO_UNICO + FOLIO_REPORTE
+            // ID_UNICO auto generado desde FOLIO_UNICO + FOLIO_REPORTE
             const fu = (dto.FOLIO_UNICO || '').trim();
             const fr = (dto.FOLIO_REPORTE || '').trim();
             dto.ID_UNICO = [fu, fr].filter(Boolean).join('-') || null;
+
+            // 🔥 NORMALIZAR DATOS (AQUÍ ESTÁ LA CLAVE)
+            dto.CUENTA_CON_POLIZA = dto.CUENTA_CON_POLIZA === "true";
+            dto.SERVICIO_CON_COSTO = dto.SERVICIO_CON_COSTO === "true";
+            dto.SOLICITUD_FINALIZADA = dto.SOLICITUD_FINALIZADA === "true";
+
+            dto.CANTIDAD = Number(dto.CANTIDAD) || null;
+            dto.COSTO = Number(dto.COSTO) || null;
 
             try {
                 const r = await fetch('/SERVICIO_PROVEEDOR', {
@@ -1211,12 +1220,15 @@
                     headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
                     body: JSON.stringify(dto)
                 });
+
                 const d = await r.json();
                 if (d.error) { alert('Error: ' + d.error); return; }
+
                 limpiarForm();
                 cargar();
-            } catch (e) { alert('Error: ' + e.message); }
-        }
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
 
         function limpiarForm() {
             ['f_ID_UNICO', 'f_FOLIO_UNICO', 'f_FOLIO_COTIZACION', 'f_FOLIO_REPORTE',
@@ -1276,38 +1288,55 @@
             editandoID = null;
         }
 
-        async function guardarCambios() {
-            const dto = {
-                FOLIO_UNICO: v('e_FOLIO_UNICO'),
-                FOLIO_COTIZACION: v('e_FOLIO_COTIZACION'),
-                FOLIO_REPORTE: v('e_FOLIO_REPORTE'),
-                FECHA: v('e_FECHA'),
-                REQUISITOR: v('e_REQUISITOR'),
-                CUENTA_CON_POLIZA: v('e_CUENTA_CON_POLIZA'),
-                SERVICIO_CON_COSTO: v('e_SERVICIO_CON_COSTO'),
-                UBICACION_PLANTA: v('e_UBICACION_PLANTA'),
-                AREA: v('e_AREA'),
-                DESCRIPCION_SERVICIO: v('e_DESCRIPCION_SERVICIO'),
-                PROVEEDORES: v('e_PROVEEDORES'),
-                PERSONAL_RECIBIO: v('e_PERSONAL_RECIBIO'),
-                SOLICITUD_FINALIZADA: v('e_SOLICITUD_FINALIZADA'),
-            };
+            async function guardarCambios() {
+                const dto = {
+                    FOLIO_UNICO: v('e_FOLIO_UNICO'),
+                    FOLIO_COTIZACION: v('e_FOLIO_COTIZACION'),
+                    FOLIO_REPORTE: v('e_FOLIO_REPORTE'),
+                    FECHA: v('e_FECHA'),
+                    REQUISITOR: v('e_REQUISITOR'),
+                    CUENTA_CON_POLIZA: v('e_CUENTA_CON_POLIZA'),
+                    SERVICIO_CON_COSTO: v('e_SERVICIO_CON_COSTO'),
+                    UBICACION_PLANTA: v('e_UBICACION_PLANTA'),
+                    AREA: v('e_AREA'),
+                    DESCRIPCION_SERVICIO: v('e_DESCRIPCION_SERVICIO'),
+                    PROVEEDORES: v('e_PROVEEDORES'),
+                    PERSONAL_RECIBIO: v('e_PERSONAL_RECIBIO'),
+                    SOLICITUD_FINALIZADA: v('e_SOLICITUD_FINALIZADA'),
+                };
 
-            const fu = (dto.FOLIO_UNICO || '').trim();
-            const fr = (dto.FOLIO_REPORTE || '').trim();
-            dto.ID_UNICO = [fu, fr].filter(Boolean).join('-') || null;
+                const fu = (dto.FOLIO_UNICO || '').trim();
+                const fr = (dto.FOLIO_REPORTE || '').trim();
+                dto.ID_UNICO = [fu, fr].filter(Boolean).join('-') || null;
 
-            try {
-                const r = await fetch(`/SERVICIO_PROVEEDOR/${editandoID}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
-                    body: JSON.stringify(dto)
-                });
-                const result = await r.json();
-                if (r.ok && !result.error) { cerrarEditar(); cargar(); }
-                else alert('Error: ' + (result.error || 'No se pudo guardar'));
-            } catch (e) { alert('Error: ' + e.message); }
-        }
+                // 🔥 AGREGA ESTO (CLAVE)
+                dto.CUENTA_CON_POLIZA = dto.CUENTA_CON_POLIZA === "true";
+                dto.SERVICIO_CON_COSTO = dto.SERVICIO_CON_COSTO === "true";
+                dto.SOLICITUD_FINALIZADA = dto.SOLICITUD_FINALIZADA === "true";
+
+                dto.CANTIDAD = Number(dto.CANTIDAD) || null;
+                dto.COSTO = Number(dto.COSTO) || null;
+
+                try {
+                    const r = await fetch(`/SERVICIO_PROVEEDOR/${editandoID}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                        body: JSON.stringify(dto)
+                    });
+
+                    const result = await r.json();
+
+                    if (r.ok && !result.error) {
+                        cerrarEditar();
+                        cargar();
+                    } else {
+                        alert('Error: ' + (result.error || 'No se pudo guardar'));
+                    }
+
+                } catch (e) {
+                    alert('Error: ' + e.message);
+                }
+            }
 
         // ═══ MODAL HISTORIAL ═══
         function esc(val) {
