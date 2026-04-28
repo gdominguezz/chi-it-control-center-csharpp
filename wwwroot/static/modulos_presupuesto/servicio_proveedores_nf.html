@@ -817,7 +817,104 @@
             font-size: 11px;
             font-weight: 700;
         }
+
+        /* ── IMPORTAR CSV ── */
+        #modalImportar {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.6);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+            #modalImportar.open {
+                display: flex;
+            }
+
+        .import-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            width: 92vw;
+            max-width: 1100px;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+            .import-box h3 {
+                margin: 0;
+                font-size: 1.1rem;
+            }
+
+        .import-preview {
+            overflow: auto;
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+            .import-preview table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: .78rem;
+            }
+
+            .import-preview th {
+                background: var(--surface-2,#1e293b);
+                padding: 6px 10px;
+                white-space: nowrap;
+                position: sticky;
+                top: 0;
+            }
+
+            .import-preview td {
+                padding: 5px 10px;
+                border-top: 1px solid var(--border);
+                white-space: nowrap;
+            }
+
+            .import-preview tr.error-row td {
+                background: rgba(239,68,68,.15);
+                color: #fca5a5;
+            }
+
+        .import-stats {
+            font-size: .85rem;
+            color: var(--muted);
+        }
+
+        .import-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        #dropZone {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .2s;
+        }
+
+            #dropZone:hover, #dropZone.drag-over {
+                border-color: #38BDF8;
+                color: #38BDF8;
+            }
+
+            #dropZone p {
+                margin: 8px 0 0;
+                font-size: .85rem;
+                color: var(--muted);
+            }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -912,6 +1009,8 @@
             <div class="toolbar-sep"></div>
             <input class="anio-input" id="anioExportar" type="number" placeholder="Año" value="">
             <button class="btn btn-cyan btn-sm" onclick="exportarPorAnio()">📅 Exportar por año</button>
+            <div class="toolbar-sep"></div>
+            <button class="btn btn-amber btn-sm" onclick="abrirImportar()">📂 Importar Excel/CSV</button>
             <div class="toolbar-sep"></div>
             <button class="btn btn-ghost btn-sm" onclick="cargar()">🔄 Recargar</button>
         </div>
@@ -1501,13 +1600,266 @@
                 .finally(() => { window.location.href = '/static/login.html'; });
         }
 
+
+        // ═══════════════════════════════════════════════
+        // ═══ IMPORTAR EXCEL / CSV ═══
+        // ═══════════════════════════════════════════════
+
+        // Columnas requeridas y sus alias aceptados (para tolerar variantes del Excel)
+        const IMPORT_COLUMNS = [
+            { key: 'FOLIO_UNICO', aliases: ['folio_unico', 'folio unico', 'foliounico'] },
+            { key: 'FOLIO_COTIZACION', aliases: ['folio_cotizacion', 'folio cotizacion', 'cotizacion'] },
+            { key: 'FOLIO_REPORTE', aliases: ['folio_reporte', 'folio reporte', 'reporte'] },
+            { key: 'FECHA', aliases: ['fecha', 'date'] },
+            { key: 'REQUISITOR', aliases: ['requisitor', 'solicitante'] },
+            { key: 'CUENTA_CON_POLIZA', aliases: ['cuenta_con_poliza', 'poliza', 'cuenta con poliza'] },
+            { key: 'SERVICIO_CON_COSTO', aliases: ['servicio_con_costo', 'con costo', 'servicio con costo'] },
+            { key: 'UBICACION_PLANTA', aliases: ['ubicacion_planta', 'ubicacion', 'planta', 'ubicación planta'] },
+            { key: 'AREA', aliases: ['area', 'área'] },
+            { key: 'DESCRIPCION_SERVICIO', aliases: ['descripcion_servicio', 'descripcion', 'descripción', 'descripción servicio'] },
+            { key: 'PROVEEDORES', aliases: ['proveedores', 'proveedor'] },
+            { key: 'PERSONAL_RECIBIO', aliases: ['personal_recibio', 'personal recibio', 'personal que recibio', 'recibio'] },
+            { key: 'SOLICITUD_FINALIZADA', aliases: ['solicitud_finalizada', 'finalizada', 'solicitud finalizada'] },
+            { key: 'CANTIDAD', aliases: ['cantidad'] },
+            { key: 'COSTO', aliases: ['costo', 'importe'] },
+        ];
+
+        let importRows = [];   // filas validadas listas para enviar
+
+        function abrirImportar() {
+            document.getElementById('modalImportar').classList.add('open');
+            resetImportUI();
+        }
+
+        function cerrarImportar() {
+            document.getElementById('modalImportar').classList.remove('open');
+            resetImportUI();
+        }
+
+        function resetImportUI() {
+            importRows = [];
+            document.getElementById('fileInput').value = '';
+            document.getElementById('importPreviewArea').style.display = 'none';
+            document.getElementById('importErrors').style.display = 'none';
+            document.getElementById('btnConfirmarImport').style.display = 'none';
+            document.getElementById('dropZone').style.display = '';
+            document.getElementById('importPreviewTable').innerHTML = '';
+            document.getElementById('importStats').textContent = '';
+        }
+
+        function onDrop(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) procesarArchivo(file);
+        }
+
+        function onFileSelected(input) {
+            if (input.files[0]) procesarArchivo(input.files[0]);
+        }
+
+        function procesarArchivo(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const wb = XLSX.read(data, { type: 'array', cellDates: true });
+                    const ws = wb.Sheets[wb.SheetNames[0]];
+                    const raw = XLSX.utils.sheet_to_json(ws, { defval: null, raw: false });
+                    procesarFilas(raw);
+                } catch (err) {
+                    alert('No se pudo leer el archivo: ' + err.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function normalizeKey(k) {
+            return (k || '').toString().toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        function mapearColumnas(rawRow) {
+            // Construye mapa: key_canonical -> valor del raw row
+            const mapped = {};
+            const rawKeys = Object.keys(rawRow);
+
+            for (const col of IMPORT_COLUMNS) {
+                const allAliases = [col.key.toLowerCase(), ...col.aliases];
+                const found = rawKeys.find(rk => allAliases.includes(normalizeKey(rk)));
+                mapped[col.key] = found !== undefined ? (rawRow[found] ?? null) : null;
+            }
+            return mapped;
+        }
+
+        const toBoolImport = v => {
+            if (v === null || v === undefined || v === '') return null;
+            const s = v.toString().toUpperCase().trim();
+            if (['SI', 'SÍ', 'S', 'TRUE', '1', 'YES', 'SÌ'].includes(s)) return true;
+            if (['NO', 'N', 'FALSE', '0'].includes(s)) return false;
+            return null;
+        };
+
+        function validarFila(row, idx) {
+            const errors = [];
+            // FECHA obligatoria y válida
+            if (!row.FECHA) {
+                errors.push(`Fila ${idx + 1}: FECHA vacía`);
+            } else {
+                const d = new Date(row.FECHA);
+                if (isNaN(d)) errors.push(`Fila ${idx + 1}: FECHA inválida ("${row.FECHA}")`);
+            }
+            // PROVEEDOR debe ser uno de los conocidos (o null)
+            const proveedoresValidos = ['SLA', 'PC TONER', 'LASERTONN', 'REDCO', 'FIRECOM', 'GLOBTECH', 'SAMSARA', 'RESQBIT', 'ALMACEN'];
+            if (row.PROVEEDORES && !proveedoresValidos.includes(row.PROVEEDORES.toString().toUpperCase().trim())) {
+                errors.push(`Fila ${idx + 1}: PROVEEDORES desconocido ("${row.PROVEEDORES}")`);
+            }
+            return errors;
+        }
+
+        function procesarFilas(raw) {
+            if (!raw.length) { alert('El archivo está vacío o no tiene datos.'); return; }
+
+            const allErrors = [];
+            const filas = [];
+
+            raw.forEach((rawRow, idx) => {
+                const row = mapearColumnas(rawRow);
+
+                // Normalizar bools
+                row.CUENTA_CON_POLIZA = toBoolImport(row.CUENTA_CON_POLIZA);
+                row.SERVICIO_CON_COSTO = toBoolImport(row.SERVICIO_CON_COSTO);
+                row.SOLICITUD_FINALIZADA = toBoolImport(row.SOLICITUD_FINALIZADA);
+
+                // Normalizar números
+                row.CANTIDAD = row.CANTIDAD !== null ? (Number(row.CANTIDAD) || null) : null;
+                row.COSTO = row.COSTO !== null ? (Number(row.COSTO) || null) : null;
+
+                // Normalizar proveedor a mayúsculas
+                if (row.PROVEEDORES) row.PROVEEDORES = row.PROVEEDORES.toString().toUpperCase().trim();
+
+                const errs = validarFila(row, idx);
+                allErrors.push(...errs);
+                filas.push({ row, errors: errs });
+            });
+
+            mostrarPreview(filas, allErrors);
+        }
+
+        function mostrarPreview(filas, allErrors) {
+            document.getElementById('dropZone').style.display = 'none';
+            const previewArea = document.getElementById('importPreviewArea');
+            previewArea.style.display = 'flex';
+
+            const tieneErrores = allErrors.length > 0;
+
+            document.getElementById('importStats').innerHTML =
+                `<strong>${filas.length}</strong> fila(s) detectadas. ` +
+                (tieneErrores
+                    ? `<span style="color:#fca5a5">⚠️ ${allErrors.length} error(es) encontrado(s) — corrige el archivo y vuelve a subirlo.</span>`
+                    : `<span style="color:#4ade80">✅ Sin errores. Listo para importar.</span>`);
+
+            if (tieneErrores) {
+                const errDiv = document.getElementById('importErrors');
+                errDiv.style.display = '';
+                errDiv.innerHTML = '<strong>Errores encontrados:</strong><br>' + allErrors.map(e => `• ${e}`).join('<br>');
+                document.getElementById('btnConfirmarImport').style.display = 'none';
+            } else {
+                document.getElementById('importErrors').style.display = 'none';
+                document.getElementById('btnConfirmarImport').style.display = '';
+                importRows = filas.map(f => f.row);
+            }
+
+            // Tabla preview (máx 50 filas)
+            const cols = IMPORT_COLUMNS.map(c => c.key);
+            const preview = filas.slice(0, 50);
+            let html = '<table><thead><tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+            for (const { row, errors } of preview) {
+                const cls = errors.length ? ' class="error-row"' : '';
+                html += `<tr${cls}>` + cols.map(c => {
+                    const v = row[c];
+                    if (v === null || v === undefined) return '<td style="color:var(--muted)">—</td>';
+                    if (v === true) return '<td style="color:#4ade80">SÍ</td>';
+                    if (v === false) return '<td style="color:#fca5a5">NO</td>';
+                    return `<td>${esc(v.toString())}</td>`;
+                }).join('') + '</tr>';
+            }
+            if (filas.length > 50) html += `<tr><td colspan="${cols.length}" style="text-align:center;color:var(--muted);padding:8px">… y ${filas.length - 50} fila(s) más</td></tr>`;
+            html += '</tbody></table>';
+            document.getElementById('importPreviewTable').innerHTML = html;
+        }
+
+        async function confirmarImportar() {
+            if (!importRows.length) return;
+
+            const btn = document.getElementById('btnConfirmarImport');
+            btn.disabled = true;
+            btn.textContent = '⏳ Importando…';
+
+            const stats = document.getElementById('importStats');
+
+            try {
+                for (let i = 0; i < importRows.length; i++) {
+                    stats.innerHTML = `⏳ Importando fila <strong>${i + 1}</strong> de <strong>${importRows.length}</strong>…`;
+
+                    const r = await fetch('/SERVICIO_PROVEEDOR', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                        body: JSON.stringify(importRows[i])
+                    });
+
+                    if (!r.ok) {
+                        let msg = `Error en fila ${i + 1}`;
+                        try { const d = await r.json(); msg += ': ' + (d.error || d.message || d.title || JSON.stringify(d)); } catch { }
+                        throw new Error(msg);
+                    }
+                }
+
+                stats.innerHTML = `<span style="color:#4ade80">✅ ${importRows.length} registro(s) importado(s) correctamente.</span>`;
+                btn.style.display = 'none';
+                document.getElementById('dropZone').style.display = '';
+                importRows = [];
+                cargar();   // refrescar tabla
+
+            } catch (err) {
+                stats.innerHTML = `<span style="color:#fca5a5">❌ Importación abortada — ${esc(err.message)}</span>`;
+                btn.disabled = false;
+                btn.textContent = '✅ Reintentar';
+            }
+        }
+
         document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
+            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); cerrarImportar(); }
         });
 
         // ═══ HELPERS ═══
         function v(id) { const el = document.getElementById(id); return el ? (el.value.trim() || null) : null; }
         function setV(id, val) { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
     </script>
+
+    <!-- ══ MODAL IMPORTAR ══ -->
+    <div id="modalImportar">
+        <div class="import-box">
+            <h3>📂 Importar registros desde Excel / CSV</h3>
+
+            <div id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="onDrop(event)">
+                <div style="font-size:2rem">📄</div>
+                <strong>Haz clic o arrastra tu archivo aquí</strong>
+                <p>Formatos aceptados: .xlsx, .xls, .csv</p>
+            </div>
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="onFileSelected(this)">
+
+            <div id="importPreviewArea" style="display:none;flex-direction:column;gap:12px;">
+                <div class="import-stats" id="importStats"></div>
+                <div class="import-preview" id="importPreviewTable"></div>
+                <div id="importErrors" style="display:none;color:#fca5a5;font-size:.83rem;"></div>
+            </div>
+
+            <div class="import-actions">
+                <button class="btn btn-ghost" onclick="cerrarImportar()">✕ Cancelar</button>
+                <button class="btn btn-success" id="btnConfirmarImport" style="display:none" onclick="confirmarImportar()">✅ Confirmar e importar</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
