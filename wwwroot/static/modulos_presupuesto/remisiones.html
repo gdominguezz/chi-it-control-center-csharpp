@@ -876,7 +876,7 @@
         const limitePag   = 20;
         let totalRegistros = 0;
         let editandoId    = null;
-        let usuarioActual = localStorage.getItem("usuario");
+        let usuarioActual = sessionStorage.getItem("usuario");
 
         if (!usuarioActual) {
             window.location.href = "/static/login.html";
@@ -891,8 +891,8 @@
         });
 
         function cerrarSesion() {
-            localStorage.removeItem("usuario");
-            window.location.href = "/login.html";
+            sessionStorage.clear();
+            window.location.href = "/static/login.html";
         }
         let importRows    = [];
 
