@@ -1121,10 +1121,15 @@
         }
 
         function statusPill(val) {
-            const v = (val || '').toString().toUpperCase().trim();
+            const v = (val === true || val === 'true') ? 'SI' : (val === false || val === 'false') ? 'NO' : (val || '').toString().toUpperCase().trim();
             if (v === 'SI' || v === 'SÍ') return 'pill-si';
             if (v === 'NO') return 'pill-no';
             return 'pill-otro';
+        }
+        function boolLabel(val) {
+            if (val === true || val === 'true') return 'SÍ';
+            if (val === false || val === 'false') return 'NO';
+            return val || '—';
         }
 
         function renderizar() {
@@ -1144,9 +1149,9 @@
                 const costoPill = statusPill(row.SERVICIO_CON_COSTO);
                 const finPill = statusPill(row.SOLICITUD_FINALIZADA);
 
-                const polizaLabel = row.CUENTA_CON_POLIZA || '—';
-                const costoLabel = row.SERVICIO_CON_COSTO || '—';
-                const finLabel = row.SOLICITUD_FINALIZADA || '—';
+                const polizaLabel = boolLabel(row.CUENTA_CON_POLIZA);
+                const costoLabel = boolLabel(row.SERVICIO_CON_COSTO);
+                const finLabel = boolLabel(row.SOLICITUD_FINALIZADA);
 
                 tbody.innerHTML += `
                             <tr>
@@ -1206,7 +1211,11 @@
             const fr = (dto.FOLIO_REPORTE || '').trim();
             dto.ID_UNICO = [fu, fr].filter(Boolean).join('-') || null;
 
-            // Los valores vienen como "SI", "NO", "EN PROCESO" desde el select — se envían tal cual
+            // Convertir SI/NO a bool para el backend
+            const toBool = v => v === 'SI' ? true : v === 'NO' ? false : null;
+            dto.CUENTA_CON_POLIZA = toBool(dto.CUENTA_CON_POLIZA);
+            dto.SERVICIO_CON_COSTO = toBool(dto.SERVICIO_CON_COSTO);
+            dto.SOLICITUD_FINALIZADA = toBool(dto.SOLICITUD_FINALIZADA);
 
             dto.CANTIDAD = Number(dto.CANTIDAD) || null;
             dto.COSTO = Number(dto.COSTO) || null;
@@ -1273,14 +1282,15 @@
                 setV('e_FOLIO_REPORTE', row.FOLIO_REPORTE);
                 setV('e_FECHA', row.FECHA ? row.FECHA.split('T')[0] : '');
                 setV('e_REQUISITOR', row.REQUISITOR);
-                setV('e_CUENTA_CON_POLIZA', row.CUENTA_CON_POLIZA);
-                setV('e_SERVICIO_CON_COSTO', row.SERVICIO_CON_COSTO);
+                const toSiNo = v => v === true || v === 'true' ? 'SI' : v === false || v === 'false' ? 'NO' : (v ?? '');
+                setV('e_CUENTA_CON_POLIZA', toSiNo(row.CUENTA_CON_POLIZA));
+                setV('e_SERVICIO_CON_COSTO', toSiNo(row.SERVICIO_CON_COSTO));
                 setV('e_UBICACION_PLANTA', row.UBICACION_PLANTA);
                 setV('e_AREA', row.AREA);
                 setV('e_DESCRIPCION_SERVICIO', row.DESCRIPCION_SERVICIO);
                 setV('e_PROVEEDORES', row.PROVEEDORES);
                 setV('e_PERSONAL_RECIBIO', row.PERSONAL_RECIBIO);
-                setV('e_SOLICITUD_FINALIZADA', row.SOLICITUD_FINALIZADA);
+                setV('e_SOLICITUD_FINALIZADA', toSiNo(row.SOLICITUD_FINALIZADA));
             }
             document.getElementById('modalEditar').classList.add('show');
             document.querySelector('#modalEditar .modal-box').scrollTop = 0;
@@ -1314,7 +1324,11 @@
             const fr = (dto.FOLIO_REPORTE || '').trim();
             dto.ID_UNICO = [fu, fr].filter(Boolean).join('-') || null;
 
-            // Los valores vienen como "SI", "NO", "EN PROCESO" desde el select — se envían tal cual
+            // Convertir SI/NO a bool para el backend
+            const toBool2 = v => v === 'SI' ? true : v === 'NO' ? false : null;
+            dto.CUENTA_CON_POLIZA = toBool2(dto.CUENTA_CON_POLIZA);
+            dto.SERVICIO_CON_COSTO = toBool2(dto.SERVICIO_CON_COSTO);
+            dto.SOLICITUD_FINALIZADA = toBool2(dto.SOLICITUD_FINALIZADA);
 
             dto.CANTIDAD = Number(dto.CANTIDAD) || null;
             dto.COSTO = Number(dto.COSTO) || null;
