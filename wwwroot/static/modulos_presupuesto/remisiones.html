@@ -1656,9 +1656,10 @@
                     <td class="td-formula">${fmtStatus(r.STATUS)}</td>
                     <td class="mono td-formula">${e(r.REQUISICION)}</td>
                     <td class="mono td-formula">${e(r.OC)}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick='abrirEditar(${JSON.stringify(r)})'>✏️</button>
-                        <button class="btn btn-purple btn-sm" onclick="verHistorial(${r.ID})" style="margin-left:4px">📋</button>
+                    <td style="white-space:nowrap">
+                        <button class="btn btn-amber btn-sm" onclick='abrirEditar(${JSON.stringify(r)})'>✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="eliminar(${r.ID})">🗑</button>
+                        <button class="btn btn-cyan btn-sm" onclick="verHistorial(${r.ID})" title="Ver historial">📋</button>
                     </td>
                 </tr>`).join('');
         }
@@ -1742,11 +1743,12 @@
             } catch (e) { alert('❌ Error al editar: ' + e.message); }
         }
 
-        async function eliminar() {
-            if (!editandoId) return;
+        async function eliminar(id) {
+            const targetId = id !== undefined ? id : editandoId;
+            if (!targetId) return;
             if (!confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
             try {
-                const res = await fetch(`${ENDPOINT_1}/${editandoId}`, {
+                const res = await fetch(`${ENDPOINT_1}/${targetId}`, {
                     method: 'DELETE',
                     headers: { 'X-Usuario': usuarioActual }
                 });
