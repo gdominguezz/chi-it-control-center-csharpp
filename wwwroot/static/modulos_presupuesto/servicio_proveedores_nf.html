@@ -1219,6 +1219,11 @@
                 });
 
                 const d = await r.json();
+                if (!r.ok) {
+                    console.error('400 body:', JSON.stringify(d));
+                    alert('Error del servidor: ' + (d.error || d.message || d.title || JSON.stringify(d)));
+                    return;
+                }
                 if (d.error) { alert('Error: ' + d.error); return; }
 
                 limpiarForm();
