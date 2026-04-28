@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -7,10 +7,11 @@
     <RootNamespace>ChiIT</RootNamespace>
   </PropertyGroup>
 
+  <!-- 🔥 PUBLICAR TODO WWWROOT -->
   <ItemGroup>
-    <None Include="wwwroot\static\correctivos.html" />
-    <None Include="wwwroot\static\bajas.html" />
-    <None Include="wwwroot\static\presupuestos_menu.html" />
+    <Content Include="wwwroot\**\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
