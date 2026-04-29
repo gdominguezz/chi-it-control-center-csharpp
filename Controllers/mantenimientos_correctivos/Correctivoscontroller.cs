@@ -928,12 +928,14 @@ public class CorrectivoController : ControllerBase
             using var cmd = conn.CreateCommand();
 
             cmd.CommandText = @"
-            SELECT DISTINCT TRIM(equipo)::text
-            FROM mantenimientos_correctivos
-            WHERE equipo IS NOT NULL
-              AND TRIM(equipo) <> ''
-              AND (@q IS NULL OR equipo ILIKE '%' || @q || '%')
-            ORDER BY TRIM(equipo)
+            SELECT val FROM (
+                SELECT DISTINCT TRIM(equipo) AS val
+                FROM mantenimientos_correctivos
+                WHERE equipo IS NOT NULL
+                  AND TRIM(equipo) <> ''
+                  AND (@q::text IS NULL OR equipo ILIKE '%' || @q || '%')
+            ) t
+            ORDER BY val
             LIMIT 20
         ";
 
@@ -966,12 +968,14 @@ public class CorrectivoController : ControllerBase
             using var cmd = conn.CreateCommand();
 
             cmd.CommandText = @"
-            SELECT DISTINCT TRIM(modelo)::text
-            FROM mantenimientos_correctivos
-            WHERE modelo IS NOT NULL
-              AND TRIM(modelo) <> ''
-              AND (@q IS NULL OR modelo ILIKE '%' || @q || '%')
-            ORDER BY TRIM(modelo)
+            SELECT val FROM (
+                SELECT DISTINCT TRIM(modelo) AS val
+                FROM mantenimientos_correctivos
+                WHERE modelo IS NOT NULL
+                  AND TRIM(modelo) <> ''
+                  AND (@q::text IS NULL OR modelo ILIKE '%' || @q || '%')
+            ) t
+            ORDER BY val
             LIMIT 20
         ";
 
@@ -1004,12 +1008,14 @@ public class CorrectivoController : ControllerBase
             using var cmd = conn.CreateCommand();
 
             cmd.CommandText = @"
-            SELECT DISTINCT TRIM(marca)::text
-            FROM mantenimientos_correctivos
-            WHERE marca IS NOT NULL
-              AND TRIM(marca) <> ''
-              AND (@q IS NULL OR marca ILIKE '%' || @q || '%')
-            ORDER BY TRIM(marca)
+            SELECT val FROM (
+                SELECT DISTINCT TRIM(marca) AS val
+                FROM mantenimientos_correctivos
+                WHERE marca IS NOT NULL
+                  AND TRIM(marca) <> ''
+                  AND (@q::text IS NULL OR marca ILIKE '%' || @q || '%')
+            ) t
+            ORDER BY val
             LIMIT 20
         ";
 
