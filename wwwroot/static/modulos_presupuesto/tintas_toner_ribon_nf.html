@@ -1,187 +1,1758 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>TINTAS TONER RIBON NF</title>
-<style>
-body{ font-family:Arial; margin:0; background:#f1f5f9; }
-.header{ background:#1e293b; color:white; padding:15px; font-size:20px; font-weight:bold; }
-.container{ padding:15px; }
-.form-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-bottom:15px; }
-.field{ display:flex; flex-direction:column; }
-.field label{ font-size:11px; font-weight:bold; color:#1e293b; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.3px; }
-.field input{ padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:12px; background:#f8fafc; transition:border-color 0.2s; }
-.field input:focus{ outline:none; border-color:#2563eb; background:white; box-shadow:0 0 0 2px rgba(37,99,235,0.15); }
-button{ padding:6px 12px; border:none; border-radius:5px; cursor:pointer; font-size:12px; font-weight:bold; margin-right:5px; }
-.save{background:#16a34a;color:white;} .cancel{background:#64748b;color:white;} .delete{background:#dc2626;color:white;}
-.edit{background:#f59e0b;color:white;} .pdf{background:#2563eb;color:white;} .export{background:#7c3aed;color:white;}
-.btn-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:12px; }
-.btn-bar input[type="number"]{ padding:6px; border:1px solid #ccc; border-radius:5px; font-size:12px; width:110px; }
-.table-container{ width:100%; height:500px; overflow:auto; border:1px solid #ccc; background:white; }
-table{ border-collapse:collapse; min-width:2800px; font-size:11px; }
-th,td{ border:1px solid #ccc; padding:6px; white-space:nowrap; text-align:center; }
-th{ background:#1e293b; color:white; position:sticky; top:0; z-index:2; }
-.filter-row input{ width:100%; font-size:11px; }
-.pagination{ margin-top:10px; }
-.back{
-    background:#dc2626;
-    font-style: italic; color:#ffffff;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Tintas / Toner / Ribon NF</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0F1A;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --surface3: #1e293b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --accent: #3B82F6;
+            --text: #F1F5F9;
+            --muted: #64748B;
+            --muted2: #94A3B8;
+            --green: #10B981;
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --purple: #8B5CF6;
+            --cyan: #06B6D4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── TOP BAR ── */
+        .topbar {
+            background: linear-gradient(135deg,#0f1e35,#0B0F1A);
+            border-bottom: 1px solid var(--border2);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+
+        .topbar-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: linear-gradient(135deg,#1e3a8a,#3B82F6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px rgba(59,130,246,.4);
+            flex-shrink: 0;
+        }
+
+        .topbar-title {
+            flex: 1;
+        }
+
+            .topbar-title h1 {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: -.01em;
+            }
+
+            .topbar-title p {
+                font-size: 11px;
+                color: var(--muted2);
+                margin-top: 1px;
+                font-family: 'DM Mono',monospace;
+            }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background .2s, border-color .2s;
+        }
+
+            .user-chip:hover {
+                background: rgba(255,255,255,.1);
+                border-color: var(--accent);
+            }
+
+            .user-chip span {
+                color: var(--muted2);
+            }
+
+            .user-chip .chip-arrow {
+                font-size: 9px;
+                color: var(--muted);
+                transition: transform .2s;
+            }
+
+            .user-chip.open .chip-arrow {
+                transform: rotate(180deg);
+            }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
+
+            .dropdown-header .d-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            .dropdown-header .d-role {
+                font-size: 10px;
+                color: var(--muted);
+                font-family: 'DM Mono',monospace;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                margin-top: 2px;
+            }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: background .15s, color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans',sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: var(--text);
+            }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        /* ── MAIN ── */
+        .main {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px 24px;
+        }
+
+        /* ── PANEL NUEVO REGISTRO ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .panel-title::before {
+                content: '';
+                width: 3px;
+                height: 14px;
+                background: var(--accent);
+                border-radius: 2px;
+                display: inline-block;
+            }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(190px,1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .field input, .field select {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 28px;
+        }
+
+            .field select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+            .field input:focus, .field select:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+            }
+
+        /* ── BOTONES ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans',sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 3px 10px rgba(59,130,246,.3);
+        }
+
+            .btn-primary:hover {
+                background: #2563EB;
+                transform: translateY(-1px);
+            }
+
+        .btn-success {
+            background: var(--green);
+            color: white;
+            box-shadow: 0 3px 10px rgba(16,185,129,.25);
+        }
+
+            .btn-success:hover {
+                background: #059669;
+                transform: translateY(-1px);
+            }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+            box-shadow: 0 3px 10px rgba(239,68,68,.25);
+        }
+
+            .btn-danger:hover {
+                background: #DC2626;
+                transform: translateY(-1px);
+            }
+
+        .btn-amber {
+            background: var(--amber);
+            color: #1c1400;
+        }
+
+            .btn-amber:hover {
+                background: #D97706;
+            }
+
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+
+            .btn-purple:hover {
+                background: #7C3AED;
+            }
+
+        .btn-cyan {
+            background: var(--cyan);
+            color: #001a1f;
+        }
+
+            .btn-cyan:hover {
+                background: #0891B2;
+            }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
+        }
+
+            .btn-ghost:hover {
+                color: var(--text);
+                border-color: var(--accent);
+            }
+
+        .btn-sm {
+            padding: 8px 13px;
+            font-size: 12px;
+        }
+
+        /* ── TOOLBAR ── */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 14px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .toolbar-sep {
+            width: 1px;
+            height: 24px;
+            background: var(--border2);
+            margin: 0 4px;
+        }
+
+        .anio-input {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+            width: 110px;
+        }
+
+            .anio-input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        /* ── TABLA ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: calc(100vh - 380px);
+            min-height: 420px;
+            overflow-y: auto;
+        }
+
+            .table-scroll::-webkit-scrollbar {
+                width: 7px;
+                height: 7px;
+            }
+
+            .table-scroll::-webkit-scrollbar-track {
+                background: var(--surface2);
+                border-radius: 999px;
+            }
+
+            .table-scroll::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 999px;
+            }
+
+                .table-scroll::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent);
+                }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1600px;
+        }
+
+        thead th {
+            background: var(--surface3);
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+            thead th:last-child {
+                position: sticky;
+                right: 0;
+                z-index: 11;
+                background: var(--surface3);
+            }
+
+        tbody td:last-child {
+            position: sticky;
+            right: 0;
+            background: var(--surface);
+            z-index: 1;
+        }
+
+        tbody tr:hover td:last-child {
+            filter: brightness(1.15);
+        }
+
+        .filter-row td input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 5px 8px;
+            font-size: 11px;
+            font-family: 'DM Mono',monospace;
+            color: var(--text);
+        }
+
+            .filter-row td input:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        .filter-row td {
+            padding: 6px 8px;
+            background: var(--surface2);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .12s;
+        }
+
+            tbody tr:hover {
+                background: rgba(255,255,255,.03);
+            }
+
+        tbody td {
+            padding: 9px 12px;
+            font-size: 12px;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .mono {
+            font-family: 'DM Mono',monospace;
+            font-size: 11px;
+            color: var(--muted2);
+        }
+
+        /* ── PILLS ── */
+        .disponible-pill {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .06em;
+        }
+
+        .pill-si {
+            background: rgba(16,185,129,.18);
+            color: #4ADE80;
+            border: 1px solid rgba(16,185,129,.3);
+        }
+
+        .pill-no {
+            background: rgba(239,68,68,.18);
+            color: #FCA5A5;
+            border: 1px solid rgba(239,68,68,.3);
+        }
+
+        .pill-otro {
+            background: rgba(148,163,184,.15);
+            color: var(--muted2);
+            border: 1px solid rgba(148,163,184,.2);
+        }
+
+        .ley-chip {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .05em;
+        }
+
+        /* ── PAGINACIÓN ── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 4px;
+            margin-bottom: 24px;
+        }
+
+        .page-info {
+            font-size: 12px;
+            color: var(--muted2);
+            margin-left: 8px;
+            font-family: 'DM Mono',monospace;
+        }
+
+        /* ── MODAL ── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.65);
+            z-index: 5000;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .modal.show {
+                display: flex;
+            }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 28px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalIn .18s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-box.form-box {
+            width: min(660px,95vw);
+        }
+
+        .modal-box.hist-box {
+            width: min(900px,95vw);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border2);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+            .modal-header h3 {
+                font-size: 15px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        /* ── FORM EDITAR ── */
+        .form-grid-modal {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media(max-width:500px) {
+            .form-grid-modal {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-field {
+            margin-bottom: 0;
+        }
+
+            .form-field label {
+                font-size: 9px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            .form-field input, .form-field select, .form-field textarea {
+                width: 100%;
+                background: var(--surface2);
+                border: 1px solid var(--border2);
+                border-radius: 7px;
+                padding: 9px 11px;
+                font-size: 12px;
+                font-family: 'DM Mono',monospace;
+                color: var(--text);
+                transition: border-color .2s;
+            }
+
+            .form-field select {
+                cursor: pointer;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 10px center;
+                padding-right: 28px;
+            }
+
+                .form-field select option {
+                    background: var(--surface2);
+                    color: var(--text);
+                }
+
+                .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+                }
+
+            .form-field textarea {
+                resize: vertical;
+                min-height: 70px;
+                font-family: 'DM Sans',sans-serif;
+            }
+
+            .form-field.full {
+                grid-column: 1 / -1;
+            }
+
+        /* ── HISTORIAL ── */
+        .ev-wrap {
+            margin-bottom: 16px;
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        .ev-header {
+            background: var(--surface2);
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+            .ev-header span {
+                font-size: 12px;
+                color: var(--muted2);
+            }
+
+            .ev-header strong {
+                color: var(--text);
+            }
+
+        .badge-cambio {
+            background: rgba(245,158,11,.2);
+            color: var(--amber);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            margin-left: 6px;
+            border: 1px solid rgba(245,158,11,.3);
+        }
+
+        .ev-table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+            .ev-table th, .ev-table td {
+                border: 1px solid var(--border);
+                padding: 9px 12px;
+                text-align: left;
+            }
+
+            .ev-table thead th {
+                background: var(--surface3);
+                color: var(--muted);
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+            }
+
+            .ev-table th:first-child {
+                width: 22%;
+            }
+
+        .row-changed td:nth-child(2) {
+            background: rgba(239,68,68,.08);
+            color: #fca5a5;
+        }
+
+        .row-changed td:nth-child(3) {
+            background: rgba(16,185,129,.08);
+            color: #6ee7b7;
+        }
+
+        .empty-val {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .sin-hist {
+            text-align: center;
+            padding: 50px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .n-cambios-badge {
+            margin-left: auto;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* ── IMPORTAR ── */
+        #modalImportar {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.6);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+            #modalImportar.open {
+                display: flex;
+            }
+
+        .import-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            width: 92vw;
+            max-width: 1100px;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+            .import-box h3 {
+                margin: 0;
+                font-size: 1.1rem;
+            }
+
+        .import-preview {
+            overflow: auto;
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+            .import-preview table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: .78rem;
+            }
+
+            .import-preview th {
+                background: var(--surface3);
+                padding: 6px 10px;
+                white-space: nowrap;
+                position: sticky;
+                top: 0;
+            }
+
+            .import-preview td {
+                padding: 5px 10px;
+                border-top: 1px solid var(--border);
+                white-space: nowrap;
+            }
+
+            .import-preview tr.error-row td {
+                background: rgba(239,68,68,.15);
+                color: #fca5a5;
+            }
+
+        .import-stats {
+            font-size: .85rem;
+            color: var(--muted);
+        }
+
+        .import-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        #dropZone {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .2s;
+        }
+
+            #dropZone:hover, #dropZone.drag-over {
+                border-color: #38BDF8;
+                color: #38BDF8;
+            }
+
+            #dropZone p {
+                margin: 8px 0 0;
+                font-size: .85rem;
+                color: var(--muted);
+            }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
-<div class="header">TINTAS TONER RIBON NF</div>
-<div class="container">
-<div class="form-grid">
-<div class="field"><label>ID Unico</label><input id="ID_UNICO"></div>
-<div class="field"><label>OC</label><input id="OC"></div>
-<div class="field"><label>Modelo</label><input id="MODELO"></div>
-<div class="field"><label>Recibido Por</label><input id="RECIBIDO_POR"></div>
-<div class="field"><label>Subcategoria</label><input id="SUBCATEGORIA"></div>
-<div class="field"><label>Fecha Registro</label><input id="FECHA_REGISTRO" type="date"></div>
-<div class="field"><label>Proveedor</label><input id="PROVEEDOR"></div>
-<div class="field"><label>Stock</label><input id="STOCK"></div>
-<div class="field"><label>Costo MN</label><input id="COSTO_MN"></div>
-<div class="field"><label>Cantidad Recibida</label><input id="CANTIDAD_RECIBIDA"></div>
-<div class="field"><label>Fecha Instalacion</label><input id="FECHA_INSTALACION" type="date"></div>
-<div class="field"><label>Ubicacion</label><input id="UBICACION"></div>
-<div class="field"><label>Impresora</label><input id="IMPRESORA"></div>
-<div class="field"><label>Instalado Por</label><input id="INSTALADO_POR"></div>
-</div>
 
-<div class="btn-bar">
-    <button class="save" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
-    <button class="cancel" onclick="cancelarEdicion()">CANCELAR</button>
-</div>
-<div class="btn-bar">
-    <button class="export" onclick="exportarFiltrado()">Exportar Filtrado</button>
-    <button class="export" onclick="exportarTodo()">Exportar Todo</button>
-    <input type="number" id="anioExportar" placeholder="Año (ej: 2026)">
-    <button class="export" onclick="exportarPorAnio()">Exportar por Año</button>
-</div>
+    <!-- ══ TOP BAR ══════════════════════════════════════════════════════════ -->
+    <div class="topbar">
+        <div class="topbar-icon">🖨️</div>
+        <div class="topbar-title">
+            <h1>Tintas / Toner / Ribon NF</h1>
+            <p>Control de consumibles de impresión sin factura</p>
+        </div>
+        <div class="topbar-actions">
+            <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
+                <span>👤</span>
+                <span id="usuarioDisplay">—</span>
+                <span class="chip-arrow">▼</span>
+                <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name" id="dropdownNombre">—</div>
+                        <div class="d-role" id="dropdownRol">—</div>
+                    </div>
+                    <button class="dropdown-item danger" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>ID</th><th>ID UNICO</th><th>OC</th><th>MODELO</th><th>RECIBIDO POR</th>
-<th>SUBCATEGORIA</th><th>FECHA REG</th><th>PROVEEDOR</th><th>STOCK</th>
-<th>COSTO MN</th><th>CANT RECIBIDA</th><th>FECHA INST</th>
-<th>UBICACION</th><th>IMPRESORA</th><th>INSTALADO POR</th>
-<th>PDF</th><th>ACCIONES</th>
-</tr>
-<tr class="filter-row">
-<th></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th><input oninput="filtrar()"></th>
-<th></th><th></th>
-</tr>
-</thead>
-<tbody id="tabla"></tbody>
-</table>
-</div>
-<div class="pagination">
-<button onclick="anterior()">Anterior</button>
-<span id="paginaInfo"></span>
-<button onclick="siguiente()">Siguiente</button>
-<button class="back" onclick="window.location.href='presupuestos_menu.html'">
-REGRESAR A PRESUPUESTOS
-</button>
-</div>
-</div>
+    <!-- ══ MAIN ═════════════════════════════════════════════════════════════ -->
+    <div class="main">
 
-<script>
-let paginaActual=1, limite=10, totalRegistros=0, editandoID=null;
+        <!-- ── Panel nuevo registro ── -->
+        <div class="panel" id="panelNuevo">
+            <div class="panel-title">➕ Nuevo Registro</div>
+            <div class="form-grid">
+                <div class="field"><label>ID Único</label><input id="f_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
+                <div class="field"><label>OC</label><input id="f_OC" placeholder="Orden de compra"></div>
+                <div class="field"><label>Modelo</label><input id="f_MODELO" placeholder="Modelo de tinta/toner/ribon"></div>
+                <div class="field"><label>Recibido Por</label><input id="f_RECIBIDO_POR" placeholder="Nombre quien recibió"></div>
+                <div class="field">
+                    <label>Subcategoría</label>
+                    <select id="f_SUBCATEGORIA">
+                        <option value="">— Selecciona —</option>
+                        <option value="TINTA">TINTA</option>
+                        <option value="TONER">TONER</option>
+                        <option value="RIBON">RIBON</option>
+                        <option value="OTRO">OTRO</option>
+                    </select>
+                </div>
+                <div class="field"><label>Fecha Registro</label><input id="f_FECHA_REGISTRO" type="date"></div>
+                <div class="field"><label>Proveedor</label><input id="f_PROVEEDOR" placeholder="Proveedor"></div>
+                <div class="field"><label>Stock</label><input id="f_STOCK" type="number" min="0" placeholder="0"></div>
+                <div class="field"><label>Costo MN</label><input id="f_COSTO_MN" type="number" step="0.01" placeholder="0.00"></div>
+                <div class="field"><label>Cantidad Recibida</label><input id="f_CANTIDAD_RECIBIDA" type="number" min="0" placeholder="0"></div>
+                <div class="field"><label>Fecha Instalación</label><input id="f_FECHA_INSTALACION" type="date"></div>
+                <div class="field"><label>Ubicación</label><input id="f_UBICACION" placeholder="Ubicación / área"></div>
+                <div class="field"><label>Impresora</label><input id="f_IMPRESORA" placeholder="Modelo de impresora"></div>
+                <div class="field"><label>Instalado Por</label><input id="f_INSTALADO_POR" placeholder="Nombre quien instaló"></div>
+            </div>
+            <button class="btn btn-success" onclick="guardar()">💾 Guardar</button>
+            <button class="btn btn-ghost" onclick="limpiarForm()" style="margin-left:8px;">✕ Limpiar</button>
+        </div>
 
-function guardar(){
-    let data={
-        ID_UNICO: ID_UNICO.value||null, OC: OC.value||null,
-        MODELO: MODELO.value||null, RECIBIDO_POR: RECIBIDO_POR.value||null,
-        SUBCATEGORIA: SUBCATEGORIA.value||null, FECHA_REGISTRO: FECHA_REGISTRO.value||null,
-        PROVEEDOR: PROVEEDOR.value||null, STOCK: STOCK.value||null,
-        COSTO_MN: COSTO_MN.value||null, CANTIDAD_RECIBIDA: CANTIDAD_RECIBIDA.value||null,
-        FECHA_INSTALACION: FECHA_INSTALACION.value||null, UBICACION: UBICACION.value||null,
-        IMPRESORA: IMPRESORA.value||null, INSTALADO_POR: INSTALADO_POR.value||null
-    };
-    if(editandoID){
-        fetch(`/TINTAS_TONER_RIBON_NF/${editandoID}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
-        .then(()=>{ editandoID=null; limpiarFormulario(); cargar(); });
-    } else {
-        fetch("/TINTAS_TONER_RIBON_NF",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
-        .then(()=>{ limpiarFormulario(); cargar(); });
-    }
-}
+        <!-- ── Toolbar ── -->
+        <div class="toolbar">
+            <button class="btn btn-cyan btn-sm" onclick="exportarFiltrado()">📥 Exportar filtrado</button>
+            <button class="btn btn-cyan btn-sm" onclick="exportarTodo()">📦 Exportar todo</button>
+            <div class="toolbar-sep"></div>
+            <input class="anio-input" id="anioExportar" type="number" placeholder="Año" value="">
+            <button class="btn btn-cyan btn-sm" onclick="exportarPorAnio()">📅 Exportar por año</button>
+            <div class="toolbar-sep"></div>
+            <button class="btn btn-amber btn-sm" onclick="abrirImportar()">📂 Importar Excel/CSV</button>
+            <div class="toolbar-sep"></div>
+            <button class="btn btn-ghost btn-sm" onclick="cargar()">🔄 Recargar</button>
+        </div>
 
-function limpiarFormulario(){ document.querySelectorAll(".form-grid input").forEach(i=>i.value=""); }
-function cancelarEdicion(){ editandoID=null; limpiarFormulario(); }
+        <!-- ── Tabla ── -->
+        <div class="table-wrap">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ID Único</th>
+                            <th>OC</th>
+                            <th>Modelo</th>
+                            <th>Recibido Por</th>
+                            <th>Subcategoría</th>
+                            <th>Fecha Registro</th>
+                            <th>Proveedor</th>
+                            <th>Stock</th>
+                            <th>Costo MN</th>
+                            <th>Cant. Recibida</th>
+                            <th>Fecha Instalación</th>
+                            <th>Ubicación</th>
+                            <th>Impresora</th>
+                            <th>Instalado Por</th>
+                            <th>Acciones</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_ID_UNICO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_OC"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_MODELO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_RECIBIDO_POR"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_SUBCATEGORIA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FECHA_REGISTRO"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_PROVEEDOR"></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_FECHA_INSTALACION"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_UBICACION"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_IMPRESORA"></td>
+                            <td><input placeholder="Filtrar…" oninput="filtrar()" id="fil_INSTALADO_POR"></td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla">
+                        <tr><td colspan="16" style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-function obtenerParametros(){
-    let f=document.querySelectorAll(".filter-row input");
-    return new URLSearchParams({
-        page:paginaActual, limit:limite,
-        ID_UNICO:f[0].value, OC:f[1].value, MODELO:f[2].value,
-        RECIBIDO_POR:f[3].value, SUBCATEGORIA:f[4].value, FECHA_REGISTRO:f[5].value,
-        PROVEEDOR:f[6].value, STOCK:f[7].value, COSTO_MN:f[8].value,
-        CANTIDAD_RECIBIDA:f[9].value, FECHA_INSTALACION:f[10].value,
-        UBICACION:f[11].value, IMPRESORA:f[12].value, INSTALADO_POR:f[13].value
-    });
-}
+        <!-- ── Paginación ── -->
+        <div class="pagination">
+            <button class="btn btn-ghost btn-sm" onclick="anterior()">◀ Anterior</button>
+            <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
+            <span class="page-info" id="paginaInfo">—</span>
+        </div>
 
-function cargar(){
-    fetch(`/TINTAS_TONER_RIBON_NF?${obtenerParametros().toString()}`)
-    .then(r=>r.json()).then(resp=>{ totalRegistros=resp.total; renderizar(resp.data); });
-}
+    </div><!-- /main -->
+    <!-- ══ MODAL EDITAR ═════════════════════════════════════════════════════ -->
+    <div class="modal" id="modalEditar">
+        <div class="modal-box form-box">
+            <div class="modal-header">
+                <h3>✏️ Editar Registro &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="editarIdLabel">#</span></h3>
+                <button class="btn btn-ghost btn-sm" onclick="cerrarEditar()">✕</button>
+            </div>
+            <div class="form-grid-modal">
+                <div class="form-field"><label>ID Único</label><input id="e_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
+                <div class="form-field"><label>OC</label><input id="e_OC" placeholder="Orden de compra"></div>
+                <div class="form-field"><label>Modelo</label><input id="e_MODELO" placeholder="Modelo de tinta/toner/ribon"></div>
+                <div class="form-field"><label>Recibido Por</label><input id="e_RECIBIDO_POR" placeholder="Nombre quien recibió"></div>
+                <div class="form-field">
+                    <label>Subcategoría</label>
+                    <select id="e_SUBCATEGORIA">
+                        <option value="">— Selecciona —</option>
+                        <option value="TINTA">TINTA</option>
+                        <option value="TONER">TONER</option>
+                        <option value="RIBON">RIBON</option>
+                        <option value="OTRO">OTRO</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Fecha Registro</label><input id="e_FECHA_REGISTRO" type="date"></div>
+                <div class="form-field"><label>Proveedor</label><input id="e_PROVEEDOR" placeholder="Proveedor"></div>
+                <div class="form-field"><label>Stock</label><input id="e_STOCK" type="number" min="0" placeholder="0"></div>
+                <div class="form-field"><label>Costo MN</label><input id="e_COSTO_MN" type="number" step="0.01" placeholder="0.00"></div>
+                <div class="form-field"><label>Cantidad Recibida</label><input id="e_CANTIDAD_RECIBIDA" type="number" min="0" placeholder="0"></div>
+                <div class="form-field"><label>Fecha Instalación</label><input id="e_FECHA_INSTALACION" type="date"></div>
+                <div class="form-field"><label>Ubicación</label><input id="e_UBICACION" placeholder="Ubicación / área"></div>
+                <div class="form-field"><label>Impresora</label><input id="e_IMPRESORA" placeholder="Modelo de impresora"></div>
+                <div class="form-field"><label>Instalado Por</label><input id="e_INSTALADO_POR" placeholder="Nombre quien instaló"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarCambios()">💾 Guardar cambios</button>
+            </div>
+        </div>
+    </div>
 
-function renderizar(datos){
-    tabla.innerHTML="";
-    datos.forEach(row=>{
-        tabla.innerHTML+=`<tr>
-        <td>${row.ID}</td><td>${row.ID_UNICO??""}</td><td>${row.OC??""}</td>
-        <td>${row.MODELO??""}</td><td>${row.RECIBIDO_POR??""}</td>
-        <td>${row.SUBCATEGORIA??""}</td><td>${row.FECHA_REGISTRO??""}</td>
-        <td>${row.PROVEEDOR??""}</td><td>${row.STOCK??""}</td>
-        <td>${row.COSTO_MN??""}</td><td>${row.CANTIDAD_RECIBIDA??""}</td>
-        <td>${row.FECHA_INSTALACION??""}</td><td>${row.UBICACION??""}</td>
-        <td>${row.IMPRESORA??""}</td><td>${row.INSTALADO_POR??""}</td>
-        <td>${row.TIENE_PDF
-            ? `<button class="pdf" onclick="verPDF(${row.ID})">Ver PDF</button><button class="delete" onclick="eliminarPDF(${row.ID})">Quitar</button>`
-            : `<input type="file" onchange="subirPDF(${row.ID},this)">`}</td>
-        <td><button class="edit" onclick='editar(${JSON.stringify(row)})'>Editar</button>
-        <button class="delete" onclick="eliminar(${row.ID})">Eliminar</button></td>
-        </tr>`;
-    });
-    paginaInfo.innerText=`Pagina ${paginaActual} de ${Math.ceil(totalRegistros/limite)}`;
-}
+    <!-- ══ MODAL HISTORIAL ══════════════════════════════════════════════════ -->
+    <div class="modal" id="modalHistorial">
+        <div class="modal-box hist-box">
+            <div class="modal-header">
+                <h3>📋 Historial de cambios &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="histIdLabel">#</span></h3>
+                <button class="btn btn-ghost btn-sm" onclick="cerrarHistorial()">✕</button>
+            </div>
+            <div id="contenidoHistorial">
+                <p style="text-align:center;padding:40px;color:var(--muted)">Cargando...</p>
+            </div>
+        </div>
+    </div>
 
-function editar(row){
-    editandoID=row.ID;
-    Object.keys(row).forEach(key=>{ let el=document.getElementById(key); if(el) el.value=row[key]??""; });
-    window.scrollTo({top:0,behavior:"smooth"});
-}
-function eliminar(id){ if(!confirm("Eliminar este registro?")) return; fetch(`/TINTAS_TONER_RIBON_NF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
-function subirPDF(id,input){ let file=input.files[0]; if(!file) return; let fd=new FormData(); fd.append("file",file); fetch(`/TINTAS_TONER_RIBON_NF/PDF/${id}`,{method:"POST",body:fd}).then(()=>cargar()); }
-function verPDF(id){ window.open(`/TINTAS_TONER_RIBON_NF/PDF/${id}`,"_blank"); }
-function eliminarPDF(id){ if(!confirm("Eliminar el PDF?")) return; fetch(`/TINTAS_TONER_RIBON_NF/PDF/${id}`,{method:"DELETE"}).then(()=>cargar()); }
-function filtrar(){ paginaActual=1; cargar(); }
-function exportarFiltrado(){ window.open(`/TINTAS_TONER_RIBON_NF/EXPORTAR?${obtenerParametros().toString()}`); }
-function exportarTodo(){ window.open(`/TINTAS_TONER_RIBON_NF/EXPORTAR_TODO`); }
-function exportarPorAnio(){ let a=document.getElementById("anioExportar").value; if(!a){alert("Ingresa un año");return;} window.open(`/TINTAS_TONER_RIBON_NF/EXPORTAR_ANIO?anio=${a}`); }
-function siguiente(){ if(paginaActual*limite<totalRegistros){ paginaActual++; cargar(); } }
-function anterior(){ if(paginaActual>1){ paginaActual--; cargar(); } }
+    <!-- ══ MODAL IMPORTAR ══ -->
+    <div id="modalImportar">
+        <div class="import-box">
+            <h3>📂 Importar registros desde Excel / CSV</h3>
+            <div id="dropZone"
+                 onclick="document.getElementById('fileInput').click()"
+                 ondragover="event.preventDefault();this.classList.add('drag-over')"
+                 ondragleave="this.classList.remove('drag-over')"
+                 ondrop="onDrop(event)">
+                <div style="font-size:2rem">📄</div>
+                <strong>Haz clic o arrastra tu archivo aquí</strong>
+                <p>Formatos aceptados: .xlsx, .xls, .csv</p>
+            </div>
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="onFileSelected(this)">
 
-cargar();
-</script>
+            <div id="importPreviewArea" style="display:none;flex-direction:column;gap:12px;">
+                <div class="import-stats" id="importStats"></div>
+                <div class="import-preview" id="importPreviewTable"></div>
+                <div id="importErrors" style="display:none;color:#fca5a5;font-size:.83rem;"></div>
+            </div>
+
+            <div class="import-actions">
+                <button class="btn btn-ghost" onclick="cerrarImportar()">✕ Cancelar</button>
+                <button class="btn btn-success" id="btnConfirmarImport" style="display:none" onclick="confirmarImportar()">✅ Confirmar e importar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══ ESTADO GLOBAL ═══
+        let paginaActual = 1;
+        let limite = 10;
+        let totalRegistros = 0;
+        let datosActuales = [];
+        let editandoID = null;
+        let usuarioActual = 'SISTEMA';
+        let rolActual = '';
+        let _filtrarTimer = null;
+
+        // ═══ CAMPOS DEL HISTORIAL ═══
+        const CAMPOS_HIST = [
+            { key: 'ID_UNICO', label: 'ID Único' },
+            { key: 'OC', label: 'OC' },
+            { key: 'MODELO', label: 'Modelo' },
+            { key: 'RECIBIDO_POR', label: 'Recibido Por' },
+            { key: 'SUBCATEGORIA', label: 'Subcategoría' },
+            { key: 'FECHA_REGISTRO', label: 'Fecha Registro' },
+            { key: 'PROVEEDOR', label: 'Proveedor' },
+            { key: 'STOCK', label: 'Stock' },
+            { key: 'COSTO_MN', label: 'Costo MN' },
+            { key: 'CANTIDAD_RECIBIDA', label: 'Cantidad Recibida' },
+            { key: 'FECHA_INSTALACION', label: 'Fecha Instalación' },
+            { key: 'UBICACION', label: 'Ubicación' },
+            { key: 'IMPRESORA', label: 'Impresora' },
+            { key: 'INSTALADO_POR', label: 'Instalado Por' },
+        ];
+
+        // ═══ INACTIVIDAD 30 min ═══
+        let _inacTimer = null;
+        function resetInactividad() {
+            clearTimeout(_inacTimer);
+            _inacTimer = setTimeout(async () => {
+                try { await fetch('/LOGOUT', { method: 'POST', credentials: 'include' }); } catch (e) { }
+                window.location.href = '/static/login.html?inactivo=1';
+            }, 30 * 60 * 1000);
+        }
+        ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(ev =>
+            document.addEventListener(ev, resetInactividad, { passive: true })
+        );
+
+        // ═══ INIT ═══
+        window.addEventListener('DOMContentLoaded', () => {
+            resetInactividad();
+
+            fetch('/obtener-usuario', { credentials: 'include' })
+                .then(r => { if (!r.ok) { window.location.href = '/static/login.html'; return null; } return r.json(); })
+                .then(d => {
+                    if (!d) return;
+                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
+                    // ── Así se lee el usuario, igual que en servicio_proveedores ──
+                    usuarioActual = d.usuario || 'SISTEMA';
+                    rolActual = (d.rol || '').trim().toUpperCase();
+                    document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownRol').textContent = rolActual;
+                })
+                .catch(() => { window.location.href = '/static/login.html'; });
+
+            cargar();
+        });
+
+        // ═══ CARGAR TABLA ═══
+        async function cargar() {
+            const qs = obtenerParametros();
+            try {
+                const r = await fetch(`/TINTAS_TONER_RIBON_NF?page=${paginaActual}&limit=${limite}&${qs}`);
+                const d = await r.json();
+                totalRegistros = d.total || 0;
+                datosActuales = d.data || [];
+                renderizar();
+            } catch (e) {
+                document.getElementById('tabla').innerHTML =
+                    `<tr><td colspan="16" style="text-align:center;padding:40px;color:var(--red)">❌ Error al cargar: ${e.message}</td></tr>`;
+            }
+        }
+
+        function obtenerParametros() {
+            const campos = ['ID_UNICO', 'OC', 'MODELO', 'RECIBIDO_POR', 'SUBCATEGORIA',
+                'FECHA_REGISTRO', 'PROVEEDOR', 'FECHA_INSTALACION',
+                'UBICACION', 'IMPRESORA', 'INSTALADO_POR'];
+            const p = new URLSearchParams();
+            campos.forEach(c => {
+                const val = (document.getElementById('fil_' + c)?.value || '').trim();
+                if (val) p.set(c, val);
+            });
+            return p.toString();
+        }
+
+        function filtrar() {
+            clearTimeout(_filtrarTimer);
+            _filtrarTimer = setTimeout(() => { paginaActual = 1; cargar(); }, 350);
+        }
+
+        // ── Colores por subcategoría ──
+        const SUBCAT_COLORS = {
+            'TINTA': { bg: 'rgba(59,130,246,.2)', color: '#93C5FD' },
+            'TONER': { bg: 'rgba(168,85,247,.2)', color: '#C084FC' },
+            'RIBON': { bg: 'rgba(20,184,166,.2)', color: '#5EEAD4' },
+            'OTRO': { bg: 'rgba(148,163,184,.15)', color: '#CBD5E1' },
+        };
+        function subcatChip(val) {
+            if (!val) return '—';
+            const c = SUBCAT_COLORS[(val || '').toString().toUpperCase()];
+            if (!c) return esc(val);
+            return `<span class="ley-chip" style="background:${c.bg};color:${c.color};">${esc(val)}</span>`;
+        }
+
+        function fmt(n, dec = 2) {
+            if (n == null || n === '') return '—';
+            return Number(n).toLocaleString('es-MX', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+        }
+
+        function renderizar() {
+            const tbody = document.getElementById('tabla');
+            tbody.innerHTML = '';
+
+            if (!datosActuales.length) {
+                tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
+                return;
+            }
+
+            const esAdmin = rolActual === 'ADMIN';
+
+            datosActuales.forEach(row => {
+                const fReg = row.FECHA_REGISTRO ? row.FECHA_REGISTRO.split('T')[0] : '—';
+                const fInst = row.FECHA_INSTALACION ? row.FECHA_INSTALACION.split('T')[0] : '—';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${row.ID}</td>
+                        <td class="mono">${esc(row.ID_UNICO) || '—'}</td>
+                        <td class="mono">${esc(row.OC) || '—'}</td>
+                        <td>${esc(row.MODELO) || '—'}</td>
+                        <td>${esc(row.RECIBIDO_POR) || '—'}</td>
+                        <td>${subcatChip(row.SUBCATEGORIA)}</td>
+                        <td class="mono">${fReg}</td>
+                        <td>${esc(row.PROVEEDOR) || '—'}</td>
+                        <td style="text-align:right">${row.STOCK ?? '—'}</td>
+                        <td style="text-align:right">${fmt(row.COSTO_MN)}</td>
+                        <td style="text-align:right">${row.CANTIDAD_RECIBIDA ?? '—'}</td>
+                        <td class="mono">${fInst}</td>
+                        <td>${esc(row.UBICACION) || '—'}</td>
+                        <td>${esc(row.IMPRESORA) || '—'}</td>
+                        <td>${esc(row.INSTALADO_POR) || '—'}</td>
+                        <td style="white-space:nowrap">
+                            ${esAdmin ? `
+                            <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
+                            ` : ''}
+                            <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
+                        </td>
+                    </tr>`;
+            });
+
+            document.getElementById('paginaInfo').textContent =
+                `Página ${paginaActual} de ${Math.ceil(totalRegistros / limite) || 1} | Total: ${totalRegistros}`;
+        }
+
+        function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
+        function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
+
+        // ═══ GUARDAR NUEVO ═══
+        async function guardar() {
+            const dto = {
+                OC: v('f_OC'),
+                MODELO: v('f_MODELO'),
+                RECIBIDO_POR: v('f_RECIBIDO_POR'),
+                SUBCATEGORIA: v('f_SUBCATEGORIA'),
+                FECHA_REGISTRO: v('f_FECHA_REGISTRO'),
+                PROVEEDOR: v('f_PROVEEDOR'),
+                STOCK: Number(document.getElementById('f_STOCK').value) || null,
+                COSTO_MN: Number(document.getElementById('f_COSTO_MN').value) || null,
+                CANTIDAD_RECIBIDA: Number(document.getElementById('f_CANTIDAD_RECIBIDA').value) || null,
+                FECHA_INSTALACION: v('f_FECHA_INSTALACION'),
+                UBICACION: v('f_UBICACION'),
+                IMPRESORA: v('f_IMPRESORA'),
+                INSTALADO_POR: v('f_INSTALADO_POR'),
+            };
+
+            // ID_UNICO auto generado desde OC + MODELO
+            const oc = (dto.OC || '').trim();
+            const mod = (dto.MODELO || '').trim();
+            dto.ID_UNICO = [oc, mod].filter(Boolean).join('-') || null;
+
+            try {
+                const r = await fetch('/TINTA_TONER_RIBON_NF', {
+                    method: 'POST',
+                    // ── X-Usuario se envía con usuarioActual, cargado desde /obtener-usuario ──
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(dto)
+                });
+                const d = await r.json();
+                if (!r.ok) { alert('Error del servidor: ' + (d.error || d.message || d.title || JSON.stringify(d))); return; }
+                if (d.error) { alert('Error: ' + d.error); return; }
+                limpiarForm();
+                cargar();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        function limpiarForm() {
+            ['f_ID_UNICO', 'f_OC', 'f_MODELO', 'f_RECIBIDO_POR', 'f_SUBCATEGORIA',
+                'f_FECHA_REGISTRO', 'f_PROVEEDOR', 'f_STOCK', 'f_COSTO_MN',
+                'f_CANTIDAD_RECIBIDA', 'f_FECHA_INSTALACION', 'f_UBICACION',
+                'f_IMPRESORA', 'f_INSTALADO_POR'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+        }
+
+        // ═══ ELIMINAR ═══
+        async function eliminar(id) {
+            if (!confirm('¿Eliminar este registro?')) return;
+            try {
+                await fetch(`/TINTA_TONER_RIBON_NF/${id}`, { method: 'DELETE' });
+                cargar();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // ═══ EXPORTAR ═══
+        function exportarFiltrado() { window.open('/TINTAS_TONER_RIBON_NF/EXPORTAR?' + obtenerParametros()); }
+        function exportarTodo() { window.open('/TINTAS_TONER_RIBON_NF/EXPORTAR_TODO'); }
+        function exportarPorAnio() {
+            const a = document.getElementById('anioExportar').value;
+            if (!a) { alert('Ingresa un año'); return; }
+            window.open('/TINTAS_TONER_RIBON_NF/EXPORTAR_ANIO?anio=' + a);
+        }
+
+        // ═══ MODAL EDITAR ═══
+        function abrirEditar(id) {
+            editandoID = id;
+            document.getElementById('editarIdLabel').textContent = '#' + id;
+            const row = datosActuales.find(r => r.ID === id);
+            if (row) {
+                setV('e_ID_UNICO', row.ID_UNICO);
+                setV('e_OC', row.OC);
+                setV('e_MODELO', row.MODELO);
+                setV('e_RECIBIDO_POR', row.RECIBIDO_POR);
+                setV('e_SUBCATEGORIA', row.SUBCATEGORIA);
+                setV('e_FECHA_REGISTRO', row.FECHA_REGISTRO ? row.FECHA_REGISTRO.split('T')[0] : '');
+                setV('e_PROVEEDOR', row.PROVEEDOR);
+                setV('e_STOCK', row.STOCK ?? '');
+                setV('e_COSTO_MN', row.COSTO_MN ?? '');
+                setV('e_CANTIDAD_RECIBIDA', row.CANTIDAD_RECIBIDA ?? '');
+                setV('e_FECHA_INSTALACION', row.FECHA_INSTALACION ? row.FECHA_INSTALACION.split('T')[0] : '');
+                setV('e_UBICACION', row.UBICACION);
+                setV('e_IMPRESORA', row.IMPRESORA);
+                setV('e_INSTALADO_POR', row.INSTALADO_POR);
+            }
+            document.getElementById('modalEditar').classList.add('show');
+            document.querySelector('#modalEditar .modal-box').scrollTop = 0;
+        }
+
+        function cerrarEditar() {
+            document.getElementById('modalEditar').classList.remove('show');
+            editandoID = null;
+        }
+
+        async function guardarCambios() {
+            const dto = {
+                OC: v('e_OC'),
+                MODELO: v('e_MODELO'),
+                RECIBIDO_POR: v('e_RECIBIDO_POR'),
+                SUBCATEGORIA: v('e_SUBCATEGORIA'),
+                FECHA_REGISTRO: v('e_FECHA_REGISTRO'),
+                PROVEEDOR: v('e_PROVEEDOR'),
+                STOCK: Number(document.getElementById('e_STOCK').value) || null,
+                COSTO_MN: Number(document.getElementById('e_COSTO_MN').value) || null,
+                CANTIDAD_RECIBIDA: Number(document.getElementById('e_CANTIDAD_RECIBIDA').value) || null,
+                FECHA_INSTALACION: v('e_FECHA_INSTALACION'),
+                UBICACION: v('e_UBICACION'),
+                IMPRESORA: v('e_IMPRESORA'),
+                INSTALADO_POR: v('e_INSTALADO_POR'),
+            };
+
+            const oc = (dto.OC || '').trim();
+            const mod = (dto.MODELO || '').trim();
+            dto.ID_UNICO = [oc, mod].filter(Boolean).join('-') || null;
+
+            try {
+                const r = await fetch(`/TINTA_TONER_RIBON_NF/${editandoID}`, {
+                    method: 'PUT',
+                    // ── X-Usuario con usuarioActual (leído al inicio desde /obtener-usuario) ──
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                    body: JSON.stringify(dto)
+                });
+                const result = await r.json();
+                if (r.ok && !result.error) { cerrarEditar(); cargar(); }
+                else { alert('Error: ' + (result.error || 'No se pudo guardar')); }
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // ═══ MODAL HISTORIAL ═══
+        function esc(val) {
+            if (val == null) return '';
+            return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function norm(v) { return (v == null) ? '' : String(v).trim(); }
+        function formatFecha(f) {
+            try {
+                const d = new Date(f);
+                if (!isNaN(d)) return d.toLocaleString('es-MX', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+            } catch (e) { }
+            return f ?? '';
+        }
+
+        function renderEvento(ev) {
+            let antes = ev.REGISTRO_ANTERIOR || ev.registro_anterior;
+            let despues = ev.REGISTRO_NUEVO || ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (e) { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (e) { }
+
+            const cambiados = new Set();
+            CAMPOS_HIST.forEach(({ key }) => {
+                if (norm(antes?.[key]) !== norm(despues?.[key])) cambiados.add(key);
+            });
+
+            let filas = '';
+            CAMPOS_HIST.forEach(({ key, label }) => {
+                const va = esc(antes?.[key] ?? '');
+                const vd = esc(despues?.[key] ?? '');
+                const chg = cambiados.has(key);
+                filas += `
+                    <tr class="${chg ? 'row-changed' : ''}">
+                        <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                        <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                        <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                    </tr>`;
+            });
+
+            const n = cambiados.size;
+            return `
+                <div class="ev-wrap">
+                    <div class="ev-header">
+                        <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
+                        <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
+                        <span class="n-cambios-badge"
+                            style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                                   color:${n > 0 ? '#FCD34D' : '#94A3B8'};
+                                   border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                            ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                    <table class="ev-table">
+                        <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                        <tbody>${filas}</tbody>
+                    </table>
+                </div>`;
+        }
+
+        function verHistorial(id) {
+            document.getElementById('histIdLabel').textContent = '#' + id;
+            document.getElementById('contenidoHistorial').innerHTML =
+                '<p style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando...</p>';
+            document.getElementById('modalHistorial').classList.add('show');
+            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
+
+            fetch(`/TINTAS_TONER_RIBON_NF/${id}/HISTORIAL`)
+                .then(r => r.json())
+                .then(data => {
+                    const lista = (data.historial || [])
+                        .sort((a, b) => new Date(b.FECHA || b.fecha || 0) - new Date(a.FECHA || a.fecha || 0));
+                    if (!lista.length) {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            '<p class="sin-hist">📭 Sin ediciones registradas</p>';
+                    } else {
+                        document.getElementById('contenidoHistorial').innerHTML =
+                            `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
+                                ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                             </p>` + lista.map(ev => renderEvento(ev)).join('');
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('contenidoHistorial').innerHTML =
+                        '<p style="color:var(--red);text-align:center;padding:30px">❌ Error al cargar historial</p>';
+                });
+        }
+
+        function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
+
+        // ═══ UI ═══
+        function toggleDropdown() { document.getElementById('userChipMain').classList.toggle('open'); }
+        document.addEventListener('click', e => {
+            const chip = document.getElementById('userChipMain');
+            if (chip && !chip.contains(e.target)) chip.classList.remove('open');
+        });
+        function cerrarSesion() {
+            fetch('/LOGOUT', { method: 'POST', credentials: 'include' })
+                .finally(() => { window.location.href = '/static/login.html'; });
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); cerrarImportar(); }
+        });
+
+        // ═══════════════════════════════════════════════
+        // ═══ IMPORTAR EXCEL / CSV ═══
+        // ═══════════════════════════════════════════════
+
+        const IMPORT_COLUMNS = [
+            { key: 'ID_UNICO', aliases: ['id_unico', 'id unico', 'idunico'] },
+            { key: 'OC', aliases: ['oc', 'orden de compra', 'orden_compra'] },
+            { key: 'MODELO', aliases: ['modelo', 'model'] },
+            { key: 'RECIBIDO_POR', aliases: ['recibido_por', 'recibido por', 'recibidopor'] },
+            { key: 'SUBCATEGORIA', aliases: ['subcategoria', 'subcategoría', 'tipo', 'categoria'] },
+            { key: 'FECHA_REGISTRO', aliases: ['fecha_registro', 'fecha registro', 'fecha', 'date'] },
+            { key: 'PROVEEDOR', aliases: ['proveedor', 'vendor'] },
+            { key: 'STOCK', aliases: ['stock', 'existencia', 'existencias'] },
+            { key: 'COSTO_MN', aliases: ['costo_mn', 'costo mn', 'costo', 'importe', 'precio'] },
+            { key: 'CANTIDAD_RECIBIDA', aliases: ['cantidad_recibida', 'cantidad recibida', 'cantidad'] },
+            { key: 'FECHA_INSTALACION', aliases: ['fecha_instalacion', 'fecha instalacion', 'fecha instalación'] },
+            { key: 'UBICACION', aliases: ['ubicacion', 'ubicación', 'location'] },
+            { key: 'IMPRESORA', aliases: ['impresora', 'printer'] },
+            { key: 'INSTALADO_POR', aliases: ['instalado_por', 'instalado por', 'instaladopor', 'instalo'] },
+        ];
+
+        let importRows = [];
+
+        function abrirImportar() { document.getElementById('modalImportar').classList.add('open'); resetImportUI(); }
+        function cerrarImportar() { document.getElementById('modalImportar').classList.remove('open'); resetImportUI(); }
+
+        function resetImportUI() {
+            importRows = [];
+            document.getElementById('fileInput').value = '';
+            document.getElementById('importPreviewArea').style.display = 'none';
+            document.getElementById('importErrors').style.display = 'none';
+            document.getElementById('btnConfirmarImport').style.display = 'none';
+            document.getElementById('dropZone').style.display = '';
+            document.getElementById('importPreviewTable').innerHTML = '';
+            document.getElementById('importStats').textContent = '';
+        }
+
+        function onDrop(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) procesarArchivo(file);
+        }
+
+        function onFileSelected(input) {
+            if (input.files[0]) procesarArchivo(input.files[0]);
+        }
+
+        function procesarArchivo(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const wb = XLSX.read(data, { type: 'array', cellDates: true });
+                    const ws = wb.Sheets[wb.SheetNames[0]];
+
+                    const raw_default = XLSX.utils.sheet_to_json(ws, { defval: null, raw: false, header: 1 });
+                    const fila1 = (raw_default[0] || []).join('').toUpperCase();
+                    const esPlantilla = fila1.includes('PLANTILLA') || fila1.includes('IMPORTACI');
+
+                    let raw;
+                    if (esPlantilla) {
+                        const headers = raw_default[2] || [];
+                        raw = raw_default.slice(5)
+                            .filter(r => r.some(c => c !== null && c !== '' && c !== undefined))
+                            .map(r => {
+                                const obj = {};
+                                headers.forEach((h, i) => { if (h) obj[h] = r[i] ?? null; });
+                                return obj;
+                            });
+                    } else {
+                        raw = XLSX.utils.sheet_to_json(ws, { defval: null, raw: false });
+                    }
+
+                    if (!raw.length) { alert('No se encontraron datos en el archivo.'); return; }
+                    procesarFilas(raw);
+                } catch (err) {
+                    alert('No se pudo leer el archivo: ' + err.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function normalizeKey(k) {
+            return (k || '').toString().toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        function mapearColumnas(rawRow) {
+            const mapped = {};
+            const rawKeys = Object.keys(rawRow);
+            for (const col of IMPORT_COLUMNS) {
+                const allAliases = [col.key.toLowerCase(), ...col.aliases];
+                const found = rawKeys.find(rk => allAliases.includes(normalizeKey(rk)));
+                mapped[col.key] = found !== undefined ? (rawRow[found] ?? null) : null;
+            }
+            return mapped;
+        }
+
+        function validarFila(row, idx) {
+            const errors = [];
+            if (!row.FECHA_REGISTRO) {
+                errors.push(`Fila ${idx + 1}: FECHA_REGISTRO vacía`);
+            } else {
+                const d = new Date(row.FECHA_REGISTRO);
+                if (isNaN(d)) errors.push(`Fila ${idx + 1}: FECHA_REGISTRO inválida ("${row.FECHA_REGISTRO}")`);
+            }
+            const subcatsValidas = ['TINTA', 'TONER', 'RIBON', 'OTRO'];
+            if (row.SUBCATEGORIA && !subcatsValidas.includes((row.SUBCATEGORIA || '').toString().toUpperCase().trim())) {
+                errors.push(`Fila ${idx + 1}: SUBCATEGORIA desconocida ("${row.SUBCATEGORIA}") — valores válidos: ${subcatsValidas.join(', ')}`);
+            }
+            return errors;
+        }
+
+        function procesarFilas(raw) {
+            if (!raw.length) { alert('El archivo está vacío o no tiene datos.'); return; }
+
+            const allErrors = [];
+            const filas = [];
+
+            raw.forEach((rawRow, idx) => {
+                const row = mapearColumnas(rawRow);
+
+                // Normalizar subcategoría a mayúsculas
+                if (row.SUBCATEGORIA) row.SUBCATEGORIA = row.SUBCATEGORIA.toString().toUpperCase().trim();
+
+                // Normalizar números
+                row.STOCK = row.STOCK !== null ? (Number(row.STOCK) || null) : null;
+                row.COSTO_MN = row.COSTO_MN !== null ? (Number(row.COSTO_MN) || null) : null;
+                row.CANTIDAD_RECIBIDA = row.CANTIDAD_RECIBIDA !== null ? (Number(row.CANTIDAD_RECIBIDA) || null) : null;
+
+                const errs = validarFila(row, idx);
+                allErrors.push(...errs);
+                filas.push({ row, errors: errs });
+            });
+
+            mostrarPreview(filas, allErrors);
+        }
+
+        function mostrarPreview(filas, allErrors) {
+            document.getElementById('dropZone').style.display = 'none';
+            const previewArea = document.getElementById('importPreviewArea');
+            previewArea.style.display = 'flex';
+
+            const tieneErrores = allErrors.length > 0;
+
+            document.getElementById('importStats').innerHTML =
+                `<strong>${filas.length}</strong> fila(s) detectadas. ` +
+                (tieneErrores
+                    ? `<span style="color:#fca5a5">⚠️ ${allErrors.length} error(es) encontrado(s) — corrige el archivo y vuelve a subirlo.</span>`
+                    : `<span style="color:#4ade80">✅ Sin errores. Listo para importar.</span>`);
+
+            if (tieneErrores) {
+                const errDiv = document.getElementById('importErrors');
+                errDiv.style.display = '';
+                errDiv.innerHTML = '<strong>Errores encontrados:</strong><br>' + allErrors.map(e => `• ${e}`).join('<br>');
+                document.getElementById('btnConfirmarImport').style.display = 'none';
+            } else {
+                document.getElementById('importErrors').style.display = 'none';
+                document.getElementById('btnConfirmarImport').style.display = '';
+                importRows = filas.map(f => f.row);
+            }
+
+            const cols = IMPORT_COLUMNS.map(c => c.key);
+            const preview = filas.slice(0, 50);
+            let html = '<table><thead><tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+            for (const { row, errors } of preview) {
+                const cls = errors.length ? ' class="error-row"' : '';
+                html += `<tr${cls}>` + cols.map(c => {
+                    const val = row[c];
+                    if (val === null || val === undefined) return '<td style="color:var(--muted)">—</td>';
+                    return `<td>${esc(val.toString())}</td>`;
+                }).join('') + '</tr>';
+            }
+            if (filas.length > 50) html += `<tr><td colspan="${cols.length}" style="text-align:center;color:var(--muted);padding:8px">… y ${filas.length - 50} fila(s) más</td></tr>`;
+            html += '</tbody></table>';
+            document.getElementById('importPreviewTable').innerHTML = html;
+        }
+
+        async function confirmarImportar() {
+            if (!importRows.length) return;
+
+            const btn = document.getElementById('btnConfirmarImport');
+            btn.disabled = true;
+            btn.textContent = '⏳ Importando…';
+
+            const stats = document.getElementById('importStats');
+
+            try {
+                for (let i = 0; i < importRows.length; i++) {
+                    stats.innerHTML = `⏳ Importando fila <strong>${i + 1}</strong> de <strong>${importRows.length}</strong>…`;
+
+                    // ── usuarioActual se lee desde /obtener-usuario al iniciar la página ──
+                    // ── y se pasa en el header X-Usuario, igual que en servicio_proveedores ──
+                    const r = await fetch('/TINTA_TONER_RIBON_NF', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                        body: JSON.stringify(importRows[i])
+                    });
+
+                    if (!r.ok) {
+                        let msg = `Error en fila ${i + 1}`;
+                        try { const d = await r.json(); msg += ': ' + (d.error || d.message || d.title || JSON.stringify(d)); } catch { }
+                        throw new Error(msg);
+                    }
+                }
+
+                stats.innerHTML = `<span style="color:#4ade80">✅ ${importRows.length} registro(s) importado(s) correctamente.</span>`;
+                btn.style.display = 'none';
+                document.getElementById('dropZone').style.display = '';
+                importRows = [];
+                cargar();
+
+            } catch (err) {
+                stats.innerHTML = `<span style="color:#fca5a5">❌ Importación abortada — ${esc(err.message)}</span>`;
+                btn.disabled = false;
+                btn.textContent = '✅ Reintentar';
+            }
+        }
+
+        // ═══ HELPERS ═══
+        function v(id) { const el = document.getElementById(id); return el ? (el.value.trim() || null) : null; }
+        function setV(id, val) { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
+    </script>
+
 </body>
 </html>
