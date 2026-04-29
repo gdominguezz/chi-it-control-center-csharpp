@@ -918,83 +918,119 @@ public class CorrectivoController : ControllerBase
 
         return Ok(data);
     }
+/*     ///////////////////////////////////////////////////////////////ayudante equipos///////////////////////////*/
     [HttpGet("CORRECTIVOS/EQUIPOS_UNICOS")]
     public IActionResult ObtenerEquiposUnicos([FromQuery] string? q)
     {
-        using var conn = _db.Open();
-        using var cmd = conn.CreateCommand();
+        try
+        {
+            using var conn = _db.Open();
+            using var cmd = conn.CreateCommand();
 
-        cmd.CommandText = @"
-        SELECT DISTINCT TRIM(equipo)
-        FROM mantenimientos_correctivos
-        WHERE equipo IS NOT NULL
-          AND TRIM(equipo) <> ''
-          AND (@q IS NULL OR equipo ILIKE '%' || @q || '%')
-        ORDER BY TRIM(equipo)
-        LIMIT 20
-    ";
+            cmd.CommandText = @"
+            SELECT DISTINCT TRIM(equipo)::text
+            FROM mantenimientos_correctivos
+            WHERE equipo IS NOT NULL
+              AND TRIM(equipo) <> ''
+              AND (@q IS NULL OR equipo ILIKE '%' || @q || '%')
+            ORDER BY TRIM(equipo)
+            LIMIT 20
+        ";
 
-        cmd.Parameters.AddWithValue("q", (object?)q ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("q", (object?)q ?? DBNull.Value);
 
-        var lista = new List<string>();
+            var lista = new List<string>();
 
-        using var r = cmd.ExecuteReader();
-        while (r.Read())
-            lista.Add(r.GetString(0));
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                var val = r[0]?.ToString();
+                if (!string.IsNullOrWhiteSpace(val))
+                    lista.Add(val.Trim());
+            }
 
-        return Ok(lista);
+            return Ok(lista);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
+    /*     ///////////////////////////////////////////////////////////////ayudante modelos///////////////////////////*/
     [HttpGet("CORRECTIVOS/MODELOS_UNICOS")]
     public IActionResult ObtenerModelosUnicos([FromQuery] string? q)
     {
-        using var conn = _db.Open();
-        using var cmd = conn.CreateCommand();
+        try
+        {
+            using var conn = _db.Open();
+            using var cmd = conn.CreateCommand();
 
-        cmd.CommandText = @"
-        SELECT DISTINCT TRIM(modelo)
-        FROM mantenimientos_correctivos
-        WHERE modelo IS NOT NULL
-          AND TRIM(modelo) <> ''
-          AND (@q IS NULL OR modelo ILIKE '%' || @q || '%')
-        ORDER BY TRIM(modelo)
-        LIMIT 20
-    ";
+            cmd.CommandText = @"
+            SELECT DISTINCT TRIM(modelo)::text
+            FROM mantenimientos_correctivos
+            WHERE modelo IS NOT NULL
+              AND TRIM(modelo) <> ''
+              AND (@q IS NULL OR modelo ILIKE '%' || @q || '%')
+            ORDER BY TRIM(modelo)
+            LIMIT 20
+        ";
 
-        cmd.Parameters.AddWithValue("q", (object?)q ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("q", (object?)q ?? DBNull.Value);
 
-        var lista = new List<string>();
+            var lista = new List<string>();
 
-        using var r = cmd.ExecuteReader();
-        while (r.Read())
-            lista.Add(r.GetString(0));
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                var val = r[0]?.ToString();
+                if (!string.IsNullOrWhiteSpace(val))
+                    lista.Add(val.Trim());
+            }
 
-        return Ok(lista);
+            return Ok(lista);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
+    /*     ///////////////////////////////////////////////////////////////ayudante marcas///////////////////////////*/
     [HttpGet("CORRECTIVOS/MARCAS_UNICAS")]
     public IActionResult ObtenerMarcasUnicas([FromQuery] string? q)
     {
-        using var conn = _db.Open();
-        using var cmd = conn.CreateCommand();
+        try
+        {
+            using var conn = _db.Open();
+            using var cmd = conn.CreateCommand();
 
-        cmd.CommandText = @"
-        SELECT DISTINCT TRIM(marca)
-        FROM mantenimientos_correctivos
-        WHERE marca IS NOT NULL
-          AND TRIM(marca) <> ''
-          AND (@q IS NULL OR marca ILIKE '%' || @q || '%')
-        ORDER BY TRIM(marca)
-        LIMIT 20
-    ";
+            cmd.CommandText = @"
+            SELECT DISTINCT TRIM(marca)::text
+            FROM mantenimientos_correctivos
+            WHERE marca IS NOT NULL
+              AND TRIM(marca) <> ''
+              AND (@q IS NULL OR marca ILIKE '%' || @q || '%')
+            ORDER BY TRIM(marca)
+            LIMIT 20
+        ";
 
-        cmd.Parameters.AddWithValue("q", (object?)q ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("q", (object?)q ?? DBNull.Value);
 
-        var lista = new List<string>();
+            var lista = new List<string>();
 
-        using var r = cmd.ExecuteReader();
-        while (r.Read())
-            lista.Add(r.GetString(0));
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                var val = r[0]?.ToString();
+                if (!string.IsNullOrWhiteSpace(val))
+                    lista.Add(val.Trim());
+            }
 
-        return Ok(lista);
+            return Ok(lista);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
     // ══════════════════════════════════════════════════════════════════════════
     // MODELOS
