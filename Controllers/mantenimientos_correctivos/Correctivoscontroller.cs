@@ -944,6 +944,58 @@ public class CorrectivoController : ControllerBase
 
         return Ok(lista);
     }
+    [HttpGet("CORRECTIVOS/MODELOS_UNICOS")]
+    public IActionResult ObtenerModelosUnicos([FromQuery] string? q)
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+
+        cmd.CommandText = @"
+        SELECT DISTINCT TRIM(modelo)
+        FROM mantenimientos_correctivos
+        WHERE modelo IS NOT NULL
+          AND TRIM(modelo) <> ''
+          AND (@q IS NULL OR modelo ILIKE '%' || @q || '%')
+        ORDER BY TRIM(modelo)
+        LIMIT 20
+    ";
+
+        cmd.Parameters.AddWithValue("q", (object?)q ?? DBNull.Value);
+
+        var lista = new List<string>();
+
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+            lista.Add(r.GetString(0));
+
+        return Ok(lista);
+    }
+    [HttpGet("CORRECTIVOS/MARCAS_UNICAS")]
+    public IActionResult ObtenerMarcasUnicas([FromQuery] string? q)
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+
+        cmd.CommandText = @"
+        SELECT DISTINCT TRIM(marca)
+        FROM mantenimientos_correctivos
+        WHERE marca IS NOT NULL
+          AND TRIM(marca) <> ''
+          AND (@q IS NULL OR marca ILIKE '%' || @q || '%')
+        ORDER BY TRIM(marca)
+        LIMIT 20
+    ";
+
+        cmd.Parameters.AddWithValue("q", (object?)q ?? DBNull.Value);
+
+        var lista = new List<string>();
+
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+            lista.Add(r.GetString(0));
+
+        return Ok(lista);
+    }
     // ══════════════════════════════════════════════════════════════════════════
     // MODELOS
     // ══════════════════════════════════════════════════════════════════════════

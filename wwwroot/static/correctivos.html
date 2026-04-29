@@ -1922,8 +1922,16 @@
                     <input type="text" id="e_EQUIPO" list="listaEquipos">
                     <datalist id="listaEquipos"></datalist>
                 </div>
-                <div class="form-field"><label>MARCA</label><input type="text" id="e_MARCA"></div>
-                <div class="form-field"><label>MODELO</label><input type="text" id="e_MODELO"></div>
+                <div class="form-field">
+                    <label>MARCA</label>
+                    <input type="text" id="e_MARCA" list="listaMarcas">
+                    <datalist id="listaMarcas"></datalist>
+                </div>
+                <div class="form-field">
+                    <label>MODELO</label>
+                    <input type="text" id="e_MODELO" list="listaModelos">
+                    <datalist id="listaModelos"></datalist>
+                </div>
                 <div class="form-field"><label>NUMERO SERIE</label><input type="text" id="e_NUMERO_SERIE"></div>
                 <div class="form-field"><label>FECHA SOLICITUD</label><input type="date" id="e_FECHA_SOLICITUD"></div>
                 <div class="form-field">
@@ -2576,61 +2584,62 @@
             window.addEventListener('resize', syncInnerWidth);
             syncInnerWidth();
 
-            // Sincronizar scroll entre ambas barras
+       
             top.addEventListener('scroll', () => { scroll.scrollLeft = top.scrollLeft; });
             scroll.addEventListener('scroll', () => { top.scrollLeft = scroll.scrollLeft; });
         })();
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
 
-            const inputEquipo = document.getElementById('e_EQUIPO');
-            const datalist = document.getElementById('listaEquipos');
+            function activarAutocomplete(inputId, datalistId, endpoint) {
+                const input = document.getElementById(inputId);
+                const datalist = document.getElementById(datalistId);
 
-           
-            try {
-                const res = await fetch('/CORRECTIVOS/EQUIPOS_UNICOS');
-                const data = await res.json();
+                let timeout;
 
-                datalist.innerHTML = '';
+               
+                fetch(endpoint)
+                    .then(r => r.json())
+                    .then(data => {
+                        datalist.innerHTML = '';
+                        data.forEach(x => {
+                            const option = document.createElement('option');
+                            option.value = x;
+                            datalist.appendChild(option);
+                        });
+                    });
 
-                data.forEach(e => {
-                    const option = document.createElement('option');
-                    option.value = e;
-                    datalist.appendChild(option);
+                
+                input.addEventListener('input', () => {
+                    clearTimeout(timeout);
+
+                    timeout = setTimeout(async () => {
+                        const valor = input.value.trim();
+                        if (valor.length < 1) return;
+
+                        try {
+                            const res = await fetch(`${endpoint}?q=${encodeURIComponent(valor)}`);
+                            const data = await res.json();
+
+                            datalist.innerHTML = '';
+
+                            data.forEach(x => {
+                                const option = document.createElement('option');
+                                option.value = x;
+                                datalist.appendChild(option);
+                            });
+
+                        } catch (err) {
+                            console.error(`Error en ${endpoint}:`, err);
+                        }
+
+                    }, 300);
                 });
-            } catch (err) {
-                console.error('Error cargando equipos:', err);
             }
 
            
-            let timeout;
-
-            inputEquipo.addEventListener('input', () => {
-                clearTimeout(timeout);
-
-                timeout = setTimeout(async () => {
-
-                    const valor = inputEquipo.value.trim();
-
-                    if (valor.length < 1) return;
-
-                    try {
-                        const res = await fetch(`/CORRECTIVOS/EQUIPOS_UNICOS?q=${encodeURIComponent(valor)}`);
-                        const data = await res.json();
-
-                        datalist.innerHTML = '';
-
-                        data.forEach(e => {
-                            const option = document.createElement('option');
-                            option.value = e;
-                            datalist.appendChild(option);
-                        });
-
-                    } catch (err) {
-                        console.error('Error en autocomplete:', err);
-                    }
-
-                }, 300); 
-            });
+            activarAutocomplete('e_EQUIPO', 'listaEquipos', '/CORRECTIVOS/EQUIPOS_UNICOS');
+            activarAutocomplete('e_MODELO', 'listaModelos', '/CORRECTIVOS/MODELOS_UNICOS');
+            activarAutocomplete('e_MARCA', 'listaMarcas', '/CORRECTIVOS/MARCAS_UNICAS');
 
         });
     </script>
