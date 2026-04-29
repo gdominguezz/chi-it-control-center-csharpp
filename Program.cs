@@ -37,6 +37,7 @@ builder.Services.AddScoped<ImpresorasNFService>();      // IMPRESORAS NF
 builder.Services.AddScoped<ServiciosProveedoresService>();//SERVICIOS POR PROVEEDORES 
 builder.Services.AddScoped<ConsumiblesNFService>();      // CONSUMIBLES NF
 builder.Services.AddScoped<RemisionesService>();        // REMISIONES
+builder.Services.AddScoped<RadiosNFService>();         //  RADIOS_NF
 
 
 // CORS
