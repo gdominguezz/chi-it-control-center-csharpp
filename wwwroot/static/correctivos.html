@@ -1612,13 +1612,21 @@
                         </select>
                     </div>
                     <div class="field"><label>LINEA / PERSONA</label><input id="n_LINEA_PERSONA" placeholder="Línea o nombre" autocomplete="off" list="lista-ubicaciones-nuevo"><datalist id="lista-ubicaciones-nuevo"></datalist></div>
-                    <div class="form-field">
+                    <div class="field">
                         <label>EQUIPO</label>
-                        <input type="text" id="e_EQUIPO" list="listaEquipos">
-                        <datalist id="listaEquipos"></datalist>
+                        <input type="text" id="n_EQUIPO" placeholder="Nombre del equipo" autocomplete="off" list="listaEquiposNuevo">
+                        <datalist id="listaEquiposNuevo"></datalist>
                     </div>
-                    <div class="field"><label>MARCA</label><input id="n_MARCA" placeholder="HP, Dell..."></div>
-                    <div class="field"><label>MODELO</label><input id="n_MODELO"></div>
+                    <div class="field">
+                        <label>MARCA</label>
+                        <input type="text" id="n_MARCA" placeholder="HP, Dell..." autocomplete="off" list="listaMarcasNuevo">
+                        <datalist id="listaMarcasNuevo"></datalist>
+                    </div>
+                    <div class="field">
+                        <label>MODELO</label>
+                        <input type="text" id="n_MODELO" autocomplete="off" list="listaModelosNuevo">
+                        <datalist id="listaModelosNuevo"></datalist>
+                    </div>
                     <div class="field"><label>NUMERO SERIE</label><input id="n_NUMERO_SERIE"></div>
                     <div class="field"><label>FECHA SOLICITUD</label><input id="n_FECHA_SOLICITUD" type="date"></div>
                     <div class="field">
@@ -1657,129 +1665,129 @@
                 <button class="btn btn-ghost" onclick="limpiarForm()" style="margin-left:8px;">✕ Limpiar</button>
             </div>
 
-                <!-- TOOLBAR -->
-                <div class="toolbar">
-                    <button class="btn btn-purple" onclick="exportarFiltrado()">📊 Exportar Filtrado</button>
-                    <button class="btn btn-purple" onclick="exportarTodo()">📦 Exportar Todo</button>
-                    <input class="anio-input" id="anioExportar" type="number" placeholder="Año (ej: 2026)">
-                    <button class="btn btn-purple" onclick="exportarAnio()">📅 Por Año</button>
-                </div>
-
-                <!-- TABLA -->
-                <!-- TABLA -->
-                <div class="table-wrap">
-                    <!-- Scrollbar superior -->
-                    <div class="scroll-top" id="scrollTop">
-                        <div class="scroll-top-inner" id="scrollTopInner"></div>
-                    </div>
-
-                    <div class="table-scroll" id="tableScroll">
-                        <table>
-                            <colgroup>
-                                <col style="width:52px">
-                                <col style="width:112px">
-                                <col style="width:122px">
-                                <col style="width:88px">
-                                <col style="width:145px">
-                                <col style="width:130px">
-                                <col style="width:100px">
-                                <col style="width:100px">
-                                <col style="width:122px">
-                                <col style="width:220px">
-                                <col style="width:180px">
-                                <col style="width:108px">
-                                <col style="width:152px">
-                                <col style="width:140px">
-                                <col style="width:88px">
-                                <col style="width:108px">
-                                <col style="width:108px">
-                                <col style="width:140px">
-                                <col style="width:200px">
-                                <col style="width:108px">
-                                <col style="width:108px">
-                                <col style="width:160px">
-                                <col style="width:140px">
-                                <col style="width:200px">
-                                <col style="width:180px">
-                                <col style="width:120px">
-                                <col style="width:170px">
-                                <col style="width:130px">
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Status</th>
-                                    <th>Folio</th>
-                                    <th>Planta</th>
-                                    <th>Línea / Persona</th>
-                                    <th>Equipo</th>
-                                    <th>Marca</th>
-                                    <th>Modelo</th>
-                                    <th>N. Serie</th>
-                                    <th>Desc. Falla</th>
-                                    <th>Accesorio Sol.</th>
-                                    <th>Fecha Sol.</th>
-                                    <th>Reporte Elab. Por</th>
-                                    <th>Tipo Obs.</th>
-                                    <th>Venc. Días</th>
-                                    <th>F. Conteo</th>
-                                    <th>F. Límite Cierre</th>
-                                    <th>Categoría</th>
-                                    <th>Refacción / Acc. Compra</th>
-                                    <th>F. Llegada Ref.</th>
-                                    <th>F. Reparación</th>
-                                    <th>Quién Realizó Rep.</th>
-                                    <th>Validación</th>
-                                    <th>Desc. Reparación</th>
-                                    <th>Observaciones</th>
-                                    <th>OC / Factura</th>
-                                    <th>PDF</th>
-                                    <th>Acciones</th>
-                                </tr>
-                                <tr class="filter-row">
-                                    <th></th>
-                                    <th><input id="f_STATUS" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_FOLIO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_PLANTA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_LINEA_PERSONA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_EQUIPO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_MARCA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_MODELO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_NUMERO_SERIE" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_DESCRIPCION_FALLA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_ACCESORIO_SOLICITADO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_FECHA_SOLICITUD" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                                    <th><input id="f_REPORTE_ELABORADO_POR" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_TIPO_OBSERVACION" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_VENCIMIENTO_DIAS" oninput="filtrar()" placeholder="Días" type="number" style="width:70px"></th>
-                                    <th><input id="f_FECHA_CONTEO_ACTUAL" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                                    <th><input id="f_FECHA_LIMITE_CIERRE" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                                    <th><input id="f_CATEGORIA_CORRECTIVO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_REFACCION_ACCESORIO_COMPRA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_FECHA_LLEGADA_REFACCION" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                                    <th><input id="f_FECHA_REPARACION" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
-                                    <th><input id="f_QUIEN_REALIZO_REPARACION" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_VALIDACION_FUNCIONAMIENTO" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_DESCRIPCION_REPARACION" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_OBSERVACIONES" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th><input id="f_OC_FACTURA" oninput="filtrar()" placeholder="Filtrar..."></th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- PAGINACIÓN -->
-                <div class="pagination">
-                    <button class="btn btn-ghost" onclick="anterior()">◀ Anterior</button>
-                    <span class="page-info" id="paginaInfo"></span>
-                    <button class="btn btn-ghost" onclick="siguiente()">Siguiente ▶</button>
-                </div>
-
+            <!-- TOOLBAR -->
+            <div class="toolbar">
+                <button class="btn btn-purple" onclick="exportarFiltrado()">📊 Exportar Filtrado</button>
+                <button class="btn btn-purple" onclick="exportarTodo()">📦 Exportar Todo</button>
+                <input class="anio-input" id="anioExportar" type="number" placeholder="Año (ej: 2026)">
+                <button class="btn btn-purple" onclick="exportarAnio()">📅 Por Año</button>
             </div>
+
+            <!-- TABLA -->
+            <!-- TABLA -->
+            <div class="table-wrap">
+                <!-- Scrollbar superior -->
+                <div class="scroll-top" id="scrollTop">
+                    <div class="scroll-top-inner" id="scrollTopInner"></div>
+                </div>
+
+                <div class="table-scroll" id="tableScroll">
+                    <table>
+                        <colgroup>
+                            <col style="width:52px">
+                            <col style="width:112px">
+                            <col style="width:122px">
+                            <col style="width:88px">
+                            <col style="width:145px">
+                            <col style="width:130px">
+                            <col style="width:100px">
+                            <col style="width:100px">
+                            <col style="width:122px">
+                            <col style="width:220px">
+                            <col style="width:180px">
+                            <col style="width:108px">
+                            <col style="width:152px">
+                            <col style="width:140px">
+                            <col style="width:88px">
+                            <col style="width:108px">
+                            <col style="width:108px">
+                            <col style="width:140px">
+                            <col style="width:200px">
+                            <col style="width:108px">
+                            <col style="width:108px">
+                            <col style="width:160px">
+                            <col style="width:140px">
+                            <col style="width:200px">
+                            <col style="width:180px">
+                            <col style="width:120px">
+                            <col style="width:170px">
+                            <col style="width:130px">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Status</th>
+                                <th>Folio</th>
+                                <th>Planta</th>
+                                <th>Línea / Persona</th>
+                                <th>Equipo</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>N. Serie</th>
+                                <th>Desc. Falla</th>
+                                <th>Accesorio Sol.</th>
+                                <th>Fecha Sol.</th>
+                                <th>Reporte Elab. Por</th>
+                                <th>Tipo Obs.</th>
+                                <th>Venc. Días</th>
+                                <th>F. Conteo</th>
+                                <th>F. Límite Cierre</th>
+                                <th>Categoría</th>
+                                <th>Refacción / Acc. Compra</th>
+                                <th>F. Llegada Ref.</th>
+                                <th>F. Reparación</th>
+                                <th>Quién Realizó Rep.</th>
+                                <th>Validación</th>
+                                <th>Desc. Reparación</th>
+                                <th>Observaciones</th>
+                                <th>OC / Factura</th>
+                                <th>PDF</th>
+                                <th>Acciones</th>
+                            </tr>
+                            <tr class="filter-row">
+                                <th></th>
+                                <th><input id="f_STATUS" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_FOLIO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_PLANTA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_LINEA_PERSONA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_EQUIPO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_MARCA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_MODELO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_NUMERO_SERIE" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_DESCRIPCION_FALLA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_ACCESORIO_SOLICITADO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_FECHA_SOLICITUD" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                                <th><input id="f_REPORTE_ELABORADO_POR" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_TIPO_OBSERVACION" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_VENCIMIENTO_DIAS" oninput="filtrar()" placeholder="Días" type="number" style="width:70px"></th>
+                                <th><input id="f_FECHA_CONTEO_ACTUAL" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                                <th><input id="f_FECHA_LIMITE_CIERRE" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                                <th><input id="f_CATEGORIA_CORRECTIVO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_REFACCION_ACCESORIO_COMPRA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_FECHA_LLEGADA_REFACCION" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                                <th><input id="f_FECHA_REPARACION" oninput="filtrar()" placeholder="yyyy-mm-dd"></th>
+                                <th><input id="f_QUIEN_REALIZO_REPARACION" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_VALIDACION_FUNCIONAMIENTO" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_DESCRIPCION_REPARACION" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_OBSERVACIONES" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th><input id="f_OC_FACTURA" oninput="filtrar()" placeholder="Filtrar..."></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PAGINACIÓN -->
+            <div class="pagination">
+                <button class="btn btn-ghost" onclick="anterior()">◀ Anterior</button>
+                <span class="page-info" id="paginaInfo"></span>
+                <button class="btn btn-ghost" onclick="siguiente()">Siguiente ▶</button>
+            </div>
+
+        </div>
 
         <!-- TIEMPOS DE RESPUESTA -->
         <div class="sla-section">
@@ -2105,16 +2113,16 @@
                 });
                 tds += `<td>${row.TIENE_PDF
                     ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-               <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
+                   <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
                     : `<input type="file" onchange="subirPDF(${row.ID},this)"
-               style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
+                   style="font-size:10px;color:var(--muted2);background:transparent;border:none;cursor:pointer;">`
                     }</td>`;
                 tds += `<td style="white-space:nowrap;">
-                    ${puedeEditar ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
-                    ${esAdmin ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
-                    <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
-                    <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-                </td>`;
+                        ${puedeEditar ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
+                        ${esAdmin ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>` : ''}
+                        <button class="btn btn-cyan btn-sm" onclick="verDetalle(${row.ID})">🔍</button>
+                        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                    </td>`;
                 tbody.innerHTML += `<tr class="${cls}">${tds}</tr>`;
             });
             document.getElementById('paginaInfo').textContent =
@@ -2122,14 +2130,14 @@
         }
 
         /* ── Guardar nuevo ── */
-            
-            function guardar() {
-                if (rolActual !== 'ADMIN' && rolActual !== 'ENCARGADO_CORRECTIVOS') {
-                    alert('No tienes permisos para crear nuevos registros.');
-                    return;
-                }
-                const data = {};
-                CAMPOS.forEach(({ key }) => {
+
+        function guardar() {
+            if (rolActual !== 'ADMIN' && rolActual !== 'ENCARGADO_CORRECTIVOS') {
+                alert('No tienes permisos para crear nuevos registros.');
+                return;
+            }
+            const data = {};
+            CAMPOS.forEach(({ key }) => {
                 const el = document.getElementById('n_' + key); if (!el) return;
                 data[key] = (key === 'VENCIMIENTO_DIAS') ? (el.value !== '' ? parseInt(el.value) : null) : (el.value || null);
             });
@@ -2208,26 +2216,26 @@
                 const va = esc(antes?.[dk] ?? ''), vd = esc(despues?.[dk] ?? '');
                 const chg = cambiados.has(key);
                 filas += `<tr class="${chg ? 'row-changed' : ''}">
-                                            <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                                            <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                                            <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                                        </tr>`;
+                                                <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                                <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                                <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                                            </tr>`;
             });
             const n = cambiados.size;
             return `<div class="ev-wrap">
-                                        <div class="ev-header">
-                                            <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                            <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
-                                            <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
-                                                color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                                ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                                            </span>
-                                        </div>
-                                        <table class="ev-table">
-                                            <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                                            <tbody>${filas}</tbody>
-                                        </table>
-                                    </div>`;
+                                            <div class="ev-header">
+                                                <span>🕐 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                                <span>👤 <strong>${esc(ev.usuario) || 'Desconocido'}</strong></span>
+                                                <span class="n-cambios-badge" style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                                                    color:${n > 0 ? '#FCD34D' : '#94A3B8'};border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                                    ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                                </span>
+                                            </div>
+                                            <table class="ev-table">
+                                                <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                                <tbody>${filas}</tbody>
+                                            </table>
+                                        </div>`;
         }
         function verHistorial(id) {
             document.getElementById('histIdLabel').textContent = id;
@@ -2242,8 +2250,8 @@
                 } else {
                     document.getElementById('contenidoHistorial').innerHTML =
                         `<p style="color:var(--muted);font-size:12px;margin-bottom:14px;">
-                                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                                </p>`+ lista.map(ev => renderEvento(ev)).join('');
+                                                        ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                                    </p>`+ lista.map(ev => renderEvento(ev)).join('');
                 }
             }).catch(err => {
                 document.getElementById('contenidoHistorial').innerHTML =
@@ -2380,135 +2388,135 @@
             ], total);
 
             document.getElementById('dash-body').innerHTML = `
-                                <div class="kpi-grid">
-                                    <div class="kpi-card k-total">
-                                        <div class="kpi-label">Total registros ${ANIO_ACTUAL}</div>
-                                        <div class="kpi-value">${total}</div>
-                                        <div class="kpi-sub">correctivos registrados</div>
+                                    <div class="kpi-grid">
+                                        <div class="kpi-card k-total">
+                                            <div class="kpi-label">Total registros ${ANIO_ACTUAL}</div>
+                                            <div class="kpi-value">${total}</div>
+                                            <div class="kpi-sub">correctivos registrados</div>
+                                        </div>
+                                        <div class="kpi-card k-open">
+                                            <div class="kpi-label">Abiertos</div>
+                                            <div class="kpi-value">${abierto}</div>
+                                            <div class="kpi-sub">${total ? ((abierto / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
+                                        </div>
+                                        <div class="kpi-card k-closed">
+                                            <div class="kpi-label">Cerrados</div>
+                                            <div class="kpi-value">${cerrado}</div>
+                                            <div class="kpi-sub">${total ? ((cerrado / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
+                                        </div>
+                                        <div class="kpi-card k-cancel">
+                                            <div class="kpi-label">Cancelados</div>
+                                            <div class="kpi-value">${cancel}</div>
+                                            <div class="kpi-sub">${total ? ((cancel / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
+                                        </div>
+                                        <div class="kpi-card k-alta">
+                                            <div class="kpi-label">Nivel Alto</div>
+                                            <div class="kpi-value">${alta}</div>
+                                            <div class="kpi-sub">categoría crítica</div>
+                                        </div>
+                                        <div class="kpi-card k-baja">
+                                            <div class="kpi-label">Días prom. cierre</div>
+                                            <div class="kpi-value" style="font-size:26px">${promDias}</div>
+                                            <div class="kpi-sub">de solicitud a reparación</div>
+                                        </div>
                                     </div>
-                                    <div class="kpi-card k-open">
-                                        <div class="kpi-label">Abiertos</div>
-                                        <div class="kpi-value">${abierto}</div>
-                                        <div class="kpi-sub">${total ? ((abierto / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
-                                    </div>
-                                    <div class="kpi-card k-closed">
-                                        <div class="kpi-label">Cerrados</div>
-                                        <div class="kpi-value">${cerrado}</div>
-                                        <div class="kpi-sub">${total ? ((cerrado / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
-                                    </div>
-                                    <div class="kpi-card k-cancel">
-                                        <div class="kpi-label">Cancelados</div>
-                                        <div class="kpi-value">${cancel}</div>
-                                        <div class="kpi-sub">${total ? ((cancel / total * 100).toFixed(1)) + '%' : '0%'} del total</div>
-                                    </div>
-                                    <div class="kpi-card k-alta">
-                                        <div class="kpi-label">Nivel Alto</div>
-                                        <div class="kpi-value">${alta}</div>
-                                        <div class="kpi-sub">categoría crítica</div>
-                                    </div>
-                                    <div class="kpi-card k-baja">
-                                        <div class="kpi-label">Días prom. cierre</div>
-                                        <div class="kpi-value" style="font-size:26px">${promDias}</div>
-                                        <div class="kpi-sub">de solicitud a reparación</div>
-                                    </div>
-                                </div>
 
-                                <div class="dash-row">
-                                    <!-- Estatus donut -->
-                                    <div class="dash-card">
-                                        <div class="dash-card-title">Distribución por Status</div>
-                                        <div class="donut-wrap">
-                                            ${donutSVG}
-                                            <div class="donut-legend">
-                                                ${[{ l: 'Abierto', v: abierto, c: '#F59E0B' }, { l: 'Cerrado', v: cerrado, c: '#10B981' }, { l: 'Cancelado', v: cancel, c: '#64748B' }]
+                                    <div class="dash-row">
+                                        <!-- Estatus donut -->
+                                        <div class="dash-card">
+                                            <div class="dash-card-title">Distribución por Status</div>
+                                            <div class="donut-wrap">
+                                                ${donutSVG}
+                                                <div class="donut-legend">
+                                                    ${[{ l: 'Abierto', v: abierto, c: '#F59E0B' }, { l: 'Cerrado', v: cerrado, c: '#10B981' }, { l: 'Cancelado', v: cancel, c: '#64748B' }]
                     .map(x => `<div class="legend-item">
-                                                        <div class="legend-dot" style="background:${x.c}"></div>
-                                                        <span class="legend-name">${x.l}</span>
-                                                        <span class="legend-num">${x.v}</span>
+                                                            <div class="legend-dot" style="background:${x.c}"></div>
+                                                            <span class="legend-name">${x.l}</span>
+                                                            <span class="legend-num">${x.v}</span>
+                                                        </div>`).join('')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Por categoría -->
+                                        <div class="dash-card">
+                                            <div class="dash-card-title">Por Categoría</div>
+                                            <div class="bar-list">
+                                                ${cats.slice(0, 6).map(([cat, cnt]) => `
+                                                    <div class="bar-item">
+                                                        <div class="bar-label-row">
+                                                            <span class="bar-label">${cat}</span>
+                                                            <span class="bar-val">${cnt}</span>
+                                                        </div>
+                                                        <div class="bar-track">
+                                                            <div class="bar-fill" style="width:${(cnt / maxCat * 100).toFixed(1)}%;background:${CAT_COLORS[cat] || '#3B82F6'}"></div>
+                                                        </div>
                                                     </div>`).join('')}
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Por categoría -->
-                                    <div class="dash-card">
-                                        <div class="dash-card-title">Por Categoría</div>
-                                        <div class="bar-list">
-                                            ${cats.slice(0, 6).map(([cat, cnt]) => `
-                                                <div class="bar-item">
-                                                    <div class="bar-label-row">
-                                                        <span class="bar-label">${cat}</span>
-                                                        <span class="bar-val">${cnt}</span>
-                                                    </div>
-                                                    <div class="bar-track">
-                                                        <div class="bar-fill" style="width:${(cnt / maxCat * 100).toFixed(1)}%;background:${CAT_COLORS[cat] || '#3B82F6'}"></div>
-                                                    </div>
-                                                </div>`).join('')}
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="dash-row">
-                                    <!-- Por planta -->
-                                    <div class="dash-card">
-                                        <div class="dash-card-title">Por Planta</div>
-                                        <div class="bar-list">
-                                            ${plantas.map(([p, cnt], i) => `
-                                                <div class="bar-item">
-                                                    <div class="bar-label-row">
-                                                        <span class="bar-label">${p}</span>
-                                                        <span class="bar-val">${cnt}</span>
-                                                    </div>
-                                                    <div class="bar-track">
-                                                        <div class="bar-fill" style="width:${(cnt / maxPlanta * 100).toFixed(1)}%;background:${PLANTA_COLORS[i % PLANTA_COLORS.length]}"></div>
-                                                    </div>
-                                                </div>`).join('')}
+                                    <div class="dash-row">
+                                        <!-- Por planta -->
+                                        <div class="dash-card">
+                                            <div class="dash-card-title">Por Planta</div>
+                                            <div class="bar-list">
+                                                ${plantas.map(([p, cnt], i) => `
+                                                    <div class="bar-item">
+                                                        <div class="bar-label-row">
+                                                            <span class="bar-label">${p}</span>
+                                                            <span class="bar-val">${cnt}</span>
+                                                        </div>
+                                                        <div class="bar-track">
+                                                            <div class="bar-fill" style="width:${(cnt / maxPlanta * 100).toFixed(1)}%;background:${PLANTA_COLORS[i % PLANTA_COLORS.length]}"></div>
+                                                        </div>
+                                                    </div>`).join('')}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <!-- Por mes -->
-                                    <div class="dash-card">
-                                        <div class="dash-card-title">Registros por Mes — ${ANIO_ACTUAL}</div>
-                                        <div style="overflow-x:auto">
-                                        <table class="mes-table">
-                                            <thead><tr><th>Mes</th><th>Total</th><th>Abiertos</th><th>Cerrados</th></tr></thead>
-                                            <tbody>
-                                                ${mesFiltrados.map(m => `<tr>
-                                                    <td>${m.label}</td>
-                                                    <td class="c-total">${m.total}</td>
-                                                    <td class="c-open">${m.abierto}</td>
-                                                    <td class="c-closed">${m.cerrado}</td>
-                                                </tr>`).join('')}
-                                            </tbody>
-                                        </table>
+                                        <!-- Por mes -->
+                                        <div class="dash-card">
+                                            <div class="dash-card-title">Registros por Mes — ${ANIO_ACTUAL}</div>
+                                            <div style="overflow-x:auto">
+                                            <table class="mes-table">
+                                                <thead><tr><th>Mes</th><th>Total</th><th>Abiertos</th><th>Cerrados</th></tr></thead>
+                                                <tbody>
+                                                    ${mesFiltrados.map(m => `<tr>
+                                                        <td>${m.label}</td>
+                                                        <td class="c-total">${m.total}</td>
+                                                        <td class="c-open">${m.abierto}</td>
+                                                        <td class="c-closed">${m.cerrado}</td>
+                                                    </tr>`).join('')}
+                                                </tbody>
+                                            </table>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>`;
+                                    </div>`;
         }
 
         function buildDonut(items, total) {
             const R = 54, cx = 64, cy = 64, stroke = 18;
             const circ = 2 * Math.PI * R;
             if (!total) return `<svg width="128" height="128" viewBox="0 0 128 128">
-                                <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
-                                <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="13" font-family="DM Mono,monospace">0</text></svg>`;
+                                    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
+                                    <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="13" font-family="DM Mono,monospace">0</text></svg>`;
             let offset = 0;
             const segs = items.map(item => {
                 const pct = item.val / total;
                 const dash = (pct * circ).toFixed(2);
                 const gap = (circ - pct * circ).toFixed(2);
                 const seg = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none"
-                                    stroke="${item.color}" stroke-width="${stroke}"
-                                    stroke-dasharray="${dash} ${gap}"
-                                    stroke-dashoffset="${(-offset * circ / total + circ / 4).toFixed(2)}"
-                                    transform="rotate(-90 ${cx} ${cy})"/>`;
+                                        stroke="${item.color}" stroke-width="${stroke}"
+                                        stroke-dasharray="${dash} ${gap}"
+                                        stroke-dashoffset="${(-offset * circ / total + circ / 4).toFixed(2)}"
+                                        transform="rotate(-90 ${cx} ${cy})"/>`;
                 offset += item.val;
                 return seg;
             });
             return `<svg width="128" height="128" viewBox="0 0 128 128" style="flex-shrink:0">
-                                <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
-                                ${segs.join('')}
-                                <text x="${cx}" y="${cy - 8}" text-anchor="middle" dominant-baseline="middle" fill="#F1F5F9" font-size="18" font-weight="700" font-family="DM Mono,monospace">${total}</text>
-                                <text x="${cx}" y="${cy + 10}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="9" font-family="DM Sans,sans-serif">TOTAL</text>
-                            </svg>`;
+                                    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1e293b" stroke-width="${stroke}"/>
+                                    ${segs.join('')}
+                                    <text x="${cx}" y="${cy - 8}" text-anchor="middle" dominant-baseline="middle" fill="#F1F5F9" font-size="18" font-weight="700" font-family="DM Mono,monospace">${total}</text>
+                                    <text x="${cx}" y="${cy + 10}" text-anchor="middle" dominant-baseline="middle" fill="#64748B" font-size="9" font-family="DM Sans,sans-serif">TOTAL</text>
+                                </svg>`;
         }
         // ── Pendientes: cargar tabla ──
         async function cargarPendientes() {
@@ -2525,18 +2533,18 @@
                 }
                 data.forEach(c => {
                     tbody.innerHTML += `
-                        <tr class="s-abierto">
-                            <td class="mono">${c.id}</td>
-                            <td>${esc(c.planta ?? "—")}</td>
-                            <td>${esc(c.linea_persona ?? "—")}</td>
-                            <td>${esc(c.equipo ?? "—")}</td>
-                            <td class="wrap" style="max-width:220px;" title="${esc(c.descripcion_falla ?? "")}">${esc(c.descripcion_falla ?? "—")}</td>
-                            <td class="mono">${esc(c.fecha_solicitud ?? "—")}</td>
-                            <td>${esc(c.reporte_elaborado_por ?? "—")}</td>
-                            <td>
-                                <button class="btn btn-amber btn-sm" onclick="gestionar(${c.id})">✏️ Gestionar</button>
-                            </td>
-                        </tr>`;
+                            <tr class="s-abierto">
+                                <td class="mono">${c.id}</td>
+                                <td>${esc(c.planta ?? "—")}</td>
+                                <td>${esc(c.linea_persona ?? "—")}</td>
+                                <td>${esc(c.equipo ?? "—")}</td>
+                                <td class="wrap" style="max-width:220px;" title="${esc(c.descripcion_falla ?? "")}">${esc(c.descripcion_falla ?? "—")}</td>
+                                <td class="mono">${esc(c.fecha_solicitud ?? "—")}</td>
+                                <td>${esc(c.reporte_elaborado_por ?? "—")}</td>
+                                <td>
+                                    <button class="btn btn-amber btn-sm" onclick="gestionar(${c.id})">✏️ Gestionar</button>
+                                </td>
+                            </tr>`;
                 });
             } catch (e) {
                 console.error("Error cargando pendientes", e);
@@ -2584,7 +2592,7 @@
             window.addEventListener('resize', syncInnerWidth);
             syncInnerWidth();
 
-       
+
             top.addEventListener('scroll', () => { scroll.scrollLeft = top.scrollLeft; });
             scroll.addEventListener('scroll', () => { top.scrollLeft = scroll.scrollLeft; });
         })();
@@ -2596,7 +2604,7 @@
 
                 let timeout;
 
-               
+
                 fetch(endpoint)
                     .then(r => r.json())
                     .then(data => {
@@ -2608,7 +2616,7 @@
                         });
                     });
 
-                
+
                 input.addEventListener('input', () => {
                     clearTimeout(timeout);
 
@@ -2636,10 +2644,16 @@
                 });
             }
 
-           
+
+            // Modal de editar
             activarAutocomplete('e_EQUIPO', 'listaEquipos', '/CORRECTIVOS/EQUIPOS_UNICOS');
             activarAutocomplete('e_MODELO', 'listaModelos', '/CORRECTIVOS/MODELOS_UNICOS');
             activarAutocomplete('e_MARCA', 'listaMarcas', '/CORRECTIVOS/MARCAS_UNICAS');
+
+            // Formulario de nuevo registro
+            activarAutocomplete('n_EQUIPO', 'listaEquiposNuevo', '/CORRECTIVOS/EQUIPOS_UNICOS');
+            activarAutocomplete('n_MODELO', 'listaModelosNuevo', '/CORRECTIVOS/MODELOS_UNICOS');
+            activarAutocomplete('n_MARCA', 'listaMarcasNuevo', '/CORRECTIVOS/MARCAS_UNICAS');
 
         });
     </script>

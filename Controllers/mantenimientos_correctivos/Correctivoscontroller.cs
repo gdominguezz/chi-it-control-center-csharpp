@@ -840,7 +840,7 @@ public class CorrectivoController : ControllerBase
 
 
     }
-    [HttpGet("CORRECTIVOS/{id}")]
+    [HttpGet("CORRECTIVOS/{id:int}")]
     public IActionResult ObtenerCorrectivo(int id)
     {
         using var conn = _db.Open();
@@ -878,7 +878,7 @@ public class CorrectivoController : ControllerBase
                 WHERE id = @id
                 ";
 
-        cmd.Parameters.AddWithValue("@id", id);
+        cmd.Parameters.AddWithValue("id", id);
 
 
         using var r = cmd.ExecuteReader();
@@ -918,7 +918,7 @@ public class CorrectivoController : ControllerBase
 
         return Ok(data);
     }
-/*     ///////////////////////////////////////////////////////////////ayudante equipos///////////////////////////*/
+    /*     ///////////////////////////////////////////////////////////////ayudante equipos///////////////////////////*/
     [HttpGet("CORRECTIVOS/EQUIPOS_UNICOS")]
     public IActionResult ObtenerEquiposUnicos([FromQuery] string? q)
     {
