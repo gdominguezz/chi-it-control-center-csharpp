@@ -143,7 +143,6 @@ public class QrPageController : ControllerBase
                         "<button class=\"pm-btn btn-ver btn-ver1 btn btn-cyan\" id=\"btn_ver1_" + row.id + "\" onclick=\"verPM(" + row.id + ",1)\" style=\"display:none\">👁 Ver</button>" +
                         "<button class=\"pm-btn btn-edit btn-edit1 btn btn-amber\" id=\"btn_edit1_" + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ",1)\" style=\"display:none\">✏️ Editar</button>" +
                         "<button class=\"pm-btn btn-del btn-del1 btn btn-danger\" id=\"btn_del1_" + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ",1)\" style=\"display:none\">🗑</button>" +
-                        "<button class=\"pm-btn btn btn-baja\" id=\"btn_baja1_" + row.id + "\" onclick=\"abrirBaja(" + row.id + ",1,'" + Esc(row.idEquipo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📤 Baja de Equipo</button>" +
                       "</div>" +
                       // ── Período 2 ──
                       "<div class=\"pm-row\">" +
@@ -152,7 +151,6 @@ public class QrPageController : ControllerBase
                         "<button class=\"pm-btn btn-ver btn-ver2 btn btn-cyan\" id=\"btn_ver2_" + row.id + "\" onclick=\"verPM(" + row.id + ",2)\" style=\"display:none\">👁 Ver</button>" +
                         "<button class=\"pm-btn btn-edit btn-edit2 btn btn-amber\" id=\"btn_edit2_" + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ",2)\" style=\"display:none\">✏️ Editar</button>" +
                         "<button class=\"pm-btn btn-del btn-del2 btn btn-danger\" id=\"btn_del2_" + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ",2)\" style=\"display:none\">🗑</button>" +
-                        "<button class=\"pm-btn btn btn-baja\" id=\"btn_baja2_" + row.id + "\" onclick=\"abrirBaja(" + row.id + ",2,'" + Esc(row.idEquipo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📤 Baja de Equipo</button>" +
                       "</div>" +
                     "</div>";
                 bool tienePmFlag = row.tienePm;
@@ -240,6 +238,7 @@ public class QrPageController : ControllerBase
                 cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm1_" + row.id + "\" placeholder=\"Observaciones P1...\"></textarea>\n");
                 cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
                 cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ",1)\">💾 Guardar P1</button>\n");
+                cards.Append("        <button class=\"btn btn-baja\" onclick=\"abrirBaja(" + row.id + ",1,'" + Esc(row.idEquipo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📤 Baja de Equipo</button>\n");
                 cards.Append("      </div>\n    </div>\n");
                 cards.Append("    <div class=\"mini-form\" id=\"ver1_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:#06B6D4\">👁 Período 1 — Registrado</div>\n");
@@ -274,6 +273,7 @@ public class QrPageController : ControllerBase
                 cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm2_" + row.id + "\" placeholder=\"Observaciones P2...\"></textarea>\n");
                 cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
                 cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ",2)\">💾 Guardar P2</button>\n");
+                cards.Append("        <button class=\"btn btn-baja\" onclick=\"abrirBaja(" + row.id + ",2,'" + Esc(row.idEquipo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📤 Baja de Equipo</button>\n");
                 cards.Append("      </div>\n    </div>\n");
                 cards.Append("    <div class=\"mini-form\" id=\"ver2_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:#06B6D4\">👁 Período 2 — Registrado</div>\n");
@@ -380,27 +380,59 @@ public class QrPageController : ControllerBase
 
             var bajaId = Convert.ToInt32(await cmdBaja.ExecuteScalarAsync());
 
-            // 2. Actualizar id_equipo del preventivo con el equipo de reemplazo
-            //    y anotar en observaciones el cambio
+            // 2. Marcar el PM del período como completado (checks vacíos, observaciones de baja)
+            //    y actualizar id_equipo con el equipo de reemplazo.
+            var fechaHoy = DateOnly.FromDateTime(DateTime.Today);
+            var proximoPm = fechaHoy.AddMonths(6);
+            var proxStr = proximoPm.ToString("yyyy-MM-dd");
             var obsMsg = $"Antes: {req.BajaDto.EQUIPO ?? "?"}, se dio de baja, ahora: {req.IdEquipoReemplazo}";
+            var usuario = req.Usuario ?? "SISTEMA";
 
-            await using var cmdUpd = new Npgsql.NpgsqlCommand("""
-                UPDATE public.mantenimientos_preventivos
-                SET id_equipo   = @nuevo_id,
-                    observaciones = CASE
-                        WHEN observaciones IS NULL OR observaciones = '' THEN @obs
-                        ELSE observaciones || E'\n' || @obs
-                    END
-                WHERE id = @prev_id
-                """, conn);
+            var pmJson = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                usuario = usuario,
+                fecha = fechaHoy.ToString("yyyy-MM-dd"),
+                proximo_pm = proxStr,
+                checks = Array.Empty<int>(),
+                observaciones = obsMsg,
+                requiere_correctivo = false,
+                verificado_por = (string?)null
+            });
 
+            string updSql = req.Periodo == 2
+                ? """
+                  UPDATE public.mantenimientos_preventivos
+                  SET id_equipo            = @nuevo_id,
+                      fecha_realizacion_p2 = @fr,
+                      plazo_p2             = @pl,
+                      realizado_por_p2     = @rp,
+                      preventivo_digital_p2 = @pd::jsonb
+                  WHERE id = @prev_id
+                  """
+                : """
+                  UPDATE public.mantenimientos_preventivos
+                  SET id_equipo        = @nuevo_id,
+                      fecha_realizacion = @fr,
+                      plazo            = @pl,
+                      realizado_por    = @rp,
+                      observaciones    = @o,
+                      preventivo_digital = @pd::jsonb
+                  WHERE id = @prev_id
+                  """;
+
+            await using var cmdUpd = new Npgsql.NpgsqlCommand(updSql, conn);
             cmdUpd.Parameters.AddWithValue("nuevo_id", req.IdEquipoReemplazo);
-            cmdUpd.Parameters.AddWithValue("obs", obsMsg);
+            cmdUpd.Parameters.AddWithValue("fr", fechaHoy.ToDateTime(TimeOnly.MinValue));
+            cmdUpd.Parameters.AddWithValue("pl", proxStr);
+            cmdUpd.Parameters.AddWithValue("rp", usuario.ToUpper());
+            cmdUpd.Parameters.AddWithValue("pd", pmJson);
             cmdUpd.Parameters.AddWithValue("prev_id", req.IdPreventivoDb);
+            if (req.Periodo != 2)
+                cmdUpd.Parameters.AddWithValue("o", obsMsg);
 
             await cmdUpd.ExecuteNonQueryAsync();
 
-            return Ok(new { ok = true, bajaId, idEquipoReemplazo = req.IdEquipoReemplazo });
+            return Ok(new { ok = true, bajaId, idEquipoReemplazo = req.IdEquipoReemplazo, proximo_pm = proxStr });
         }
         catch (Exception ex)
         {
@@ -1104,32 +1136,41 @@ public class QrPageController : ControllerBase
         sb.AppendLine("    var res=await fetch('/PREVENTIVO/REGISTRAR_BAJA',{method:'POST',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(body)});");
         sb.AppendLine("    var data=await res.json();");
         sb.AppendLine("    if(data.ok){");
-        sb.AppendLine("      // Actualizar tarjeta en frontend sin recargar");
         sb.AppendLine("      var idAnterior=bajaTemp.idEquipoOriginal;");
+        sb.AppendLine("      var p=bajaTemp.periodo;");
         sb.AppendLine("      var card=document.getElementById('equipo_'+bajaTemp.id)?.closest('.card');");
         sb.AppendLine("      if(card){");
-        sb.AppendLine("        // Actualizar el input de ID equipo");
+        sb.AppendLine("        // Actualizar ID equipo en input y encabezado");
         sb.AppendLine("        var equipoInput=document.getElementById('equipo_'+bajaTemp.id);");
         sb.AppendLine("        if(equipoInput)equipoInput.value=idReemplazo;");
-        sb.AppendLine("        // Actualizar el encabezado de la tarjeta");
         sb.AppendLine("        var idSpan=card.querySelector('.dev-name span');if(idSpan)idSpan.textContent=idReemplazo;");
-        sb.AppendLine("        // Actualizar observaciones");
-        sb.AppendLine("        var obsEl=document.getElementById('obs_'+bajaTemp.id);");
-        sb.AppendLine("        if(obsEl){");
-        sb.AppendLine("          var obsMsg='Antes: '+idAnterior+', se dio de baja, ahora: '+idReemplazo;");
-        sb.AppendLine("          obsEl.value=(obsEl.value?obsEl.value+'\\n':'')+obsMsg;");
+        sb.AppendLine("        // Observaciones del PM del período");
+        sb.AppendLine("        var obsEl=document.getElementById('obs_pm'+p+'_'+bajaTemp.id);");
+        sb.AppendLine("        if(obsEl){var obsMsg='Antes: '+idAnterior+', se dio de baja, ahora: '+idReemplazo;obsEl.value=(obsEl.value?obsEl.value+'\\n':'')+obsMsg;}");
+        sb.AppendLine("        // Marcar período como completado: badge + plazo + botones");
+        sb.AppendLine("        var badge=document.getElementById('pbadge'+p+'_'+bajaTemp.id);");
+        sb.AppendLine("        if(badge){badge.textContent='📋 P'+p+': ✅ Registrado';badge.className='periodo-badge periodo-ok';}");
+        sb.AppendLine("        var plazoEl=document.getElementById(p===2?'plazo_p2_'+bajaTemp.id:'plazo_'+bajaTemp.id);");
+        sb.AppendLine("        if(plazoEl&&data.proximo_pm)plazoEl.textContent=data.proximo_pm;");
+        sb.AppendLine("        if(p===1){");
+        sb.AppendLine("          card.dataset.tienePm='true';");
+        sb.AppendLine("          var b1=card.querySelector('.btn-p1');if(b1)b1.style.display='none';");
+        sb.AppendLine("          var bv1=card.querySelector('.btn-ver1');if(bv1)bv1.style.display='inline-flex';");
+        sb.AppendLine("          var be1=card.querySelector('.btn-edit1');if(be1)be1.style.display='inline-flex';");
+        sb.AppendLine("        }else{");
+        sb.AppendLine("          card.dataset.tienePm2='true';");
+        sb.AppendLine("          var b2=card.querySelector('.btn-p2');if(b2)b2.style.display='none';");
+        sb.AppendLine("          var bv2=card.querySelector('.btn-ver2');if(bv2)bv2.style.display='inline-flex';");
+        sb.AppendLine("          var be2=card.querySelector('.btn-edit2');if(be2)be2.style.display='inline-flex';");
         sb.AppendLine("        }");
-        sb.AppendLine("        // Actualizar QR del dispositivo");
+        sb.AppendLine("        // Regenerar QR con el nuevo ID");
         sb.AppendLine("        var qrEl=document.getElementById('qr_'+bajaTemp.id);");
-        sb.AppendLine("        if(qrEl){");
-        sb.AppendLine("          qrEl.innerHTML='';");
-        sb.AppendLine("          qrEl.setAttribute('data-equipo',idReemplazo);");
+        sb.AppendLine("        if(qrEl){qrEl.innerHTML='';qrEl.setAttribute('data-equipo',idReemplazo);");
         sb.AppendLine("          new QRCode(qrEl,{text:idReemplazo,width:74,height:74,correctLevel:QRCode.CorrectLevel.M});");
-        sb.AppendLine("          var qrLabel=qrEl.nextElementSibling;if(qrLabel)qrLabel.textContent=idReemplazo;");
-        sb.AppendLine("        }");
+        sb.AppendLine("          var qrLabel=qrEl.nextElementSibling;if(qrLabel)qrLabel.textContent=idReemplazo;}");
         sb.AppendLine("      }");
         sb.AppendLine("      cerrarBaja();");
-        sb.AppendLine("      toast('Baja registrada — Equipo actualizado a: '+idReemplazo,true);");
+        sb.AppendLine("      toast('Baja registrada — PM P'+p+' completado — Equipo: '+idReemplazo,true);");
         sb.AppendLine("    }else{errEl.textContent=data.error||'Error al registrar baja';errEl.style.display='block';}");
         sb.AppendLine("  }catch(e){errEl.textContent='Error de conexión. Intenta de nuevo.';errEl.style.display='block';}");
         sb.AppendLine("  finally{btnGuardar.disabled=false;btnGuardar.textContent='💾 Registrar Baja';}");
