@@ -1612,12 +1612,31 @@
                         </select>
                     </div>
                     <div class="field"><label>LINEA / PERSONA</label><input id="n_LINEA_PERSONA" placeholder="Línea o nombre" autocomplete="off" list="lista-ubicaciones-nuevo"><datalist id="lista-ubicaciones-nuevo"></datalist></div>
-                    <div class="field"><label>EQUIPO</label><input id="n_EQUIPO" placeholder="ID o nombre del equipo"></div>
+                    <div class="form-field">
+                        <label>EQUIPO</label>
+                        <input type="text" id="e_EQUIPO" list="listaEquipos">
+                        <datalist id="listaEquipos"></datalist>
+                    </div>
                     <div class="field"><label>MARCA</label><input id="n_MARCA" placeholder="HP, Dell..."></div>
                     <div class="field"><label>MODELO</label><input id="n_MODELO"></div>
                     <div class="field"><label>NUMERO SERIE</label><input id="n_NUMERO_SERIE"></div>
                     <div class="field"><label>FECHA SOLICITUD</label><input id="n_FECHA_SOLICITUD" type="date"></div>
-                    <div class="field"><label>REPORTE ELABORADO POR</label><input id="n_REPORTE_ELABORADO_POR"></div>
+                    <div class="field">
+                        <label>REPORTE ELABORADO POR</label>
+                        <select id="n_REPORTE_ELABORADO_POR">
+                            <option value="">-- Seleccionar --</option>
+                            <option>FLOR RODRIGUEZ LOPEZ</option>
+                            <option>VICTOR ALFONSO PEÑA GARCIA</option>
+                            <option>ISMAEL LUNA VILLALOBOS</option>
+                            <option>SANTIAGO CHAVEZ CARRASCO</option>
+                            <option>JOSE ANGEL GANDARA CARRILLO</option>
+                            <option>RAUL ENRIQUE SIFUENTES GURROLA</option>
+                            <option>LUIS ALONSO GARCIA ESQUIBEL</option>
+                            <option>VIANEY ALEJANDRA LOPEZ GARCIA</option>
+                            <option>TRISTAN GEOVANNI DOMINGUEZ GOMEZ</option>
+
+                        </select>
+                    </div>
                     <div class="field"><label>TIPO OBSERVACION</label><input id="n_TIPO_OBSERVACION"></div>
                     <div class="field"><label>VENCIMIENTO DIAS</label><input id="n_VENCIMIENTO_DIAS" type="number" min="0" placeholder="Días"></div>
                     <div class="field"><label>FECHA CONTEO ACTUAL</label><input id="n_FECHA_CONTEO_ACTUAL" type="date"></div>
@@ -1898,12 +1917,30 @@
                     </select>
                 </div>
                 <div class="form-field"><label>LINEA / PERSONA</label><input type="text" id="e_LINEA_PERSONA" autocomplete="off" list="lista-ubicaciones-edit"><datalist id="lista-ubicaciones-edit"></datalist></div>
-                <div class="form-field"><label>EQUIPO</label><input type="text" id="e_EQUIPO"></div>
+                <div class="form-field">
+                    <label>EQUIPO</label>
+                    <input type="text" id="e_EQUIPO" list="listaEquipos">
+                    <datalist id="listaEquipos"></datalist>
+                </div>
                 <div class="form-field"><label>MARCA</label><input type="text" id="e_MARCA"></div>
                 <div class="form-field"><label>MODELO</label><input type="text" id="e_MODELO"></div>
                 <div class="form-field"><label>NUMERO SERIE</label><input type="text" id="e_NUMERO_SERIE"></div>
                 <div class="form-field"><label>FECHA SOLICITUD</label><input type="date" id="e_FECHA_SOLICITUD"></div>
-                <div class="form-field"><label>REPORTE ELABORADO POR</label><input type="text" id="e_REPORTE_ELABORADO_POR"></div>
+                <div class="form-field">
+                    <label>REPORTE ELABORADO POR</label>
+                    <select id="e_REPORTE_ELABORADO_POR">
+                        <option value="">-- Seleccionar --</option>
+                        <option>FLOR RODRIGUEZ LOPEZ</option>
+                        <option>VICTOR ALFONSO PEÑA GARCIA</option>
+                        <option>ISMAEL LUNA VILLALOBOS</option>
+                        <option>SANTIAGO CHAVEZ CARRASCO</option>
+                        <option>JOSE ANGEL GANDARA CARRILLO</option>
+                        <option>RAUL ENRIQUE SIFUENTES GURROLA</option>
+                        <option>LUIS ALONSO GARCIA ESQUIBEL</option>
+                        <option>VIANEY ALEJANDRA LOPEZ GARCIA</option>
+                        <option>TRISTAN GEOVANNI DOMINGUEZ GOMEZ</option>
+                    </select>
+                </div>
                 <div class="form-field"><label>TIPO OBSERVACION</label><input type="text" id="e_TIPO_OBSERVACION"></div>
 
                 <div class="form-field"><label>VENCIMIENTO DIAS</label><input type="number" min="0" id="e_VENCIMIENTO_DIAS"></div>
@@ -2543,6 +2580,59 @@
             top.addEventListener('scroll', () => { scroll.scrollLeft = top.scrollLeft; });
             scroll.addEventListener('scroll', () => { top.scrollLeft = scroll.scrollLeft; });
         })();
+        document.addEventListener('DOMContentLoaded', async () => {
+
+            const inputEquipo = document.getElementById('e_EQUIPO');
+            const datalist = document.getElementById('listaEquipos');
+
+           
+            try {
+                const res = await fetch('/CORRECTIVOS/EQUIPOS_UNICOS');
+                const data = await res.json();
+
+                datalist.innerHTML = '';
+
+                data.forEach(e => {
+                    const option = document.createElement('option');
+                    option.value = e;
+                    datalist.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Error cargando equipos:', err);
+            }
+
+           
+            let timeout;
+
+            inputEquipo.addEventListener('input', () => {
+                clearTimeout(timeout);
+
+                timeout = setTimeout(async () => {
+
+                    const valor = inputEquipo.value.trim();
+
+                    if (valor.length < 1) return;
+
+                    try {
+                        const res = await fetch(`/CORRECTIVOS/EQUIPOS_UNICOS?q=${encodeURIComponent(valor)}`);
+                        const data = await res.json();
+
+                        datalist.innerHTML = '';
+
+                        data.forEach(e => {
+                            const option = document.createElement('option');
+                            option.value = e;
+                            datalist.appendChild(option);
+                        });
+
+                    } catch (err) {
+                        console.error('Error en autocomplete:', err);
+                    }
+
+                }, 300); 
+            });
+
+        });
     </script>
 </body>
 </html>

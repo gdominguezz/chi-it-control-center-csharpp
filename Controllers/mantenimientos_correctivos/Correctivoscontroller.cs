@@ -918,6 +918,32 @@ public class CorrectivoController : ControllerBase
 
         return Ok(data);
     }
+    [HttpGet("CORRECTIVOS/EQUIPOS_UNICOS")]
+    public IActionResult ObtenerEquiposUnicos([FromQuery] string? q)
+    {
+        using var conn = _db.Open();
+        using var cmd = conn.CreateCommand();
+
+        cmd.CommandText = @"
+        SELECT DISTINCT TRIM(equipo)
+        FROM mantenimientos_correctivos
+        WHERE equipo IS NOT NULL
+          AND TRIM(equipo) <> ''
+          AND (@q IS NULL OR equipo ILIKE '%' || @q || '%')
+        ORDER BY TRIM(equipo)
+        LIMIT 20
+    ";
+
+        cmd.Parameters.AddWithValue("q", (object?)q ?? DBNull.Value);
+
+        var lista = new List<string>();
+
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+            lista.Add(r.GetString(0));
+
+        return Ok(lista);
+    }
     // ══════════════════════════════════════════════════════════════════════════
     // MODELOS
     // ══════════════════════════════════════════════════════════════════════════
