@@ -1,4 +1,5 @@
 using ChiIT.Data;
+using ChiIT.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 
@@ -142,6 +143,7 @@ public class QrPageController : ControllerBase
                         "<button class=\"pm-btn btn-ver btn-ver1 btn btn-cyan\" id=\"btn_ver1_" + row.id + "\" onclick=\"verPM(" + row.id + ",1)\" style=\"display:none\">👁 Ver</button>" +
                         "<button class=\"pm-btn btn-edit btn-edit1 btn btn-amber\" id=\"btn_edit1_" + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ",1)\" style=\"display:none\">✏️ Editar</button>" +
                         "<button class=\"pm-btn btn-del btn-del1 btn btn-danger\" id=\"btn_del1_" + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ",1)\" style=\"display:none\">🗑</button>" +
+                        "<button class=\"pm-btn btn btn-baja\" id=\"btn_baja1_" + row.id + "\" onclick=\"abrirBaja(" + row.id + ",1,'" + Esc(row.idEquipo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📤 Baja de Equipo</button>" +
                       "</div>" +
                       // ── Período 2 ──
                       "<div class=\"pm-row\">" +
@@ -150,6 +152,7 @@ public class QrPageController : ControllerBase
                         "<button class=\"pm-btn btn-ver btn-ver2 btn btn-cyan\" id=\"btn_ver2_" + row.id + "\" onclick=\"verPM(" + row.id + ",2)\" style=\"display:none\">👁 Ver</button>" +
                         "<button class=\"pm-btn btn-edit btn-edit2 btn btn-amber\" id=\"btn_edit2_" + row.id + "\" onclick=\"abrirEditarPM(" + row.id + ",2)\" style=\"display:none\">✏️ Editar</button>" +
                         "<button class=\"pm-btn btn-del btn-del2 btn btn-danger\" id=\"btn_del2_" + row.id + "\" onclick=\"eliminarPreventivo(" + row.id + ",2)\" style=\"display:none\">🗑</button>" +
+                        "<button class=\"pm-btn btn btn-baja\" id=\"btn_baja2_" + row.id + "\" onclick=\"abrirBaja(" + row.id + ",2,'" + Esc(row.idEquipo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📤 Baja de Equipo</button>" +
                       "</div>" +
                     "</div>";
                 bool tienePmFlag = row.tienePm;
@@ -328,6 +331,85 @@ public class QrPageController : ControllerBase
         }
     }
 
+    // ── POST /PREVENTIVO/REGISTRAR_BAJA ──────────────────────────────────────
+    // Inserta en bajas_equipos (ESTADO=PENDIENTE forzado) y actualiza
+    // el id_equipo del preventivo con el equipo de reemplazo.
+    [HttpPost("/PREVENTIVO/REGISTRAR_BAJA")]
+    public async Task<IActionResult> RegistrarBaja([FromBody] RegistrarBajaRequest req)
+    {
+        if (req?.BajaDto == null)
+            return BadRequest(new { error = "Payload inválido" });
+
+        if (string.IsNullOrWhiteSpace(req.IdEquipoReemplazo))
+            return BadRequest(new { error = "El ID Equipo de Reemplazo es obligatorio" });
+
+        // Forzar ESTADO = PENDIENTE siempre
+        req.BajaDto.ESTADO = "PENDIENTE";
+
+        try
+        {
+            await using var conn = await _db.OpenAsync();
+
+            // 1. Insertar en bajas_equipos
+            await using var cmdBaja = new Npgsql.NpgsqlCommand("""
+                INSERT INTO bajas_equipos
+                    (folio, estado, planta, fecha, equipo, marca, modelo,
+                     no_serie, activo_fijo, ubicacion_persona,
+                     motivo_de_baja, diagnostico, comentarios, motivo_de_cancelacion)
+                VALUES
+                    (@folio, @estado, @planta, @fecha::date, @equipo, @marca, @modelo,
+                     @no_serie, @activo_fijo, @ubicacion_persona,
+                     @motivo_de_baja, @diagnostico, @comentarios, @motivo_de_cancelacion)
+                RETURNING id
+                """, conn);
+
+            cmdBaja.Parameters.AddWithValue("folio", (object?)req.BajaDto.FOLIO ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("estado", "PENDIENTE");
+            cmdBaja.Parameters.AddWithValue("planta", (object?)req.BajaDto.PLANTA ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("fecha", (object?)req.BajaDto.FECHA ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("equipo", (object?)req.BajaDto.EQUIPO ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("marca", (object?)req.BajaDto.MARCA ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("modelo", (object?)req.BajaDto.MODELO ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("no_serie", (object?)req.BajaDto.NO_SERIE ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("activo_fijo", (object?)req.BajaDto.ACTIVO_FIJO ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("ubicacion_persona", (object?)req.BajaDto.UBICACION_PERSONA ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("motivo_de_baja", (object?)req.BajaDto.MOTIVO_DE_BAJA ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("diagnostico", (object?)req.BajaDto.DIAGNOSTICO ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("comentarios", (object?)req.BajaDto.COMENTARIOS ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("motivo_de_cancelacion", (object?)req.BajaDto.MOTIVO_DE_CANCELACION ?? DBNull.Value);
+
+            var bajaId = Convert.ToInt32(await cmdBaja.ExecuteScalarAsync());
+
+            // 2. Actualizar id_equipo del preventivo con el equipo de reemplazo
+            //    y anotar en observaciones el cambio
+            var obsMsg = $"Antes: {req.BajaDto.EQUIPO ?? "?"}, se dio de baja, ahora: {req.IdEquipoReemplazo}";
+
+            await using var cmdUpd = new Npgsql.NpgsqlCommand("""
+                UPDATE public.mantenimientos_preventivos
+                SET id_equipo   = @nuevo_id,
+                    observaciones = CASE
+                        WHEN observaciones IS NULL OR observaciones = '' THEN @obs
+                        ELSE observaciones || E'\n' || @obs
+                    END
+                WHERE id = @prev_id
+                """, conn);
+
+            cmdUpd.Parameters.AddWithValue("nuevo_id", req.IdEquipoReemplazo);
+            cmdUpd.Parameters.AddWithValue("obs", obsMsg);
+            cmdUpd.Parameters.AddWithValue("prev_id", req.IdPreventivoDb);
+
+            await cmdUpd.ExecuteNonQueryAsync();
+
+            return Ok(new { ok = true, bajaId, idEquipoReemplazo = req.IdEquipoReemplazo });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[RegistrarBaja] Error: " + ex);
+            return StatusCode(500, new { error = "Error interno: " + ex.Message });
+        }
+    }
+
+
     private static string HtmlPage(string ubicacion, string cardsHtml)
     {
         var sb = new StringBuilder();
@@ -436,6 +518,15 @@ public class QrPageController : ControllerBase
         sb.AppendLine(".qr-section .form-sep{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:6px;}");
         sb.AppendLine(".auto-tag{font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(59,130,246,.18);color:#60a5fa;letter-spacing:.06em;vertical-align:middle;margin-left:4px;}");
         sb.AppendLine(".input-auto{background:rgba(59,130,246,.06)!important;border-color:rgba(59,130,246,.3)!important;color:var(--muted2)!important;cursor:not-allowed!important;}");
+        sb.AppendLine(".btn-baja{background:linear-gradient(135deg,#7c2d12,#ea580c);color:white;}");
+        sb.AppendLine(".modal-baja-box{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:28px;width:min(560px,95vw);max-height:90vh;overflow-y:auto;}");
+        sb.AppendLine(".baja-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}");
+        sb.AppendLine(".baja-field{display:flex;flex-direction:column;gap:4px;}");
+        sb.AppendLine(".baja-field label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}");
+        sb.AppendLine(".baja-field input,.baja-field select,.baja-field textarea{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;}");
+        sb.AppendLine(".baja-field textarea{min-height:60px;resize:vertical;}");
+        sb.AppendLine(".baja-field.full{grid-column:1/-1;}");
+        sb.AppendLine(".baja-field input.auto-fill{background:rgba(59,130,246,.06);border-color:rgba(59,130,246,.3);color:var(--muted2);}");
         sb.AppendLine("</style></head><body>");
         sb.AppendLine("<div class=\"top-bar\">");
         sb.AppendLine("  <div class=\"top-icon\">🔧</div>");
@@ -925,6 +1016,125 @@ public class QrPageController : ControllerBase
         sb.AppendLine("<button class=\"btn btn-danger\" onclick=\"guardarCorrectivo()\">Guardar Correctivo</button>");
         sb.AppendLine("</div>");
         sb.AppendLine("</div></div>");
+        // ── Modal Baja de Equipo ──────────────────────────────────────────────
+        sb.AppendLine("<div class=\"modal\" id=\"modalBaja\">");
+        sb.AppendLine("<div class=\"modal-baja-box\">");
+        sb.AppendLine("<h3 style=\"font-size:17px;font-weight:700;margin-bottom:4px;\">📤 Baja de Equipo</h3>");
+        sb.AppendLine("<p style=\"font-size:12px;color:var(--muted2);margin-bottom:18px;\">Registra la baja y asigna el equipo de reemplazo</p>");
+        sb.AppendLine("<div class=\"baja-grid\">");
+        sb.AppendLine("  <div class=\"baja-field\"><label>Folio</label><input id=\"baja_FOLIO\" placeholder=\"Ej: BJ-2025-001\"></div>");
+        sb.AppendLine("  <div class=\"baja-field\"><label>Planta <span class=\"auto-tag\">AUTO</span></label><input id=\"baja_PLANTA\" class=\"auto-fill\" readonly></div>");
+        sb.AppendLine("  <div class=\"baja-field\"><label>Fecha</label><input id=\"baja_FECHA\" type=\"date\"></div>");
+        sb.AppendLine("  <div class=\"baja-field\"><label>Equipo (ID actual) <span class=\"auto-tag\">AUTO</span></label><input id=\"baja_EQUIPO\" class=\"auto-fill\" readonly></div>");
+        sb.AppendLine("  <div class=\"baja-field\"><label>Marca</label><input id=\"baja_MARCA\" placeholder=\"Ej: HP, Dell\"></div>");
+        sb.AppendLine("  <div class=\"baja-field\"><label>Modelo</label><input id=\"baja_MODELO\" placeholder=\"Ej: EliteBook 840\"></div>");
+        sb.AppendLine("  <div class=\"baja-field\"><label>No. Serie <span class=\"auto-tag\">AUTO (id_equipo)</span></label><input id=\"baja_NO_SERIE\" class=\"auto-fill\" readonly></div>");
+        sb.AppendLine("  <div class=\"baja-field\"><label>Activo Fijo</label><input id=\"baja_ACTIVO_FIJO\" placeholder=\"Ej: AF-00123\"></div>");
+        sb.AppendLine("  <div class=\"baja-field full\"><label>Ubicación / Persona <span class=\"auto-tag\">AUTO</span></label><input id=\"baja_UBICACION_PERSONA\" class=\"auto-fill\" readonly></div>");
+        sb.AppendLine("  <div class=\"baja-field full\"><label>Motivo de Baja</label><input id=\"baja_MOTIVO_DE_BAJA\" placeholder=\"Motivo...\"></div>");
+        sb.AppendLine("  <div class=\"baja-field full\"><label>Diagnóstico</label><textarea id=\"baja_DIAGNOSTICO\" placeholder=\"Diagnóstico técnico...\"></textarea></div>");
+        sb.AppendLine("  <div class=\"baja-field full\"><label>Comentarios</label><textarea id=\"baja_COMENTARIOS\" placeholder=\"Comentarios adicionales...\"></textarea></div>");
+        sb.AppendLine("  <div class=\"baja-field full\"><label>Motivo de Cancelación</label><input id=\"baja_MOTIVO_DE_CANCELACION\" placeholder=\"Solo si aplica\"></div>");
+        sb.AppendLine("  <div class=\"baja-field full\" style=\"border-top:1px solid rgba(234,88,12,.35);padding-top:14px;margin-top:4px;\">");
+        sb.AppendLine("    <label style=\"color:#fb923c;\">🔄 ID Equipo de Reemplazo <span style=\"color:#ef4444;\">*</span></label>");
+        sb.AppendLine("    <input id=\"baja_ID_REEMPLAZO\" placeholder=\"ID del equipo que reemplaza (obligatorio)\" style=\"border-color:rgba(234,88,12,.5);\">");
+        sb.AppendLine("    <span style=\"font-size:10px;color:var(--muted2);margin-top:3px;\">Este ID actualizará el id_equipo de la tarjeta en el sistema</span>");
+        sb.AppendLine("  </div>");
+        sb.AppendLine("</div>");
+        sb.AppendLine("<div id=\"baja-error\" style=\"color:#fca5a5;font-size:12px;margin-bottom:10px;display:none;\"></div>");
+        sb.AppendLine("<div style=\"display:flex;gap:8px;justify-content:flex-end;\">");
+        sb.AppendLine("  <button class=\"btn btn-ghost\" onclick=\"cerrarBaja()\">Cancelar</button>");
+        sb.AppendLine("  <button class=\"btn\" style=\"background:linear-gradient(135deg,#7c2d12,#ea580c);color:white;\" onclick=\"guardarBaja()\">💾 Registrar Baja</button>");
+        sb.AppendLine("</div>");
+        sb.AppendLine("</div></div>");
+        // ── JS: lógica de Baja de Equipo ─────────────────────────────────────
+        sb.AppendLine("<script>");
+        sb.AppendLine("let bajaTemp={};");
+        sb.AppendLine("function abrirBaja(id,periodo,idEquipo,ubicacion,planta){");
+        sb.AppendLine("  if(!usuarioActual){abrirLogin();return;}");
+        sb.AppendLine("  bajaTemp={id:id,periodo:periodo,idEquipoOriginal:idEquipo};");
+        sb.AppendLine("  // Auto-llenado campos mapeados");
+        sb.AppendLine("  document.getElementById('baja_PLANTA').value=planta||'';");
+        sb.AppendLine("  document.getElementById('baja_EQUIPO').value=idEquipo||'';");
+        sb.AppendLine("  document.getElementById('baja_NO_SERIE').value=idEquipo||'';");
+        sb.AppendLine("  document.getElementById('baja_UBICACION_PERSONA').value=ubicacion||'';");
+        sb.AppendLine("  document.getElementById('baja_FECHA').value=new Date().toISOString().split('T')[0];");
+        sb.AppendLine("  // Limpiar campos manuales");
+        sb.AppendLine("  ['baja_FOLIO','baja_MARCA','baja_MODELO','baja_ACTIVO_FIJO',");
+        sb.AppendLine("   'baja_MOTIVO_DE_BAJA','baja_DIAGNOSTICO','baja_COMENTARIOS',");
+        sb.AppendLine("   'baja_MOTIVO_DE_CANCELACION','baja_ID_REEMPLAZO'].forEach(function(fid){");
+        sb.AppendLine("    var el=document.getElementById(fid);if(el)el.value='';");
+        sb.AppendLine("  });");
+        sb.AppendLine("  document.getElementById('baja-error').style.display='none';");
+        sb.AppendLine("  document.getElementById('modalBaja').classList.add('show');");
+        sb.AppendLine("  setTimeout(function(){document.getElementById('baja_FOLIO').focus();},100);");
+        sb.AppendLine("}");
+        sb.AppendLine("function cerrarBaja(){document.getElementById('modalBaja').classList.remove('show');}");
+        sb.AppendLine("async function guardarBaja(){");
+        sb.AppendLine("  var errEl=document.getElementById('baja-error');errEl.style.display='none';");
+        sb.AppendLine("  var idReemplazo=document.getElementById('baja_ID_REEMPLAZO').value.trim();");
+        sb.AppendLine("  if(!idReemplazo){errEl.textContent='El ID Equipo de Reemplazo es obligatorio';errEl.style.display='block';return;}");
+        sb.AppendLine("  var fecha=document.getElementById('baja_FECHA').value;");
+        sb.AppendLine("  if(!fecha){errEl.textContent='Selecciona la fecha';errEl.style.display='block';return;}");
+        sb.AppendLine("  var btnGuardar=document.querySelector('#modalBaja .btn:not(.btn-ghost)');");
+        sb.AppendLine("  btnGuardar.disabled=true;btnGuardar.textContent='Guardando...';");
+        sb.AppendLine("  try{");
+        sb.AppendLine("    var body={");
+        sb.AppendLine("      bajaDto:{");
+        sb.AppendLine("        FOLIO:document.getElementById('baja_FOLIO').value,");
+        sb.AppendLine("        ESTADO:'PENDIENTE',");
+        sb.AppendLine("        PLANTA:document.getElementById('baja_PLANTA').value,");
+        sb.AppendLine("        FECHA:fecha,");
+        sb.AppendLine("        EQUIPO:document.getElementById('baja_EQUIPO').value,");
+        sb.AppendLine("        MARCA:document.getElementById('baja_MARCA').value,");
+        sb.AppendLine("        MODELO:document.getElementById('baja_MODELO').value,");
+        sb.AppendLine("        NO_SERIE:document.getElementById('baja_NO_SERIE').value,");
+        sb.AppendLine("        ACTIVO_FIJO:document.getElementById('baja_ACTIVO_FIJO').value,");
+        sb.AppendLine("        UBICACION_PERSONA:document.getElementById('baja_UBICACION_PERSONA').value,");
+        sb.AppendLine("        MOTIVO_DE_BAJA:document.getElementById('baja_MOTIVO_DE_BAJA').value,");
+        sb.AppendLine("        DIAGNOSTICO:document.getElementById('baja_DIAGNOSTICO').value,");
+        sb.AppendLine("        COMENTARIOS:document.getElementById('baja_COMENTARIOS').value,");
+        sb.AppendLine("        MOTIVO_DE_CANCELACION:document.getElementById('baja_MOTIVO_DE_CANCELACION').value");
+        sb.AppendLine("      },");
+        sb.AppendLine("      idPreventivoDb:bajaTemp.id,");
+        sb.AppendLine("      idEquipoReemplazo:idReemplazo,");
+        sb.AppendLine("      periodo:bajaTemp.periodo,");
+        sb.AppendLine("      usuario:usuarioActual");
+        sb.AppendLine("    };");
+        sb.AppendLine("    var res=await fetch('/PREVENTIVO/REGISTRAR_BAJA',{method:'POST',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(body)});");
+        sb.AppendLine("    var data=await res.json();");
+        sb.AppendLine("    if(data.ok){");
+        sb.AppendLine("      // Actualizar tarjeta en frontend sin recargar");
+        sb.AppendLine("      var idAnterior=bajaTemp.idEquipoOriginal;");
+        sb.AppendLine("      var card=document.getElementById('equipo_'+bajaTemp.id)?.closest('.card');");
+        sb.AppendLine("      if(card){");
+        sb.AppendLine("        // Actualizar el input de ID equipo");
+        sb.AppendLine("        var equipoInput=document.getElementById('equipo_'+bajaTemp.id);");
+        sb.AppendLine("        if(equipoInput)equipoInput.value=idReemplazo;");
+        sb.AppendLine("        // Actualizar el encabezado de la tarjeta");
+        sb.AppendLine("        var idSpan=card.querySelector('.dev-name span');if(idSpan)idSpan.textContent=idReemplazo;");
+        sb.AppendLine("        // Actualizar observaciones");
+        sb.AppendLine("        var obsEl=document.getElementById('obs_'+bajaTemp.id);");
+        sb.AppendLine("        if(obsEl){");
+        sb.AppendLine("          var obsMsg='Antes: '+idAnterior+', se dio de baja, ahora: '+idReemplazo;");
+        sb.AppendLine("          obsEl.value=(obsEl.value?obsEl.value+'\\n':'')+obsMsg;");
+        sb.AppendLine("        }");
+        sb.AppendLine("        // Actualizar QR del dispositivo");
+        sb.AppendLine("        var qrEl=document.getElementById('qr_'+bajaTemp.id);");
+        sb.AppendLine("        if(qrEl){");
+        sb.AppendLine("          qrEl.innerHTML='';");
+        sb.AppendLine("          qrEl.setAttribute('data-equipo',idReemplazo);");
+        sb.AppendLine("          new QRCode(qrEl,{text:idReemplazo,width:74,height:74,correctLevel:QRCode.CorrectLevel.M});");
+        sb.AppendLine("          var qrLabel=qrEl.nextElementSibling;if(qrLabel)qrLabel.textContent=idReemplazo;");
+        sb.AppendLine("        }");
+        sb.AppendLine("      }");
+        sb.AppendLine("      cerrarBaja();");
+        sb.AppendLine("      toast('Baja registrada — Equipo actualizado a: '+idReemplazo,true);");
+        sb.AppendLine("    }else{errEl.textContent=data.error||'Error al registrar baja';errEl.style.display='block';}");
+        sb.AppendLine("  }catch(e){errEl.textContent='Error de conexión. Intenta de nuevo.';errEl.style.display='block';}");
+        sb.AppendLine("  finally{btnGuardar.disabled=false;btnGuardar.textContent='💾 Registrar Baja';}");
+        sb.AppendLine("}");
+        sb.AppendLine("</script>");
         sb.AppendLine("</body></html>");
         return sb.ToString();
     }
@@ -983,4 +1193,23 @@ public class QrPageController : ControllerBase
             return new List<string> { "Limpieza y verificación del UPS", "Limpieza del cableado", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificación vida de la pila del UPS", "Inspección y funcionamiento del UPS", "Verificar que solo equipo IT esté conectado al UPS" };
         return new List<string> { "Inspección general", "Limpieza exterior", "Verificación de funcionamiento" };
     }
+}
+
+// ── DTO para registrar baja desde QrPage ─────────────────────────────────────
+public class RegistrarBajaRequest
+{
+    /// <summary>Datos del formulario de baja (los mismos campos que BajaDto)</summary>
+    public BajaDto? BajaDto { get; set; }
+
+    /// <summary>ID (PK) del registro en mantenimientos_preventivos a actualizar</summary>
+    public int IdPreventivoDb { get; set; }
+
+    /// <summary>ID del equipo de reemplazo — actualiza id_equipo en preventivos</summary>
+    public string? IdEquipoReemplazo { get; set; }
+
+    /// <summary>Período desde donde se presionó el botón (1 o 2) — informativo</summary>
+    public int Periodo { get; set; }
+
+    /// <summary>Usuario que realiza la baja</summary>
+    public string? Usuario { get; set; }
 }
