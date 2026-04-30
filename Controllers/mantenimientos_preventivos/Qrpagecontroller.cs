@@ -617,6 +617,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("          <datalist id=\"recal-ub-list\"></datalist>");
         sb.AppendLine("        </div>");
         sb.AppendLine("        <button class=\"btn\" style=\"white-space:nowrap;font-size:11px;padding:10px 12px;background:rgba(244,114,182,.15);border:1px solid rgba(244,114,182,.4);color:#f472b6;border-radius:7px;\" onclick=\"abrirStockModal()\">🗄️ Soporte Site (#) stock</button>");
+        sb.AppendLine("        <button class=\"btn\" style=\"white-space:nowrap;font-size:11px;padding:10px 12px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;border-radius:7px;\" onclick=\"abrirCambioPlantaModal()\">🏭 Cambio de planta</button>");
         sb.AppendLine("      </div>");
         sb.AppendLine("    </div>");
         sb.AppendLine("    <!-- Paso 2: si está ocupada -->");
@@ -633,6 +634,29 @@ public class QrPageController : ControllerBase
         sb.AppendLine("      <button class=\"btn btn-primary\" id=\"btnRecalConfirmar\" onclick=\"confirmarRecal()\">Confirmar →</button>");
         sb.AppendLine("    </div>");
         sb.AppendLine("  </div>");
+        sb.AppendLine("<!-- Modal: Cambio de planta -->");
+        sb.AppendLine("<div class=\"modal\" id=\"modalCambioPlanta\">");
+        sb.AppendLine("  <div class=\"modal-box\" style=\"width:min(360px,95vw);\">");
+        sb.AppendLine("    <h3>🏭 Cambio de planta</h3>");
+        sb.AppendLine("    <p>Selecciona la nueva planta para este dispositivo</p>");
+        sb.AppendLine("    <div class=\"modal-field\">");
+        sb.AppendLine("      <label>Planta</label>");
+        sb.AppendLine("      <select id=\"cp-planta\">");
+        sb.AppendLine("        <option value=\"\">-- Selecciona --</option>");
+        sb.AppendLine("        <option value=\"B1\">B1</option>");
+        sb.AppendLine("        <option value=\"B2\">B2</option>");
+        sb.AppendLine("        <option value=\"Planta Satelite\">Planta Satelite</option>");
+        sb.AppendLine("        <option value=\"Planta Mixing\">Planta Mixing</option>");
+        sb.AppendLine("        <option value=\"Bodega\">Bodega</option>");
+        sb.AppendLine("      </select>");
+        sb.AppendLine("    </div>");
+        sb.AppendLine("    <div id=\"cp-error\" style=\"color:#fca5a5;font-size:12px;margin-bottom:10px;display:none;\"></div>");
+        sb.AppendLine("    <div class=\"modal-footer\">");
+        sb.AppendLine("      <button class=\"btn btn-ghost\" onclick=\"cerrarCambioPlantaModal()\">Cancelar</button>");
+        sb.AppendLine("      <button class=\"btn btn-primary\" id=\"btnCpGuardar\" onclick=\"guardarCambioPlanta()\">💾 Guardar</button>");
+        sb.AppendLine("    </div>");
+        sb.AppendLine("  </div>");
+        sb.AppendLine("</div>");
         sb.AppendLine("<!-- Modal: Stock Soporte Site -->");
         sb.AppendLine("<div class=\"modal\" id=\"modalStock\">");
         sb.AppendLine("  <div class=\"modal-box\" style=\"width:min(400px,95vw);\">");
@@ -1241,6 +1265,59 @@ function descargarFormatoPM(){
         sb.AppendLine("  }catch(e){errEl.textContent='Error de conexión. Intenta de nuevo.';errEl.style.display='block';}");
         sb.AppendLine("  finally{btnGuardar.disabled=false;btnGuardar.textContent='💾 Registrar Baja';}");
         sb.AppendLine("}");
+        // ── Cambio de planta ─────────────────────────────────────────────────────
+        sb.AppendLine(@"
+function abrirCambioPlantaModal(){
+  document.getElementById('cp-error').style.display='none';
+  document.getElementById('cp-planta').value='';
+  document.getElementById('btnCpGuardar').disabled=false;
+  document.getElementById('btnCpGuardar').textContent='💾 Guardar';
+  document.getElementById('modalCambioPlanta').classList.add('show');
+}
+function cerrarCambioPlantaModal(){
+  document.getElementById('modalCambioPlanta').classList.remove('show');
+}
+async function guardarCambioPlanta(){
+  const errEl=document.getElementById('cp-error');
+  errEl.style.display='none';
+  const planta=document.getElementById('cp-planta').value.trim();
+  if(!planta){errEl.textContent='Debes seleccionar una planta';errEl.style.display='block';return;}
+  const btn=document.getElementById('btnCpGuardar');
+  btn.disabled=true;btn.textContent='⏳ Guardando...';
+  try{
+    const res=await fetch('/PREVENTIVO/CAMBIO_PLANTA',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Usuario':usuarioActual||''},
+      body:JSON.stringify({idDispositivo:recalIdDispositivo,planta,usuario:usuarioActual})
+    });
+    const data=await res.json();
+    if(data.ok){
+      // 4.3 Actualizar tarjeta en frontend
+      const card=document.getElementById('equipo_'+recalIdDispositivo)?.closest('.card');
+      if(card){
+        const plantaEl=card.querySelector('.card-planta');
+        if(plantaEl)plantaEl.textContent=planta;
+        // Actualizar también el input oculto de planta si existe
+        const plantaInput=document.getElementById('planta_'+recalIdDispositivo);
+        if(plantaInput)plantaInput.value=planta;
+        // Actualizar el dato visible en el modal de recalendarización
+        document.getElementById('recal-planta').textContent=planta;
+      }
+      cerrarCambioPlantaModal();
+      toast('✅ Planta actualizada: '+planta,true);
+    }else{
+      errEl.textContent=data.error||'Error desconocido';
+      errEl.style.display='block';
+      btn.disabled=false;btn.textContent='💾 Guardar';
+    }
+  }catch(e){
+    errEl.textContent='Error de conexión';
+    errEl.style.display='block';
+    btn.disabled=false;btn.textContent='💾 Guardar';
+  }
+}
+");
+
         // ── Stock Soporte Site ───────────────────────────────────────────────
         sb.AppendLine(@"
 function abrirStockModal(){
@@ -1416,6 +1493,40 @@ async function guardarStock(){
             });
         }
         catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+    }
+
+    // ── POST /PREVENTIVO/CAMBIO_PLANTA ───────────────────────────────────────
+    // Actualiza SOLO el campo planta del registro. Sin duplicar, sin cambiar status.
+    [HttpPost("/PREVENTIVO/CAMBIO_PLANTA")]
+    public IActionResult CambiarPlanta([FromBody] CambioPlantaRequest data)
+    {
+        try
+        {
+            if (data.IdDispositivo <= 0)
+                return Ok(new { ok = false, error = "ID de dispositivo requerido" });
+            if (string.IsNullOrWhiteSpace(data.Planta))
+                return Ok(new { ok = false, error = "Debes seleccionar una planta" });
+
+            using var conn = _db.Open();
+            using var upd = conn.CreateCommand();
+            upd.CommandText = "UPDATE public.mantenimientos_preventivos SET planta = @p WHERE id = @id";
+            upd.Parameters.AddWithValue("p", data.Planta.Trim());
+            upd.Parameters.AddWithValue("id", data.IdDispositivo);
+            int rows = upd.ExecuteNonQuery();
+
+            if (rows == 0)
+                return Ok(new { ok = false, error = "Dispositivo no encontrado" });
+
+            return Ok(new { ok = true, planta = data.Planta.Trim() });
+        }
+        catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+    }
+
+    public class CambioPlantaRequest
+    {
+        public long IdDispositivo { get; set; }
+        public string Planta { get; set; } = "";
+        public string? Usuario { get; set; }
     }
 
     public class StockRequest
