@@ -520,6 +520,9 @@ public class QrPageController : ControllerBase
         sb.AppendLine(".modal-box h3{font-size:16px;font-weight:700;margin-bottom:6px;}.modal-box p{font-size:12px;color:var(--muted2);margin-bottom:20px;}");
         sb.AppendLine(".modal-field{margin-bottom:16px;}.modal-field label{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;}");
         sb.AppendLine(".modal-field input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);}");
+        sb.AppendLine(".modal-field select{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);}");
+        sb.AppendLine(".modal-field-row{display:flex;gap:8px;align-items:flex-end;}");
+        sb.AppendLine(".modal-field-row .modal-field{flex:1;margin-bottom:0;}");
         sb.AppendLine(".modal-footer{display:flex;gap:8px;justify-content:flex-end;}");
         sb.AppendLine(".toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;pointer-events:none;}");
         sb.AppendLine(".toast-ok{background:#052e16;border:1px solid #10B981;color:#6ee7b7;}");
@@ -608,8 +611,13 @@ public class QrPageController : ControllerBase
         sb.AppendLine("    </div>");
         sb.AppendLine("    <div class=\"modal-field\">");
         sb.AppendLine("      <label>📍 Nueva ubicación</label>");
-        sb.AppendLine("      <input id=\"recal-nueva-ub\" list=\"recal-ub-list\" type=\"text\" placeholder=\"Escribe o selecciona la ubicación\" autocomplete=\"off\">");
-        sb.AppendLine("      <datalist id=\"recal-ub-list\"></datalist>");
+        sb.AppendLine("      <div class=\"modal-field-row\" style=\"margin-bottom:0;\">");
+        sb.AppendLine("        <div class=\"modal-field\" style=\"flex:1;margin-bottom:0;\">");
+        sb.AppendLine("          <input id=\"recal-nueva-ub\" list=\"recal-ub-list\" type=\"text\" placeholder=\"Escribe o selecciona la ubicación\" autocomplete=\"off\">");
+        sb.AppendLine("          <datalist id=\"recal-ub-list\"></datalist>");
+        sb.AppendLine("        </div>");
+        sb.AppendLine("        <button class=\"btn\" style=\"white-space:nowrap;font-size:11px;padding:10px 12px;background:rgba(244,114,182,.15);border:1px solid rgba(244,114,182,.4);color:#f472b6;border-radius:7px;\" onclick=\"abrirStockModal()\">🗄️ Soporte Site (#) stock</button>");
+        sb.AppendLine("      </div>");
         sb.AppendLine("    </div>");
         sb.AppendLine("    <!-- Paso 2: si está ocupada -->");
         sb.AppendLine("    <div id=\"recal-paso2\" style=\"display:none;margin-bottom:14px;padding:12px;border-radius:10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);\">");
@@ -625,6 +633,41 @@ public class QrPageController : ControllerBase
         sb.AppendLine("      <button class=\"btn btn-primary\" id=\"btnRecalConfirmar\" onclick=\"confirmarRecal()\">Confirmar →</button>");
         sb.AppendLine("    </div>");
         sb.AppendLine("  </div>");
+        sb.AppendLine("<!-- Modal: Stock Soporte Site -->");
+        sb.AppendLine("<div class=\"modal\" id=\"modalStock\">");
+        sb.AppendLine("  <div class=\"modal-box\" style=\"width:min(400px,95vw);\">");
+        sb.AppendLine("    <h3>🗄️ Mover a Soporte Site (stock)</h3>");
+        sb.AppendLine("    <p>Selecciona el rack y el espacio donde se colocará el equipo</p>");
+        sb.AppendLine("    <div class=\"modal-field\">");
+        sb.AppendLine("      <label>Rack</label>");
+        sb.AppendLine("      <select id=\"stock-rack\">");
+        sb.AppendLine("        <option value=\"A\">A (Planta 1)</option>");
+        sb.AppendLine("        <option value=\"T\">T (Planta 1)</option>");
+        sb.AppendLine("        <option value=\"C\">C (Planta 1)</option>");
+        sb.AppendLine("        <option value=\"D\">D (Planta 1)</option>");
+        sb.AppendLine("        <option value=\"E\">E (Planta 2)</option>");
+        sb.AppendLine("        <option value=\"F\">F (Planta satelite)</option>");
+        sb.AppendLine("        <option value=\"G\">G (Planta mixing)</option>");
+        sb.AppendLine("      </select>");
+        sb.AppendLine("    </div>");
+        sb.AppendLine("    <div class=\"modal-field\">");
+        sb.AppendLine("      <label>Espacio</label>");
+        sb.AppendLine("      <select id=\"stock-espacio\">");
+        sb.AppendLine("        <option value=\"1\">1</option>");
+        sb.AppendLine("        <option value=\"2\">2</option>");
+        sb.AppendLine("        <option value=\"3\">3</option>");
+        sb.AppendLine("        <option value=\"4\">4</option>");
+        sb.AppendLine("        <option value=\"5\">5</option>");
+        sb.AppendLine("        <option value=\"6\">6</option>");
+        sb.AppendLine("      </select>");
+        sb.AppendLine("    </div>");
+        sb.AppendLine("    <div id=\"stock-error\" style=\"color:#fca5a5;font-size:12px;margin-bottom:10px;display:none;\"></div>");
+        sb.AppendLine("    <div class=\"modal-footer\">");
+        sb.AppendLine("      <button class=\"btn btn-ghost\" onclick=\"cerrarStockModal()\">Cancelar</button>");
+        sb.AppendLine("      <button class=\"btn btn-primary\" id=\"btnStockGuardar\" onclick=\"guardarStock()\">💾 Guardar</button>");
+        sb.AppendLine("    </div>");
+        sb.AppendLine("  </div>");
+        sb.AppendLine("</div>");
         sb.AppendLine("</div>");
         sb.AppendLine("<script>");
         sb.AppendLine("let usuarioActual=null,nombreActual=null,usuarioTarjeta={};");
@@ -1198,11 +1241,192 @@ function descargarFormatoPM(){
         sb.AppendLine("  }catch(e){errEl.textContent='Error de conexión. Intenta de nuevo.';errEl.style.display='block';}");
         sb.AppendLine("  finally{btnGuardar.disabled=false;btnGuardar.textContent='💾 Registrar Baja';}");
         sb.AppendLine("}");
+        // ── Stock Soporte Site ───────────────────────────────────────────────
+        sb.AppendLine(@"
+function abrirStockModal(){
+  document.getElementById('stock-error').style.display='none';
+  document.getElementById('stock-rack').value='A';
+  document.getElementById('stock-espacio').value='1';
+  document.getElementById('btnStockGuardar').disabled=false;
+  document.getElementById('btnStockGuardar').textContent='💾 Guardar';
+  document.getElementById('modalStock').classList.add('show');
+}
+function cerrarStockModal(){
+  document.getElementById('modalStock').classList.remove('show');
+}
+async function guardarStock(){
+  const errEl=document.getElementById('stock-error');
+  errEl.style.display='none';
+
+  const rack=document.getElementById('stock-rack').value.trim();
+  const espacio=document.getElementById('stock-espacio').value.trim();
+  const nuevaUbicacion='Soporte Site ('+rack+') '+espacio;
+
+  // 4.1 Pedir ID de dispositivo de reemplazo (obligatorio)
+  const idReemplazo=prompt('Ingresa el ID del dispositivo de reemplazo (id_dispositivo_reemplazo):');
+  if(!idReemplazo||!idReemplazo.trim()){
+    errEl.textContent='El ID de reemplazo es obligatorio';
+    errEl.style.display='block';
+    return;
+  }
+
+  const btn=document.getElementById('btnStockGuardar');
+  btn.disabled=true; btn.textContent='⏳ Guardando...';
+
+  try{
+    const body={
+      idDispositivo: recalIdDispositivo,
+      idReemplazo: idReemplazo.trim(),
+      rack,
+      espacio,
+      nuevaUbicacion,
+      usuario: usuarioActual
+    };
+    const res=await fetch('/PREVENTIVO/STOCK',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Usuario':usuarioActual||''},
+      body:JSON.stringify(body)
+    });
+    const data=await res.json();
+    if(data.ok){
+      // 4.6 Actualizar frontend
+      const card=document.getElementById('equipo_'+recalIdDispositivo)?.closest('.card');
+      if(card){
+        // Actualizar ubicación visible
+        const ubEl=card.querySelector('.card-ubicacion');
+        if(ubEl) ubEl.textContent=nuevaUbicacion;
+        // Cambiar color de la tarjeta a rosa
+        card.style.borderColor='rgba(244,114,182,.5)';
+        const badge=card.querySelector('.color-badge');
+        if(badge){ badge.style.background='rgba(244,114,182,.15)'; badge.style.color='#f472b6'; badge.style.borderColor='rgba(244,114,182,.4)'; badge.textContent='Rosa'; }
+      }
+      // Rellenar campo nueva ubicación en modalRecal
+      document.getElementById('recal-nueva-ub').value=nuevaUbicacion;
+      cerrarStockModal();
+      toast('✅ Equipo movido a '+nuevaUbicacion+' | Reemplazo: '+idReemplazo.trim(), true);
+    }else{
+      errEl.textContent=data.error||'Error desconocido';
+      errEl.style.display='block';
+      btn.disabled=false; btn.textContent='💾 Guardar';
+    }
+  }catch(e){
+    errEl.textContent='Error de conexión';
+    errEl.style.display='block';
+    btn.disabled=false; btn.textContent='💾 Guardar';
+  }
+}
+");
+
         sb.AppendLine("</script>");
         sb.AppendLine("</body></html>");
         return sb.ToString();
     }
 
+
+    // ── POST /PREVENTIVO/STOCK ────────────────────────────────────────────────
+    // 1. Duplica el registro del dispositivo actual con el nuevo id_equipo (reemplazo)
+    // 2. Actualiza ubicacion y categoria_color="ROSA" del dispositivo original
+    [HttpPost("/PREVENTIVO/STOCK")]
+    public IActionResult MoverAStock([FromBody] StockRequest data)
+    {
+        try
+        {
+            var usuario = Request.Cookies["usuario"]
+                       ?? Request.Headers["X-Usuario"].FirstOrDefault()
+                       ?? data.Usuario ?? "SISTEMA";
+
+            if (data.IdDispositivo <= 0)
+                return Ok(new { ok = false, error = "ID de dispositivo requerido" });
+            if (string.IsNullOrWhiteSpace(data.IdReemplazo))
+                return Ok(new { ok = false, error = "ID de reemplazo es obligatorio" });
+            if (string.IsNullOrWhiteSpace(data.Rack) || string.IsNullOrWhiteSpace(data.Espacio))
+                return Ok(new { ok = false, error = "Rack y espacio son requeridos" });
+
+            var nuevaUbicacion = $"Soporte Site ({data.Rack.Trim()}) {data.Espacio.Trim()}";
+
+            using var conn = _db.Open();
+
+            // 4.2 Leer datos completos del dispositivo actual para duplicar
+            using var sel = conn.CreateCommand();
+            sel.CommandText = """
+                SELECT id_equipo, ubicacion, plazo, realizado_por, fecha_realizacion,
+                       observaciones, nombre_dispositivo, planta, categoria_color, anio_creacion
+                FROM public.mantenimientos_preventivos WHERE id = @id
+                """;
+            sel.Parameters.AddWithValue("id", data.IdDispositivo);
+
+            string? idEquipoOrig = null, ubicOrig = null, plazoOrig = null, realPorOrig = null,
+                    obsOrig = null, nomDispOrig = null, plantaOrig = null, colorOrig = null;
+            DateTime? fechaOrig = null;
+            int? anioOrig = null;
+
+            using (var r = sel.ExecuteReader())
+            {
+                if (!r.Read()) return Ok(new { ok = false, error = "Dispositivo no encontrado" });
+                idEquipoOrig = r.IsDBNull(0) ? null : r.GetString(0);
+                ubicOrig = r.IsDBNull(1) ? null : r.GetString(1);
+                plazoOrig = r.IsDBNull(2) ? null : r.GetString(2);
+                realPorOrig = r.IsDBNull(3) ? null : r.GetString(3);
+                fechaOrig = r.IsDBNull(4) ? (DateTime?)null : r.GetDateTime(4);
+                obsOrig = r.IsDBNull(5) ? null : r.GetString(5);
+                nomDispOrig = r.IsDBNull(6) ? null : r.GetString(6);
+                plantaOrig = r.IsDBNull(7) ? null : r.GetString(7);
+                colorOrig = r.IsDBNull(8) ? null : r.GetString(8);
+                anioOrig = r.IsDBNull(9) ? (int?)null : Convert.ToInt32(r.GetValue(9));
+            }
+
+            // 4.2 Crear nuevo registro (equipo de reemplazo) con toda la info del actual
+            using var ins = conn.CreateCommand();
+            ins.CommandText = """
+                INSERT INTO public.mantenimientos_preventivos
+                (id_equipo, ubicacion, plazo, realizado_por, fecha_realizacion,
+                 observaciones, nombre_dispositivo, planta, categoria_color, anio_creacion)
+                VALUES (@e, @u, @p, @rp, @fr, @o, @nd, @pl, @cc, @ac)
+                RETURNING id
+                """;
+            ins.Parameters.AddWithValue("e", (object?)data.IdReemplazo ?? DBNull.Value);
+            ins.Parameters.AddWithValue("u", (object?)ubicOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("p", (object?)plazoOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("rp", (object?)realPorOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("fr", (object?)fechaOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("o", (object?)obsOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("nd", (object?)nomDispOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("pl", (object?)plantaOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("cc", (object?)colorOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("ac", (object?)anioOrig ?? DBNull.Value);
+            var nuevoId = ins.ExecuteScalar();
+
+            // 4.3 + 4.4 + 4.5 Actualizar dispositivo actual: nueva ubicacion y color ROSA
+            using var upd = conn.CreateCommand();
+            upd.CommandText = """
+                UPDATE public.mantenimientos_preventivos
+                SET ubicacion = @u, categoria_color = 'ROSA'
+                WHERE id = @id
+                """;
+            upd.Parameters.AddWithValue("u", nuevaUbicacion);
+            upd.Parameters.AddWithValue("id", data.IdDispositivo);
+            upd.ExecuteNonQuery();
+
+            return Ok(new
+            {
+                ok = true,
+                nueva_ubicacion = nuevaUbicacion,
+                id_nuevo_registro = nuevoId,
+                mensaje = $"Equipo movido a {nuevaUbicacion}. Reemplazo registrado con ID {data.IdReemplazo}."
+            });
+        }
+        catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+    }
+
+    public class StockRequest
+    {
+        public long IdDispositivo { get; set; }
+        public string IdReemplazo { get; set; } = "";
+        public string Rack { get; set; } = "";
+        public string Espacio { get; set; } = "";
+        public string NuevaUbicacion { get; set; } = "";
+        public string? Usuario { get; set; }
+    }
 
     private static DateTime LunesDeSemanaISO(int anio, int semana)
     {
