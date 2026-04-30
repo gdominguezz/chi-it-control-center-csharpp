@@ -155,7 +155,7 @@ public class QrPageController : ControllerBase
                     "</div>";
                 bool tienePmFlag = row.tienePm;
 
-                cards.Append("<div class=\"card\" data-tiene-pm=\"" + (row.tienePm ? "true" : "false") + "\" data-tiene-pm2=\"" + (row.tienePm2 ? "true" : "false") + "\">\n");
+                cards.Append("<div class=\"card\" data-id=\"" + row.id + "\" data-tiene-pm=\"" + (row.tienePm ? "true" : "false") + "\" data-tiene-pm2=\"" + (row.tienePm2 ? "true" : "false") + "\">\n");
                 cards.Append("  <input type=\"hidden\" id=\"ubicacion_" + row.id + "\" value=\"" + Esc(ubicacion) + "\">\n");
                 cards.Append("  <input type=\"hidden\" id=\"anio_" + row.id + "\" value=\"" + (row.anio?.ToString() ?? "") + "\">\n");  // kept for legacy
                 cards.Append("  <div class=\"card-top\">\n");
@@ -598,53 +598,53 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  </div>");
         sb.AppendLine("</div>");
         sb.AppendLine("<div class=\"modal\" id=\"modalRecal\">");
-        sb.AppendLine("  <div class=\"modal-box\" style=\"width:min(680px,96vw);max-height:90vh;overflow-y:auto;\">");
+        sb.AppendLine("  <div class=\"modal-box\" style=\"width:min(820px,97vw);max-height:92vh;overflow-y:auto;\">");
         sb.AppendLine("    <h3>📍 Recalendarización</h3>");
         sb.AppendLine("    <p>Selecciona el tipo de recalendarización o mueve el dispositivo</p>");
-        sb.AppendLine("    <div style=\"background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;\">");
-        sb.AppendLine("      <div style=\"display:grid;grid-template-columns:1fr 1fr;gap:6px;\">");
+        // ── Info del dispositivo ─────────────────────────────────────────────
+        sb.AppendLine("    <div style=\"background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;\">");
+        sb.AppendLine("      <div style=\"display:grid;grid-template-columns:repeat(4,1fr);gap:8px;\">");
         sb.AppendLine("        <div><span style=\"color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;\">ID Equipo</span><br><b id=\"recal-id-equipo\" style=\"font-family:'DM Mono',monospace;color:var(--accent);\"></b></div>");
         sb.AppendLine("        <div><span style=\"color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;\">Dispositivo</span><br><b id=\"recal-dispositivo\"></b></div>");
         sb.AppendLine("        <div><span style=\"color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;\">Ubicación actual</span><br><b id=\"recal-ub-actual\" style=\"color:var(--amber);\"></b></div>");
         sb.AppendLine("        <div><span style=\"color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;\">Planta</span><br><b id=\"recal-planta\"></b></div>");
         sb.AppendLine("      </div>");
         sb.AppendLine("    </div>");
-        // ── Fila de botones de tipo ──────────────────────────────────────────
-        sb.AppendLine("    <div style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:14px;\">");
-        sb.AppendLine("      <button class=\"btn\" style=\"padding:10px 12px;font-size:11px;white-space:nowrap;background:rgba(244,114,182,.15);border:1px solid rgba(244,114,182,.4);color:#f472b6;border-radius:7px;\" onclick=\"abrirStockModal()\">🗄️ Soporte Site (stock)</button>");
-        sb.AppendLine("      <button class=\"btn\" style=\"padding:10px 12px;font-size:11px;white-space:nowrap;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;border-radius:7px;\" onclick=\"abrirCambioPlantaModal()\">🏭 Cambio de planta</button>");
-        sb.AppendLine("      <button class=\"btn\" id=\"btn-tipo-reparacion\" style=\"padding:10px 12px;font-size:11px;white-space:nowrap;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fca5a5;border-radius:7px;\" onclick=\"toggleFormReparacion()\">🔧 Recalendarización por Reparación</button>");
+        // ── Botones de tipo (3 columnas fijas, sin encimarse) ────────────────
+        sb.AppendLine("    <div style=\"display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;\">");
+        sb.AppendLine("      <button class=\"btn\" style=\"padding:12px 10px;font-size:12px;background:rgba(244,114,182,.15);border:1px solid rgba(244,114,182,.4);color:#f472b6;border-radius:8px;\" onclick=\"abrirStockModal()\">🗄️ Soporte Site (stock)</button>");
+        sb.AppendLine("      <button class=\"btn\" style=\"padding:12px 10px;font-size:12px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;border-radius:8px;\" onclick=\"abrirCambioPlantaModal()\">🏭 Cambio de planta</button>");
+        sb.AppendLine("      <button class=\"btn\" id=\"btn-tipo-reparacion\" style=\"padding:12px 10px;font-size:12px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fca5a5;border-radius:8px;\" onclick=\"toggleFormReparacion()\">🔧 Recalendarización por Reparación</button>");
         sb.AppendLine("    </div>");
-        // ── Sub-formulario de Reparación (oculto por defecto) ───────────────
-        sb.AppendLine("    <div id=\"form-reparacion\" style=\"display:none;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.35);border-radius:10px;padding:14px;margin-bottom:14px;\">");
-        sb.AppendLine("      <div style=\"font-size:12px;font-weight:700;color:#fca5a5;margin-bottom:10px;\">🔧 Datos de Reparación</div>");
-        sb.AppendLine("      <div style=\"display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;\">");
+        // ── Sub-formulario de Reparación ─────────────────────────────────────
+        sb.AppendLine("    <div id=\"form-reparacion\" style=\"display:none;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.35);border-radius:10px;padding:16px;margin-bottom:16px;\">");
+        sb.AppendLine("      <div style=\"font-size:13px;font-weight:700;color:#fca5a5;margin-bottom:12px;\">🔧 Datos de Reparación</div>");
+        sb.AppendLine("      <div style=\"display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;\">");
+        // Rack
         sb.AppendLine("        <div><label style=\"font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;\">Rack <span style=\"color:#ef4444;\">*</span></label>");
         sb.AppendLine("          <select id=\"rep-rack\" style=\"width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 10px;font-size:13px;color:var(--text);\" onchange=\"actualizarPreviewRep()\">");
-        sb.AppendLine("            <option value=\"\">-- Selecciona --</option>");
-        sb.AppendLine("            <optgroup label=\"Planta 1\"><option value=\"A\">A</option><option value=\"T\">T</option><option value=\"C\">C</option><option value=\"D\">D</option></optgroup>");
-        sb.AppendLine("            <optgroup label=\"Planta 2\"><option value=\"E\">E</option></optgroup>");
-        sb.AppendLine("            <optgroup label=\"Planta Satélite\"><option value=\"F\">F</option></optgroup>");
-        sb.AppendLine("            <optgroup label=\"Planta Mixing\"><option value=\"G\">G</option></optgroup>");
-        sb.AppendLine("          </select>");
-        sb.AppendLine("        </div>");
+        sb.AppendLine("            <option value=\"\">-- Rack --</option>");
+        sb.AppendLine("            <optgroup label=\"Planta 1\"><option value=\"A\">A — Planta 1</option><option value=\"T\">T — Planta 1</option><option value=\"C\">C — Planta 1</option><option value=\"D\">D — Planta 1</option></optgroup>");
+        sb.AppendLine("            <optgroup label=\"Planta 2\"><option value=\"E\">E — Planta 2</option></optgroup>");
+        sb.AppendLine("            <optgroup label=\"Planta Satélite\"><option value=\"F\">F — Planta Satélite</option></optgroup>");
+        sb.AppendLine("            <optgroup label=\"Planta Mixing\"><option value=\"G\">G — Planta Mixing</option></optgroup>");
+        sb.AppendLine("          </select></div>");
+        // Espacio
         sb.AppendLine("        <div><label style=\"font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;\">Espacio <span style=\"color:#ef4444;\">*</span></label>");
         sb.AppendLine("          <select id=\"rep-espacio\" style=\"width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 10px;font-size:13px;color:var(--text);\" onchange=\"actualizarPreviewRep()\">");
-        sb.AppendLine("            <option value=\"\">-- Selecciona --</option>");
-        sb.AppendLine("            <option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option>");
-        sb.AppendLine("            <option value=\"4\">4</option><option value=\"5\">5</option><option value=\"6\">6</option>");
-        sb.AppendLine("          </select>");
-        sb.AppendLine("        </div>");
+        sb.AppendLine("            <option value=\"\">-- Espacio --</option>");
+        sb.AppendLine("            <option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option><option value=\"5\">5</option><option value=\"6\">6</option>");
+        sb.AppendLine("          </select></div>");
+        // ID Préstamo
+        sb.AppendLine("        <div><label style=\"font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;\">ID Dispositivo Préstamo <span style=\"color:#ef4444;\">*</span></label>");
+        sb.AppendLine("          <input id=\"rep-id-prestamo\" type=\"text\" placeholder=\"ID del equipo de préstamo\" style=\"width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 10px;font-size:13px;color:var(--text);\">");
+        sb.AppendLine("          <span style=\"font-size:10px;color:var(--muted2);\">Se duplica la tarjeta con este ID</span></div>");
         sb.AppendLine("      </div>");
-        sb.AppendLine("      <div style=\"margin-bottom:10px;\">");
-        sb.AppendLine("        <label style=\"font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;\">ID Dispositivo Préstamo <span style=\"color:#ef4444;\">*</span></label>");
-        sb.AppendLine("        <input id=\"rep-id-prestamo\" type=\"text\" placeholder=\"ID del equipo de préstamo que se asignará\" style=\"width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 10px;font-size:13px;color:var(--text);\">");
-        sb.AppendLine("        <span style=\"font-size:10px;color:var(--muted2);\">Se duplicará la tarjeta actual con este ID</span>");
-        sb.AppendLine("      </div>");
-        sb.AppendLine("      <div id=\"rep-preview\" style=\"display:none;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:7px;padding:8px 10px;margin-bottom:10px;font-size:11px;color:var(--amber);\">📍 Ubicación: <b id=\"rep-preview-txt\"></b></div>");
-        sb.AppendLine("      <div id=\"rep-error\" style=\"display:none;color:#fca5a5;font-size:11px;margin-bottom:8px;\"></div>");
+        // Preview ubicación
+        sb.AppendLine("      <div id=\"rep-preview\" style=\"display:none;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:7px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--amber);\">📍 Ubicación generada: <b id=\"rep-preview-txt\"></b></div>");
+        sb.AppendLine("      <div id=\"rep-error\" style=\"display:none;color:#fca5a5;font-size:12px;margin-bottom:8px;\"></div>");
         sb.AppendLine("      <div style=\"display:flex;gap:8px;justify-content:flex-end;\">");
-        sb.AppendLine("        <button class=\"btn btn-ghost\" onclick=\"cerrarFormReparacion()\">Cancelar</button>");
+        sb.AppendLine("        <button class=\"btn btn-ghost\" onclick=\"cerrarFormReparacion()\">✕ Cancelar</button>");
         sb.AppendLine("        <button class=\"btn btn-danger\" id=\"btnGuardarRep\" onclick=\"guardarReparacion()\">💾 Guardar Reparación</button>");
         sb.AppendLine("      </div>");
         sb.AppendLine("    </div>");
@@ -968,6 +968,111 @@ function descargarFormatoPM(){
         sb.AppendLine(" toast('Correctivo registrado',true);");
         sb.AppendLine("}");
 
+        // ── Form Reparación JS ──
+        sb.AppendLine("function actualizarPreviewRep(){");
+        sb.AppendLine("  const rack=document.getElementById('rep-rack').value;");
+        sb.AppendLine("  const esp=document.getElementById('rep-espacio').value;");
+        sb.AppendLine("  const prev=document.getElementById('rep-preview');");
+        sb.AppendLine("  const txt=document.getElementById('rep-preview-txt');");
+        sb.AppendLine("  if(rack&&esp){prev.style.display='block';txt.textContent='Soporte Site Reparacion ('+rack+' espacio '+esp+')';}");
+        sb.AppendLine("  else{prev.style.display='none';}");
+        sb.AppendLine("}");
+
+        sb.AppendLine("function toggleFormReparacion(){");
+        sb.AppendLine("  const f=document.getElementById('form-reparacion');");
+        sb.AppendLine("  if(!f)return;");
+        sb.AppendLine("  const abriendo=f.style.display==='none';");
+        sb.AppendLine("  f.style.display=abriendo?'block':'none';");
+        sb.AppendLine("  if(abriendo){");
+        sb.AppendLine("    document.getElementById('rep-rack').value='';");
+        sb.AppendLine("    document.getElementById('rep-espacio').value='';");
+        sb.AppendLine("    document.getElementById('rep-id-prestamo').value='';");
+        sb.AppendLine("    document.getElementById('rep-preview').style.display='none';");
+        sb.AppendLine("    document.getElementById('rep-error').style.display='none';");
+        sb.AppendLine("  }");
+        sb.AppendLine("}");
+
+        sb.AppendLine("function cerrarFormReparacion(){");
+        sb.AppendLine("  const f=document.getElementById('form-reparacion');");
+        sb.AppendLine("  if(f) f.style.display='none';");
+        sb.AppendLine("}");
+
+        sb.AppendLine("async function guardarReparacion(){");
+        sb.AppendLine("  const errEl=document.getElementById('rep-error');");
+        sb.AppendLine("  errEl.style.display='none';");
+        sb.AppendLine("  const idDisp=recalIdDispositivo;");
+        sb.AppendLine("  if(!idDisp){errEl.textContent='No hay dispositivo seleccionado.';errEl.style.display='block';return;}");
+        sb.AppendLine("  const rack=document.getElementById('rep-rack').value.trim();");
+        sb.AppendLine("  const espacio=document.getElementById('rep-espacio').value.trim();");
+        sb.AppendLine("  const idPrestamo=document.getElementById('rep-id-prestamo').value.trim();");
+        sb.AppendLine("  if(!rack){errEl.textContent='Selecciona un rack.';errEl.style.display='block';return;}");
+        sb.AppendLine("  if(!espacio){errEl.textContent='Selecciona un espacio.';errEl.style.display='block';return;}");
+        sb.AppendLine("  if(!idPrestamo){errEl.textContent='El ID del dispositivo de préstamo es obligatorio.';errEl.style.display='block';return;}");
+        sb.AppendLine("  const btn=document.getElementById('btnGuardarRep');");
+        sb.AppendLine("  btn.disabled=true;btn.textContent='Guardando...';");
+        sb.AppendLine("  try{");
+        sb.AppendLine("    const res=await fetch('/PREVENTIVO/RECAL_REPARACION',{");
+        sb.AppendLine("      method:'POST',");
+        sb.AppendLine("      headers:{'Content-Type':'application/json'},");
+        sb.AppendLine("      body:JSON.stringify({id_dispositivo:idDisp,rack,espacio,id_dispositivo_prestamo:idPrestamo,usuario:usuarioActual})");
+        sb.AppendLine("    });");
+        sb.AppendLine("    const d=await res.json();");
+        sb.AppendLine("    if(d.ok){");
+        sb.AppendLine("      cerrarFormReparacion();");
+        sb.AppendLine("      cerrarRecal();");
+        sb.AppendLine("      // Actualizar tarjeta visualmente sin recargar");
+        sb.AppendLine("      aplicarEstadoReparacion(idDisp);");
+        sb.AppendLine("      toast('🔧 En reparación: '+d.nueva_ubicacion,true);");
+        sb.AppendLine("    }else{");
+        sb.AppendLine("      errEl.textContent=d.error||'Error al guardar';errEl.style.display='block';");
+        sb.AppendLine("    }");
+        sb.AppendLine("  }catch(e){errEl.textContent='Error de conexión';errEl.style.display='block';}");
+        sb.AppendLine("  finally{btn.disabled=false;btn.textContent='💾 Guardar Reparación';}");
+        sb.AppendLine("}");
+
+        // ── Aplicar estado EN REPARACION a la tarjeta dinámicamente ──
+        sb.AppendLine("function aplicarEstadoReparacion(id){");
+        sb.AppendLine("  const card=document.querySelector('.card[data-id=\"'+id+'\"]');");
+        sb.AppendLine("  if(!card)return;");
+        // Borde rojo
+        sb.AppendLine("  card.style.border='2px solid #EF4444';");
+        sb.AppendLine("  card.style.boxShadow='0 0 0 2px rgba(239,68,68,.25)';");
+        // Badge color rojo en card-top
+        sb.AppendLine("  const badge=card.querySelector('.color-badge');");
+        sb.AppendLine("  if(badge){badge.textContent='Rojo';badge.style.background='#1f0000';badge.style.color='#EF4444';badge.style.borderColor='rgba(239,68,68,.4)';}");
+        // Etiqueta EN REPARACION
+        sb.AppendLine("  let repTag=card.querySelector('.rep-tag');");
+        sb.AppendLine("  if(!repTag){");
+        sb.AppendLine("    repTag=document.createElement('div');");
+        sb.AppendLine("    repTag.className='rep-tag';");
+        sb.AppendLine("    repTag.style.cssText='background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.5);color:#fca5a5;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.1em;padding:5px 12px;text-align:center;border-radius:6px;margin:8px 16px 0;';");
+        sb.AppendLine("    repTag.textContent='🔧 EN REPARACIÓN';");
+        sb.AppendLine("    const cardTop=card.querySelector('.card-top');");
+        sb.AppendLine("    if(cardTop)cardTop.after(repTag);");
+        sb.AppendLine("  }");
+        // Ocultar TODOS los botones de acción excepto Generar Correctivo
+        sb.AppendLine("  const actions=card.querySelector('.card-actions');");
+        sb.AppendLine("  if(actions){");
+        sb.AppendLine("    actions.querySelectorAll('.btn').forEach(b=>{b.style.display='none';});");
+        sb.AppendLine("    // Mostrar solo botón de Generar Correctivo");
+        sb.AppendLine("    let btnCorr=actions.querySelector('.btn-correctivo-rep');");
+        sb.AppendLine("    if(!btnCorr){");
+        sb.AppendLine("      btnCorr=document.createElement('button');");
+        sb.AppendLine("      btnCorr.className='btn btn-danger btn-correctivo-rep';");
+        sb.AppendLine("      btnCorr.style.width='100%';");
+        sb.AppendLine("      const ub=document.getElementById('ubicacion_'+id)?.value||'';");
+        sb.AppendLine("      const pl=document.getElementById('recal-planta')?.textContent||'';");
+        sb.AppendLine("      const eq=document.getElementById('recal-id-equipo')?.textContent||'';");
+        sb.AppendLine("      btnCorr.textContent='⚠️ Generar Correctivo';");
+        sb.AppendLine("      btnCorr.onclick=()=>abrirModalCorrectivo(id,pl,eq,ub);");
+        sb.AppendLine("      const row=actions.querySelector('.ca-edit-row')||actions;");
+        sb.AppendLine("      row.appendChild(btnCorr);");
+        sb.AppendLine("    }else{btnCorr.style.display='';}");
+        sb.AppendLine("  }");
+        // Ocultar sección PM
+        sb.AppendLine("  const pmSec=card.querySelector('.pm-section');");
+        sb.AppendLine("  if(pmSec)pmSec.style.display='none';");
+        sb.AppendLine("}");
 
         // ── Recalendarización JS ──
         sb.AppendLine("let recalIdDispositivo=null,recalIdOcupante=null;");
@@ -1630,6 +1735,134 @@ async function guardarStock(){
         if (d.Contains("UPS"))
             return new List<string> { "Limpieza y verificación del UPS", "Limpieza del cableado", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificación vida de la pila del UPS", "Inspección y funcionamiento del UPS", "Verificar que solo equipo IT esté conectado al UPS" };
         return new List<string> { "Inspección general", "Limpieza exterior", "Verificación de funcionamiento" };
+    }
+
+    // ── POST /PREVENTIVO/RECAL_REPARACION ────────────────────────────────────
+    // Recalendarización por reparación:
+    // 4.2 Duplica el registro actual con el id_dispositivo_prestamo
+    // 4.3 Construye ubicación: "Soporte Site Reparacion (RACK espacio ESPACIO)"
+    // 4.4 Actualiza dispositivo original: ubicacion = generada, categoria_color = 'ROJO'
+    //     + inserta en mantenimientos_correctivos con status PENDIENTE
+    [HttpPost("/PREVENTIVO/RECAL_REPARACION")]
+    public IActionResult RecalReparacion([FromBody] RecalReparacionRequest data)
+    {
+        try
+        {
+            if (data.IdDispositivo <= 0)
+                return Ok(new { ok = false, error = "ID de dispositivo requerido" });
+            if (string.IsNullOrWhiteSpace(data.Rack))
+                return Ok(new { ok = false, error = "El rack es obligatorio" });
+            if (string.IsNullOrWhiteSpace(data.Espacio))
+                return Ok(new { ok = false, error = "El espacio es obligatorio" });
+            if (string.IsNullOrWhiteSpace(data.IdDispositivoPrestamo))
+                return Ok(new { ok = false, error = "El ID del dispositivo de préstamo es obligatorio" });
+
+            var usuario = Request.Cookies["usuario"]
+                       ?? Request.Headers["X-Usuario"].FirstOrDefault()
+                       ?? data.Usuario ?? "SISTEMA";
+
+            // 4.3 Construir ubicación
+            var nuevaUbicacion = $"Soporte Site Reparacion ({data.Rack.Trim()} espacio {data.Espacio.Trim()})";
+
+            using var conn = _db.Open();
+
+            // Leer datos completos del dispositivo actual para duplicar
+            using var sel = conn.CreateCommand();
+            sel.CommandText = """
+                SELECT id_equipo, ubicacion, plazo, realizado_por, fecha_realizacion,
+                       observaciones, nombre_dispositivo, planta, categoria_color, anio_creacion
+                FROM public.mantenimientos_preventivos WHERE id = @id
+                """;
+            sel.Parameters.AddWithValue("id", data.IdDispositivo);
+
+            string? idEquipoOrig = null, ubicOrig = null, plazoOrig = null, realPorOrig = null,
+                    obsOrig = null, nomDispOrig = null, plantaOrig = null, colorOrig = null;
+            DateTime? fechaOrig = null;
+            int? anioOrig = null;
+
+            using (var r = sel.ExecuteReader())
+            {
+                if (!r.Read())
+                    return Ok(new { ok = false, error = "Dispositivo no encontrado" });
+                idEquipoOrig = r.IsDBNull(0) ? null : r.GetString(0);
+                ubicOrig = r.IsDBNull(1) ? null : r.GetString(1);
+                plazoOrig = r.IsDBNull(2) ? null : r.GetString(2);
+                realPorOrig = r.IsDBNull(3) ? null : r.GetString(3);
+                fechaOrig = r.IsDBNull(4) ? (DateTime?)null : r.GetDateTime(4);
+                obsOrig = r.IsDBNull(5) ? null : r.GetString(5);
+                nomDispOrig = r.IsDBNull(6) ? null : r.GetString(6);
+                plantaOrig = r.IsDBNull(7) ? null : r.GetString(7);
+                colorOrig = r.IsDBNull(8) ? null : r.GetString(8);
+                anioOrig = r.IsDBNull(9) ? (int?)null : Convert.ToInt32(r.GetValue(9));
+            }
+
+            // 4.2 Duplicar tarjeta con id_dispositivo_prestamo
+            using var ins = conn.CreateCommand();
+            ins.CommandText = """
+                INSERT INTO public.mantenimientos_preventivos
+                (id_equipo, ubicacion, plazo, realizado_por, fecha_realizacion,
+                 observaciones, nombre_dispositivo, planta, categoria_color, anio_creacion)
+                VALUES (@e, @u, @p, @rp, @fr, @o, @nd, @pl, @cc, @ac)
+                RETURNING id
+                """;
+            ins.Parameters.AddWithValue("e", (object?)data.IdDispositivoPrestamo.Trim() ?? DBNull.Value);
+            ins.Parameters.AddWithValue("u", (object?)ubicOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("p", (object?)plazoOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("rp", (object?)realPorOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("fr", (object?)fechaOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("o", (object?)obsOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("nd", (object?)nomDispOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("pl", (object?)plantaOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("cc", (object?)colorOrig ?? DBNull.Value);
+            ins.Parameters.AddWithValue("ac", (object?)anioOrig ?? DBNull.Value);
+            ins.ExecuteScalar();
+
+            // 4.4 Actualizar dispositivo original: nueva ubicación + color ROJO
+            using var upd = conn.CreateCommand();
+            upd.CommandText = """
+                UPDATE public.mantenimientos_preventivos
+                SET ubicacion = @u, categoria_color = 'ROJO'
+                WHERE id = @id
+                """;
+            upd.Parameters.AddWithValue("u", nuevaUbicacion);
+            upd.Parameters.AddWithValue("id", data.IdDispositivo);
+            upd.ExecuteNonQuery();
+
+            // Insertar correctivo en mantenimientos_correctivos con los datos del dispositivo
+            using var corrCmd = conn.CreateCommand();
+            corrCmd.CommandText = """
+                INSERT INTO public.mantenimientos_correctivos
+                    (status, planta, linea_persona, equipo, descripcion_falla,
+                     fecha_solicitud, reporte_elaborado_por, observaciones)
+                VALUES
+                    ('PENDIENTE', @planta, @linea, @equipo, @falla,
+                     CURRENT_DATE, @reporte, @obs)
+                """;
+            corrCmd.Parameters.AddWithValue("planta", (object?)plantaOrig ?? DBNull.Value);
+            corrCmd.Parameters.AddWithValue("linea", (object?)ubicOrig ?? DBNull.Value);
+            corrCmd.Parameters.AddWithValue("equipo", (object?)idEquipoOrig ?? DBNull.Value);
+            corrCmd.Parameters.AddWithValue("falla", $"Equipo en reparación — enviado a {nuevaUbicacion}");
+            corrCmd.Parameters.AddWithValue("reporte", usuario.ToUpper());
+            corrCmd.Parameters.AddWithValue("obs", $"Recalendarización por reparación. Equipo préstamo: {data.IdDispositivoPrestamo.Trim()}");
+            corrCmd.ExecuteNonQuery();
+
+            return Ok(new
+            {
+                ok = true,
+                nueva_ubicacion = nuevaUbicacion,
+                mensaje = $"Equipo enviado a reparación. Ubicación: {nuevaUbicacion}"
+            });
+        }
+        catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+    }
+
+    public class RecalReparacionRequest
+    {
+        public long IdDispositivo { get; set; }
+        public string Rack { get; set; } = "";
+        public string Espacio { get; set; } = "";
+        public string IdDispositivoPrestamo { get; set; } = "";
+        public string? Usuario { get; set; }
     }
 }
 
