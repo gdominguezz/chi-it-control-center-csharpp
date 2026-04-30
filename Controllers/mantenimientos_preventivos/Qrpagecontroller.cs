@@ -1014,7 +1014,7 @@ function descargarFormatoPM(){
         sb.AppendLine("    const res=await fetch('/PREVENTIVO/RECAL_REPARACION',{");
         sb.AppendLine("      method:'POST',");
         sb.AppendLine("      headers:{'Content-Type':'application/json'},");
-        sb.AppendLine("      body:JSON.stringify({id_dispositivo:idDisp,rack,espacio,id_dispositivo_prestamo:idPrestamo,usuario:usuarioActual})");
+        sb.AppendLine("      body:JSON.stringify({idDispositivo:idDisp,rack,espacio,idDispositivoPrestamo:idPrestamo,usuario:usuarioActual})");
         sb.AppendLine("    });");
         sb.AppendLine("    const d=await res.json();");
         sb.AppendLine("    if(d.ok){");
