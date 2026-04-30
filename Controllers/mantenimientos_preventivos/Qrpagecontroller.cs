@@ -238,6 +238,7 @@ public class QrPageController : ControllerBase
                 cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm1_" + row.id + "\" placeholder=\"Observaciones P1...\"></textarea>\n");
                 cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
                 cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ",1)\">💾 Guardar P1</button>\n");
+                cards.Append("        <button class=\"btn btn-ghost\" style=\"background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.35)\" onclick=\"descargarPdfDesdeForm(" + row.id + ",1,'" + Esc(row.idEquipo) + "','" + Esc(row.dispositivo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📥 Descargar PDF</button>\n");
                 cards.Append("        <button class=\"btn btn-baja\" onclick=\"abrirBaja(" + row.id + ",1,'" + Esc(row.idEquipo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📤 Baja de Equipo</button>\n");
                 cards.Append("      </div>\n    </div>\n");
                 cards.Append("    <div class=\"mini-form\" id=\"ver1_" + row.id + "\" style=\"display:none\">\n");
@@ -251,6 +252,7 @@ public class QrPageController : ControllerBase
                 cards.Append("      <div style=\"margin-top:6px;font-size:11px;color:var(--muted2)\" id=\"ver_obs1_" + row.id + "\"></div>\n");
                 cards.Append("      <div id=\"ver_correctivo1_" + row.id + "\" style=\"display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);font-size:12px;font-weight:700;color:#fca5a5;\">⚠️ Requiere Correctivo</div>\n");
                 cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
+                cards.Append("        <button class=\"btn btn-ghost\" style=\"background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.35)\" onclick=\"descargarPdfDesdeVer(" + row.id + ",1,'" + Esc(row.idEquipo) + "','" + Esc(row.dispositivo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📥 Descargar PDF</button>\n");
                 cards.Append("      </div>\n    </div>\n");
                 cards.Append("    <div class=\"mini-form\" id=\"edit_pm1_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 1</div>\n");
@@ -273,6 +275,7 @@ public class QrPageController : ControllerBase
                 cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm2_" + row.id + "\" placeholder=\"Observaciones P2...\"></textarea>\n");
                 cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
                 cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ",2)\">💾 Guardar P2</button>\n");
+                cards.Append("        <button class=\"btn btn-ghost\" style=\"background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.35)\" onclick=\"descargarPdfDesdeForm(" + row.id + ",2,'" + Esc(row.idEquipo) + "','" + Esc(row.dispositivo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📥 Descargar PDF</button>\n");
                 cards.Append("        <button class=\"btn btn-baja\" onclick=\"abrirBaja(" + row.id + ",2,'" + Esc(row.idEquipo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📤 Baja de Equipo</button>\n");
                 cards.Append("      </div>\n    </div>\n");
                 cards.Append("    <div class=\"mini-form\" id=\"ver2_" + row.id + "\" style=\"display:none\">\n");
@@ -286,6 +289,7 @@ public class QrPageController : ControllerBase
                 cards.Append("      <div style=\"margin-top:6px;font-size:11px;color:var(--muted2)\" id=\"ver_obs2_" + row.id + "\"></div>\n");
                 cards.Append("      <div id=\"ver_correctivo2_" + row.id + "\" style=\"display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);font-size:12px;font-weight:700;color:#fca5a5;\">⚠️ Requiere Correctivo</div>\n");
                 cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
+                cards.Append("        <button class=\"btn btn-ghost\" style=\"background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.35)\" onclick=\"descargarPdfDesdeVer(" + row.id + ",2,'" + Esc(row.idEquipo) + "','" + Esc(row.dispositivo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📥 Descargar PDF</button>\n");
                 cards.Append("      </div>\n    </div>\n");
                 cards.Append("    <div class=\"mini-form\" id=\"edit_pm2_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 2</div>\n");
@@ -453,6 +457,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("<title>PM — " + ubicacion + "</title>");
         sb.AppendLine("<link href=\"https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap\" rel=\"stylesheet\">");
         sb.AppendLine("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js\"></script>");
+        sb.AppendLine("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js\"></script>");
         sb.AppendLine("<style>");
         sb.AppendLine(":root{--bg:#0B0F1A;--surface:#111827;--surface2:#1a2235;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--accent:#3B82F6;--text:#F1F5F9;--muted:#64748B;--muted2:#94A3B8;--green:#10B981;--red:#EF4444;--amber:#F59E0B;--radius:14px;}");
         sb.AppendLine("*{box-sizing:border-box;margin:0;padding:0;}");
@@ -796,7 +801,171 @@ public class QrPageController : ControllerBase
         sb.AppendLine("}");
         sb.AppendLine("function toast(msg,ok){const t=document.createElement('div');t.className='toast '+(ok?'toast-ok':'toast-err');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}");
 
-        //modal de correctivos
+        // ── PDF generation functions ─────────────────────────────────────────
+        sb.AppendLine(@"
+// ── Recolecta datos del formulario activo (form1/form2) ──
+function descargarPdfDesdeForm(id,p,idEquipo,dispositivo,ubicacion,planta){
+  const fecha=document.getElementById('fecha'+p+'_'+id)?.value||'';
+  const obs=document.getElementById('obs_pm'+p+'_'+id)?.value||'';
+  const reqCorr=document.getElementById('req_correctivo'+p+'_'+id)?.checked||false;
+  const cbs=document.querySelectorAll('#form'+p+'_'+id+' .acts-list input[type=checkbox]');
+  const actTexts=document.querySelectorAll('#form'+p+'_'+id+' .acts-list .act-text');
+  const checks=[];
+  cbs.forEach((cb,i)=>{if(cb.checked)checks.push(i);});
+  const actividadesList=Array.from(actTexts).map(e=>e.textContent.trim());
+  generarPdfPm({id,p,idEquipo,dispositivo,ubicacion,planta,fecha,obs,reqCorr,checks,actividadesList,usuario:usuarioActual||nombreActual||'—'});
+}
+
+// ── Recolecta datos del panel 'ver' (PM ya guardado) ──
+async function descargarPdfDesdeVer(id,p,idEquipo,dispositivo,ubicacion,planta){
+  const endpoint=p===2?'/PREVENTIVO/DIGITAL_P2/'+id:'/PREVENTIVO/DIGITAL/'+id;
+  try{
+    const res=await fetch(endpoint);const data=await res.json();
+    if(!data.existe){toast('No hay PM de P'+p+' guardado',false);return;}
+    const pm=data.data;
+    const allActs=Array.from(document.querySelectorAll('#edit_acts'+p+'_'+id+' .act-text')).map(e=>e.textContent.trim());
+    generarPdfPm({id,p,idEquipo,dispositivo,ubicacion,planta,
+      fecha:pm.fecha||'',
+      obs:pm.observaciones||'',
+      reqCorr:pm.requiere_correctivo||false,
+      checks:pm.checks||[],
+      actividadesList:allActs,
+      usuario:pm.usuario||'—',
+      proximo:pm.proximo_pm||''});
+  }catch(e){toast('Error al obtener datos del PM',false);}
+}
+
+// ── Genera y descarga el PDF ──
+function generarPdfPm({id,p,idEquipo,dispositivo,ubicacion,planta,fecha,obs,reqCorr,checks,actividadesList,usuario,proximo}){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'letter'});
+  const W=215.9,M=12,cW=W-M*2;
+  let y=M;
+
+  // ── Colores ──
+  const azulOsc=[13,71,161];
+  const azulCla=[30,136,229];
+  const gris=[240,242,245];
+  const negro=[20,20,20];
+  const verde=[16,120,64];
+  const rojo=[180,30,30];
+
+  // ── Cabecera: fondo azul ──
+  doc.setFillColor(...azulOsc);
+  doc.rect(M,y,cW,14,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(13);
+  doc.text('S-Riko Automotive Hose de Chihuahua',W/2,y+5.5,{align:'center'});
+  doc.setFontSize(10);
+  doc.text('MANTENIMIENTO PREVENTIVO — IT-FO-002 Rev.9',W/2,y+10.5,{align:'center'});
+  y+=16;
+
+  // ── Franja de datos del equipo ──
+  doc.setFillColor(...gris);
+  doc.rect(M,y,cW,10,'F');
+  doc.setTextColor(...negro);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(8);
+  const col=cW/4;
+  const labels=[['FECHA',fecha],['ID EQUIPO',idEquipo],['DISPOSITIVO',dispositivo],['PLANTA',planta]];
+  labels.forEach(([lbl,val],i)=>{
+    const x=M+i*col+2;
+    doc.text(lbl,x,y+3.5);
+    doc.setFont('helvetica','normal');
+    doc.text(val||'—',x,y+7.5);
+    doc.setFont('helvetica','bold');
+  });
+  y+=12;
+
+  // ── Línea: Ubicación / Periodo / Usuario ──
+  doc.setFont('helvetica','bold');doc.setFontSize(8);
+  doc.setFillColor(...azulCla);
+  doc.rect(M,y,cW,7,'F');
+  doc.setTextColor(255,255,255);
+  doc.text('LÍNEA/ÁREA: '+ubicacion+'   |   PERÍODO: P'+p+'   |   REALIZADO POR: '+usuario,M+3,y+4.5);
+  y+=9;
+
+  // ── Título sección actividades ──
+  doc.setFillColor(...negro);
+  doc.rect(M,y,cW,6,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');doc.setFontSize(8);
+  doc.text('ACTIVIDADES REALIZADAS',M+3,y+4);
+  y+=7;
+
+  // ── Lista de actividades ──
+  doc.setFontSize(8);
+  const lineH=6;
+  actividadesList.forEach((act,i)=>{
+    const done=checks.includes(i);
+    // fondo alterno
+    if(i%2===0){doc.setFillColor(248,250,252);doc.rect(M,y,cW,lineH,'F');}
+    // checkbox visual
+    doc.setDrawColor(100,116,139);doc.setLineWidth(0.3);
+    doc.rect(M+2,y+1.5,3.5,3.5);
+    if(done){
+      doc.setDrawColor(...verde);doc.setLineWidth(0.5);
+      doc.line(M+2.5,y+3.2,M+3.5,y+4.5);
+      doc.line(M+3.5,y+4.5,M+5.2,y+2);
+    }
+    // texto
+    doc.setFont('helvetica',done?'bold':'normal');
+    doc.setTextColor(done?...[verde]:...[100,116,139]);
+    doc.text(act,M+7,y+4);
+    // estado a la derecha
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(7);
+    doc.setTextColor(done?...[verde]:...[100,116,139]);
+    doc.text(done?'REALIZADO':'NO REALIZADO',M+cW-25,y+4);
+    doc.setFontSize(8);
+    y+=lineH;
+    if(y>258){doc.addPage();y=M;}
+  });
+
+  y+=3;
+
+  // ── Requiere correctivo ──
+  doc.setFillColor(...(reqCorr?[254,226,226]:[236,253,245]));
+  doc.rect(M,y,cW,8,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(9);
+  doc.setTextColor(...(reqCorr?rojo:verde));
+  doc.text(reqCorr?'⚠ REQUIERE MANTENIMIENTO CORRECTIVO: SÍ':'✔ NO REQUIERE MANTENIMIENTO CORRECTIVO',M+3,y+5.5);
+  y+=10;
+
+  // ── Observaciones ──
+  if(obs){
+    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...negro);
+    doc.text('OBSERVACIONES:',M,y+4);
+    doc.setFont('helvetica','normal');
+    const obsLines=doc.splitTextToSize(obs,cW);
+    doc.text(obsLines,M,y+9);
+    y+=9+obsLines.length*5;
+  }
+
+  // ── Próximo PM ──
+  if(proximo){
+    y+=3;
+    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...azulOsc);
+    doc.text('PRÓXIMO PM: '+proximo,M,y);
+    y+=6;
+  }
+
+  // ── Simbología y pie de página ──
+  const piY=doc.internal.pageSize.height-20;
+  doc.setDrawColor(...azulOsc);doc.setLineWidth(0.3);
+  doc.line(M,piY-2,M+cW,piY-2);
+  doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...azulOsc);
+  doc.text('SIMBOLOGÍA:  REALIZADO = O    NO REALIZADO = X',M,piY+3);
+  doc.setFont('helvetica','normal');doc.setTextColor(...negro);
+  doc.text('Fecha de Creación: 01-Jun-16   |   Fecha de Revisión: 04-Feb-26   |   IT-FO-002 Rev.9   |   Pág. 1 de 1',M,piY+8);
+
+  const filename='PM_P'+p+'_'+idEquipo+'_'+(fecha||new Date().toISOString().split('T')[0])+'.pdf';
+  doc.save(filename);
+  toast('PDF descargado: '+filename,true);
+}
+");
+
 
 
         sb.AppendLine("let correctivoTemp={};");
