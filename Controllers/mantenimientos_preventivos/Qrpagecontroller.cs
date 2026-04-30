@@ -238,7 +238,6 @@ public class QrPageController : ControllerBase
                 cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm1_" + row.id + "\" placeholder=\"Observaciones P1...\"></textarea>\n");
                 cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
                 cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ",1)\">💾 Guardar P1</button>\n");
-                cards.Append("        <button class=\"btn btn-ghost\" style=\"background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.35)\" onclick=\"descargarPdfDesdeForm(" + row.id + ",1,'" + Esc(row.idEquipo) + "','" + Esc(row.dispositivo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📥 Descargar PDF</button>\n");
                 cards.Append("        <button class=\"btn btn-baja\" onclick=\"abrirBaja(" + row.id + ",1,'" + Esc(row.idEquipo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📤 Baja de Equipo</button>\n");
                 cards.Append("      </div>\n    </div>\n");
                 cards.Append("    <div class=\"mini-form\" id=\"ver1_" + row.id + "\" style=\"display:none\">\n");
@@ -252,7 +251,6 @@ public class QrPageController : ControllerBase
                 cards.Append("      <div style=\"margin-top:6px;font-size:11px;color:var(--muted2)\" id=\"ver_obs1_" + row.id + "\"></div>\n");
                 cards.Append("      <div id=\"ver_correctivo1_" + row.id + "\" style=\"display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);font-size:12px;font-weight:700;color:#fca5a5;\">⚠️ Requiere Correctivo</div>\n");
                 cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
-                cards.Append("        <button class=\"btn btn-ghost\" style=\"background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.35)\" onclick=\"descargarPdfDesdeVer(" + row.id + ",1,'" + Esc(row.idEquipo) + "','" + Esc(row.dispositivo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📥 Descargar PDF</button>\n");
                 cards.Append("      </div>\n    </div>\n");
                 cards.Append("    <div class=\"mini-form\" id=\"edit_pm1_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 1</div>\n");
@@ -275,7 +273,6 @@ public class QrPageController : ControllerBase
                 cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm2_" + row.id + "\" placeholder=\"Observaciones P2...\"></textarea>\n");
                 cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
                 cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ",2)\">💾 Guardar P2</button>\n");
-                cards.Append("        <button class=\"btn btn-ghost\" style=\"background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.35)\" onclick=\"descargarPdfDesdeForm(" + row.id + ",2,'" + Esc(row.idEquipo) + "','" + Esc(row.dispositivo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📥 Descargar PDF</button>\n");
                 cards.Append("        <button class=\"btn btn-baja\" onclick=\"abrirBaja(" + row.id + ",2,'" + Esc(row.idEquipo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📤 Baja de Equipo</button>\n");
                 cards.Append("      </div>\n    </div>\n");
                 cards.Append("    <div class=\"mini-form\" id=\"ver2_" + row.id + "\" style=\"display:none\">\n");
@@ -289,7 +286,6 @@ public class QrPageController : ControllerBase
                 cards.Append("      <div style=\"margin-top:6px;font-size:11px;color:var(--muted2)\" id=\"ver_obs2_" + row.id + "\"></div>\n");
                 cards.Append("      <div id=\"ver_correctivo2_" + row.id + "\" style=\"display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);font-size:12px;font-weight:700;color:#fca5a5;\">⚠️ Requiere Correctivo</div>\n");
                 cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
-                cards.Append("        <button class=\"btn btn-ghost\" style=\"background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.35)\" onclick=\"descargarPdfDesdeVer(" + row.id + ",2,'" + Esc(row.idEquipo) + "','" + Esc(row.dispositivo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📥 Descargar PDF</button>\n");
                 cards.Append("      </div>\n    </div>\n");
                 cards.Append("    <div class=\"mini-form\" id=\"edit_pm2_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 2</div>\n");
@@ -457,7 +453,6 @@ public class QrPageController : ControllerBase
         sb.AppendLine("<title>PM — " + ubicacion + "</title>");
         sb.AppendLine("<link href=\"https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap\" rel=\"stylesheet\">");
         sb.AppendLine("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js\"></script>");
-        sb.AppendLine("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js\"></script>");
         sb.AppendLine("<style>");
         sb.AppendLine(":root{--bg:#0B0F1A;--surface:#111827;--surface2:#1a2235;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--accent:#3B82F6;--text:#F1F5F9;--muted:#64748B;--muted2:#94A3B8;--green:#10B981;--red:#EF4444;--amber:#F59E0B;--radius:14px;}");
         sb.AppendLine("*{box-sizing:border-box;margin:0;padding:0;}");
@@ -578,6 +573,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("  </div>");
         sb.AppendLine("  <button class=\"btn btn-login\" id=\"btnLogin\" onclick=\"abrirLogin()\">🔑 Iniciar Sesión</button>");
         sb.AppendLine("  <button class=\"btn btn-print-all\" onclick=\"imprimirTodosQr()\">🖨️ Imprimir QR</button>");
+        sb.AppendLine("  <button class=\"btn\" style=\"background:linear-gradient(135deg,#1e3a5f,#2563eb);color:white;font-size:12px;padding:8px 14px\" onclick=\"descargarReportePDF()\">📥 Descargar Reporte PDF</button>");
         sb.AppendLine("</div>");
         sb.AppendLine("<div class=\"grid\">");
         sb.AppendLine(cardsHtml);
@@ -799,170 +795,105 @@ public class QrPageController : ControllerBase
         sb.AppendLine("    cancelarEditar(id);");
         sb.AppendLine("  }else toast('Error al guardar',false);");
         sb.AppendLine("}");
-        sb.AppendLine("function toast(msg,ok){const t=document.createElement('div');t.className='toast '+(ok?'toast-ok':'toast-err');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}");
+        sb.AppendLine("function toast(msg,ok){const t=document.createElement('div');t.className='toast '+(ok?'toast-ok':'toast-err');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3500);}");
 
-        // ── PDF generation functions ─────────────────────────────────────────
+        // ── PDF Report Download ──────────────────────────────────────────────
         sb.AppendLine(@"
-// ── Recolecta datos del formulario activo (form1/form2) ──
-function descargarPdfDesdeForm(id,p,idEquipo,dispositivo,ubicacion,planta){
-  const fecha=document.getElementById('fecha'+p+'_'+id)?.value||'';
-  const obs=document.getElementById('obs_pm'+p+'_'+id)?.value||'';
-  const reqCorr=document.getElementById('req_correctivo'+p+'_'+id)?.checked||false;
-  const cbs=document.querySelectorAll('#form'+p+'_'+id+' .acts-list input[type=checkbox]');
-  const actTexts=document.querySelectorAll('#form'+p+'_'+id+' .acts-list .act-text');
-  const checks=[];
-  cbs.forEach((cb,i)=>{if(cb.checked)checks.push(i);});
-  const actividadesList=Array.from(actTexts).map(e=>e.textContent.trim());
-  generarPdfPm({id,p,idEquipo,dispositivo,ubicacion,planta,fecha,obs,reqCorr,checks,actividadesList,usuario:usuarioActual||nombreActual||'—'});
-}
+async function descargarReportePDF(){
+  // Recolectar datos de todas las tarjetas visibles
+  const cards = document.querySelectorAll('.card');
+  const tarjetas = [];
+  let requiere_correctivo = false;
+  let planta = '';
+  let reporte_por = usuarioActual || nombreActual || '';
 
-// ── Recolecta datos del panel 'ver' (PM ya guardado) ──
-async function descargarPdfDesdeVer(id,p,idEquipo,dispositivo,ubicacion,planta){
-  const endpoint=p===2?'/PREVENTIVO/DIGITAL_P2/'+id:'/PREVENTIVO/DIGITAL/'+id;
-  try{
-    const res=await fetch(endpoint);const data=await res.json();
-    if(!data.existe){toast('No hay PM de P'+p+' guardado',false);return;}
-    const pm=data.data;
-    const allActs=Array.from(document.querySelectorAll('#edit_acts'+p+'_'+id+' .act-text')).map(e=>e.textContent.trim());
-    generarPdfPm({id,p,idEquipo,dispositivo,ubicacion,planta,
-      fecha:pm.fecha||'',
-      obs:pm.observaciones||'',
-      reqCorr:pm.requiere_correctivo||false,
-      checks:pm.checks||[],
-      actividadesList:allActs,
-      usuario:pm.usuario||'—',
-      proximo:pm.proximo_pm||''});
-  }catch(e){toast('Error al obtener datos del PM',false);}
-}
+  for(const card of cards){
+    const id = card.querySelector('[id^=""equipo_""]')?.id?.replace('equipo_','');
+    if(!id) continue;
+    const idEquipo   = document.getElementById('equipo_'+id)?.value || '';
+    const dispositivo= document.getElementById('disp_'+id)?.value || '';
+    const plantaEl   = document.getElementById('planta_'+id)?.value || '';
+    if(plantaEl) planta = plantaEl;
 
-// ── Genera y descarga el PDF ──
-function generarPdfPm({id,p,idEquipo,dispositivo,ubicacion,planta,fecha,obs,reqCorr,checks,actividadesList,usuario,proximo}){
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'letter'});
-  const W=215.9,M=12,cW=W-M*2;
-  let y=M;
-
-  // ── Colores ──
-  const azulOsc=[13,71,161];
-  const azulCla=[30,136,229];
-  const gris=[240,242,245];
-  const negro=[20,20,20];
-  const verde=[16,120,64];
-  const rojo=[180,30,30];
-
-  // ── Cabecera: fondo azul ──
-  doc.setFillColor(...azulOsc);
-  doc.rect(M,y,cW,14,'F');
-  doc.setTextColor(255,255,255);
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(13);
-  doc.text('S-Riko Automotive Hose de Chihuahua',W/2,y+5.5,{align:'center'});
-  doc.setFontSize(10);
-  doc.text('MANTENIMIENTO PREVENTIVO — IT-FO-002 Rev.9',W/2,y+10.5,{align:'center'});
-  y+=16;
-
-  // ── Franja de datos del equipo ──
-  doc.setFillColor(...gris);
-  doc.rect(M,y,cW,10,'F');
-  doc.setTextColor(...negro);
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(8);
-  const col=cW/4;
-  const labels=[['FECHA',fecha],['ID EQUIPO',idEquipo],['DISPOSITIVO',dispositivo],['PLANTA',planta]];
-  labels.forEach(([lbl,val],i)=>{
-    const x=M+i*col+2;
-    doc.text(lbl,x,y+3.5);
-    doc.setFont('helvetica','normal');
-    doc.text(val||'—',x,y+7.5);
-    doc.setFont('helvetica','bold');
-  });
-  y+=12;
-
-  // ── Línea: Ubicación / Periodo / Usuario ──
-  doc.setFont('helvetica','bold');doc.setFontSize(8);
-  doc.setFillColor(...azulCla);
-  doc.rect(M,y,cW,7,'F');
-  doc.setTextColor(255,255,255);
-  doc.text('LÍNEA/ÁREA: '+ubicacion+'   |   PERÍODO: P'+p+'   |   REALIZADO POR: '+usuario,M+3,y+4.5);
-  y+=9;
-
-  // ── Título sección actividades ──
-  doc.setFillColor(...negro);
-  doc.rect(M,y,cW,6,'F');
-  doc.setTextColor(255,255,255);
-  doc.setFont('helvetica','bold');doc.setFontSize(8);
-  doc.text('ACTIVIDADES REALIZADAS',M+3,y+4);
-  y+=7;
-
-  // ── Lista de actividades ──
-  doc.setFontSize(8);
-  const lineH=6;
-  actividadesList.forEach((act,i)=>{
-    const done=checks.includes(i);
-    // fondo alterno
-    if(i%2===0){doc.setFillColor(248,250,252);doc.rect(M,y,cW,lineH,'F');}
-    // checkbox visual
-    doc.setDrawColor(100,116,139);doc.setLineWidth(0.3);
-    doc.rect(M+2,y+1.5,3.5,3.5);
-    if(done){
-      doc.setDrawColor(...verde);doc.setLineWidth(0.5);
-      doc.line(M+2.5,y+3.2,M+3.5,y+4.5);
-      doc.line(M+3.5,y+4.5,M+5.2,y+2);
+    // Intentar leer PM P1 y P2 del servidor para cada tarjeta
+    for(const p of [1,2]){
+      try{
+        const ep = p===2 ? '/PREVENTIVO/DIGITAL_P2/'+id : '/PREVENTIVO/DIGITAL/'+id;
+        const res = await fetch(ep);
+        const data = await res.json();
+        if(data.existe && data.data){
+          const pm = data.data;
+          if(pm.requiere_correctivo) requiere_correctivo = true;
+          if(pm.usuario && !reporte_por) reporte_por = pm.usuario;
+          // Recolectar actividadesList del DOM (edit_acts panel)
+          const actEls = document.querySelectorAll('#edit_acts'+p+'_'+id+' .act-text');
+          const actividadesList = Array.from(actEls).map(e=>e.textContent.trim());
+          tarjetas.push({
+            dispositivo,
+            idEquipo,
+            periodo: p,
+            checks: pm.checks || [],
+            actividadesList,
+            obs: pm.observaciones || ''
+          });
+        }
+      }catch(e){}
     }
-    // texto
-    doc.setFont('helvetica',done?'bold':'normal');
-    if(done){doc.setTextColor(verde[0],verde[1],verde[2]);}else{doc.setTextColor(100,116,139);}
-    doc.text(act,M+7,y+4);
-    // estado a la derecha
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(7);
-    if(done){doc.setTextColor(verde[0],verde[1],verde[2]);}else{doc.setTextColor(100,116,139);}
-    doc.text(done?'REALIZADO':'NO REALIZADO',M+cW-25,y+4);
-    doc.setFontSize(8);
-    y+=lineH;
-    if(y>258){doc.addPage();y=M;}
-  });
-
-  y+=3;
-
-  // ── Requiere correctivo ──
-  doc.setFillColor(...(reqCorr?[254,226,226]:[236,253,245]));
-  doc.rect(M,y,cW,8,'F');
-  doc.setFont('helvetica','bold');doc.setFontSize(9);
-  if(reqCorr){doc.setTextColor(rojo[0],rojo[1],rojo[2]);}else{doc.setTextColor(verde[0],verde[1],verde[2]);}
-  doc.text(reqCorr?'⚠ REQUIERE MANTENIMIENTO CORRECTIVO: SÍ':'✔ NO REQUIERE MANTENIMIENTO CORRECTIVO',M+3,y+5.5);
-  y+=10;
-
-  // ── Observaciones ──
-  if(obs){
-    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...negro);
-    doc.text('OBSERVACIONES:',M,y+4);
-    doc.setFont('helvetica','normal');
-    const obsLines=doc.splitTextToSize(obs,cW);
-    doc.text(obsLines,M,y+9);
-    y+=9+obsLines.length*5;
   }
 
-  // ── Próximo PM ──
-  if(proximo){
-    y+=3;
-    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...azulOsc);
-    doc.text('PRÓXIMO PM: '+proximo,M,y);
-    y+=6;
+  if(tarjetas.length === 0){
+    toast('No hay preventivos registrados para generar el reporte', false);
+    return;
   }
 
-  // ── Simbología y pie de página ──
-  const piY=doc.internal.pageSize.height-20;
-  doc.setDrawColor(...azulOsc);doc.setLineWidth(0.3);
-  doc.line(M,piY-2,M+cW,piY-2);
-  doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...azulOsc);
-  doc.text('SIMBOLOGÍA:  REALIZADO = O    NO REALIZADO = X',M,piY+3);
-  doc.setFont('helvetica','normal');doc.setTextColor(...negro);
-  doc.text('Fecha de Creación: 01-Jun-16   |   Fecha de Revisión: 04-Feb-26   |   IT-FO-002 Rev.9   |   Pág. 1 de 1',M,piY+8);
+  // Datos del reporte (primera tarjeta para IDs de serie)
+  const ubicacion = document.querySelector('.top-title p')?.textContent?.replace('📍 ','') || '';
+  const fecha = new Date().toISOString().split('T')[0];
 
-  const filename='PM_P'+p+'_'+idEquipo+'_'+(fecha||new Date().toISOString().split('T')[0])+'.pdf';
-  doc.save(filename);
-  toast('PDF descargado: '+filename,true);
+  // Identificar series por tipo de equipo
+  const getSerieFor = (tipo) => {
+    const card = Array.from(document.querySelectorAll('.card')).find(c=>{
+      const disp = c.querySelector('[id^=""disp_""]')?.value || '';
+      return disp.toUpperCase().includes(tipo.toUpperCase());
+    });
+    if(!card) return '';
+    return card.querySelector('[id^=""equipo_""]')?.value || '';
+  };
+
+  const body = {
+    ubicacion,
+    fecha,
+    reporte_por,
+    no_serie_pc:  getSerieFor('COMPUTADORA') || getSerieFor('LAPTOP'),
+    no_serie_imp: getSerieFor('IMPRESORA'),
+    no_serie_ups: getSerieFor('UPS'),
+    obs: tarjetas.map(t=>t.obs).filter(Boolean).join(' | '),
+    requiere_correctivo,
+    planta,
+    tarjetas
+  };
+
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = '⏳ Generando...';
+
+  try{
+    const res = await fetch('/PREVENTIVO/GENERAR_PDF', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    if(!res.ok){ const e=await res.json(); toast('Error: '+(e.error||'desconocido'),false); return; }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = 'PM_'+ubicacion.replace(/[^a-z0-9]/gi,'_')+'_'+fecha+'.pdf';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('✅ PDF descargado correctamente', true);
+  }catch(e){ toast('Error de conexión al generar PDF', false); }
+  finally{ btn.disabled=false; btn.textContent='📥 Descargar Reporte PDF'; }
 }
 ");
 
@@ -1348,6 +1279,266 @@ function generarPdfPm({id,p,idEquipo,dispositivo,ubicacion,planta,fecha,obs,reqC
         sb.AppendLine("</body></html>");
         return sb.ToString();
     }
+
+    // ── POST /PREVENTIVO/GENERAR_PDF ──────────────────────────────────────────
+    // Recibe JSON con datos de todas las tarjetas, genera PDF IT-FO-002 con Python
+    [HttpPost("/PREVENTIVO/GENERAR_PDF")]
+    public async Task<IActionResult> GenerarPdf([FromBody] System.Text.Json.JsonElement body)
+    {
+        try
+        {
+            var jsonStr = body.GetRawText();
+            var tmpIn = System.IO.Path.GetTempFileName();
+            var tmpOut = System.IO.Path.ChangeExtension(System.IO.Path.GetTempFileName(), ".pdf");
+            var tmpPy = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "generar_pdf_pm.py");
+
+            // Write the Python script if it doesn't exist
+            if (!System.IO.File.Exists(tmpPy))
+                await System.IO.File.WriteAllTextAsync(tmpPy, PdfGeneratorScript);
+
+            await System.IO.File.WriteAllTextAsync(tmpIn, jsonStr);
+
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "python3",
+                Arguments = $"{tmpPy}",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+            };
+
+            using var proc = System.Diagnostics.Process.Start(psi)!;
+            await proc.StandardInput.WriteAsync(jsonStr);
+            proc.StandardInput.Close();
+
+            var pdfBytes = await ReadAllBytesAsync(proc.StandardOutput.BaseStream);
+            var stderr = await proc.StandardError.ReadToEndAsync();
+            await proc.WaitForExitAsync();
+
+            if (proc.ExitCode != 0 || pdfBytes.Length < 100)
+                return StatusCode(500, new { error = "Error generando PDF", detail = stderr });
+
+            var filename = $"PM_{System.Uri.EscapeDataString(body.TryGetProperty("ubicacion", out var u) ? u.GetString() ?? "reporte" : "reporte")}_{DateTime.Now:yyyy-MM-dd}.pdf";
+            return File(pdfBytes, "application/pdf", filename);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    private static async Task<byte[]> ReadAllBytesAsync(System.IO.Stream stream)
+    {
+        using var ms = new System.IO.MemoryStream();
+        await stream.CopyToAsync(ms);
+        return ms.ToArray();
+    }
+
+    // ── Python script embebido para generación de PDF IT-FO-002 ──────────────
+    private const string PdfGeneratorScript = @"
+import json, sys, io
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+
+W, H = letter
+X_ACT=48.2; X_PUNTOS=108.3; X_PORT=363.1; X_PC=405.9; X_IMP=448.9; X_UPS_C=507.5; X_RIGHT=564.2; ROW_H=13.3
+
+GRUPOS=[
+    ('1. Limpieza\nInterior',[
+        '1) Sopletear el gabinete',
+        '2) Limpieza de contactos de memoria RAM',
+        '3) Sopletear fuente de poder y ventiladores del mismo',
+        '4) Sopletear la impresora térmica',
+        '5) Limpieza de rodillos de la impresora (No usar alcohol)',
+        '6) Limpieza del cabezal de la impresora térmica',
+    ]),
+    ('2.Limpieza\nExterior',[
+        '1) Limpieza del gabinete',
+        '2) Limpieza del monitor o pantalla',
+        '3) Limpieza y sopleteado del teclado y/o touchpad',
+        '4) Limpieza del ratón',
+        '5) Limpieza de la impresora térmica',
+        '6) Limpieza de la laptop',
+        '7) Limpieza y verificación del UPS',
+        '8) Sopleteado de ventiladores y ranuras de enfriamiento del equipo',
+        '9) Limpieza exterior del lector óptico (incluye la mica)',
+        '10) Limpieza del cableado',
+    ]),
+    ('3.Preventivo de\nSoftware',[
+        '1) Actualizaciones de seguridad al sistema operativo',
+        '2) Actualizaciones de Office',
+        '3) Eliminación de archivos temporales y vaciar bandeja de reciclaje',
+        '4) Revisión del estado del antivirus y escaneo del equipo',
+        '5) Desfragmentar las unidades de disco duro',
+    ]),
+    ('4.Montaje',[
+        '1) Conectar todos los periféricos correspondientes',
+        '2) Verificar que los cables y conectores no presenten daños',
+        '3) Rutear los cables de los periféricos/anclar eliminador de impresora',
+    ]),
+    ('5.Inspección',[
+        '1) Verificación vida de la pila del UPS',
+        '2) Verificación vida de la pila del BIOS',
+        '3) Inspección y funcionamiento del UPS',
+        '4) Encender el equipo y ver que funcione correctamente',
+        '5) Verificar que los periféricos funcionen correctamente',
+        '6) Verificar que solo equipo de sistemas esté conectado al UPS',
+    ]),
+]
+
+FLAT=[]; GROUP_RANGES=[]
+for gl,puntos in GRUPOS:
+    s=len(FLAT)
+    for i,p in enumerate(puntos): FLAT.append((gl,p,i,len(puntos)))
+    GROUP_RANGES.append((gl,s,len(FLAT)-1))
+
+def tipo_col(d):
+    d=(d or '').upper()
+    if 'PORTATIL' in d or 'LAPTOP' in d: return 0
+    if 'COMPUTADORA' in d or 'CPU' in d: return 1
+    if 'IMPRESORA' in d: return 2
+    if 'UPS' in d: return 3
+    return 1
+
+def rl(y): return H-y
+
+def gen(c,data):
+    ub=data.get('ubicacion',''); fecha=data.get('fecha',''); rp=data.get('reporte_por','')
+    ns_pc=data.get('no_serie_pc',''); ns_imp=data.get('no_serie_imp',''); ns_ups=data.get('no_serie_ups','')
+    obs=data.get('obs',''); req=data.get('requiere_correctivo',False); planta=data.get('planta','')
+    tarjetas=data.get('tarjetas',[])
+
+    row_marks={}
+    for t in tarjetas:
+        col=tipo_col(t.get('dispositivo',''))
+        acts=t.get('actividadesList',[])
+        checks=t.get('checks',[])
+        for li in checks:
+            if li<len(acts):
+                at=acts[li].strip().lower()
+                for fi,(_,punto,_,_) in enumerate(FLAT):
+                    if at in punto.lower() or punto.lower() in at or any(w in punto.lower() for w in at.split() if len(w)>4):
+                        row_marks.setdefault(fi,set()).add(col); break
+
+    c.setLineWidth(1.0)
+    c.rect(X_ACT-13,rl(128.8),121,81,stroke=1,fill=0)
+    c.rect(X_ACT+108,rl(128.8),306,81,stroke=1,fill=0)
+    c.rect(459.4,rl(128.8),105,81,stroke=1,fill=0)
+    c.setFont('Helvetica-Bold',15)
+    c.drawCentredString(W/2,rl(55),'S-Riko Automotive Hose de')
+    c.drawCentredString(W/2,rl(71),'Chihuahua')
+    c.setFont('Helvetica-Bold',12)
+    c.drawCentredString(W/2,rl(108),'MANTENIMIENTO PREVENTIVO')
+    c.setFont('Helvetica-Bold',8)
+    c.drawCentredString(511.8,rl(82),'IT'); c.drawCentredString(511.8,rl(93),'DEPARTMENT')
+    c.setLineWidth(0.8); c.line(X_ACT-13,rl(128.8),X_RIGHT,rl(128.8))
+
+    def field(lbl,val,lx,ly,lw=0.4,vx=None,ux1=None,ux2=None):
+        c.setFont('Helvetica-Bold',9); c.drawString(lx,rl(ly),lbl)
+        c.setFont('Helvetica',9)
+        if vx: c.drawString(vx,rl(ly),val or '')
+        if ux1 and ux2: c.setLineWidth(lw); c.line(ux1,rl(ly+2),ux2,rl(ly+2))
+
+    c.setFont('Helvetica-Bold',9); c.drawString(442.5,rl(149),'FECHA:')
+    c.setFont('Helvetica',9); c.drawString(475,rl(149),fecha)
+    c.setLineWidth(0.4); c.line(474,rl(151),X_RIGHT,rl(151))
+    c.setFont('Helvetica-Bold',9); c.drawString(X_ACT-13,rl(169),'LINEA/PERSONA:')
+    c.setFont('Helvetica',9); c.drawString(X_ACT+68,rl(169),ub)
+    c.line(X_ACT+65,rl(171),X_RIGHT,rl(171))
+    c.setFont('Helvetica-Bold',9); c.drawString(X_ACT-13,rl(189),'REPORTE ELABORADO POR:')
+    c.setFont('Helvetica',9); c.drawString(X_ACT+142,rl(189),rp)
+    c.line(X_ACT+140,rl(191),X_RIGHT,rl(191))
+    c.setFont('Helvetica-Bold',9); c.drawString(X_ACT-13,rl(209),'NO. SERIE:  PC/PORTATIL')
+    c.setFont('Helvetica',9); c.drawString(X_ACT+130,rl(209),ns_pc)
+    c.line(X_ACT+128,rl(211),302,rl(211))
+    c.setFont('Helvetica-Bold',9); c.drawString(305,rl(209),'IMPRESORA:')
+    c.setFont('Helvetica',9); c.drawString(356,rl(209),ns_imp)
+    c.line(354,rl(211),445,rl(211))
+    c.setFont('Helvetica-Bold',9); c.drawString(447,rl(209),'UPS:')
+    c.setFont('Helvetica',9); c.drawString(468,rl(209),ns_ups)
+    c.line(466,rl(211),X_RIGHT,rl(211))
+
+    TT=225.0; HH=ROW_H*2; DT=TT+HH; TB=DT+len(FLAT)*ROW_H
+    c.setLineWidth(0.8); c.rect(X_ACT,rl(TB),X_RIGHT-X_ACT,TB-TT,stroke=1,fill=0)
+    c.setLineWidth(0.5)
+    for x in [X_PUNTOS,X_PORT,X_PC,X_IMP,X_UPS_C,X_RIGHT]: c.line(x,rl(TT),x,rl(TT+HH))
+    c.line(X_ACT,rl(TT+HH),X_RIGHT,rl(TT+HH))
+    c.setFont('Helvetica-Bold',8)
+    c.drawCentredString((X_ACT+X_PUNTOS)/2,rl(TT+HH-9),'Actividades')
+    c.drawCentredString((X_PUNTOS+X_PORT)/2,rl(TT+HH-9),'Puntos a verificar')
+    COLS=[('Portátil',X_PORT,X_PC,0),('PC',X_PC,X_IMP,1),('IMPRESORAS',X_IMP,X_UPS_C,2),('UPS',X_UPS_C,X_RIGHT,3)]
+    for lbl,cx0,cx1,ci in COLS:
+        cw=cx1-cx0; cb=7; cbx=cx0+(cw-cb)/2
+        c.rect(cbx,rl(TT+4+cb),cb,cb,stroke=1,fill=0)
+        c.setFont('Helvetica-Bold',7); c.drawCentredString(cx0+cw/2,rl(TT+HH-5),lbl)
+
+    for ri,(_,punto,_,_) in enumerate(FLAT):
+        rt=DT+ri*ROW_H; rb=rt+ROW_H; rlb=rl(rb)
+        c.setLineWidth(0.3); c.line(X_ACT,rlb,X_RIGHT,rlb)
+        for x in [X_PUNTOS,X_PORT,X_PC,X_IMP,X_UPS_C,X_RIGHT]: c.line(x,rl(rt),x,rlb)
+        c.setFont('Helvetica',7.5); c.drawString(X_PUNTOS+3,rlb+4,punto)
+        marks=row_marks.get(ri,set())
+        for _,cx0,cx1,ci in COLS:
+            cw=cx1-cx0
+            if any(tipo_col(t.get('dispositivo',''))==ci for t in tarjetas):
+                c.setFont('Helvetica-Bold',9); c.drawCentredString(cx0+cw/2,rlb+4,'O' if ci in marks else 'X')
+
+    for gl,si,ei in GROUP_RANGES:
+        rt=DT+si*ROW_H; rb=DT+(ei+1)*ROW_H; ch=rb-rt; my=(rt+rb)/2
+        c.setLineWidth(0.6); c.rect(X_ACT,rl(rb),X_PUNTOS-X_ACT,ch,stroke=1,fill=0)
+        lines=gl.split('\n'); th=len(lines)*8.5
+        for li,line in enumerate(lines):
+            y=my+th/2-li*8.5-4; c.setFont('Helvetica',7.5); c.drawCentredString((X_ACT+X_PUNTOS)/2,rl(y),line)
+
+    OT=TB+3; OB=OT+42
+    c.setFont('Helvetica-Bold',8); c.drawString(X_ACT-5,rl(OT+11),'Observaciones:')
+    c.setFont('Helvetica',7); c.drawString(X_ACT+57,rl(OT+11),'(utiliza el # de actividad y el # de punto a verificar para describir la observación, ejemplo: 5-1 batería por debajo del 40%)')
+    c.setLineWidth(0.5); c.rect(X_ACT-5,rl(OB),X_RIGHT-X_ACT+5,OB-OT-12,stroke=1,fill=0)
+    if obs:
+        c.setFont('Helvetica',8)
+        words=obs.split(); lines2=[]; cur=''
+        for w in words:
+            if len(cur)+len(w)+1<=115: cur=(cur+' '+w).strip()
+            else: lines2.append(cur); cur=w
+        if cur: lines2.append(cur)
+        for li2,l2 in enumerate(lines2[:2]): c.drawString(X_ACT-2,rl(OB-5-li2*11),l2)
+
+    ST=670.6; SB=763.6; CL=154.6; CR=459.4
+    c.setLineWidth(0.8); c.rect(X_ACT-13,rl(SB),121,SB-ST,stroke=1,fill=0)
+    c.setFont('Helvetica-Bold',9); c.drawString(X_ACT-5,rl(ST+28),'Simbología')
+    c.setLineWidth(0.5)
+    c.rect(X_ACT-5,rl(ST+54),52,13,stroke=1,fill=0)
+    c.setFont('Helvetica',8); c.drawString(X_ACT-4,rl(ST+50),'REALIZADO'); c.drawString(X_ACT+47,rl(ST+50),'O')
+    c.rect(X_ACT-5,rl(ST+67),52,13,stroke=1,fill=0)
+    c.drawString(X_ACT-4,rl(ST+63),'NO REALIZADO'); c.drawString(X_ACT+47,rl(ST+63),'X')
+    c.setLineWidth(0.8); c.rect(CL,rl(SB),CR-CL,SB-ST,stroke=1,fill=0)
+    c.rect(CL,rl(ST+39),CR-CL,39,stroke=1,fill=0)
+    c.setFont('Helvetica-Bold',8); c.drawCentredString((CL+CR)/2,rl(ST+26),'Requiere mantenimiento correctivo marque con una X')
+    cbx2=CL+30; c.setLineWidth(0.5)
+    c.rect(cbx2,rl(ST+53),12,12,stroke=1,fill=0)
+    if req: c.setFont('Helvetica-Bold',10); c.drawString(cbx2+2,rl(ST+49),'X')
+    c.setFont('Helvetica',9); c.drawString(cbx2+14,rl(ST+49),'SI')
+    c.rect(cbx2,rl(ST+67),12,12,stroke=1,fill=0)
+    if not req: c.setFont('Helvetica-Bold',10); c.drawString(cbx2+2,rl(ST+63),'X')
+    c.setFont('Helvetica',9); c.drawString(cbx2+14,rl(ST+63),'NO')
+    c.setFont('Helvetica-Bold',9); c.drawString(CL+140,rl(ST+49),'PLANTA:')
+    c.setFont('Helvetica',9); c.drawString(CL+180,rl(ST+49),planta)
+    c.setFont('Helvetica',7); c.drawString(CL+10,rl(ST+82),'*El porcentaje para cambio de pila debe estar por debajo del 40%')
+    c.setLineWidth(0.8); c.rect(CR,rl(SB),120,SB-ST,stroke=1,fill=0)
+    c.setFont('Helvetica-Bold',8); c.drawCentredString(CR+60,rl(ST+40),'IT'); c.drawCentredString(CR+60,rl(ST+52),'DEPARTMENT')
+    c.setFont('Helvetica',7)
+    c.drawString(X_ACT-13,rl(779),'Fecha de Creación: 01-Jun-16')
+    c.drawString(X_ACT-13,rl(769),'Fecha de Revisión: 04-Feb-26')
+    c.drawCentredString(W/2,rl(769),'IT-FO-002 Rev.9')
+    c.drawString(531,rl(769),'Pág.: 1 de 1')
+
+data=json.load(sys.stdin)
+buf=io.BytesIO()
+cv=canvas.Canvas(buf,pagesize=letter)
+gen(cv,data); cv.showPage(); cv.save()
+sys.stdout.buffer.write(buf.getvalue())
+";
 
     private static DateTime LunesDeSemanaISO(int anio, int semana)
     {
