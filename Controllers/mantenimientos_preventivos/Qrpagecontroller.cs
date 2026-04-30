@@ -911,12 +911,12 @@ function generarPdfPm({id,p,idEquipo,dispositivo,ubicacion,planta,fecha,obs,reqC
     }
     // texto
     doc.setFont('helvetica',done?'bold':'normal');
-    doc.setTextColor(done?...[verde]:...[100,116,139]);
+    if(done){doc.setTextColor(verde[0],verde[1],verde[2]);}else{doc.setTextColor(100,116,139);}
     doc.text(act,M+7,y+4);
     // estado a la derecha
     doc.setFont('helvetica','bold');
     doc.setFontSize(7);
-    doc.setTextColor(done?...[verde]:...[100,116,139]);
+    if(done){doc.setTextColor(verde[0],verde[1],verde[2]);}else{doc.setTextColor(100,116,139);}
     doc.text(done?'REALIZADO':'NO REALIZADO',M+cW-25,y+4);
     doc.setFontSize(8);
     y+=lineH;
@@ -929,7 +929,7 @@ function generarPdfPm({id,p,idEquipo,dispositivo,ubicacion,planta,fecha,obs,reqC
   doc.setFillColor(...(reqCorr?[254,226,226]:[236,253,245]));
   doc.rect(M,y,cW,8,'F');
   doc.setFont('helvetica','bold');doc.setFontSize(9);
-  doc.setTextColor(...(reqCorr?rojo:verde));
+  if(reqCorr){doc.setTextColor(rojo[0],rojo[1],rojo[2]);}else{doc.setTextColor(verde[0],verde[1],verde[2]);}
   doc.text(reqCorr?'⚠ REQUIERE MANTENIMIENTO CORRECTIVO: SÍ':'✔ NO REQUIERE MANTENIMIENTO CORRECTIVO',M+3,y+5.5);
   y+=10;
 
