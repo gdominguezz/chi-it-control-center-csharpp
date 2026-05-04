@@ -363,51 +363,65 @@ public class BuscarGlobalService
 
         foreach (var (modulo, tabla, columnas) in MODULOS)
         {
-            // Verificar que la tabla existe antes de consultar
-            await using var chk = new NpgsqlCommand(
-                "SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name=@t)", conn);
-            chk.Parameters.AddWithValue("t", tabla);
-            var existe = (bool)(await chk.ExecuteScalarAsync() ?? false);
-            if (!existe) continue;
-
-            // Filtrar solo columnas que existen en esa tabla
-            var colsExistentes = await ColumnasExistentesAsync(conn, tabla, columnas);
-            if (!colsExistentes.Any()) continue;
-
-            var condiciones = colsExistentes
-                .Select((c, i) => $"LOWER({c}::TEXT) LIKE LOWER(@p{i})")
-                .ToList();
-
-            var where = "WHERE " + string.Join(" OR ", condiciones);
-
-            // Total
-            await using var cmdCount = new NpgsqlCommand(
-                $"SELECT COUNT(*) FROM {tabla} {where}", conn);
-            for (int i = 0; i < colsExistentes.Count; i++)
-                cmdCount.Parameters.AddWithValue($"p{i}", $"%{termino}%");
-            var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
-            if (total == 0) continue;
-
-            // Registros (limitado)
-            var selectCols = string.Join(", ", colsExistentes);
-            await using var cmdData = new NpgsqlCommand(
-                $"SELECT id, {selectCols} FROM {tabla} {where} ORDER BY id DESC LIMIT @lim", conn);
-            for (int i = 0; i < colsExistentes.Count; i++)
-                cmdData.Parameters.AddWithValue($"p{i}", $"%{termino}%");
-            cmdData.Parameters.AddWithValue("lim", limite);
-
-            var registros = new List<Dictionary<string, string?>>();
-            await using var r = await cmdData.ExecuteReaderAsync();
-            var fields = Enumerable.Range(0, r.FieldCount).Select(r.GetName).ToList();
-            while (await r.ReadAsync())
+            try
             {
-                var row = new Dictionary<string, string?>();
-                foreach (var f in fields)
-                    row[f.ToUpper()] = r[f] is DBNull ? null : r[f]?.ToString();
-                registros.Add(row);
-            }
+                // Verificar que la tabla existe antes de consultar
+                await using var chk = new NpgsqlCommand(
+                    "SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name=@t)", conn);
+                chk.Parameters.AddWithValue("t", tabla);
+                var existe = (bool)(await chk.ExecuteScalarAsync() ?? false);
+                if (!existe) continue;
 
-            resultados.Add(new { modulo, total, registros });
+                // Filtrar solo columnas que existen en esa tabla
+                var colsExistentes = await ColumnasExistentesAsync(conn, tabla, columnas);
+                if (!colsExistentes.Any()) continue;
+
+                // Excluir "id" de las columnas de búsqueda para evitar duplicado en SELECT
+                var colsSinId = colsExistentes.Where(c => c != "id").ToList();
+
+                var condiciones = colsSinId.Any()
+                    ? colsSinId.Select((c, i) => $"LOWER({c}::TEXT) LIKE LOWER(@p{i})").ToList()
+                    : colsExistentes.Select((c, i) => $"LOWER({c}::TEXT) LIKE LOWER(@p{i})").ToList();
+
+                var colsParaWhere = colsSinId.Any() ? colsSinId : colsExistentes;
+                var where = "WHERE " + string.Join(" OR ", condiciones);
+
+                // Total
+                await using var cmdCount = new NpgsqlCommand(
+                    $"SELECT COUNT(*) FROM {tabla} {where}", conn);
+                for (int i = 0; i < colsParaWhere.Count; i++)
+                    cmdCount.Parameters.AddWithValue($"p{i}", $"%{termino}%");
+                var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
+                if (total == 0) continue;
+
+                // Registros (limitado) — "id" siempre primero, sin duplicar
+                var selectCols = colsSinId.Any()
+                    ? "id, " + string.Join(", ", colsSinId)
+                    : "id";
+                await using var cmdData = new NpgsqlCommand(
+                    $"SELECT {selectCols} FROM {tabla} {where} ORDER BY id DESC LIMIT @lim", conn);
+                for (int i = 0; i < colsParaWhere.Count; i++)
+                    cmdData.Parameters.AddWithValue($"p{i}", $"%{termino}%");
+                cmdData.Parameters.AddWithValue("lim", limite);
+
+                var registros = new List<Dictionary<string, string?>>();
+                await using var r = await cmdData.ExecuteReaderAsync();
+                var fields = Enumerable.Range(0, r.FieldCount).Select(r.GetName).ToList();
+                while (await r.ReadAsync())
+                {
+                    var row = new Dictionary<string, string?>();
+                    foreach (var f in fields)
+                        row[f.ToUpper()] = r[f] is DBNull ? null : r[f]?.ToString();
+                    registros.Add(row);
+                }
+
+                resultados.Add(new { modulo, total, registros });
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[BuscarGlobal] Error en módulo {modulo}: {ex.Message}");
+                continue;
+            }
         }
 
         return new

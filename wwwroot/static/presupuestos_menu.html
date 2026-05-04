@@ -153,6 +153,7 @@
                     border-color: var(--green);
                     transform: translateY(-1px);
                 }
+
             .btn-pill.purple {
                 background: rgba(168,85,247,.1);
                 color: #A855F7;
@@ -1134,6 +1135,8 @@
             "SERVICIO POR PROVEEDORES": "/static/modulos_presupuesto/servicio_proveedores_nf.html",
             "EQUIPO DE RED NF": "/static/modulos_presupuesto/refacciones_red_nf.html",
             "REGISTRO DE ENTRADAS TEMPORAL": "/static/modulos_presupuesto/registro_de_entradas_temporal.html",
+            "REPORTES_IMPRESORAS": "/static/modulos_presupuesto/reportes_impresoras.html",
+            "IMPRESORAS_INFO": "/static/modulos_presupuesto/reportes_impresoras.html",
         };
 
         async function buscarGlobal() {
@@ -1175,22 +1178,22 @@
                         const cardId = 'card_' + Math.random().toString(36).slice(2);
 
                         cont.innerHTML += `
-                                <div class="modulo-card">
-                                    <div class="modulo-head" onclick="toggleCard('${cardId}')">
-                                        <span class="modulo-icon">📦</span>
-                                        <span class="modulo-name">${r.modulo}</span>
-                                        <span class="badge">${r.total}</span>
-                                        <button class="btn-ir" onclick="event.stopPropagation();window.location.href='${pagina}'">IR AL MÓDULO</button>
-                                        <span class="chevron open" id="chev_${cardId}">▼</span>
-                                    </div>
-                                    <div class="modulo-body" id="${cardId}" style="max-height:260px;overflow-y:auto;">
-                                        ${masReg}
-                                        <table>
-                                            <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
-                                            <tbody>${filas}</tbody>
-                                        </table>
-                                    </div>
-                                </div>`;
+                                    <div class="modulo-card">
+                                        <div class="modulo-head" onclick="toggleCard('${cardId}')">
+                                            <span class="modulo-icon">📦</span>
+                                            <span class="modulo-name">${r.modulo}</span>
+                                            <span class="badge">${r.total}</span>
+                                            <button class="btn-ir" onclick="event.stopPropagation();window.location.href='${pagina}'">IR AL MÓDULO</button>
+                                            <span class="chevron open" id="chev_${cardId}">▼</span>
+                                        </div>
+                                        <div class="modulo-body" id="${cardId}" style="max-height:260px;overflow-y:auto;">
+                                            ${masReg}
+                                            <table>
+                                                <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+                                                <tbody>${filas}</tbody>
+                                            </table>
+                                        </div>
+                                    </div>`;
                     });
                 }
 
