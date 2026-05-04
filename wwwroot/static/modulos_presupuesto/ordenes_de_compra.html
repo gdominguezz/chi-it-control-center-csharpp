@@ -1019,6 +1019,7 @@
             animation: spin .7s linear infinite;
             display: inline-block;
         }
+
         .filter-row select {
             width: 100%;
             background: rgba(255,255,255,.04);
@@ -1039,7 +1040,6 @@
             to {
                 transform: rotate(360deg)
             }
-
         }
     </style>
 </head>
@@ -1078,38 +1078,35 @@
 
             <!-- LLENADO POR FÓRMULA -->
             <div class="form-section">
-                <span class="form-section-label lbl-formula">🔗 Llenado por Fórmula</span>
+                <span class="form-section-label lbl-formula">🔗 Llenado por Fórmula — se calculan automáticamente al guardar</span>
                 <div class="form-grid">
                     <div class="field">
-                        <label>Orden de Compra</label>
-                        <input id="n_ORDEN_DE_COMPRA" placeholder="Se obtiene de Req vs OC">
+                        <label>Orden de Compra 🔒</label>
+                        <input id="n_ORDEN_DE_COMPRA" placeholder="Calculado desde Requisición" readonly tabindex="-1" title="Se obtiene automáticamente de Req VS OC usando la Requisición">
                     </div>
                     <div class="field">
-                        <label>Fecha OC</label>
-                        <input id="n_FECHA_OC" type="date">
+                        <label>Fecha OC 🔒</label>
+                        <input id="n_FECHA_OC" placeholder="Calculado desde Requisición" readonly tabindex="-1" title="Se obtiene automáticamente de Req VS OC usando la Requisición">
                     </div>
                     <div class="field">
-                        <label>OC</label>
-                        <input id="n_OC" placeholder="Se obtiene de Req vs OC">
+                        <label>OC 🔒</label>
+                        <input id="n_OC" placeholder="Calculado desde Requisición" readonly tabindex="-1" title="Se obtiene automáticamente de Req VS OC usando la Requisición">
                     </div>
                     <div class="field">
                         <label>Fecha Entrada</label>
                         <input id="n_FECHA_ENTRADA" type="date">
                     </div>
                     <div class="field">
-                        <label>Total (Sin IVA) — calculado</label>
-                        <input id="n_TOTAL_SIN_IVA" type="number" step="0.01" placeholder="Cantidad × Precio Unitario" readonly tabindex="-1">
+                        <label>Total (Sin IVA) 🔒</label>
+                        <input id="n_TOTAL_SIN_IVA" type="number" step="0.01" placeholder="Cantidad × Precio Unitario" readonly tabindex="-1" title="Calculado automáticamente: Cantidad × Precio Unitario">
                     </div>
                     <div class="field">
-                        <label>Estatus OC</label>
-                        <select id="n_ESTATUS_OC">
-                            <option value="">— Seleccionar —</option>
-                            <option>COMPLETA</option>
-                            <option>FALSO</option>
-                            <option>PARCIAL</option>
-                            <option>PENDIENTE</option>
-                            <option>VERDADERO</option>
-                        </select>
+                        <label>Cantidad Registrada 🔒</label>
+                        <input id="n_CANTIDAD_REGISTRADA" type="number" step="1" placeholder="Calculado desde entradas" readonly tabindex="-1" title="Calculado automáticamente desde la tabla de entradas">
+                    </div>
+                    <div class="field">
+                        <label>Estatus OC 🔒</label>
+                        <input id="n_ESTATUS_OC" placeholder="COMPLETA / PARCIAL / PENDIENTE" readonly tabindex="-1" title="Calculado automáticamente: depende de Cantidad vs Cantidad Registrada">
                     </div>
                 </div>
             </div>
@@ -1198,10 +1195,6 @@
                         <label>Requisición</label>
                         <input id="n_REQUISICION" placeholder="Núm. de requisición">
                     </div>
-                    <div class="field">
-                        <label>Cantidad Registrada</label>
-                        <input id="n_CANTIDAD_REGISTRADA" type="number" step="1" min="0" placeholder="0">
-                    </div>
                 </div>
             </div>
 
@@ -1287,17 +1280,19 @@
                             <th><input oninput="filtrar()" id="f_REQUISICION" placeholder="🔍"></th>
                             <th></th>
                             <th></th>
-                            <th><select onchange="filtrar()" id="f_ESTATUS_OC"
+                            <th>
+                                <select onchange="filtrar()" id="f_ESTATUS_OC"
                                         style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:5px;padding:4px 6px;font-size:10px;color:var(--text);font-family:'DM Mono',monospace;">
 
-                                <option value="">— Todos —</option>
-                                <option>COMPLETA</option>
-                                <option>FALSO</option>
-                                <option>PARCIAL</option>
-                                <option>PENDIENTE</option>
-                                <option>VERDADERO</option>
+                                    <option value="">— Todos —</option>
+                                    <option>COMPLETA</option>
+                                    <option>FALSO</option>
+                                    <option>PARCIAL</option>
+                                    <option>PENDIENTE</option>
+                                    <option>VERDADERO</option>
 
-                            </select></th>
+                                </select>
+                            </th>
                             <th></th>
                             <th></th>
                         </tr>
@@ -1333,24 +1328,24 @@
             </div>
 
             <div style="margin-bottom:10px;">
-                <span class="form-section-label lbl-formula">🔗 Llenado por Fórmula</span>
+                <span class="form-section-label lbl-formula">🔗 Llenado por Fórmula — se recalculan automáticamente al guardar</span>
             </div>
 
             <div class="form-cols">
 
                 <div class="form-field">
-                    <label>Orden de Compra</label>
-                    <input id="e_ORDEN_DE_COMPRA">
+                    <label>Orden de Compra 🔒</label>
+                    <input id="e_ORDEN_DE_COMPRA" readonly tabindex="-1" placeholder="Calculado desde Requisición" title="Se obtiene automáticamente de Req VS OC">
                 </div>
 
                 <div class="form-field">
-                    <label>Fecha OC</label>
-                    <input type="date" id="e_FECHA_OC">
+                    <label>Fecha OC 🔒</label>
+                    <input id="e_FECHA_OC" readonly tabindex="-1" placeholder="Calculado desde Requisición" title="Se obtiene automáticamente de Req VS OC">
                 </div>
 
                 <div class="form-field">
-                    <label>OC</label>
-                    <input id="e_OC">
+                    <label>OC 🔒</label>
+                    <input id="e_OC" readonly tabindex="-1" placeholder="Calculado desde Requisición" title="Se obtiene automáticamente de Req VS OC">
                 </div>
 
                 <div class="form-field">
@@ -1359,8 +1354,8 @@
                 </div>
 
                 <div class="form-field">
-                    <label>Total (Sin IVA) — calculado</label>
-                    <input type="number" step="0.01" id="e_TOTAL_SIN_IVA" readonly tabindex="-1">
+                    <label>Total (Sin IVA) 🔒</label>
+                    <input type="number" step="0.01" id="e_TOTAL_SIN_IVA" readonly tabindex="-1" placeholder="Cantidad × Precio Unitario" title="Calculado automáticamente: Cantidad × Precio Unitario">
                 </div>
                 <div class="form-field">
                     <label>Folio</label>
@@ -1435,20 +1430,13 @@
                 </div>
 
                 <div class="form-field">
-                    <label>Cantidad Registrada</label>
-                    <input id="e_CANTIDAD_REGISTRADA">
+                    <label>Cantidad Registrada 🔒</label>
+                    <input id="e_CANTIDAD_REGISTRADA" readonly tabindex="-1" placeholder="Calculado desde entradas" title="Calculado automáticamente desde la tabla de entradas">
                 </div>
 
                 <div class="form-field">
-                    <label>Estatus OC</label>
-                    <select id="e_ESTATUS_OC">
-                        <option value="">— Seleccionar —</option>
-                        <option>COMPLETA</option>
-                        <option>FALSO</option>
-                        <option>PARCIAL</option>
-                        <option>PENDIENTE</option>
-                        <option>VERDADERO</option>
-                    </select>
+                    <label>Estatus OC 🔒</label>
+                    <input id="e_ESTATUS_OC" readonly tabindex="-1" placeholder="COMPLETA / PARCIAL / PENDIENTE" title="Calculado automáticamente: depende de Cantidad vs Cantidad Registrada">
                 </div>
 
             </div>
@@ -1481,26 +1469,26 @@
         let usuarioActual = 'SISTEMA', rolActual = 'USER';
 
         const CAMPOS = [
-            { key: 'ORDEN_DE_COMPRA', label: 'Orden de Compra' },
-            { key: 'FOLIO', label: 'Folio' },
-            { key: 'SOLICITANTE', label: 'Solicitante' },
-            { key: 'PRESUPUESTO_MES', label: 'Presupuesto (Mes)' },
-            { key: 'SERIE_UBICACION_NO_EMPLEADO', label: 'Serie/Ubicación/No. Empleado' },
-            { key: 'ACCESORIO_SOLICITADO', label: 'Accesorio Solicitado' },
-            { key: 'PROVEEDOR_ELEGIDO', label: 'Proveedor Elegido' },
-            { key: 'PIEZA_SERVICIO', label: 'Pieza/Servicio' },
-            { key: 'CANTIDAD', label: 'Cantidad' },
-            { key: 'PRECIO_UNITARIO', label: 'Precio Unitario' },
-            { key: 'TOTAL_SIN_IVA', label: 'Total (Sin IVA)' },
-            { key: 'MONEDA', label: 'Moneda' },
-            { key: 'COMENTARIOS', label: 'Comentarios' },
-            { key: 'HOJA_CONTROL', label: 'Hoja Control' },
-            { key: 'REQUISICION', label: 'Requisición' },
-            { key: 'FECHA_OC', label: 'Fecha OC' },
-            { key: 'OC', label: 'OC' },
-            { key: 'FECHA_ENTRADA', label: 'Fecha Entrada' },
-            { key: 'CANTIDAD_REGISTRADA', label: 'Cantidad Registrada' },
-            { key: 'ESTATUS_OC', label: 'Estatus OC' },
+            { key: 'ORDEN_DE_COMPRA', label: 'Orden de Compra', formula: true },
+            { key: 'FOLIO', label: 'Folio', formula: false },
+            { key: 'SOLICITANTE', label: 'Solicitante', formula: false },
+            { key: 'PRESUPUESTO_MES', label: 'Presupuesto (Mes)', formula: false },
+            { key: 'SERIE_UBICACION_NO_EMPLEADO', label: 'Serie/Ubicación/No. Empleado', formula: false },
+            { key: 'ACCESORIO_SOLICITADO', label: 'Accesorio Solicitado', formula: false },
+            { key: 'PROVEEDOR_ELEGIDO', label: 'Proveedor Elegido', formula: false },
+            { key: 'PIEZA_SERVICIO', label: 'Pieza/Servicio', formula: false },
+            { key: 'CANTIDAD', label: 'Cantidad', formula: false },
+            { key: 'PRECIO_UNITARIO', label: 'Precio Unitario', formula: false },
+            { key: 'TOTAL_SIN_IVA', label: 'Total (Sin IVA)', formula: true },
+            { key: 'MONEDA', label: 'Moneda', formula: false },
+            { key: 'COMENTARIOS', label: 'Comentarios', formula: false },
+            { key: 'HOJA_CONTROL', label: 'Hoja Control', formula: false },
+            { key: 'REQUISICION', label: 'Requisición', formula: false },
+            { key: 'FECHA_OC', label: 'Fecha OC', formula: true },
+            { key: 'OC', label: 'OC', formula: true },
+            { key: 'FECHA_ENTRADA', label: 'Fecha Entrada', formula: false },
+            { key: 'CANTIDAD_REGISTRADA', label: 'Cantidad Registrada', formula: true },
+            { key: 'ESTATUS_OC', label: 'Estatus OC', formula: true },
         ];
 
         // ── Colores por Solicitante ────────────────────────────────────────────────
@@ -1687,46 +1675,46 @@
 
                 const solCell = row.SOLICITANTE
                     ? `<span style="display:inline-flex;align-items:center;gap:5px;">
-                                                             <span style="width:8px;height:8px;border-radius:50%;background:${colorSolicitante(row.SOLICITANTE)};flex-shrink:0;"></span>
-                                                             ${row.SOLICITANTE}
-                                                           </span>`
+                                                                 <span style="width:8px;height:8px;border-radius:50%;background:${colorSolicitante(row.SOLICITANTE)};flex-shrink:0;"></span>
+                                                                 ${row.SOLICITANTE}
+                                                               </span>`
                     : '';
 
                 tbody.innerHTML += `
-                                                    <tr style="${rowStyle}">
-                                                        <td class="mono">${row.ID}</td>
-                                                        <td class="auto">${row.ORDEN_DE_COMPRA ?? ''}</td>
-                                                        <td class="auto mono">${row.FECHA_OC ?? ''}</td>
-                                                        <td class="auto mono">${row.OC ?? ''}</td>
-                                                        <td>${row.FOLIO ?? ''}</td>
-                                                        <td>${solCell}</td>
-                                                        <td>${row.PRESUPUESTO_MES ?? ''}</td>
-                                                        <td>${row.SERIE_UBICACION_NO_EMPLEADO ?? ''}</td>
-                                                        <td class="wrap">${row.ACCESORIO_SOLICITADO ?? ''}</td>
-                                                        <td>${row.PROVEEDOR_ELEGIDO ?? ''}</td>
-                                                        <td>${row.PIEZA_SERVICIO ?? ''}</td>
-                                                        <td class="num">${row.CANTIDAD ?? ''}</td>
-                                                        <td class="num">${row.PRECIO_UNITARIO ?? ''}</td>
-                                                        <td class="num auto">${row.TOTAL_SIN_IVA ?? ''}</td>
-                                                        <td>${row.MONEDA ?? ''}</td>
-                                                        <td class="wrap">${row.COMENTARIOS ?? ''}</td>
-                                                        <td>${row.HOJA_CONTROL ?? ''}</td>
-                                                        <td class="mono">${row.REQUISICION ?? ''}</td>
-                                                        <td class="auto mono">${row.FECHA_ENTRADA ?? ''}</td>
-                                                        <td class="num">${row.CANTIDAD_REGISTRADA ?? ''}</td>
-                                                        <td>${estatusPill(row.ESTATUS_OC)}</td>
-                                                        <td>
-                                                            ${row.TIENE_PDF
+                                                        <tr style="${rowStyle}">
+                                                            <td class="mono">${row.ID}</td>
+                                                            <td class="auto">${row.ORDEN_DE_COMPRA ?? ''}</td>
+                                                            <td class="auto mono">${row.FECHA_OC ?? ''}</td>
+                                                            <td class="auto mono">${row.OC ?? ''}</td>
+                                                            <td>${row.FOLIO ?? ''}</td>
+                                                            <td>${solCell}</td>
+                                                            <td>${row.PRESUPUESTO_MES ?? ''}</td>
+                                                            <td>${row.SERIE_UBICACION_NO_EMPLEADO ?? ''}</td>
+                                                            <td class="wrap">${row.ACCESORIO_SOLICITADO ?? ''}</td>
+                                                            <td>${row.PROVEEDOR_ELEGIDO ?? ''}</td>
+                                                            <td>${row.PIEZA_SERVICIO ?? ''}</td>
+                                                            <td class="num">${row.CANTIDAD ?? ''}</td>
+                                                            <td class="num">${row.PRECIO_UNITARIO ?? ''}</td>
+                                                            <td class="num auto">${row.TOTAL_SIN_IVA ?? ''}</td>
+                                                            <td>${row.MONEDA ?? ''}</td>
+                                                            <td class="wrap">${row.COMENTARIOS ?? ''}</td>
+                                                            <td>${row.HOJA_CONTROL ?? ''}</td>
+                                                            <td class="mono">${row.REQUISICION ?? ''}</td>
+                                                            <td class="auto mono">${row.FECHA_ENTRADA ?? ''}</td>
+                                                            <td class="num">${row.CANTIDAD_REGISTRADA ?? ''}</td>
+                                                            <td>${estatusPill(row.ESTATUS_OC)}</td>
+                                                            <td>
+                                                                ${row.TIENE_PDF
                         ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                                                                   <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
+                                                                       <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
                         : `<label class="file-label">📎 Subir PDF<input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)"></label>`}
-                                                        </td>
-                                                        <td style="white-space:nowrap;">
-                                                            ${puedeEditar ? `<button class="btn btn-amber  btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
-                                                            ${puedeEliminar ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑️</button>` : ''}
-                                                            <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-                                                        </td>
-                                                    </tr>`;
+                                                            </td>
+                                                            <td style="white-space:nowrap;">
+                                                                ${puedeEditar ? `<button class="btn btn-amber  btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
+                                                                ${puedeEliminar ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑️</button>` : ''}
+                                                                <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})">📋</button>
+                                                            </td>
+                                                        </tr>`;
             });
 
             const totalPags = Math.ceil(totalRegistros / limite) || 1;
@@ -1742,24 +1730,24 @@
                 leyenda.style.display = 'block';
 
                 contenido.innerHTML += `
-                                                        <div style="display:inline-flex;align-items:center;gap:8px;
-                                                            padding:6px 14px;border-radius:999px;
-                                                            background:rgba(16,185,129,0.13);
-                                                            border:1px solid rgba(16,185,129,0.4);">
-                                                            <span style="width:10px;height:10px;border-radius:50%;background:#10B981;flex-shrink:0;"></span>
-                                                            <span style="font-size:11px;font-weight:600;color:#6EE7B7;font-family:'DM Mono',monospace;">COMPLETA</span>
-                                                        </div>`;
+                                                            <div style="display:inline-flex;align-items:center;gap:8px;
+                                                                padding:6px 14px;border-radius:999px;
+                                                                background:rgba(16,185,129,0.13);
+                                                                border:1px solid rgba(16,185,129,0.4);">
+                                                                <span style="width:10px;height:10px;border-radius:50%;background:#10B981;flex-shrink:0;"></span>
+                                                                <span style="font-size:11px;font-weight:600;color:#6EE7B7;font-family:'DM Mono',monospace;">COMPLETA</span>
+                                                            </div>`;
 
                 unicos.forEach(s => {
                     const c = colorSolicitante(s);
                     contenido.innerHTML += `
-                                                            <div style="display:inline-flex;align-items:center;gap:8px;
-                                                                padding:6px 14px;border-radius:999px;
-                                                                background:${hexToRgba(c, 0.13)};
-                                                                border:1px solid ${hexToRgba(c, 0.4)};">
-                                                                <span style="width:10px;height:10px;border-radius:50%;background:${c};flex-shrink:0;"></span>
-                                                                <span style="font-size:11px;font-weight:600;color:${c};font-family:'DM Mono',monospace;">${s}</span>
-                                                            </div>`;
+                                                                <div style="display:inline-flex;align-items:center;gap:8px;
+                                                                    padding:6px 14px;border-radius:999px;
+                                                                    background:${hexToRgba(c, 0.13)};
+                                                                    border:1px solid ${hexToRgba(c, 0.4)};">
+                                                                    <span style="width:10px;height:10px;border-radius:50%;background:${c};flex-shrink:0;"></span>
+                                                                    <span style="font-size:11px;font-weight:600;color:${c};font-family:'DM Mono',monospace;">${s}</span>
+                                                                </div>`;
                 });
             } else {
                 leyenda.style.display = 'none';
@@ -1772,10 +1760,11 @@
                 return;
             }
             const data = {};
-            CAMPOS.forEach(({ key }) => {
+            CAMPOS.forEach(({ key, formula }) => {
+                if (formula) return; // los campos de fórmula los calcula el backend
                 const el = document.getElementById('n_' + key);
                 if (!el) return;
-                const isNum = ['CANTIDAD', 'PRECIO_UNITARIO', 'TOTAL_SIN_IVA', 'CANTIDAD_REGISTRADA'].includes(key);
+                const isNum = ['CANTIDAD', 'PRECIO_UNITARIO'].includes(key);
                 data[key] = el.value !== '' ? (isNum ? parseFloat(el.value) : el.value) : null;
             });
 
@@ -1796,9 +1785,9 @@
         }
 
         function limpiarForm() {
-            CAMPOS.forEach(({ key }) => {
+            CAMPOS.forEach(({ key, formula }) => {
                 const el = document.getElementById('n_' + key);
-                if (el) el.value = '';
+                if (el && !formula) el.value = '';
             });
         }
 
@@ -1856,10 +1845,11 @@
 
         async function guardarCambios() {
             const datos = {};
-            CAMPOS.forEach(({ key }) => {
+            CAMPOS.forEach(({ key, formula }) => {
+                if (formula) return; // los campos de fórmula los recalcula el backend
                 const el = document.getElementById('e_' + key);
                 if (!el) return;
-                const isNum = ['CANTIDAD', 'PRECIO_UNITARIO', 'TOTAL_SIN_IVA', 'CANTIDAD_REGISTRADA'].includes(key);
+                const isNum = ['CANTIDAD', 'PRECIO_UNITARIO'].includes(key);
                 datos[key] = el.value !== '' ? (isNum ? parseFloat(el.value) : el.value) : null;
             });
 
@@ -1899,25 +1889,25 @@
                 const vD = despues && key in despues ? despues[key] : '';
                 const cambiado = cambios.has(key);
                 filas += `<tr class="${cambiado ? 'row-changed' : ''}">
-                                                                    <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                                                                    <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
-                                                                    <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
-                                                                </tr>`;
+                                                                        <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                                                                        <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
+                                                                        <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
+                                                                    </tr>`;
             });
 
             return `<div class="ev-wrap">
-                                                                <div class="ev-header">
-                                                                    <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                                                    <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                                                                    <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-                                                                        ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-                                                                    </span>
-                                                                </div>
-                                                                <table class="ev-table">
-                                                                    <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
-                                                                    <tbody>${filas}</tbody>
-                                                                </table>
-                                                            </div>`;
+                                                                    <div class="ev-header">
+                                                                        <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                                                                        <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                                                                        <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                                                                            ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                                                                        </span>
+                                                                    </div>
+                                                                    <table class="ev-table">
+                                                                        <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
+                                                                        <tbody>${filas}</tbody>
+                                                                    </table>
+                                                                </div>`;
         }
 
         function verHistorial(id) {
@@ -2004,13 +1994,13 @@
                 const c = colorSolicitante(s);
 
                 contenido.innerHTML += `
-                                                    <div style="display:inline-flex;align-items:center;gap:8px;
-                                                        padding:6px 14px;border-radius:999px;
-                                                        background:${hexToRgba(c, 0.13)};
-                                                        border:1px solid ${hexToRgba(c, 0.4)};">
-                                                        <span style="width:10px;height:10px;border-radius:50%;background:${c};"></span>
-                                                        <span style="font-size:11px;font-weight:600;color:${c};font-family:'DM Mono',monospace;">${s}</span>
-                                                    </div>`;
+                                                        <div style="display:inline-flex;align-items:center;gap:8px;
+                                                            padding:6px 14px;border-radius:999px;
+                                                            background:${hexToRgba(c, 0.13)};
+                                                            border:1px solid ${hexToRgba(c, 0.4)};">
+                                                            <span style="width:10px;height:10px;border-radius:50%;background:${c};"></span>
+                                                            <span style="font-size:11px;font-weight:600;color:${c};font-family:'DM Mono',monospace;">${s}</span>
+                                                        </div>`;
             });
 
             leyenda.style.display = lista.length ? 'block' : 'none';

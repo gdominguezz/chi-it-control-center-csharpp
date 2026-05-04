@@ -187,6 +187,18 @@ public class OrdenesDeCompraController : ControllerBase
             $"OrdenesDeCompra_{anio}.xlsx");
     }
 
+    // ── RECALCULAR FÓRMULAS (registros existentes) ────────────────────────
+    /// <summary>
+    /// Recalcula los campos derivados por fórmula en todos los registros.
+    /// Equivalente a re-aplicar las fórmulas del Excel en toda la tabla.
+    /// </summary>
+    [HttpPost("RECALCULAR")]
+    public IActionResult RecalcularFormulas()
+    {
+        var actualizados = _service.RecalcularFormulas();
+        return Ok(new { actualizados, mensaje = $"{actualizados} registros recalculados." });
+    }
+
     // ── HISTORIAL ─────────────────────────────────────────────────────────
     [HttpGet("{id}/HISTORIAL")]
     public IActionResult GetHistorial(int id)
