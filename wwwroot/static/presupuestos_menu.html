@@ -326,90 +326,161 @@
             }
         }
 
-        /* ── RESULTADOS ── */
+        /* ══════════════════════════════════════
+           RESULTADOS — REDESIGN ELEGANTE
+        ══════════════════════════════════════ */
         #resultados {
-            max-width: 900px;
-            margin: 0 auto 32px;
+            max-width: 1040px;
+            margin: 0 auto 48px;
             padding: 0 24px;
             display: none;
             position: relative;
             z-index: 1;
         }
 
+        .res-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .res-header-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--border2), transparent);
+        }
+
         .res-summary {
-            font-size: .82rem;
+            font-family: 'DM Mono', monospace;
+            font-size: .72rem;
             color: var(--muted);
-            margin-bottom: 14px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border);
+            letter-spacing: .06em;
+            white-space: nowrap;
         }
 
             .res-summary strong {
-                color: var(--text);
+                color: var(--accent2);
             }
 
         .modulo-card {
             background: var(--surface);
-            border: 1px solid var(--border2);
-            border-radius: 12px;
-            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 14px;
             overflow: hidden;
+            transition: border-color .2s, box-shadow .2s;
+            animation: cardIn .3s ease both;
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modulo-card:hover {
+            border-color: rgba(37,99,235,.3);
+            box-shadow: 0 8px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(37,99,235,.08);
         }
 
         .modulo-head {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 13px 18px;
-            background: var(--surface2);
+            gap: 12px;
+            padding: 14px 20px;
+            background: linear-gradient(90deg, var(--surface2), var(--surface));
             cursor: pointer;
             user-select: none;
+            border-bottom: 1px solid var(--border);
             transition: background .15s;
+            position: relative;
+            overflow: hidden;
         }
 
-            .modulo-head:hover {
-                background: var(--surface3);
+            .modulo-head::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 3px;
+                background: linear-gradient(to bottom, var(--accent2), var(--accent));
+                border-radius: 0 2px 2px 0;
             }
 
+            .modulo-head:hover {
+                background: linear-gradient(90deg, var(--surface3), var(--surface2));
+            }
+
+        .modulo-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 6px rgba(96,165,250,.4));
+        }
+
         .modulo-name {
-            font-size: .88rem;
-            font-weight: 600;
-            flex: 1;
             font-family: 'Syne', sans-serif;
+            font-size: .82rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--text);
+            flex: 1;
         }
 
         .badge {
-            background: var(--accent);
-            color: white;
-            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            background: rgba(37,99,235,.15);
+            color: var(--accent2);
+            border: 1px solid rgba(37,99,235,.3);
+            border-radius: 999px;
             padding: 2px 10px;
-            font-size: .72rem;
+            font-size: .68rem;
             font-weight: 700;
             font-family: 'DM Mono', monospace;
+            letter-spacing: .04em;
         }
 
         .btn-ir {
-            padding: 5px 13px;
-            background: var(--green);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: .73rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            background: transparent;
+            color: var(--accent2);
+            border: 1px solid rgba(37,99,235,.35);
+            border-radius: 8px;
+            font-size: .7rem;
             font-weight: 700;
             cursor: pointer;
             font-family: 'Syne', sans-serif;
-            letter-spacing: .04em;
-            transition: background .15s;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            transition: all .2s;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
             .btn-ir:hover {
-                background: #059669;
+                background: rgba(37,99,235,.18);
+                border-color: var(--accent2);
+                transform: translateX(2px);
+                box-shadow: 0 0 16px rgba(37,99,235,.2);
             }
 
         .chevron {
             color: var(--muted2);
-            font-size: .72rem;
-            transition: transform .2s;
+            font-size: .65rem;
+            transition: transform .22s ease;
+            flex-shrink: 0;
         }
 
             .chevron.open {
@@ -419,63 +490,104 @@
         .modulo-body {
             display: block;
             overflow-x: auto;
+            background: var(--surface);
         }
+
+            .modulo-body::-webkit-scrollbar {
+                height: 5px;
+            }
+
+            .modulo-body::-webkit-scrollbar-track {
+                background: var(--surface2);
+            }
+
+            .modulo-body::-webkit-scrollbar-thumb {
+                background: #2d3a52;
+                border-radius: 99px;
+            }
+
+                .modulo-body::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent);
+                }
 
             .modulo-body table {
                 width: 100%;
                 border-collapse: collapse;
-                font-size: .76rem;
+                font-size: .73rem;
                 font-family: 'DM Mono', monospace;
+                min-width: 500px;
             }
 
-            .modulo-body th {
-                background: var(--surface3);
-                color: var(--muted);
-                padding: 7px 10px;
+            .modulo-body thead th {
+                background: rgba(255,255,255,.025);
+                color: var(--muted2);
+                padding: 8px 12px;
                 text-align: left;
-                border-bottom: 1px solid var(--border);
+                border-bottom: 1px solid var(--border2);
                 white-space: nowrap;
-                font-size: .7rem;
-                letter-spacing: .04em;
+                font-size: .62rem;
+                letter-spacing: .1em;
+                text-transform: uppercase;
             }
 
-            .modulo-body td {
-                padding: 6px 10px;
+            .modulo-body tbody td {
+                padding: 7px 12px;
                 border-bottom: 1px solid var(--border);
                 color: var(--text);
                 white-space: nowrap;
+                max-width: 240px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                transition: background .1s;
             }
 
-            .modulo-body tr:last-child td {
+            .modulo-body tbody tr:last-child td {
                 border-bottom: none;
             }
 
-            .modulo-body tr:hover td {
-                background: rgba(255,255,255,.03);
+            .modulo-body tbody tr:hover td {
+                background: rgba(37,99,235,.05);
             }
 
         .highlight {
-            background: #FBBF24;
-            color: #080C14;
-            border-radius: 2px;
-            padding: 0 2px;
+            background: rgba(251,191,36,.2);
+            color: #FCD34D;
+            border-radius: 3px;
+            padding: 0 3px;
             font-weight: 700;
+            border: 1px solid rgba(251,191,36,.28);
         }
 
         .more-notice {
-            padding: 8px 12px;
-            background: rgba(245,158,11,.08);
-            color: #FBBF24;
-            font-size: .76rem;
-            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(245,158,11,.06);
+            color: #FCD34D;
+            font-size: .7rem;
+            border-bottom: 1px solid rgba(245,158,11,.12);
+            font-family: 'DM Mono', monospace;
+            letter-spacing: .03em;
         }
 
         .no-results {
-            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 48px 24px;
             text-align: center;
             color: var(--muted2);
-            font-size: .86rem;
-            font-style: italic;
+            font-size: .84rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .no-results-icon {
+            font-size: 2rem;
+            opacity: .4;
         }
 
         /* ── SECTION LABEL ── */
@@ -988,7 +1100,11 @@
     <div id="spinner"><span class="spin"></span> Buscando en todos los módulos…</div>
 
     <div id="resultados">
-        <p class="res-summary" id="resSummary"></p>
+        <div class="res-header">
+            <div class="res-header-line"></div>
+            <p class="res-summary" id="resSummary"></p>
+            <div class="res-header-line" style="background:linear-gradient(to left,var(--border2),transparent)"></div>
+        </div>
         <div id="resContent"></div>
     </div>
 
@@ -1135,8 +1251,6 @@
             "SERVICIO POR PROVEEDORES": "/static/modulos_presupuesto/servicio_proveedores_nf.html",
             "EQUIPO DE RED NF": "/static/modulos_presupuesto/refacciones_red_nf.html",
             "REGISTRO DE ENTRADAS TEMPORAL": "/static/modulos_presupuesto/registro_de_entradas_temporal.html",
-            "REPORTES_IMPRESORAS": "/static/modulos_presupuesto/reportes_impresoras.html",
-            "IMPRESORAS_INFO": "/static/modulos_presupuesto/reportes_impresoras.html",
         };
 
         async function buscarGlobal() {
@@ -1157,43 +1271,47 @@
 
                 if (data.modulos_con_resultados === 0) {
                     document.getElementById('resSummary').innerHTML =
-                        `❌ Sin resultados para: "<em>${termino}</em>"`;
-                    cont.innerHTML = `<div class="no-results">Ningún módulo contiene esa información.</div>`;
+                        `Sin resultados para: "<strong>${termino}</strong>"`;
+                    cont.innerHTML = `
+                            <div class="no-results">
+                                <span class="no-results-icon">🔍</span>
+                                Ningún módulo contiene esa información.
+                            </div>`;
                 } else {
                     const total = data.resultados.reduce((a, r) => a + r.total, 0);
                     document.getElementById('resSummary').innerHTML =
-                        `✅ <strong>${total}</strong> resultado(s) en <strong>${data.modulos_con_resultados}</strong> módulo(s) para: "<em>${termino}</em>"`;
+                        `<strong>${total}</strong> resultado(s) &nbsp;·&nbsp; <strong>${data.modulos_con_resultados}</strong> módulo(s) &nbsp;·&nbsp; "<strong>${termino}</strong>"`;
 
-                    data.resultados.forEach(r => {
+                    data.resultados.forEach((r, idx) => {
                         const cols = Object.keys(r.registros[0] || {});
                         const filas = r.registros.map(row =>
-                            `<tr>${cols.map(c => `<td>${resaltar(String(row[c] ?? ''), termino)}</td>`).join('')}</tr>`
+                            `<tr>${cols.map(c => `<td title="${String(row[c] ?? '')}">${resaltar(String(row[c] ?? '—'), termino)}</td>`).join('')}</tr>`
                         ).join('');
 
                         const masReg = r.total > r.registros.length
-                            ? `<div class="more-notice">⚠️ Mostrando ${r.registros.length} de ${r.total} registros. Entra al módulo para ver todos.</div>`
+                            ? `<div class="more-notice">⚠&nbsp; Mostrando <strong>${r.registros.length}</strong> de <strong>${r.total}</strong> registros — entra al módulo para ver todos.</div>`
                             : '';
 
                         const pagina = PAGINA_MAP[r.modulo] || '/static/menu.html';
                         const cardId = 'card_' + Math.random().toString(36).slice(2);
 
                         cont.innerHTML += `
-                                    <div class="modulo-card">
-                                        <div class="modulo-head" onclick="toggleCard('${cardId}')">
-                                            <span class="modulo-icon">📦</span>
-                                            <span class="modulo-name">${r.modulo}</span>
-                                            <span class="badge">${r.total}</span>
-                                            <button class="btn-ir" onclick="event.stopPropagation();window.location.href='${pagina}'">IR AL MÓDULO</button>
-                                            <span class="chevron open" id="chev_${cardId}">▼</span>
-                                        </div>
-                                        <div class="modulo-body" id="${cardId}" style="max-height:260px;overflow-y:auto;">
-                                            ${masReg}
-                                            <table>
-                                                <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
-                                                <tbody>${filas}</tbody>
-                                            </table>
-                                        </div>
-                                    </div>`;
+                                <div class="modulo-card" style="animation-delay:${idx * 0.06}s">
+                                    <div class="modulo-head" onclick="toggleCard('${cardId}')">
+                                        <span class="modulo-icon">📦</span>
+                                        <span class="modulo-name">${r.modulo}</span>
+                                        <span class="badge">${r.total}</span>
+                                        <button class="btn-ir" onclick="event.stopPropagation();window.location.href='${pagina}'">IR AL MÓDULO</button>
+                                        <span class="chevron open" id="chev_${cardId}">▼</span>
+                                    </div>
+                                    <div class="modulo-body" id="${cardId}" style="max-height:280px;overflow-y:auto;">
+                                        ${masReg}
+                                        <table>
+                                            <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+                                            <tbody>${filas}</tbody>
+                                        </table>
+                                    </div>
+                                </div>`;
                     });
                 }
 
