@@ -40,6 +40,7 @@ builder.Services.AddScoped<RemisionesService>();        // REMISIONES
 builder.Services.AddScoped<RadiosNFService>();         //  RADIOS_NF
 builder.Services.AddScoped<TintasTonerRibonNFService>();  // TINTAS TONER RIBON NF
 builder.Services.AddScoped<EquipoRedNFService>();        // EQUIPO DE RED NF
+builder.Services.AddSingleton<ImpresorasReportesService>(); //REPORTES IMPRESORAS
 
 
 // CORS
