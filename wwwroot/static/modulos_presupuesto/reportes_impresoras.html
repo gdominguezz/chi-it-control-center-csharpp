@@ -3,106 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Impresoras & Reportes</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>Impresoras &amp; Reportes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0B0F1A;
-            --surface: #111827;
-            --surface2: #1a2235;
-            --surface3: #1e293b;
-            --border: rgba(255,255,255,0.07);
-            --border2: rgba(255,255,255,0.13);
-            --accent: #3B82F6;
-            --text: #F1F5F9;
-            --muted: #64748B;
-            --muted2: #94A3B8;
-            --green: #10B981;
+            --bg: #07080F;
+            --surface: #0C0E18;
+            --surface2: #141727;
+            --surface3: #1A1F33;
+            --border: rgba(255,255,255,0.06);
+            --border2: rgba(255,255,255,0.11);
+            --accent: #7C3AED;
+            --accent2: #A78BFA;
+            --accent3: #C4B5FD;
+            --text: #EBEEf8;
+            --muted: #555C80;
+            --muted2: #8891B8;
+            --green: #22C55E;
             --red: #EF4444;
             --amber: #F59E0B;
-            --purple: #8B5CF6;
+            --blue: #3B82F6;
             --cyan: #06B6D4;
+            --line-h: 56px;
+            --grid-color: rgba(124,58,237,0.04);
         }
 
-        * {
+        *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
         body {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent calc(var(--line-h) - 1px), var(--grid-color) var(--line-h)), repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(124,58,237,0.02) 80px);
         }
 
-        /* ── TOP BAR ── */
+        /* ══════════════════════════════════════
+           TOP BAR
+        ══════════════════════════════════════ */
         .topbar {
-            background: linear-gradient(135deg,#0f1e35,#0B0F1A);
-            border-bottom: 1px solid var(--border2);
-            padding: 14px 24px;
+            background: rgba(7,8,15,0.96);
+            border-bottom: 2px solid var(--accent);
+            padding: 0 24px;
             display: flex;
-            align-items: center;
-            gap: 16px;
+            align-items: stretch;
+            gap: 0;
             position: sticky;
             top: 0;
             z-index: 200;
+            height: 58px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 40px rgba(124,58,237,0.15);
         }
 
-        .topbar-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 11px;
-            background: linear-gradient(135deg,#1e3a8a,#3B82F6);
+        .topbar-brand {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            box-shadow: 0 0 20px rgba(59,130,246,.4);
+            gap: 14px;
+            padding-right: 24px;
+            border-right: 1px solid rgba(124,58,237,0.2);
             flex-shrink: 0;
         }
 
-        .topbar-title {
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #3B0764, var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 18px rgba(124,58,237,0.55);
+            flex-shrink: 0;
+        }
+
+        .brand-text h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .brand-text p {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            color: var(--accent2);
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        .topbar-stats {
+            display: flex;
+            align-items: center;
+            padding-left: 20px;
             flex: 1;
         }
 
-            .topbar-title h1 {
-                font-size: 16px;
-                font-weight: 700;
-                letter-spacing: -.01em;
+        .stat-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 18px;
+            height: 100%;
+            border-right: 1px solid var(--border2);
+        }
+
+            .stat-chip .stat-val {
+                font-family: 'Oswald', sans-serif;
+                font-size: 22px;
+                font-weight: 600;
+                color: var(--accent2);
+                line-height: 1;
+                min-width: 36px;
             }
 
-            .topbar-title p {
-                font-size: 11px;
-                color: var(--muted2);
-                margin-top: 1px;
-                font-family: 'DM Mono',monospace;
+            .stat-chip .stat-label {
+                font-size: 9px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                color: var(--muted);
+                line-height: 1.3;
             }
 
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        /* ── user chip ── */
         .user-chip {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 7px 14px;
+            padding: 6px 14px;
             border-radius: 999px;
-            background: rgba(255,255,255,.06);
+            background: rgba(255,255,255,.05);
             border: 1px solid var(--border2);
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             position: relative;
             user-select: none;
-            transition: background .2s, border-color .2s;
+            transition: all .2s;
         }
 
             .user-chip:hover {
-                background: rgba(255,255,255,.1);
+                background: rgba(124,58,237,.12);
                 border-color: var(--accent);
-            }
-
-            .user-chip span {
-                color: var(--muted2);
             }
 
             .user-chip .chip-arrow {
@@ -124,7 +183,7 @@
             background: var(--surface);
             border: 1px solid var(--border2);
             border-radius: 12px;
-            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            box-shadow: 0 16px 48px rgba(0,0,0,.7), 0 0 0 1px rgba(124,58,237,.1);
             padding: 8px;
             z-index: 999;
             animation: dropIn .15s ease;
@@ -133,12 +192,12 @@
         @keyframes dropIn {
             from {
                 opacity: 0;
-                transform: translateY(-6px)
+                transform: translateY(-6px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0)
+                transform: translateY(0);
             }
         }
 
@@ -160,8 +219,8 @@
 
             .dropdown-header .d-role {
                 font-size: 10px;
-                color: var(--muted);
-                font-family: 'DM Mono',monospace;
+                color: var(--accent2);
+                font-family: 'Space Mono', monospace;
                 text-transform: uppercase;
                 letter-spacing: .08em;
                 margin-top: 2px;
@@ -182,7 +241,7 @@
             background: none;
             width: 100%;
             text-align: left;
-            font-family: 'DM Sans',sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
         }
 
             .dropdown-item:hover {
@@ -199,67 +258,65 @@
                     color: #fff;
                 }
 
-        .topbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-        }
-
-        /* ── TABS ── */
+        /* ══════════════════════════════════════
+           TABS NAV
+        ══════════════════════════════════════ */
         .tabs-nav {
             display: flex;
-            gap: 4px;
-            padding: 16px 24px 0;
+            gap: 0;
+            padding: 0 24px;
+            background: rgba(7,8,15,0.94);
             border-bottom: 1px solid var(--border2);
-            background: var(--surface);
             position: sticky;
-            top: 73px;
+            top: 58px;
             z-index: 100;
+            backdrop-filter: blur(8px);
         }
 
         .tab-btn {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 20px;
-            border-radius: 10px 10px 0 0;
-            font-size: 13px;
+            padding: 14px 22px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px;
             font-weight: 600;
+            letter-spacing: .04em;
+            text-transform: uppercase;
             cursor: pointer;
-            border: 1px solid transparent;
-            border-bottom: none;
+            border: none;
+            border-bottom: 2px solid transparent;
             background: transparent;
-            color: var(--muted2);
-            font-family: 'DM Sans', sans-serif;
+            color: var(--muted);
             transition: all .2s;
             white-space: nowrap;
+            position: relative;
+            bottom: -1px;
         }
 
             .tab-btn:hover {
-                color: var(--text);
-                background: var(--surface2);
+                color: var(--muted2);
             }
 
             .tab-btn.active {
-                color: var(--text);
-                background: var(--bg);
-                border-color: var(--border2);
-                border-bottom-color: var(--bg);
-                margin-bottom: -1px;
+                color: var(--accent2);
+                border-bottom-color: var(--accent);
             }
 
-            .tab-btn .tab-badge {
-                background: rgba(59,130,246,.2);
-                color: var(--accent);
-                border: 1px solid rgba(59,130,246,.3);
-                font-size: 10px;
-                font-weight: 700;
-                padding: 2px 7px;
-                border-radius: 999px;
-            }
+        .tab-badge {
+            background: rgba(124,58,237,.2);
+            color: var(--accent2);
+            border: 1px solid rgba(124,58,237,.35);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-family: 'Space Mono', monospace;
+        }
 
-        /* ── MAIN LAYOUT ── */
+        /* ══════════════════════════════════════
+           MAIN LAYOUT
+        ══════════════════════════════════════ */
         .main {
             max-width: 1600px;
             margin: 0 auto;
@@ -274,51 +331,55 @@
                 display: block;
             }
 
-        /* ── PANEL NUEVO REGISTRO ── */
+        /* ── PANEL / FORM ── */
         .panel {
             background: var(--surface);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border2);
             border-radius: 14px;
             padding: 20px 24px;
             margin-bottom: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,.3);
         }
 
         .panel-title {
-            font-size: 11px;
-            font-weight: 700;
+            font-family: 'Oswald', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: .1em;
-            color: var(--muted);
-            margin-bottom: 14px;
+            letter-spacing: .14em;
+            color: var(--accent2);
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
             .panel-title::before {
                 content: '';
                 width: 3px;
-                height: 14px;
-                background: var(--accent);
+                height: 16px;
+                background: linear-gradient(to bottom, var(--accent), var(--accent2));
                 border-radius: 2px;
                 display: inline-block;
+                box-shadow: 0 0 8px rgba(124,58,237,.5);
             }
 
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill,minmax(190px,1fr));
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
             gap: 12px;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
 
         .field label {
             font-size: 9px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: .1em;
+            letter-spacing: .12em;
             color: var(--muted);
             display: block;
             margin-bottom: 5px;
+            font-family: 'Space Mono', monospace;
         }
 
         .field input, .field select, .field textarea {
@@ -328,7 +389,7 @@
             border-radius: 7px;
             padding: 8px 10px;
             font-size: 12px;
-            font-family: 'DM Mono',monospace;
+            font-family: 'Space Mono', monospace;
             color: var(--text);
             transition: border-color .2s, box-shadow .2s;
         }
@@ -336,7 +397,7 @@
         .field select {
             cursor: pointer;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555C80' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 10px center;
             padding-right: 28px;
@@ -350,20 +411,22 @@
             .field input:focus, .field select:focus, .field textarea:focus {
                 outline: none;
                 border-color: var(--accent);
-                box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+                box-shadow: 0 0 0 3px rgba(124,58,237,.15);
             }
 
         .field textarea {
             resize: vertical;
             min-height: 70px;
-            font-family: 'DM Sans',sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
         }
 
         .field.full {
             grid-column: 1 / -1;
         }
 
-        /* ── BOTONES ── */
+        /* ══════════════════════════════════════
+           BOTONES
+        ══════════════════════════════════════ */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -371,33 +434,35 @@
             padding: 9px 16px;
             border: none;
             border-radius: 8px;
-            font-family: 'DM Sans',sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 12px;
             font-weight: 600;
+            letter-spacing: .02em;
             cursor: pointer;
             transition: all .2s;
             white-space: nowrap;
         }
 
         .btn-primary {
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent), #6D28D9);
             color: white;
-            box-shadow: 0 3px 10px rgba(59,130,246,.3);
+            box-shadow: 0 3px 12px rgba(124,58,237,.35);
         }
 
             .btn-primary:hover {
-                background: #2563EB;
+                filter: brightness(1.15);
                 transform: translateY(-1px);
+                box-shadow: 0 6px 20px rgba(124,58,237,.4);
             }
 
         .btn-success {
             background: var(--green);
             color: white;
-            box-shadow: 0 3px 10px rgba(16,185,129,.25);
+            box-shadow: 0 3px 10px rgba(34,197,94,.25);
         }
 
             .btn-success:hover {
-                background: #059669;
+                background: #16A34A;
                 transform: translateY(-1px);
             }
 
@@ -422,12 +487,14 @@
             }
 
         .btn-purple {
-            background: var(--purple);
+            background: linear-gradient(135deg, var(--accent), #A855F7);
             color: white;
+            box-shadow: 0 3px 12px rgba(124,58,237,.3);
         }
 
             .btn-purple:hover {
-                background: #7C3AED;
+                filter: brightness(1.15);
+                transform: translateY(-1px);
             }
 
         .btn-cyan {
@@ -448,23 +515,26 @@
             .btn-ghost:hover {
                 color: var(--text);
                 border-color: var(--accent);
+                background: rgba(124,58,237,.08);
             }
 
         .btn-sm {
-            padding: 8px 13px;
+            padding: 7px 13px;
             font-size: 12px;
         }
 
-        /* ── TOOLBAR ── */
+        /* ══════════════════════════════════════
+           TOOLBAR
+        ══════════════════════════════════════ */
         .toolbar {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             align-items: center;
-            padding: 14px 24px;
+            padding: 12px 18px;
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
+            border: 1px solid var(--border2);
+            border-radius: 12px;
             margin-bottom: 16px;
         }
 
@@ -479,9 +549,9 @@
             background: var(--surface2);
             border: 1px solid var(--border2);
             border-radius: 7px;
-            padding: 8px 10px;
+            padding: 7px 10px;
             font-size: 12px;
-            font-family: 'DM Mono',monospace;
+            font-family: 'Space Mono', monospace;
             color: var(--text);
             width: 110px;
         }
@@ -491,10 +561,12 @@
                 border-color: var(--accent);
             }
 
-        /* ── TABLA ── */
+        /* ══════════════════════════════════════
+           TABLA
+        ══════════════════════════════════════ */
         .table-wrap {
             background: var(--surface);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border2);
             border-radius: 14px;
             overflow: hidden;
             margin-bottom: 16px;
@@ -502,14 +574,10 @@
 
         .table-scroll {
             overflow-x: auto;
-            max-height: calc(100vh - 400px);
-            min-height: 380px;
-            overflow-y: auto;
         }
 
             .table-scroll::-webkit-scrollbar {
-                width: 7px;
-                height: 7px;
+                height: 6px;
             }
 
             .table-scroll::-webkit-scrollbar-track {
@@ -518,7 +586,7 @@
             }
 
             .table-scroll::-webkit-scrollbar-thumb {
-                background: #334155;
+                background: #2D2F4A;
                 border-radius: 999px;
             }
 
@@ -536,12 +604,14 @@
             background: var(--surface3);
             padding: 10px 12px;
             text-align: left;
-            font-size: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: .08em;
+            letter-spacing: .1em;
             color: var(--muted);
             white-space: nowrap;
+            border-bottom: 1px solid rgba(124,58,237,.15);
             position: sticky;
             top: 0;
             z-index: 10;
@@ -573,7 +643,7 @@
             padding: 5px 8px;
             font-size: 11px;
             color: var(--text);
-            font-family: 'DM Mono',monospace;
+            font-family: 'Space Mono', monospace;
         }
 
             .filter-row td input:focus {
@@ -591,7 +661,7 @@
             }
 
             tbody tr:hover td {
-                filter: brightness(1.15);
+                filter: brightness(1.12);
             }
 
         td {
@@ -599,21 +669,23 @@
             color: var(--text);
             vertical-align: middle;
             line-height: 1.4;
+            font-size: 12px;
         }
 
             td.mono {
-                font-family: 'DM Sans',sans-serif;
-                font-size: 12px;
-                color: var(--text);
+                font-family: 'Space Mono', monospace;
+                font-size: 11px;
             }
 
+        /* STATUS PILLS */
         .status-pill {
             display: inline-block;
             padding: 3px 10px;
             border-radius: 999px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
-            letter-spacing: .04em;
+            letter-spacing: .06em;
+            font-family: 'Space Mono', monospace;
         }
 
         .pill-abierto {
@@ -629,43 +701,47 @@
         }
 
         .pill-cerrado {
-            background: rgba(16,185,129,.2);
-            color: #6ee7b7;
-            border: 1px solid rgba(16,185,129,.35);
+            background: rgba(34,197,94,.15);
+            color: #86efac;
+            border: 1px solid rgba(34,197,94,.3);
         }
 
         .pill-otro {
-            background: rgba(100,116,139,.15);
-            color: #94A3B8;
-            border: 1px solid rgba(100,116,139,.3);
+            background: rgba(85,92,128,.15);
+            color: #8891B8;
+            border: 1px solid rgba(85,92,128,.3);
         }
 
-        /* ── PAGINACIÓN ── */
+        /* ══════════════════════════════════════
+           PAGINACIÓN
+        ══════════════════════════════════════ */
         .pagination {
             display: flex;
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
-            padding: 14px 24px;
+            padding: 12px 18px;
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
+            border: 1px solid var(--border2);
+            border-radius: 12px;
             margin-bottom: 16px;
         }
 
         .page-info {
-            font-size: 12px;
-            font-family: 'DM Mono',monospace;
+            font-size: 11px;
+            font-family: 'Space Mono', monospace;
             color: var(--muted2);
         }
 
-        /* ── MODALES ── */
+        /* ══════════════════════════════════════
+           MODALES
+        ══════════════════════════════════════ */
         .modal {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,.7);
-            backdrop-filter: blur(4px);
+            background: rgba(0,0,0,.75);
+            backdrop-filter: blur(5px);
             justify-content: center;
             align-items: center;
             z-index: 9999;
@@ -677,12 +753,12 @@
 
         .modal-box {
             background: var(--surface);
-            border: 1px solid var(--border2);
+            border: 1px solid rgba(124,58,237,.25);
             border-radius: 16px;
             padding: 24px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 30px 80px rgba(0,0,0,.6);
+            box-shadow: 0 30px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(124,58,237,.1), 0 0 60px rgba(124,58,237,.07);
             position: relative;
             animation: modalIn .2s ease;
         }
@@ -690,21 +766,21 @@
         @keyframes modalIn {
             from {
                 opacity: 0;
-                transform: scale(.96)
+                transform: scale(.96);
             }
 
             to {
                 opacity: 1;
-                transform: scale(1)
+                transform: scale(1);
             }
         }
 
         .modal-box.form-box {
-            width: min(680px,95vw);
+            width: min(680px, 95vw);
         }
 
         .modal-box.hist-box {
-            width: min(900px,95vw);
+            width: min(900px, 95vw);
         }
 
         .modal-header {
@@ -717,9 +793,12 @@
         }
 
             .modal-header h3 {
-                font-size: 15px;
-                font-weight: 700;
-                color: var(--text);
+                font-family: 'Oswald', sans-serif;
+                font-size: 16px;
+                font-weight: 500;
+                letter-spacing: .1em;
+                text-transform: uppercase;
+                color: var(--accent2);
             }
 
         .modal-footer {
@@ -731,7 +810,7 @@
             margin-top: 16px;
         }
 
-        /* ── FORM MODAL ── */
+        /* ── Form modal ── */
         .form-grid-modal {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -752,10 +831,11 @@
                 font-size: 9px;
                 font-weight: 600;
                 text-transform: uppercase;
-                letter-spacing: .1em;
+                letter-spacing: .12em;
                 color: var(--muted);
                 display: block;
                 margin-bottom: 5px;
+                font-family: 'Space Mono', monospace;
             }
 
             .form-field input, .form-field select, .form-field textarea {
@@ -765,15 +845,15 @@
                 border-radius: 7px;
                 padding: 9px 11px;
                 font-size: 12px;
-                font-family: 'DM Mono',monospace;
+                font-family: 'Space Mono', monospace;
                 color: var(--text);
-                transition: border-color .2s;
+                transition: border-color .2s, box-shadow .2s;
             }
 
             .form-field select {
                 cursor: pointer;
                 appearance: none;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555C80' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
                 background-repeat: no-repeat;
                 background-position: right 10px center;
                 padding-right: 28px;
@@ -787,22 +867,24 @@
                 .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
                     outline: none;
                     border-color: var(--accent);
-                    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+                    box-shadow: 0 0 0 3px rgba(124,58,237,.15);
                 }
 
             .form-field textarea {
                 resize: vertical;
                 min-height: 70px;
-                font-family: 'DM Sans',sans-serif;
+                font-family: 'Space Grotesk', sans-serif;
             }
 
             .form-field.full {
                 grid-column: 1 / -1;
             }
 
-        /* ── HISTORIAL ── */
+        /* ══════════════════════════════════════
+           HISTORIAL
+        ══════════════════════════════════════ */
         .ev-wrap {
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             border: 1px solid var(--border2);
             border-radius: 10px;
             overflow-x: auto;
@@ -859,6 +941,7 @@
                 font-weight: 700;
                 text-transform: uppercase;
                 letter-spacing: .08em;
+                font-family: 'Space Mono', monospace;
             }
 
             .ev-table th:first-child {
@@ -871,8 +954,8 @@
         }
 
         .row-changed td:nth-child(3) {
-            background: rgba(16,185,129,.08);
-            color: #6ee7b7;
+            background: rgba(34,197,94,.08);
+            color: #86efac;
         }
 
         .empty-val {
@@ -894,18 +977,95 @@
             font-size: 11px;
             font-weight: 700;
         }
+
+        /* ══════════════════════════════════════
+           TOAST
+        ══════════════════════════════════════ */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 99999;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity .25s, transform .25s;
+            pointer-events: none;
+            max-width: 320px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+            #toast.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+                #toast.show.success {
+                    background: #052e16;
+                    color: #86efac;
+                    border: 1px solid rgba(34,197,94,.3);
+                }
+
+                #toast.show.error {
+                    background: #2c0606;
+                    color: #fca5a5;
+                    border: 1px solid rgba(239,68,68,.3);
+                }
+
+                #toast.show.info {
+                    background: #1e0748;
+                    color: var(--accent3);
+                    border: 1px solid rgba(124,58,237,.3);
+                }
+
+        /* ══════════════════════════════════════
+           SCROLL GLOBAL
+        ══════════════════════════════════════ */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--surface2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2D2F4A;
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--accent);
+            }
     </style>
 </head>
 <body>
 
     <!-- ══ TOP BAR ══ -->
     <div class="topbar">
-        <div class="topbar-icon">🖨️</div>
-        <div class="topbar-title">
-            <h1>Impresoras & Reportes</h1>
-            <p>Gestión de reportes e inventario de impresoras</p>
+        <div class="topbar-brand">
+            <div class="brand-icon">🖨️</div>
+            <div class="brand-text">
+                <h1>Impresoras</h1>
+                <p>Sistema de Reportes</p>
+            </div>
         </div>
-        <div class="topbar-actions">
+
+        <div class="topbar-stats">
+            <div class="stat-chip">
+                <span class="stat-val" id="statReportes">—</span>
+                <span class="stat-label">Reportes<br>totales</span>
+            </div>
+            <div class="stat-chip">
+                <span class="stat-val" id="statImpresoras">—</span>
+                <span class="stat-label">Impresoras<br>registradas</span>
+            </div>
+        </div>
+
+        <div class="topbar-right">
             <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
                 <span>👤</span>
                 <span id="usuarioDisplay">—</span>
@@ -924,11 +1084,11 @@
     <!-- ══ TABS NAV ══ -->
     <div class="tabs-nav">
         <button class="tab-btn active" id="tab-reportes-btn" onclick="cambiarTab('reportes')">
-            🛠️ Reportes de Impresoras
+            🛠️ Reportes
             <span class="tab-badge" id="badge-reportes">0</span>
         </button>
         <button class="tab-btn" id="tab-info-btn" onclick="cambiarTab('info')">
-            🖨️ Info de Impresoras
+            🖨️ Info Impresoras
             <span class="tab-badge" id="badge-info">0</span>
         </button>
     </div>
@@ -936,12 +1096,11 @@
     <!-- ══ MAIN ══ -->
     <div class="main">
 
-        <!-- ════════════════════════════════════════
+        <!-- ════════════════════════════════
              TAB 1 — REPORTES IMPRESORAS
-        ════════════════════════════════════════ -->
+        ════════════════════════════════ -->
         <div class="tab-content active" id="tab-reportes">
 
-            <!-- Panel nuevo reporte -->
             <div class="panel">
                 <div class="panel-title">➕ Nuevo Reporte</div>
                 <div class="form-grid">
@@ -969,18 +1128,16 @@
                 <button class="btn btn-ghost" onclick="limpiarFormReporte()" style="margin-left:8px;">✕ Limpiar</button>
             </div>
 
-            <!-- Toolbar -->
             <div class="toolbar">
-                <button class="btn btn-cyan btn-sm" onclick="exportarReportesFiltrado()">📥 Exportar filtrado</button>
-                <button class="btn btn-cyan btn-sm" onclick="exportarReportesTodo()">📦 Exportar todo</button>
+                <button class="btn btn-purple btn-sm" onclick="exportarReportesFiltrado()">📥 Exportar filtrado</button>
+                <button class="btn btn-purple btn-sm" onclick="exportarReportesTodo()">📦 Exportar todo</button>
                 <div class="toolbar-sep"></div>
                 <input class="anio-input" id="anioExportarR" type="number" placeholder="Año">
-                <button class="btn btn-cyan btn-sm" onclick="exportarReportesPorAnio()">📅 Exportar por año</button>
+                <button class="btn btn-purple btn-sm" onclick="exportarReportesPorAnio()">📅 Exportar por año</button>
                 <div class="toolbar-sep"></div>
                 <button class="btn btn-ghost btn-sm" onclick="cargarReportes()">🔄 Recargar</button>
             </div>
 
-            <!-- Tabla Reportes -->
             <div class="table-wrap">
                 <div class="table-scroll">
                     <table>
@@ -1028,12 +1185,11 @@
             </div>
 
         </div><!-- /tab-reportes -->
-        <!-- ════════════════════════════════════════
+        <!-- ════════════════════════════════
              TAB 2 — IMPRESORAS INFO
-        ════════════════════════════════════════ -->
+        ════════════════════════════════ -->
         <div class="tab-content" id="tab-info">
 
-            <!-- Panel nueva impresora -->
             <div class="panel">
                 <div class="panel-title">➕ Nueva Impresora</div>
                 <div class="form-grid">
@@ -1050,15 +1206,13 @@
                 <button class="btn btn-ghost" onclick="limpiarFormInfo()" style="margin-left:8px;">✕ Limpiar</button>
             </div>
 
-            <!-- Toolbar -->
             <div class="toolbar">
-                <button class="btn btn-cyan btn-sm" onclick="exportarInfoFiltrado()">📥 Exportar filtrado</button>
-                <button class="btn btn-cyan btn-sm" onclick="exportarInfoTodo()">📦 Exportar todo</button>
+                <button class="btn btn-purple btn-sm" onclick="exportarInfoFiltrado()">📥 Exportar filtrado</button>
+                <button class="btn btn-purple btn-sm" onclick="exportarInfoTodo()">📦 Exportar todo</button>
                 <div class="toolbar-sep"></div>
                 <button class="btn btn-ghost btn-sm" onclick="cargarInfo()">🔄 Recargar</button>
             </div>
 
-            <!-- Tabla Info -->
             <div class="table-wrap">
                 <div class="table-scroll">
                     <table>
@@ -1108,7 +1262,7 @@
     <div class="modal" id="modalEditarR">
         <div class="modal-box form-box">
             <div class="modal-header">
-                <h3>✏️ Editar Reporte &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="editarIdLabelR">#</span></h3>
+                <h3>✏️ Editar Reporte &nbsp;<span style="color:var(--muted);font-size:12px;font-weight:400;font-family:'Space Mono',monospace" id="editarIdLabelR">#</span></h3>
                 <button class="btn btn-ghost btn-sm" onclick="cerrarEditarR()">✕</button>
             </div>
             <div class="form-grid-modal">
@@ -1143,7 +1297,7 @@
     <div class="modal" id="modalEditarI">
         <div class="modal-box form-box">
             <div class="modal-header">
-                <h3>✏️ Editar Impresora &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="editarIdLabelI">#</span></h3>
+                <h3>✏️ Editar Impresora &nbsp;<span style="color:var(--muted);font-size:12px;font-weight:400;font-family:'Space Mono',monospace" id="editarIdLabelI">#</span></h3>
                 <button class="btn btn-ghost btn-sm" onclick="cerrarEditarI()">✕</button>
             </div>
             <div class="form-grid-modal">
@@ -1167,7 +1321,7 @@
     <div class="modal" id="modalHistorial">
         <div class="modal-box hist-box">
             <div class="modal-header">
-                <h3>📋 Historial de cambios &nbsp;<span style="color:var(--muted);font-size:13px;font-weight:400" id="histIdLabel">#</span></h3>
+                <h3>📋 Historial de Cambios &nbsp;<span style="color:var(--muted);font-size:12px;font-weight:400;font-family:'Space Mono',monospace" id="histIdLabel">#</span></h3>
                 <button class="btn btn-ghost btn-sm" onclick="cerrarHistorial()">✕</button>
             </div>
             <div id="contenidoHistorial">
@@ -1176,46 +1330,64 @@
         </div>
     </div>
 
+    <!-- TOAST -->
+    <div id="toast"></div>
+
     <script>
         // ══════════════════════════════════════════════════════════════
         //  ESTADO GLOBAL
         // ══════════════════════════════════════════════════════════════
         let usuarioActual = 'SISTEMA';
-        let rolActual     = '';
+        let rolActual = '';
 
         // Reportes
         let rPage = 1, rLimit = 10, rTotal = 0, rDatos = [], rEditID = null, _rTimer = null;
         // Info
         let iPage = 1, iLimit = 10, iTotal = 0, iDatos = [], iEditID = null, _iTimer = null;
         // Historial
-        let histEndpoint = '';
+        let camposHistActual = [];
 
-        // Campos historial reportes
         const CAMPOS_HIST_R = [
-            { key:'FOLIO',                label:'Folio' },
-            { key:'FECHA',                label:'Fecha' },
-            { key:'PLANTA',               label:'Planta' },
-            { key:'IMPRESORA',            label:'Impresora' },
-            { key:'AREA',                 label:'Área' },
-            { key:'REPORTE',              label:'Reporte' },
-            { key:'QUIEN_REPORTA',        label:'Quien Reporta' },
-            { key:'ESTATUS',              label:'Estatus' },
-            { key:'FECHA_DE_REALIZACION', label:'Fecha de Realización' },
-            { key:'COMENTARIOS',          label:'Comentarios' },
+            { key: 'FOLIO', label: 'Folio' },
+            { key: 'FECHA', label: 'Fecha' },
+            { key: 'PLANTA', label: 'Planta' },
+            { key: 'IMPRESORA', label: 'Impresora' },
+            { key: 'AREA', label: 'Área' },
+            { key: 'REPORTE', label: 'Reporte' },
+            { key: 'QUIEN_REPORTA', label: 'Quien Reporta' },
+            { key: 'ESTATUS', label: 'Estatus' },
+            { key: 'FECHA_DE_REALIZACION', label: 'F. Realización' },
+            { key: 'COMENTARIOS', label: 'Comentarios' },
         ];
 
-        // Campos historial info
         const CAMPOS_HIST_I = [
-            { key:'IMPRESORA',       label:'Impresora' },
-            { key:'MODELO',          label:'Modelo' },
-            { key:'NUMERO_DE_SERIE', label:'No. Serie' },
-            { key:'IP',              label:'IP' },
-            { key:'UBICACION',       label:'Ubicación' },
-            { key:'PLANTA',          label:'Planta' },
-            { key:'IDENTIFICADOR',   label:'Identificador' },
-            { key:'NUMERO',          label:'Número' },
+            { key: 'IMPRESORA', label: 'Impresora' },
+            { key: 'MODELO', label: 'Modelo' },
+            { key: 'NUMERO_DE_SERIE', label: 'No. Serie' },
+            { key: 'IP', label: 'IP' },
+            { key: 'UBICACION', label: 'Ubicación' },
+            { key: 'PLANTA', label: 'Planta' },
+            { key: 'IDENTIFICADOR', label: 'Identificador' },
+            { key: 'NUMERO', label: 'Número' },
         ];
-        let camposHistActual = CAMPOS_HIST_R;
+
+        // ══════════════════════════════════════════════════════════════
+        //  INIT
+        // ══════════════════════════════════════════════════════════════
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/ME', { credentials: 'include' })
+                .then(r => r.json())
+                .then(d => {
+                    usuarioActual = d.usuario || d.USUARIO || 'SISTEMA';
+                    rolActual = d.rol || d.ROL || '';
+                    document.getElementById('usuarioDisplay').textContent = usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = usuarioActual;
+                    document.getElementById('dropdownRol').textContent = rolActual;
+                })
+                .catch(() => { });
+            cargarReportes();
+            cargarInfo();
+        });
 
         // ══════════════════════════════════════════════════════════════
         //  TABS
@@ -1228,449 +1400,408 @@
         }
 
         // ══════════════════════════════════════════════════════════════
-        //  INACTIVIDAD
+        //  REPORTES — CARGA
         // ══════════════════════════════════════════════════════════════
-        let _inacTimer = null;
-        function resetInactividad() {
-            clearTimeout(_inacTimer);
-            _inacTimer = setTimeout(async () => {
-                try { await fetch('/LOGOUT', { method:'POST', credentials:'include' }); } catch(e){}
-                window.location.href = '/static/login.html?inactivo=1';
-            }, 30 * 60 * 1000);
+        function qsReportes() {
+            const p = new URLSearchParams({
+                page: rPage,
+                limit: rLimit,
+                FOLIO: v('rfil_FOLIO') || '',
+                FECHA: v('rfil_FECHA') || '',
+                PLANTA: v('rfil_PLANTA') || '',
+                IMPRESORA: v('rfil_IMPRESORA') || '',
+                AREA: v('rfil_AREA') || '',
+                REPORTE: v('rfil_REPORTE') || '',
+                QUIEN_REPORTA: v('rfil_QUIEN_REPORTA') || '',
+                ESTATUS: v('rfil_ESTATUS') || '',
+                FECHA_DE_REALIZACION: v('rfil_FECHA_DE_REALIZACION') || '',
+                COMENTARIOS: v('rfil_COMENTARIOS') || '',
+            });
+            return p.toString();
         }
-        ['mousemove','mousedown','keydown','touchstart','scroll','click'].forEach(ev =>
-            document.addEventListener(ev, resetInactividad, { passive:true })
-        );
-
-        // ══════════════════════════════════════════════════════════════
-        //  INIT
-        // ══════════════════════════════════════════════════════════════
-        window.addEventListener('DOMContentLoaded', () => {
-            resetInactividad();
-            fetch('/obtener-usuario', { credentials:'include' })
-                .then(r => { if (!r.ok) { window.location.href='/static/login.html'; return null; } return r.json(); })
-                .then(d => {
-                    if (!d) return;
-                    if (!d.usuario) { window.location.href='/static/login.html'; return; }
-                    usuarioActual = d.usuario || 'SISTEMA';
-                    rolActual     = (d.rol || '').trim().toUpperCase();
-                    document.getElementById('usuarioDisplay').textContent  = d.nombre || usuarioActual;
-                    document.getElementById('dropdownNombre').textContent  = d.nombre || usuarioActual;
-                    document.getElementById('dropdownRol').textContent     = rolActual;
-                })
-                .catch(() => { window.location.href = '/static/login.html'; });
-
-            cargarReportes();
-            cargarInfo();
-        });
-
-        // ══════════════════════════════════════════════════════════════
-        //  ── REPORTES ──
-        // ══════════════════════════════════════════════════════════════
 
         async function cargarReportes() {
-            const qs = qsReportes();
             try {
-                const r = await fetch(`/REPORTES_IMPRESORAS?page=${rPage}&limit=${rLimit}&${qs}`);
+                const r = await fetch('/REPORTES_IMPRESORAS?' + qsReportes());
                 const d = await r.json();
+                rDatos = d.datos || d.data || [];
                 rTotal = d.total || 0;
-                rDatos = d.data  || [];
                 document.getElementById('badge-reportes').textContent = rTotal;
-                renderReportes();
-            } catch(e) {
+                document.getElementById('statReportes').textContent = rTotal;
+                renderTablaReportes();
+                document.getElementById('paginaInfoR').textContent =
+                    `Página ${rPage} — ${rDatos.length} de ${rTotal}`;
+            } catch (e) {
                 document.getElementById('tablaReportes').innerHTML =
-                    `<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--red)">❌ Error: ${e.message}</td></tr>`;
+                    `<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--red)">❌ Error al cargar datos</td></tr>`;
             }
         }
 
-        function qsReportes() {
-            const campos = ['FOLIO','FECHA','PLANTA','IMPRESORA','AREA','REPORTE','QUIEN_REPORTA','ESTATUS','FECHA_DE_REALIZACION','COMENTARIOS'];
-            const p = new URLSearchParams();
-            campos.forEach(c => { const val = (document.getElementById('rfil_'+c)?.value||'').trim(); if(val) p.set(c,val); });
-            return p.toString();
+        function renderTablaReportes() {
+            const tb = document.getElementById('tablaReportes');
+            if (!rDatos.length) {
+                tb.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>`;
+                return;
+            }
+            tb.innerHTML = rDatos.map(r => `
+                    <tr>
+                        <td class="mono">${esc(r.ID)}</td>
+                        <td class="mono">${esc(r.FOLIO) || '—'}</td>
+                        <td class="mono">${fmtDate(r.FECHA)}</td>
+                        <td>${esc(r.PLANTA) || '—'}</td>
+                        <td>${esc(r.IMPRESORA) || '—'}</td>
+                        <td>${esc(r.AREA) || '—'}</td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.REPORTE)}">${esc(r.REPORTE) || '—'}</td>
+                        <td>${esc(r.QUIEN_REPORTA) || '—'}</td>
+                        <td><span class="status-pill ${estatusPill(r.ESTATUS)}">${esc(r.ESTATUS) || '—'}</span></td>
+                        <td class="mono">${fmtDate(r.FECHA_DE_REALIZACION)}</td>
+                        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.COMENTARIOS)}">${esc(r.COMENTARIOS) || '—'}</td>
+                        <td>
+                            <div style="display:flex;gap:5px">
+                                <button class="btn btn-ghost btn-sm" onclick="abrirEditarR(${r.ID})">✏️</button>
+                                <button class="btn btn-ghost btn-sm" onclick="verHistorial(${r.ID},'R')">📋</button>
+                            </div>
+                        </td>
+                    </tr>`).join('');
         }
 
         function filtrarReportes() {
             clearTimeout(_rTimer);
-            _rTimer = setTimeout(() => { rPage=1; cargarReportes(); }, 350);
+            _rTimer = setTimeout(() => { rPage = 1; cargarReportes(); }, 350);
         }
 
-        function renderReportes() {
-            const tb = document.getElementById('tablaReportes');
-            tb.innerHTML = '';
-            if (!rDatos.length) {
-                tb.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
-                return;
-            }
-            const esAdmin = rolActual === 'ADMIN';
-            rDatos.forEach(row => {
-                const fecha  = fmtDate(row.FECHA);
-                const fReal  = fmtDate(row.FECHA_DE_REALIZACION);
-                const pill   = estatusPill(row.ESTATUS);
-                tb.innerHTML += `
-                <tr>
-                    <td>${row.ID}</td>
-                    <td class="mono">${esc(row.FOLIO)||'—'}</td>
-                    <td class="mono">${fecha}</td>
-                    <td>${esc(row.PLANTA)||'—'}</td>
-                    <td class="mono">${esc(row.IMPRESORA)||'—'}</td>
-                    <td>${esc(row.AREA)||'—'}</td>
-                    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.REPORTE)||''}">${esc(row.REPORTE)||'—'}</td>
-                    <td>${esc(row.QUIEN_REPORTA)||'—'}</td>
-                    <td><span class="status-pill ${pill}">${esc(row.ESTATUS)||'—'}</span></td>
-                    <td class="mono">${fReal}</td>
-                    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.COMENTARIOS)||''}">${esc(row.COMENTARIOS)||'—'}</td>
-                    <td style="white-space:nowrap">
-                        ${esAdmin ? `
-                        <button class="btn btn-amber btn-sm" onclick="abrirEditarR(${row.ID})">✏️</button>
-                        <button class="btn btn-danger btn-sm" onclick="eliminarReporte(${row.ID})">🗑</button>` : ''}
-                        <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID},'R')" title="Ver historial">📋</button>
-                    </td>
-                </tr>`;
-            });
-            document.getElementById('paginaInfoR').textContent =
-                `Página ${rPage} de ${Math.ceil(rTotal/rLimit)||1} | Total: ${rTotal}`;
-        }
+        function anteriorR() { if (rPage > 1) { rPage--; cargarReportes(); } }
+        function siguienteR() { if (rPage * rLimit < rTotal) { rPage++; cargarReportes(); } }
 
-        function siguienteR() { if (rPage*rLimit < rTotal) { rPage++; cargarReportes(); } }
-        function anteriorR()  { if (rPage > 1) { rPage--; cargarReportes(); } }
-
-        // Guardar nuevo reporte
+        // ══════════════════════════════════════════════════════════════
+        //  REPORTES — CRUD
+        // ══════════════════════════════════════════════════════════════
         async function guardarReporte() {
             const dto = {
-                FOLIO:                v('rf_FOLIO'),
-                FECHA:                v('rf_FECHA'),
-                PLANTA:               v('rf_PLANTA'),
-                IMPRESORA:            v('rf_IMPRESORA'),
-                AREA:                 v('rf_AREA'),
-                REPORTE:              v('rf_REPORTE'),
-                QUIEN_REPORTA:        v('rf_QUIEN_REPORTA'),
-                ESTATUS:              v('rf_ESTATUS'),
+                FOLIO: v('rf_FOLIO'),
+                FECHA: v('rf_FECHA'),
+                PLANTA: v('rf_PLANTA'),
+                IMPRESORA: v('rf_IMPRESORA'),
+                AREA: v('rf_AREA'),
+                REPORTE: v('rf_REPORTE'),
+                QUIEN_REPORTA: v('rf_QUIEN_REPORTA'),
+                ESTATUS: v('rf_ESTATUS'),
                 FECHA_DE_REALIZACION: v('rf_FECHA_DE_REALIZACION'),
-                COMENTARIOS:          v('rf_COMENTARIOS'),
+                COMENTARIOS: v('rf_COMENTARIOS'),
             };
             try {
-                const r = await fetch('/REPORTE_IMPRESORA', {
-                    method:'POST',
-                    headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},
+                const r = await fetch('/REPORTES_IMPRESORAS', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
                     body: JSON.stringify(dto)
                 });
                 const d = await r.json();
-                if (d.error) { alert('Error: '+d.error); return; }
+                if (d.error) { toast('❌ Error: ' + d.error, 'error'); return; }
                 limpiarFormReporte();
                 cargarReportes();
-            } catch(e) { alert('Error: '+e.message); }
+                toast('✅ Reporte guardado', 'success');
+            } catch (e) { toast('❌ Error: ' + e.message, 'error'); }
         }
 
         function limpiarFormReporte() {
-            ['rf_FOLIO','rf_FECHA','rf_PLANTA','rf_IMPRESORA','rf_AREA',
-             'rf_REPORTE','rf_QUIEN_REPORTA','rf_ESTATUS',
-             'rf_FECHA_DE_REALIZACION','rf_COMENTARIOS'].forEach(id => {
-                const el = document.getElementById(id); if(el) el.value='';
-            });
+            ['rf_FOLIO', 'rf_FECHA', 'rf_PLANTA', 'rf_IMPRESORA', 'rf_AREA', 'rf_REPORTE',
+                'rf_QUIEN_REPORTA', 'rf_ESTATUS', 'rf_FECHA_DE_REALIZACION', 'rf_COMENTARIOS'].forEach(id => {
+                    const el = document.getElementById(id); if (el) el.value = '';
+                });
         }
 
-        // Eliminar reporte
-        async function eliminarReporte(id) {
-            if (!confirm('¿Eliminar este reporte?')) return;
-            try {
-                await fetch(`/REPORTE_IMPRESORA/${id}`, { method:'DELETE' });
-                cargarReportes();
-            } catch(e) { alert('Error: '+e.message); }
-        }
-
-        // Modal editar reporte
         function abrirEditarR(id) {
             rEditID = id;
-            document.getElementById('editarIdLabelR').textContent = '#'+id;
+            document.getElementById('editarIdLabelR').textContent = '#' + id;
             const row = rDatos.find(r => r.ID === id);
             if (row) {
-                setV('er_FOLIO',                row.FOLIO);
-                setV('er_FECHA',                row.FECHA ? row.FECHA.split('T')[0] : '');
-                setV('er_PLANTA',               row.PLANTA);
-                setV('er_IMPRESORA',            row.IMPRESORA);
-                setV('er_AREA',                 row.AREA);
-                setV('er_REPORTE',              row.REPORTE);
-                setV('er_QUIEN_REPORTA',        row.QUIEN_REPORTA);
-                setV('er_ESTATUS',              row.ESTATUS);
+                setV('er_FOLIO', row.FOLIO);
+                setV('er_FECHA', row.FECHA ? row.FECHA.split('T')[0] : '');
+                setV('er_PLANTA', row.PLANTA);
+                setV('er_IMPRESORA', row.IMPRESORA);
+                setV('er_AREA', row.AREA);
+                setV('er_REPORTE', row.REPORTE);
+                setV('er_QUIEN_REPORTA', row.QUIEN_REPORTA);
+                setV('er_ESTATUS', row.ESTATUS);
                 setV('er_FECHA_DE_REALIZACION', row.FECHA_DE_REALIZACION ? row.FECHA_DE_REALIZACION.split('T')[0] : '');
-                setV('er_COMENTARIOS',          row.COMENTARIOS);
+                setV('er_COMENTARIOS', row.COMENTARIOS);
             }
             document.getElementById('modalEditarR').classList.add('show');
-            document.querySelector('#modalEditarR .modal-box').scrollTop = 0;
         }
 
-        function cerrarEditarR() { document.getElementById('modalEditarR').classList.remove('show'); rEditID=null; }
+        function cerrarEditarR() { document.getElementById('modalEditarR').classList.remove('show'); rEditID = null; }
 
         async function guardarCambiosR() {
             const dto = {
-                FOLIO:                v('er_FOLIO'),
-                FECHA:                v('er_FECHA'),
-                PLANTA:               v('er_PLANTA'),
-                IMPRESORA:            v('er_IMPRESORA'),
-                AREA:                 v('er_AREA'),
-                REPORTE:              v('er_REPORTE'),
-                QUIEN_REPORTA:        v('er_QUIEN_REPORTA'),
-                ESTATUS:              v('er_ESTATUS'),
+                FOLIO: v('er_FOLIO'),
+                FECHA: v('er_FECHA'),
+                PLANTA: v('er_PLANTA'),
+                IMPRESORA: v('er_IMPRESORA'),
+                AREA: v('er_AREA'),
+                REPORTE: v('er_REPORTE'),
+                QUIEN_REPORTA: v('er_QUIEN_REPORTA'),
+                ESTATUS: v('er_ESTATUS'),
                 FECHA_DE_REALIZACION: v('er_FECHA_DE_REALIZACION'),
-                COMENTARIOS:          v('er_COMENTARIOS'),
+                COMENTARIOS: v('er_COMENTARIOS'),
             };
             try {
-                const r = await fetch(`/REPORTE_IMPRESORA/${rEditID}`, {
-                    method:'PUT',
-                    headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},
+                const r = await fetch(`/REPORTES_IMPRESORAS/${rEditID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
                     body: JSON.stringify(dto)
                 });
                 const result = await r.json();
-                if (r.ok && !result.error) { cerrarEditarR(); cargarReportes(); }
-                else alert('Error: '+(result.error||'No se pudo guardar'));
-            } catch(e) { alert('Error: '+e.message); }
+                if (r.ok && !result.error) { cerrarEditarR(); cargarReportes(); toast('✅ Cambios guardados', 'success'); }
+                else toast('❌ Error: ' + (result.error || 'No se pudo guardar'), 'error');
+            } catch (e) { toast('❌ Error: ' + e.message, 'error'); }
         }
 
-        // Exportar reportes
-        function exportarReportesFiltrado() { window.open('/REPORTES_IMPRESORAS/EXPORTAR?'+qsReportes()); }
-        function exportarReportesTodo()     { window.open('/REPORTES_IMPRESORAS/EXPORTAR_TODO'); }
-        function exportarReportesPorAnio()  {
+        function exportarReportesFiltrado() { window.open('/REPORTES_IMPRESORAS/EXPORTAR?' + qsReportes()); }
+        function exportarReportesTodo() { window.open('/REPORTES_IMPRESORAS/EXPORTAR_TODO'); }
+        function exportarReportesPorAnio() {
             const a = document.getElementById('anioExportarR').value;
-            if (!a) { alert('Ingresa un año'); return; }
-            window.open('/REPORTES_IMPRESORAS/EXPORTAR_ANIO?anio='+a);
+            if (!a) { toast('⚠️ Ingresa un año', 'error'); return; }
+            window.open('/REPORTES_IMPRESORAS/EXPORTAR_ANIO?anio=' + a);
         }
 
         // ══════════════════════════════════════════════════════════════
-        //  ── INFO IMPRESORAS ──
+        //  INFO IMPRESORAS — CARGA
         // ══════════════════════════════════════════════════════════════
+        function qsInfo() {
+            const p = new URLSearchParams({
+                page: iPage,
+                limit: iLimit,
+                IMPRESORA: v('ifil_IMPRESORA') || '',
+                MODELO: v('ifil_MODELO') || '',
+                NUMERO_DE_SERIE: v('ifil_NUMERO_DE_SERIE') || '',
+                IP: v('ifil_IP') || '',
+                UBICACION: v('ifil_UBICACION') || '',
+                PLANTA: v('ifil_PLANTA') || '',
+                IDENTIFICADOR: v('ifil_IDENTIFICADOR') || '',
+            });
+            return p.toString();
+        }
 
         async function cargarInfo() {
-            const qs = qsInfo();
             try {
-                const r = await fetch(`/IMPRESORAS_INFO?page=${iPage}&limit=${iLimit}&${qs}`);
+                const r = await fetch('/IMPRESORAS_INFO?' + qsInfo());
                 const d = await r.json();
+                iDatos = d.datos || d.data || [];
                 iTotal = d.total || 0;
-                iDatos = d.data  || [];
                 document.getElementById('badge-info').textContent = iTotal;
-                renderInfo();
-            } catch(e) {
+                document.getElementById('statImpresoras').textContent = iTotal;
+                renderTablaInfo();
+                document.getElementById('paginaInfoI').textContent =
+                    `Página ${iPage} — ${iDatos.length} de ${iTotal}`;
+            } catch (e) {
                 document.getElementById('tablaInfo').innerHTML =
-                    `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--red)">❌ Error: ${e.message}</td></tr>`;
+                    `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--red)">❌ Error al cargar datos</td></tr>`;
             }
         }
 
-        function qsInfo() {
-            const campos = ['IMPRESORA','MODELO','NUMERO_DE_SERIE','IP','UBICACION','PLANTA','IDENTIFICADOR'];
-            const p = new URLSearchParams();
-            campos.forEach(c => { const val = (document.getElementById('ifil_'+c)?.value||'').trim(); if(val) p.set(c,val); });
-            return p.toString();
+        function renderTablaInfo() {
+            const tb = document.getElementById('tablaInfo');
+            if (!iDatos.length) {
+                tb.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>`;
+                return;
+            }
+            tb.innerHTML = iDatos.map(r => `
+                    <tr>
+                        <td class="mono">${esc(r.ID)}</td>
+                        <td>${esc(r.IMPRESORA) || '—'}</td>
+                        <td>${esc(r.MODELO) || '—'}</td>
+                        <td class="mono">${esc(r.NUMERO_DE_SERIE) || '—'}</td>
+                        <td class="mono">${esc(r.IP) || '—'}</td>
+                        <td>${esc(r.UBICACION) || '—'}</td>
+                        <td>${esc(r.PLANTA) || '—'}</td>
+                        <td class="mono">${esc(r.IDENTIFICADOR) || '—'}</td>
+                        <td class="mono">${esc(r.NUMERO) ?? '—'}</td>
+                        <td>
+                            <div style="display:flex;gap:5px">
+                                <button class="btn btn-ghost btn-sm" onclick="abrirEditarI(${r.ID})">✏️</button>
+                                <button class="btn btn-ghost btn-sm" onclick="verHistorial(${r.ID},'I')">📋</button>
+                                <button class="btn btn-danger btn-sm" onclick="eliminarInfo(${r.ID})">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>`).join('');
         }
 
         function filtrarInfo() {
             clearTimeout(_iTimer);
-            _iTimer = setTimeout(() => { iPage=1; cargarInfo(); }, 350);
+            _iTimer = setTimeout(() => { iPage = 1; cargarInfo(); }, 350);
         }
 
-        function renderInfo() {
-            const tb = document.getElementById('tablaInfo');
-            tb.innerHTML = '';
-            if (!iDatos.length) {
-                tb.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>';
-                return;
-            }
-            const esAdmin = rolActual === 'ADMIN';
-            iDatos.forEach(row => {
-                tb.innerHTML += `
-                <tr>
-                    <td>${row.ID}</td>
-                    <td>${esc(row.IMPRESORA)||'—'}</td>
-                    <td class="mono">${esc(row.MODELO)||'—'}</td>
-                    <td class="mono">${esc(row.NUMERO_DE_SERIE)||'—'}</td>
-                    <td class="mono" style="color:var(--cyan)">${esc(row.IP)||'—'}</td>
-                    <td>${esc(row.UBICACION)||'—'}</td>
-                    <td>${esc(row.PLANTA)||'—'}</td>
-                    <td class="mono">${esc(row.IDENTIFICADOR)||'—'}</td>
-                    <td class="mono" style="text-align:center">${row.NUMERO??'—'}</td>
-                    <td style="white-space:nowrap">
-                        ${esAdmin ? `
-                        <button class="btn btn-amber btn-sm" onclick="abrirEditarI(${row.ID})">✏️</button>
-                        <button class="btn btn-danger btn-sm" onclick="eliminarInfo(${row.ID})">🗑</button>` : ''}
-                        <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID},'I')" title="Ver historial">📋</button>
-                    </td>
-                </tr>`;
-            });
-            document.getElementById('paginaInfoI').textContent =
-                `Página ${iPage} de ${Math.ceil(iTotal/iLimit)||1} | Total: ${iTotal}`;
-        }
+        function anteriorI() { if (iPage > 1) { iPage--; cargarInfo(); } }
+        function siguienteI() { if (iPage * iLimit < iTotal) { iPage++; cargarInfo(); } }
 
-        function siguienteI() { if (iPage*iLimit < iTotal) { iPage++; cargarInfo(); } }
-        function anteriorI()  { if (iPage > 1) { iPage--; cargarInfo(); } }
-
-        // Guardar nueva info
+        // ══════════════════════════════════════════════════════════════
+        //  INFO — CRUD
+        // ══════════════════════════════════════════════════════════════
         async function guardarInfo() {
             const dto = {
-                IMPRESORA:       v('if_IMPRESORA'),
-                MODELO:          v('if_MODELO'),
+                IMPRESORA: v('if_IMPRESORA'),
+                MODELO: v('if_MODELO'),
                 NUMERO_DE_SERIE: v('if_NUMERO_DE_SERIE'),
-                IP:              v('if_IP'),
-                UBICACION:       v('if_UBICACION'),
-                PLANTA:          v('if_PLANTA'),
-                IDENTIFICADOR:   v('if_IDENTIFICADOR'),
-                NUMERO:          vInt('if_NUMERO'),
+                IP: v('if_IP'),
+                UBICACION: v('if_UBICACION'),
+                PLANTA: v('if_PLANTA'),
+                IDENTIFICADOR: v('if_IDENTIFICADOR'),
+                NUMERO: vInt('if_NUMERO'),
             };
             try {
                 const r = await fetch('/IMPRESORA_INFO', {
-                    method:'POST',
-                    headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
                     body: JSON.stringify(dto)
                 });
                 const d = await r.json();
-                if (d.error) { alert('Error: '+d.error); return; }
+                if (d.error) { toast('❌ Error: ' + d.error, 'error'); return; }
                 limpiarFormInfo();
                 cargarInfo();
-            } catch(e) { alert('Error: '+e.message); }
+                toast('✅ Impresora registrada', 'success');
+            } catch (e) { toast('❌ Error: ' + e.message, 'error'); }
         }
 
         function limpiarFormInfo() {
-            ['if_IMPRESORA','if_MODELO','if_NUMERO_DE_SERIE','if_IP',
-             'if_UBICACION','if_PLANTA','if_IDENTIFICADOR','if_NUMERO'].forEach(id => {
-                const el = document.getElementById(id); if(el) el.value='';
-            });
+            ['if_IMPRESORA', 'if_MODELO', 'if_NUMERO_DE_SERIE', 'if_IP',
+                'if_UBICACION', 'if_PLANTA', 'if_IDENTIFICADOR', 'if_NUMERO'].forEach(id => {
+                    const el = document.getElementById(id); if (el) el.value = '';
+                });
         }
 
-        // Eliminar info
         async function eliminarInfo(id) {
             if (!confirm('¿Eliminar esta impresora?')) return;
             try {
-                await fetch(`/IMPRESORA_INFO/${id}`, { method:'DELETE' });
+                await fetch(`/IMPRESORA_INFO/${id}`, { method: 'DELETE', headers: { 'X-Usuario': usuarioActual } });
                 cargarInfo();
-            } catch(e) { alert('Error: '+e.message); }
+                toast('🗑️ Impresora eliminada', 'info');
+            } catch (e) { toast('❌ Error: ' + e.message, 'error'); }
         }
 
-        // Modal editar info
         function abrirEditarI(id) {
             iEditID = id;
-            document.getElementById('editarIdLabelI').textContent = '#'+id;
+            document.getElementById('editarIdLabelI').textContent = '#' + id;
             const row = iDatos.find(r => r.ID === id);
             if (row) {
-                setV('ei_IMPRESORA',       row.IMPRESORA);
-                setV('ei_MODELO',          row.MODELO);
+                setV('ei_IMPRESORA', row.IMPRESORA);
+                setV('ei_MODELO', row.MODELO);
                 setV('ei_NUMERO_DE_SERIE', row.NUMERO_DE_SERIE);
-                setV('ei_IP',              row.IP);
-                setV('ei_UBICACION',       row.UBICACION);
-                setV('ei_PLANTA',          row.PLANTA);
-                setV('ei_IDENTIFICADOR',   row.IDENTIFICADOR);
-                setV('ei_NUMERO',          row.NUMERO);
+                setV('ei_IP', row.IP);
+                setV('ei_UBICACION', row.UBICACION);
+                setV('ei_PLANTA', row.PLANTA);
+                setV('ei_IDENTIFICADOR', row.IDENTIFICADOR);
+                setV('ei_NUMERO', row.NUMERO);
             }
             document.getElementById('modalEditarI').classList.add('show');
-            document.querySelector('#modalEditarI .modal-box').scrollTop = 0;
         }
 
-        function cerrarEditarI() { document.getElementById('modalEditarI').classList.remove('show'); iEditID=null; }
+        function cerrarEditarI() { document.getElementById('modalEditarI').classList.remove('show'); iEditID = null; }
 
         async function guardarCambiosI() {
             const dto = {
-                IMPRESORA:       v('ei_IMPRESORA'),
-                MODELO:          v('ei_MODELO'),
+                IMPRESORA: v('ei_IMPRESORA'),
+                MODELO: v('ei_MODELO'),
                 NUMERO_DE_SERIE: v('ei_NUMERO_DE_SERIE'),
-                IP:              v('ei_IP'),
-                UBICACION:       v('ei_UBICACION'),
-                PLANTA:          v('ei_PLANTA'),
-                IDENTIFICADOR:   v('ei_IDENTIFICADOR'),
-                NUMERO:          vInt('ei_NUMERO'),
+                IP: v('ei_IP'),
+                UBICACION: v('ei_UBICACION'),
+                PLANTA: v('ei_PLANTA'),
+                IDENTIFICADOR: v('ei_IDENTIFICADOR'),
+                NUMERO: vInt('ei_NUMERO'),
             };
             try {
-                const r = await fetch(`/IMPRESORA_INFO/${iEditID}`, {
-                    method:'PUT',
-                    headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},
+                const r = await fetch(`/IMPRESORAS_INFO/${iEditID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
                     body: JSON.stringify(dto)
                 });
                 const result = await r.json();
-                if (r.ok && !result.error) { cerrarEditarI(); cargarInfo(); }
-                else alert('Error: '+(result.error||'No se pudo guardar'));
-            } catch(e) { alert('Error: '+e.message); }
+                if (r.ok && !result.error) { cerrarEditarI(); cargarInfo(); toast('✅ Cambios guardados', 'success'); }
+                else toast('❌ Error: ' + (result.error || 'No se pudo guardar'), 'error');
+            } catch (e) { toast('❌ Error: ' + e.message, 'error'); }
         }
 
-        // Exportar info
-        function exportarInfoFiltrado() { window.open('/IMPRESORAS_INFO/EXPORTAR?'+qsInfo()); }
-        function exportarInfoTodo()     { window.open('/IMPRESORAS_INFO/EXPORTAR_TODO'); }
+        function exportarInfoFiltrado() { window.open('/IMPRESORAS_INFO/EXPORTAR?' + qsInfo()); }
+        function exportarInfoTodo() { window.open('/IMPRESORAS_INFO/EXPORTAR_TODO'); }
 
         // ══════════════════════════════════════════════════════════════
-        //  HISTORIAL (compartido)
+        //  HISTORIAL
         // ══════════════════════════════════════════════════════════════
         function verHistorial(id, tipo) {
             camposHistActual = tipo === 'R' ? CAMPOS_HIST_R : CAMPOS_HIST_I;
-            const endpoint   = tipo === 'R'
+            const endpoint = tipo === 'R'
                 ? `/REPORTES_IMPRESORAS/${id}/HISTORIAL`
                 : `/IMPRESORAS_INFO/${id}/HISTORIAL`;
 
-            document.getElementById('histIdLabel').textContent = '#'+id;
+            document.getElementById('histIdLabel').textContent = '#' + id;
             document.getElementById('contenidoHistorial').innerHTML =
-                '<p style="text-align:center;padding:40px;color:var(--muted)">🔄 Cargando...</p>';
+                '<p style="text-align:center;padding:40px;color:var(--muted);font-family:\'Space Mono\',monospace;font-size:12px">🔄 Cargando...</p>';
             document.getElementById('modalHistorial').classList.add('show');
-            document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
 
             fetch(endpoint)
                 .then(r => r.json())
                 .then(data => {
-                    const lista = (data.historial||[])
-                        .sort((a,b) => new Date(b.FECHA||b.fecha||0) - new Date(a.FECHA||a.fecha||0));
+                    const lista = (data.historial || [])
+                        .sort((a, b) => new Date(b.FECHA || b.fecha || 0) - new Date(a.FECHA || a.fecha || 0));
                     if (!lista.length) {
                         document.getElementById('contenidoHistorial').innerHTML =
                             '<p class="sin-hist">📭 Sin ediciones registradas</p>';
                     } else {
                         document.getElementById('contenidoHistorial').innerHTML =
-                            `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                ${lista.length} edición${lista.length!==1?'es':''} registrada${lista.length!==1?'s':''}
-                             </p>` + lista.map(ev => renderEvento(ev)).join('');
+                            `<p style="color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;margin-bottom:14px">
+                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                 </p>` + lista.map(ev => renderEvento(ev)).join('');
                     }
                 })
                 .catch(() => {
                     document.getElementById('contenidoHistorial').innerHTML =
-                        '<p style="color:var(--red);text-align:center;padding:30px">❌ Error al cargar historial</p>';
+                        '<p style="color:var(--red);text-align:center;padding:30px;font-size:12px">❌ Error al cargar historial</p>';
                 });
         }
 
         function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
 
         function renderEvento(ev) {
-            let antes   = ev.REGISTRO_ANTERIOR || ev.registro_anterior;
-            let despues = ev.REGISTRO_NUEVO    || ev.registro_nuevo;
-            try { if(typeof antes   === 'string') antes   = JSON.parse(antes);   } catch(e){}
-            try { if(typeof despues === 'string') despues = JSON.parse(despues); } catch(e){}
+            let antes = ev.REGISTRO_ANTERIOR || ev.registro_anterior;
+            let despues = ev.REGISTRO_NUEVO || ev.registro_nuevo;
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch (e) { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch (e) { }
 
             const cambiados = new Set();
-            camposHistActual.forEach(({key}) => {
+            camposHistActual.forEach(({ key }) => {
                 if (norm(antes?.[key]) !== norm(despues?.[key])) cambiados.add(key);
             });
 
             let filas = '';
-            camposHistActual.forEach(({key,label}) => {
-                const va  = esc(antes?.[key]??'');
-                const vd  = esc(despues?.[key]??'');
+            camposHistActual.forEach(({ key, label }) => {
+                const va = esc(antes?.[key] ?? '');
+                const vd = esc(despues?.[key] ?? '');
                 const chg = cambiados.has(key);
                 filas += `
-                    <tr class="${chg?'row-changed':''}">
-                        <td><strong>${esc(label)}</strong>${chg?`<span class="badge-cambio">✎ cambio</span>`:''}</td>
-                        <td>${!va||va==='None'?'<span class="empty-val">vacío</span>':va}</td>
-                        <td>${!vd||vd==='None'?'<span class="empty-val">vacío</span>':vd}</td>
-                    </tr>`;
+                        <tr class="${chg ? 'row-changed' : ''}">
+                            <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                            <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                            <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                        </tr>`;
             });
 
             const n = cambiados.size;
             return `
-                <div class="ev-wrap">
-                    <div class="ev-header">
-                        <span>🕐 <strong>${formatFecha(ev.FECHA||ev.fecha)}</strong></span>
-                        <span>👤 <strong>${esc(ev.USUARIO||ev.usuario)||'Desconocido'}</strong></span>
-                        <span class="n-cambios-badge"
-                            style="background:${n>0?'rgba(245,158,11,.2)':'rgba(100,116,139,.2)'};
-                                   color:${n>0?'#FCD34D':'#94A3B8'};
-                                   border:1px solid ${n>0?'rgba(245,158,11,.3)':'rgba(100,116,139,.3)'}">
-                            ${n} campo${n!==1?'s':''} modificado${n!==1?'s':''}
-                        </span>
-                    </div>
-                    <table class="ev-table">
-                        <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                        <tbody>${filas}</tbody>
-                    </table>
-                </div>`;
+                    <div class="ev-wrap">
+                        <div class="ev-header">
+                            <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
+                            <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
+                            <span class="n-cambios-badge"
+                                style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(85,92,128,.2)'};
+                                       color:${n > 0 ? '#FCD34D' : '#8891B8'};
+                                       border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(85,92,128,.3)'}">
+                                ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                        <table class="ev-table">
+                            <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                            <tbody>${filas}</tbody>
+                        </table>
+                    </div>`;
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -1681,47 +1812,59 @@
             const chip = document.getElementById('userChipMain');
             if (chip && !chip.contains(e.target)) chip.classList.remove('open');
         });
+
         function cerrarSesion() {
-            fetch('/LOGOUT', { method:'POST', credentials:'include' })
-                .finally(() => { window.location.href='/static/login.html'; });
+            fetch('/LOGOUT', { method: 'POST', credentials: 'include' })
+                .finally(() => { window.location.href = '/static/login.html'; });
         }
+
         document.addEventListener('keydown', e => {
-            if (e.key==='Escape') { cerrarEditarR(); cerrarEditarI(); cerrarHistorial(); }
+            if (e.key === 'Escape') { cerrarEditarR(); cerrarEditarI(); cerrarHistorial(); }
         });
 
         function estatusPill(val) {
             if (!val) return 'pill-otro';
             const v = val.toUpperCase();
-            if (v === 'ABIERTO')     return 'pill-abierto';
-            if (v === 'EN PROCESO')  return 'pill-proceso';
-            if (v === 'CERRADO')     return 'pill-cerrado';
+            if (v === 'ABIERTO') return 'pill-abierto';
+            if (v === 'EN PROCESO') return 'pill-proceso';
+            if (v === 'CERRADO') return 'pill-cerrado';
             return 'pill-otro';
         }
 
-        function fmtDate(f) {
-            if (!f) return '—';
-            return f.split('T')[0] || f;
-        }
+        function fmtDate(f) { if (!f) return '—'; return f.split('T')[0] || f; }
 
         function formatFecha(f) {
             try {
                 const d = new Date(f);
                 if (!isNaN(d)) return d.toLocaleString('es-MX', {
-                    year:'numeric', month:'2-digit', day:'2-digit',
-                    hour:'2-digit', minute:'2-digit', second:'2-digit'
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
                 });
-            } catch(e){}
-            return f??'';
+            } catch (e) { }
+            return f ?? '';
         }
 
         function esc(val) {
-            if (val==null) return '';
-            return String(val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            if (val == null) return '';
+            return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
-        function norm(v)    { return (v==null)?'':String(v).trim(); }
-        function v(id)      { const el=document.getElementById(id); return el?(el.value.trim()||null):null; }
-        function vInt(id)   { const x=v(id); return x!=null?parseInt(x)||null:null; }
-        function setV(id,val){ const el=document.getElementById(id); if(el) el.value=val??''; }
+
+        function norm(v) { return (v == null) ? '' : String(v).trim(); }
+        function v(id) { const el = document.getElementById(id); return el ? (el.value.trim() || null) : null; }
+        function vInt(id) { const x = v(id); return x != null ? (parseInt(x) || null) : null; }
+        function setV(id, val) { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
+
+        // ══════════════════════════════════════════════════════════════
+        //  TOAST
+        // ══════════════════════════════════════════════════════════════
+        let toastTimer;
+        function toast(msg, type = 'info') {
+            const el = document.getElementById('toast');
+            clearTimeout(toastTimer);
+            el.textContent = msg;
+            el.className = `show ${type}`;
+            toastTimer = setTimeout(() => el.className = '', 3500);
+        }
     </script>
 </body>
 </html>
