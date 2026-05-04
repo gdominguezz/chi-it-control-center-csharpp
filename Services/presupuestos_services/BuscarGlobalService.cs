@@ -303,6 +303,34 @@ public class BuscarGlobalService
     "instalado_por"
     ]),
 
+    ("REPORTES_IMPRESORAS","reportes_impresoras",[
+    "id",
+    "folio",
+    "fecha",
+    "planta",
+    "impresora",
+    "area",
+    "reporte",
+    "quien_reporta",
+    "estatus",
+    "fecha_de_realizacion",
+    "comentarios",
+    "creado_en"
+    ]),
+
+    ("IMPRESORAS_INFO","impresoras_info",[
+        "id",
+        "impresora",
+        "modelo",
+        "numero_de_serie",
+        "ip",
+        "ubicacion",
+        "planta",
+        "identificador",
+        "numero",
+        "creado_en"
+    ]),
+
     ("REMISIONES","remisiones",[
     "id_oc",
     "id_remision",
@@ -325,8 +353,6 @@ public class BuscarGlobalService
     "requisicion",
     "oc"
     ])
-
-
     ];
 
     public async Task<object> BuscarAsync(string termino, int limite = 20)
