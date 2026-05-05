@@ -242,52 +242,156 @@ public class OrdenesDeCompraService
     /// Equivale a la fórmula de columna S (CANTIDAD REGISTRADA):
     ///   =SUMIFS(INDIRECT("'"&N&"'!J:J"), INDIRECT("'"&N&"'!A:A"), A&B)
     ///
-    /// Donde N = HOJA_CONTROL → determina en qué tabla de BD buscar.
-    /// Col A en cada hoja Excel = CONCAT(OC, FOLIO) → clave de búsqueda.
-    /// Col J en cada hoja Excel = CANTIDAD → campo a sumar.
+    /// Donde N = HOJA_CONTROL → decide en qué tabla buscar.
+    /// Cada tabla tiene nombres de columnas distintos para OC y folio,
+    /// por eso se usa un query específico por tabla en lugar de uno genérico.
     ///
-    /// Si HOJA_CONTROL no está mapeado o está vacío → devuelve 0 (sin crash).
+    /// Mapeo HOJA_CONTROL (Excel) → tabla PostgreSQL:
+    ///   Accesorio NF / ACCESORIOS NF → accesorios_nf       (oc, folio)
+    ///   Consumibles NF / CONSUMIBLES NF → consumibles_nf   (oc, folio_cantidad)
+    ///   Dispositivos NF               → dispositivos_nf    (oc, folio)
+    ///   IMPRESORAS NF                 → impresoras_nf      (oc, folio_inventario)
+    ///   PANTALLAS NF                  → pantallas_nf       (oc, folio)
+    ///   PERIFERICOS NF                → perifericos_nf     (oc, folio_inventario)
+    ///   Refacciones NF / REFACCIONES NF → refacciones_nf   (oc, folio_correctivo)
+    ///   Radio NF / RADIOS             → radios_nf          (oc, folio)
+    ///   HERRAMIENTA NF / HERRAMIENTAS NF → herramientas_nf (oc, folio_correctivo)
+    ///   EQUIPO DE RED                 → equipo_red_nf      (oc, folio_correctivo)
+    ///   Camaras_Audio / CAMARAS AUDIO → camaras_audio      (oc, folio_inventario)
+    ///   FIRECOM / BITACORA FIRECOM    → bitacora_firecom   (oc, orden_servicio)
+    ///   Tintas,Toner,Ribon NF         → tintas_toner_ribon_nf (oc, sin folio → solo oc)
+    ///   Servicios por Proveedores NF  → servicios_proveedores  (sin oc directo → retorna 0)
     /// </summary>
-    private static readonly Dictionary<string, string> _tablasPorHojaControl =
-        new(StringComparer.OrdinalIgnoreCase)
-        {
-            { "Accesorio NF",                "accesorio_nf"                },
-            { "Consumibles NF",              "consumibles_nf"              },
-            { "Dispositivos NF",             "dispositivos_nf"             },
-            { "IMPRESORAS NF",               "impresoras_nf"               },
-            { "PANTALLAS NF",                "pantallas_nf"                },
-            { "PERIFERICOS NF",              "perifericos_nf"              },
-            { "Refacciones NF",              "refacciones_nf"              },
-            { "Radio NF",                    "radio_nf"                    },
-            { "Servicios por Proveedores NF","servicios_por_proveedores_nf"},
-            { "Tintas,Toner,Ribon NF",       "tintas_toner_ribon_nf"       },
-            { "HERRAMIENTA NF",              "herramienta_nf"              },
-            { "FIRECOM",                     "firecom"                     },
-        };
-
     private decimal SumarCantidadRegistrada(
         NpgsqlConnection con,
         string? ordenDeCompra,
         string? folio,
         string? hojaControl)
     {
-        if (string.IsNullOrWhiteSpace(ordenDeCompra) && string.IsNullOrWhiteSpace(folio))
+        if (string.IsNullOrWhiteSpace(hojaControl))
             return 0;
 
-        // Si la hoja no está mapeada → retorna 0 en lugar de crashear
-        if (string.IsNullOrWhiteSpace(hojaControl) ||
-            !_tablasPorHojaControl.TryGetValue(hojaControl.Trim(), out var tabla))
-            return 0;
+        var hoja = hojaControl.Trim();
+
+        // Builds the query string and parameters according to each table's schema.
+        // Table name is from a controlled mapping (not user input) → interpolation is safe.
+        string? sql = null;
 
         using var cmd = con.CreateCommand();
-        // Tabla viene de diccionario controlado → interpolación segura
-        cmd.CommandText = $"""
-            SELECT COALESCE(SUM(cantidad), 0)
-            FROM {tabla}
-            WHERE CONCAT(orden_de_compra, folio) = @clave
-            """;
-        cmd.Parameters.AddWithValue("clave", $"{ordenDeCompra}{folio}");
 
+        // ── Accesorio NF ──────────────────────────────────────────────────
+        if (hoja.Equals("Accesorio NF", StringComparison.OrdinalIgnoreCase) ||
+            hoja.Equals("ACCESORIOS NF", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad),0) FROM accesorios_nf WHERE oc=@odc AND folio=@folio";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        // ── Consumibles NF ────────────────────────────────────────────────
+        else if (hoja.Equals("Consumibles NF", StringComparison.OrdinalIgnoreCase) ||
+                 hoja.Equals("CONSUMIBLES NF", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad),0) FROM consumibles_nf WHERE oc=@odc AND folio_cantidad=@folio";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        // ── Dispositivos NF ───────────────────────────────────────────────
+        else if (hoja.Equals("Dispositivos NF", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad),0) FROM dispositivos_nf WHERE oc=@odc AND folio=@folio";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        // ── Impresoras NF ─────────────────────────────────────────────────
+        else if (hoja.Equals("IMPRESORAS NF", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad),0) FROM impresoras_nf WHERE oc=@odc AND folio_inventario=@folio";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        // ── Pantallas NF ──────────────────────────────────────────────────
+        else if (hoja.Equals("PANTALLAS NF", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad),0) FROM pantallas_nf WHERE oc=@odc AND folio=@folio";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        // ── Periféricos NF ────────────────────────────────────────────────
+        else if (hoja.Equals("PERIFERICOS NF", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad),0) FROM perifericos_nf WHERE oc=@odc AND folio_inventario=@folio";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        // ── Refacciones NF ────────────────────────────────────────────────
+        else if (hoja.Equals("Refacciones NF", StringComparison.OrdinalIgnoreCase) ||
+                 hoja.Equals("REFACCIONES NF", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad),0) FROM refacciones_nf WHERE oc=@odc AND folio_correctivo=@folio";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        // ── Radios NF ─────────────────────────────────────────────────────
+        else if (hoja.Equals("Radio NF", StringComparison.OrdinalIgnoreCase) ||
+                 hoja.Equals("RADIOS", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad),0) FROM radios_nf WHERE oc=@odc AND folio=@folio";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        // ── Herramientas NF ───────────────────────────────────────────────
+        else if (hoja.Equals("HERRAMIENTA NF", StringComparison.OrdinalIgnoreCase) ||
+                 hoja.Equals("HERRAMIENTAS NF", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad),0) FROM herramientas_nf WHERE oc=@odc AND folio_correctivo=@folio";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        // ── Equipo de Red ─────────────────────────────────────────────────
+        else if (hoja.Equals("EQUIPO DE RED", StringComparison.OrdinalIgnoreCase) ||
+                 hoja.Equals("EQUIPO RED", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad),0) FROM equipo_red_nf WHERE oc=@odc AND folio_correctivo=@folio";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        // ── Cámaras / Audio ───────────────────────────────────────────────
+        else if (hoja.Equals("Camaras_Audio", StringComparison.OrdinalIgnoreCase) ||
+                 hoja.Equals("CAMARAS AUDIO", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad),0) FROM camaras_audio WHERE oc=@odc AND folio_inventario=@folio";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        // ── Bitácora FIRECOM ──────────────────────────────────────────────
+        // En Excel: col A = oc & orden_de_servicio (no folio convencional)
+        else if (hoja.Equals("FIRECOM", StringComparison.OrdinalIgnoreCase) ||
+                 hoja.Equals("BITACORA FIRECOM", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad),0) FROM bitacora_firecom WHERE oc=@odc AND orden_servicio=@folio";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        // ── Tintas / Tóner / Ribón ────────────────────────────────────────
+        // No tiene columna folio → se filtra solo por OC
+        else if (hoja.Equals("Tintas,Toner,Ribon NF", StringComparison.OrdinalIgnoreCase))
+        {
+            sql = "SELECT COALESCE(SUM(cantidad_recibida),0) FROM tintas_toner_ribon_nf WHERE oc=@odc";
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+        }
+        // ── Servicios por Proveedores NF ──────────────────────────────────
+        // No tiene columna OC directa ligada a ordenes_de_compra → retorna 0
+        else if (hoja.Equals("Servicios por Proveedores NF", StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+        // ── Hoja no reconocida ────────────────────────────────────────────
+        else
+        {
+            return 0;
+        }
+
+        cmd.CommandText = sql;
         var result = cmd.ExecuteScalar();
         return result is DBNull or null ? 0 : Convert.ToDecimal(result);
     }
