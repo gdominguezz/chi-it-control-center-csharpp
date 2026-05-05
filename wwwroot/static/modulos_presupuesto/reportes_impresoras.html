@@ -1570,26 +1570,27 @@
             tb.innerHTML = rDatos.map(r => {
                 const esAdmin = rolActual === 'ADMIN';
                 return `
-                        <tr>
-                            <td class="mono">${esc(r.ID)}</td>
-                            <td class="mono">${esc(r.FOLIO) || '—'}</td>
-                            <td class="mono">${fmtDate(r.FECHA)}</td>
-                            <td>${esc(r.PLANTA) || '—'}</td>
-                            <td>${esc(r.IMPRESORA) || '—'}</td>
-                            <td>${esc(r.AREA) || '—'}</td>
-                            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.REPORTE)}">${esc(r.REPORTE) || '—'}</td>
-                            <td>${esc(r.QUIEN_REPORTA) || '—'}</td>
-                            <td><span class="status-pill ${estatusPill(r.ESTATUS)}">${esc(r.ESTATUS) || '—'}</span></td>
-                            <td class="mono">${fmtDate(r.FECHA_DE_REALIZACION)}</td>
-                            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.COMENTARIOS)}">${esc(r.COMENTARIOS) || '—'}</td>
-                            <td>
-                                <div style="display:flex;gap:5px">
-                                    <button class="btn btn-ghost btn-sm" onclick="abrirEditarR(${r.ID})">✏️</button>
-                                    <button class="btn btn-ghost btn-sm" onclick="verHistorial(${r.ID},'R')">📋</button>
-                                    ${esAdmin ? `<button class="btn btn-danger btn-sm" onclick="eliminarReporte(${r.ID})">🗑️</button>` : ''}
-                                </div>
-                            </td>
-                        </tr>`).join('');
+            <tr>
+                <td class="mono">${esc(r.ID)}</td>
+                <td class="mono">${esc(r.FOLIO) || '—'}</td>
+                <td class="mono">${fmtDate(r.FECHA)}</td>
+                <td>${esc(r.PLANTA) || '—'}</td>
+                <td>${esc(r.IMPRESORA) || '—'}</td>
+                <td>${esc(r.AREA) || '—'}</td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.REPORTE)}">${esc(r.REPORTE) || '—'}</td>
+                <td>${esc(r.QUIEN_REPORTA) || '—'}</td>
+                <td><span class="status-pill ${estatusPill(r.ESTATUS)}">${esc(r.ESTATUS) || '—'}</span></td>
+                <td class="mono">${fmtDate(r.FECHA_DE_REALIZACION)}</td>
+                <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.COMENTARIOS)}">${esc(r.COMENTARIOS) || '—'}</td>
+                <td>
+                    <div style="display:flex;gap:5px">
+                        <button class="btn btn-ghost btn-sm" onclick="abrirEditarR(${r.ID})">✏️</button>
+                        <button class="btn btn-ghost btn-sm" onclick="verHistorial(${r.ID},'R')">📋</button>
+                        ${esAdmin ? `<button class="btn btn-danger btn-sm" onclick="eliminarReporte(${r.ID})">🗑️</button>` : ''}
+                    </div>
+                </td>
+            </tr>`;
+            }).join('');
         }
 
         function filtrarReportes() {
