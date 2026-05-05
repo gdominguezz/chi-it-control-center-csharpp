@@ -3,33 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Órdenes de Compra</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>Órdenes de Compra · CHI-IT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0B0F1A;
+            --bg: #070B14;
+            --bg2: #0D1220;
             --surface: #111827;
-            --surface2: #1a2235;
-            --surface3: #1e293b;
-            --border: rgba(255,255,255,0.07);
-            --border2: rgba(255,255,255,0.13);
-            --accent: #2563EB;
-            --text: #F1F5F9;
-            --muted: #64748B;
-            --muted2: #94A3B8;
+            --surface2: #162032;
+            --surface3: #1C2A3E;
+            --border: rgba(255,255,255,0.06);
+            --border2: rgba(255,255,255,0.11);
+            --border3: rgba(255,255,255,0.18);
+            --accent: #3B82F6;
+            --accent2: #1D4ED8;
+            --accent-glow: rgba(59,130,246,0.35);
+            --text: #F0F6FF;
+            --text2: #A0AEBF;
+            --muted: #56687A;
             --green: #10B981;
+            --green2: #059669;
             --red: #EF4444;
             --amber: #F59E0B;
             --purple: #8B5CF6;
             --cyan: #06B6D4;
-            --blue: #2563EB;
-            /* colores de encabezado por grupo */
-            --col-formula: #06B6D4;
-            --col-requisitor: #8B5CF6;
-            --col-autorizador: #F59E0B;
-            --col-formula-bg: rgba(6,182,212,.12);
-            --col-requisitor-bg: rgba(139,92,246,.12);
-            --col-autorizador-bg: rgba(245,158,11,.12);
+            --pink: #EC4899;
+            --col-formula: #22D3EE;
+            --col-requisitor: #A78BFA;
+            --col-autorizador: #FCD34D;
+            --col-formula-bg: rgba(34,211,238,.10);
+            --col-requisitor-bg: rgba(167,139,250,.10);
+            --col-autorizador-bg: rgba(252,211,77,.10);
+            --radius: 12px;
+            --radius-sm: 8px;
         }
 
         *, *::before, *::after {
@@ -39,86 +45,128 @@
         }
 
         body {
-            font-family: 'DM Sans',sans-serif;
+            font-family: 'Plus Jakarta Sans',sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* ── TOPBAR ── */
+            /* subtle grid texture */
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background-image: linear-gradient(rgba(59,130,246,.015) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,.015) 1px, transparent 1px);
+                background-size: 40px 40px;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+        /* ══════════════════════════════════════════
+           TOPBAR
+        ══════════════════════════════════════════ */
         .topbar {
-            background: linear-gradient(135deg,#05091a,#0B0F1A);
-            border-bottom: 1px solid var(--border2);
-            padding: 14px 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
             position: sticky;
             top: 0;
             z-index: 200;
+            background: rgba(7,11,20,.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border2);
+            padding: 0 28px;
+            height: 62px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
-        .topbar-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 11px;
-            background: linear-gradient(135deg,#1d4ed8,#2563EB);
+        .topbar-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1E40AF, #3B82F6);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            box-shadow: 0 0 20px rgba(37,99,235,.45);
+            font-size: 18px;
+            box-shadow: 0 0 20px rgba(59,130,246,.4), 0 0 40px rgba(59,130,246,.15);
             flex-shrink: 0;
+            position: relative;
         }
+
+            .topbar-logo::after {
+                content: '';
+                position: absolute;
+                inset: -1px;
+                border-radius: 11px;
+                border: 1px solid rgba(99,163,255,.5);
+            }
 
         .topbar-title {
             flex: 1;
         }
 
             .topbar-title h1 {
-                font-size: 16px;
-                font-weight: 700;
-                letter-spacing: -.01em;
+                font-size: 15px;
+                font-weight: 800;
+                letter-spacing: -.02em;
+                background: linear-gradient(90deg, #F0F6FF, #93C5FD);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
             }
 
             .topbar-title p {
-                font-size: 11px;
-                color: var(--muted2);
+                font-size: 10.5px;
+                color: var(--muted);
+                font-family: 'JetBrains Mono', monospace;
                 margin-top: 1px;
-                font-family: 'DM Mono',monospace;
+                letter-spacing: .03em;
             }
 
-        .topbar-actions {
+        .topbar-badge {
             display: flex;
             align-items: center;
-            gap: 8px;
-            position: relative;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: rgba(59,130,246,.12);
+            border: 1px solid rgba(59,130,246,.25);
+            font-size: 11px;
+            font-weight: 600;
+            color: #93C5FD;
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        /* ── USER CHIP ── */
+            .topbar-badge::before {
+                content: '';
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #3B82F6;
+                box-shadow: 0 0 6px #3B82F6;
+            }
+
+        /* user chip */
         .user-chip {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 7px 14px;
+            padding: 6px 14px;
             border-radius: 999px;
-            background: rgba(255,255,255,.06);
+            background: rgba(255,255,255,.05);
             border: 1px solid var(--border2);
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            position: relative;
             user-select: none;
-            transition: background .2s, border-color .2s;
+            transition: all .2s;
+            position: relative;
         }
 
             .user-chip:hover {
-                background: rgba(255,255,255,.1);
+                background: rgba(255,255,255,.09);
                 border-color: var(--accent);
-            }
-
-            .user-chip span {
-                color: var(--muted2);
             }
 
             .user-chip .chip-arrow {
@@ -136,11 +184,11 @@
             position: absolute;
             top: calc(100% + 10px);
             right: 0;
-            min-width: 200px;
+            min-width: 210px;
             background: var(--surface);
-            border: 1px solid var(--border2);
-            border-radius: 12px;
-            box-shadow: 0 16px 48px rgba(0,0,0,.5);
+            border: 1px solid var(--border3);
+            border-radius: var(--radius);
+            box-shadow: 0 20px 60px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04);
             padding: 8px;
             z-index: 999;
             animation: dropIn .15s ease;
@@ -163,7 +211,7 @@
         }
 
         .dropdown-header {
-            padding: 10px 12px 8px;
+            padding: 10px 12px 10px;
             border-bottom: 1px solid var(--border);
             margin-bottom: 6px;
         }
@@ -171,16 +219,15 @@
             .dropdown-header .d-name {
                 font-size: 13px;
                 font-weight: 700;
-                color: var(--text);
             }
 
             .dropdown-header .d-role {
                 font-size: 10px;
                 color: var(--muted);
-                font-family: 'DM Mono',monospace;
+                font-family: 'JetBrains Mono',monospace;
                 text-transform: uppercase;
                 letter-spacing: .08em;
-                margin-top: 2px;
+                margin-top: 3px;
             }
 
         .dropdown-item {
@@ -192,13 +239,13 @@
             font-size: 12px;
             font-weight: 500;
             cursor: pointer;
-            color: var(--muted2);
-            transition: background .15s,color .15s;
+            color: var(--text2);
+            transition: all .15s;
             border: none;
             background: none;
             width: 100%;
             text-align: left;
-            font-family: 'DM Sans',sans-serif;
+            font-family: 'Plus Jakarta Sans',sans-serif;
         }
 
             .dropdown-item:hover {
@@ -221,90 +268,107 @@
             margin: 6px 0;
         }
 
-        /* ── MAIN ── */
+        /* ══════════════════════════════════════════
+           MAIN LAYOUT
+        ══════════════════════════════════════════ */
         .main {
             max-width: 100%;
-            padding: 20px 24px;
+            padding: 20px 28px;
+            position: relative;
+            z-index: 1;
         }
 
-        /* ── PANEL ── */
+        /* ══════════════════════════════════════════
+           PANEL
+        ══════════════════════════════════════════ */
         .panel {
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 20px 24px;
-            margin-bottom: 16px;
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 22px 26px;
+            margin-bottom: 18px;
+            position: relative;
+            overflow: hidden;
         }
+
+            .panel::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(59,130,246,.4), transparent);
+            }
 
         .panel-title {
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: .1em;
-            color: var(--muted);
-            margin-bottom: 16px;
+            letter-spacing: .12em;
+            color: var(--text2);
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-            .panel-title::before {
-                content: '';
-                width: 3px;
-                height: 14px;
-                background: var(--accent);
-                border-radius: 2px;
-                display: inline-block;
-            }
+        .panel-title-dot {
+            width: 3px;
+            height: 16px;
+            background: linear-gradient(180deg, #3B82F6, #8B5CF6);
+            border-radius: 3px;
+            box-shadow: 0 0 8px rgba(59,130,246,.6);
+        }
 
-        /* ── SECCIÓN GRUPOS ── */
+        /* ── Section labels ── */
         .form-section {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
 
         .form-section-label {
-            font-size: 9px;
+            font-size: 9.5px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: .12em;
-            padding: 4px 10px;
-            border-radius: 5px;
+            letter-spacing: .1em;
+            padding: 4px 11px;
+            border-radius: 6px;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .lbl-formula {
             background: var(--col-formula-bg);
             color: var(--col-formula);
-            border: 1px solid rgba(6,182,212,.3);
+            border: 1px solid rgba(34,211,238,.25);
         }
 
         .lbl-requisitor {
             background: var(--col-requisitor-bg);
             color: var(--col-requisitor);
-            border: 1px solid rgba(139,92,246,.3);
+            border: 1px solid rgba(167,139,250,.25);
         }
 
         .lbl-autorizador {
             background: var(--col-autorizador-bg);
             color: var(--col-autorizador);
-            border: 1px solid rgba(245,158,11,.3);
+            border: 1px solid rgba(252,211,77,.25);
         }
 
-        /* ── FORM GRID ── */
+        /* ── Form grid ── */
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+            grid-template-columns: repeat(auto-fill, minmax(195px,1fr));
             gap: 12px;
         }
 
         .field label {
             font-size: 9px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: .1em;
+            letter-spacing: .09em;
             color: var(--muted);
             display: block;
             margin-bottom: 5px;
@@ -314,29 +378,30 @@
             width: 100%;
             background: var(--surface2);
             border: 1px solid var(--border2);
-            border-radius: 7px;
-            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            padding: 8px 11px;
             font-size: 12px;
-            font-family: 'DM Mono',monospace;
+            font-family: 'JetBrains Mono',monospace;
             color: var(--text);
-            transition: border-color .2s, box-shadow .2s;
+            transition: border-color .2s, box-shadow .2s, background .2s;
         }
 
         .field textarea {
             resize: vertical;
-            min-height: 58px;
+            min-height: 60px;
         }
 
             .field input:focus, .field select:focus, .field textarea:focus {
                 outline: none;
                 border-color: var(--accent);
-                box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+                box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+                background: rgba(59,130,246,.04);
             }
 
         .field select {
             cursor: pointer;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2356687A' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 9px center;
             padding-right: 26px;
@@ -351,114 +416,125 @@
             grid-column: 1/-1;
         }
 
-        /* campo calculado (readonly visual) */
         .field input[readonly] {
-            background: rgba(37,99,235,.08);
-            border-color: rgba(37,99,235,.25);
-            color: #93C5FD;
+            background: rgba(34,211,238,.06);
+            border-color: rgba(34,211,238,.2);
+            color: #67E8F9;
             cursor: default;
         }
 
-        /* ── BOTONES ── */
+        /* ══════════════════════════════════════════
+           BUTTONS
+        ══════════════════════════════════════════ */
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 9px 16px;
+            padding: 9px 17px;
             border: none;
-            border-radius: 8px;
-            font-family: 'DM Sans',sans-serif;
+            border-radius: var(--radius-sm);
+            font-family: 'Plus Jakarta Sans',sans-serif;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all .2s;
             white-space: nowrap;
+            letter-spacing: .01em;
         }
 
         .btn-primary {
-            background: var(--blue);
-            color: white;
-            box-shadow: 0 3px 10px rgba(37,99,235,.3);
+            background: linear-gradient(135deg, #2563EB, #3B82F6);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(59,130,246,.35);
         }
 
             .btn-primary:hover {
-                background: #1d4ed8;
                 transform: translateY(-1px);
+                box-shadow: 0 6px 20px rgba(59,130,246,.45);
             }
 
         .btn-success {
-            background: var(--green);
-            color: white;
-            box-shadow: 0 3px 10px rgba(16,185,129,.25);
+            background: linear-gradient(135deg, #059669, #10B981);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(16,185,129,.3);
         }
 
             .btn-success:hover {
-                background: #059669;
                 transform: translateY(-1px);
             }
 
         .btn-danger {
-            background: var(--red);
-            color: white;
+            background: linear-gradient(135deg,#DC2626,#EF4444);
+            color: #fff;
         }
 
             .btn-danger:hover {
-                background: #DC2626;
+                transform: translateY(-1px);
             }
 
         .btn-amber {
-            background: var(--amber);
-            color: #1c1400;
+            background: linear-gradient(135deg,#D97706,#F59E0B);
+            color: #1a0f00;
         }
 
             .btn-amber:hover {
-                background: #D97706;
+                transform: translateY(-1px);
             }
 
         .btn-purple {
-            background: var(--purple);
-            color: white;
+            background: linear-gradient(135deg,#7C3AED,#8B5CF6);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(139,92,246,.3);
         }
 
             .btn-purple:hover {
-                background: #7C3AED;
+                transform: translateY(-1px);
             }
 
         .btn-cyan {
-            background: var(--cyan);
+            background: linear-gradient(135deg,#0891B2,#06B6D4);
             color: #001a1f;
         }
 
             .btn-cyan:hover {
-                background: #0891B2;
+                transform: translateY(-1px);
             }
 
         .btn-ghost {
             background: var(--surface2);
-            color: var(--muted2);
+            color: var(--text2);
             border: 1px solid var(--border2);
         }
 
             .btn-ghost:hover {
                 color: var(--text);
                 border-color: var(--accent);
+                background: rgba(59,130,246,.08);
             }
 
         .btn-sm {
-            padding: 6px 11px;
+            padding: 5px 12px;
             font-size: 11px;
         }
 
-        /* ── TOOLBAR ── */
+        .btn-xs {
+            padding: 4px 8px;
+            font-size: 10px;
+            border-radius: 6px;
+        }
+
+        /* ══════════════════════════════════════════
+           TOOLBAR
+        ══════════════════════════════════════════ */
         .toolbar {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             align-items: center;
-            padding: 14px 24px;
+            padding: 14px 20px;
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
             margin-bottom: 16px;
         }
 
@@ -472,12 +548,12 @@
         .anio-input {
             background: var(--surface2);
             border: 1px solid var(--border2);
-            border-radius: 7px;
-            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            padding: 7px 10px;
             font-size: 12px;
-            font-family: 'DM Mono',monospace;
+            font-family: 'JetBrains Mono',monospace;
             color: var(--text);
-            width: 110px;
+            width: 120px;
         }
 
             .anio-input:focus {
@@ -485,21 +561,33 @@
                 border-color: var(--accent);
             }
 
-        /* ── TABLA ── */
+        /* ══════════════════════════════════════════
+           TABLE
+        ══════════════════════════════════════════ */
         .table-wrap {
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
+            border: 1px solid var(--border2);
+            border-radius: 16px;
             overflow: hidden;
             margin-bottom: 16px;
+            position: relative;
         }
+
+            .table-wrap::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: linear-gradient(90deg,transparent,rgba(59,130,246,.35),rgba(167,139,250,.35),transparent);
+                z-index: 5;
+            }
 
         .table-scroll {
             overflow-x: auto;
-            display: flex;
-            flex-direction: column;
-            max-height: calc(100vh - 380px);
-            min-height: 380px;
+            max-height: calc(100vh - 360px);
+            min-height: 360px;
             overflow-y: auto;
         }
 
@@ -510,11 +598,10 @@
 
             .table-scroll::-webkit-scrollbar-track {
                 background: var(--surface2);
-                border-radius: 999px;
             }
 
             .table-scroll::-webkit-scrollbar-thumb {
-                background: #334155;
+                background: #2D3F55;
                 border-radius: 999px;
             }
 
@@ -536,6 +623,7 @@
         table {
             border-collapse: collapse;
             font-size: 11px;
+            width: 100%;
         }
 
         thead {
@@ -544,45 +632,44 @@
             z-index: 10;
         }
 
-        /* fila 1: grupos de encabezado con color */
+        /* group row */
         .group-row th {
-            padding: 5px 10px;
+            padding: 6px 10px;
             font-size: 9px;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: .1em;
             text-align: center;
-            border-bottom: none;
             white-space: nowrap;
         }
 
         .gh-formula {
-            background: var(--col-formula-bg);
+            background: rgba(34,211,238,.12);
             color: var(--col-formula);
             border-bottom: 2px solid var(--col-formula) !important;
         }
 
         .gh-requisitor {
-            background: var(--col-requisitor-bg);
+            background: rgba(167,139,250,.12);
             color: var(--col-requisitor);
             border-bottom: 2px solid var(--col-requisitor) !important;
         }
 
         .gh-autorizador {
-            background: var(--col-autorizador-bg);
+            background: rgba(252,211,77,.12);
             color: var(--col-autorizador);
             border-bottom: 2px solid var(--col-autorizador) !important;
         }
 
         .gh-neutral {
             background: var(--surface3);
-            color: var(--muted2);
+            color: var(--text2);
         }
 
-        /* fila 2: nombres de columnas */
+        /* col row */
         .col-row th {
             background: var(--surface3);
-            color: var(--muted2);
+            color: var(--text2);
             font-size: 9px;
             font-weight: 700;
             text-transform: uppercase;
@@ -591,8 +678,29 @@
             border-bottom: 1px solid var(--border2);
             white-space: nowrap;
             text-align: left;
+            cursor: pointer;
+            user-select: none;
+            transition: color .2s, background .2s;
+            position: relative;
         }
-        /* tinte sutil por grupo */
+
+            .col-row th:hover {
+                color: var(--text);
+                background: rgba(255,255,255,.04);
+            }
+
+            .col-row th.sort-asc::after {
+                content: ' ↑';
+                color: var(--accent);
+                font-size: 10px;
+            }
+
+            .col-row th.sort-desc::after {
+                content: ' ↓';
+                color: var(--accent);
+                font-size: 10px;
+            }
+
         .col-formula {
             border-top: 2px solid var(--col-formula) !important;
         }
@@ -605,29 +713,41 @@
             border-top: 2px solid var(--col-autorizador) !important;
         }
 
-        /* fila 3: filtros */
+        /* filter row */
         .filter-row th {
-            background: var(--surface2);
-            padding: 5px 6px;
-            border-bottom: 1px solid var(--border2);
+            background: var(--bg2);
+            padding: 5px 5px;
+            border-bottom: 2px solid var(--border2);
         }
 
-        .filter-row input {
+        .filter-row input, .filter-row select {
             width: 100%;
             background: rgba(255,255,255,.04);
-            border: 1px solid var(--border2);
+            border: 1px solid rgba(255,255,255,.08);
             border-radius: 5px;
-            padding: 4px 6px;
+            padding: 4px 7px;
             font-size: 10px;
             color: var(--text);
-            font-family: 'DM Mono',monospace;
+            font-family: 'JetBrains Mono',monospace;
+            transition: border-color .2s, background .2s;
         }
 
-            .filter-row input:focus {
+            .filter-row input:focus, .filter-row select:focus {
                 outline: none;
                 border-color: var(--accent);
+                background: rgba(59,130,246,.07);
             }
 
+            .filter-row input::placeholder {
+                color: var(--muted);
+            }
+
+            .filter-row select option {
+                background: var(--surface2);
+                color: var(--text);
+            }
+
+        /* body rows */
         tbody tr {
             border-bottom: 1px solid var(--border);
             transition: background .15s;
@@ -638,11 +758,11 @@
             }
 
             tbody tr:hover td {
-                filter: brightness(1.12);
+                filter: brightness(1.15);
             }
 
         td {
-            padding: 8px 10px;
+            padding: 9px 10px;
             color: var(--text);
             vertical-align: middle;
             white-space: nowrap;
@@ -650,8 +770,8 @@
         }
 
             td.mono {
-                font-family: 'DM Mono',monospace;
-                color: var(--muted2);
+                font-family: 'JetBrains Mono',monospace;
+                color: var(--text2);
             }
 
             td.wrap {
@@ -661,90 +781,141 @@
             }
 
             td.num {
-                font-family: 'DM Mono',monospace;
+                font-family: 'JetBrains Mono',monospace;
                 text-align: right;
             }
 
             td.auto {
-                color: #93C5FD;
-                font-family: 'DM Mono',monospace;
+                color: #67E8F9;
+                font-family: 'JetBrains Mono',monospace;
             }
 
-        /* columna acciones fija */
+        /* sticky last col */
         table th:last-child, table td:last-child {
             position: sticky;
             right: 0;
             z-index: 2;
             background: var(--surface);
-            box-shadow: -2px 0 6px rgba(0,0,0,.3);
+            box-shadow: -3px 0 8px rgba(0,0,0,.4);
         }
 
         table thead th:last-child {
             z-index: 3;
         }
 
-        /* pills estatus */
+        /* ── Pills ── */
         .pill {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             padding: 2px 9px;
             border-radius: 999px;
             font-size: 10px;
             font-weight: 700;
+            font-family: 'JetBrains Mono',monospace;
+            letter-spacing: .03em;
         }
+
+            .pill::before {
+                content: '';
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+            }
 
         .pill-green {
             background: rgba(16,185,129,.15);
-            color: #6EE7B7;
+            color: #34D399;
+            border: 1px solid rgba(16,185,129,.25);
         }
+
+            .pill-green::before {
+                background: #10B981;
+                box-shadow: 0 0 4px #10B981;
+            }
 
         .pill-amber {
             background: rgba(245,158,11,.15);
-            color: #FDE68A;
+            color: #FCD34D;
+            border: 1px solid rgba(245,158,11,.25);
         }
+
+            .pill-amber::before {
+                background: #F59E0B;
+                box-shadow: 0 0 4px #F59E0B;
+            }
 
         .pill-red {
             background: rgba(239,68,68,.15);
             color: #FCA5A5;
+            border: 1px solid rgba(239,68,68,.25);
         }
+
+            .pill-red::before {
+                background: #EF4444;
+                box-shadow: 0 0 4px #EF4444;
+            }
 
         .pill-gray {
-            background: rgba(100,116,139,.15);
-            color: var(--muted2);
+            background: rgba(86,104,122,.15);
+            color: var(--text2);
+            border: 1px solid rgba(86,104,122,.25);
         }
+
+            .pill-gray::before {
+                background: var(--muted);
+            }
 
         .pill-blue {
-            background: rgba(37,99,235,.15);
+            background: rgba(59,130,246,.15);
             color: #93C5FD;
+            border: 1px solid rgba(59,130,246,.25);
         }
 
-        /* ── PAGINACIÓN ── */
+            .pill-blue::before {
+                background: var(--accent);
+                box-shadow: 0 0 4px var(--accent);
+            }
+
+        /* ══════════════════════════════════════════
+           PAGINATION
+        ══════════════════════════════════════════ */
         .pagination {
             display: flex;
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
-            padding: 14px 24px;
+            padding: 13px 20px;
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 14px;
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
             margin-bottom: 16px;
         }
 
         .page-info {
             font-size: 12px;
-            font-family: 'DM Mono',monospace;
-            color: var(--muted2);
+            font-family: 'JetBrains Mono',monospace;
+            color: var(--text2);
+            flex: 1;
+            text-align: center;
         }
 
-        /* ── MODALES ── */
+            .page-info strong {
+                color: var(--accent);
+            }
+
+        /* ══════════════════════════════════════════
+           MODALS
+        ══════════════════════════════════════════ */
         .modal {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,.68);
+            background: rgba(0,0,0,.75);
             justify-content: center;
             align-items: center;
             z-index: 9999;
+            backdrop-filter: blur(4px);
         }
 
             .modal.show {
@@ -753,33 +924,45 @@
 
         .modal-box {
             background: var(--surface);
-            border: 1px solid var(--border2);
-            border-radius: 16px;
-            padding: 26px;
-            max-height: 90vh;
+            border: 1px solid var(--border3);
+            border-radius: 18px;
+            padding: 28px;
+            max-height: 92vh;
             overflow-y: auto;
-            box-shadow: 0 30px 80px rgba(0,0,0,.55);
-            animation: modalIn .2s ease;
+            box-shadow: 0 40px 100px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.05);
+            animation: modalIn .2s cubic-bezier(.22,.68,0,1.2);
+            position: relative;
         }
+
+            .modal-box::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: linear-gradient(90deg,transparent,rgba(59,130,246,.5),rgba(139,92,246,.5),transparent);
+                border-radius: 18px 18px 0 0;
+            }
 
         @keyframes modalIn {
             from {
                 opacity: 0;
-                transform: scale(.96)
+                transform: scale(.94) translateY(8px);
             }
 
             to {
                 opacity: 1;
-                transform: scale(1)
+                transform: scale(1) translateY(0);
             }
         }
 
         .modal-box.form-box {
-            width: min(820px,96vw);
+            width: min(840px,96vw);
         }
 
         .modal-box.hist-box {
-            width: min(960px,96vw);
+            width: min(980px,96vw);
         }
 
         .modal-box::-webkit-scrollbar {
@@ -792,7 +975,7 @@
         }
 
         .modal-box::-webkit-scrollbar-thumb {
-            background: #334155;
+            background: #2D3F55;
             border-radius: 999px;
         }
 
@@ -801,32 +984,31 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border2);
-            padding-bottom: 14px;
-            margin-bottom: 20px;
+            padding-bottom: 16px;
+            margin-bottom: 22px;
         }
 
             .modal-header h3 {
-                margin: 0;
-                color: var(--text);
-                font-size: 15px;
-                font-weight: 700;
+                font-size: 16px;
+                font-weight: 800;
             }
 
         .close-btn {
-            background: rgba(37,99,235,.15);
-            color: #93C5FD;
-            border: 1px solid rgba(37,99,235,.3);
-            padding: 5px 12px;
-            border-radius: 7px;
+            background: rgba(255,255,255,.06);
+            color: var(--text2);
+            border: 1px solid var(--border2);
+            padding: 6px 14px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
             transition: all .2s;
         }
 
             .close-btn:hover {
-                background: var(--blue);
-                color: white;
+                background: rgba(239,68,68,.15);
+                color: #FCA5A5;
+                border-color: rgba(239,68,68,.3);
             }
 
         .modal-footer {
@@ -834,18 +1016,18 @@
             justify-content: flex-end;
             gap: 8px;
             border-top: 1px solid var(--border);
-            padding-top: 16px;
-            margin-top: 10px;
+            padding-top: 18px;
+            margin-top: 12px;
         }
 
         .form-cols {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 14px;
         }
 
         .form-field {
-            margin-bottom: 12px;
+            margin-bottom: 2px;
             display: flex;
             flex-direction: column;
         }
@@ -862,38 +1044,38 @@
             .form-field input, .form-field textarea, .form-field select {
                 padding: 9px 11px;
                 border: 1px solid var(--border2);
-                border-radius: 7px;
+                border-radius: var(--radius-sm);
                 font-size: 12px;
                 background: var(--surface2);
                 color: var(--text);
-                font-family: 'DM Mono',monospace;
+                font-family: 'JetBrains Mono',monospace;
                 transition: border-color .2s, box-shadow .2s;
             }
 
             .form-field textarea {
                 resize: vertical;
-                min-height: 68px;
+                min-height: 70px;
             }
 
                 .form-field input:focus, .form-field textarea:focus, .form-field select:focus {
                     outline: none;
                     border-color: var(--accent);
-                    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+                    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
                 }
 
             .form-field select {
                 cursor: pointer;
                 appearance: none;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2356687A' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
                 background-repeat: no-repeat;
                 background-position: right 9px center;
                 padding-right: 26px;
             }
 
             .form-field input[readonly] {
-                background: rgba(37,99,235,.08);
-                border-color: rgba(37,99,235,.25);
-                color: #93C5FD;
+                background: rgba(34,211,238,.07);
+                border-color: rgba(34,211,238,.2);
+                color: #67E8F9;
                 cursor: default;
             }
 
@@ -901,9 +1083,11 @@
                 grid-column: 1/-1;
             }
 
-        /* ── HISTORIAL ── */
+        /* ══════════════════════════════════════════
+           HISTORIAL
+        ══════════════════════════════════════════ */
         .ev-wrap {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             border: 1px solid var(--border2);
             border-radius: 10px;
             overflow: hidden;
@@ -920,11 +1104,11 @@
 
             .ev-header span {
                 font-size: 12px;
-                color: var(--muted2);
+                color: var(--text2);
             }
 
             .ev-header strong {
-                color: #7dd3fc;
+                color: #7DD3FC;
             }
 
         .badge-cambio {
@@ -933,7 +1117,7 @@
             font-size: 10px;
             padding: 2px 7px;
             border-radius: 999px;
-            font-weight: bold;
+            font-weight: 800;
             text-transform: uppercase;
             margin-left: 6px;
         }
@@ -947,14 +1131,13 @@
             .ev-table th, .ev-table td {
                 border: 1px solid var(--border2);
                 padding: 8px 10px;
-                text-align: left;
                 background: var(--surface2);
                 color: var(--text);
             }
 
             .ev-table thead th {
                 background: var(--surface3);
-                color: var(--muted2);
+                color: var(--text2);
                 font-weight: 700;
             }
 
@@ -984,7 +1167,7 @@
             font-size: 14px;
         }
 
-        /* ── FILE ── */
+        /* ── File upload ── */
         .file-label {
             display: inline-flex;
             align-items: center;
@@ -992,9 +1175,9 @@
             padding: 5px 10px;
             border-radius: 7px;
             cursor: pointer;
-            background: rgba(37,99,235,.1);
+            background: rgba(59,130,246,.1);
             color: #93C5FD;
-            border: 1px solid rgba(37,99,235,.25);
+            border: 1px solid rgba(59,130,246,.25);
             font-size: 11px;
             font-weight: 600;
             transition: all .2s;
@@ -1002,59 +1185,129 @@
         }
 
             .file-label:hover {
-                background: rgba(37,99,235,.2);
-                border-color: var(--blue);
+                background: rgba(59,130,246,.2);
+                border-color: var(--accent);
             }
 
             .file-label input[type=file] {
                 display: none;
             }
 
+        /* spinner */
         .spin {
             width: 18px;
             height: 18px;
             border: 2px solid var(--border2);
-            border-top-color: var(--blue);
+            border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin .7s linear infinite;
             display: inline-block;
         }
 
-        .filter-row select {
-            width: 100%;
-            background: rgba(255,255,255,.04);
-            border: 1px solid var(--border2);
-            border-radius: 5px;
-            padding: 4px 6px;
-            font-size: 10px;
-            color: var(--text);
-            font-family: 'DM Mono',monospace;
-        }
-
-            .filter-row select option {
-                background: var(--surface2);
-                color: var(--text);
-            }
-
         @keyframes spin {
             to {
-                transform: rotate(360deg)
+                transform: rotate(360deg);
             }
+        }
+
+        /* ── Leyenda ── */
+        .legend-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .legend-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── Filter active indicator ── */
+        .filter-active {
+            border-color: var(--accent) !important;
+            background: rgba(59,130,246,.1) !important;
+        }
+
+        /* ── Stats bar ── */
+        .stats-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 140px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .stat-card::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 40%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,.02));
+            }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            font-family: 'JetBrains Mono',monospace;
+            letter-spacing: -.03em;
+        }
+
+        .stat-sub {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 3px;
+            font-family: 'JetBrains Mono',monospace;
         }
     </style>
 </head>
 <body>
 
-    <!-- TOPBAR -->
+    <!-- ══ TOPBAR ══ -->
     <div class="topbar">
-        <div class="topbar-icon">📋</div>
+        <div class="topbar-logo">📋</div>
         <div class="topbar-title">
             <h1>ÓRDENES DE COMPRA</h1>
             <p>Módulo de presupuesto · CHI-IT</p>
         </div>
-        <div class="topbar-actions">
+        <div class="topbar-badge" id="totalBadge">— registros</div>
+        <div style="position:relative;">
             <div class="user-chip" id="userChip" onclick="toggleChip()">
-                👤 <span id="nombreUsuario">Cargando...</span>
+                <span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#1D4ED8,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:12px;">👤</span>
+                <span id="nombreUsuario" style="color:var(--text);">Cargando...</span>
                 <span class="chip-arrow">▼</span>
                 <div class="user-dropdown">
                     <div class="dropdown-header">
@@ -1069,61 +1322,57 @@
         </div>
     </div>
 
-    <!-- MAIN -->
+    <!-- ══ MAIN ══ -->
     <div class="main">
 
-        <!-- ══ PANEL NUEVO REGISTRO ══ -->
-        <div class="panel" id="panelNuevoRegistro">
-            <div class="panel-title">➕ Nueva Orden de Compra</div>
+        <!-- Stats bar -->
+        <div class="stats-bar" id="statsBar" style="display:none;">
+            <div class="stat-card">
+                <div class="stat-label">Total registros</div>
+                <div class="stat-value" id="st-total" style="color:#93C5FD;">0</div>
+                <div class="stat-sub">órdenes de compra</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Completas</div>
+                <div class="stat-value" id="st-completas" style="color:#34D399;">0</div>
+                <div class="stat-sub">entregadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pendientes</div>
+                <div class="stat-value" id="st-pendientes" style="color:#FCD34D;">0</div>
+                <div class="stat-sub">en proceso</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Esta página</div>
+                <div class="stat-value" id="st-pagina" style="color:#C084FC;">0</div>
+                <div class="stat-sub">registros visibles</div>
+            </div>
+        </div>
 
-            <!-- LLENADO POR FÓRMULA -->
+        <!-- PANEL NUEVO REGISTRO -->
+        <div class="panel" id="panelNuevoRegistro">
+            <div class="panel-title"><div class="panel-title-dot"></div>➕ Nueva Orden de Compra</div>
+
             <div class="form-section">
                 <span class="form-section-label lbl-formula">🔗 Llenado por Fórmula — se calculan automáticamente al guardar</span>
                 <div class="form-grid">
-                    <div class="field">
-                        <label>Orden de Compra 🔒</label>
-                        <input id="n_ORDEN_DE_COMPRA" placeholder="Calculado desde Requisición" readonly tabindex="-1" title="Se obtiene automáticamente de Req VS OC usando la Requisición">
-                    </div>
-                    <div class="field">
-                        <label>Fecha OC 🔒</label>
-                        <input id="n_FECHA_OC" placeholder="Calculado desde Requisición" readonly tabindex="-1" title="Se obtiene automáticamente de Req VS OC usando la Requisición">
-                    </div>
-                    <div class="field">
-                        <label>OC 🔒</label>
-                        <input id="n_OC" placeholder="Calculado desde Requisición" readonly tabindex="-1" title="Se obtiene automáticamente de Req VS OC usando la Requisición">
-                    </div>
-                    <div class="field">
-                        <label>Fecha Entrada</label>
-                        <input id="n_FECHA_ENTRADA" type="date">
-                    </div>
-                    <div class="field">
-                        <label>Total (Sin IVA) 🔒</label>
-                        <input id="n_TOTAL_SIN_IVA" type="number" step="0.01" placeholder="Cantidad × Precio Unitario" readonly tabindex="-1" title="Calculado automáticamente: Cantidad × Precio Unitario">
-                    </div>
-                    <div class="field">
-                        <label>Cantidad Registrada 🔒</label>
-                        <input id="n_CANTIDAD_REGISTRADA" type="number" step="1" placeholder="Calculado desde entradas" readonly tabindex="-1" title="Calculado automáticamente desde la tabla de entradas">
-                    </div>
-                    <div class="field">
-                        <label>Estatus OC 🔒</label>
-                        <input id="n_ESTATUS_OC" placeholder="COMPLETA / PARCIAL / PENDIENTE" readonly tabindex="-1" title="Calculado automáticamente: depende de Cantidad vs Cantidad Registrada">
-                    </div>
+                    <div class="field"><label>Orden de Compra 🔒</label><input id="n_ORDEN_DE_COMPRA" placeholder="Calculado desde Requisición" readonly tabindex="-1"></div>
+                    <div class="field"><label>Fecha OC 🔒</label><input id="n_FECHA_OC" placeholder="Calculado desde Requisición" readonly tabindex="-1"></div>
+                    <div class="field"><label>OC 🔒</label><input id="n_OC" placeholder="Calculado desde Requisición" readonly tabindex="-1"></div>
+                    <div class="field"><label>Fecha Entrada</label><input id="n_FECHA_ENTRADA" type="date"></div>
+                    <div class="field"><label>Total (Sin IVA) 🔒</label><input id="n_TOTAL_SIN_IVA" type="number" step="0.01" placeholder="Cantidad × Precio Unitario" readonly tabindex="-1"></div>
+                    <div class="field"><label>Cantidad Registrada 🔒</label><input id="n_CANTIDAD_REGISTRADA" type="number" step="1" placeholder="Calculado desde entradas" readonly tabindex="-1"></div>
+                    <div class="field"><label>Estatus OC 🔒</label><input id="n_ESTATUS_OC" placeholder="COMPLETA / PARCIAL / PENDIENTE" readonly tabindex="-1"></div>
                 </div>
             </div>
 
-            <!-- LLENADO POR REQUISITOR -->
             <div class="form-section">
                 <span class="form-section-label lbl-requisitor">✏️ Llenado por Requisitor</span>
                 <div class="form-grid">
-                    <div class="field">
-                        <label>Folio (Correctivo / Solicitud / Inv.)</label>
-                        <input id="n_FOLIO" placeholder="Folio del correctivo o solicitud">
-                    </div>
+                    <div class="field"><label>Folio</label><input id="n_FOLIO" placeholder="Folio del correctivo o solicitud"></div>
                     <div class="field">
                         <label>Solicitante</label>
-                        <select id="n_SOLICITANTE">
-                            <option value="">— Seleccionar —</option>
-                        </select>
+                        <select id="n_SOLICITANTE"><option value="">— Seleccionar —</option></select>
                     </div>
                     <div class="field">
                         <label>Presupuesto (Mes)</label>
@@ -1143,58 +1392,25 @@
                             <option>DICIEMBRE</option>
                         </select>
                     </div>
-                    <div class="field">
-                        <label>Serie / Ubicación / No. Empleado</label>
-                        <input id="n_SERIE_UBICACION_NO_EMPLEADO" placeholder="Serie, ubicación o núm. empleado">
-                    </div>
-                    <div class="field field-wide">
-                        <label>Accesorio Solicitado</label>
-                        <input id="n_ACCESORIO_SOLICITADO" placeholder="Descripción del accesorio o equipo solicitado">
-                    </div>
-                    <div class="field">
-                        <label>Proveedor Elegido</label>
-                        <input id="n_PROVEEDOR_ELEGIDO" placeholder="Nombre del proveedor">
-                    </div>
-                    <div class="field">
-                        <label>Pieza / Servicio</label>
-                        <input id="n_PIEZA_SERVICIO" placeholder="PIEZA o SERVICIO">
-                    </div>
-                    <div class="field">
-                        <label>Cantidad</label>
-                        <input id="n_CANTIDAD" type="number" step="1" min="0" placeholder="0" oninput="calcularTotal('n')">
-                    </div>
-                    <div class="field">
-                        <label>Precio Unitario</label>
-                        <input id="n_PRECIO_UNITARIO" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcularTotal('n')">
-                    </div>
+                    <div class="field"><label>Serie / Ubicación / No. Empleado</label><input id="n_SERIE_UBICACION_NO_EMPLEADO" placeholder="Serie, ubicación o núm. empleado"></div>
+                    <div class="field field-wide"><label>Accesorio Solicitado</label><input id="n_ACCESORIO_SOLICITADO" placeholder="Descripción del accesorio o equipo solicitado"></div>
+                    <div class="field"><label>Proveedor Elegido</label><input id="n_PROVEEDOR_ELEGIDO" placeholder="Nombre del proveedor"></div>
+                    <div class="field"><label>Pieza / Servicio</label><input id="n_PIEZA_SERVICIO" placeholder="PIEZA o SERVICIO"></div>
+                    <div class="field"><label>Cantidad</label><input id="n_CANTIDAD" type="number" step="1" min="0" placeholder="0" oninput="calcularTotal('n')"></div>
+                    <div class="field"><label>Precio Unitario</label><input id="n_PRECIO_UNITARIO" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcularTotal('n')"></div>
                     <div class="field">
                         <label>Moneda</label>
-                        <select id="n_MONEDA">
-                            <option value="">— Seleccionar —</option>
-                            <option>PESOS</option>
-                            <option>DOLARES</option>
-                            <option>EUROS</option>
-                        </select>
+                        <select id="n_MONEDA"><option value="">— Seleccionar —</option><option>PESOS</option><option>DOLARES</option><option>EUROS</option></select>
                     </div>
-                    <div class="field field-wide">
-                        <label>Comentarios</label>
-                        <textarea id="n_COMENTARIOS" rows="2" placeholder="Observaciones adicionales"></textarea>
-                    </div>
-                    <div class="field">
-                        <label>Hoja Control</label>
-                        <input id="n_HOJA_CONTROL" placeholder="Núm. hoja de control">
-                    </div>
+                    <div class="field field-wide"><label>Comentarios</label><textarea id="n_COMENTARIOS" rows="2" placeholder="Observaciones adicionales"></textarea></div>
+                    <div class="field"><label>Hoja Control</label><input id="n_HOJA_CONTROL" placeholder="Núm. hoja de control"></div>
                 </div>
             </div>
 
-            <!-- LLENADO POR AUTORIZADOR -->
             <div class="form-section">
                 <span class="form-section-label lbl-autorizador">🔐 Llenado por Autorizador</span>
                 <div class="form-grid">
-                    <div class="field">
-                        <label>Requisición</label>
-                        <input id="n_REQUISICION" placeholder="Núm. de requisición">
-                    </div>
+                    <div class="field"><label>Requisición</label><input id="n_REQUISICION" placeholder="Núm. de requisición"></div>
                 </div>
             </div>
 
@@ -1211,6 +1427,9 @@
             <div class="toolbar-sep"></div>
             <input class="anio-input" id="anioExportar" type="number" placeholder="Año (ej: 2026)">
             <button class="btn btn-purple btn-sm" onclick="exportarPorAnio()">⬇ Por Año</button>
+            <div class="toolbar-sep"></div>
+            <button class="btn btn-ghost btn-sm" id="btnLimpiarFiltros" onclick="limpiarFiltros()" style="display:none;">✕ Limpiar Filtros</button>
+            <span id="filtrosActivos" style="font-size:11px;color:var(--amber);font-family:'JetBrains Mono',monospace;display:none;"></span>
         </div>
 
         <!-- TABLA -->
@@ -1219,7 +1438,7 @@
             <div class="table-scroll" id="tableScroll">
                 <table>
                     <thead>
-                        <!-- FILA 1: grupos de encabezado -->
+                        <!-- FILA 1: grupos -->
                         <tr class="group-row">
                             <th class="gh-neutral" rowspan="1"></th>
                             <th class="gh-formula" colspan="3">🔗 Llenado por Fórmula</th>
@@ -1228,69 +1447,89 @@
                             <th class="gh-formula" colspan="3">🔗 Llenado por Fórmula</th>
                             <th class="gh-neutral" colspan="2"></th>
                         </tr>
-                        <!-- FILA 2: nombres de columna -->
-                        <tr class="col-row">
-                            <th>ID</th>
-                            <th class="col-formula">ORDEN DE COMPRA</th>
-                            <th class="col-formula">FECHA OC</th>
-                            <th class="col-formula">OC</th>
-                            <th class="col-requisitor">FOLIO</th>
-                            <th class="col-requisitor">SOLICITANTE</th>
-                            <th class="col-requisitor">PRESUPUESTO (MES)</th>
-                            <th class="col-requisitor">SERIE / UBIC. / NO. EMP.</th>
-                            <th class="col-requisitor">ACCESORIO SOLICITADO</th>
-                            <th class="col-requisitor">PROVEEDOR</th>
-                            <th class="col-requisitor">PIEZA / SERVICIO</th>
-                            <th class="col-requisitor">CANTIDAD</th>
-                            <th class="col-requisitor">PRECIO UNIT.</th>
-                            <th class="col-requisitor">TOTAL (SIN IVA)</th>
-                            <th class="col-requisitor">MONEDA</th>
-                            <th class="col-requisitor">COMENTARIOS</th>
-                            <th class="col-autorizador">HOJA CONTROL</th>
-                            <th class="col-autorizador">REQUISICIÓN</th>
-                            <th class="col-formula">FECHA ENTRADA</th>
-                            <th class="col-formula">CANT. REGISTRADA</th>
-                            <th class="col-formula">ESTATUS OC</th>
+                        <!-- FILA 2: nombres -->
+                        <tr class="col-row" id="colHeaders">
+                            <th onclick="sortBy('ID')">ID</th>
+                            <th class="col-formula" onclick="sortBy('ORDEN_DE_COMPRA')">ORDEN DE COMPRA</th>
+                            <th class="col-formula" onclick="sortBy('FECHA_OC')">FECHA OC</th>
+                            <th class="col-formula" onclick="sortBy('OC')">OC</th>
+                            <th class="col-requisitor" onclick="sortBy('FOLIO')">FOLIO</th>
+                            <th class="col-requisitor" onclick="sortBy('SOLICITANTE')">SOLICITANTE</th>
+                            <th class="col-requisitor" onclick="sortBy('PRESUPUESTO_MES')">PRESUPUESTO (MES)</th>
+                            <th class="col-requisitor" onclick="sortBy('SERIE_UBICACION_NO_EMPLEADO')">SERIE / UBIC. / NO. EMP.</th>
+                            <th class="col-requisitor" onclick="sortBy('ACCESORIO_SOLICITADO')">ACCESORIO SOLICITADO</th>
+                            <th class="col-requisitor" onclick="sortBy('PROVEEDOR_ELEGIDO')">PROVEEDOR</th>
+                            <th class="col-requisitor" onclick="sortBy('PIEZA_SERVICIO')">PIEZA / SERVICIO</th>
+                            <th class="col-requisitor" onclick="sortBy('CANTIDAD')">CANTIDAD</th>
+                            <th class="col-requisitor" onclick="sortBy('PRECIO_UNITARIO')">PRECIO UNIT.</th>
+                            <th class="col-requisitor" onclick="sortBy('TOTAL_SIN_IVA')">TOTAL (SIN IVA)</th>
+                            <th class="col-requisitor" onclick="sortBy('MONEDA')">MONEDA</th>
+                            <th class="col-requisitor" onclick="sortBy('COMENTARIOS')">COMENTARIOS</th>
+                            <th class="col-autorizador" onclick="sortBy('HOJA_CONTROL')">HOJA CONTROL</th>
+                            <th class="col-autorizador" onclick="sortBy('REQUISICION')">REQUISICIÓN</th>
+                            <th class="col-formula" onclick="sortBy('FECHA_ENTRADA')">FECHA ENTRADA</th>
+                            <th class="col-formula" onclick="sortBy('CANTIDAD_REGISTRADA')">CANT. REGISTRADA</th>
+                            <th class="col-formula" onclick="sortBy('ESTATUS_OC')">ESTATUS OC</th>
                             <th class="gh-neutral">PDF</th>
                             <th class="gh-neutral">ACCIONES</th>
                         </tr>
-                        <!-- FILA 3: filtros -->
+                        <!-- FILA 3: filtros en TODAS las columnas -->
                         <tr class="filter-row">
-                            <th></th>
-                            <th><input oninput="filtrar()" id="f_ORDEN_DE_COMPRA" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" id="f_FECHA_OC" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" id="f_OC" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" id="f_FOLIO" placeholder="🔍"></th>
+                            <th><input oninput="filtrar()" id="f_ID" placeholder="🔍" title="Filtrar por ID"></th>
+                            <th><input oninput="filtrar()" id="f_ORDEN_DE_COMPRA" placeholder="🔍" title="Filtrar por Orden de Compra"></th>
+                            <th><input oninput="filtrar()" id="f_FECHA_OC" placeholder="🔍 AAAA-MM" title="Filtrar por Fecha OC"></th>
+                            <th><input oninput="filtrar()" id="f_OC" placeholder="🔍" title="Filtrar por OC"></th>
+                            <th><input oninput="filtrar()" id="f_FOLIO" placeholder="🔍" title="Filtrar por Folio"></th>
                             <th>
-                                <select onchange="filtrar()" id="f_SOLICITANTE" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:5px;padding:4px 6px;font-size:10px;color:var(--text);font-family:'DM Mono',monospace;">
+                                <select onchange="filtrar()" id="f_SOLICITANTE">
                                     <option value="">— Todos —</option>
                                 </select>
                             </th>
-                            <th><input oninput="filtrar()" id="f_PRESUPUESTO_MES" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" id="f_SERIE_UBICACION_NO_EMPLEADO" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" id="f_ACCESORIO_SOLICITADO" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" id="f_PROVEEDOR_ELEGIDO" placeholder="🔍"></th>
-                            <th><input oninput="filtrar()" id="f_PIEZA_SERVICIO" placeholder="🔍"></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th><input oninput="filtrar()" id="f_MONEDA" placeholder="🔍"></th>
-                            <th></th>
-                            <th></th>
-                            <th><input oninput="filtrar()" id="f_REQUISICION" placeholder="🔍"></th>
-                            <th></th>
-                            <th></th>
                             <th>
-                                <select onchange="filtrar()" id="f_ESTATUS_OC"
-                                        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:5px;padding:4px 6px;font-size:10px;color:var(--text);font-family:'DM Mono',monospace;">
-
+                                <select onchange="filtrar()" id="f_PRESUPUESTO_MES">
+                                    <option value="">— Todos —</option>
+                                    <option>ENERO</option>
+                                    <option>FEBRERO</option>
+                                    <option>MARZO</option>
+                                    <option>ABRIL</option>
+                                    <option>MAYO</option>
+                                    <option>JUNIO</option>
+                                    <option>JULIO</option>
+                                    <option>AGOSTO</option>
+                                    <option>SEPTIEMBRE</option>
+                                    <option>OCTUBRE</option>
+                                    <option>NOVIEMBRE</option>
+                                    <option>DICIEMBRE</option>
+                                </select>
+                            </th>
+                            <th><input oninput="filtrar()" id="f_SERIE_UBICACION_NO_EMPLEADO" placeholder="🔍" title="Filtrar por Serie/Ubic/No.Emp"></th>
+                            <th><input oninput="filtrar()" id="f_ACCESORIO_SOLICITADO" placeholder="🔍" title="Filtrar por Accesorio"></th>
+                            <th><input oninput="filtrar()" id="f_PROVEEDOR_ELEGIDO" placeholder="🔍" title="Filtrar por Proveedor"></th>
+                            <th><input oninput="filtrar()" id="f_PIEZA_SERVICIO" placeholder="🔍" title="Filtrar por Pieza/Servicio"></th>
+                            <th><input oninput="filtrar()" id="f_CANTIDAD" placeholder="🔍" title="Filtrar por Cantidad" type="number" style="min-width:60px;"></th>
+                            <th><input oninput="filtrar()" id="f_PRECIO_UNITARIO" placeholder="🔍" title="Filtrar por Precio" type="number"></th>
+                            <th><input oninput="filtrar()" id="f_TOTAL_SIN_IVA" placeholder="🔍" title="Filtrar por Total" type="number"></th>
+                            <th>
+                                <select onchange="filtrar()" id="f_MONEDA">
+                                    <option value="">— Todos —</option>
+                                    <option>PESOS</option>
+                                    <option>DOLARES</option>
+                                    <option>EUROS</option>
+                                </select>
+                            </th>
+                            <th><input oninput="filtrar()" id="f_COMENTARIOS" placeholder="🔍" title="Filtrar por Comentarios"></th>
+                            <th><input oninput="filtrar()" id="f_HOJA_CONTROL" placeholder="🔍" title="Filtrar por Hoja Control"></th>
+                            <th><input oninput="filtrar()" id="f_REQUISICION" placeholder="🔍" title="Filtrar por Requisición"></th>
+                            <th><input oninput="filtrar()" id="f_FECHA_ENTRADA" placeholder="🔍 AAAA-MM" title="Filtrar por Fecha Entrada"></th>
+                            <th><input oninput="filtrar()" id="f_CANTIDAD_REGISTRADA" placeholder="🔍" title="Filtrar por Cant. Registrada" type="number"></th>
+                            <th>
+                                <select onchange="filtrar()" id="f_ESTATUS_OC">
                                     <option value="">— Todos —</option>
                                     <option>COMPLETA</option>
                                     <option>FALSO</option>
                                     <option>PARCIAL</option>
                                     <option>PENDIENTE</option>
                                     <option>VERDADERO</option>
-
                                 </select>
                             </th>
                             <th></th>
@@ -1305,157 +1544,76 @@
         <!-- PAGINACIÓN -->
         <div class="pagination">
             <button class="btn btn-ghost btn-sm" onclick="anterior()">◀ Anterior</button>
+            <button class="btn btn-ghost btn-sm" onclick="irPagina(1)" title="Primera página">«</button>
             <span class="page-info" id="paginaInfo">—</span>
+            <button class="btn btn-ghost btn-sm" onclick="irUltima()" title="Última página">»</button>
             <button class="btn btn-ghost btn-sm" onclick="siguiente()">Siguiente ▶</button>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+                <span style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Filas:</span>
+                <select id="limiteSel" onchange="cambiarLimite()" style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text);font-family:'JetBrains Mono',monospace;">
+                    <option value="15">15</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
         </div>
 
+        <!-- Leyenda solicitantes -->
         <div class="panel" id="leyendaSolicitantes" style="display:none;">
-            <div class="panel-title">🎨 Solicitantes</div>
-            <div id="leyendaContenido" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+            <div class="panel-title"><div class="panel-title-dot" style="background:linear-gradient(180deg,#8B5CF6,#EC4899);"></div>🎨 Leyenda de Solicitantes</div>
+            <div class="legend-wrap" id="leyendaContenido"></div>
         </div>
 
-    </div> <!-- /main -->
-    <!-- MODAL EDITAR -->
+    </div><!-- /main -->
+    <!-- ══ MODAL EDITAR ══ -->
     <div id="modalEditar" class="modal">
         <div class="modal-box form-box">
-
             <div class="modal-header">
-                <h3>
-                    ✏️ Editar Orden
-                    <span id="editarIdLabel" style="color:var(--cyan);font-family:'DM Mono',monospace;">#</span>
-                </h3>
-                <button class="close-btn" onclick="cerrarEditar()">✕</button>
+                <h3>✏️ Editar Orden &nbsp;<span id="editarIdLabel" style="color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:14px;">#</span></h3>
+                <button class="close-btn" onclick="cerrarEditar()">✕ Cerrar</button>
             </div>
-
-            <div style="margin-bottom:10px;">
-                <span class="form-section-label lbl-formula">🔗 Llenado por Fórmula — se recalculan automáticamente al guardar</span>
+            <div style="margin-bottom:14px;">
+                <span class="form-section-label lbl-formula">🔗 Campos calculados automáticamente al guardar</span>
             </div>
-
             <div class="form-cols">
-
-                <div class="form-field">
-                    <label>Orden de Compra 🔒</label>
-                    <input id="e_ORDEN_DE_COMPRA" readonly tabindex="-1" placeholder="Calculado desde Requisición" title="Se obtiene automáticamente de Req VS OC">
-                </div>
-
-                <div class="form-field">
-                    <label>Fecha OC 🔒</label>
-                    <input id="e_FECHA_OC" readonly tabindex="-1" placeholder="Calculado desde Requisición" title="Se obtiene automáticamente de Req VS OC">
-                </div>
-
-                <div class="form-field">
-                    <label>OC 🔒</label>
-                    <input id="e_OC" readonly tabindex="-1" placeholder="Calculado desde Requisición" title="Se obtiene automáticamente de Req VS OC">
-                </div>
-
-                <div class="form-field">
-                    <label>Fecha Entrada</label>
-                    <input type="date" id="e_FECHA_ENTRADA">
-                </div>
-
-                <div class="form-field">
-                    <label>Total (Sin IVA) 🔒</label>
-                    <input type="number" step="0.01" id="e_TOTAL_SIN_IVA" readonly tabindex="-1" placeholder="Cantidad × Precio Unitario" title="Calculado automáticamente: Cantidad × Precio Unitario">
-                </div>
-                <div class="form-field">
-                    <label>Folio</label>
-                    <input id="e_FOLIO">
-                </div>
-
-                <div class="form-field">
-                    <label>Solicitante</label>
-                    <select id="e_SOLICITANTE">
-                        <option value="">— Seleccionar —</option>
-                    </select>
-                </div>
-
-                <div class="form-field">
-                    <label>Presupuesto Mes</label>
-                    <input id="e_PRESUPUESTO_MES">
-                </div>
-
-                <div class="form-field">
-                    <label>Serie / Ubicación</label>
-                    <input id="e_SERIE_UBICACION_NO_EMPLEADO">
-                </div>
-
-                <div class="form-field">
-                    <label>Accesorio Solicitado</label>
-                    <input id="e_ACCESORIO_SOLICITADO">
-                </div>
-
-                <div class="form-field">
-                    <label>Proveedor</label>
-                    <input id="e_PROVEEDOR_ELEGIDO">
-                </div>
-
-                <div class="form-field">
-                    <label>Pieza / Servicio</label>
-                    <input id="e_PIEZA_SERVICIO">
-                </div>
-
-                <div class="form-field">
-                    <label>Cantidad</label>
-                    <input id="e_CANTIDAD" type="number" step="1" min="0" oninput="calcularTotal('e')">
-                </div>
-
-                <div class="form-field">
-                    <label>Precio Unitario</label>
-                    <input id="e_PRECIO_UNITARIO" type="number" step="0.01" min="0" oninput="calcularTotal('e')">
-                </div>
-
+                <div class="form-field"><label>Orden de Compra 🔒</label><input id="e_ORDEN_DE_COMPRA" readonly tabindex="-1" placeholder="Calculado"></div>
+                <div class="form-field"><label>Fecha OC 🔒</label><input id="e_FECHA_OC" readonly tabindex="-1" placeholder="Calculado"></div>
+                <div class="form-field"><label>OC 🔒</label><input id="e_OC" readonly tabindex="-1" placeholder="Calculado"></div>
+                <div class="form-field"><label>Fecha Entrada</label><input type="date" id="e_FECHA_ENTRADA"></div>
+                <div class="form-field"><label>Total (Sin IVA) 🔒</label><input type="number" step="0.01" id="e_TOTAL_SIN_IVA" readonly tabindex="-1" placeholder="Calculado"></div>
+                <div class="form-field"><label>Folio</label><input id="e_FOLIO"></div>
+                <div class="form-field"><label>Solicitante</label><select id="e_SOLICITANTE"><option value="">— Seleccionar —</option></select></div>
+                <div class="form-field"><label>Presupuesto Mes</label><input id="e_PRESUPUESTO_MES"></div>
+                <div class="form-field"><label>Serie / Ubicación</label><input id="e_SERIE_UBICACION_NO_EMPLEADO"></div>
+                <div class="form-field"><label>Accesorio Solicitado</label><input id="e_ACCESORIO_SOLICITADO"></div>
+                <div class="form-field"><label>Proveedor</label><input id="e_PROVEEDOR_ELEGIDO"></div>
+                <div class="form-field"><label>Pieza / Servicio</label><input id="e_PIEZA_SERVICIO"></div>
+                <div class="form-field"><label>Cantidad</label><input id="e_CANTIDAD" type="number" step="1" min="0" oninput="calcularTotal('e')"></div>
+                <div class="form-field"><label>Precio Unitario</label><input id="e_PRECIO_UNITARIO" type="number" step="0.01" min="0" oninput="calcularTotal('e')"></div>
                 <div class="form-field">
                     <label>Moneda</label>
-                    <select id="e_MONEDA">
-                        <option value="">— Seleccionar —</option>
-                        <option>PESOS</option>
-                        <option>DOLARES</option>
-                        <option>EUROS</option>
-                    </select>
+                    <select id="e_MONEDA"><option value="">— Seleccionar —</option><option>PESOS</option><option>DOLARES</option><option>EUROS</option></select>
                 </div>
-
-                <div class="form-field">
-                    <label>Comentarios</label>
-                    <textarea id="e_COMENTARIOS"></textarea>
-                </div>
-
-                <div class="form-field">
-                    <label>Hoja Control</label>
-                    <input id="e_HOJA_CONTROL">
-                </div>
-
-                <div class="form-field">
-                    <label>Requisición</label>
-                    <input id="e_REQUISICION">
-                </div>
-
-                <div class="form-field">
-                    <label>Cantidad Registrada 🔒</label>
-                    <input id="e_CANTIDAD_REGISTRADA" readonly tabindex="-1" placeholder="Calculado desde entradas" title="Calculado automáticamente desde la tabla de entradas">
-                </div>
-
-                <div class="form-field">
-                    <label>Estatus OC 🔒</label>
-                    <input id="e_ESTATUS_OC" readonly tabindex="-1" placeholder="COMPLETA / PARCIAL / PENDIENTE" title="Calculado automáticamente: depende de Cantidad vs Cantidad Registrada">
-                </div>
-
+                <div class="form-field full"><label>Comentarios</label><textarea id="e_COMENTARIOS"></textarea></div>
+                <div class="form-field"><label>Hoja Control</label><input id="e_HOJA_CONTROL"></div>
+                <div class="form-field"><label>Requisición</label><input id="e_REQUISICION"></div>
+                <div class="form-field"><label>Cantidad Registrada 🔒</label><input id="e_CANTIDAD_REGISTRADA" readonly tabindex="-1" placeholder="Calculado"></div>
+                <div class="form-field"><label>Estatus OC 🔒</label><input id="e_ESTATUS_OC" readonly tabindex="-1" placeholder="Calculado"></div>
             </div>
-
             <div class="modal-footer">
                 <button class="btn btn-success" onclick="guardarCambios()">💾 Guardar Cambios</button>
                 <button class="btn btn-ghost" onclick="cerrarEditar()">Cancelar</button>
             </div>
-
         </div>
     </div>
 
-
-    <!-- MODAL HISTORIAL -->
+    <!-- ══ MODAL HISTORIAL ══ -->
     <div id="modalHistorial" class="modal">
         <div class="modal-box hist-box">
             <div class="modal-header">
                 <h3>📋 Historial — OC <span id="histIdLabel" style="color:var(--cyan);">#</span></h3>
-                <button class="close-btn" onclick="cerrarHistorial()">✕</button>
+                <button class="close-btn" onclick="cerrarHistorial()">✕ Cerrar</button>
             </div>
             <div id="contenidoHistorial"></div>
             <div class="modal-footer"><button class="btn btn-ghost" onclick="cerrarHistorial()">Cerrar</button></div>
@@ -1463,17 +1621,18 @@
     </div>
 
     <script>
-        // ── Estado global ──────────────────────────────────────────────────────
+        // ── Estado global ───────────────────────────────────────────────
         let paginaActual = 1, limite = 15, totalRegistros = 0;
         let datosActuales = [], editandoID = null;
         let usuarioActual = 'SISTEMA', rolActual = 'USER';
+        let sortCol = null, sortDir = 1; // 1=asc, -1=desc
 
         const CAMPOS = [
             { key: 'ORDEN_DE_COMPRA', label: 'Orden de Compra', formula: true },
             { key: 'FOLIO', label: 'Folio', formula: false },
             { key: 'SOLICITANTE', label: 'Solicitante', formula: false },
             { key: 'PRESUPUESTO_MES', label: 'Presupuesto (Mes)', formula: false },
-            { key: 'SERIE_UBICACION_NO_EMPLEADO', label: 'Serie/Ubicación/No. Empleado', formula: false },
+            { key: 'SERIE_UBICACION_NO_EMPLEADO', label: 'Serie/Ubicación/No.Empleado', formula: false },
             { key: 'ACCESORIO_SOLICITADO', label: 'Accesorio Solicitado', formula: false },
             { key: 'PROVEEDOR_ELEGIDO', label: 'Proveedor Elegido', formula: false },
             { key: 'PIEZA_SERVICIO', label: 'Pieza/Servicio', formula: false },
@@ -1491,49 +1650,33 @@
             { key: 'ESTATUS_OC', label: 'Estatus OC', formula: true },
         ];
 
-        // ── Colores por Solicitante ────────────────────────────────────────────────
-        const SOLICITANTE_COLORES = [
-            '#FF3B30', // rojo
-            '#FF9500', // naranja
-            '#FFCC00', // amarillo
-            '#34C759', // verde
-            '#30B0C7', // turquesa
-            '#007AFF', // azul
-            '#5856D6', // índigo
-            '#AF52DE', // morado
-            '#FF2D55', // rosa
-            '#8E8E93', // gris
-            '#A2845E', // café
-            '#00C7BE', // aqua
-            '#5AC8FA', // celeste
-            '#4CD964', // verde claro
-            '#FF9F0A', // naranja fuerte
-            '#FFD60A', // amarillo fuerte
-            '#BF5AF2', // violeta
-            '#64D2FF', // azul claro
-            '#FF375F', // rojo intenso
-            '#32D74B', // verde intenso
-            '#AC8E68', // beige
-            '#FFD3B6', // durazno
-            '#6EE7B7', // verde menta
-            '#FCA5A5', // rojo claro
-            '#C084FC', // lila
-            '#FDE68A', // amarillo suave
-            '#67E8F9', // cyan claro
-            '#FDBA74', // naranja claro
-            '#86EFAC', // verde suave
-            '#A5B4FC'  // lavanda
+        // IDs de todos los filtros de columna
+        const FILTER_IDS = [
+            'f_ID', 'f_ORDEN_DE_COMPRA', 'f_FECHA_OC', 'f_OC', 'f_FOLIO', 'f_SOLICITANTE',
+            'f_PRESUPUESTO_MES', 'f_SERIE_UBICACION_NO_EMPLEADO', 'f_ACCESORIO_SOLICITADO',
+            'f_PROVEEDOR_ELEGIDO', 'f_PIEZA_SERVICIO', 'f_CANTIDAD', 'f_PRECIO_UNITARIO',
+            'f_TOTAL_SIN_IVA', 'f_MONEDA', 'f_COMENTARIOS', 'f_HOJA_CONTROL', 'f_REQUISICION',
+            'f_FECHA_ENTRADA', 'f_CANTIDAD_REGISTRADA', 'f_ESTATUS_OC'
         ];
-        const _solicitanteColorMap = {};
+
+        // ── Colores solicitantes ────────────────────────────────────────
+        const SOLICITANTE_COLORES = [
+            '#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#30B0C7', '#007AFF', '#5856D6',
+            '#AF52DE', '#FF2D55', '#8E8E93', '#A2845E', '#00C7BE', '#5AC8FA', '#4CD964',
+            '#FF9F0A', '#FFD60A', '#BF5AF2', '#64D2FF', '#FF375F', '#32D74B', '#AC8E68',
+            '#FFD3B6', '#6EE7B7', '#FCA5A5', '#C084FC', '#FDE68A', '#67E8F9', '#FDBA74',
+            '#86EFAC', '#A5B4FC'
+        ];
+        const _solMap = {};
 
         function colorSolicitante(nombre) {
             if (!nombre) return null;
             const key = nombre.trim().toUpperCase();
-            if (!_solicitanteColorMap[key]) {
-                const idx = Object.keys(_solicitanteColorMap).length % SOLICITANTE_COLORES.length;
-                _solicitanteColorMap[key] = SOLICITANTE_COLORES[idx];
+            if (!_solMap[key]) {
+                const idx = Object.keys(_solMap).length % SOLICITANTE_COLORES.length;
+                _solMap[key] = SOLICITANTE_COLORES[idx];
             }
-            return _solicitanteColorMap[key];
+            return _solMap[key];
         }
 
         function hexToRgba(hex, alpha) {
@@ -1543,31 +1686,26 @@
             return `rgba(${r},${g},${b},${alpha})`;
         }
 
-        // ── Init ───────────────────────────────────────────────────────────────
+        // ── Init ────────────────────────────────────────────────────────
         window.addEventListener('DOMContentLoaded', async () => {
             await verificarSesion();
             cargar();
             cargarSolicitantes();
-            cargarLeyendaSolicitantes();
         });
 
-
-        // ── Sesión ─────────────────────────────────────────────────────────────
+        // ── Sesión ──────────────────────────────────────────────────────
         async function verificarSesion() {
             try {
                 const res = await fetch('/obtener-usuario', { credentials: 'include' });
                 if (!res.ok) { window.location.href = '/static/login.html'; return; }
                 const data = await res.json();
                 if (!data.usuario) { window.location.href = '/static/login.html'; return; }
-
                 usuarioActual = data.usuario;
                 rolActual = data.rol || 'USER';
                 const nombre = data.nombre || data.usuario;
-
                 document.getElementById('nombreUsuario').textContent = nombre;
                 document.getElementById('dropNombre').textContent = nombre;
                 document.getElementById('dropRol').textContent = rolActual;
-
                 if (rolActual !== 'ADMIN' && rolActual !== 'ENCARGADO_CORRECTIVOS') {
                     const p = document.getElementById('panelNuevoRegistro');
                     if (p) p.style.display = 'none';
@@ -1587,7 +1725,7 @@
             if (c && !c.contains(e.target)) c.classList.remove('open');
         });
 
-        // ── Calcular total en vivo ─────────────────────────────────────────────
+        // ── Calcular total ──────────────────────────────────────────────
         function calcularTotal(prefix) {
             const cant = parseFloat(document.getElementById(prefix + '_CANTIDAD')?.value) || 0;
             const precio = parseFloat(document.getElementById(prefix + '_PRECIO_UNITARIO')?.value) || 0;
@@ -1596,10 +1734,33 @@
             if (el) el.value = total > 0 ? total.toFixed(2) : '';
         }
 
-        // ── Parámetros ─────────────────────────────────────────────────────────
+        // ── Sort ────────────────────────────────────────────────────────
+        function sortBy(col) {
+            if (sortCol === col) sortDir *= -1;
+            else { sortCol = col; sortDir = 1; }
+            // update header visual
+            document.querySelectorAll('.col-row th').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+            const colKeys = ['ID', 'ORDEN_DE_COMPRA', 'FECHA_OC', 'OC', 'FOLIO', 'SOLICITANTE',
+                'PRESUPUESTO_MES', 'SERIE_UBICACION_NO_EMPLEADO', 'ACCESORIO_SOLICITADO',
+                'PROVEEDOR_ELEGIDO', 'PIEZA_SERVICIO', 'CANTIDAD', 'PRECIO_UNITARIO', 'TOTAL_SIN_IVA',
+                'MONEDA', 'COMENTARIOS', 'HOJA_CONTROL', 'REQUISICION', 'FECHA_ENTRADA',
+                'CANTIDAD_REGISTRADA', 'ESTATUS_OC'];
+            const idx = colKeys.indexOf(col);
+            if (idx >= 0) {
+                const ths = document.querySelectorAll('.col-row th');
+                if (ths[idx]) ths[idx].classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+            }
+            paginaActual = 1;
+            cargar();
+        }
+
+        // ── Parámetros ──────────────────────────────────────────────────
         function obtenerParametros() {
-            return new URLSearchParams({
+            const p = new URLSearchParams({
                 page: paginaActual, limit: limite,
+                ID: document.getElementById('f_ID').value || '',
                 ORDEN_DE_COMPRA: document.getElementById('f_ORDEN_DE_COMPRA').value,
                 FOLIO: document.getElementById('f_FOLIO').value,
                 SOLICITANTE: document.getElementById('f_SOLICITANTE').value,
@@ -1608,179 +1769,232 @@
                 ACCESORIO_SOLICITADO: document.getElementById('f_ACCESORIO_SOLICITADO').value,
                 PROVEEDOR_ELEGIDO: document.getElementById('f_PROVEEDOR_ELEGIDO').value,
                 PIEZA_SERVICIO: document.getElementById('f_PIEZA_SERVICIO').value,
+                CANTIDAD: document.getElementById('f_CANTIDAD').value || '',
+                PRECIO_UNITARIO: document.getElementById('f_PRECIO_UNITARIO').value || '',
+                TOTAL_SIN_IVA: document.getElementById('f_TOTAL_SIN_IVA').value || '',
                 MONEDA: document.getElementById('f_MONEDA').value,
+                COMENTARIOS: document.getElementById('f_COMENTARIOS').value,
+                HOJA_CONTROL: document.getElementById('f_HOJA_CONTROL').value,
                 REQUISICION: document.getElementById('f_REQUISICION').value,
                 OC: document.getElementById('f_OC').value,
+                FECHA_OC: document.getElementById('f_FECHA_OC').value,
+                FECHA_ENTRADA: document.getElementById('f_FECHA_ENTRADA').value,
+                CANTIDAD_REGISTRADA: document.getElementById('f_CANTIDAD_REGISTRADA').value || '',
                 ESTATUS_OC: document.getElementById('f_ESTATUS_OC').value,
             });
+            if (sortCol) { p.set('sort_col', sortCol); p.set('sort_dir', sortDir === 1 ? 'asc' : 'desc'); }
+            return p;
         }
 
-        // ── Cargar ─────────────────────────────────────────────────────────────
+        // ── Indicador de filtros activos ────────────────────────────────
+        function actualizarIndicadorFiltros() {
+            let count = 0;
+            FILTER_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.value) {
+                    count++;
+                    el.classList.add('filter-active');
+                } else if (el) {
+                    el.classList.remove('filter-active');
+                }
+            });
+            const badge = document.getElementById('filtrosActivos');
+            const btnLimpiar = document.getElementById('btnLimpiarFiltros');
+            if (count > 0) {
+                badge.textContent = `${count} filtro${count !== 1 ? 's' : ''} activo${count !== 1 ? 's' : ''}`;
+                badge.style.display = 'inline';
+                btnLimpiar.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+                btnLimpiar.style.display = 'none';
+            }
+        }
+
+        function limpiarFiltros() {
+            FILTER_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.value = ''; el.classList.remove('filter-active'); }
+            });
+            paginaActual = 1;
+            cargar();
+        }
+
+        // ── Cargar ──────────────────────────────────────────────────────
         function cargar() {
+            actualizarIndicadorFiltros();
             fetch(`/ORDENES_DE_COMPRA?${obtenerParametros()}`)
                 .then(r => r.json())
-                .then(resp => { totalRegistros = resp.total; datosActuales = resp.data; renderizar(); })
+                .then(resp => {
+                    totalRegistros = resp.total;
+                    datosActuales = resp.data;
+                    renderizar();
+                    actualizarStats();
+                })
                 .catch(() => {
                     document.getElementById('tabla').innerHTML =
-                        `<tr><td colspan="23" style="text-align:center;padding:30px;color:var(--muted)">⚠️ Error al cargar datos</td></tr>`;
+                        `<tr><td colspan="23" style="text-align:center;padding:40px;color:var(--muted)">⚠️ Error al cargar datos</td></tr>`;
                 });
+        }
+
+        function actualizarStats() {
+            document.getElementById('statsBar').style.display = 'flex';
+            document.getElementById('st-total').textContent = totalRegistros;
+            document.getElementById('st-pagina').textContent = datosActuales.length;
+            const completas = datosActuales.filter(r => (r.ESTATUS_OC || '').toUpperCase() === 'COMPLETA').length;
+            const pendientes = datosActuales.filter(r => (r.ESTATUS_OC || '').toUpperCase() === 'PENDIENTE').length;
+            document.getElementById('st-completas').textContent = completas;
+            document.getElementById('st-pendientes').textContent = pendientes;
+            document.getElementById('totalBadge').textContent = `${totalRegistros} registros`;
         }
 
         function filtrar() { paginaActual = 1; cargar(); }
         function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
         function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
+        function irPagina(p) { paginaActual = p; cargar(); }
+        function irUltima() { paginaActual = Math.ceil(totalRegistros / limite) || 1; cargar(); }
+        function cambiarLimite() {
+            limite = parseInt(document.getElementById('limiteSel').value);
+            paginaActual = 1;
+            cargar();
+        }
 
-        // ── Pills estatus ──────────────────────────────────────────────────────
+        // ── Pills ───────────────────────────────────────────────────────
         function estatusPill(s) {
             if (!s) return '';
             const v = s.toUpperCase();
             if (v === 'COMPLETA' || v === 'TRUE') return `<span class="pill pill-green">${s}</span>`;
             if (v === 'PENDIENTE' || v === 'FALSE') return `<span class="pill pill-amber">${s}</span>`;
             if (v === 'CANCELADA') return `<span class="pill pill-red">${s}</span>`;
+            if (v === 'PARCIAL') return `<span class="pill pill-blue">${s}</span>`;
             return `<span class="pill pill-gray">${s}</span>`;
         }
 
+        function fmtNum(v) {
+            if (v == null || v === '') return '';
+            const n = parseFloat(v);
+            if (isNaN(n)) return v;
+            return n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // ── Renderizar ──────────────────────────────────────────────────
         function renderizar() {
             const tbody = document.getElementById('tabla');
             tbody.innerHTML = '';
 
             if (!datosActuales.length) {
-                tbody.innerHTML = `<tr><td colspan="23" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="23" style="text-align:center;padding:50px;color:var(--muted);font-size:14px;">📭 Sin registros que coincidan con los filtros</td></tr>`;
                 document.getElementById('paginaInfo').textContent = 'Sin resultados';
                 document.getElementById('leyendaSolicitantes').style.display = 'none';
                 return;
             }
 
-            // ── Solo para colores de fila y leyenda ───────────────────────────────
-            const unicos = [...new Set(
-                datosActuales.map(r => r.SOLICITANTE).filter(Boolean)
-            )].sort();
-
+            const unicos = [...new Set(datosActuales.map(r => r.SOLICITANTE).filter(Boolean))].sort();
             unicos.forEach(s => colorSolicitante(s));
 
-            // ── Renderizar filas ──────────────────────────────────────────────────
             const puedeEditar = rolActual === 'ADMIN' || rolActual === 'ENCARGADO_CORRECTIVOS';
             const puedeEliminar = rolActual === 'ADMIN';
+            const totalPags = Math.ceil(totalRegistros / limite) || 1;
+
+            document.getElementById('paginaInfo').innerHTML =
+                `Página <strong>${paginaActual}</strong> / <strong>${totalPags}</strong> &nbsp;·&nbsp; <strong>${totalRegistros}</strong> registros total`;
 
             datosActuales.forEach(row => {
                 const esCompleta = (row.ESTATUS_OC || '').toUpperCase() === 'COMPLETA';
                 let rowStyle = '';
-
                 if (esCompleta) {
-                    rowStyle = 'background:rgba(16,185,129,0.13);border-left:3px solid #10B981;';
+                    rowStyle = 'background:rgba(16,185,129,0.10);border-left:3px solid #10B981;';
                 } else if (row.SOLICITANTE) {
                     const c = colorSolicitante(row.SOLICITANTE);
-                    rowStyle = `background:${hexToRgba(c, 0.10)};border-left:3px solid ${c};`;
+                    rowStyle = `background:${hexToRgba(c, 0.08)};border-left:3px solid ${hexToRgba(c, 0.6)};`;
                 }
 
                 const solCell = row.SOLICITANTE
                     ? `<span style="display:inline-flex;align-items:center;gap:5px;">
-                                                                     <span style="width:8px;height:8px;border-radius:50%;background:${colorSolicitante(row.SOLICITANTE)};flex-shrink:0;"></span>
-                                                                     ${row.SOLICITANTE}
-                                                                   </span>`
-                    : '';
+                         <span style="width:7px;height:7px;border-radius:50%;background:${colorSolicitante(row.SOLICITANTE)};box-shadow:0 0 5px ${colorSolicitante(row.SOLICITANTE)};flex-shrink:0;"></span>
+                         ${row.SOLICITANTE}
+                       </span>` : '';
 
                 tbody.innerHTML += `
-                                                            <tr style="${rowStyle}">
-                                                                <td class="mono">${row.ID}</td>
-                                                                <td class="auto">${row.ORDEN_DE_COMPRA ?? ''}</td>
-                                                                <td class="auto mono">${row.FECHA_OC ?? ''}</td>
-                                                                <td class="auto mono">${row.OC ?? ''}</td>
-                                                                <td>${row.FOLIO ?? ''}</td>
-                                                                <td>${solCell}</td>
-                                                                <td>${row.PRESUPUESTO_MES ?? ''}</td>
-                                                                <td>${row.SERIE_UBICACION_NO_EMPLEADO ?? ''}</td>
-                                                                <td class="wrap">${row.ACCESORIO_SOLICITADO ?? ''}</td>
-                                                                <td>${row.PROVEEDOR_ELEGIDO ?? ''}</td>
-                                                                <td>${row.PIEZA_SERVICIO ?? ''}</td>
-                                                                <td class="num">${row.CANTIDAD ?? ''}</td>
-                                                                <td class="num">${row.PRECIO_UNITARIO ?? ''}</td>
-                                                                <td class="num auto">${row.TOTAL_SIN_IVA ?? ''}</td>
-                                                                <td>${row.MONEDA ?? ''}</td>
-                                                                <td class="wrap">${row.COMENTARIOS ?? ''}</td>
-                                                                <td>${row.HOJA_CONTROL ?? ''}</td>
-                                                                <td class="mono">${row.REQUISICION ?? ''}</td>
-                                                                <td class="auto mono">${row.FECHA_ENTRADA ?? ''}</td>
-                                                                <td class="num">${row.CANTIDAD_REGISTRADA ?? ''}</td>
-                                                                <td>${estatusPill(row.ESTATUS_OC)}</td>
-                                                                <td>
-                                                                    ${row.TIENE_PDF
-                        ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                                                                           <button class="btn btn-danger btn-sm"  onclick="eliminarPDF(${row.ID})">✕</button>`
-                        : `<label class="file-label">📎 Subir PDF<input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)"></label>`}
-                                                                </td>
-                                                                <td style="white-space:nowrap;">
-                                                                    ${puedeEditar ? `<button class="btn btn-amber  btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
-                                                                    ${puedeEliminar ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑️</button>` : ''}
-                                                                    <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-                                                                </td>
-                                                            </tr>`;
+                <tr style="${rowStyle}">
+                    <td class="mono">${row.ID}</td>
+                    <td class="auto" style="font-family:'JetBrains Mono',monospace;">${row.ORDEN_DE_COMPRA ?? ''}</td>
+                    <td class="auto mono">${row.FECHA_OC ?? ''}</td>
+                    <td class="auto mono">${row.OC ?? ''}</td>
+                    <td>${row.FOLIO ?? ''}</td>
+                    <td>${solCell}</td>
+                    <td style="font-size:10px;">${row.PRESUPUESTO_MES ?? ''}</td>
+                    <td class="mono" style="font-size:10px;">${row.SERIE_UBICACION_NO_EMPLEADO ?? ''}</td>
+                    <td class="wrap">${row.ACCESORIO_SOLICITADO ?? ''}</td>
+                    <td>${row.PROVEEDOR_ELEGIDO ?? ''}</td>
+                    <td>${row.PIEZA_SERVICIO ?? ''}</td>
+                    <td class="num">${row.CANTIDAD ?? ''}</td>
+                    <td class="num">${fmtNum(row.PRECIO_UNITARIO)}</td>
+                    <td class="num auto">${fmtNum(row.TOTAL_SIN_IVA)}</td>
+                    <td><span class="pill ${row.MONEDA === 'DOLARES' ? 'pill-amber' : row.MONEDA === 'EUROS' ? 'pill-purple' : row.MONEDA ? 'pill-blue' : 'pill-gray'}" style="font-size:9px;">${row.MONEDA ?? ''}</span></td>
+                    <td class="wrap" style="color:var(--text2);">${row.COMENTARIOS ?? ''}</td>
+                    <td class="mono">${row.HOJA_CONTROL ?? ''}</td>
+                    <td class="mono">${row.REQUISICION ?? ''}</td>
+                    <td class="auto mono">${row.FECHA_ENTRADA ?? ''}</td>
+                    <td class="num">${row.CANTIDAD_REGISTRADA ?? ''}</td>
+                    <td>${estatusPill(row.ESTATUS_OC)}</td>
+                    <td>
+                        ${row.TIENE_PDF
+                        ? `<button class="btn btn-primary btn-xs" onclick="verPDF(${row.ID})" title="Ver PDF">📄</button>
+                               <button class="btn btn-danger btn-xs"  onclick="eliminarPDF(${row.ID})" title="Eliminar PDF">✕</button>`
+                        : `<label class="file-label" style="font-size:10px;padding:4px 8px;">📎 Subir<input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)"></label>`}
+                    </td>
+                    <td style="white-space:nowrap;display:flex;gap:4px;padding:6px 8px;">
+                        ${puedeEditar ? `<button class="btn btn-amber btn-xs" onclick="abrirEditar(${row.ID})" title="Editar">✏️</button>` : ''}
+                        ${puedeEliminar ? `<button class="btn btn-danger btn-xs" onclick="eliminar(${row.ID})" title="Eliminar">🗑️</button>` : ''}
+                        <button class="btn btn-cyan btn-xs" onclick="verHistorial(${row.ID})" title="Historial">📋</button>
+                    </td>
+                </tr>`;
             });
 
-            const totalPags = Math.ceil(totalRegistros / limite) || 1;
-            document.getElementById('paginaInfo').textContent =
-                `Página ${paginaActual} / ${totalPags} · Total: ${totalRegistros} registros`;
-
-            // ── Leyenda de solicitantes ───────────────────────────────────────────
+            // Leyenda
             const leyenda = document.getElementById('leyendaSolicitantes');
             const contenido = document.getElementById('leyendaContenido');
             contenido.innerHTML = '';
-
             if (unicos.length) {
                 leyenda.style.display = 'block';
-
                 contenido.innerHTML += `
-                                                                <div style="display:inline-flex;align-items:center;gap:8px;
-                                                                    padding:6px 14px;border-radius:999px;
-                                                                    background:rgba(16,185,129,0.13);
-                                                                    border:1px solid rgba(16,185,129,0.4);">
-                                                                    <span style="width:10px;height:10px;border-radius:50%;background:#10B981;flex-shrink:0;"></span>
-                                                                    <span style="font-size:11px;font-weight:600;color:#6EE7B7;font-family:'DM Mono',monospace;">COMPLETA</span>
-                                                                </div>`;
-
+                    <div class="legend-chip" style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);">
+                        <span class="legend-dot" style="background:#10B981;box-shadow:0 0 6px #10B981;"></span>
+                        <span style="color:#34D399;">COMPLETA</span>
+                    </div>`;
                 unicos.forEach(s => {
                     const c = colorSolicitante(s);
                     contenido.innerHTML += `
-                                                                    <div style="display:inline-flex;align-items:center;gap:8px;
-                                                                        padding:6px 14px;border-radius:999px;
-                                                                        background:${hexToRgba(c, 0.13)};
-                                                                        border:1px solid ${hexToRgba(c, 0.4)};">
-                                                                        <span style="width:10px;height:10px;border-radius:50%;background:${c};flex-shrink:0;"></span>
-                                                                        <span style="font-size:11px;font-weight:600;color:${c};font-family:'DM Mono',monospace;">${s}</span>
-                                                                    </div>`;
+                        <div class="legend-chip" style="background:${hexToRgba(c, .12)};border:1px solid ${hexToRgba(c, .35)};">
+                            <span class="legend-dot" style="background:${c};box-shadow:0 0 5px ${c};"></span>
+                            <span style="color:${c};">${s}</span>
+                        </div>`;
                 });
             } else {
                 leyenda.style.display = 'none';
             }
         }
-        // ── Guardar nuevo ──────────────────────────────────────────────────────
+
+        // ── Guardar nuevo ───────────────────────────────────────────────
         function guardar() {
             if (rolActual !== 'ADMIN' && rolActual !== 'ENCARGADO_CORRECTIVOS') {
-                alert('No tienes permisos para crear nuevos registros.');
-                return;
+                alert('No tienes permisos para crear nuevos registros.'); return;
             }
             const data = {};
             CAMPOS.forEach(({ key, formula }) => {
-                if (formula) return; // los campos de fórmula los calcula el backend
+                if (formula) return;
                 const el = document.getElementById('n_' + key);
                 if (!el) return;
                 const isNum = ['CANTIDAD', 'PRECIO_UNITARIO'].includes(key);
                 data[key] = el.value !== '' ? (isNum ? parseFloat(el.value) : el.value) : null;
             });
-
             fetch('/ORDENES_DE_COMPRA', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
                 body: JSON.stringify(data)
             })
-                .then(async r => {
-                    const text = await r.text();
-                    return text ? JSON.parse(text) : {};
-                })
-                .then(() => {
-                    limpiarForm();
-                    cargar();
-                })
+                .then(async r => { const t = await r.text(); return t ? JSON.parse(t) : {}; })
+                .then(() => { limpiarForm(); cargar(); })
                 .catch(e => alert('Error al guardar: ' + e.message));
         }
 
@@ -1791,14 +2005,13 @@
             });
         }
 
-        // ── Eliminar / PDF ─────────────────────────────────────────────────────
+        // ── CRUD ────────────────────────────────────────────────────────
         function eliminar(id) {
             if (!confirm('¿Eliminar esta orden de compra?')) return;
             fetch(`/ORDENES_DE_COMPRA/${id}`, { method: 'DELETE' }).then(() => cargar());
         }
         function subirPDF(id, input) {
-            const fd = new FormData();
-            fd.append('file', input.files[0]);
+            const fd = new FormData(); fd.append('file', input.files[0]);
             fetch(`/ORDENES_DE_COMPRA/PDF/${id}`, { method: 'POST', body: fd }).then(() => cargar());
         }
         function verPDF(id) { window.open(`/ORDENES_DE_COMPRA/PDF/${id}`, '_blank'); }
@@ -1807,7 +2020,7 @@
             fetch(`/ORDENES_DE_COMPRA/PDF/${id}`, { method: 'DELETE' }).then(() => cargar());
         }
 
-        // ── Exportar ───────────────────────────────────────────────────────────
+        // ── Exportar ────────────────────────────────────────────────────
         function exportarFiltrado() { window.open(`/ORDENES_DE_COMPRA/EXPORTAR?${obtenerParametros()}`); }
         function exportarTodo() { window.open('/ORDENES_DE_COMPRA/EXPORTAR_TODO'); }
         function exportarPorAnio() {
@@ -1816,7 +2029,7 @@
             window.open(`/ORDENES_DE_COMPRA/EXPORTAR_ANIO?anio=${a}`);
         }
 
-        // ── Modal Editar ───────────────────────────────────────────────────────
+        // ── Modal Editar ────────────────────────────────────────────────
         function abrirEditar(id) {
             if (rolActual !== 'ADMIN' && rolActual !== 'ENCARGADO_CORRECTIVOS') return;
             editandoID = id;
@@ -1846,13 +2059,12 @@
         async function guardarCambios() {
             const datos = {};
             CAMPOS.forEach(({ key, formula }) => {
-                if (formula) return; // los campos de fórmula los recalcula el backend
+                if (formula) return;
                 const el = document.getElementById('e_' + key);
                 if (!el) return;
                 const isNum = ['CANTIDAD', 'PRECIO_UNITARIO'].includes(key);
                 datos[key] = el.value !== '' ? (isNum ? parseFloat(el.value) : el.value) : null;
             });
-
             try {
                 const res = await fetch(`/ORDENES_DE_COMPRA/${editandoID}`, {
                     method: 'PUT',
@@ -1866,7 +2078,7 @@
             } catch (e) { alert('Error: ' + e.message); }
         }
 
-        // ── Historial ──────────────────────────────────────────────────────────
+        // ── Historial ───────────────────────────────────────────────────
         function esc(v) {
             if (v == null) return '';
             return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -1879,132 +2091,97 @@
             let antes = ev.registro_anterior, despues = ev.registro_nuevo;
             try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch { }
             try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch { }
-
             const cambios = new Set();
             CAMPOS.forEach(({ key }) => { if (String(antes?.[key] ?? '') !== String(despues?.[key] ?? '')) cambios.add(key); });
-
             let filas = '';
             CAMPOS.forEach(({ key, label }) => {
                 const vA = antes && key in antes ? antes[key] : '';
                 const vD = despues && key in despues ? despues[key] : '';
                 const cambiado = cambios.has(key);
                 filas += `<tr class="${cambiado ? 'row-changed' : ''}">
-                                                                            <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                                                                            <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
-                                                                            <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
-                                                                        </tr>`;
+                    <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                    <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
+                    <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
+                </tr>`;
             });
-
             return `<div class="ev-wrap">
-                                                                        <div class="ev-header">
-                                                                            <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                                                                            <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                                                                            <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-                                                                                ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-                                                                            </span>
-                                                                        </div>
-                                                                        <table class="ev-table">
-                                                                            <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
-                                                                            <tbody>${filas}</tbody>
-                                                                        </table>
-                                                                    </div>`;
+                <div class="ev-header">
+                    <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                    <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                    <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;">
+                        ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                    </span>
+                </div>
+                <table class="ev-table">
+                    <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
+                    <tbody>${filas}</tbody>
+                </table>
+            </div>`;
         }
 
         function verHistorial(id) {
             document.getElementById('histIdLabel').textContent = id;
             document.getElementById('contenidoHistorial').innerHTML =
-                '<p style="text-align:center;padding:30px;color:var(--muted)"><span class="spin"></span> Cargando...</p>';
+                '<p style="text-align:center;padding:40px;color:var(--muted)"><span class="spin"></span> Cargando historial...</p>';
             document.getElementById('modalHistorial').classList.add('show');
             document.querySelector('#modalHistorial .modal-box').scrollTop = 0;
-
             fetch(`/ORDENES_DE_COMPRA/${id}/HISTORIAL`)
                 .then(r => r.json())
                 .then(data => {
                     const lista = (data.historial || []).sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
                     document.getElementById('contenidoHistorial').innerHTML = !lista.length
                         ? '<p class="sin-hist">📭 Sin ediciones registradas.</p>'
-                        : `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}</p>`
-                        + lista.map(renderEvento).join('');
+                        : `<p style="color:var(--muted);font-size:12px;margin-bottom:14px;font-family:'JetBrains Mono',monospace;">
+                             ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                           </p>` + lista.map(renderEvento).join('');
                 })
                 .catch(() => {
                     document.getElementById('contenidoHistorial').innerHTML =
-                        '<p style="color:var(--red);text-align:center;padding:30px">Error al cargar historial.</p>';
+                        '<p style="color:var(--red);text-align:center;padding:30px">⚠️ Error al cargar historial.</p>';
                 });
         }
 
         function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
 
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); } });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
+        });
 
-        // ── Scrollbar sincronizado ─────────────────────────────────────────────
-        (function () {
-            const top = document.getElementById('scrollTop');
-            const inner = document.getElementById('scrollTopInner');
-            const scroll = document.getElementById('tableScroll');
-
-            function syncWidth() { inner.style.width = scroll.scrollWidth + 'px'; }
-            new MutationObserver(syncWidth).observe(document.getElementById('tabla'), { childList: true, subtree: true });
-            window.addEventListener('resize', syncWidth);
-            syncWidth();
-
-            top.addEventListener('scroll', () => { scroll.scrollLeft = top.scrollLeft; });
-            scroll.addEventListener('scroll', () => { top.scrollLeft = scroll.scrollLeft; });
-        })();
+        // ── Cargar solicitantes ─────────────────────────────────────────
         async function cargarSolicitantes() {
             try {
-                const res = await fetch('/ORDENES_DE_COMPRA/SOLICITANTES'); // ← URL sin _UNICOS
+                const res = await fetch('/ORDENES_DE_COMPRA/SOLICITANTES');
                 const data = await res.json();
                 const lista = data.solicitantes || [];
-
                 lista.forEach(s => colorSolicitante(s));
-
                 ['n_SOLICITANTE', 'e_SOLICITANTE', 'f_SOLICITANTE'].forEach(id => {
                     const sel = document.getElementById(id);
                     if (!sel) return;
                     const esFilter = id === 'f_SOLICITANTE';
                     const valActual = sel.value;
-                    sel.innerHTML = esFilter
-                        ? '<option value="">— Todos —</option>'
-                        : '<option value="">— Seleccionar —</option>';
+                    sel.innerHTML = esFilter ? '<option value="">— Todos —</option>' : '<option value="">— Seleccionar —</option>';
                     lista.forEach(s => {
                         const opt = document.createElement('option');
-                        opt.value = s;
-                        opt.textContent = s;
+                        opt.value = s; opt.textContent = s;
                         sel.appendChild(opt);
                     });
                     sel.value = valActual;
                 });
-            } catch (e) {
-                console.warn('No se pudieron cargar solicitantes:', e);
-            }
+            } catch (e) { console.warn('No se pudieron cargar solicitantes:', e); }
         }
-        async function cargarLeyendaSolicitantes() {
 
-            const res = await fetch('/ORDENES_DE_COMPRA/SOLICITANTES');
-            const data = await res.json();
-
-            const lista = data.solicitantes || [];
-
-            const leyenda = document.getElementById('leyendaSolicitantes');
-            const contenido = document.getElementById('leyendaContenido');
-
-            contenido.innerHTML = '';
-
-            lista.forEach(s => {
-                const c = colorSolicitante(s);
-
-                contenido.innerHTML += `
-                                                            <div style="display:inline-flex;align-items:center;gap:8px;
-                                                                padding:6px 14px;border-radius:999px;
-                                                                background:${hexToRgba(c, 0.13)};
-                                                                border:1px solid ${hexToRgba(c, 0.4)};">
-                                                                <span style="width:10px;height:10px;border-radius:50%;background:${c};"></span>
-                                                                <span style="font-size:11px;font-weight:600;color:${c};font-family:'DM Mono',monospace;">${s}</span>
-                                                            </div>`;
-            });
-
-            leyenda.style.display = lista.length ? 'block' : 'none';
-        }
+        // ── Scrollbar sync ──────────────────────────────────────────────
+        (function () {
+            const top = document.getElementById('scrollTop');
+            const inner = document.getElementById('scrollTopInner');
+            const scroll = document.getElementById('tableScroll');
+            function syncWidth() { inner.style.width = scroll.scrollWidth + 'px'; }
+            new MutationObserver(syncWidth).observe(document.getElementById('tabla'), { childList: true, subtree: true });
+            window.addEventListener('resize', syncWidth);
+            syncWidth();
+            top.addEventListener('scroll', () => { scroll.scrollLeft = top.scrollLeft; });
+            scroll.addEventListener('scroll', () => { top.scrollLeft = scroll.scrollLeft; });
+        })();
     </script>
 </body>
 </html>
