@@ -1567,7 +1567,9 @@
                 tb.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--muted)">📭 Sin registros</td></tr>`;
                 return;
             }
-            tb.innerHTML = rDatos.map(r => `
+            tb.innerHTML = rDatos.map(r => {
+                const esAdmin = rolActual === 'ADMIN';
+                return `
                         <tr>
                             <td class="mono">${esc(r.ID)}</td>
                             <td class="mono">${esc(r.FOLIO) || '—'}</td>
@@ -1584,6 +1586,7 @@
                                 <div style="display:flex;gap:5px">
                                     <button class="btn btn-ghost btn-sm" onclick="abrirEditarR(${r.ID})">✏️</button>
                                     <button class="btn btn-ghost btn-sm" onclick="verHistorial(${r.ID},'R')">📋</button>
+                                    ${esAdmin ? `<button class="btn btn-danger btn-sm" onclick="eliminarReporte(${r.ID})">🗑️</button>` : ''}
                                 </div>
                             </td>
                         </tr>`).join('');
@@ -1926,6 +1929,19 @@
                                 <tbody>${filas}</tbody>
                             </table>
                         </div>`;
+        }
+        async function eliminarReporte(id) {
+            if (!confirm('¿Eliminar este reporte?')) return;
+            try {
+                await fetch(`/REPORTES_IMPRESORAS/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Usuario': usuarioActual }
+                });
+                cargarReportes();
+                toast('🗑️ Reporte eliminado', 'info');
+            } catch (e) {
+                toast('❌ Error: ' + e.message, 'error');
+            }
         }
 
         // ══════════════════════════════════════════════════════════════
