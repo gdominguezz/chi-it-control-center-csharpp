@@ -1210,6 +1210,157 @@
             }
         }
 
+        /* ══════════════════════════════════════════
+           FIELD INFO TOOLTIP SYSTEM
+        ══════════════════════════════════════════ */
+        .field-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+            .field-header label {
+                margin-bottom: 0 !important;
+            }
+
+        .info-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(59,130,246,.18);
+            border: 1px solid rgba(59,130,246,.35);
+            color: #93C5FD;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            user-select: none;
+            flex-shrink: 0;
+            transition: all .2s;
+            font-style: normal;
+            line-height: 1;
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            position: relative;
+        }
+
+            .info-btn:hover {
+                background: rgba(59,130,246,.35);
+                border-color: var(--accent);
+                box-shadow: 0 0 8px rgba(59,130,246,.5);
+                transform: scale(1.15);
+            }
+
+        /* tooltip bubble */
+        .info-tooltip {
+            position: fixed;
+            z-index: 99999;
+            max-width: 280px;
+            min-width: 200px;
+            background: linear-gradient(135deg, #0D1220, #111827);
+            border: 1px solid rgba(59,130,246,.4);
+            border-radius: 10px;
+            padding: 12px 14px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04), 0 0 20px rgba(59,130,246,.12);
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(4px) scale(.97);
+            transition: opacity .18s ease, transform .18s ease;
+            font-family: 'Plus Jakarta Sans',sans-serif;
+        }
+
+            .info-tooltip.visible {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            .info-tooltip::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(59,130,246,.6), transparent);
+                border-radius: 10px 10px 0 0;
+            }
+
+        .tt-module {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            padding: 3px 8px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+        }
+
+        .tt-module-formula {
+            background: rgba(34,211,238,.12);
+            color: #22D3EE;
+            border: 1px solid rgba(34,211,238,.3);
+        }
+
+        .tt-module-req {
+            background: rgba(139,92,246,.12);
+            color: #A78BFA;
+            border: 1px solid rgba(139,92,246,.3);
+        }
+
+        .tt-module-entradas {
+            background: rgba(16,185,129,.12);
+            color: #34D399;
+            border: 1px solid rgba(16,185,129,.3);
+        }
+
+        .tt-module-manual {
+            background: rgba(245,158,11,.12);
+            color: #FCD34D;
+            border: 1px solid rgba(245,158,11,.3);
+        }
+
+        .tt-module-calc {
+            background: rgba(59,130,246,.12);
+            color: #93C5FD;
+            border: 1px solid rgba(59,130,246,.3);
+        }
+
+        .tt-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .tt-desc {
+            font-size: 11px;
+            color: var(--text2);
+            line-height: 1.5;
+        }
+
+        .tt-path {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,.06);
+            font-size: 10px;
+            color: var(--muted);
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+        .tt-path-arrow {
+            color: var(--accent);
+            font-size: 12px;
+        }
+
         /* ── Leyenda ── */
         .legend-wrap {
             display: flex;
@@ -1356,13 +1507,55 @@
             <div class="form-section">
                 <span class="form-section-label lbl-formula">🔗 Llenado por Fórmula — se calculan automáticamente al guardar</span>
                 <div class="form-grid">
-                    <div class="field"><label>Orden de Compra 🔒</label><input id="n_ORDEN_DE_COMPRA" placeholder="Calculado desde Requisición" readonly tabindex="-1"></div>
-                    <div class="field"><label>Fecha OC 🔒</label><input id="n_FECHA_OC" placeholder="Calculado desde Requisición" readonly tabindex="-1"></div>
-                    <div class="field"><label>OC 🔒</label><input id="n_OC" placeholder="Calculado desde Requisición" readonly tabindex="-1"></div>
-                    <div class="field"><label>Fecha Entrada</label><input id="n_FECHA_ENTRADA" type="date"></div>
-                    <div class="field"><label>Total (Sin IVA) 🔒</label><input id="n_TOTAL_SIN_IVA" type="number" step="0.01" placeholder="Cantidad × Precio Unitario" readonly tabindex="-1"></div>
-                    <div class="field"><label>Cantidad Registrada 🔒</label><input id="n_CANTIDAD_REGISTRADA" type="number" step="1" placeholder="Calculado desde entradas" readonly tabindex="-1"></div>
-                    <div class="field"><label>Estatus OC 🔒</label><input id="n_ESTATUS_OC" placeholder="COMPLETA / PARCIAL / PENDIENTE" readonly tabindex="-1"></div>
+                    <div class="field">
+                        <div class="field-header">
+                            <label>Orden de Compra 🔒</label>
+                            <i class="info-btn" data-tt="orden_de_compra">ⓘ</i>
+                        </div>
+                        <input id="n_ORDEN_DE_COMPRA" placeholder="Calculado desde Requisición" readonly tabindex="-1">
+                    </div>
+                    <div class="field">
+                        <div class="field-header">
+                            <label>Fecha OC 🔒</label>
+                            <i class="info-btn" data-tt="fecha_oc">ⓘ</i>
+                        </div>
+                        <input id="n_FECHA_OC" placeholder="Calculado desde Requisición" readonly tabindex="-1">
+                    </div>
+                    <div class="field">
+                        <div class="field-header">
+                            <label>OC 🔒</label>
+                            <i class="info-btn" data-tt="oc">ⓘ</i>
+                        </div>
+                        <input id="n_OC" placeholder="Calculado desde Requisición" readonly tabindex="-1">
+                    </div>
+                    <div class="field">
+                        <div class="field-header">
+                            <label>Fecha Entrada</label>
+                            <i class="info-btn" data-tt="fecha_entrada">ⓘ</i>
+                        </div>
+                        <input id="n_FECHA_ENTRADA" type="date">
+                    </div>
+                    <div class="field">
+                        <div class="field-header">
+                            <label>Total (Sin IVA) 🔒</label>
+                            <i class="info-btn" data-tt="total_sin_iva">ⓘ</i>
+                        </div>
+                        <input id="n_TOTAL_SIN_IVA" type="number" step="0.01" placeholder="Cantidad × Precio Unitario" readonly tabindex="-1">
+                    </div>
+                    <div class="field">
+                        <div class="field-header">
+                            <label>Cantidad Registrada 🔒</label>
+                            <i class="info-btn" data-tt="cantidad_registrada">ⓘ</i>
+                        </div>
+                        <input id="n_CANTIDAD_REGISTRADA" type="number" step="1" placeholder="Calculado desde entradas" readonly tabindex="-1">
+                    </div>
+                    <div class="field">
+                        <div class="field-header">
+                            <label>Estatus OC 🔒</label>
+                            <i class="info-btn" data-tt="estatus_oc">ⓘ</i>
+                        </div>
+                        <input id="n_ESTATUS_OC" placeholder="COMPLETA / PARCIAL / PENDIENTE" readonly tabindex="-1">
+                    </div>
                 </div>
             </div>
 
@@ -1410,7 +1603,13 @@
             <div class="form-section">
                 <span class="form-section-label lbl-autorizador">🔐 Llenado por Autorizador</span>
                 <div class="form-grid">
-                    <div class="field"><label>Requisición</label><input id="n_REQUISICION" placeholder="Núm. de requisición"></div>
+                    <div class="field">
+                        <div class="field-header">
+                            <label>Requisición</label>
+                            <i class="info-btn" data-tt="requisicion">ⓘ</i>
+                        </div>
+                        <input id="n_REQUISICION" placeholder="Núm. de requisición">
+                    </div>
                 </div>
             </div>
 
@@ -1577,11 +1776,26 @@
                 <span class="form-section-label lbl-formula">🔗 Campos calculados automáticamente al guardar</span>
             </div>
             <div class="form-cols">
-                <div class="form-field"><label>Orden de Compra 🔒</label><input id="e_ORDEN_DE_COMPRA" readonly tabindex="-1" placeholder="Calculado"></div>
-                <div class="form-field"><label>Fecha OC 🔒</label><input id="e_FECHA_OC" readonly tabindex="-1" placeholder="Calculado"></div>
-                <div class="form-field"><label>OC 🔒</label><input id="e_OC" readonly tabindex="-1" placeholder="Calculado"></div>
-                <div class="form-field"><label>Fecha Entrada</label><input type="date" id="e_FECHA_ENTRADA"></div>
-                <div class="form-field"><label>Total (Sin IVA) 🔒</label><input type="number" step="0.01" id="e_TOTAL_SIN_IVA" readonly tabindex="-1" placeholder="Calculado"></div>
+                <div class="form-field">
+                    <div class="field-header"><label>Orden de Compra 🔒</label><i class="info-btn" data-tt="orden_de_compra">ⓘ</i></div>
+                    <input id="e_ORDEN_DE_COMPRA" readonly tabindex="-1" placeholder="Calculado">
+                </div>
+                <div class="form-field">
+                    <div class="field-header"><label>Fecha OC 🔒</label><i class="info-btn" data-tt="fecha_oc">ⓘ</i></div>
+                    <input id="e_FECHA_OC" readonly tabindex="-1" placeholder="Calculado">
+                </div>
+                <div class="form-field">
+                    <div class="field-header"><label>OC 🔒</label><i class="info-btn" data-tt="oc">ⓘ</i></div>
+                    <input id="e_OC" readonly tabindex="-1" placeholder="Calculado">
+                </div>
+                <div class="form-field">
+                    <div class="field-header"><label>Fecha Entrada</label><i class="info-btn" data-tt="fecha_entrada">ⓘ</i></div>
+                    <input type="date" id="e_FECHA_ENTRADA">
+                </div>
+                <div class="form-field">
+                    <div class="field-header"><label>Total (Sin IVA) 🔒</label><i class="info-btn" data-tt="total_sin_iva">ⓘ</i></div>
+                    <input type="number" step="0.01" id="e_TOTAL_SIN_IVA" readonly tabindex="-1" placeholder="Calculado">
+                </div>
                 <div class="form-field"><label>Folio</label><input id="e_FOLIO"></div>
                 <div class="form-field"><label>Solicitante</label><select id="e_SOLICITANTE"><option value="">— Seleccionar —</option></select></div>
                 <div class="form-field"><label>Presupuesto Mes</label><input id="e_PRESUPUESTO_MES"></div>
@@ -1597,9 +1811,18 @@
                 </div>
                 <div class="form-field full"><label>Comentarios</label><textarea id="e_COMENTARIOS"></textarea></div>
                 <div class="form-field"><label>Hoja Control</label><input id="e_HOJA_CONTROL"></div>
-                <div class="form-field"><label>Requisición</label><input id="e_REQUISICION"></div>
-                <div class="form-field"><label>Cantidad Registrada 🔒</label><input id="e_CANTIDAD_REGISTRADA" readonly tabindex="-1" placeholder="Calculado"></div>
-                <div class="form-field"><label>Estatus OC 🔒</label><input id="e_ESTATUS_OC" readonly tabindex="-1" placeholder="Calculado"></div>
+                <div class="form-field">
+                    <div class="field-header"><label>Requisición</label><i class="info-btn" data-tt="requisicion">ⓘ</i></div>
+                    <input id="e_REQUISICION">
+                </div>
+                <div class="form-field">
+                    <div class="field-header"><label>Cantidad Registrada 🔒</label><i class="info-btn" data-tt="cantidad_registrada">ⓘ</i></div>
+                    <input id="e_CANTIDAD_REGISTRADA" readonly tabindex="-1" placeholder="Calculado">
+                </div>
+                <div class="form-field">
+                    <div class="field-header"><label>Estatus OC 🔒</label><i class="info-btn" data-tt="estatus_oc">ⓘ</i></div>
+                    <input id="e_ESTATUS_OC" readonly tabindex="-1" placeholder="Calculado">
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-success" onclick="guardarCambios()">💾 Guardar Cambios</button>
