@@ -240,22 +240,48 @@ public class OrdenesDeCompraService
 
     /// <summary>
     /// Equivale a la fórmula de columna S (CANTIDAD REGISTRADA):
-    ///   =SUMAR.SI.CONJUNTO(INDIRECTO("'"&HOJA_CONTROL&"'!J:J"),
-    ///                      INDIRECTO("'"&HOJA_CONTROL&"'!A:A"), A&B)
-    /// En BD: suma la cantidad en entradas_de_compra donde la clave orden_de_compra+folio coincide.
+    ///   =SUMAR.SI.CONJUNTO(INDIRECTO("'"&Proveedor&"'!J:J"),
+    ///                      INDIRECTO("'"&Proveedor&"'!A:A"), ID & FOLIO)
+    ///
+    /// Lógica:
+    ///   1. Usar PROVEEDOR_ELEGIDO para determinar la tabla de entradas
+    ///      (ej: FIRECOM → entradas_firecom, HP → entradas_hp, etc.)
+    ///   2. En esa tabla buscar registros donde orden_de_compra = @odc AND folio = @folio
+    ///   3. Sumar el campo cantidad
     /// </summary>
-    private decimal SumarCantidadRegistrada(NpgsqlConnection con, string? ordenDeCompra, string? folio)
+    private static readonly Dictionary<string, string> _tablasPorProveedor = new(StringComparer.OrdinalIgnoreCase)
+    {
+        { "FIRECOM",  "entradas_firecom"  },
+        { "HP",       "entradas_hp"       },
+        // ← agrega aquí más proveedores conforme se necesiten
+    };
+
+    private decimal SumarCantidadRegistrada(
+        NpgsqlConnection con,
+        string? ordenDeCompra,
+        string? folio,
+        string? proveedor)
     {
         if (string.IsNullOrWhiteSpace(ordenDeCompra) && string.IsNullOrWhiteSpace(folio))
             return 0;
 
+        // Determinar tabla según proveedor; si no está mapeado, tabla genérica
+        string tabla = (!string.IsNullOrWhiteSpace(proveedor) &&
+                        _tablasPorProveedor.TryGetValue(proveedor.Trim(), out var t))
+                       ? t
+                       : "entradas_de_compra";
+
         using var cmd = con.CreateCommand();
-        cmd.CommandText = """
+        // Nombre de tabla no puede ir como parámetro en SQL → interpolación segura
+        // (el valor viene de un diccionario controlado, no de input externo)
+        cmd.CommandText = $"""
             SELECT COALESCE(SUM(cantidad), 0)
-            FROM entradas_de_compra
-            WHERE CONCAT(orden_de_compra, folio) = @clave
+            FROM {tabla}
+            WHERE orden_de_compra = @odc
+              AND folio            = @folio
             """;
-        cmd.Parameters.AddWithValue("clave", $"{ordenDeCompra}{folio}");
+        cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
 
         var result = cmd.ExecuteScalar();
         return result is DBNull or null ? 0 : Convert.ToDecimal(result);
@@ -307,7 +333,7 @@ public class OrdenesDeCompraService
 
         // ── Fórmula: CANTIDAD REGISTRADA (col S) ──────────────────────────
         decimal cantidadRegistrada = d.CANTIDAD_REGISTRADA
-            ?? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO);
+            ?? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO, d.PROVEEDOR_ELEGIDO);
 
         // ── Fórmula: ESTATUS OC (col T) ───────────────────────────────────
         string estatusOc = CalcularEstatusOC(d.CANTIDAD, cantidadRegistrada);
@@ -370,7 +396,7 @@ public class OrdenesDeCompraService
 
         // ── Fórmula: CANTIDAD REGISTRADA (col S) ──────────────────────────
         decimal cantidadRegistrada = d.CANTIDAD_REGISTRADA
-            ?? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO);
+            ?? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO, d.PROVEEDOR_ELEGIDO);
 
         // ── Fórmula: ESTATUS OC (col T) ───────────────────────────────────
         string estatusOc = CalcularEstatusOC(d.CANTIDAD, cantidadRegistrada);
@@ -441,13 +467,14 @@ public class OrdenesDeCompraService
         // Leer todos los registros
         var todos = new List<(int id, string? requisicion, string? ordenDeCompra, string? folio,
                                string? fechaOc, string? oc, decimal? cantidad,
-                               decimal? precioUnitario, decimal? cantidadRegistrada)>();
+                               decimal? precioUnitario, decimal? cantidadRegistrada,
+                               string? proveedorElegido)>();
 
         using (var cmd = con.CreateCommand())
         {
             cmd.CommandText = """
                 SELECT id, requisicion, orden_de_compra, folio, fecha_oc, oc,
-                       cantidad, precio_unitario, cantidad_registrada
+                       cantidad, precio_unitario, cantidad_registrada, proveedor_elegido
                 FROM ordenes_de_compra
                 ORDER BY id
                 """;
@@ -463,7 +490,8 @@ public class OrdenesDeCompraService
                     dr.IsDBNull(5) ? null : dr.GetString(5),
                     dr.IsDBNull(6) ? null : dr.GetDecimal(6),
                     dr.IsDBNull(7) ? null : dr.GetDecimal(7),
-                    dr.IsDBNull(8) ? null : dr.GetDecimal(8)
+                    dr.IsDBNull(8) ? null : dr.GetDecimal(8),
+                    dr.IsDBNull(9) ? null : dr.GetString(9)
                 ));
             }
         }
@@ -481,7 +509,7 @@ public class OrdenesDeCompraService
                 ? r.cantidad.Value * r.precioUnitario.Value
                 : null;
 
-            decimal cantReg = SumarCantidadRegistrada(con, ordenDeCompra, r.folio);
+            decimal cantReg = SumarCantidadRegistrada(con, ordenDeCompra, r.folio, r.proveedorElegido);
             string estatus = CalcularEstatusOC(r.cantidad, cantReg);
 
             using var upd = con.CreateCommand();
