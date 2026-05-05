@@ -240,48 +240,53 @@ public class OrdenesDeCompraService
 
     /// <summary>
     /// Equivale a la fórmula de columna S (CANTIDAD REGISTRADA):
-    ///   =SUMAR.SI.CONJUNTO(INDIRECTO("'"&Proveedor&"'!J:J"),
-    ///                      INDIRECTO("'"&Proveedor&"'!A:A"), ID & FOLIO)
+    ///   =SUMIFS(INDIRECT("'"&N&"'!J:J"), INDIRECT("'"&N&"'!A:A"), A&B)
     ///
-    /// Lógica:
-    ///   1. Usar PROVEEDOR_ELEGIDO para determinar la tabla de entradas
-    ///      (ej: FIRECOM → entradas_firecom, HP → entradas_hp, etc.)
-    ///   2. En esa tabla buscar registros donde orden_de_compra = @odc AND folio = @folio
-    ///   3. Sumar el campo cantidad
+    /// Donde N = HOJA_CONTROL → determina en qué tabla de BD buscar.
+    /// Col A en cada hoja Excel = CONCAT(OC, FOLIO) → clave de búsqueda.
+    /// Col J en cada hoja Excel = CANTIDAD → campo a sumar.
+    ///
+    /// Si HOJA_CONTROL no está mapeado o está vacío → devuelve 0 (sin crash).
     /// </summary>
-    private static readonly Dictionary<string, string> _tablasPorProveedor = new(StringComparer.OrdinalIgnoreCase)
-    {
-        { "FIRECOM",  "entradas_firecom"  },
-        { "HP",       "entradas_hp"       },
-        // ← agrega aquí más proveedores conforme se necesiten
-    };
+    private static readonly Dictionary<string, string> _tablasPorHojaControl =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Accesorio NF",                "accesorio_nf"                },
+            { "Consumibles NF",              "consumibles_nf"              },
+            { "Dispositivos NF",             "dispositivos_nf"             },
+            { "IMPRESORAS NF",               "impresoras_nf"               },
+            { "PANTALLAS NF",                "pantallas_nf"                },
+            { "PERIFERICOS NF",              "perifericos_nf"              },
+            { "Refacciones NF",              "refacciones_nf"              },
+            { "Radio NF",                    "radio_nf"                    },
+            { "Servicios por Proveedores NF","servicios_por_proveedores_nf"},
+            { "Tintas,Toner,Ribon NF",       "tintas_toner_ribon_nf"       },
+            { "HERRAMIENTA NF",              "herramienta_nf"              },
+            { "FIRECOM",                     "firecom"                     },
+        };
 
     private decimal SumarCantidadRegistrada(
         NpgsqlConnection con,
         string? ordenDeCompra,
         string? folio,
-        string? proveedor)
+        string? hojaControl)
     {
         if (string.IsNullOrWhiteSpace(ordenDeCompra) && string.IsNullOrWhiteSpace(folio))
             return 0;
 
-        // Determinar tabla según proveedor; si no está mapeado, tabla genérica
-        string tabla = (!string.IsNullOrWhiteSpace(proveedor) &&
-                        _tablasPorProveedor.TryGetValue(proveedor.Trim(), out var t))
-                       ? t
-                       : "entradas_de_compra";
+        // Si la hoja no está mapeada → retorna 0 en lugar de crashear
+        if (string.IsNullOrWhiteSpace(hojaControl) ||
+            !_tablasPorHojaControl.TryGetValue(hojaControl.Trim(), out var tabla))
+            return 0;
 
         using var cmd = con.CreateCommand();
-        // Nombre de tabla no puede ir como parámetro en SQL → interpolación segura
-        // (el valor viene de un diccionario controlado, no de input externo)
+        // Tabla viene de diccionario controlado → interpolación segura
         cmd.CommandText = $"""
             SELECT COALESCE(SUM(cantidad), 0)
             FROM {tabla}
-            WHERE orden_de_compra = @odc
-              AND folio            = @folio
+            WHERE CONCAT(orden_de_compra, folio) = @clave
             """;
-        cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("clave", $"{ordenDeCompra}{folio}");
 
         var result = cmd.ExecuteScalar();
         return result is DBNull or null ? 0 : Convert.ToDecimal(result);
@@ -333,7 +338,7 @@ public class OrdenesDeCompraService
 
         // ── Fórmula: CANTIDAD REGISTRADA (col S) ──────────────────────────
         decimal cantidadRegistrada = d.CANTIDAD_REGISTRADA
-            ?? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO, d.PROVEEDOR_ELEGIDO);
+            ?? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO, d.HOJA_CONTROL);
 
         // ── Fórmula: ESTATUS OC (col T) ───────────────────────────────────
         string estatusOc = CalcularEstatusOC(d.CANTIDAD, cantidadRegistrada);
@@ -396,7 +401,7 @@ public class OrdenesDeCompraService
 
         // ── Fórmula: CANTIDAD REGISTRADA (col S) ──────────────────────────
         decimal cantidadRegistrada = d.CANTIDAD_REGISTRADA
-            ?? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO, d.PROVEEDOR_ELEGIDO);
+            ?? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO, d.HOJA_CONTROL);
 
         // ── Fórmula: ESTATUS OC (col T) ───────────────────────────────────
         string estatusOc = CalcularEstatusOC(d.CANTIDAD, cantidadRegistrada);
@@ -468,13 +473,13 @@ public class OrdenesDeCompraService
         var todos = new List<(int id, string? requisicion, string? ordenDeCompra, string? folio,
                                string? fechaOc, string? oc, decimal? cantidad,
                                decimal? precioUnitario, decimal? cantidadRegistrada,
-                               string? proveedorElegido)>();
+                               string? hojaControl)>();
 
         using (var cmd = con.CreateCommand())
         {
             cmd.CommandText = """
                 SELECT id, requisicion, orden_de_compra, folio, fecha_oc, oc,
-                       cantidad, precio_unitario, cantidad_registrada, proveedor_elegido
+                       cantidad, precio_unitario, cantidad_registrada, hoja_control
                 FROM ordenes_de_compra
                 ORDER BY id
                 """;
@@ -509,7 +514,7 @@ public class OrdenesDeCompraService
                 ? r.cantidad.Value * r.precioUnitario.Value
                 : null;
 
-            decimal cantReg = SumarCantidadRegistrada(con, ordenDeCompra, r.folio, r.proveedorElegido);
+            decimal cantReg = SumarCantidadRegistrada(con, ordenDeCompra, r.folio, r.hojaControl);
             string estatus = CalcularEstatusOC(r.cantidad, cantReg);
 
             using var upd = con.CreateCommand();
