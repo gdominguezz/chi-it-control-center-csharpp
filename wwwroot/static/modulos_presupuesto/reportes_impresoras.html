@@ -1375,16 +1375,17 @@
         //  INIT
         // ══════════════════════════════════════════════════════════════
         document.addEventListener('DOMContentLoaded', () => {
-            fetch('/ME', { credentials: 'include' })
+            fetch('/obtener-usuario', { credentials: 'include' })
                 .then(r => r.json())
                 .then(d => {
-                    usuarioActual = d.usuario || d.USUARIO || 'SISTEMA';
+                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
+                    usuarioActual = d.usuario || 'SISTEMA';
                     rolActual = d.rol || d.ROL || '';
-                    document.getElementById('usuarioDisplay').textContent = usuarioActual;
-                    document.getElementById('dropdownNombre').textContent = usuarioActual;
+                    document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
                     document.getElementById('dropdownRol').textContent = rolActual;
                 })
-                .catch(() => { });
+                .catch(() => { window.location.href = '/static/login.html'; });
             cargarReportes();
             cargarInfo();
         });
@@ -1444,25 +1445,25 @@
                 return;
             }
             tb.innerHTML = rDatos.map(r => `
-                    <tr>
-                        <td class="mono">${esc(r.ID)}</td>
-                        <td class="mono">${esc(r.FOLIO) || '—'}</td>
-                        <td class="mono">${fmtDate(r.FECHA)}</td>
-                        <td>${esc(r.PLANTA) || '—'}</td>
-                        <td>${esc(r.IMPRESORA) || '—'}</td>
-                        <td>${esc(r.AREA) || '—'}</td>
-                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.REPORTE)}">${esc(r.REPORTE) || '—'}</td>
-                        <td>${esc(r.QUIEN_REPORTA) || '—'}</td>
-                        <td><span class="status-pill ${estatusPill(r.ESTATUS)}">${esc(r.ESTATUS) || '—'}</span></td>
-                        <td class="mono">${fmtDate(r.FECHA_DE_REALIZACION)}</td>
-                        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.COMENTARIOS)}">${esc(r.COMENTARIOS) || '—'}</td>
-                        <td>
-                            <div style="display:flex;gap:5px">
-                                <button class="btn btn-ghost btn-sm" onclick="abrirEditarR(${r.ID})">✏️</button>
-                                <button class="btn btn-ghost btn-sm" onclick="verHistorial(${r.ID},'R')">📋</button>
-                            </div>
-                        </td>
-                    </tr>`).join('');
+                        <tr>
+                            <td class="mono">${esc(r.ID)}</td>
+                            <td class="mono">${esc(r.FOLIO) || '—'}</td>
+                            <td class="mono">${fmtDate(r.FECHA)}</td>
+                            <td>${esc(r.PLANTA) || '—'}</td>
+                            <td>${esc(r.IMPRESORA) || '—'}</td>
+                            <td>${esc(r.AREA) || '—'}</td>
+                            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.REPORTE)}">${esc(r.REPORTE) || '—'}</td>
+                            <td>${esc(r.QUIEN_REPORTA) || '—'}</td>
+                            <td><span class="status-pill ${estatusPill(r.ESTATUS)}">${esc(r.ESTATUS) || '—'}</span></td>
+                            <td class="mono">${fmtDate(r.FECHA_DE_REALIZACION)}</td>
+                            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.COMENTARIOS)}">${esc(r.COMENTARIOS) || '—'}</td>
+                            <td>
+                                <div style="display:flex;gap:5px">
+                                    <button class="btn btn-ghost btn-sm" onclick="abrirEditarR(${r.ID})">✏️</button>
+                                    <button class="btn btn-ghost btn-sm" onclick="verHistorial(${r.ID},'R')">📋</button>
+                                </div>
+                            </td>
+                        </tr>`).join('');
         }
 
         function filtrarReportes() {
@@ -1606,24 +1607,24 @@
                 return;
             }
             tb.innerHTML = iDatos.map(r => `
-                    <tr>
-                        <td class="mono">${esc(r.ID)}</td>
-                        <td>${esc(r.IMPRESORA) || '—'}</td>
-                        <td>${esc(r.MODELO) || '—'}</td>
-                        <td class="mono">${esc(r.NUMERO_DE_SERIE) || '—'}</td>
-                        <td class="mono">${esc(r.IP) || '—'}</td>
-                        <td>${esc(r.UBICACION) || '—'}</td>
-                        <td>${esc(r.PLANTA) || '—'}</td>
-                        <td class="mono">${esc(r.IDENTIFICADOR) || '—'}</td>
-                        <td class="mono">${esc(r.NUMERO) ?? '—'}</td>
-                        <td>
-                            <div style="display:flex;gap:5px">
-                                <button class="btn btn-ghost btn-sm" onclick="abrirEditarI(${r.ID})">✏️</button>
-                                <button class="btn btn-ghost btn-sm" onclick="verHistorial(${r.ID},'I')">📋</button>
-                                <button class="btn btn-danger btn-sm" onclick="eliminarInfo(${r.ID})">🗑️</button>
-                            </div>
-                        </td>
-                    </tr>`).join('');
+                        <tr>
+                            <td class="mono">${esc(r.ID)}</td>
+                            <td>${esc(r.IMPRESORA) || '—'}</td>
+                            <td>${esc(r.MODELO) || '—'}</td>
+                            <td class="mono">${esc(r.NUMERO_DE_SERIE) || '—'}</td>
+                            <td class="mono">${esc(r.IP) || '—'}</td>
+                            <td>${esc(r.UBICACION) || '—'}</td>
+                            <td>${esc(r.PLANTA) || '—'}</td>
+                            <td class="mono">${esc(r.IDENTIFICADOR) || '—'}</td>
+                            <td class="mono">${esc(r.NUMERO) ?? '—'}</td>
+                            <td>
+                                <div style="display:flex;gap:5px">
+                                    <button class="btn btn-ghost btn-sm" onclick="abrirEditarI(${r.ID})">✏️</button>
+                                    <button class="btn btn-ghost btn-sm" onclick="verHistorial(${r.ID},'I')">📋</button>
+                                    <button class="btn btn-danger btn-sm" onclick="eliminarInfo(${r.ID})">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>`).join('');
         }
 
         function filtrarInfo() {
@@ -1748,8 +1749,8 @@
                     } else {
                         document.getElementById('contenidoHistorial').innerHTML =
                             `<p style="color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;margin-bottom:14px">
-                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                 </p>` + lista.map(ev => renderEvento(ev)).join('');
+                                        ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                     </p>` + lista.map(ev => renderEvento(ev)).join('');
                     }
                 })
                 .catch(() => {
@@ -1777,31 +1778,31 @@
                 const vd = esc(despues?.[key] ?? '');
                 const chg = cambiados.has(key);
                 filas += `
-                        <tr class="${chg ? 'row-changed' : ''}">
-                            <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                            <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                            <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                        </tr>`;
+                            <tr class="${chg ? 'row-changed' : ''}">
+                                <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                            </tr>`;
             });
 
             const n = cambiados.size;
             return `
-                    <div class="ev-wrap">
-                        <div class="ev-header">
-                            <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
-                            <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
-                            <span class="n-cambios-badge"
-                                style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(85,92,128,.2)'};
-                                       color:${n > 0 ? '#FCD34D' : '#8891B8'};
-                                       border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(85,92,128,.3)'}">
-                                ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                            </span>
-                        </div>
-                        <table class="ev-table">
-                            <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                            <tbody>${filas}</tbody>
-                        </table>
-                    </div>`;
+                        <div class="ev-wrap">
+                            <div class="ev-header">
+                                <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
+                                <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
+                                <span class="n-cambios-badge"
+                                    style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(85,92,128,.2)'};
+                                           color:${n > 0 ? '#FCD34D' : '#8891B8'};
+                                           border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(85,92,128,.3)'}">
+                                    ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                </span>
+                            </div>
+                            <table class="ev-table">
+                                <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                <tbody>${filas}</tbody>
+                            </table>
+                        </div>`;
         }
 
         // ══════════════════════════════════════════════════════════════
