@@ -2397,49 +2397,56 @@
             orden_de_compra: {
                 modulo: "formula",
                 titulo: "Orden de Compra",
-                desc: "Se obtiene automáticamente desde la tabla 'Req VS OC' usando la requisición.",
-                path: "Requisición → Req VS OC → Orden de Compra"
+                desc: "Se obtiene automáticamente buscando la requisición en la tabla 'Req VS OC'. Si no hay requisición, el campo queda vacío.",
+                path: "Requisición → BUSCARV → Req VS OC (columna 2)"
             },
+
             fecha_oc: {
                 modulo: "formula",
                 titulo: "Fecha OC",
-                desc: "Se obtiene desde la tabla 'Req VS OC' según la requisición.",
-                path: "Requisición → Req VS OC → Fecha OC"
+                desc: "Se obtiene desde la tabla 'Req VS OC' usando la requisición.",
+                path: "Requisición → BUSCARV → Req VS OC (columna 3)"
             },
+
             oc: {
                 modulo: "formula",
                 titulo: "OC",
-                desc: "Código interno generado automáticamente con base en la requisición.",
-                path: "Requisición → Req VS OC → OC"
+                desc: "Se obtiene automáticamente desde 'Req VS OC' usando la requisición.",
+                path: "Requisición → BUSCARV → Req VS OC (columna 2)"
             },
+
             total_sin_iva: {
                 modulo: "calculo",
                 titulo: "Total sin IVA",
                 desc: "Se calcula multiplicando la cantidad por el precio unitario.",
                 path: "Cantidad × Precio Unitario"
             },
+
             cantidad_registrada: {
                 modulo: "entradas",
                 titulo: "Cantidad Registrada",
-                desc: "Se obtiene sumando las entradas registradas en el módulo de entradas.",
-                path: "Entradas → SUMA por OC"
+                desc: "Suma todas las entradas registradas en la hoja dinámica (proveedor o módulo) donde coincida la clave del equipo.",
+                path: "SUMAR.SI.CONJUNTO → hoja dinámica → columna J"
             },
+
             estatus_oc: {
                 modulo: "calculo",
                 titulo: "Estatus OC",
-                desc: "Se determina comparando cantidad vs cantidad registrada.",
-                path: "Cantidad vs Cantidad Registrada"
+                desc: "Se compara la cantidad solicitada con la cantidad registrada.",
+                path: "Si igual → COMPLETA | Si parcial → PARCIAL | Si 0 → PENDIENTE"
             },
+
             requisicion: {
                 modulo: "manual",
                 titulo: "Requisición",
-                desc: "Número ingresado por el usuario para vincular la OC.",
-                path: "Captura manual"
+                desc: "Dato ingresado por el usuario. Es la base para calcular OC, Fecha OC y Orden de Compra.",
+                path: "Captura manual → dispara fórmulas"
             },
+
             fecha_entrada: {
                 modulo: "manual",
                 titulo: "Fecha de Entrada",
-                desc: "Fecha en que el material fue recibido físicamente.",
+                desc: "Fecha en la que el material fue recibido físicamente.",
                 path: "Captura manual"
             }
         };
