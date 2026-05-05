@@ -1352,7 +1352,7 @@
             // ID_UNICO auto generado desde FOLIO_UNICO + FOLIO_REPORTE
             const fu = (dto.FOLIO_UNICO || '').trim();
             const fr = (dto.FOLIO_REPORTE || '').trim();
-            dto.ID_UNICO = [fu, fr].filter(Boolean).join('-') || null;
+            dto.ID_UNICO = [fu, fr].filter(Boolean).join('&') || null;
 
             // Convertir SI/NO a bool para el backend
             const toBool = v => v === 'SI' ? true : v === 'NO' ? false : null;

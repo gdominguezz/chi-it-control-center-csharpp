@@ -355,7 +355,14 @@ public class RefaccionesNFService
 
     private static void AgregarParametros(NpgsqlCommand cmd, RefaccionNFDto dto)
     {
-        cmd.Parameters.AddWithValue("id_unico",         (object?)dto.ID_UNICO         ?? DBNull.Value);
+       
+        var idUnicoCalculado = (!string.IsNullOrWhiteSpace(dto.OC) && !string.IsNullOrWhiteSpace(dto.FOLIO_CORRECTIVO))
+            ? dto.OC.Trim() + dto.FOLIO_CORRECTIVO.Trim()
+            : (!string.IsNullOrWhiteSpace(dto.OC) ? dto.OC.Trim()
+            : (!string.IsNullOrWhiteSpace(dto.FOLIO_CORRECTIVO) ? dto.FOLIO_CORRECTIVO.Trim()
+            : dto.ID_UNICO));
+
+        cmd.Parameters.AddWithValue("id_unico", (object?)idUnicoCalculado ?? DBNull.Value);
         cmd.Parameters.AddWithValue("oc",               (object?)dto.OC               ?? DBNull.Value);
         cmd.Parameters.AddWithValue("folio_correctivo", (object?)dto.FOLIO_CORRECTIVO ?? DBNull.Value);
         cmd.Parameters.AddWithValue("fecha_registro",   (object?)dto.FECHA_REGISTRO   ?? DBNull.Value);

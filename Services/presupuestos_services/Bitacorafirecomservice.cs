@@ -411,7 +411,12 @@ public class BitacoraFirecomService
 
     private static void AgregarParametros(NpgsqlCommand cmd, BitacoraFirecomDto dto)
     {
-        cmd.Parameters.AddWithValue("id_unico", (object?)dto.ID_UNICO ?? DBNull.Value);
+        
+        var idUnicoCalculado = (!string.IsNullOrWhiteSpace(dto.OC) && !string.IsNullOrWhiteSpace(dto.ORDEN_SERVICIO))
+            ? dto.OC.Trim() + dto.ORDEN_SERVICIO.Trim()
+            : dto.ID_UNICO;
+
+        cmd.Parameters.AddWithValue("id_unico", (object?)idUnicoCalculado ?? DBNull.Value);
         cmd.Parameters.AddWithValue("oc", (object?)dto.OC ?? DBNull.Value);
         cmd.Parameters.AddWithValue("orden_servicio", (object?)dto.ORDEN_SERVICIO ?? DBNull.Value);
         cmd.Parameters.AddWithValue("fecha", (object?)dto.FECHA ?? DBNull.Value);
