@@ -1106,9 +1106,40 @@
                 <div class="form-grid">
                     <div class="field"><label>Folio</label><input id="rf_FOLIO" placeholder="Folio del reporte"></div>
                     <div class="field"><label>Fecha</label><input id="rf_FECHA" type="date"></div>
-                    <div class="field"><label>Planta</label><input id="rf_PLANTA" placeholder="Planta"></div>
+                    <div class="field">
+                        <label>Planta</label>
+                        <select id="rf_PLANTA">
+                            <option value="">— Selecciona —</option>
+                            <option>B1</option>
+                            <option>B2</option>
+                            <option>Planta Satélite</option>
+                            <option>Planta Mixing</option>
+                            <option>Bodega</option>
+                        </select>
+                    </div>
                     <div class="field"><label>Impresora</label><input id="rf_IMPRESORA" placeholder="Nombre o ID de impresora"></div>
-                    <div class="field"><label>Área</label><input id="rf_AREA" placeholder="Área"></div>
+                    <div class="field">
+                        <label>Área</label>
+                        <select id="rf_AREA">
+                            <option value="">— Selecciona —</option>
+                            <option>Bodega</option>
+                            <option>Control de Documentos</option>
+                            <option>Control Documentos Ing</option>
+                            <option>Entrenamiento</option>
+                            <option>Ing Docs</option>
+                            <option>Ingeniería</option>
+                            <option>Ingeniería Documentos</option>
+                            <option>Laboratorio</option>
+                            <option>Mezzanine de Ingeniería</option>
+                            <option>Oficinas</option>
+                            <option>Oficinas B1</option>
+                            <option>Oficinas B2</option>
+                            <option>Oficinas Mixin</option>
+                            <option>B1</option>
+                            <option>Planta Satélite</option>
+                            <option>Planta Mixing</option>
+                        </select>
+                    </div>
                     <div class="field">
                         <label>Estatus</label>
                         <select id="rf_ESTATUS">
@@ -1194,11 +1225,41 @@
                 <div class="panel-title">➕ Nueva Impresora</div>
                 <div class="form-grid">
                     <div class="field"><label>Impresora</label><input id="if_IMPRESORA" placeholder="Nombre de impresora"></div>
-                    <div class="field"><label>Modelo</label><input id="if_MODELO" placeholder="Modelo"></div>
+                    <div class="field">
+                        <label>Modelo</label>
+                        <select id="if_MODELO">
+                            <option value="">— Selecciona —</option>
+                            <option>C524A</option>
+                            <option>MX-3570N</option>
+                            <option>MX-5001N</option>
+                        </select>
+                    </div>
                     <div class="field"><label>No. Serie</label><input id="if_NUMERO_DE_SERIE" placeholder="Número de serie"></div>
                     <div class="field"><label>IP</label><input id="if_IP" placeholder="192.168.x.x"></div>
-                    <div class="field"><label>Ubicación</label><input id="if_UBICACION" placeholder="Ubicación física"></div>
-                    <div class="field"><label>Planta</label><input id="if_PLANTA" placeholder="Planta"></div>
+                    <div class="field">
+                        <label>Ubicación</label>
+                        <select id="if_UBICACION">
+                            <option value="">— Selecciona —</option>
+                            <option>BODEGA</option>
+                            <option>CONTROL DE DOCUMENTOS</option>
+                            <option>CONTROL DE DOCUMENTOS INGENIERIA</option>
+                            <option>ENTRENAMIENTO</option>
+                            <option>LABORATORIO</option>
+                            <option>MEZZANINE DE INGENIERIA</option>
+                            <option>OFICINAS PRINCIPALES</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Planta</label>
+                        <select id="if_PLANTA">
+                            <option value="">— Selecciona —</option>
+                            <option>B1</option>
+                            <option>B2</option>
+                            <option>Planta Satélite</option>
+                            <option>Planta Mixing</option>
+                            <option>Bodega</option>
+                        </select>
+                    </div>
                     <div class="field"><label>Identificador</label><input id="if_IDENTIFICADOR" placeholder="Identificador interno"></div>
                     <div class="field"><label>Número</label><input id="if_NUMERO" type="number" min="0" placeholder="0"></div>
                 </div>
@@ -1268,9 +1329,40 @@
             <div class="form-grid-modal">
                 <div class="form-field"><label>Folio</label><input id="er_FOLIO" placeholder="Folio del reporte"></div>
                 <div class="form-field"><label>Fecha</label><input id="er_FECHA" type="date"></div>
-                <div class="form-field"><label>Planta</label><input id="er_PLANTA" placeholder="Planta"></div>
+                <div class="form-field">
+                    <label>Planta</label>
+                    <select id="er_PLANTA">
+                        <option value="">— Selecciona —</option>
+                        <option>B1</option>
+                        <option>B2</option>
+                        <option>Planta Satélite</option>
+                        <option>Planta Mixing</option>
+                        <option>Bodega</option>
+                    </select>
+                </div>
                 <div class="form-field"><label>Impresora</label><input id="er_IMPRESORA" placeholder="Nombre o ID de impresora"></div>
-                <div class="form-field"><label>Área</label><input id="er_AREA" placeholder="Área"></div>
+                <div class="form-field">
+                    <label>Área</label>
+                    <select id="er_AREA">
+                        <option value="">— Selecciona —</option>
+                        <option>Bodega</option>
+                        <option>Control de Documentos</option>
+                        <option>Control Documentos Ing</option>
+                        <option>Entrenamiento</option>
+                        <option>Ing Docs</option>
+                        <option>Ingeniería</option>
+                        <option>Ingeniería Documentos</option>
+                        <option>Laboratorio</option>
+                        <option>Mezzanine de Ingeniería</option>
+                        <option>Oficinas</option>
+                        <option>Oficinas B1</option>
+                        <option>Oficinas B2</option>
+                        <option>Oficinas Mixin</option>
+                        <option>B1</option>
+                        <option>Planta Satélite</option>
+                        <option>Planta Mixing</option>
+                    </select>
+                </div>
                 <div class="form-field">
                     <label>Estatus</label>
                     <select id="er_ESTATUS">
@@ -1302,11 +1394,41 @@
             </div>
             <div class="form-grid-modal">
                 <div class="form-field"><label>Impresora</label><input id="ei_IMPRESORA" placeholder="Nombre de impresora"></div>
-                <div class="form-field"><label>Modelo</label><input id="ei_MODELO" placeholder="Modelo"></div>
+                <div class="form-field">
+                    <label>Modelo</label>
+                    <select id="ei_MODELO">
+                        <option value="">— Selecciona —</option>
+                        <option>C524A</option>
+                        <option>MX-3570N</option>
+                        <option>MX-5001N</option>
+                    </select>
+                </div>
                 <div class="form-field"><label>No. Serie</label><input id="ei_NUMERO_DE_SERIE" placeholder="Número de serie"></div>
                 <div class="form-field"><label>IP</label><input id="ei_IP" placeholder="192.168.x.x"></div>
-                <div class="form-field"><label>Ubicación</label><input id="ei_UBICACION" placeholder="Ubicación física"></div>
-                <div class="form-field"><label>Planta</label><input id="ei_PLANTA" placeholder="Planta"></div>
+                <div class="form-field">
+                    <label>Ubicación</label>
+                    <select id="ei_UBICACION">
+                        <option value="">— Selecciona —</option>
+                        <option>BODEGA</option>
+                        <option>CONTROL DE DOCUMENTOS</option>
+                        <option>CONTROL DE DOCUMENTOS INGENIERIA</option>
+                        <option>ENTRENAMIENTO</option>
+                        <option>LABORATORIO</option>
+                        <option>MEZZANINE DE INGENIERIA</option>
+                        <option>OFICINAS PRINCIPALES</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Planta</label>
+                    <select id="ei_PLANTA">
+                        <option value="">— Selecciona —</option>
+                        <option>B1</option>
+                        <option>B2</option>
+                        <option>Planta Satélite</option>
+                        <option>Planta Mixing</option>
+                        <option>Bodega</option>
+                    </select>
+                </div>
                 <div class="form-field"><label>Identificador</label><input id="ei_IDENTIFICADOR" placeholder="Identificador interno"></div>
                 <div class="form-field"><label>Número</label><input id="ei_NUMERO" type="number" min="0" placeholder="0"></div>
             </div>
@@ -1375,17 +1497,16 @@
         //  INIT
         // ══════════════════════════════════════════════════════════════
         document.addEventListener('DOMContentLoaded', () => {
-            fetch('/obtener-usuario', { credentials: 'include' })
+            fetch('/ME', { credentials: 'include' })
                 .then(r => r.json())
                 .then(d => {
-                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
-                    usuarioActual = d.usuario || 'SISTEMA';
+                    usuarioActual = d.usuario || d.USUARIO || 'SISTEMA';
                     rolActual = d.rol || d.ROL || '';
-                    document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
-                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
+                    document.getElementById('usuarioDisplay').textContent = usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = usuarioActual;
                     document.getElementById('dropdownRol').textContent = rolActual;
                 })
-                .catch(() => { window.location.href = '/static/login.html'; });
+                .catch(() => { });
             cargarReportes();
             cargarInfo();
         });
