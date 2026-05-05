@@ -2392,7 +2392,143 @@
                 });
             } catch (e) { console.warn('No se pudieron cargar solicitantes:', e); }
         }
+        // ===== CONFIGURACIÓN DE MENSAJES =====
+        const tooltips = {
+            orden_de_compra: {
+                modulo: "formula",
+                titulo: "Orden de Compra",
+                desc: "Se obtiene automáticamente desde la tabla 'Req VS OC' usando la requisición.",
+                path: "Requisición → Req VS OC → Orden de Compra"
+            },
+            fecha_oc: {
+                modulo: "formula",
+                titulo: "Fecha OC",
+                desc: "Se obtiene desde la tabla 'Req VS OC' según la requisición.",
+                path: "Requisición → Req VS OC → Fecha OC"
+            },
+            oc: {
+                modulo: "formula",
+                titulo: "OC",
+                desc: "Código interno generado automáticamente con base en la requisición.",
+                path: "Requisición → Req VS OC → OC"
+            },
+            total_sin_iva: {
+                modulo: "calculo",
+                titulo: "Total sin IVA",
+                desc: "Se calcula multiplicando la cantidad por el precio unitario.",
+                path: "Cantidad × Precio Unitario"
+            },
+            cantidad_registrada: {
+                modulo: "entradas",
+                titulo: "Cantidad Registrada",
+                desc: "Se obtiene sumando las entradas registradas en el módulo de entradas.",
+                path: "Entradas → SUMA por OC"
+            },
+            estatus_oc: {
+                modulo: "calculo",
+                titulo: "Estatus OC",
+                desc: "Se determina comparando cantidad vs cantidad registrada.",
+                path: "Cantidad vs Cantidad Registrada"
+            },
+            requisicion: {
+                modulo: "manual",
+                titulo: "Requisición",
+                desc: "Número ingresado por el usuario para vincular la OC.",
+                path: "Captura manual"
+            },
+            fecha_entrada: {
+                modulo: "manual",
+                titulo: "Fecha de Entrada",
+                desc: "Fecha en que el material fue recibido físicamente.",
+                path: "Captura manual"
+            }
+        };
 
+        // ===== CLASE SEGÚN MÓDULO =====
+        function getModuloClass(mod) {
+            return {
+                formula: "tt-module-formula",
+                calculo: "tt-module-calc",
+                entradas: "tt-module-entradas",
+                manual: "tt-module-manual"
+            }[mod] || "tt-module-manual";
+        }
+
+        // ===== TOOLTIP GLOBAL =====
+        let tooltipDiv;
+
+        // ===== CREAR TOOLTIP =====
+        function crearTooltip() {
+            tooltipDiv = document.createElement("div");
+            tooltipDiv.className = "info-tooltip";
+            document.body.appendChild(tooltipDiv);
+        }
+
+        // ===== MOSTRAR TOOLTIP =====
+        function mostrarTooltip(e, key) {
+            const data = tooltips[key];
+            if (!data) return;
+
+            tooltipDiv.innerHTML = `
+        <div class="tt-module ${getModuloClass(data.modulo)}">
+            ${data.modulo.toUpperCase()}
+        </div>
+        <div class="tt-title">${data.titulo}</div>
+        <div class="tt-desc">${data.desc}</div>
+        <div class="tt-path">
+            <span class="tt-path-arrow">→</span>
+            ${data.path}
+        </div>
+    `;
+
+            // Posición inteligente
+            let x = e.clientX + 12;
+            let y = e.clientY + 12;
+
+            if (x + 300 > window.innerWidth) {
+                x = e.clientX - 310;
+            }
+            if (y + 120 > window.innerHeight) {
+                y = e.clientY - 130;
+            }
+
+            tooltipDiv.style.left = x + "px";
+            tooltipDiv.style.top = y + "px";
+
+            tooltipDiv.classList.add("visible");
+        }
+
+        // ===== OCULTAR TOOLTIP =====
+        function ocultarTooltip() {
+            if (tooltipDiv) {
+                tooltipDiv.classList.remove("visible");
+            }
+        }
+
+        // ===== INICIALIZAR =====
+        function initTooltips() {
+            crearTooltip();
+
+            document.querySelectorAll(".info-btn").forEach(btn => {
+                const key = btn.getAttribute("data-tt");
+
+                btn.addEventListener("mouseenter", (e) => mostrarTooltip(e, key));
+                btn.addEventListener("mousemove", (e) => mostrarTooltip(e, key));
+                btn.addEventListener("mouseleave", ocultarTooltip);
+
+                // opcional click
+                btn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    mostrarTooltip(e, key);
+                });
+            });
+
+            // cerrar si haces click afuera
+            document.addEventListener("click", ocultarTooltip);
+        }
+
+        // ===== AUTO INIT =====
+        document.addEventListener("DOMContentLoaded", initTooltips);
         // ── Scrollbar sync ──────────────────────────────────────────────
         (function () {
             const top = document.getElementById('scrollTop');
