@@ -210,7 +210,7 @@ public class OrdenesDeCompraService
     ///   =SI(ESBLANCO($O), " ",
     ///      SI(BUSCARV($O, 'Req VS OC'!$A:$C, 2, FALSO) = 0, " ",
     ///         BUSCARV($O, 'Req VS OC'!$A:$C, 2, FALSO)))
-    /// La tabla req_vs_oc tiene: no_requisicion (col A), orden_de_compra (col B), fecha_de_compra (col C).
+    /// La tabla req_vs_oc tiene: no_requisicion (col A), orden_compra (col B), fecha_compra (col C).
     /// </summary>
     private (string? ordenDeCompra, string? fechaOc) BuscarEnReqVsOC(NpgsqlConnection con, string? requisicion)
     {
@@ -219,7 +219,7 @@ public class OrdenesDeCompraService
 
         using var cmd = con.CreateCommand();
         cmd.CommandText = """
-            SELECT orden_de_compra, fecha_de_compra
+            SELECT orden_compra, fecha_compra
             FROM req_vs_oc
             WHERE no_requisicion = @req
             LIMIT 1
