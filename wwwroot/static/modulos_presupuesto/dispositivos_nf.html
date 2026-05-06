@@ -993,7 +993,7 @@
 
                 <!-- MEMORIA -->
                 <div class="form-section-label">🧠 Memoria RAM</div>
-                <div class="field"><label>Memoria RAM</label><input id="f_MEMORIA_RAM" placeholder="Ej. 16 GB"></div>
+                <div class="field"><label>Memoria RAM</label><input id="f_MEMORIA_RAM" placeholder="Ej. 16 GB" oninput="calcularSlotMemoria('f_MEMORIA_RAM','f_SLOT_MEMORIA')"></div>
                 <div class="field"><label>Velocidad Memoria</label><input id="f_VELOCIDAD_MEMORIA" placeholder="Ej. 3200 MHz"></div>
                 <div class="field">
                     <label>Tipo Memoria</label>
@@ -1006,7 +1006,7 @@
                         <option>LPDDR5</option>
                     </select>
                 </div>
-                <div class="field"><label>Slot Memoria</label><input id="f_SLOT_MEMORIA" placeholder="Ej. 2 de 2 ocupados"></div>
+                <div class="field"><label>Slot Memoria</label><input id="f_SLOT_MEMORIA" placeholder="Se calcula automáticamente" readonly style="opacity:.7;cursor:not-allowed;background:var(--surface3);"></div>
                 <div class="field"><label>Máx. Memoria</label><input id="f_MAX_MEMORIA" placeholder="Ej. 32 GB"></div>
 
                 <!-- LAPTOP / ELIMINADOR -->
@@ -1270,7 +1270,7 @@
 
                 <!-- MEMORIA -->
                 <div class="modal-section-label">🧠 Memoria RAM</div>
-                <div class="form-field"><label>Memoria RAM</label><input id="e_MEMORIA_RAM" placeholder="Ej. 16 GB"></div>
+                <div class="form-field"><label>Memoria RAM</label><input id="e_MEMORIA_RAM" placeholder="Ej. 16 GB" oninput="calcularSlotMemoria('e_MEMORIA_RAM','e_SLOT_MEMORIA')"></div>
                 <div class="form-field"><label>Velocidad Memoria</label><input id="e_VELOCIDAD_MEMORIA" placeholder="Ej. 3200 MHz"></div>
                 <div class="form-field">
                     <label>Tipo Memoria</label>
@@ -1283,7 +1283,7 @@
                         <option>LPDDR5</option>
                     </select>
                 </div>
-                <div class="form-field"><label>Slot Memoria</label><input id="e_SLOT_MEMORIA" placeholder="Ej. 2 de 2 ocupados"></div>
+                <div class="form-field"><label>Slot Memoria</label><input id="e_SLOT_MEMORIA" placeholder="Se calcula automáticamente" readonly style="opacity:.7;cursor:not-allowed;background:var(--surface3);"></div>
                 <div class="form-field"><label>Máx. Memoria</label><input id="e_MAX_MEMORIA" placeholder="Ej. 32 GB"></div>
 
                 <!-- LAPTOP / CARGADOR -->
@@ -1623,6 +1623,7 @@
                 setV('e_SISTEMA_OPERATIVO', row.SISTEMA_OPERATIVO);
                 setV('e_LICENCIA_SISTEMA_OPERATIVO', row.LICENCIA_SISTEMA_OPERATIVO);
                 setV('e_MEMORIA_RAM', row.MEMORIA_RAM);
+                calcularSlotMemoria('e_MEMORIA_RAM', 'e_SLOT_MEMORIA');
                 setV('e_VELOCIDAD_MEMORIA', row.VELOCIDAD_MEMORIA);
                 setV('e_TIPO_MEMORIA', row.TIPO_MEMORIA);
                 setV('e_SLOT_MEMORIA', row.SLOT_MEMORIA);
@@ -1824,6 +1825,12 @@
         function vDec(id) { const x = v(id); return x != null ? parseFloat(x) || null : null; }
         function vBool(id) { const x = v(id); if (x === 'true') return true; if (x === 'false') return false; return null; }
         function setV(id, val) { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
+        function calcularSlotMemoria(memoriaRamId, slotId) {
+            const ram = document.getElementById(memoriaRamId)?.value?.trim() || '';
+            const numero = parseFloat(ram.split(' ')[0]);
+            const el = document.getElementById(slotId);
+            if (el) el.value = (!isNaN(numero) && numero > 0) ? (numero / 8) : '';
+        }
     </script>
 </body>
 </html>
