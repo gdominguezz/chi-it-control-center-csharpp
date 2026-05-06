@@ -941,7 +941,7 @@
         <div class="panel" id="panelNuevo">
             <div class="panel-title">➕ Nuevo Registro</div>
             <div class="form-grid">
-                <div class="field"><label>ID Único</label><input id="f_ID_UNICO" placeholder="Ej. OC001-FOL01"></div>
+                <div class="field"><label>ID Único</label><input id="f_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
                 <div class="field"><label>OC</label><input id="f_OC" placeholder="Orden de compra"></div>
                 <div class="field"><label>Folio / Cantidad</label><input id="f_FOLIO_CANTIDAD" placeholder="Folio o cantidad"></div>
                 <div class="field"><label>Fecha Entrada</label><input id="f_FECHA_ENTRADA" type="date"></div>
@@ -1051,7 +1051,7 @@
                 <button class="btn btn-ghost btn-sm" onclick="cerrarEditar()">✕</button>
             </div>
             <div class="form-grid-modal">
-                <div class="form-field"><label>ID Único</label><input id="e_ID_UNICO" placeholder="ID único"></div>
+                <div class="form-field"><label>ID Único</label><input id="e_ID_UNICO" readonly style="opacity:.5;cursor:not-allowed;background:var(--surface3);" placeholder="Se genera automáticamente"></div>
                 <div class="form-field"><label>OC</label><input id="e_OC" placeholder="Orden de compra"></div>
                 <div class="form-field"><label>Folio / Cantidad</label><input id="e_FOLIO_CANTIDAD" placeholder="Folio o cantidad"></div>
                 <div class="form-field"><label>Fecha Entrada</label><input id="e_FECHA_ENTRADA" type="date"></div>
@@ -1256,7 +1256,7 @@
         // ═══ GUARDAR NUEVO ═══
         async function guardar() {
             const dto = {
-                ID_UNICO: v('f_ID_UNICO'),
+                ID_UNICO: ([v('f_OC'), v('f_FOLIO_CANTIDAD')].filter(Boolean).join('')) || null,
                 OC: v('f_OC'),
                 FOLIO_CANTIDAD: v('f_FOLIO_CANTIDAD'),
                 FECHA_ENTRADA: v('f_FECHA_ENTRADA'),
@@ -1347,7 +1347,7 @@
 
         async function guardarCambios() {
             const dto = {
-                ID_UNICO: v('e_ID_UNICO'),
+                ID_UNICO: ([v('e_OC'), v('e_FOLIO_CANTIDAD')].filter(Boolean).join('')) || null,
                 OC: v('e_OC'),
                 FOLIO_CANTIDAD: v('e_FOLIO_CANTIDAD'),
                 FECHA_ENTRADA: v('e_FECHA_ENTRADA'),
