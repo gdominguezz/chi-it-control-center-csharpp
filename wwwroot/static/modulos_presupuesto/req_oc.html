@@ -878,17 +878,17 @@
             <p>Módulo de Presupuestos · PRESUPUESTOS_REQ_VS_OC</p>
         </div>
         <div class="topbar-actions">
-            <div class="user-chip" id="userChip" onclick="toggleChip()">
-                👤 <span id="nombreUsuario">Cargando...</span>
+            <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
+                👤 <span id="usuarioDisplay">Cargando...</span>
                 <span class="chip-arrow">▼</span>
                 <div class="user-dropdown">
                     <div class="dropdown-header">
-                        <div class="d-name" id="dropNombre">—</div>
-                        <div class="d-role" id="dropRol">—</div>
+                        <div class="d-name" id="dropdownNombre">—</div>
+                        <div class="d-role" id="dropdownRol">—</div>
                     </div>
-                    <button class="dropdown-item" onclick="window.location.href='/static/presupuestos_menu.html'">↩ &nbsp;Regresar a Presupuestos</button>
+                    <button class="dropdown-item" onclick="event.stopPropagation(); window.location.href='/static/presupuestos_menu.html'">↩ &nbsp;Regresar a Presupuestos</button>
                     <div class="dropdown-sep"></div>
-                    <button class="dropdown-item danger" onclick="cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
+                    <button class="dropdown-item danger" onclick="event.stopPropagation(); cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
                 </div>
             </div>
         </div>
@@ -1109,9 +1109,9 @@
 
                 usuarioActual = data.usuario;
                 const nombre = data.nombre || data.usuario;
-                document.getElementById('nombreUsuario').textContent = nombre;
-                document.getElementById('dropNombre').textContent = nombre;
-                document.getElementById('dropRol').textContent = data.rol || 'USER';
+                document.getElementById('usuarioDisplay').textContent = nombre;
+                document.getElementById('dropdownNombre').textContent = nombre;
+                document.getElementById('dropdownRol').textContent = data.rol || 'USER';
             } catch {
                 window.location.href = '/static/login.html';
             }
@@ -1123,11 +1123,11 @@
             window.location.href = '/static/login.html';
         }
 
-        function toggleChip() {
-            document.getElementById('userChip').classList.toggle('open');
+        function toggleDropdown() {
+            document.getElementById('userChipMain').classList.toggle('open');
         }
         document.addEventListener('click', e => {
-            const c = document.getElementById('userChip');
+            const c = document.getElementById('userChipMain');
             if (c && !c.contains(e.target)) c.classList.remove('open');
         });
 
