@@ -624,6 +624,21 @@ public class QrPageController : ControllerBase
         sb.AppendLine("      </div>");
         sb.AppendLine("    </div>");
 
+        // Separador paso 4
+        sb.AppendLine("    <div style=\"width:1px;height:14px;background:rgba(37,99,235,.25);margin-left:25px;\"></div>");
+
+        // Paso 4
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;align-items:flex-start;\">");
+        sb.AppendLine("      <div style=\"flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;\">4</div>");
+        sb.AppendLine("      <div style=\"padding-top:3px;\">");
+        sb.AppendLine("        <div style=\"font-size:12px;font-weight:700;color:var(--text);\">🖨️ Imprimir y Pegar los QR de los Dispositivos</div>");
+        sb.AppendLine("        <div style=\"font-size:11px;color:var(--muted);margin-top:2px;\">Usa el botón <b>🖨️ Imprimir QR</b> de la barra superior para imprimir las etiquetas de cada dispositivo.</div>");
+        sb.AppendLine("        <div style=\"margin-top:6px;padding:6px 10px;border-radius:6px;background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.35);font-size:11px;color:#fbbf24;font-weight:600;\">");
+        sb.AppendLine("          ⚠️ <b>IMPORTANTE:</b> El QR <u>no debe pegarse directamente</u> con el papel de la etiqueta &mdash; debe fijarse con una tira de <b>tape transparente encima del código</b> para protegerlo.");
+        sb.AppendLine("        </div>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
+
         sb.AppendLine("  </div>");
         sb.AppendLine("</div>");
         // ── Fin instrucciones ────────────────────────────────────────────────
@@ -1773,11 +1788,11 @@ async function guardarStock(){
     {
         var d = (disp ?? "").ToUpper();
         if (d.Contains("COMPUTADORA") || d.Contains("CPU"))
-            return new List<string> { "Sopletear el gabinete", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del gabinete", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y mouse", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza exterior del lector óptico", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente", "Verificación vida de la pila del BIOS", "Cambiar Qr del Dispositivo", "Cambiar Qr del Area" };
+            return new List<string> { "Sopletear el gabinete", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del gabinete", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y mouse", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza exterior del lector óptico", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente", "Verificación vida de la pila del BIOS", "Cambiar Qr del Dispositivo" };
         if (d.Contains("PORTATIL") || d.Contains("LAPTOP"))
             return new List<string> { "Sopletear el gabinete / chasis", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y touchpad", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente", "Cambiar Qr de la Laptop" };
         if (d.Contains("IMPRESORA"))
-            return new List<string> { "Sopletear la impresora térmica", "Limpieza de rodillos (no usar alcohol)", "Limpieza del cabezal de la impresora térmica", "Limpieza exterior de la impresora", "Limpieza del cableado", "Rutear cables / anclar eliminador de impresora", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificar que los periféricos funcionen correctamente", "Cambiar Qr del Dispositivo", "cambiar Qr del Dispositivo" };
+            return new List<string> { "Sopletear la impresora térmica", "Limpieza de rodillos (no usar alcohol)", "Limpieza del cabezal de la impresora térmica", "Limpieza exterior de la impresora", "Limpieza del cableado", "Rutear cables / anclar eliminador de impresora", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificar que los periféricos funcionen correctamente", "Cambiar Qr del Dispositivo" };
         if (d.Contains("UPS"))
             return new List<string> { "Limpieza y verificación del UPS", "Limpieza del cableado", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificación vida de la pila del UPS", "Inspección y funcionamiento del UPS", "Verificar que solo equipo IT esté conectado al UPS" };
         return new List<string> { "Inspección general", "Limpieza exterior", "Verificación de funcionamiento" };
