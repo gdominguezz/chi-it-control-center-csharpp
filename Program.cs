@@ -17,7 +17,8 @@ builder.Services.AddScoped<AuditoriaServicepreventivos>();                // AUD
 builder.Services.AddSingleton<AuditoriaServiceCorrectivos>();            // AUDITORIA DE CORRECTIVOS
 builder.Services.AddScoped<ExcelService>();                             // SERVICIOS DE EXCEL
 builder.Services.AddScoped<QrService>();                               // QRS
-builder.Services.AddScoped<BajasService>();  // BAJAS
+builder.Services.AddScoped<BajasService>();                           // BAJAS
+builder.Services.AddScoped<SoftDeleteService>();                     // SOFT DELETE GENÉRICO
 
 ///////////////////////////////////////////////////////// PRESUPUESTO //////////////////////////////////////
 builder.Services.AddScoped<PresupuestosReqVsOcService>();            //SERVICIO DEL MODULO REQ VS OC

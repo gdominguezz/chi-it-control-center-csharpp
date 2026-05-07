@@ -2496,8 +2496,23 @@
 
         // ═══ ELIMINAR / PDF ═══
         function eliminar(id) {
-            if (!confirm('¿Eliminar este registro?')) return;
-            fetch(`/PREVENTIVO/${id}`, { method: 'DELETE' }).then(() => cargar());
+            if (!confirm('¿Enviar este registro a inactivos?')) return;
+
+            fetch(`/SOFT_DELETE/mantenimientos_preventivos/${id}`, {
+                method: 'DELETE'
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok) {
+                        cargar();
+                    } else {
+                        alert("Error: " + data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Error al eliminar");
+                });
         }
         function subirPDF(id, input) {
             const fd = new FormData(); fd.append('file', input.files[0]);

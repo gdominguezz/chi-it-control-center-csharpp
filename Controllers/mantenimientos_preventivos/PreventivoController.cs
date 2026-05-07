@@ -31,7 +31,7 @@ public class PreventivoController : ControllerBase
     [HttpGet("PREVENTIVOS")]
     public IActionResult ObtenerPreventivos([FromQuery] FiltrosPreventivo f)
     {
-        var where = "WHERE 1=1";
+        var where = "WHERE (activo IS NULL OR activo = true)";
         var parms = new List<NpgsqlParameter>();
         int pIdx = 1;
 
