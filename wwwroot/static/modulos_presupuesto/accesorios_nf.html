@@ -1317,9 +1317,9 @@
 
         // ═══ ELIMINAR ═══
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este accesorio NF?')) return;
+            if (!confirm('¿Enviar este accesorio NF a inactivos?')) return;
             try {
-                await fetch(`/ACCESORIO_NF/${id}`, { method: 'DELETE' });
+                await fetch(`/SOFT_DELETE/accesorios_nf/${id}`, { method: 'DELETE' });
                 cargar();
             } catch (e) { alert('Error: ' + e.message); }
         }
