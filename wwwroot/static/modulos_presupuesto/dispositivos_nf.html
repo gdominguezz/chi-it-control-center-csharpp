@@ -1524,8 +1524,9 @@
                             <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.PERSONAL_IT_QUE_ASIGNA) || ''}">${esc(row.PERSONAL_IT_QUE_ASIGNA) || '—'}</td>
                             <td class="mono">${esc(row.FORMATO_DE_BAJA) || '—'}</td>
                             <td style="white-space:nowrap">
-                                ${esAdmin ? `
                                 <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                ${esAdmin ? `
+
                                 <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
                                 ` : ''}
                                 <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
