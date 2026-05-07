@@ -1564,7 +1564,7 @@
             document.getElementById('userChipMain').classList.toggle('open');
         }
         document.addEventListener('click', e => {
-            if (!e.target.closest('#userChip')) document.getElementById('userChipMain').classList.remove('open');
+            if (!e.target.closest('#userChipMain')) document.getElementById('userChipMain').classList.remove('open');
         });
         async function cerrarSesion() {
             try { await fetch('/logout', { method: 'POST' }); } catch { }
@@ -1578,7 +1578,7 @@
 
             document.getElementById('usuarioDisplay').textContent = nombre;
             document.getElementById('dropdownNombre').textContent = nombre;
-                document.getElementById('dropdownRol').textContent = rolActual;
+            document.getElementById('dropdownRol').textContent = rolActual;
 
             const rol = getCookie('rol') || 'USER';
             document.getElementById('dropRol').textContent = rol;
@@ -1715,35 +1715,35 @@
                 };
 
                 return `<tr>
-                <td class="mono">${esc(r.id_unico) || '—'}</td>
-                <td class="mono">${esc(r.oc) || '—'}</td>
-                <td class="mono">${esc(r.folio) || '—'}</td>
-                <td class="mono">${fmtDate(r.fecha_registro)}</td>
-                <td>${esc(r.recibido_por) || '—'}</td>
-                <td>${subPill}</td>
-                <td>${esc(r.proveedor) || '—'}</td>
-                <td class="num">${fmtUSD(r.costo_usd)}</td>
-                <td class="num">${r.vida_util_meses != null ? r.vida_util_meses : '—'}</td>
-                <td><strong>${esc(r.marca) || '—'}</strong></td>
-                <td>${esc(r.modelo) || '—'}</td>
-                <td class="mono">${esc(r.no_serie) || '—'}</td>
-                <td class="num">${r.cantidad != null ? r.cantidad : '—'}</td>
-                <td class="num">${r.tamano_pulgadas != null ? r.tamano_pulgadas + '"' : '—'}</td>
-                <td class="wrap">${esc(r.accesorios) || '—'}</td>
-                <td class="mono">${esc(r.mac_wifi) || '—'}</td>
-                <td class="mono">${esc(r.mac_ethernet) || '—'}</td>
-                <td>${estadoPill}</td>
-                <td>${dispPill}</td>
-                <td class="mono">${fmtDate(r.fecha_salida)}</td>
-                <td>${esc(r.destino_planta) || '—'}</td>
-                <td>${esc(r.asignado_a) || '—'}</td>
-                <td>${esc(r.personal_it_que_asigna) || '—'}</td>
-                <td class="td-acciones" style="display:flex;gap:5px;padding:6px 10px;">
-                    <button class="btn btn-amber btn-sm" title="Editar" onclick="abrirEditar(${r.id})">✏️</button>
-                    <button class="btn btn-primary btn-sm" title="Historial" onclick="verHistorial(${r.id})">📄</button>
-                    <button class="btn btn-danger btn-sm" title="Eliminar" onclick="eliminarRegistro(${r.id})">🗑</button>
-                </td>
-            </tr>`;
+                    <td class="mono">${esc(r.id_unico) || '—'}</td>
+                    <td class="mono">${esc(r.oc) || '—'}</td>
+                    <td class="mono">${esc(r.folio) || '—'}</td>
+                    <td class="mono">${fmtDate(r.fecha_registro)}</td>
+                    <td>${esc(r.recibido_por) || '—'}</td>
+                    <td>${subPill}</td>
+                    <td>${esc(r.proveedor) || '—'}</td>
+                    <td class="num">${fmtUSD(r.costo_usd)}</td>
+                    <td class="num">${r.vida_util_meses != null ? r.vida_util_meses : '—'}</td>
+                    <td><strong>${esc(r.marca) || '—'}</strong></td>
+                    <td>${esc(r.modelo) || '—'}</td>
+                    <td class="mono">${esc(r.no_serie) || '—'}</td>
+                    <td class="num">${r.cantidad != null ? r.cantidad : '—'}</td>
+                    <td class="num">${r.tamano_pulgadas != null ? r.tamano_pulgadas + '"' : '—'}</td>
+                    <td class="wrap">${esc(r.accesorios) || '—'}</td>
+                    <td class="mono">${esc(r.mac_wifi) || '—'}</td>
+                    <td class="mono">${esc(r.mac_ethernet) || '—'}</td>
+                    <td>${estadoPill}</td>
+                    <td>${dispPill}</td>
+                    <td class="mono">${fmtDate(r.fecha_salida)}</td>
+                    <td>${esc(r.destino_planta) || '—'}</td>
+                    <td>${esc(r.asignado_a) || '—'}</td>
+                    <td>${esc(r.personal_it_que_asigna) || '—'}</td>
+                    <td class="td-acciones" style="display:flex;gap:5px;padding:6px 10px;">
+                        <button class="btn btn-amber btn-sm" title="Editar" onclick="abrirEditar(${r.id})">✏️</button>
+                        <button class="btn btn-primary btn-sm" title="Historial" onclick="verHistorial(${r.id})">📄</button>
+                        <button class="btn btn-danger btn-sm" title="Eliminar" onclick="eliminarRegistro(${r.id})">🗑</button>
+                    </td>
+                </tr>`;
             }).join('');
         }
 
@@ -1932,25 +1932,25 @@
                 const vD = despues && key in despues ? despues[key] : '';
                 const cambiado = cambios.has(key);
                 filas += `<tr class="${cambiado ? 'row-changed' : ''}">
-                <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
-                <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
-            </tr>`;
+                    <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                    <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
+                    <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
+                </tr>`;
             });
 
             return `<div class="ev-wrap">
-            <div class="ev-header">
-                <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-                    ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-                </span>
-            </div>
-            <table class="ev-table">
-                <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
-                <tbody>${filas}</tbody>
-            </table>
-        </div>`;
+                <div class="ev-header">
+                    <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                    <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                    <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                        ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                    </span>
+                </div>
+                <table class="ev-table">
+                    <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
+                    <tbody>${filas}</tbody>
+                </table>
+            </div>`;
         }
 
         function verHistorial(id) {
