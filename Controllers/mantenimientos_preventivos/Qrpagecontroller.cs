@@ -702,6 +702,66 @@ public class QrPageController : ControllerBase
         sb.AppendLine("</div>");
         // ── Fin instrucciones correctivo ─────────────────────────────────────
 
+        // ── Instrucciones Baja de Equipo desde Preventivo ────────────────────
+        sb.AppendLine("<div style=\"margin:0 20px 28px;padding:18px 22px;background:linear-gradient(135deg,rgba(234,88,12,.08),rgba(194,65,12,.05));border:1px solid rgba(234,88,12,.28);border-radius:14px;\">");
+        sb.AppendLine("  <div style=\"display:flex;align-items:center;gap:8px;margin-bottom:14px;\">");
+        sb.AppendLine("    <span style=\"font-size:16px;\">📤</span>");
+        sb.AppendLine("    <span style=\"font-size:12px;font-weight:700;color:#fb923c;text-transform:uppercase;letter-spacing:.08em;\">¿Cómo registrar la baja de un equipo?</span>");
+        sb.AppendLine("  </div>");
+        sb.AppendLine("  <div style=\"display:flex;flex-direction:column;gap:12px;\">");
+
+        // Paso A
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;align-items:flex-start;\">");
+        sb.AppendLine("      <div style=\"flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#c2410c,#ea580c);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;\">1</div>");
+        sb.AppendLine("      <div style=\"padding-top:3px;\">");
+        sb.AppendLine("        <div style=\"font-size:12px;font-weight:700;color:var(--text);\">📋 Presiona el botón <b>📤 Baja de Equipo</b></div>");
+        sb.AppendLine("        <div style=\"font-size:11px;color:var(--muted);margin-top:2px;\">Dentro del período (P1 o P2) encontrarás el botón naranja <b>📤 Baja de Equipo</b>, visible junto al botón de guardar el preventivo.</div>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
+
+        // Separador
+        sb.AppendLine("    <div style=\"width:1px;height:14px;background:rgba(234,88,12,.25);margin-left:25px;\"></div>");
+
+        // Paso B
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;align-items:flex-start;\">");
+        sb.AppendLine("      <div style=\"flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#c2410c,#ea580c);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;\">2</div>");
+        sb.AppendLine("      <div style=\"padding-top:3px;\">");
+        sb.AppendLine("        <div style=\"font-size:12px;font-weight:700;color:var(--text);\">📝 Llena los datos de la baja</div>");
+        sb.AppendLine("        <div style=\"font-size:11px;color:var(--muted);margin-top:2px;\">Los campos <b>Planta</b>, <b>Equipo</b>, <b>No. Serie</b> y <b>Ubicación/Persona</b> se llenan automáticamente. Debes completar manualmente: <b>Folio</b>, <b>Fecha</b>, <b>Marca</b>, <b>Modelo</b>, <b>Activo Fijo</b>, <b>Motivo de Baja</b>, <b>Diagnóstico</b> y <b>Comentarios</b>.</div>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
+
+        // Separador
+        sb.AppendLine("    <div style=\"width:1px;height:14px;background:rgba(234,88,12,.25);margin-left:25px;\"></div>");
+
+        // Paso C
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;align-items:flex-start;\">");
+        sb.AppendLine("      <div style=\"flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#c2410c,#ea580c);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;\">3</div>");
+        sb.AppendLine("      <div style=\"padding-top:3px;\">");
+        sb.AppendLine("        <div style=\"font-size:12px;font-weight:700;color:var(--text);\">🔄 Asigna el ID del equipo de reemplazo</div>");
+        sb.AppendLine("        <div style=\"font-size:11px;color:var(--muted);margin-top:2px;\">El campo <b>ID Equipo de Reemplazo</b> es <b>obligatorio</b>. Ingresa el ID del equipo que sustituirá al que se da de baja — este ID actualizará automáticamente la tarjeta en el sistema.</div>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
+
+        // Separador
+        sb.AppendLine("    <div style=\"width:1px;height:14px;background:rgba(234,88,12,.25);margin-left:25px;\"></div>");
+
+        // Paso D
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;align-items:flex-start;\">");
+        sb.AppendLine("      <div style=\"flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#c2410c,#ea580c);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;\">4</div>");
+        sb.AppendLine("      <div style=\"padding-top:3px;\">");
+        sb.AppendLine("        <div style=\"font-size:12px;font-weight:700;color:var(--text);\">💾 Registra la baja</div>");
+        sb.AppendLine("        <div style=\"font-size:11px;color:var(--muted);margin-top:2px;\">Presiona <b>Registrar Baja</b>. El equipo quedará marcado como dado de baja con estatus <b>PENDIENTE</b> y el ID del equipo de reemplazo tomará su lugar en la tarjeta del preventivo.</div>");
+        sb.AppendLine("        <div style=\"margin-top:6px;padding:6px 10px;border-radius:6px;background:rgba(234,88,12,.12);border:1px solid rgba(234,88,12,.30);font-size:11px;color:#fdba74;font-weight:600;\">");
+        sb.AppendLine("          ⚠️ <b>IMPORTANTE:</b> Una vez registrada la baja, la tarjeta del preventivo se actualiza con el <u>nuevo ID de equipo</u> de forma inmediata &mdash; verifica que el ID de reemplazo sea el correcto antes de guardar.");
+        sb.AppendLine("        </div>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
+
+        sb.AppendLine("  </div>");
+        sb.AppendLine("</div>");
+        // ── Fin instrucciones baja ────────────────────────────────────────────
+
         // ── Fin instrucciones ────────────────────────────────────────────────
 
         sb.AppendLine("<div class=\"modal\" id=\"modalLogin\">");
