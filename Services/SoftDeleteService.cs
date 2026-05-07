@@ -33,6 +33,9 @@ public static class TablasPermitidas
 
     // ── PREVENTIVOS ──
     "mantenimientos_preventivos",
+    
+    // ── CORRECTIVOS ──
+    "mantenimientos_correctivos",
 
     // ── Otros módulos ──
     "bajas",

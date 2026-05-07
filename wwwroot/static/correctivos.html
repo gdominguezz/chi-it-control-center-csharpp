@@ -2147,7 +2147,7 @@
         function limpiarForm() { CAMPOS.forEach(({ key }) => { const el = document.getElementById('n_' + key); if (el) el.value = ''; }); }
 
         /* ── PDF / Eliminar ── */
-        function eliminar(id) { if (!confirm('¿Eliminar este registro?')) return; fetch(`/CORRECTIVO/${id}`, { method: 'DELETE' }).then(() => cargar()); }
+        function eliminar(id) { if (!confirm('¿Enviar este registro a inactivos?')) return; fetch(`/SOFT_DELETE/mantenimientos_correctivos/${id}`, { method: 'DELETE' }).then(() => cargar()); }
         function subirPDF(id, input) { const fd = new FormData(); fd.append('file', input.files[0]); fetch(`/CORRECTIVO/PDF/${id}`, { method: 'POST', body: fd }).then(() => cargar()); }
         function verPDF(id) { window.open(`/CORRECTIVO/PDF/${id}`, '_blank'); }
         function eliminarPDF(id) { if (!confirm('¿Eliminar el PDF?')) return; fetch(`/CORRECTIVO/PDF/${id}`, { method: 'DELETE' }).then(() => cargar()); }

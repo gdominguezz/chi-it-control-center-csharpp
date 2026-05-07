@@ -44,7 +44,7 @@ public class CorrectivoController : ControllerBase
     [HttpGet("CORRECTIVOS")]
     public IActionResult ObtenerCorrectivos([FromQuery] FiltrosCorrectivo f)
     {
-        var where = "WHERE 1=1";
+        var where = "WHERE (activo IS NULL OR activo = true)";
         var parms = new List<NpgsqlParameter>();
         int pIdx = 1;
 
