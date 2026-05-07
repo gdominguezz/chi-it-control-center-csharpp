@@ -1038,6 +1038,53 @@ public class CorrectivoController : ControllerBase
             return StatusCode(500, new { error = ex.Message });
         }
     }
+    // ══════════════════════════════════════════════════════════════════════
+    // GET /CORRECTIVOS/BUSCAR_SERIE?q=ABC123
+    // Devuelve los registros activos que tienen ese número de serie exacto.
+    // Usado por el formulario de nuevo registro para avisar duplicados.
+    // ══════════════════════════════════════════════════════════════════════
+    [HttpGet("CORRECTIVOS/BUSCAR_SERIE")]
+    public IActionResult BuscarSerie([FromQuery] string? q)
+    {
+        if (string.IsNullOrWhiteSpace(q))
+            return Ok(new { duplicado = false, registros = Array.Empty<object>() });
+
+        try
+        {
+            using var conn = _db.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                SELECT id, folio, equipo, planta, status
+                FROM public.mantenimientos_correctivos
+                WHERE (activo IS NULL OR activo = true)
+                  AND TRIM(LOWER(numero_serie)) = TRIM(LOWER(@serie))
+                ORDER BY id DESC
+                LIMIT 10
+                """;
+            cmd.Parameters.AddWithValue("serie", q.Trim());
+
+            var lista = new List<Dictionary<string, object?>>();
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                lista.Add(new Dictionary<string, object?>
+                {
+                    ["id"] = r.IsDBNull(0) ? null : r.GetValue(0),
+                    ["folio"] = r.IsDBNull(1) ? null : r.GetString(1),
+                    ["equipo"] = r.IsDBNull(2) ? null : r.GetString(2),
+                    ["planta"] = r.IsDBNull(3) ? null : r.GetString(3),
+                    ["status"] = r.IsDBNull(4) ? null : r.GetString(4),
+                });
+            }
+
+            return Ok(new { duplicado = lista.Count > 0, registros = lista });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
     // ══════════════════════════════════════════════════════════════════════════
     // MODELOS
     // ══════════════════════════════════════════════════════════════════════════

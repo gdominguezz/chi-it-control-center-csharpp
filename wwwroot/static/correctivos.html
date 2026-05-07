@@ -426,6 +426,41 @@
                 opacity: 0.8;
             }
 
+        /* Aviso de serie duplicada en el formulario */
+        .serie-warning {
+            display: none;
+            margin-top: 5px;
+            background: rgba(139,92,246,.15);
+            border: 1px solid rgba(139,92,246,.4);
+            border-radius: 7px;
+            padding: 7px 10px;
+            font-size: 11px;
+            color: #C4B5FD;
+            line-height: 1.5;
+        }
+
+            .serie-warning.visible {
+                display: block;
+            }
+
+            .serie-warning strong {
+                color: #DDD6FE;
+                font-weight: 700;
+            }
+
+            .serie-warning .serie-warn-list {
+                margin-top: 4px;
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .serie-warning .serie-warn-item {
+                font-family: 'DM Mono', monospace;
+                font-size: 10px;
+                color: #A78BFA;
+            }
+
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -1644,7 +1679,14 @@
                         <input type="text" id="n_MODELO" autocomplete="off" list="listaModelosNuevo">
                         <datalist id="listaModelosNuevo"></datalist>
                     </div>
-                    <div class="field"><label>NUMERO SERIE</label><input id="n_NUMERO_SERIE"></div>
+                    <div class="field">
+                        <label>NUMERO SERIE</label>
+                        <input id="n_NUMERO_SERIE" autocomplete="off">
+                        <div class="serie-warning" id="serieWarning">
+                            ⚠️ <strong>Número de serie duplicado</strong> — ya existe en:
+                            <div class="serie-warn-list" id="serieWarnList"></div>
+                        </div>
+                    </div>
                     <div class="field"><label>FECHA SOLICITUD</label><input id="n_FECHA_SOLICITUD" type="date"></div>
                     <div class="field">
                         <label>REPORTE ELABORADO POR</label>
@@ -2169,7 +2211,36 @@
             fetch('/CORRECTIVO', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
                 .then(r => r.json()).then(d => { if (d.error) { alert('Error: ' + d.error); return; } limpiarForm(); cargar(); });
         }
-        function limpiarForm() { CAMPOS.forEach(({ key }) => { const el = document.getElementById('n_' + key); if (el) el.value = ''; }); }
+        function limpiarForm() {
+            CAMPOS.forEach(({ key }) => { const el = document.getElementById('n_' + key); if (el) el.value = ''; });
+            ocultarSerieWarning();
+        }
+
+        /* ── Validación de número de serie duplicado ── */
+        let _serieTmr;
+        function ocultarSerieWarning() {
+            document.getElementById('serieWarning').classList.remove('visible');
+            document.getElementById('serieWarnList').innerHTML = '';
+        }
+        document.getElementById('n_NUMERO_SERIE').addEventListener('input', function () {
+            clearTimeout(_serieTmr);
+            ocultarSerieWarning();
+            const val = this.value.trim();
+            if (!val) return;
+            _serieTmr = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/CORRECTIVOS/BUSCAR_SERIE?q=${encodeURIComponent(val)}`);
+                    const data = await res.json();
+                    if (data.duplicado && data.registros.length > 0) {
+                        const list = document.getElementById('serieWarnList');
+                        list.innerHTML = data.registros.map(r =>
+                            `<div class="serie-warn-item">· #${r.id} ${r.folio ? '· ' + r.folio : ''} · ${r.equipo || '—'} · ${r.planta || '—'} · ${r.status || '—'}</div>`
+                        ).join('');
+                        document.getElementById('serieWarning').classList.add('visible');
+                    }
+                } catch (e) { /* silencioso */ }
+            }, 500);
+        });
 
         /* ── PDF / Eliminar ── */
         function eliminar(id) { if (!confirm('¿Enviar este registro a inactivos?')) return; fetch(`/SOFT_DELETE/mantenimientos_correctivos/${id}`, { method: 'DELETE' }).then(() => cargar()); }
