@@ -2229,9 +2229,18 @@
         }
 
         // ── CRUD ────────────────────────────────────────────────────────
-        function eliminar(id) {
-            if (!confirm('¿Eliminar esta orden de compra?')) return;
-            fetch(`/ORDENES_DE_COMPRA/${id}`, { method: 'DELETE' }).then(() => cargar());
+        async function eliminar(id) {
+            if (!confirm('¿Enviar esta orden de compra a inactivos?')) return;
+
+            try {
+                await fetch(`/SOFT_DELETE/ordenes_de_compra/${id}`, {
+                    method: 'DELETE'
+                });
+
+                cargar();
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
         }
         function subirPDF(id, input) {
             const fd = new FormData(); fd.append('file', input.files[0]);

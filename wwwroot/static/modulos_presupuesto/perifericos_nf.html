@@ -1308,11 +1308,21 @@
 
         // ═══ ELIMINAR ═══
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este periférico NF?')) return;
+
+            if (!confirm('¿Enviar este periférico NF a inactivos?')) return;
+
             try {
-                await fetch(`/PERIFERICO_NF/${id}`, { method: 'DELETE' });
+
+                await fetch('/SOFT_DELETE/perifericos_nf/' + id, {
+                    method: 'DELETE',
+                    headers: { 'X-Usuario': usuarioActual }
+                });
+
                 cargar();
-            } catch (e) { alert('Error: ' + e.message); }
+
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
         }
 
         // ═══ EXPORTAR ═══

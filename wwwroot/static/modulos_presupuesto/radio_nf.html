@@ -801,11 +801,25 @@
 
     // ═══ ELIMINAR ═══
     async function eliminar(id) {
-        if (!confirm('¿Eliminar este radio?')) return;
+
+        if (!confirm('¿Enviar este registro a inactivos?')) return;
+
         try {
-            await fetch(`/RADIO_NF/${id}`, { method: 'DELETE' });
+
+            await fetch(`/SOFT_DELETE/radios_nf/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-Usuario': usuarioActual
+                }
+            });
+
             cargar();
-        } catch (e) { alert('Error: ' + e.message); }
+
+        } catch (e) {
+
+            alert('Error: ' + e.message);
+
+        }
     }
 
     // ═══ EXPORTAR ═══

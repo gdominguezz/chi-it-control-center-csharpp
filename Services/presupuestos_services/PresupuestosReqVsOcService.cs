@@ -56,6 +56,9 @@ public class PresupuestosReqVsOcService
     {
         using var con = Abrir();
         var whereConditions = new List<string>();
+
+        whereConditions.Add("(activo IS NULL OR activo = true)");
+
         var paramValues = new List<(string name, string value)>();
 
         void CollectFilter(string column, string? value, string param)
@@ -272,6 +275,7 @@ public class PresupuestosReqVsOcService
                    po_subtotal, moneda, oc_subtotal, registrada_en_oc, pdf
             FROM req_vs_oc
             WHERE EXTRACT(YEAR FROM fecha_compra) = @anio
+            AND (activo IS NULL OR activo = true)
             ORDER BY id DESC
             """;
 

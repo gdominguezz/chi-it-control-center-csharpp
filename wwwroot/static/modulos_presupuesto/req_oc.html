@@ -1296,8 +1296,13 @@
 
         // ── Eliminar ───────────────────────────────────────────────────────
         function eliminar(id) {
-            if (!confirm('¿Eliminar este registro?')) return;
-            fetch(`/PRESUPUESTOS_REQ_VS_OC/${id}`, { method: 'DELETE' })
+
+            if (!confirm('¿Enviar este registro a inactivos?')) return;
+
+            fetch(`/SOFT_DELETE/req_vs_oc/${id}`, {
+                method: 'DELETE',
+                headers: { 'X-Usuario': usuarioActual }
+            })
                 .then(() => cargar());
         }
 

@@ -110,14 +110,15 @@ public class PantallasNfService
     {
         await using var conn = await _pool.OpenAsync();
         await using var cmd = new NpgsqlCommand("""
-            SELECT id, id_unico, oc, folio, fecha_registro, recibido_por, subcategoria,
-                   marca, modelo, no_serie, cantidad, tamano_pulgadas, accesorios,
-                   mac_wifi, mac_ethernet, proveedor, costo_usd, vida_util_meses,
-                   estado, disponible, fecha_salida, destino_planta, asignado_a,
-                   personal_it_que_asigna
-            FROM pantallas_nf
-            ORDER BY id DESC
-            """, conn);
+        SELECT id, id_unico, oc, folio, fecha_registro, recibido_por, subcategoria,
+               marca, modelo, no_serie, cantidad, tamano_pulgadas, accesorios,
+               mac_wifi, mac_ethernet, proveedor, costo_usd, vida_util_meses,
+               estado, disponible, fecha_salida, destino_planta, asignado_a,
+               personal_it_que_asigna
+        FROM pantallas_nf
+        WHERE (activo IS NULL OR activo = true)
+        ORDER BY id DESC
+        """, conn);
 
         var lista = new List<object>();
         await using var r = await cmd.ExecuteReaderAsync();

@@ -103,6 +103,10 @@ public class TintasTonerRibonNFService
         await using var conn = await _pool.OpenAsync();
 
         var (where, parms) = ConstruirWhere(f);
+        if (string.IsNullOrWhiteSpace(where))
+            where = "WHERE (activo IS NULL OR activo = true)";
+        else
+            where += " AND (activo IS NULL OR activo = true)";
         var offset = (page - 1) * limit;
 
         // Total
@@ -254,6 +258,11 @@ public class TintasTonerRibonNFService
 
         var (where, parms) = ConstruirWhere(f);
 
+        if (string.IsNullOrWhiteSpace(where))
+            where = "WHERE (activo IS NULL OR activo = true)";
+        else
+            where += " AND (activo IS NULL OR activo = true)";
+
         await using var cmd = new NpgsqlCommand(
             $@"SELECT id, id_unico, oc, modelo, recibido_por,
                       subcategoria, fecha_registro, proveedor, stock,
@@ -279,14 +288,17 @@ public class TintasTonerRibonNFService
     public async Task<byte[]> ExportarPorAnioAsync(int anio)
     {
         await using var conn = await _pool.OpenAsync();
+
         await using var cmd = new NpgsqlCommand(
             @"SELECT id, id_unico, oc, modelo, recibido_por,
-                     subcategoria, fecha_registro, proveedor, stock,
-                     costo_mn, cantidad_recibida, fecha_instalacion,
-                     ubicacion, impresora, instalado_por
-              FROM tintas_toner_ribon_nf
-              WHERE EXTRACT(YEAR FROM fecha_registro) = @anio
-              ORDER BY id DESC", conn);
+                 subcategoria, fecha_registro, proveedor, stock,
+                 costo_mn, cantidad_recibida, fecha_instalacion,
+                 ubicacion, impresora, instalado_por
+          FROM tintas_toner_ribon_nf
+          WHERE EXTRACT(YEAR FROM fecha_registro) = @anio
+          AND (activo IS NULL OR activo = true)
+          ORDER BY id DESC", conn);
+
         cmd.Parameters.AddWithValue("anio", anio);
 
         var rows = new List<string?[]>();
@@ -354,9 +366,12 @@ public class TintasTonerRibonNFService
     {
         await using var cmd = new NpgsqlCommand(
             @"SELECT id_unico, oc, modelo, recibido_por, subcategoria,
-                     fecha_registro, proveedor, stock, costo_mn,
-                     cantidad_recibida, fecha_instalacion, ubicacion, impresora, instalado_por
-              FROM tintas_toner_ribon_nf WHERE id=@id", conn);
+                 fecha_registro, proveedor, stock, costo_mn,
+                 cantidad_recibida, fecha_instalacion, ubicacion, impresora, instalado_por
+          FROM tintas_toner_ribon_nf
+          WHERE id=@id
+          AND (activo IS NULL OR activo = true)", conn);
+
         cmd.Parameters.AddWithValue("id", id);
 
         await using var r = await cmd.ExecuteReaderAsync();

@@ -336,6 +336,7 @@ public class PerifeicosNFService
                      destino_planta, asignado_a, personal_it_que_asigna, created_at
               FROM perifericos_nf
               WHERE EXTRACT(YEAR FROM fecha_entrada) = @anio
+              AND (activo IS NULL OR activo = true)
               ORDER BY id DESC", conn);
         cmd.Parameters.AddWithValue("anio", anio);
 
@@ -356,6 +357,9 @@ public class PerifeicosNFService
     private static (string where, List<(string key, object? val)> parms) ConstruirWhere(PerifericoNFFiltros f)
     {
         var conds = new List<string>();
+
+        conds.Add("(activo IS NULL OR activo = true)");
+
         var parms = new List<(string, object?)>();
         var idx   = 1;
 

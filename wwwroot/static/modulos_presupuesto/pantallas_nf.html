@@ -1886,18 +1886,18 @@
         }
         async function eliminarRegistro(id) {
 
-            if (!confirm('¿Eliminar este registro de pantalla?')) return;
+            if (!confirm('¿Enviar este registro de pantalla a inactivos?')) return;
 
             try {
 
-                const r = await fetch('/PANTALLAS_NF/' + id, {
+                const r = await fetch('/SOFT_DELETE/pantallas_nf/' + id, {
                     method: 'DELETE',
                     headers: { 'X-Usuario': usuarioActual }
                 });
 
                 if (!r.ok) {
                     const txt = await r.text();
-                    throw new Error(txt || 'No se pudo eliminar');
+                    throw new Error(txt || 'No se pudo enviar a inactivos');
                 }
 
                 cargar();

@@ -331,6 +331,7 @@ public class RadiosNFService
                      asignado_a, destino_planta, personal_it_asigna
               FROM radios_nf
               WHERE EXTRACT(YEAR FROM fecha_registro) = @anio
+              AND (activo IS NULL OR activo = true)
               ORDER BY id DESC", conn);
         cmd.Parameters.AddWithValue("anio", anio);
 
@@ -351,6 +352,8 @@ public class RadiosNFService
     private static (string where, List<(string key, object? val)> parms) ConstruirWhere(RadioNFFiltros f)
     {
         var conds = new List<string>();
+
+        conds.Add("(activo IS NULL OR activo = true)");
         var parms = new List<(string, object?)>();
         var idx = 1;
 

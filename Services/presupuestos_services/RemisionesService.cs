@@ -329,6 +329,7 @@ public class RemisionesService
                      cuenta_a_descontar, fecha_entrada_planta, status, requisicion, oc
               FROM remisiones
               WHERE EXTRACT(YEAR FROM fecha_solicitud) = @anio
+              AND (activo IS NULL OR activo = true)
               ORDER BY id DESC", conn);
         cmd.Parameters.AddWithValue("anio", anio);
 
@@ -349,6 +350,9 @@ public class RemisionesService
     private static (string where, List<(string key, object? val)> parms) ConstruirWhere(RemisionFiltros f)
     {
         var conds = new List<string>();
+
+        conds.Add("(activo IS NULL OR activo = true)");
+
         var parms = new List<(string, object?)>();
         var idx = 1;
 
@@ -410,10 +414,13 @@ public class RemisionesService
     {
         await using var cmd = new NpgsqlCommand(
             @"SELECT id_oc, id_remision, folio, solicitante, fecha_solicitud,
-                     accesorio_solicitado, modelo_serie_comentarios, proveedor, pieza_servicio,
-                     cantidad, precio_unitario, total_sin_iva, moneda, pagado,
-                     presupuesto, cuenta_a_descontar, fecha_entrada_planta, status, requisicion, oc
-              FROM remisiones WHERE id=@id", conn);
+             accesorio_solicitado, modelo_serie_comentarios, proveedor, pieza_servicio,
+             cantidad, precio_unitario, total_sin_iva, moneda, pagado,
+             presupuesto, cuenta_a_descontar, fecha_entrada_planta, status, requisicion, oc
+          FROM remisiones
+          WHERE id = @id
+          AND (activo IS NULL OR activo = true)", conn);
+
         cmd.Parameters.AddWithValue("id", id);
 
         await using var r = await cmd.ExecuteReaderAsync();

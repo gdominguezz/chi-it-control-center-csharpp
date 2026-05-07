@@ -69,6 +69,9 @@ public class RegistroEntradasTemporalService
         using var con = Abrir();
 
         var whereConditions = new List<string>();
+
+        whereConditions.Add("(activo IS NULL OR activo = true)");
+
         var paramValues = new List<(string name, string value)>();
 
         void AddFilter(string column, string? value, string param)
@@ -183,6 +186,7 @@ public class RegistroEntradasTemporalService
                    fecha_salida, destino, responsable, pdf
             FROM registro_entradas_temporal
             WHERE id = @id
+            AND (activo IS NULL OR activo = true)
             """;
 
         cmd.Parameters.AddWithValue("id", id);
@@ -439,6 +443,7 @@ public class RegistroEntradasTemporalService
                    fecha_salida, destino, responsable, pdf
             FROM registro_entradas_temporal
             WHERE EXTRACT(YEAR FROM fecha_ingreso) = @anio
+            AND (activo IS NULL OR activo = true)
             ORDER BY id DESC
             """;
 

@@ -1344,13 +1344,23 @@
                 });
         }
 
-        // ═══ ELIMINAR ═══
+        // ═══ ELIMINAR ══
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este registro?')) return;
+            if (!confirm('¿Enviar este registro a inactivos?')) return;
+
             try {
-                await fetch(`/TINTA_TONER_RIBON_NF/${id}`, { method: 'DELETE' });
+
+                await fetch(`/SOFT_DELETE/tintas_toner_ribon_nf/${id}`, {
+                    method: 'DELETE'
+                });
+
                 cargar();
-            } catch (e) { alert('Error: ' + e.message); }
+
+            } catch (e) {
+
+                alert('Error: ' + e.message);
+
+            }
         }
 
         // ═══ EXPORTAR ═══

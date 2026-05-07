@@ -122,6 +122,10 @@ public class ServiciosProveedoresService
         await using var conn = await _pool.OpenAsync();
 
         var (where, parms) = ConstruirWhere(f);
+        if (string.IsNullOrWhiteSpace(where))
+            where = "WHERE (activo IS NULL OR activo = true)";
+        else
+            where += " AND (activo IS NULL OR activo = true)";
         var offset = (page - 1) * limit;
 
         // Total
@@ -305,7 +309,10 @@ public class ServiciosProveedoresService
     {
         await using var conn = await _pool.OpenAsync();
         var (where, parms) = ConstruirWhere(f);
-
+        if (string.IsNullOrWhiteSpace(where))
+            where = "WHERE (activo IS NULL OR activo = true)";
+        else
+            where += " AND (activo IS NULL OR activo = true)";
         await using var cmd = new NpgsqlCommand(
             $@"SELECT id, id_unico, folio_unico, folio_cotizacion, folio_reporte,
                       fecha, requisitor, cuenta_con_poliza, servicio_con_costo,
@@ -422,10 +429,13 @@ public class ServiciosProveedoresService
     {
         await using var cmd = new NpgsqlCommand(
             @"SELECT id_unico, folio_unico, folio_cotizacion, folio_reporte, fecha,
-                     requisitor, cuenta_con_poliza, servicio_con_costo, ubicacion_planta, area,
-                     cantidad, descripcion_servicio, descripcion_trabajo, material_equipo, observaciones,
-                     proveedores, panel_faceplate, switch, personal_recibio, solicitud_finalizada, costo
-              FROM servicios_proveedores WHERE id=@id", conn);
+                 requisitor, cuenta_con_poliza, servicio_con_costo, ubicacion_planta, area,
+                 cantidad, descripcion_servicio, descripcion_trabajo, material_equipo, observaciones,
+                 proveedores, panel_faceplate, switch, personal_recibio, solicitud_finalizada, costo
+          FROM servicios_proveedores
+          WHERE id=@id
+          AND (activo IS NULL OR activo = true)", conn);
+
         cmd.Parameters.AddWithValue("id", id);
 
         await using var r = await cmd.ExecuteReaderAsync();

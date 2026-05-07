@@ -1747,17 +1747,29 @@
 
         async function eliminar(id) {
             const targetId = id !== undefined ? id : editandoId;
+
             if (!targetId) return;
-            if (!confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
+
+            if (!confirm('¿Enviar esta remisión a inactivos?')) return;
+
             try {
-                const res = await fetch(`${ENDPOINT_1}/${targetId}`, {
+
+                const res = await fetch(`/SOFT_DELETE/remisiones/${targetId}`, {
                     method: 'DELETE',
                     headers: { 'X-Usuario': usuarioActual }
                 });
-                if (!res.ok) throw new Error((await res.json()).error || res.statusText);
+
+                if (!res.ok)
+                    throw new Error((await res.json()).error || res.statusText);
+
                 cerrarEditar();
                 cargar();
-            } catch (e) { alert('❌ Error al eliminar: ' + e.message); }
+
+            } catch (e) {
+
+                alert('❌ Error al eliminar: ' + e.message);
+
+            }
         }
 
         // ════════════════════════════════════════

@@ -1399,11 +1399,21 @@
 
         // ═══ ELIMINAR ═══
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este servicio de proveedor?')) return;
+            if (!confirm('¿Enviar este servicio de proveedor a inactivos?')) return;
+
             try {
-                await fetch(`/SERVICIO_PROVEEDOR/${id}`, { method: 'DELETE' });
+
+                await fetch(`/SOFT_DELETE/servicios_proveedores/${id}`, {
+                    method: 'DELETE'
+                });
+
                 cargar();
-            } catch (e) { alert('Error: ' + e.message); }
+
+            } catch (e) {
+
+                alert('Error: ' + e.message);
+
+            }
         }
 
         // ═══ EXPORTAR ═══

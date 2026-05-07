@@ -74,6 +74,9 @@ public class OrdenesDeCompraService
         using var con = Abrir();
 
         var whereConditions = new List<string>();
+
+        whereConditions.Add("(activo IS NULL OR activo = true)");
+
         var paramValues = new List<(string name, string value)>();
 
         void AddFilter(string column, string? value, string param)

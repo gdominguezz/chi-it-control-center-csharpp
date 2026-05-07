@@ -1456,9 +1456,18 @@
         }
 
         // ── Eliminar / PDF ─────────────────────────────────────────────────
-        function eliminar(id) {
-            if (!confirm('¿Eliminar este registro?')) return;
-            fetch(`/REGISTRO_ENTRADAS_TEMPORAL/${id}`, { method: 'DELETE' }).then(() => cargar());
+        async function eliminar(id) {
+            if (!confirm('¿Enviar este registro a inactivos?')) return;
+
+            try {
+                await fetch(`/SOFT_DELETE/registro_entradas_temporal/${id}`, {
+                    method: 'DELETE'
+                });
+
+                cargar();
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
         }
         function subirPDF(id, input) {
             const fd = new FormData();
