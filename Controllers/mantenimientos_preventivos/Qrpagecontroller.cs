@@ -582,6 +582,52 @@ public class QrPageController : ControllerBase
         sb.AppendLine("<div class=\"grid\">");
         sb.AppendLine(cardsHtml);
         sb.AppendLine("</div>");
+
+        // ── Instrucciones de proceso PM ──────────────────────────────────────
+        sb.AppendLine("<div style=\"margin:8px 20px 28px;padding:18px 22px;background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(6,182,212,.06));border:1px solid rgba(37,99,235,.22);border-radius:14px;\">");
+        sb.AppendLine("  <div style=\"display:flex;align-items:center;gap:8px;margin-bottom:14px;\">");
+        sb.AppendLine("    <span style=\"font-size:16px;\">📋</span>");
+        sb.AppendLine("    <span style=\"font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;\">Instrucciones de Preventivo</span>");
+        sb.AppendLine("  </div>");
+        sb.AppendLine("  <div style=\"display:flex;flex-direction:column;gap:12px;\">");
+
+        // Paso 1
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;align-items:flex-start;\">");
+        sb.AppendLine("      <div style=\"flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;\">1</div>");
+        sb.AppendLine("      <div style=\"padding-top:3px;\">");
+        sb.AppendLine("        <div style=\"font-size:12px;font-weight:700;color:var(--text);\">Registrar el Preventivo Digital</div>");
+        sb.AppendLine("        <div style=\"font-size:11px;color:var(--muted);margin-top:2px;\">Presiona <b>📋 Registrar</b> en el período correspondiente, completa las actividades y guarda el registro en el sistema.</div>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
+
+        // Separador
+        sb.AppendLine("    <div style=\"margin-left:13px;width:1px;height:14px;background:rgba(37,99,235,.25);margin-left:25px;\"></div>");
+
+        // Paso 2
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;align-items:flex-start;\">");
+        sb.AppendLine("      <div style=\"flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#0891b2,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;\">2</div>");
+        sb.AppendLine("      <div style=\"padding-top:3px;\">");
+        sb.AppendLine("        <div style=\"font-size:12px;font-weight:700;color:var(--text);\">Descargar el Formato de Preventivo Físico</div>");
+        sb.AppendLine("        <div style=\"font-size:11px;color:var(--muted);margin-top:2px;\">Usa el botón <b>📥 Descargar Formato PM</b> de la barra superior para obtener la hoja de registro física en formato Excel.</div>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
+
+        // Separador
+        sb.AppendLine("    <div style=\"width:1px;height:14px;background:rgba(37,99,235,.25);margin-left:25px;\"></div>");
+
+        // Paso 3
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;align-items:flex-start;\">");
+        sb.AppendLine("      <div style=\"flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#059669,#10b981);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;\">3</div>");
+        sb.AppendLine("      <div style=\"padding-top:3px;\">");
+        sb.AppendLine("        <div style=\"font-size:12px;font-weight:700;color:var(--text);\">Llenar el Formato Físico con los Datos del Digital</div>");
+        sb.AppendLine("        <div style=\"font-size:11px;color:var(--muted);margin-top:2px;\">Transfiere la información registrada en el sistema (actividades, fecha, observaciones) al formato físico impreso y fírmalo.</div>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
+
+        sb.AppendLine("  </div>");
+        sb.AppendLine("</div>");
+        // ── Fin instrucciones ────────────────────────────────────────────────
+
         sb.AppendLine("<div class=\"modal\" id=\"modalLogin\">");
         sb.AppendLine("  <div class=\"modal-box\">");
         sb.AppendLine("    <h3>🔑 Iniciar Sesión</h3>");
