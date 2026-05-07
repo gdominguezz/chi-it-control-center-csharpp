@@ -1482,9 +1482,9 @@
 
         // ═══ ELIMINAR ═══
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este registro de cámara/audio?')) return;
+            if (!confirm('¿Enviar este registro de cámara/audio a inactivos?')) return;
             try {
-                await fetch(`/CAMARA_AUDIO/${id}`, { method: 'DELETE' });
+                await fetch(`/SOFT_DELETE/camaras_audio/${id}`, { method: 'DELETE' });
                 cargar();
             } catch (e) { alert('Error: ' + e.message); }
         }
