@@ -1,162 +1,748 @@
 ﻿<!DOCTYPE html>
-
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Estatus Warehouse</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Estatus Warehouse</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0F1A;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --surface3: #1e293b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --accent: #14B8A6;
+            --accent-dark: #0f766e;
+            --accent-glow: rgba(20,184,166,.35);
+            --text: #F1F5F9;
+            --muted: #64748B;
+            --muted2: #94A3B8;
+            --green: #10B981;
+            --red: #EF4444;
+            --amber: #F59E0B;
+        }
 
-<style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-body{
-font-family: Arial;
-background:#0B0F1A;
-color:white;
-padding:20px;
-}
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
 
-h1{
-margin-bottom:20px;
-}
+        /* ── TOPBAR ── */
+        .topbar {
+            background: linear-gradient(135deg, #05111a, #0B0F1A);
+            border-bottom: 1px solid var(--border2);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
 
-.toolbar{
-margin-bottom:15px;
-}
+        .topbar-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 22px var(--accent-glow);
+            flex-shrink: 0;
+        }
 
-input{
-padding:8px;
-border-radius:6px;
-border:none;
-width:250px;
-}
+        .topbar-title {
+            flex: 1;
+        }
 
-table{
-width:100%;
-border-collapse:collapse;
-background:#111827;
-border-radius:10px;
-overflow:hidden;
-}
+            .topbar-title h1 {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: -.01em;
+            }
 
-th{
-background:#1e293b;
-padding:10px;
-text-align:left;
-font-size:12px;
-}
+            .topbar-title p {
+                font-size: 11px;
+                color: var(--muted2);
+                margin-top: 1px;
+                font-family: 'DM Mono', monospace;
+            }
 
-td{
-padding:10px;
-border-bottom:1px solid rgba(255,255,255,0.08);
-}
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
 
-tr:hover{
-background:#1a2235;
-}
+        /* ── USER CHIP ── */
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border2);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background .2s, border-color .2s;
+        }
 
-.badge{
-background:linear-gradient(135deg,#0f766e,#14b8a6);
-padding:4px 10px;
-border-radius:20px;
-font-size:12px;
-font-weight:bold;
-}
+            .user-chip:hover {
+                background: rgba(255,255,255,.1);
+                border-color: var(--accent);
+            }
 
-</style>
+            .user-chip span {
+                color: var(--muted2);
+            }
 
+            .user-chip .chip-arrow {
+                font-size: 9px;
+                color: var(--muted);
+                transition: transform .2s;
+            }
+
+            .user-chip.open .chip-arrow {
+                transform: rotate(180deg);
+            }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.55);
+            padding: 8px;
+            z-index: 999;
+            animation: dropIn .15s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-chip.open .user-dropdown {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 10px 12px 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
+        }
+
+            .dropdown-header .d-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            .dropdown-header .d-role {
+                font-size: 10px;
+                color: var(--muted);
+                font-family: 'DM Mono', monospace;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                margin-top: 2px;
+            }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: background .15s, color .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(255,255,255,.06);
+                color: var(--text);
+            }
+
+            .dropdown-item.danger {
+                color: #FCA5A5;
+            }
+
+                .dropdown-item.danger:hover {
+                    background: rgba(239,68,68,.1);
+                    color: #fff;
+                }
+
+        .dropdown-sep {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
+        }
+
+        /* ── MAIN ── */
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 28px 24px;
+        }
+
+        /* ── STATS BAR ── */
+        .stats-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 160px;
+            animation: fadeUp .4s ease both;
+        }
+
+            .stat-card:nth-child(2) {
+                animation-delay: .08s;
+            }
+
+            .stat-card:nth-child(3) {
+                animation-delay: .16s;
+            }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+            .stat-icon.teal {
+                background: rgba(20,184,166,.15);
+                box-shadow: 0 0 14px rgba(20,184,166,.2);
+            }
+
+            .stat-icon.amber {
+                background: rgba(245,158,11,.15);
+            }
+
+            .stat-icon.blue {
+                background: rgba(59,130,246,.15);
+            }
+
+        .stat-val {
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'DM Mono', monospace;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .stat-lbl {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        /* ── SEARCH PANEL ── */
+        .search-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: fadeUp .4s .22s ease both;
+        }
+
+        .search-icon {
+            font-size: 16px;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            flex: 1;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-size: 13px;
+            font-family: 'DM Mono', monospace;
+            color: var(--text);
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+            .search-input::placeholder {
+                color: var(--muted);
+            }
+
+            .search-input:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(20,184,166,.13);
+            }
+
+        .search-count {
+            font-size: 11px;
+            font-family: 'DM Mono', monospace;
+            color: var(--muted2);
+            background: var(--surface3);
+            border: 1px solid var(--border2);
+            padding: 5px 12px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        /* ── TABLE WRAP ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            animation: fadeUp .4s .3s ease both;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: calc(100vh - 340px);
+            min-height: 300px;
+            overflow-y: auto;
+        }
+
+            .table-scroll::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+
+            .table-scroll::-webkit-scrollbar-track {
+                background: var(--surface2);
+                border-radius: 999px;
+            }
+
+            .table-scroll::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 999px;
+            }
+
+                .table-scroll::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent);
+                }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: var(--surface3);
+            padding: 11px 16px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+            thead th:first-child {
+                width: 70px;
+            }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+
+            tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            tbody tr:hover td {
+                background: var(--surface2);
+            }
+
+        td {
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        .td-id {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            color: var(--muted2);
+        }
+
+        /* ── BADGE ── */
+        .badge-estatus {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(15,118,110,.35), rgba(20,184,166,.25));
+            border: 1px solid rgba(20,184,166,.4);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'DM Mono', monospace;
+            color: #5eead4;
+            letter-spacing: .04em;
+            white-space: nowrap;
+        }
+
+            .badge-estatus::before {
+                content: '';
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: var(--accent);
+                box-shadow: 0 0 6px var(--accent);
+                flex-shrink: 0;
+            }
+
+        .td-desc {
+            color: var(--muted2);
+            font-size: 13px;
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+
+            .empty-state .empty-icon {
+                font-size: 36px;
+                margin-bottom: 12px;
+            }
+
+            .empty-state p {
+                font-size: 13px;
+            }
+
+        /* ── FOOTER ── */
+        .table-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: var(--surface3);
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            font-family: 'DM Mono', monospace;
+            color: var(--muted);
+        }
+
+        .footer-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+            display: inline-block;
+            margin-right: 7px;
+        }
+
+        /* ── BTN ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--muted2);
+            border: 1px solid var(--border2);
+        }
+
+            .btn-ghost:hover {
+                color: var(--text);
+                border-color: var(--accent);
+            }
+
+        .btn-sm {
+            padding: 7px 12px;
+            font-size: 11px;
+        }
+    </style>
 </head>
-
 <body>
 
-<h1>📦 Estatus Warehouse</h1>
+    <!-- ══ TOPBAR ══════════════════════════════════════════════════════════════ -->
+    <div class="topbar">
+        <div class="topbar-icon">📦</div>
+        <div class="topbar-title">
+            <h1>Estatus Warehouse</h1>
+            <p>Catálogo de estados del almacén</p>
+        </div>
+        <div class="topbar-actions">
+            <div class="user-chip" id="userChipMain" onclick="toggleDropdown()">
+                👤 <span id="usuarioDisplay">Cargando...</span>
+                <span class="chip-arrow">▼</span>
+                <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="d-name" id="dropdownNombre">—</div>
+                        <div class="d-role" id="dropdownRol">—</div>
+                    </div>
+                    <button class="dropdown-item" onclick="event.stopPropagation(); window.location.href='/static/menu.html'">☰ &nbsp;Menú principal</button>
+                    <div class="dropdown-sep"></div>
+                    <button class="dropdown-item danger" onclick="event.stopPropagation(); cerrarSesion()">⏻ &nbsp;Cerrar sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="toolbar">
+    <!-- ══ MAIN ════════════════════════════════════════════════════════════════ -->
+    <div class="main">
 
-<input 
-type="text"
-id="buscar"
-placeholder="Buscar estatus..."
-onkeyup="filtrar()">
+        <!-- Stats -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-icon teal">📦</div>
+                <div>
+                    <div class="stat-val" id="statTotal">—</div>
+                    <div class="stat-lbl">Total estatus</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amber">🔍</div>
+                <div>
+                    <div class="stat-val" id="statFiltrados">—</div>
+                    <div class="stat-lbl">Resultados</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue">🗂️</div>
+                <div>
+                    <div class="stat-val" id="statUltimo">—</div>
+                    <div class="stat-lbl">Último ID</div>
+                </div>
+            </div>
+        </div>
 
-</div>
+        <!-- Búsqueda -->
+        <div class="search-panel">
+            <span class="search-icon">🔍</span>
+            <input class="search-input"
+                   type="text"
+                   id="buscar"
+                   placeholder="Buscar por estatus ID o descripción…"
+                   oninput="filtrar()">
+            <span class="search-count" id="searchCount">— resultados</span>
+        </div>
 
-<table>
+        <!-- Tabla -->
+        <div class="table-wrap">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Estatus ID</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaEstatus">
+                        <tr>
+                            <td colspan="3">
+                                <div class="empty-state">
+                                    <div class="empty-icon">🔄</div>
+                                    <p>Cargando datos…</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-footer">
+                <span><span class="footer-dot"></span>Estatus Warehouse</span>
+                <span id="footerInfo">—</span>
+            </div>
+        </div>
 
-<thead>
-<tr>
-<th>ID</th>
-<th>ESTATUS ID</th>
-<th>DESCRIPCIÓN</th>
-</tr>
-</thead>
+    </div><!-- /main -->
 
-<tbody id="tablaEstatus"></tbody>
+    <script>
+        let todosLosDatos = [];
+        let usuarioActual = 'SISTEMA';
 
-</table>
+        // ── CARGAR ──────────────────────────────────────────────────────────────
+        async function cargar(buscar = '') {
+            try {
+                const res = await fetch(`/estatus_warehouse?buscar=${encodeURIComponent(buscar)}`);
+                if (!res.ok) throw new Error('Error backend');
+                const datos = await res.json();
+                if (!buscar) todosLosDatos = datos;
+                render(datos);
+            } catch (e) {
+                console.error('Error cargando estatus', e);
+                document.getElementById('tablaEstatus').innerHTML = `
+                        <tr><td colspan="3">
+                            <div class="empty-state">
+                                <div class="empty-icon">❌</div>
+                                <p>Error al cargar datos</p>
+                            </div>
+                        </td></tr>`;
+            }
+        }
 
-<script>
+        function render(lista) {
+            const tbody = document.getElementById('tablaEstatus');
 
-async function cargar(buscar=""){
+            // Actualizar stats
+            document.getElementById('statFiltrados').textContent = lista.length;
+            document.getElementById('searchCount').textContent = `${lista.length} resultado${lista.length !== 1 ? 's' : ''}`;
+            document.getElementById('footerInfo').textContent = `${lista.length} registro${lista.length !== 1 ? 's' : ''}`;
 
-try{
+            if (todosLosDatos.length) {
+                document.getElementById('statTotal').textContent = todosLosDatos.length;
+                const maxId = Math.max(...todosLosDatos.map(e => e.id || 0));
+                document.getElementById('statUltimo').textContent = maxId > 0 ? maxId : '—';
+            }
 
-const res = await fetch(`/estatus_warehouse?buscar=${encodeURIComponent(buscar)}`);
+            if (!lista.length) {
+                tbody.innerHTML = `
+                        <tr><td colspan="3">
+                            <div class="empty-state">
+                                <div class="empty-icon">📭</div>
+                                <p>Sin resultados para tu búsqueda</p>
+                            </div>
+                        </td></tr>`;
+                return;
+            }
 
-if(!res.ok){
-throw new Error("Error backend");
-}
+            tbody.innerHTML = lista.map((e, i) => `
+                    <tr style="animation: fadeUp .25s ${i * 0.025}s ease both">
+                        <td class="td-id">${e.id}</td>
+                        <td><span class="badge-estatus">${esc(e.estatus_id)}</span></td>
+                        <td class="td-desc">${esc(e.descripcion)}</td>
+                    </tr>
+                `).join('');
+        }
 
-const datos = await res.json();
+        let _filtrarTimer = null;
+        function filtrar() {
+            clearTimeout(_filtrarTimer);
+            _filtrarTimer = setTimeout(() => cargar(document.getElementById('buscar').value), 300);
+        }
 
-render(datos);
+        function esc(v) {
+            if (v == null) return '—';
+            return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
 
-}catch(e){
+        // ── USER CHIP ───────────────────────────────────────────────────────────
+        function toggleDropdown() {
+            document.getElementById('userChipMain').classList.toggle('open');
+        }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#userChipMain')) {
+                document.getElementById('userChipMain').classList.remove('open');
+            }
+        });
 
-console.error("Error cargando estatus",e);
+        function cerrarSesion() {
+            fetch('/LOGOUT', { method: 'POST', credentials: 'include' })
+                .finally(() => { window.location.href = '/static/login.html'; });
+        }
 
-}
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') document.getElementById('userChipMain').classList.remove('open');
+        });
 
-}
+        // ── INIT ────────────────────────────────────────────────────────────────
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch('/obtener-usuario', { credentials: 'include' })
+                .then(r => { if (!r.ok) { window.location.href = '/static/login.html'; return null; } return r.json(); })
+                .then(d => {
+                    if (!d) return;
+                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
+                    usuarioActual = d.usuario || 'SISTEMA';
+                    document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
+                    document.getElementById('dropdownRol').textContent = (d.rol || '').toUpperCase();
+                })
+                .catch(() => { window.location.href = '/static/login.html'; });
 
-
-function render(lista){
-
-const tabla=document.getElementById("tablaEstatus");
-
-tabla.innerHTML="";
-
-lista.forEach(e=>{
-
-tabla.innerHTML+=`
-<tr>
-<td>${e.id}</td>
-
-<td>
-<span class="badge">
-${e.estatus_id}
-</span>
-</td>
-
-<td>${e.descripcion}</td>
-</tr>
-`;
-
-});
-
-}
-
-
-function filtrar(){
-
-const texto=document.getElementById("buscar").value;
-
-cargar(texto);
-
-}
-
-
-cargar();
-
-</script>
-
+            cargar();
+        });
+    </script>
 </body>
 </html>
