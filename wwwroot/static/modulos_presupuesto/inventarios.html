@@ -1220,11 +1220,15 @@
 
         // ═══ ELIMINAR ═══
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este registro de inventario NF?')) return;
+            if (!confirm('¿Enviar este registro de inventario NF a inactivos?')) return;
             try {
-                await fetch(`/INVENTARIO_NF/${id}`, { method: 'DELETE' });
+                await fetch(`/SOFT_DELETE/inventarios_nf/${id}`, {
+                    method: 'DELETE'
+                });
                 cargar();
-            } catch (e) { alert('Error: ' + e.message); }
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
         }
 
         // ═══ EXPORTAR ═══
