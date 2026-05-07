@@ -38,7 +38,7 @@ public static class TablasPermitidas
     "mantenimientos_correctivos",
 
     // ── Otros módulos ──
-    "bajas",
+    "bajas_equipos",
     "control_vales",
     "directorio_proveedores_nf",
     "reportes_impresoras",

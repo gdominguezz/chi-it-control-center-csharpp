@@ -1652,8 +1652,8 @@
 
         // ── Eliminar / PDF ─────────────────────────────────────────────────
         function eliminar(id) {
-            if (!confirm('¿Eliminar este registro de baja?')) return;
-            fetch(`/BAJA/${id}`, { method: 'DELETE' }).then(() => cargar());
+            if (!confirm('¿Enviar este registro a inactivos?')) return;
+            fetch(`/SOFT_DELETE/bajas_equipos/${id}`, { method: 'DELETE' }).then(() => cargar());
         }
         function subirPDF(id, input) {
             const fd = new FormData();
