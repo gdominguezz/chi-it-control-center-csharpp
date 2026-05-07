@@ -42,6 +42,7 @@ public static class TablasPermitidas
     "control_vales",
     "directorio_proveedores_nf",
     "reportes_impresoras",
+    "impresoras_info",
 };
 
     public static bool EsValida(string tabla) => _tablas.Contains(tabla);

@@ -1800,12 +1800,17 @@
         }
 
         async function eliminarInfo(id) {
-            if (!confirm('¿Eliminar esta impresora?')) return;
+            if (!confirm('¿Enviar esta impresora a inactivos?')) return;
             try {
-                await fetch(`/IMPRESORA_INFO/${id}`, { method: 'DELETE', headers: { 'X-Usuario': usuarioActual } });
+                await fetch(`/SOFT_DELETE/impresoras_info/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Usuario': usuarioActual }
+                });
                 cargarInfo();
-                toast('🗑️ Impresora eliminada', 'info');
-            } catch (e) { toast('❌ Error: ' + e.message, 'error'); }
+                toast('📦 Impresora enviada a inactivos', 'info');
+            } catch (e) {
+                toast('❌ Error: ' + e.message, 'error');
+            }
         }
 
         function abrirEditarI(id) {
@@ -1934,14 +1939,14 @@
                         </div>`;
         }
         async function eliminarReporte(id) {
-            if (!confirm('¿Eliminar este reporte?')) return;
+            if (!confirm('¿Enviar este reporte a inactivos?')) return;
             try {
-                await fetch(`/REPORTES_IMPRESORAS/${id}`, {
+                await fetch(`/SOFT_DELETE/reportes_impresoras/${id}`, {
                     method: 'DELETE',
                     headers: { 'X-Usuario': usuarioActual }
                 });
                 cargarReportes();
-                toast('🗑️ Reporte eliminado', 'info');
+                toast('📦 Reporte enviado a inactivos', 'info');
             } catch (e) {
                 toast('❌ Error: ' + e.message, 'error');
             }

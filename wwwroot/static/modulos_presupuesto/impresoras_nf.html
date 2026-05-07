@@ -1395,11 +1395,17 @@
 
         // ═══ ELIMINAR ═══
         async function eliminar(id) {
-            if (!confirm('¿Eliminar esta impresora NF?')) return;
+            if (!confirm('¿Enviar esta impresora a inactivos?')) return;
+
             try {
-                await fetch(`/IMPRESORA_NF/${id}`, { method: 'DELETE' });
+                await fetch(`/SOFT_DELETE/impresoras_nf/${id}`, {
+                    method: 'DELETE'
+                });
+
                 cargar();
-            } catch (e) { alert('Error: ' + e.message); }
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
         }
 
         // ═══ EXPORTAR ═══
