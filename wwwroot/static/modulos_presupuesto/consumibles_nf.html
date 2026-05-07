@@ -1299,9 +1299,9 @@
 
         // ═══ ELIMINAR ═══
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este consumible?')) return;
+            if (!confirm('¿Enviar este consumible a inactivos?')) return;
             try {
-                await fetch(`/CONSUMIBLE_NF/${id}`, { method: 'DELETE' });
+                await fetch(`/SOFT_DELETE/consumibles_nf/${id}`, { method: 'DELETE' });
                 cargar();
             } catch (e) { alert('Error: ' + e.message); }
         }
