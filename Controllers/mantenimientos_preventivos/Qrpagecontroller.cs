@@ -641,6 +641,67 @@ public class QrPageController : ControllerBase
 
         sb.AppendLine("  </div>");
         sb.AppendLine("</div>");
+
+        // ── Instrucciones Correctivo desde Preventivo ──────────────────────
+        sb.AppendLine("<div style=\"margin:0 20px 28px;padding:18px 22px;background:linear-gradient(135deg,rgba(239,68,68,.08),rgba(220,38,38,.05));border:1px solid rgba(239,68,68,.28);border-radius:14px;\">");
+        sb.AppendLine("  <div style=\"display:flex;align-items:center;gap:8px;margin-bottom:14px;\">");
+        sb.AppendLine("    <span style=\"font-size:16px;\">⚠️</span>");
+        sb.AppendLine("    <span style=\"font-size:12px;font-weight:700;color:#f87171;text-transform:uppercase;letter-spacing:.08em;\">¿Qué hacer cuando el equipo requiere un correctivo?</span>");
+        sb.AppendLine("  </div>");
+        sb.AppendLine("  <div style=\"display:flex;flex-direction:column;gap:12px;\">");
+
+        // Paso A
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;align-items:flex-start;\">");
+        sb.AppendLine("      <div style=\"flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#ef4444);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;\">1</div>");
+        sb.AppendLine("      <div style=\"padding-top:3px;\">");
+        sb.AppendLine("        <div style=\"font-size:12px;font-weight:700;color:var(--text);\">✅ Completa primero el Preventivo Digital</div>");
+        sb.AppendLine("        <div style=\"font-size:11px;color:var(--muted);margin-top:2px;\">Marca todas las actividades revisadas del período correspondiente y registra la fecha antes de generar el correctivo.</div>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
+
+        // Separador
+        sb.AppendLine("    <div style=\"width:1px;height:14px;background:rgba(239,68,68,.25);margin-left:25px;\"></div>");
+
+        // Paso B
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;align-items:flex-start;\">");
+        sb.AppendLine("      <div style=\"flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#ef4444);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;\">2</div>");
+        sb.AppendLine("      <div style=\"padding-top:3px;\">");
+        sb.AppendLine("        <div style=\"font-size:12px;font-weight:700;color:var(--text);\">⚠️ Presiona el botón <b>⚠️ Requiere Correctivo</b></div>");
+        sb.AppendLine("        <div style=\"font-size:11px;color:var(--muted);margin-top:2px;\">Dentro del período (P1 o P2) encontrarás el botón rojo <b>⚠️ Requiere Correctivo</b>. Al presionarlo se abre el formulario de registro.</div>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
+
+        // Separador
+        sb.AppendLine("    <div style=\"width:1px;height:14px;background:rgba(239,68,68,.25);margin-left:25px;\"></div>");
+
+        // Paso C
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;align-items:flex-start;\">");
+        sb.AppendLine("      <div style=\"flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#ef4444);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;\">3</div>");
+        sb.AppendLine("      <div style=\"padding-top:3px;\">");
+        sb.AppendLine("        <div style=\"font-size:12px;font-weight:700;color:var(--text);\">📝 Llena los datos del correctivo</div>");
+        sb.AppendLine("        <div style=\"font-size:11px;color:var(--muted);margin-top:2px;\">Los campos <b>Planta</b>, <b>Línea/Persona</b>, <b>Equipo</b> y <b>Reporte elaborado por</b> se llenan automáticamente. Solo debes completar: <b>Fecha</b>, <b>Marca</b>, <b>Modelo</b>, <b>No. Serie</b>, <b>Descripción de la falla</b> y (si aplica) <b>Accesorios solicitados</b>.</div>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
+
+        // Separador
+        sb.AppendLine("    <div style=\"width:1px;height:14px;background:rgba(239,68,68,.25);margin-left:25px;\"></div>");
+
+        // Paso D
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;align-items:flex-start;\">");
+        sb.AppendLine("      <div style=\"flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#ef4444);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;\">4</div>");
+        sb.AppendLine("      <div style=\"padding-top:3px;\">");
+        sb.AppendLine("        <div style=\"font-size:12px;font-weight:700;color:var(--text);\">💾 Guarda el correctivo</div>");
+        sb.AppendLine("        <div style=\"font-size:11px;color:var(--muted);margin-top:2px;\">Presiona <b>Guardar Correctivo</b>. El registro quedará en el sistema con estatus <b>PENDIENTE</b> para que el área de soporte lo gestione desde el módulo de Correctivos.</div>");
+        sb.AppendLine("        <div style=\"margin-top:6px;padding:6px 10px;border-radius:6px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.30);font-size:11px;color:#fca5a5;font-weight:600;\">");
+        sb.AppendLine("          ⚠️ <b>IMPORTANTE:</b> Generar el correctivo <u>no cierra ni cancela</u> el preventivo en curso &mdash; ambos registros quedan guardados de forma independiente.");
+        sb.AppendLine("        </div>");
+        sb.AppendLine("      </div>");
+        sb.AppendLine("    </div>");
+
+        sb.AppendLine("  </div>");
+        sb.AppendLine("</div>");
+        // ── Fin instrucciones correctivo ─────────────────────────────────────
+
         // ── Fin instrucciones ────────────────────────────────────────────────
 
         sb.AppendLine("<div class=\"modal\" id=\"modalLogin\">");
