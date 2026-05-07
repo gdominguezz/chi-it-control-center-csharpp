@@ -1249,11 +1249,17 @@
 
         // ═══ ELIMINAR ═══
         async function eliminar(id) {
-            if (!confirm('¿Eliminar esta herramienta NF?')) return;
+            if (!confirm('¿Enviar esta herramienta NF a inactivos?')) return;
+
             try {
-                await fetch(`/HERRAMIENTA_NF/${id}`, { method: 'DELETE' });
+                await fetch(`/SOFT_DELETE/herramientas_nf/${id}`, {
+                    method: 'DELETE'
+                });
+
                 cargar();
-            } catch (e) { alert('Error: ' + e.message); }
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
         }
 
         // ═══ EXPORTAR ═══

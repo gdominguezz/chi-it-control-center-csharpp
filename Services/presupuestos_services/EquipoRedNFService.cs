@@ -355,6 +355,9 @@ public class EquipoRedNFService
     private static (string where, List<(string key, object? val)> parms) ConstruirWhere(EquipoRedNFFiltros f)
     {
         var conds = new List<string>();
+
+        conds.Add("(activo IS NULL OR activo = true)");
+
         var parms = new List<(string, object?)>();
         var idx = 1;
 
