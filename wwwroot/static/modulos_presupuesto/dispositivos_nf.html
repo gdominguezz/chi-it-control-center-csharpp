@@ -859,6 +859,152 @@
             font-size: 11px;
             font-weight: 700;
         }
+
+        /* ── DUPLICAR MASIVO ── */
+        .modal-box.dup-ask-box {
+            width: min(400px,95vw);
+        }
+
+        .modal-box.dup-batch-box {
+            width: min(900px,96vw);
+            max-height: 92vh;
+        }
+
+        .dup-counter {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 18px 0 6px;
+        }
+
+            .dup-counter input[type=number] {
+                width: 90px;
+                background: var(--surface2);
+                border: 1px solid var(--border2);
+                border-radius: 8px;
+                padding: 10px 12px;
+                font-size: 18px;
+                font-family: 'DM Mono',monospace;
+                color: var(--text);
+                text-align: center;
+            }
+
+                .dup-counter input[type=number]:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                }
+
+        .dup-label {
+            font-size: 13px;
+            color: var(--muted2);
+        }
+
+        .batch-records-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 4px;
+        }
+
+        .batch-record {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            position: relative;
+        }
+
+        .batch-record-header {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted2);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .batch-record-header .rec-num {
+                background: var(--accent);
+                color: #fff;
+                border-radius: 999px;
+                padding: 2px 10px;
+                font-size: 11px;
+                font-weight: 700;
+            }
+
+        .batch-serie-field {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(59,130,246,.08);
+            border: 1px solid rgba(59,130,246,.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+        }
+
+            .batch-serie-field label {
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                color: var(--accent);
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .batch-serie-field input {
+                flex: 1;
+                background: var(--surface3);
+                border: 1px solid rgba(59,130,246,.4);
+                border-radius: 6px;
+                padding: 8px 12px;
+                font-size: 13px;
+                font-family: 'DM Mono',monospace;
+                color: var(--text);
+                transition: border-color .2s;
+            }
+
+                .batch-serie-field input:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                    box-shadow: 0 0 0 3px rgba(59,130,246,.18);
+                }
+
+                .batch-serie-field input.missing {
+                    border-color: var(--red) !important;
+                    box-shadow: 0 0 0 3px rgba(239,68,68,.18) !important;
+                }
+
+        .batch-summary {
+            font-size: 12px;
+            color: var(--muted2);
+            font-family: 'DM Mono',monospace;
+            background: var(--surface3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            border: 1px solid var(--border);
+        }
+
+        .batch-progress {
+            height: 4px;
+            background: var(--surface3);
+            border-radius: 999px;
+            margin-top: 14px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .batch-progress-bar {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 999px;
+            transition: width .3s ease;
+            width: 0%;
+        }
     </style>
 </head>
 <body>
@@ -1045,10 +1191,48 @@
                 <div class="field"><label>Formato de Baja</label><input id="f_FORMATO_DE_BAJA" placeholder="No. formato de baja"></div>
             </div>
             <button class="btn btn-success" onclick="guardar()">💾 Guardar</button>
+            <button class="btn btn-purple" onclick="abrirDuplicar()" style="margin-left:8px;">⧉ Duplicar registros</button>
             <button class="btn btn-ghost" onclick="limpiarForm()" style="margin-left:8px;">✕ Limpiar</button>
         </div>
 
-        <!-- ── Toolbar ── -->
+        <!-- ══ MODAL: ¿CUÁNTOS DUPLICAR? ══════════════════════════════════════ -->
+        <div class="modal" id="modalDuplicarAsk" style="position:fixed">
+            <div class="modal-box dup-ask-box">
+                <div class="modal-header">
+                    <h3>⧉ Duplicar Registros</h3>
+                    <button class="btn btn-ghost btn-sm" onclick="cerrarDuplicarAsk()">✕</button>
+                </div>
+                <p style="font-size:13px;color:var(--muted2);line-height:1.5;">
+                    Se crearán copias del formulario actual con todos los datos excepto el <strong style="color:var(--accent)">Número de Serie</strong>, que deberás asignar individualmente.
+                </p>
+                <div class="dup-counter">
+                    <input type="number" id="dupCantidad" min="2" max="50" value="2">
+                    <span class="dup-label">registros a crear</span>
+                </div>
+                <p style="font-size:11px;color:var(--muted);margin-bottom:4px;">Mínimo 2 · Máximo 50</p>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" onclick="cerrarDuplicarAsk()">Cancelar</button>
+                    <button class="btn btn-purple" onclick="abrirBatchDuplicar()">Continuar ▶</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ MODAL: BATCH DUPLICAR ══════════════════════════════════════════ -->
+        <div class="modal" id="modalBatchDuplicar" style="position:fixed">
+            <div class="modal-box dup-batch-box">
+                <div class="modal-header">
+                    <h3>📋 Asignar Series — Registro Masivo</h3>
+                    <button class="btn btn-ghost btn-sm" onclick="cerrarBatchDuplicar()">✕</button>
+                </div>
+                <div class="batch-summary" id="batchSummaryInfo"></div>
+                <div class="batch-records-wrap" id="batchRecordsWrap"></div>
+                <div class="batch-progress" id="batchProgress"><div class="batch-progress-bar" id="batchProgressBar"></div></div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" onclick="cerrarBatchDuplicar()">Cancelar</button>
+                    <button class="btn btn-success" id="btnGuardarBatch" onclick="guardarBatch()">💾 Guardar todos</button>
+                </div>
+            </div>
+        </div> -->
         <div class="toolbar">
             <button class="btn btn-cyan btn-sm" onclick="exportarFiltrado()">📥 Exportar filtrado</button>
             <button class="btn btn-cyan btn-sm" onclick="exportarTodo()">📦 Exportar todo</button>
@@ -1483,55 +1667,55 @@
                     : '—';
 
                 tbody.innerHTML += `
-                        <tr>
-                            <td>${row.ID}</td>
-                            <td class="mono">${esc(row.ID_UNICO) || '—'}</td>
-                            <td class="mono">${esc(row.OC) || '—'}</td>
-                            <td class="mono">${esc(row.FOLIO) || '—'}</td>
-                            <td class="mono">${fechaReg}</td>
-                            <td>${esc(row.RECIBIDO_POR) || '—'}</td>
-                            <td>${esc(row.SUBCATEGORIA) || '—'}</td>
-                            <td>${esc(row.MARCA) || '—'}</td>
-                            <td>${esc(row.MODELO) || '—'}</td>
-                            <td class="mono">${esc(row.NUMERO_SERIE) || '—'}</td>
-                            <td class="mono" style="text-align:center">${row.CANTIDAD ?? '—'}</td>
-                            <td class="mono">${costoStr}</td>
-                            <td>${esc(row.PROVEEDOR) || '—'}</td>
-                            <td class="mono">${esc(row.ACTIVO_FIJO) || '—'}</td>
-                            <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.PROCESADOR) || ''}">${esc(row.PROCESADOR) || '—'}</td>
-                            <td>${esc(row.ARQUITECTURA) || '—'}</td>
-                            <td class="mono">${esc(row.ALMACENAMIENTO) || '—'}</td>
-                            <td>${esc(row.TIPO_DISCO_DURO) || '—'}</td>
-                            <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.SISTEMA_OPERATIVO) || ''}">${esc(row.SISTEMA_OPERATIVO) || '—'}</td>
-                            <td>${esc(row.LICENCIA_SISTEMA_OPERATIVO) || '—'}</td>
-                            <td class="mono">${esc(row.MEMORIA_RAM) || '—'}</td>
-                            <td class="mono">${esc(row.VELOCIDAD_MEMORIA) || '—'}</td>
-                            <td>${esc(row.TIPO_MEMORIA) || '—'}</td>
-                            <td class="mono">${esc(row.SLOT_MEMORIA) || '—'}</td>
-                            <td class="mono">${esc(row.MAX_MEMORIA) || '—'}</td>
-                            <td>${esc(row.MODELO_CARGADOR) || '—'}</td>
-                            <td class="mono">${esc(row.NO_SERIE_ELIMINADOR) || '—'}</td>
-                            <td>${esc(row.BATERIA_LAPTOP) || '—'}</td>
-                            <td class="mono">${esc(row.WIFI_MAC) || '—'}</td>
-                            <td class="mono">${esc(row.ETH_MAC) || '—'}</td>
-                            <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.ACCESORIOS) || ''}">${esc(row.ACCESORIOS) || '—'}</td>
-                            <td>${esc(row.UBICACION) || '—'}</td>
-                            <td>${esc(row.EDIFICIO) || '—'}</td>
-                            <td class="mono">${fechaSal}</td>
-                            <td>${esc(row.ASIGNADO_A) || '—'}</td>
-                            <td>${esc(row.DESTINO_PLANTA) || '—'}</td>
-                            <td><span class="disponible-pill ${dispPill}">${dispLabel}</span></td>
-                            <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.PERSONAL_IT_QUE_ASIGNA) || ''}">${esc(row.PERSONAL_IT_QUE_ASIGNA) || '—'}</td>
-                            <td class="mono">${esc(row.FORMATO_DE_BAJA) || '—'}</td>
-                            <td style="white-space:nowrap">
-                                <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
-                                ${esAdmin ? `
+                            <tr>
+                                <td>${row.ID}</td>
+                                <td class="mono">${esc(row.ID_UNICO) || '—'}</td>
+                                <td class="mono">${esc(row.OC) || '—'}</td>
+                                <td class="mono">${esc(row.FOLIO) || '—'}</td>
+                                <td class="mono">${fechaReg}</td>
+                                <td>${esc(row.RECIBIDO_POR) || '—'}</td>
+                                <td>${esc(row.SUBCATEGORIA) || '—'}</td>
+                                <td>${esc(row.MARCA) || '—'}</td>
+                                <td>${esc(row.MODELO) || '—'}</td>
+                                <td class="mono">${esc(row.NUMERO_SERIE) || '—'}</td>
+                                <td class="mono" style="text-align:center">${row.CANTIDAD ?? '—'}</td>
+                                <td class="mono">${costoStr}</td>
+                                <td>${esc(row.PROVEEDOR) || '—'}</td>
+                                <td class="mono">${esc(row.ACTIVO_FIJO) || '—'}</td>
+                                <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.PROCESADOR) || ''}">${esc(row.PROCESADOR) || '—'}</td>
+                                <td>${esc(row.ARQUITECTURA) || '—'}</td>
+                                <td class="mono">${esc(row.ALMACENAMIENTO) || '—'}</td>
+                                <td>${esc(row.TIPO_DISCO_DURO) || '—'}</td>
+                                <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.SISTEMA_OPERATIVO) || ''}">${esc(row.SISTEMA_OPERATIVO) || '—'}</td>
+                                <td>${esc(row.LICENCIA_SISTEMA_OPERATIVO) || '—'}</td>
+                                <td class="mono">${esc(row.MEMORIA_RAM) || '—'}</td>
+                                <td class="mono">${esc(row.VELOCIDAD_MEMORIA) || '—'}</td>
+                                <td>${esc(row.TIPO_MEMORIA) || '—'}</td>
+                                <td class="mono">${esc(row.SLOT_MEMORIA) || '—'}</td>
+                                <td class="mono">${esc(row.MAX_MEMORIA) || '—'}</td>
+                                <td>${esc(row.MODELO_CARGADOR) || '—'}</td>
+                                <td class="mono">${esc(row.NO_SERIE_ELIMINADOR) || '—'}</td>
+                                <td>${esc(row.BATERIA_LAPTOP) || '—'}</td>
+                                <td class="mono">${esc(row.WIFI_MAC) || '—'}</td>
+                                <td class="mono">${esc(row.ETH_MAC) || '—'}</td>
+                                <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.ACCESORIOS) || ''}">${esc(row.ACCESORIOS) || '—'}</td>
+                                <td>${esc(row.UBICACION) || '—'}</td>
+                                <td>${esc(row.EDIFICIO) || '—'}</td>
+                                <td class="mono">${fechaSal}</td>
+                                <td>${esc(row.ASIGNADO_A) || '—'}</td>
+                                <td>${esc(row.DESTINO_PLANTA) || '—'}</td>
+                                <td><span class="disponible-pill ${dispPill}">${dispLabel}</span></td>
+                                <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.PERSONAL_IT_QUE_ASIGNA) || ''}">${esc(row.PERSONAL_IT_QUE_ASIGNA) || '—'}</td>
+                                <td class="mono">${esc(row.FORMATO_DE_BAJA) || '—'}</td>
+                                <td style="white-space:nowrap">
+                                    <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                    ${esAdmin ? `
 
-                                <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
-                                ` : ''}
-                                <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
-                            </td>
-                        </tr>`;
+                                    <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
+                                    ` : ''}
+                                    <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
+                                </td>
+                            </tr>`;
             });
 
             document.getElementById('paginaInfo').textContent =
@@ -1754,31 +1938,31 @@
                 const vd = esc(despues?.[key] ?? '');
                 const chg = cambiados.has(key);
                 filas += `
-                        <tr class="${chg ? 'row-changed' : ''}">
-                            <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                            <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                            <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                        </tr>`;
+                            <tr class="${chg ? 'row-changed' : ''}">
+                                <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                            </tr>`;
             });
 
             const n = cambiados.size;
             return `
-                    <div class="ev-wrap">
-                        <div class="ev-header">
-                            <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
-                            <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
-                            <span class="n-cambios-badge"
-                                style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
-                                       color:${n > 0 ? '#FCD34D' : '#94A3B8'};
-                                       border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                            </span>
-                        </div>
-                        <table class="ev-table">
-                            <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                            <tbody>${filas}</tbody>
-                        </table>
-                    </div>`;
+                        <div class="ev-wrap">
+                            <div class="ev-header">
+                                <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
+                                <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
+                                <span class="n-cambios-badge"
+                                    style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                                           color:${n > 0 ? '#FCD34D' : '#94A3B8'};
+                                           border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                    ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                </span>
+                            </div>
+                            <table class="ev-table">
+                                <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                <tbody>${filas}</tbody>
+                            </table>
+                        </div>`;
         }
 
         function verHistorial(id) {
@@ -1799,8 +1983,8 @@
                     } else {
                         document.getElementById('contenidoHistorial').innerHTML =
                             `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                 </p>` + lista.map(ev => renderEvento(ev)).join('');
+                                        ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                     </p>` + lista.map(ev => renderEvento(ev)).join('');
                     }
                 })
                 .catch(() => {
@@ -1810,6 +1994,196 @@
         }
 
         function cerrarHistorial() { document.getElementById('modalHistorial').classList.remove('show'); }
+
+        // ═══ DUPLICAR MASIVO ═══
+        function capturarFormulario() {
+            return {
+                OC: v('f_OC'),
+                FOLIO: v('f_FOLIO'),
+                FECHA_REGISTRO: v('f_FECHA_REGISTRO'),
+                RECIBIDO_POR: v('f_RECIBIDO_POR'),
+                SUBCATEGORIA: v('f_SUBCATEGORIA'),
+                MARCA: v('f_MARCA'),
+                MODELO: v('f_MODELO'),
+                CANTIDAD: v('f_CANTIDAD'),
+                COSTO: v('f_COSTO'),
+                PROVEEDOR: v('f_PROVEEDOR'),
+                ACTIVO_FIJO: v('f_ACTIVO_FIJO'),
+                PROCESADOR: v('f_PROCESADOR'),
+                ARQUITECTURA: v('f_ARQUITECTURA'),
+                ALMACENAMIENTO: v('f_ALMACENAMIENTO'),
+                TIPO_DISCO_DURO: v('f_TIPO_DISCO_DURO'),
+                SISTEMA_OPERATIVO: v('f_SISTEMA_OPERATIVO'),
+                LICENCIA_SISTEMA_OPERATIVO: v('f_LICENCIA_SISTEMA_OPERATIVO'),
+                MEMORIA_RAM: v('f_MEMORIA_RAM'),
+                VELOCIDAD_MEMORIA: v('f_VELOCIDAD_MEMORIA'),
+                TIPO_MEMORIA: v('f_TIPO_MEMORIA'),
+                SLOT_MEMORIA: v('f_SLOT_MEMORIA'),
+                MAX_MEMORIA: v('f_MAX_MEMORIA'),
+                MODELO_CARGADOR: v('f_MODELO_CARGADOR'),
+                NO_SERIE_ELIMINADOR: v('f_NO_SERIE_ELIMINADOR'),
+                BATERIA_LAPTOP: v('f_BATERIA_LAPTOP'),
+                WIFI_MAC: v('f_WIFI_MAC'),
+                ETH_MAC: v('f_ETH_MAC'),
+                ACCESORIOS: v('f_ACCESORIOS'),
+                UBICACION: v('f_UBICACION'),
+                EDIFICIO: v('f_EDIFICIO'),
+                FECHA_SALIDA: v('f_FECHA_SALIDA'),
+                ASIGNADO_A: v('f_ASIGNADO_A'),
+                DESTINO_PLANTA: v('f_DESTINO_PLANTA'),
+                DISPONIBLE: v('f_DISPONIBLE'),
+                PERSONAL_IT_QUE_ASIGNA: v('f_PERSONAL_IT_QUE_ASIGNA'),
+                FORMATO_DE_BAJA: v('f_FORMATO_DE_BAJA'),
+            };
+        }
+
+        function abrirDuplicar() {
+            document.getElementById('dupCantidad').value = 2;
+            document.getElementById('modalDuplicarAsk').classList.add('show');
+        }
+
+        function cerrarDuplicarAsk() {
+            document.getElementById('modalDuplicarAsk').classList.remove('show');
+        }
+
+        function abrirBatchDuplicar() {
+            const n = Math.min(50, Math.max(2, parseInt(document.getElementById('dupCantidad').value) || 2));
+            document.getElementById('dupCantidad').value = n;
+            cerrarDuplicarAsk();
+
+            const base = capturarFormulario();
+            const resumen = [base.MARCA, base.MODELO, base.SUBCATEGORIA, base.PROVEEDOR].filter(Boolean).join(' · ') || 'Sin datos en formulario';
+
+            document.getElementById('batchSummaryInfo').innerHTML =
+                `<strong style="color:var(--text)">${n} registros</strong> a crear &nbsp;·&nbsp; ${resumen}`;
+
+            const wrap = document.getElementById('batchRecordsWrap');
+            wrap.innerHTML = '';
+
+            for (let i = 1; i <= n; i++) {
+                const div = document.createElement('div');
+                div.className = 'batch-record';
+                div.innerHTML = `
+                        <div class="batch-record-header">
+                            <span class="rec-num">#${i}</span>
+                            Registro ${i} de ${n}
+                        </div>
+                        <div class="batch-serie-field">
+                            <label>No. Serie *</label>
+                            <input type="text" id="batch_serie_${i}" placeholder="Ingresa el número de serie…" autocomplete="off">
+                        </div>`;
+                wrap.appendChild(div);
+            }
+
+            document.getElementById('batchProgress').style.display = 'none';
+            document.getElementById('batchProgressBar').style.width = '0%';
+            document.getElementById('btnGuardarBatch').disabled = false;
+            document.getElementById('btnGuardarBatch').textContent = `💾 Guardar todos (${n})`;
+            document.getElementById('modalBatchDuplicar').classList.add('show');
+            document.querySelector('#modalBatchDuplicar .modal-box').scrollTop = 0;
+            setTimeout(() => document.getElementById('batch_serie_1')?.focus(), 200);
+        }
+
+        function cerrarBatchDuplicar() {
+            document.getElementById('modalBatchDuplicar').classList.remove('show');
+        }
+
+        async function guardarBatch() {
+            const wrap = document.getElementById('batchRecordsWrap');
+            const inputs = wrap.querySelectorAll('[id^="batch_serie_"]');
+            const n = inputs.length;
+
+            let hayVacio = false;
+            inputs.forEach(inp => {
+                inp.classList.remove('missing');
+                if (!inp.value.trim()) { inp.classList.add('missing'); hayVacio = true; }
+            });
+            if (hayVacio) {
+                alert('⚠️ Todos los números de serie son obligatorios.');
+                wrap.querySelector('.missing')?.focus();
+                return;
+            }
+
+            const base = capturarFormulario();
+            const oc = (base.OC || '').trim();
+            const folio = (base.FOLIO || '').trim();
+            const idUnico = [oc, folio].filter(Boolean).join('') || null;
+
+            const btn = document.getElementById('btnGuardarBatch');
+            btn.disabled = true;
+            btn.textContent = '⏳ Guardando…';
+            document.getElementById('batchProgress').style.display = 'block';
+
+            let guardados = 0;
+            let errores = [];
+
+            for (let i = 0; i < n; i++) {
+                const serie = inputs[i].value.trim();
+                const dto = {
+                    OC: base.OC,
+                    FOLIO: base.FOLIO,
+                    FECHA_REGISTRO: base.FECHA_REGISTRO,
+                    RECIBIDO_POR: base.RECIBIDO_POR,
+                    SUBCATEGORIA: base.SUBCATEGORIA,
+                    MARCA: base.MARCA,
+                    MODELO: base.MODELO,
+                    NUMERO_SERIE: serie,
+                    CANTIDAD: base.CANTIDAD != null ? parseInt(base.CANTIDAD) || null : null,
+                    COSTO: base.COSTO != null ? parseFloat(base.COSTO) || null : null,
+                    PROVEEDOR: base.PROVEEDOR,
+                    ACTIVO_FIJO: base.ACTIVO_FIJO,
+                    PROCESADOR: base.PROCESADOR,
+                    ARQUITECTURA: base.ARQUITECTURA,
+                    ALMACENAMIENTO: base.ALMACENAMIENTO,
+                    TIPO_DISCO_DURO: base.TIPO_DISCO_DURO,
+                    SISTEMA_OPERATIVO: base.SISTEMA_OPERATIVO,
+                    LICENCIA_SISTEMA_OPERATIVO: base.LICENCIA_SISTEMA_OPERATIVO,
+                    MEMORIA_RAM: base.MEMORIA_RAM,
+                    VELOCIDAD_MEMORIA: base.VELOCIDAD_MEMORIA,
+                    TIPO_MEMORIA: base.TIPO_MEMORIA,
+                    SLOT_MEMORIA: base.SLOT_MEMORIA,
+                    MAX_MEMORIA: base.MAX_MEMORIA,
+                    MODELO_CARGADOR: base.MODELO_CARGADOR,
+                    NO_SERIE_ELIMINADOR: base.NO_SERIE_ELIMINADOR,
+                    BATERIA_LAPTOP: base.BATERIA_LAPTOP,
+                    WIFI_MAC: base.WIFI_MAC,
+                    ETH_MAC: base.ETH_MAC,
+                    ACCESORIOS: base.ACCESORIOS,
+                    UBICACION: base.UBICACION,
+                    EDIFICIO: base.EDIFICIO,
+                    FECHA_SALIDA: base.FECHA_SALIDA,
+                    ASIGNADO_A: base.ASIGNADO_A,
+                    DESTINO_PLANTA: base.DESTINO_PLANTA,
+                    DISPONIBLE: base.DISPONIBLE === 'true' ? true : base.DISPONIBLE === 'false' ? false : null,
+                    PERSONAL_IT_QUE_ASIGNA: base.PERSONAL_IT_QUE_ASIGNA,
+                    FORMATO_DE_BAJA: base.FORMATO_DE_BAJA,
+                    ID_UNICO: idUnico,
+                };
+                try {
+                    const r = await fetch('/DISPOSITIVO_NF', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
+                        body: JSON.stringify(dto)
+                    });
+                    const d = await r.json();
+                    if (d.error) errores.push(`Registro ${i + 1}: ${d.error}`);
+                    else guardados++;
+                } catch (e) {
+                    errores.push(`Registro ${i + 1}: ${e.message}`);
+                }
+                document.getElementById('batchProgressBar').style.width = `${Math.round(((i + 1) / n) * 100)}%`;
+            }
+
+            btn.disabled = false;
+            if (errores.length === 0) {
+                btn.textContent = `✅ ${guardados} guardados`;
+                setTimeout(() => { cerrarBatchDuplicar(); limpiarForm(); cargar(); }, 1000);
+            } else {
+                btn.textContent = `⚠️ ${guardados}/${n} guardados`;
+                alert(`Se guardaron ${guardados} de ${n} registros.\n\nErrores:\n${errores.join('\n')}`);
+                cargar();
+            }
+        }
 
         // ═══ UI ═══
         function toggleDropdown() { document.getElementById('userChipMain').classList.toggle('open'); }
@@ -1823,7 +2197,7 @@
         }
 
         document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); }
+            if (e.key === 'Escape') { cerrarEditar(); cerrarHistorial(); cerrarDuplicarAsk(); cerrarBatchDuplicar(); }
         });
 
         // ═══ HELPERS ═══
