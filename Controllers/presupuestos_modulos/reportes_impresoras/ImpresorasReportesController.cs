@@ -19,37 +19,37 @@ public class ImpresorasReportesController : ControllerBase
     public async Task<IActionResult> ListarReportes(
         [FromQuery] int page = 1,
         [FromQuery] int limit = 10,
-        [FromQuery] string? FOLIO                = null,
-        [FromQuery] string? FECHA                = null,
-        [FromQuery] string? PLANTA               = null,
-        [FromQuery] string? IMPRESORA            = null,
-        [FromQuery] string? AREA                 = null,
-        [FromQuery] string? REPORTE              = null,
-        [FromQuery] string? QUIEN_REPORTA        = null,
-        [FromQuery] string? ESTATUS              = null,
+        [FromQuery] string? FOLIO = null,
+        [FromQuery] string? FECHA = null,
+        [FromQuery] string? PLANTA = null,
+        [FromQuery] string? IMPRESORA = null,
+        [FromQuery] string? AREA = null,
+        [FromQuery] string? REPORTE = null,
+        [FromQuery] string? QUIEN_REPORTA = null,
+        [FromQuery] string? ESTATUS = null,
         [FromQuery] string? FECHA_DE_REALIZACION = null,
-        [FromQuery] string? COMENTARIOS          = null)
+        [FromQuery] string? COMENTARIOS = null)
     {
         var filtros = new ReporteImpresoraFiltros
         {
-            FOLIO                = FOLIO,
-            FECHA                = FECHA,
-            PLANTA               = PLANTA,
-            IMPRESORA            = IMPRESORA,
-            AREA                 = AREA,
-            REPORTE              = REPORTE,
-            QUIEN_REPORTA        = QUIEN_REPORTA,
-            ESTATUS              = ESTATUS,
+            FOLIO = FOLIO,
+            FECHA = FECHA,
+            PLANTA = PLANTA,
+            IMPRESORA = IMPRESORA,
+            AREA = AREA,
+            REPORTE = REPORTE,
+            QUIEN_REPORTA = QUIEN_REPORTA,
+            ESTATUS = ESTATUS,
             FECHA_DE_REALIZACION = FECHA_DE_REALIZACION,
-            COMENTARIOS          = COMENTARIOS
+            COMENTARIOS = COMENTARIOS
         };
 
         var resultado = await _svc.ListarReportesAsync(page, limit, filtros);
         return Ok(resultado);
     }
 
-    // ── POST /REPORTE_IMPRESORA  (crear) ──────────────────────────────────
-    [HttpPost("/REPORTE_IMPRESORA")]
+    // ── POST /REPORTES_IMPRESORAS  (crear) ───────────────────────────────
+    [HttpPost("/REPORTES_IMPRESORAS")]
     public async Task<IActionResult> CrearReporte([FromBody] ReporteImpresoraDto dto)
     {
         var usuario = ObtenerUsuario();
@@ -57,8 +57,8 @@ public class ImpresorasReportesController : ControllerBase
         return Ok(new { id });
     }
 
-    // ── PUT /REPORTE_IMPRESORA/{id}  (editar) ─────────────────────────────
-    [HttpPut("/REPORTE_IMPRESORA/{id:int}")]
+    // ── PUT /REPORTES_IMPRESORAS/{id}  (editar) ──────────────────────────
+    [HttpPut("/REPORTES_IMPRESORAS/{id:int}")]
     public async Task<IActionResult> EditarReporte(int id, [FromBody] ReporteImpresoraDto dto)
     {
         var usuario = ObtenerUsuario();
@@ -66,8 +66,8 @@ public class ImpresorasReportesController : ControllerBase
         return ok ? Ok(new { ok = true }) : NotFound(new { error = "Registro no encontrado" });
     }
 
-    // ── DELETE /REPORTE_IMPRESORA/{id}  (eliminar) ────────────────────────
-    [HttpDelete("/REPORTE_IMPRESORA/{id:int}")]
+    // ── DELETE /REPORTES_IMPRESORAS/{id}  (eliminar) ─────────────────────
+    [HttpDelete("/REPORTES_IMPRESORAS/{id:int}")]
     public async Task<IActionResult> EliminarReporte(int id)
     {
         var ok = await _svc.EliminarReporteAsync(id);
@@ -85,29 +85,29 @@ public class ImpresorasReportesController : ControllerBase
     // ── GET /REPORTES_IMPRESORAS/EXPORTAR  (Excel filtrado) ───────────────
     [HttpGet("/REPORTES_IMPRESORAS/EXPORTAR")]
     public async Task<IActionResult> ExportarReportes(
-        [FromQuery] string? FOLIO                = null,
-        [FromQuery] string? FECHA                = null,
-        [FromQuery] string? PLANTA               = null,
-        [FromQuery] string? IMPRESORA            = null,
-        [FromQuery] string? AREA                 = null,
-        [FromQuery] string? REPORTE              = null,
-        [FromQuery] string? QUIEN_REPORTA        = null,
-        [FromQuery] string? ESTATUS              = null,
+        [FromQuery] string? FOLIO = null,
+        [FromQuery] string? FECHA = null,
+        [FromQuery] string? PLANTA = null,
+        [FromQuery] string? IMPRESORA = null,
+        [FromQuery] string? AREA = null,
+        [FromQuery] string? REPORTE = null,
+        [FromQuery] string? QUIEN_REPORTA = null,
+        [FromQuery] string? ESTATUS = null,
         [FromQuery] string? FECHA_DE_REALIZACION = null,
-        [FromQuery] string? COMENTARIOS          = null)
+        [FromQuery] string? COMENTARIOS = null)
     {
         var filtros = new ReporteImpresoraFiltros
         {
-            FOLIO                = FOLIO,
-            FECHA                = FECHA,
-            PLANTA               = PLANTA,
-            IMPRESORA            = IMPRESORA,
-            AREA                 = AREA,
-            REPORTE              = REPORTE,
-            QUIEN_REPORTA        = QUIEN_REPORTA,
-            ESTATUS              = ESTATUS,
+            FOLIO = FOLIO,
+            FECHA = FECHA,
+            PLANTA = PLANTA,
+            IMPRESORA = IMPRESORA,
+            AREA = AREA,
+            REPORTE = REPORTE,
+            QUIEN_REPORTA = QUIEN_REPORTA,
+            ESTATUS = ESTATUS,
             FECHA_DE_REALIZACION = FECHA_DE_REALIZACION,
-            COMENTARIOS          = COMENTARIOS
+            COMENTARIOS = COMENTARIOS
         };
 
         var bytes = await _svc.ExportarReportesAsync(filtros);
@@ -142,23 +142,23 @@ public class ImpresorasReportesController : ControllerBase
     public async Task<IActionResult> ListarInfo(
         [FromQuery] int page = 1,
         [FromQuery] int limit = 10,
-        [FromQuery] string? IMPRESORA       = null,
-        [FromQuery] string? MODELO          = null,
+        [FromQuery] string? IMPRESORA = null,
+        [FromQuery] string? MODELO = null,
         [FromQuery] string? NUMERO_DE_SERIE = null,
-        [FromQuery] string? IP              = null,
-        [FromQuery] string? UBICACION       = null,
-        [FromQuery] string? PLANTA          = null,
-        [FromQuery] string? IDENTIFICADOR   = null)
+        [FromQuery] string? IP = null,
+        [FromQuery] string? UBICACION = null,
+        [FromQuery] string? PLANTA = null,
+        [FromQuery] string? IDENTIFICADOR = null)
     {
         var filtros = new ImpresoraInfoFiltros
         {
-            IMPRESORA       = IMPRESORA,
-            MODELO          = MODELO,
+            IMPRESORA = IMPRESORA,
+            MODELO = MODELO,
             NUMERO_DE_SERIE = NUMERO_DE_SERIE,
-            IP              = IP,
-            UBICACION       = UBICACION,
-            PLANTA          = PLANTA,
-            IDENTIFICADOR   = IDENTIFICADOR
+            IP = IP,
+            UBICACION = UBICACION,
+            PLANTA = PLANTA,
+            IDENTIFICADOR = IDENTIFICADOR
         };
 
         var resultado = await _svc.ListarInfoAsync(page, limit, filtros);
@@ -174,8 +174,8 @@ public class ImpresorasReportesController : ControllerBase
         return Ok(new { id });
     }
 
-    // ── PUT /IMPRESORA_INFO/{id}  (editar) ────────────────────────────────
-    [HttpPut("/IMPRESORA_INFO/{id:int}")]
+    // ── PUT /IMPRESORAS_INFO/{id}  (editar) ──────────────────────────────
+    [HttpPut("/IMPRESORAS_INFO/{id:int}")]
     public async Task<IActionResult> EditarInfo(int id, [FromBody] ImpresoraInfoDto dto)
     {
         var usuario = ObtenerUsuario();
@@ -183,8 +183,8 @@ public class ImpresorasReportesController : ControllerBase
         return ok ? Ok(new { ok = true }) : NotFound(new { error = "Registro no encontrado" });
     }
 
-    // ── DELETE /IMPRESORA_INFO/{id}  (eliminar) ───────────────────────────
-    [HttpDelete("/IMPRESORA_INFO/{id:int}")]
+    // ── DELETE /IMPRESORAS_INFO/{id}  (eliminar) ─────────────────────────
+    [HttpDelete("/IMPRESORAS_INFO/{id:int}")]
     public async Task<IActionResult> EliminarInfo(int id)
     {
         var ok = await _svc.EliminarInfoAsync(id);
@@ -202,23 +202,23 @@ public class ImpresorasReportesController : ControllerBase
     // ── GET /IMPRESORAS_INFO/EXPORTAR  (Excel filtrado) ───────────────────
     [HttpGet("/IMPRESORAS_INFO/EXPORTAR")]
     public async Task<IActionResult> ExportarInfo(
-        [FromQuery] string? IMPRESORA       = null,
-        [FromQuery] string? MODELO          = null,
+        [FromQuery] string? IMPRESORA = null,
+        [FromQuery] string? MODELO = null,
         [FromQuery] string? NUMERO_DE_SERIE = null,
-        [FromQuery] string? IP              = null,
-        [FromQuery] string? UBICACION       = null,
-        [FromQuery] string? PLANTA          = null,
-        [FromQuery] string? IDENTIFICADOR   = null)
+        [FromQuery] string? IP = null,
+        [FromQuery] string? UBICACION = null,
+        [FromQuery] string? PLANTA = null,
+        [FromQuery] string? IDENTIFICADOR = null)
     {
         var filtros = new ImpresoraInfoFiltros
         {
-            IMPRESORA       = IMPRESORA,
-            MODELO          = MODELO,
+            IMPRESORA = IMPRESORA,
+            MODELO = MODELO,
             NUMERO_DE_SERIE = NUMERO_DE_SERIE,
-            IP              = IP,
-            UBICACION       = UBICACION,
-            PLANTA          = PLANTA,
-            IDENTIFICADOR   = IDENTIFICADOR
+            IP = IP,
+            UBICACION = UBICACION,
+            PLANTA = PLANTA,
+            IDENTIFICADOR = IDENTIFICADOR
         };
 
         var bytes = await _svc.ExportarInfoAsync(filtros);
