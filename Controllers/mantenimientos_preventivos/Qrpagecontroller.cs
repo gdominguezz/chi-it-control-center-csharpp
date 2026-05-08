@@ -228,25 +228,12 @@ public class QrPageController : ControllerBase
                 cards.Append("    <div class=\"mini-form\" id=\"form1_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px\">📋 Período 1 — Actividades</div>\n");
                 cards.Append("      <div class=\"acts-list\">" + actsHtml + "</div>\n");
-                cards.Append(
-                "<label class=\"act-item act-correctivo\">" +
-                "<button class=\"btn btn-danger btn-sm\" " +
-                "onclick=\"abrirModalCorrectivo(" +
-                row.id + ",'" +
-                Esc(row.planta) + "','" +
-                Esc(row.idEquipo) + "','" +
-                Esc(ubicacion) +
-                "')\">" +
-                "⚠️ Requiere Correctivo" +
-                "</button>" +
-                "</label>\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
                 cards.Append("      <input type=\"date\" class=\"date-input\" id=\"fecha1_" + row.id + "\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
                 cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm1_" + row.id + "\" placeholder=\"Observaciones P1...\"></textarea>\n");
                 cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
                 cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ",1)\">💾 Guardar P1</button>\n");
-                cards.Append("        <button class=\"btn btn-baja\" onclick=\"abrirBaja(" + row.id + ",1,'" + Esc(row.idEquipo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📤 Baja de Equipo</button>\n");
                 cards.Append("      </div>\n    </div>\n");
                 cards.Append("    <div class=\"mini-form\" id=\"ver1_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:#06B6D4\">👁 Período 1 — Registrado</div>\n");
@@ -263,7 +250,6 @@ public class QrPageController : ControllerBase
                 cards.Append("    <div class=\"mini-form\" id=\"edit_pm1_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 1</div>\n");
                 cards.Append("      <div class=\"acts-list\" id=\"edit_acts1_" + row.id + "\">" + actsHtml + "</div>\n");
-                cards.Append("<button class=\"btn btn-danger btn-sm\" onclick=\"abrirModalCorrectivo(" + row.id + ",'" + row.planta + "','" + row.idEquipo + "','" + Esc(ubicacion) + "')\">⚠️ Requiere Correctivo</button>");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
                 cards.Append("      <input type=\"date\" class=\"date-input\" id=\"edit_fecha1_" + row.id + "\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
@@ -274,14 +260,12 @@ public class QrPageController : ControllerBase
                 cards.Append("    <div class=\"mini-form\" id=\"form2_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px\">📋 Período 2 — Actividades</div>\n");
                 cards.Append("      <div class=\"acts-list\">" + actsHtml + "</div>\n");
-                cards.Append("<button class=\"btn btn-danger btn-sm\" onclick=\"abrirModalCorrectivo(" + row.id + ",'" + row.planta + "','" + row.idEquipo + "','" + Esc(ubicacion) + "')\">⚠️ Requiere Correctivo</button>");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
                 cards.Append("      <input type=\"date\" class=\"date-input\" id=\"fecha2_" + row.id + "\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
                 cards.Append("      <textarea class=\"date-input\" style=\"min-height:52px;resize:vertical;\" id=\"obs_pm2_" + row.id + "\" placeholder=\"Observaciones P2...\"></textarea>\n");
                 cards.Append("      <div class=\"form-actions\" style=\"margin-top:8px\">\n");
                 cards.Append("        <button class=\"btn btn-success\" onclick=\"guardarPreventivo(" + row.id + ",2)\">💾 Guardar P2</button>\n");
-                cards.Append("        <button class=\"btn btn-baja\" onclick=\"abrirBaja(" + row.id + ",2,'" + Esc(row.idEquipo) + "','" + Esc(ubicacion) + "','" + Esc(row.planta) + "')\">📤 Baja de Equipo</button>\n");
                 cards.Append("      </div>\n    </div>\n");
                 cards.Append("    <div class=\"mini-form\" id=\"ver2_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:#06B6D4\">👁 Período 2 — Registrado</div>\n");
@@ -298,7 +282,6 @@ public class QrPageController : ControllerBase
                 cards.Append("    <div class=\"mini-form\" id=\"edit_pm2_" + row.id + "\" style=\"display:none\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:12px;color:var(--amber)\">✏️ Editar Período 2</div>\n");
                 cards.Append("      <div class=\"acts-list\" id=\"edit_acts2_" + row.id + "\">" + actsHtml + "</div>\n");
-                cards.Append("      <label class=\"act-item act-correctivo\"><input type=\"checkbox\" id=\"req_correctivo_edit2_" + row.id + "\"><span class=\"act-check\"></span><span class=\"act-text\">⚠️ Requiere Correctivo</span></label>\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:10px\">📅 Fecha</div>\n");
                 cards.Append("      <input type=\"date\" class=\"date-input\" id=\"edit_fecha2_" + row.id + "\">\n");
                 cards.Append("      <div class=\"form-sep\" style=\"margin-top:8px\">📝 Observaciones</div>\n");
@@ -800,50 +783,11 @@ public class QrPageController : ControllerBase
         sb.AppendLine("        <div><span style=\"color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;\">Planta</span><br><b id=\"recal-planta\"></b></div>");
         sb.AppendLine("      </div>");
         sb.AppendLine("    </div>");
-        // ── Botones de tipo (3 columnas fijas, sin encimarse) ────────────────
+        // ── Botones de tipo ──────────────────────────────────────────────────
         sb.AppendLine("    <div style=\"display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;\">");
-        sb.AppendLine("      <button class=\"btn\" style=\"padding:12px 10px;font-size:12px;background:rgba(244,114,182,.15);border:1px solid rgba(244,114,182,.4);color:#f472b6;border-radius:8px;\" onclick=\"abrirStockModal()\">🗄️ Soporte Site (stock)</button>");
-        sb.AppendLine("      <button class=\"btn\" style=\"padding:12px 10px;font-size:12px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;border-radius:8px;\" onclick=\"abrirCambioPlantaModal()\">🏭 Cambio de planta</button>");
-        sb.AppendLine("      <button class=\"btn\" id=\"btn-tipo-reparacion\" style=\"padding:12px 10px;font-size:12px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fca5a5;border-radius:8px;\" onclick=\"toggleFormReparacion()\">🔧 Recalendarización por Reparación</button>");
+        sb.AppendLine("      <button class=\"btn\" style=\"padding:12px 10px;font-size:12px;background:rgba(37,99,235,.15);border:1px solid rgba(37,99,235,.4);color:#93c5fd;border-radius:8px;font-weight:700;\" onclick=\"abrirCambioUbicacionRecal()\">📍 Cambio de Ubicación</button>");
         sb.AppendLine("      <button class=\"btn\" style=\"padding:12px 10px;font-size:12px;background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.5);color:#fca5a5;border-radius:8px;font-weight:700;\" onclick=\"abrirCorrectivoDesdeRecal()\">⚠️ Requiere Correctivo</button>");
         sb.AppendLine("      <button class=\"btn\" style=\"padding:12px 10px;font-size:12px;background:rgba(234,88,12,.18);border:1px solid rgba(234,88,12,.5);color:#fb923c;border-radius:8px;font-weight:700;\" onclick=\"abrirBajaDesdeRecal()\">📤 Baja de Equipo</button>");
-        sb.AppendLine("    </div>");
-        // ── Observaciones de recalendarización (obligatorio para todos los flujos) ──
-        sb.AppendLine("    <div class=\"modal-field\" id=\"recal-obs-wrap\" style=\"margin-bottom:14px;\">");
-        sb.AppendLine("      <label style=\"font-size:10px;font-weight:700;text-transform:uppercase;color:#f59e0b;letter-spacing:.08em;\">📝 Observaciones de Recalendarización <span style=\"color:#ef4444;\">*</span></label>");
-        sb.AppendLine("      <textarea id=\"recal-observaciones\" placeholder=\"Describe el motivo de la recalendarización (obligatorio)...\" style=\"width:100%;background:var(--surface2);border:1px solid rgba(245,158,11,.4);border-radius:7px;padding:10px 12px;font-size:13px;color:var(--text);resize:vertical;min-height:60px;margin-top:4px;font-family:'DM Sans',sans-serif;\"></textarea>");
-        sb.AppendLine("    </div>");
-        // ── Sub-formulario de Reparación ─────────────────────────────────────
-        sb.AppendLine("    <div id=\"form-reparacion\" style=\"display:none;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.35);border-radius:10px;padding:16px;margin-bottom:16px;\">");
-        sb.AppendLine("      <div style=\"font-size:13px;font-weight:700;color:#fca5a5;margin-bottom:12px;\">🔧 Datos de Reparación</div>");
-        sb.AppendLine("      <div style=\"display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;\">");
-        // Rack
-        sb.AppendLine("        <div><label style=\"font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;\">Rack <span style=\"color:#ef4444;\">*</span></label>");
-        sb.AppendLine("          <select id=\"rep-rack\" style=\"width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 10px;font-size:13px;color:var(--text);\" onchange=\"actualizarPreviewRep()\">");
-        sb.AppendLine("            <option value=\"\">-- Rack --</option>");
-        sb.AppendLine("            <optgroup label=\"Planta 1\"><option value=\"A\">A — Planta 1</option><option value=\"T\">T — Planta 1</option><option value=\"C\">C — Planta 1</option><option value=\"D\">D — Planta 1</option></optgroup>");
-        sb.AppendLine("            <optgroup label=\"Planta 2\"><option value=\"E\">E — Planta 2</option></optgroup>");
-        sb.AppendLine("            <optgroup label=\"Planta Satélite\"><option value=\"F\">F — Planta Satélite</option></optgroup>");
-        sb.AppendLine("            <optgroup label=\"Planta Mixing\"><option value=\"G\">G — Planta Mixing</option></optgroup>");
-        sb.AppendLine("          </select></div>");
-        // Espacio
-        sb.AppendLine("        <div><label style=\"font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;\">Espacio <span style=\"color:#ef4444;\">*</span></label>");
-        sb.AppendLine("          <select id=\"rep-espacio\" style=\"width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 10px;font-size:13px;color:var(--text);\" onchange=\"actualizarPreviewRep()\">");
-        sb.AppendLine("            <option value=\"\">-- Espacio --</option>");
-        sb.AppendLine("            <option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option><option value=\"5\">5</option><option value=\"6\">6</option>");
-        sb.AppendLine("          </select></div>");
-        // ID Préstamo
-        sb.AppendLine("        <div><label style=\"font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;\">ID Dispositivo Préstamo <span style=\"color:#ef4444;\">*</span></label>");
-        sb.AppendLine("          <input id=\"rep-id-prestamo\" type=\"text\" placeholder=\"ID del equipo de préstamo\" style=\"width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 10px;font-size:13px;color:var(--text);\">");
-        sb.AppendLine("          <span style=\"font-size:10px;color:var(--muted2);\">Se duplica la tarjeta con este ID</span></div>");
-        sb.AppendLine("      </div>");
-        // Preview ubicación
-        sb.AppendLine("      <div id=\"rep-preview\" style=\"display:none;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:7px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--amber);\">📍 Ubicación generada: <b id=\"rep-preview-txt\"></b></div>");
-        sb.AppendLine("      <div id=\"rep-error\" style=\"display:none;color:#fca5a5;font-size:12px;margin-bottom:8px;\"></div>");
-        sb.AppendLine("      <div style=\"display:flex;gap:8px;justify-content:flex-end;\">");
-        sb.AppendLine("        <button class=\"btn btn-ghost\" onclick=\"cerrarFormReparacion()\">✕ Cancelar</button>");
-        sb.AppendLine("        <button class=\"btn btn-danger\" id=\"btnGuardarRep\" onclick=\"guardarReparacion()\">💾 Guardar Reparación</button>");
-        sb.AppendLine("      </div>");
         sb.AppendLine("    </div>");
         // ── Campo de nueva ubicación libre ───────────────────────────────────
         sb.AppendLine("    <div class=\"modal-field\">");
