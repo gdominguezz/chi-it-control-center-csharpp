@@ -996,10 +996,8 @@
                 <div class="field"><label>Folio Inventario</label><input id="f_FOLIO_INVENTARIO" placeholder="Folio de inventario"></div>
                 <div class="field"><label>Fecha Entrada</label><input id="f_FECHA_ENTRADA" type="date"></div>
                 <div class="field"><label>Recibido Por</label><input id="f_RECIBIDO_POR" placeholder="Nombre"></div>
-                <div class="field"><label>Subcategoría</label><input id="f_SUBCATEGORIA" placeholder="Subcategoría"></div>
                 <div class="field">
-                    <label>Tipo</label>
-                    <select id="f_TIPO">
+                    <label>Subcategoría</label><select id="f_SUBCATEGORIA">
                         <option value="">— Selecciona —</option>
                         <option>MONITOR</option>
                         <option>TECLADO</option>
@@ -1017,8 +1015,55 @@
                         <option>OTRO</option>
                     </select>
                 </div>
-                <div class="field"><label>Marca</label><input id="f_MARCA" placeholder="Marca"></div>
-                <div class="field"><label>Modelo</label><input id="f_MODELO" placeholder="Modelo"></div>
+                <div class="field">
+                    <label>Tipo</label>
+                    <select id="f_TIPO">
+                        <option value="">— Selecciona —</option>
+                        <option>ALAMBRICO</option>
+                        <option>INALAMBICO</option>
+                        <option>INALAMBRICO</option>
+                        <option>K120</option>
+                        <option>LOGITECH</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Marca</label><select id="f_MARCA">
+                        <option value="">— Selecciona —</option>
+                        <option>ACTEK</option>
+                        <option>DELL</option>
+                        <option>G915 RGB</option>
+                        <option>HONEYWELL</option>
+                        <option>LOGITECH</option>
+                        <option>RICHER-R</option>
+                        <option>STYLOS</option>
+                        <option>YELANDAR</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Modelo</label><input id="f_MODELO" placeholder="Modelo" list="lista_modelos" autocomplete="off">
+                    <datalist id="lista_modelos">
+                        <option>2410MR1493B8</option>
+                        <option>AC-928984</option>
+                        <option>CTEC2</option>
+                        <option>HERO G502</option>
+                        <option>K120</option>
+                        <option>KEM-248</option>
+                        <option>M100</option>
+                        <option>M110</option>
+                        <option>M185</option>
+                        <option>MK5145</option>
+                        <option>MS116</option>
+                        <option>MS5145</option>
+                        <option>MX KEYS</option>
+                        <option>MX MASTER</option>
+                        <option>MX-ANYWHERE 3S</option>
+                        <option>VOYAGER 1202G</option>
+                        <option>VOYAGER 1202g</option>
+                        <option>WM126</option>
+                        <option>WM127</option>
+                        <option>YHD-3600CB</option>
+                    </datalist>
+                </div>
                 <div class="field"><label>Cantidad</label><input id="f_CANTIDAD" type="number" min="0" placeholder="0"></div>
                 <div class="field"><label>Número de Serie</label><input id="f_NUMERO_SERIE" placeholder="No. de serie"></div>
                 <div class="field">
@@ -1060,7 +1105,16 @@
                     </select>
                 </div>
                 <div class="field"><label>Fecha Salida</label><input id="f_FECHA_SALIDA" type="date"></div>
-                <div class="field"><label>Destino Planta</label><input id="f_DESTINO_PLANTA" placeholder="Planta destino"></div>
+                <div class="field">
+                    <label>Destino Planta</label><select id="f_DESTINO_PLANTA">
+                        <option value="">— Selecciona —</option>
+                        <option>B1</option>
+                        <option>B2</option>
+                        <option>Planta Satelite</option>
+                        <option>Planta Mixing</option>
+                        <option>Bodega</option>
+                    </select>
+                </div>
                 <div class="field"><label>Asignado A</label><input id="f_ASIGNADO_A" placeholder="Persona asignada"></div>
                 <div class="field"><label>Personal IT que Asigna</label><input id="f_PERSONAL_IT_QUE_ASIGNA" placeholder="Nombre del IT"></div>
             </div>
@@ -1202,10 +1256,8 @@
                     <div class="form-field"><label>Folio Inventario</label><input id="e_FOLIO_INVENTARIO" placeholder="Folio de inventario"></div>
                     <div class="form-field"><label>Fecha Entrada</label><input id="e_FECHA_ENTRADA" type="date"></div>
                     <div class="form-field"><label>Recibido Por</label><input id="e_RECIBIDO_POR" placeholder="Nombre"></div>
-                    <div class="form-field"><label>Subcategoría</label><input id="e_SUBCATEGORIA" placeholder="Subcategoría"></div>
                     <div class="form-field">
-                        <label>Tipo</label>
-                        <select id="e_TIPO">
+                        <label>Subcategoría</label><select id="e_SUBCATEGORIA">
                             <option value="">— Selecciona —</option>
                             <option>MONITOR</option>
                             <option>TECLADO</option>
@@ -1223,8 +1275,31 @@
                             <option>OTRO</option>
                         </select>
                     </div>
-                    <div class="form-field"><label>Marca</label><input id="e_MARCA" placeholder="Marca"></div>
-                    <div class="form-field"><label>Modelo</label><input id="e_MODELO" placeholder="Modelo"></div>
+                    <div class="form-field">
+                        <label>Tipo</label>
+                        <select id="e_TIPO">
+                            <option value="">— Selecciona —</option>
+                            <option>ALAMBRICO</option>
+                            <option>INALAMBICO</option>
+                            <option>INALAMBRICO</option>
+                            <option>K120</option>
+                            <option>LOGITECH</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Marca</label><select id="e_MARCA">
+                            <option value="">— Selecciona —</option>
+                            <option>ACTEK</option>
+                            <option>DELL</option>
+                            <option>G915 RGB</option>
+                            <option>HONEYWELL</option>
+                            <option>LOGITECH</option>
+                            <option>RICHER-R</option>
+                            <option>STYLOS</option>
+                            <option>YELANDAR</option>
+                        </select>
+                    </div>
+                    <div class="form-field"><label>Modelo</label><input id="e_MODELO" placeholder="Modelo" list="lista_modelos" autocomplete="off"></div>
                     <div class="form-field"><label>Cantidad</label><input id="e_CANTIDAD" type="number" min="0" placeholder="0"></div>
                     <div class="form-field"><label>Número de Serie</label><input id="e_NUMERO_SERIE" placeholder="No. de serie"></div>
                     <div class="form-field">
@@ -1266,7 +1341,16 @@
                         </select>
                     </div>
                     <div class="form-field"><label>Fecha Salida</label><input id="e_FECHA_SALIDA" type="date"></div>
-                    <div class="form-field"><label>Destino Planta</label><input id="e_DESTINO_PLANTA" placeholder="Planta destino"></div>
+                    <div class="form-field">
+                        <label>Destino Planta</label><select id="e_DESTINO_PLANTA">
+                            <option value="">— Selecciona —</option>
+                            <option>B1</option>
+                            <option>B2</option>
+                            <option>Planta Satelite</option>
+                            <option>Planta Mixing</option>
+                            <option>Bodega</option>
+                        </select>
+                    </div>
                     <div class="form-field"><label>Asignado A</label><input id="e_ASIGNADO_A" placeholder="Persona asignada"></div>
                     <div class="form-field"><label>Personal IT que Asigna</label><input id="e_PERSONAL_IT_QUE_ASIGNA" placeholder="Nombre del IT"></div>
                 </div>
@@ -1403,36 +1487,36 @@
                     : '—';
 
                 tbody.innerHTML += `
-                            <tr>
-                                <td>${row.ID}</td>
-                                <td class="mono">${esc(row.ID_UNICO) || '—'}</td>
-                                <td class="mono">${esc(row.OC) || '—'}</td>
-                                <td class="mono">${esc(row.FOLIO_INVENTARIO) || '—'}</td>
-                                <td class="mono">${fechaEnt}</td>
-                                <td>${esc(row.RECIBIDO_POR) || '—'}</td>
-                                <td>${esc(row.SUBCATEGORIA) || '—'}</td>
-                                <td>${esc(row.TIPO) || '—'}</td>
-                                <td>${esc(row.MARCA) || '—'}</td>
-                                <td>${esc(row.MODELO) || '—'}</td>
-                                <td class="mono" style="text-align:center">${row.CANTIDAD ?? '—'}</td>
-                                <td class="mono">${esc(row.NUMERO_SERIE) || '—'}</td>
-                                <td>${esc(row.PROVEEDOR) || '—'}</td>
-                                <td class="mono">${costoStr}</td>
-                                <td>${esc(row.ESTADO) || '—'}</td>
-                                <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.DESTINO) || ''}">${esc(row.DESTINO) || '—'}</td>
-                                <td><span class="disponible-pill ${dispPill}">${dispLabel}</span></td>
-                                <td class="mono">${fechaSal}</td>
-                                <td>${esc(row.DESTINO_PLANTA) || '—'}</td>
-                                <td>${esc(row.ASIGNADO_A) || '—'}</td>
-                                <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.PERSONAL_IT_QUE_ASIGNA) || ''}">${esc(row.PERSONAL_IT_QUE_ASIGNA) || '—'}</td>
-                                <td style="white-space:nowrap">
-                                    <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
-                                    ${esAdmin ? `
-                                    <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
-                                    ` : ''}
-                                    <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
-                                </td>
-                            </tr>`;
+                                <tr>
+                                    <td>${row.ID}</td>
+                                    <td class="mono">${esc(row.ID_UNICO) || '—'}</td>
+                                    <td class="mono">${esc(row.OC) || '—'}</td>
+                                    <td class="mono">${esc(row.FOLIO_INVENTARIO) || '—'}</td>
+                                    <td class="mono">${fechaEnt}</td>
+                                    <td>${esc(row.RECIBIDO_POR) || '—'}</td>
+                                    <td>${esc(row.SUBCATEGORIA) || '—'}</td>
+                                    <td>${esc(row.TIPO) || '—'}</td>
+                                    <td>${esc(row.MARCA) || '—'}</td>
+                                    <td>${esc(row.MODELO) || '—'}</td>
+                                    <td class="mono" style="text-align:center">${row.CANTIDAD ?? '—'}</td>
+                                    <td class="mono">${esc(row.NUMERO_SERIE) || '—'}</td>
+                                    <td>${esc(row.PROVEEDOR) || '—'}</td>
+                                    <td class="mono">${costoStr}</td>
+                                    <td>${esc(row.ESTADO) || '—'}</td>
+                                    <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.DESTINO) || ''}">${esc(row.DESTINO) || '—'}</td>
+                                    <td><span class="disponible-pill ${dispPill}">${dispLabel}</span></td>
+                                    <td class="mono">${fechaSal}</td>
+                                    <td>${esc(row.DESTINO_PLANTA) || '—'}</td>
+                                    <td>${esc(row.ASIGNADO_A) || '—'}</td>
+                                    <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.PERSONAL_IT_QUE_ASIGNA) || ''}">${esc(row.PERSONAL_IT_QUE_ASIGNA) || '—'}</td>
+                                    <td style="white-space:nowrap">
+                                        <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                        ${esAdmin ? `
+                                        <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
+                                        ` : ''}
+                                        <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
+                                    </td>
+                                </tr>`;
             });
 
             document.getElementById('paginaInfo').textContent =
@@ -1640,31 +1724,31 @@
                 const vd = esc(despues?.[key] ?? '');
                 const chg = cambiados.has(key);
                 filas += `
-                            <tr class="${chg ? 'row-changed' : ''}">
-                                <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
-                                <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
-                                <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
-                            </tr>`;
+                                <tr class="${chg ? 'row-changed' : ''}">
+                                    <td><strong>${esc(label)}</strong>${chg ? `<span class="badge-cambio">✎ cambio</span>` : ''}</td>
+                                    <td>${!va || va === 'None' ? '<span class="empty-val">vacío</span>' : va}</td>
+                                    <td>${!vd || vd === 'None' ? '<span class="empty-val">vacío</span>' : vd}</td>
+                                </tr>`;
             });
 
             const n = cambiados.size;
             return `
-                        <div class="ev-wrap">
-                            <div class="ev-header">
-                                <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
-                                <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
-                                <span class="n-cambios-badge"
-                                    style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
-                                           color:${n > 0 ? '#FCD34D' : '#94A3B8'};
-                                           border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
-                                    ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
-                                </span>
-                            </div>
-                            <table class="ev-table">
-                                <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
-                                <tbody>${filas}</tbody>
-                            </table>
-                        </div>`;
+                            <div class="ev-wrap">
+                                <div class="ev-header">
+                                    <span>🕐 <strong>${formatFecha(ev.FECHA || ev.fecha)}</strong></span>
+                                    <span>👤 <strong>${esc(ev.USUARIO || ev.usuario) || 'Desconocido'}</strong></span>
+                                    <span class="n-cambios-badge"
+                                        style="background:${n > 0 ? 'rgba(245,158,11,.2)' : 'rgba(100,116,139,.2)'};
+                                               color:${n > 0 ? '#FCD34D' : '#94A3B8'};
+                                               border:1px solid ${n > 0 ? 'rgba(245,158,11,.3)' : 'rgba(100,116,139,.3)'}">
+                                        ${n} campo${n !== 1 ? 's' : ''} modificado${n !== 1 ? 's' : ''}
+                                    </span>
+                                </div>
+                                <table class="ev-table">
+                                    <thead><tr><th>Campo</th><th>⬅ Antes</th><th>➡ Después</th></tr></thead>
+                                    <tbody>${filas}</tbody>
+                                </table>
+                            </div>`;
         }
 
         function verHistorial(id) {
@@ -1686,8 +1770,8 @@
                     } else {
                         document.getElementById('contenidoHistorial').innerHTML =
                             `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                        ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                                     </p>` + lista.map(ev => renderEvento(ev)).join('');
+                                            ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                         </p>` + lista.map(ev => renderEvento(ev)).join('');
                     }
                 })
                 .catch(() => {
@@ -1751,14 +1835,14 @@
                 const div = document.createElement('div');
                 div.className = 'batch-record';
                 div.innerHTML = `
-                            <div class="batch-record-header">
-                                <span class="rec-num">#${i}</span>
-                                Registro ${i} de ${n}
-                            </div>
-                            <div class="batch-serie-field">
-                                <label>No. Serie *</label>
-                                <input type="text" id="batch_serie_${i}" placeholder="Ingresa el número de serie…" autocomplete="off">
-                            </div>`;
+                                <div class="batch-record-header">
+                                    <span class="rec-num">#${i}</span>
+                                    Registro ${i} de ${n}
+                                </div>
+                                <div class="batch-serie-field">
+                                    <label>No. Serie *</label>
+                                    <input type="text" id="batch_serie_${i}" placeholder="Ingresa el número de serie…" autocomplete="off">
+                                </div>`;
                 wrap.appendChild(div);
             }
 
