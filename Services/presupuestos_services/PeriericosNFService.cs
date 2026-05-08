@@ -12,46 +12,46 @@ namespace ChiIT.Services;
 
 public class PerifericoNFDto
 {
-    public string?  ID_UNICO               { get; set; }
-    public string?  OC                     { get; set; }
-    public string?  FOLIO_INVENTARIO       { get; set; }
-    public string?  FECHA_ENTRADA          { get; set; }
-    public string?  RECIBIDO_POR           { get; set; }
-    public string?  SUBCATEGORIA           { get; set; }
-    public string?  TIPO                   { get; set; }
-    public string?  MARCA                  { get; set; }
-    public string?  MODELO                 { get; set; }
-    public int?     CANTIDAD               { get; set; }
-    public string?  NUMERO_SERIE           { get; set; }
-    public string?  PROVEEDOR              { get; set; }
-    public decimal? COSTO_PESOS            { get; set; }
-    public string?  ESTADO                 { get; set; }
-    public string?  DESTINO                { get; set; }
-    public bool?    DISPONIBLE             { get; set; }
-    public string?  FECHA_SALIDA           { get; set; }
-    public string?  DESTINO_PLANTA         { get; set; }
-    public string?  ASIGNADO_A             { get; set; }
-    public string?  PERSONAL_IT_QUE_ASIGNA { get; set; }
+    public string? ID_UNICO { get; set; }
+    public string? OC { get; set; }
+    public string? FOLIO_INVENTARIO { get; set; }
+    public string? FECHA_ENTRADA { get; set; }
+    public string? RECIBIDO_POR { get; set; }
+    public string? SUBCATEGORIA { get; set; }
+    public string? TIPO { get; set; }
+    public string? MARCA { get; set; }
+    public string? MODELO { get; set; }
+    public int? CANTIDAD { get; set; }
+    public string? NUMERO_SERIE { get; set; }
+    public string? PROVEEDOR { get; set; }
+    public decimal? COSTO_PESOS { get; set; }
+    public string? ESTADO { get; set; }
+    public string? DESTINO { get; set; }
+    public bool? DISPONIBLE { get; set; }
+    public string? FECHA_SALIDA { get; set; }
+    public string? DESTINO_PLANTA { get; set; }
+    public string? ASIGNADO_A { get; set; }
+    public string? PERSONAL_IT_QUE_ASIGNA { get; set; }
 }
 
 public class PerifericoNFFiltros
 {
-    public string? ID_UNICO               { get; set; }
-    public string? OC                     { get; set; }
-    public string? FOLIO_INVENTARIO       { get; set; }
-    public string? FECHA_ENTRADA          { get; set; }
-    public string? RECIBIDO_POR           { get; set; }
-    public string? SUBCATEGORIA           { get; set; }
-    public string? TIPO                   { get; set; }
-    public string? MARCA                  { get; set; }
-    public string? MODELO                 { get; set; }
-    public string? NUMERO_SERIE           { get; set; }
-    public string? PROVEEDOR              { get; set; }
-    public string? ESTADO                 { get; set; }
-    public string? DESTINO                { get; set; }
-    public string? DISPONIBLE             { get; set; }
-    public string? DESTINO_PLANTA         { get; set; }
-    public string? ASIGNADO_A             { get; set; }
+    public string? ID_UNICO { get; set; }
+    public string? OC { get; set; }
+    public string? FOLIO_INVENTARIO { get; set; }
+    public string? FECHA_ENTRADA { get; set; }
+    public string? RECIBIDO_POR { get; set; }
+    public string? SUBCATEGORIA { get; set; }
+    public string? TIPO { get; set; }
+    public string? MARCA { get; set; }
+    public string? MODELO { get; set; }
+    public string? NUMERO_SERIE { get; set; }
+    public string? PROVEEDOR { get; set; }
+    public string? ESTADO { get; set; }
+    public string? DESTINO { get; set; }
+    public string? DISPONIBLE { get; set; }
+    public string? DESTINO_PLANTA { get; set; }
+    public string? ASIGNADO_A { get; set; }
     public string? PERSONAL_IT_QUE_ASIGNA { get; set; }
 }
 
@@ -153,28 +153,28 @@ public class PerifeicosNFService
         {
             lista.Add(new
             {
-                ID                     = reader.GetInt32(0),
-                ID_UNICO               = Str(reader, 1),
-                OC                     = Str(reader, 2),
-                FOLIO_INVENTARIO       = Str(reader, 3),
-                FECHA_ENTRADA          = Str(reader, 4),
-                RECIBIDO_POR           = Str(reader, 5),
-                SUBCATEGORIA           = Str(reader, 6),
-                TIPO                   = Str(reader, 7),
-                MARCA                  = Str(reader, 8),
-                MODELO                 = Str(reader, 9),
-                CANTIDAD               = reader.IsDBNull(10) ? (int?)null     : reader.GetInt32(10),
-                NUMERO_SERIE           = Str(reader, 11),
-                PROVEEDOR              = Str(reader, 12),
-                COSTO_PESOS            = reader.IsDBNull(13) ? (decimal?)null : reader.GetDecimal(13),
-                ESTADO                 = Str(reader, 14),
-                DESTINO                = Str(reader, 15),
-                DISPONIBLE             = reader.IsDBNull(16) ? (bool?)null    : reader.GetBoolean(16),
-                FECHA_SALIDA           = Str(reader, 17),
-                DESTINO_PLANTA         = Str(reader, 18),
-                ASIGNADO_A             = Str(reader, 19),
+                ID = reader.GetInt32(0),
+                ID_UNICO = Str(reader, 1),
+                OC = Str(reader, 2),
+                FOLIO_INVENTARIO = Str(reader, 3),
+                FECHA_ENTRADA = Str(reader, 4),
+                RECIBIDO_POR = Str(reader, 5),
+                SUBCATEGORIA = Str(reader, 6),
+                TIPO = Str(reader, 7),
+                MARCA = Str(reader, 8),
+                MODELO = Str(reader, 9),
+                CANTIDAD = reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10),
+                NUMERO_SERIE = Str(reader, 11),
+                PROVEEDOR = Str(reader, 12),
+                COSTO_PESOS = reader.IsDBNull(13) ? (decimal?)null : reader.GetDecimal(13),
+                ESTADO = Str(reader, 14),
+                DESTINO = Str(reader, 15),
+                DISPONIBLE = reader.IsDBNull(16) ? (bool?)null : reader.GetBoolean(16),
+                FECHA_SALIDA = Str(reader, 17),
+                DESTINO_PLANTA = Str(reader, 18),
+                ASIGNADO_A = Str(reader, 19),
                 PERSONAL_IT_QUE_ASIGNA = Str(reader, 20),
-                CREATED_AT             = Str(reader, 21),
+                CREATED_AT = Str(reader, 21),
             });
         }
 
@@ -285,11 +285,11 @@ public class PerifeicosNFService
         {
             lista.Add(new
             {
-                ID                = r.GetInt32(0),
-                USUARIO           = r.GetString(1),
-                FECHA             = r.GetValue(2)?.ToString(),
+                ID = r.GetInt32(0),
+                USUARIO = r.GetString(1),
+                FECHA = r.GetValue(2)?.ToString(),
                 REGISTRO_ANTERIOR = r.IsDBNull(3) ? null : r.GetString(3),
-                REGISTRO_NUEVO    = r.IsDBNull(4) ? null : r.GetString(4),
+                REGISTRO_NUEVO = r.IsDBNull(4) ? null : r.GetString(4),
             });
         }
         return lista;
@@ -361,7 +361,7 @@ public class PerifeicosNFService
         conds.Add("(activo IS NULL OR activo = true)");
 
         var parms = new List<(string, object?)>();
-        var idx   = 1;
+        var idx = 1;
 
         void Add(string col, string? val)
         {
@@ -371,22 +371,22 @@ public class PerifeicosNFService
             idx++;
         }
 
-        Add("id_unico",               f.ID_UNICO);
-        Add("oc",                     f.OC);
-        Add("folio_inventario",       f.FOLIO_INVENTARIO);
-        Add("fecha_entrada",          f.FECHA_ENTRADA);
-        Add("recibido_por",           f.RECIBIDO_POR);
-        Add("subcategoria",           f.SUBCATEGORIA);
-        Add("tipo",                   f.TIPO);
-        Add("marca",                  f.MARCA);
-        Add("modelo",                 f.MODELO);
-        Add("numero_serie",           f.NUMERO_SERIE);
-        Add("proveedor",              f.PROVEEDOR);
-        Add("estado",                 f.ESTADO);
-        Add("destino",                f.DESTINO);
-        Add("disponible::TEXT",       f.DISPONIBLE);
-        Add("destino_planta",         f.DESTINO_PLANTA);
-        Add("asignado_a",             f.ASIGNADO_A);
+        Add("id_unico", f.ID_UNICO);
+        Add("oc", f.OC);
+        Add("folio_inventario", f.FOLIO_INVENTARIO);
+        Add("fecha_entrada", f.FECHA_ENTRADA);
+        Add("recibido_por", f.RECIBIDO_POR);
+        Add("subcategoria", f.SUBCATEGORIA);
+        Add("tipo", f.TIPO);
+        Add("marca", f.MARCA);
+        Add("modelo", f.MODELO);
+        Add("numero_serie", f.NUMERO_SERIE);
+        Add("proveedor", f.PROVEEDOR);
+        Add("estado", f.ESTADO);
+        Add("destino", f.DESTINO);
+        Add("disponible::TEXT", f.DISPONIBLE);
+        Add("destino_planta", f.DESTINO_PLANTA);
+        Add("asignado_a", f.ASIGNADO_A);
         Add("personal_it_que_asigna", f.PERSONAL_IT_QUE_ASIGNA);
 
         var where = conds.Count > 0 ? "WHERE " + string.Join(" AND ", conds) : "";
@@ -395,26 +395,36 @@ public class PerifeicosNFService
 
     private static void AgregarParametros(NpgsqlCommand cmd, PerifericoNFDto dto)
     {
-        cmd.Parameters.AddWithValue("id_unico",               (object?)dto.ID_UNICO               ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("oc",                     (object?)dto.OC                     ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("folio_inventario",       (object?)dto.FOLIO_INVENTARIO       ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("fecha_entrada",          (object?)dto.FECHA_ENTRADA           ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("recibido_por",           (object?)dto.RECIBIDO_POR            ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("subcategoria",           (object?)dto.SUBCATEGORIA            ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("tipo",                   (object?)dto.TIPO                   ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("marca",                  (object?)dto.MARCA                  ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("modelo",                 (object?)dto.MODELO                 ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("cantidad",               (object?)dto.CANTIDAD               ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("numero_serie",           (object?)dto.NUMERO_SERIE           ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("proveedor",              (object?)dto.PROVEEDOR              ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("costo_pesos",            (object?)dto.COSTO_PESOS            ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("estado",                 (object?)dto.ESTADO                 ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("destino",                (object?)dto.DESTINO                ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("disponible",             (object?)dto.DISPONIBLE             ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("fecha_salida",           (object?)dto.FECHA_SALIDA           ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("destino_planta",         (object?)dto.DESTINO_PLANTA         ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("asignado_a",             (object?)dto.ASIGNADO_A             ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("id_unico", (object?)dto.ID_UNICO ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("oc", (object?)dto.OC ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("folio_inventario", (object?)dto.FOLIO_INVENTARIO ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("fecha_entrada", ParseDate(dto.FECHA_ENTRADA));
+        cmd.Parameters.AddWithValue("recibido_por", (object?)dto.RECIBIDO_POR ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("subcategoria", (object?)dto.SUBCATEGORIA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("tipo", (object?)dto.TIPO ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("marca", (object?)dto.MARCA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("modelo", (object?)dto.MODELO ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("cantidad", (object?)dto.CANTIDAD ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("numero_serie", (object?)dto.NUMERO_SERIE ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("proveedor", (object?)dto.PROVEEDOR ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("costo_pesos", (object?)dto.COSTO_PESOS ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("estado", (object?)dto.ESTADO ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("destino", (object?)dto.DESTINO ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("disponible", (object?)dto.DISPONIBLE ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("fecha_salida", ParseDate(dto.FECHA_SALIDA));
+        cmd.Parameters.AddWithValue("destino_planta", (object?)dto.DESTINO_PLANTA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("asignado_a", (object?)dto.ASIGNADO_A ?? DBNull.Value);
         cmd.Parameters.AddWithValue("personal_it_que_asigna", (object?)dto.PERSONAL_IT_QUE_ASIGNA ?? DBNull.Value);
+    }
+
+    // Convierte string "yyyy-MM-dd" (o null/vacío) a DateOnly para Npgsql.
+    // Acepta también formatos con hora ("yyyy-MM-ddTHH:mm:ss") por si el frontend manda datetime.
+    private static object ParseDate(string? val)
+    {
+        if (string.IsNullOrWhiteSpace(val)) return DBNull.Value;
+        // Intentar parsear solo la parte de fecha si viene con hora
+        var part = val.Length > 10 ? val[..10] : val;
+        return DateOnly.TryParse(part, out var d) ? (object)d : DBNull.Value;
     }
 
     private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
@@ -440,7 +450,7 @@ public class PerifeicosNFService
     private async Task RegistrarHistorialAsync(NpgsqlConnection conn, int perifericoId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {
-        var antesJson   = System.Text.Json.JsonSerializer.Serialize(anterior);
+        var antesJson = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
         await using var cmd = new NpgsqlCommand(
