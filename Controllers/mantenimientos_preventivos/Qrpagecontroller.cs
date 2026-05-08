@@ -1118,7 +1118,15 @@ function descargarFormatoPM(){
         sb.AppendLine(" toast('Correctivo registrado',true);");
         sb.AppendLine("}");
 
-        // ── Abrir Correctivo / Baja desde el modal de Recalendarización ──
+        // ── Abrir Correctivo / Baja / CambioUbicacion desde el modal de Recalendarización ──
+        sb.AppendLine("function abrirCambioUbicacionRecal(){");
+        sb.AppendLine("  document.getElementById('recal-nueva-ub').value='';");
+        sb.AppendLine("  document.getElementById('recal-error').style.display='none';");
+        sb.AppendLine("  document.getElementById('recal-paso2').style.display='none';");
+        sb.AppendLine("  document.getElementById('btnRecalConfirmar').disabled=false;");
+        sb.AppendLine("  document.getElementById('btnRecalConfirmar').textContent='Confirmar ubicación →';");
+        sb.AppendLine("  setTimeout(()=>document.getElementById('recal-nueva-ub').focus(),100);");
+        sb.AppendLine("}");
         sb.AppendLine("function abrirCorrectivoDesdeRecal(){");
         sb.AppendLine("  if(!recalIdDispositivo){toast('Sin dispositivo seleccionado',false);return;}");
         sb.AppendLine("  const obs=document.getElementById('recal-observaciones').value.trim();");
