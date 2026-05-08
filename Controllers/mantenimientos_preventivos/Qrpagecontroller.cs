@@ -377,4 +377,81 @@ public class QrPageController : ControllerBase
             cmdBaja.Parameters.AddWithValue("estado", "PENDIENTE");
             cmdBaja.Parameters.AddWithValue("planta", (object?)req.BajaDto.PLANTA ?? DBNull.Value);
             cmdBaja.Parameters.AddWithValue("fecha", (object?)req.BajaDto.FECHA ?? DBNull.Value);
-            cmdBaja.Parameters.AddWithValue("equipo", (object?)req.BajaDto.E
+            cmdBaja.Parameters.AddWithValue("equipo", (object?)req.BajaDto.EQUIPO ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("marca", (object?)req.BajaDto.MARCA ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("modelo", (object?)req.BajaDto.MODELO ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("no_serie", (object?)req.BajaDto.NO_SERIE ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("activo_fijo", (object?)req.BajaDto.ACTIVO_FIJO ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("ubicacion_persona", (object?)req.BajaDto.UBICACION_PERSONA ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("motivo_de_baja", (object?)req.BajaDto.MOTIVO_DE_BAJA ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("diagnostico", (object?)req.BajaDto.DIAGNOSTICO ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("comentarios", (object?)req.BajaDto.COMENTARIOS ?? DBNull.Value);
+            cmdBaja.Parameters.AddWithValue("motivo_de_cancelacion", (object?)req.BajaDto.MOTIVO_DE_CANCELACION ?? DBNull.Value);
+
+            var bajaId = (long)(await cmdBaja.ExecuteScalarAsync())!;
+
+            // 2. Actualizar el id_equipo del preventivo con el equipo de reemplazo
+            await using var cmdUpdate = new Npgsql.NpgsqlCommand("""
+                UPDATE mantenimientos_preventivos
+                SET id_equipo = @id_equipo_nuevo
+                WHERE id_equipo = @id_equipo_viejo
+                """, conn);
+
+            cmdUpdate.Parameters.AddWithValue("id_equipo_nuevo", req.IdEquipoReemplazo);
+            cmdUpdate.Parameters.AddWithValue("id_equipo_viejo", req.BajaDto.EQUIPO ?? "");
+            await cmdUpdate.ExecuteNonQueryAsync();
+
+            return Ok(new { id = bajaId });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[REGISTRAR_BAJA] Error: " + ex);
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────────
+    private static string Esc(string? s) =>
+        string.IsNullOrEmpty(s) ? "" :
+        s.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
+
+    private static string HtmlPage(string ubicacion, string cards) => $$"""
+        <!DOCTYPE html>
+        <html lang="es">
+        <!-- contenido generado por QrPageController -->
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>Preventivos — {{ubicacion}}</title>
+        </head>
+        <body>
+          {{cards}}
+        </body>
+        </html>
+        """;
+}
+
+// ── DTOs ────────────────────────────────────────────────────────────────────
+public class RegistrarBajaRequest
+{
+    public BajaEquipoDto? BajaDto { get; set; }
+    public string? IdEquipoReemplazo { get; set; }
+}
+
+public class BajaEquipoDto
+{
+    public string? FOLIO { get; set; }
+    public string? ESTADO { get; set; }
+    public string? PLANTA { get; set; }
+    public string? FECHA { get; set; }
+    public string? EQUIPO { get; set; }
+    public string? MARCA { get; set; }
+    public string? MODELO { get; set; }
+    public string? NO_SERIE { get; set; }
+    public string? ACTIVO_FIJO { get; set; }
+    public string? UBICACION_PERSONA { get; set; }
+    public string? MOTIVO_DE_BAJA { get; set; }
+    public string? DIAGNOSTICO { get; set; }
+    public string? COMENTARIOS { get; set; }
+    public string? MOTIVO_DE_CANCELACION { get; set; }
+}
