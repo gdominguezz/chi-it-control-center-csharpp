@@ -1,3 +1,11 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// MIGRACIÓN SQL REQUERIDA — ejecutar una sola vez en la base de datos:
+//
+//   ALTER TABLE public.mantenimientos_preventivos
+//     ADD COLUMN IF NOT EXISTS recalendarizado_por               TEXT,
+//     ADD COLUMN IF NOT EXISTS observaciones_de_recalendarizacion TEXT;
+//
+// ═══════════════════════════════════════════════════════════════════════════
 using ChiIT.Data;
 using ChiIT.Models;
 using ChiIT.Services;
@@ -968,8 +976,16 @@ public class PreventivoController : ControllerBase
 
             // 3. Mover el dispositivo principal
             using var mov1 = conn.CreateCommand();
-            mov1.CommandText = "UPDATE public.mantenimientos_preventivos SET ubicacion=@u WHERE id=@id";
+            mov1.CommandText = """
+                UPDATE public.mantenimientos_preventivos
+                SET ubicacion=@u,
+                    recalendarizado_por=@rp,
+                    observaciones_de_recalendarizacion=@obs
+                WHERE id=@id
+                """;
             mov1.Parameters.AddWithValue("u", nuevaUbicacion);
+            mov1.Parameters.AddWithValue("rp", (object?)usuario ?? DBNull.Value);
+            mov1.Parameters.AddWithValue("obs", (object?)data.ObservacionesRecal ?? DBNull.Value);
             mov1.Parameters.AddWithValue("id", data.IdDispositivo);
             mov1.ExecuteNonQuery();
 
@@ -1466,6 +1482,45 @@ public class PreventivoController : ControllerBase
         return Ok(new { equipos = lista });
     }
 
+    // ── POST /PREVENTIVO/GUARDAR_RECAL_META ──────────────────────────────────
+    // Guarda recalendarizado_por y observaciones_de_recalendarizacion
+    // sin tocar ningún otro campo. Se llama desde JS cuando se abre
+    // Correctivo o Baja desde el modal de Recalendarización.
+    [HttpPost("PREVENTIVO/GUARDAR_RECAL_META")]
+    public IActionResult GuardarRecalMeta([FromBody] GuardarRecalMetaRequest data)
+    {
+        try
+        {
+            var usuario = Request.Cookies["usuario"]
+                       ?? Request.Headers["X-Usuario"].FirstOrDefault()
+                       ?? data.RecalendarizadoPor ?? "SISTEMA";
+
+            if (data.IdDispositivo <= 0)
+                return Ok(new { ok = false, error = "ID de dispositivo requerido" });
+            if (string.IsNullOrWhiteSpace(data.ObservacionesRecal))
+                return Ok(new { ok = false, error = "Las observaciones son obligatorias" });
+
+            using var conn = _db.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                UPDATE public.mantenimientos_preventivos
+                SET recalendarizado_por               = @rp,
+                    observaciones_de_recalendarizacion = @obs
+                WHERE id = @id
+                """;
+            cmd.Parameters.AddWithValue("rp", (object?)usuario ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("obs", data.ObservacionesRecal.Trim());
+            cmd.Parameters.AddWithValue("id", data.IdDispositivo);
+            int rows = cmd.ExecuteNonQuery();
+
+            if (rows == 0)
+                return Ok(new { ok = false, error = "Registro no encontrado" });
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+    }
+
     // ── Modelo recalendarización ──────────────────────────────────────────────
 } // fin PreventivoController
 
@@ -1475,10 +1530,18 @@ public class RecalendarizarRequest
     public string? NuevaUbicacion { get; set; }
     public string? UbicacionOcupante { get; set; }  // dónde va el que ya estaba allí
     public string? Usuario { get; set; }
+    public string? ObservacionesRecal { get; set; }  // observaciones de recalendarización (obligatorio desde UI)
 }
 
 public class VerificarPmRequest
 {
     public int Periodo { get; set; }       // 1 o 2
     public string? Verificador { get; set; } // nombre del auditor
+}
+
+public class GuardarRecalMetaRequest
+{
+    public long IdDispositivo { get; set; }
+    public string? RecalendarizadoPor { get; set; }
+    public string? ObservacionesRecal { get; set; }
 }

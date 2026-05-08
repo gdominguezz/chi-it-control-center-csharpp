@@ -1,3 +1,11 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// MIGRACIÓN SQL REQUERIDA — ejecutar una sola vez en la base de datos:
+//
+//   ALTER TABLE public.mantenimientos_preventivos
+//     ADD COLUMN IF NOT EXISTS recalendarizado_por               TEXT,
+//     ADD COLUMN IF NOT EXISTS observaciones_de_recalendarizacion TEXT;
+//
+// ═══════════════════════════════════════════════════════════════════════════
 using ChiIT.Data;
 using ChiIT.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -797,6 +805,13 @@ public class QrPageController : ControllerBase
         sb.AppendLine("      <button class=\"btn\" style=\"padding:12px 10px;font-size:12px;background:rgba(244,114,182,.15);border:1px solid rgba(244,114,182,.4);color:#f472b6;border-radius:8px;\" onclick=\"abrirStockModal()\">🗄️ Soporte Site (stock)</button>");
         sb.AppendLine("      <button class=\"btn\" style=\"padding:12px 10px;font-size:12px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;border-radius:8px;\" onclick=\"abrirCambioPlantaModal()\">🏭 Cambio de planta</button>");
         sb.AppendLine("      <button class=\"btn\" id=\"btn-tipo-reparacion\" style=\"padding:12px 10px;font-size:12px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fca5a5;border-radius:8px;\" onclick=\"toggleFormReparacion()\">🔧 Recalendarización por Reparación</button>");
+        sb.AppendLine("      <button class=\"btn\" style=\"padding:12px 10px;font-size:12px;background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.5);color:#fca5a5;border-radius:8px;font-weight:700;\" onclick=\"abrirCorrectivoDesdeRecal()\">⚠️ Requiere Correctivo</button>");
+        sb.AppendLine("      <button class=\"btn\" style=\"padding:12px 10px;font-size:12px;background:rgba(234,88,12,.18);border:1px solid rgba(234,88,12,.5);color:#fb923c;border-radius:8px;font-weight:700;\" onclick=\"abrirBajaDesdeRecal()\">📤 Baja de Equipo</button>");
+        sb.AppendLine("    </div>");
+        // ── Observaciones de recalendarización (obligatorio para todos los flujos) ──
+        sb.AppendLine("    <div class=\"modal-field\" id=\"recal-obs-wrap\" style=\"margin-bottom:14px;\">");
+        sb.AppendLine("      <label style=\"font-size:10px;font-weight:700;text-transform:uppercase;color:#f59e0b;letter-spacing:.08em;\">📝 Observaciones de Recalendarización <span style=\"color:#ef4444;\">*</span></label>");
+        sb.AppendLine("      <textarea id=\"recal-observaciones\" placeholder=\"Describe el motivo de la recalendarización (obligatorio)...\" style=\"width:100%;background:var(--surface2);border:1px solid rgba(245,158,11,.4);border-radius:7px;padding:10px 12px;font-size:13px;color:var(--text);resize:vertical;min-height:60px;margin-top:4px;font-family:'DM Sans',sans-serif;\"></textarea>");
         sb.AppendLine("    </div>");
         // ── Sub-formulario de Reparación ─────────────────────────────────────
         sb.AppendLine("    <div id=\"form-reparacion\" style=\"display:none;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.35);border-radius:10px;padding:16px;margin-bottom:16px;\">");
@@ -1146,8 +1161,36 @@ function descargarFormatoPM(){
         sb.AppendLine(" body:JSON.stringify(body)");
         sb.AppendLine(" });");
 
+        sb.AppendLine(" // Si se abrió desde recalendarización, guardar recalendarizado_por y observaciones");
+        sb.AppendLine(" if(recalIdDispositivo&&correctivoTemp._desdeRecal){");
+        sb.AppendLine("   const obs=document.getElementById('recal-observaciones')?.value?.trim()||'Recalendarización por correctivo';");
+        sb.AppendLine("   await fetch('/PREVENTIVO/GUARDAR_RECAL_META',{method:'POST',headers:{'Content-Type':'application/json'},");
+        sb.AppendLine("     body:JSON.stringify({idDispositivo:recalIdDispositivo,recalendarizadoPor:usuarioActual,observacionesRecal:obs})});");
+        sb.AppendLine("   correctivoTemp._desdeRecal=false;");
+        sb.AppendLine("   cerrarRecal();");
+        sb.AppendLine(" }");
+
         sb.AppendLine(" cerrarModalCorrectivo();");
         sb.AppendLine(" toast('Correctivo registrado',true);");
+        sb.AppendLine("}");
+
+        // ── Abrir Correctivo / Baja desde el modal de Recalendarización ──
+        sb.AppendLine("function abrirCorrectivoDesdeRecal(){");
+        sb.AppendLine("  if(!recalIdDispositivo){toast('Sin dispositivo seleccionado',false);return;}");
+        sb.AppendLine("  const obs=document.getElementById('recal-observaciones').value.trim();");
+        sb.AppendLine("  if(!obs){document.getElementById('recal-error').textContent='Las observaciones son obligatorias antes de continuar';document.getElementById('recal-error').style.display='block';document.getElementById('recal-observaciones').focus();return;}");
+        sb.AppendLine("  document.getElementById('recal-error').style.display='none';");
+        sb.AppendLine("  correctivoTemp._desdeRecal=true;");
+        sb.AppendLine("  abrirModalCorrectivo(recalIdDispositivo,recalPlanta,recalIdEquipo,recalUbicacion);");
+        sb.AppendLine("}");
+
+        sb.AppendLine("function abrirBajaDesdeRecal(){");
+        sb.AppendLine("  if(!recalIdDispositivo){toast('Sin dispositivo seleccionado',false);return;}");
+        sb.AppendLine("  const obs=document.getElementById('recal-observaciones').value.trim();");
+        sb.AppendLine("  if(!obs){document.getElementById('recal-error').textContent='Las observaciones son obligatorias antes de continuar';document.getElementById('recal-error').style.display='block';document.getElementById('recal-observaciones').focus();return;}");
+        sb.AppendLine("  document.getElementById('recal-error').style.display='none';");
+        sb.AppendLine("  bajaTemp._desdeRecal=true;");
+        sb.AppendLine("  abrirBaja(recalIdDispositivo,0,recalIdEquipo,recalUbicacion,recalPlanta);");
         sb.AppendLine("}");
 
         // ── Form Reparación JS ──
@@ -1257,7 +1300,7 @@ function descargarFormatoPM(){
         sb.AppendLine("}");
 
         // ── Recalendarización JS ──
-        sb.AppendLine("let recalIdDispositivo=null,recalIdOcupante=null;");
+        sb.AppendLine("let recalIdDispositivo=null,recalIdOcupante=null,recalIdEquipo=null,recalUbicacion=null,recalPlanta=null;");
         sb.AppendLine("let todasUbicaciones=[];");
         sb.AppendLine("async function cargarUbicacionesRecal(){");
         sb.AppendLine("  try{const r=await fetch('/PREVENTIVO/UBICACIONES_TODAS');const d=await r.json();todasUbicaciones=d.ubicaciones||[];");
@@ -1266,13 +1309,14 @@ function descargarFormatoPM(){
         sb.AppendLine("}");
         sb.AppendLine("function abrirRecal(id,idEquipo,ubActual,planta,dispositivo){");
         sb.AppendLine("  if(!usuarioActual){abrirLogin();return;}");
-        sb.AppendLine("  recalIdDispositivo=id;recalIdOcupante=null;");
+        sb.AppendLine("  recalIdDispositivo=id;recalIdOcupante=null;recalIdEquipo=idEquipo;recalUbicacion=ubActual;recalPlanta=planta;");
         sb.AppendLine("  document.getElementById('recal-id-equipo').textContent=idEquipo;");
         sb.AppendLine("  document.getElementById('recal-dispositivo').textContent=dispositivo;");
         sb.AppendLine("  document.getElementById('recal-ub-actual').textContent=ubActual;");
         sb.AppendLine("  document.getElementById('recal-planta').textContent=planta;");
         sb.AppendLine("  document.getElementById('recal-nueva-ub').value='';");
         sb.AppendLine("  document.getElementById('recal-ub-ocupante').value='';");
+        sb.AppendLine("  const recalObs=document.getElementById('recal-observaciones');if(recalObs)recalObs.value='';");
         sb.AppendLine("  document.getElementById('recal-paso2').style.display='none';");
         sb.AppendLine("  document.getElementById('recal-error').style.display='none';");
         sb.AppendLine("  document.getElementById('btnRecalConfirmar').disabled=false;");
@@ -1287,13 +1331,15 @@ function descargarFormatoPM(){
         sb.AppendLine("  errEl.style.display='none';");
         sb.AppendLine("  const nuevaUb=document.getElementById('recal-nueva-ub').value.trim();");
         sb.AppendLine("  if(!nuevaUb){errEl.textContent='Ingresa la nueva ubicación';errEl.style.display='block';return;}");
+        sb.AppendLine("  const recalObs=document.getElementById('recal-observaciones').value.trim();");
+        sb.AppendLine("  if(!recalObs){errEl.textContent='Las observaciones de recalendarización son obligatorias';errEl.style.display='block';document.getElementById('recal-observaciones').focus();return;}");
         sb.AppendLine("  const ubOcupante=document.getElementById('recal-ub-ocupante').value.trim();");
         sb.AppendLine("  const paso2=document.getElementById('recal-paso2').style.display!=='none';");
         sb.AppendLine("  if(paso2&&!ubOcupante){errEl.textContent='Ingresa dónde mover el dispositivo existente';errEl.style.display='block';return;}");
         sb.AppendLine("  const btn=document.getElementById('btnRecalConfirmar');");
         sb.AppendLine("  btn.disabled=true;btn.textContent='Guardando...';");
         sb.AppendLine("  try{");
-        sb.AppendLine("    const body={idDispositivo:recalIdDispositivo,nuevaUbicacion:nuevaUb,usuario:usuarioActual};");
+        sb.AppendLine("    const body={idDispositivo:recalIdDispositivo,nuevaUbicacion:nuevaUb,usuario:usuarioActual,observacionesRecal:recalObs};");
         sb.AppendLine("    if(paso2)body.ubicacionOcupante=ubOcupante;");
         sb.AppendLine("    const res=await fetch('/PREVENTIVO/RECALENDARIZAR',{method:'POST',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(body)});");
         sb.AppendLine("    const data=await res.json();");
@@ -1585,6 +1631,14 @@ function descargarFormatoPM(){
         sb.AppendLine("          var qrLabel=qrEl.nextElementSibling;if(qrLabel)qrLabel.textContent=idReemplazo;}");
         sb.AppendLine("      }");
         sb.AppendLine("      cerrarBaja();");
+        sb.AppendLine("      // Si se abrió desde recalendarización, guardar recalendarizado_por y observaciones");
+        sb.AppendLine("      if(bajaTemp._desdeRecal&&recalIdDispositivo){");
+        sb.AppendLine("        const obs=document.getElementById('recal-observaciones')?.value?.trim()||'Recalendarización por baja de equipo';");
+        sb.AppendLine("        await fetch('/PREVENTIVO/GUARDAR_RECAL_META',{method:'POST',headers:{'Content-Type':'application/json'},");
+        sb.AppendLine("          body:JSON.stringify({idDispositivo:recalIdDispositivo,recalendarizadoPor:usuarioActual,observacionesRecal:obs})});");
+        sb.AppendLine("        bajaTemp._desdeRecal=false;");
+        sb.AppendLine("        cerrarRecal();");
+        sb.AppendLine("      }");
         sb.AppendLine("      toast('Baja registrada — PM P'+p+' completado — Equipo: '+idReemplazo,true);");
         sb.AppendLine("    }else{errEl.textContent=data.error||'Error al registrar baja';errEl.style.display='block';}");
         sb.AppendLine("  }catch(e){errEl.textContent='Error de conexión. Intenta de nuevo.';errEl.style.display='block';}");
