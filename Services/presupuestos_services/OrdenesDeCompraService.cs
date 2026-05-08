@@ -37,91 +37,329 @@ public class OrdenesDeCompraService
 {
     private readonly DbConnectionPool _db;
 
-    public OrdenesDeCompraService(DbConnectionPool db)
-    {
-        _db = db;
-    }
+    public OrdenesDeCompraService(DbConnectionPool db) => _db = db;
 
     private NpgsqlConnection Abrir() => _db.Open();
 
-    /// <summary>
-    /// Convierte un string "yyyy-MM-dd" (o cualquier formato parseable) a DateTime? para Npgsql.
-    /// Devuelve DBNull si el string es nulo/vacío o no parseable.
-    /// </summary>
     private static object ParseFecha(string? valor)
     {
         if (string.IsNullOrWhiteSpace(valor)) return DBNull.Value;
         return DateTime.TryParse(valor, out var dt) ? (object)dt : DBNull.Value;
     }
 
-    // ── GET PAGINADO ──────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════════════════════
+    // MAPEO CANÓNICO: normaliza cualquier alias de hoja al nombre oficial.
+    // Es public static para que otros Services puedan llamarlo directamente.
+    // ═══════════════════════════════════════════════════════════════════════
+    public static string? NormalizarHojaControl(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return null;
+        return raw.Trim().ToUpperInvariant() switch
+        {
+            "ACCESORIO NF"
+            or "ACCESORIOS NF" => "Accesorio NF",
+
+            "CONSUMIBLES NF"
+            or "CONSUMIBLE NF" => "Consumibles NF",
+
+            "DISPOSITIVOS NF"
+            or "DISPOSITIVO NF" => "Dispositivos NF",
+
+            "IMPRESORAS NF"
+            or "IMPRESORA NF" => "IMPRESORAS NF",
+
+            "PANTALLAS NF"
+            or "PANTALLA NF" => "PANTALLAS NF",
+
+            "PERIFERICOS NF"
+            or "PERIFERICO NF"
+            or "PERIFÉRICOS NF" => "PERIFERICOS NF",
+
+            "REFACCIONES NF"
+            or "REFACCION NF"
+            or "REFACCIONES" => "Refacciones NF",
+
+            "RADIO NF"
+            or "RADIOS NF"
+            or "RADIOS" => "Radio NF",
+
+            "HERRAMIENTA NF"
+            or "HERRAMIENTAS NF"
+            or "HERRAMIENTAS" => "HERRAMIENTAS NF",
+
+            "EQUIPO DE RED"
+            or "EQUIPO RED"
+            or "EQUIPOS DE RED" => "EQUIPO DE RED",
+
+            "CAMARAS_AUDIO"
+            or "CAMARAS AUDIO"
+            or "CÁMARAS AUDIO"
+            or "CAMARA AUDIO" => "CAMARAS AUDIO",
+
+            "FIRECOM"
+            or "BITACORA FIRECOM"
+            or "BITÁCORA FIRECOM" => "BITACORA FIRECOM",
+
+            "TINTAS,TONER,RIBON NF"
+            or "TINTAS TONER RIBON NF"
+            or "TINTAS TONER RIBON" => "Tintas,Toner,Ribon NF",
+
+            "SERVICIOS POR PROVEEDORES NF"
+            or "SERVICIOS POR PROVEEDORES"
+            or "SERVICIOS PROVEEDORES" => "Servicios por Proveedores NF",
+
+            "INVENTARIOS NF"
+            or "INVENTARIO NF"
+            or "INVENTARIOS" => "Inventarios NF",
+
+            _ => null
+        };
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // FÓRMULA: CANTIDAD REGISTRADA
+    // Equivale a:
+    //   =SUMAR.SI.CONJUNTO(INDIRECTO("'"&N&"'!J:J"),
+    //                      INDIRECTO("'"&N&"'!A:A"),
+    //                      A&B)
+    //
+    // Mapeo verificado contra esquema real de la DB:
+    //  Hoja canónica          Tabla PG               col OC   col folio        col cantidad
+    //  ─────────────────────────────────────────────────────────────────────────────────────
+    //  Accesorio NF           accesorios_nf           oc       folio            cantidad
+    //  Consumibles NF         consumibles_nf          oc       folio_cantidad   cantidad
+    //  Dispositivos NF        dispositivos_nf         oc       folio            cantidad
+    //  IMPRESORAS NF          impresoras_nf           oc       folio_inventario cantidad
+    //  PANTALLAS NF           pantallas_nf            oc       folio            cantidad
+    //  PERIFERICOS NF         perifericos_nf          oc       folio_inventario cantidad
+    //  Refacciones NF         refacciones_nf          oc       folio_correctivo cantidad
+    //  Radio NF               radios_nf               oc       folio            cantidad
+    //  HERRAMIENTAS NF        herramientas_nf         oc       folio_correctivo cantidad
+    //  EQUIPO DE RED          equipo_red_nf           oc       folio_correctivo cantidad
+    //  CAMARAS AUDIO          camaras_audio           oc       folio_inventario cantidad
+    //  BITACORA FIRECOM       bitacora_firecom         oc       orden_servicio   cantidad
+    //  Tintas,Toner,Ribon NF  tintas_toner_ribon_nf   oc       —                cantidad_recibida
+    //  Inventarios NF         inventarios_nf          oc       inv_folio        cantidad
+    //  Servicios Proveedores  servicios_proveedores    —        —                —  → 0
+    // ═══════════════════════════════════════════════════════════════════════
+    private decimal SumarCantidadRegistrada(
+        NpgsqlConnection con,
+        string? ordenDeCompra,
+        string? folio,
+        string? hojaControl)
+    {
+        var hoja = NormalizarHojaControl(hojaControl);
+        if (hoja == null) return 0;
+
+        // Servicios no tiene OC → siempre 0
+        if (hoja == "Servicios por Proveedores NF") return 0;
+
+        using var cmd = con.CreateCommand();
+
+        (string tabla, string colFolio, string colCantidad, bool usaFolio) cfg = hoja switch
+        {
+            "Accesorio NF" => ("accesorios_nf", "folio", "cantidad", true),
+            "Consumibles NF" => ("consumibles_nf", "folio_cantidad", "cantidad", true),
+            "Dispositivos NF" => ("dispositivos_nf", "folio", "cantidad", true),
+            "IMPRESORAS NF" => ("impresoras_nf", "folio_inventario", "cantidad", true),
+            "PANTALLAS NF" => ("pantallas_nf", "folio", "cantidad", true),
+            "PERIFERICOS NF" => ("perifericos_nf", "folio_inventario", "cantidad", true),
+            "Refacciones NF" => ("refacciones_nf", "folio_correctivo", "cantidad", true),
+            "Radio NF" => ("radios_nf", "folio", "cantidad", true),
+            "HERRAMIENTAS NF" => ("herramientas_nf", "folio_correctivo", "cantidad", true),
+            "EQUIPO DE RED" => ("equipo_red_nf", "folio_correctivo", "cantidad", true),
+            "CAMARAS AUDIO" => ("camaras_audio", "folio_inventario", "cantidad", true),
+            "BITACORA FIRECOM" => ("bitacora_firecom", "orden_servicio", "cantidad", true),
+            "Tintas,Toner,Ribon NF" => ("tintas_toner_ribon_nf", "", "cantidad_recibida", false),
+            "Inventarios NF" => ("inventarios_nf", "inv_folio", "cantidad", true),
+            _ => ("", "", "", false)
+        };
+
+        if (string.IsNullOrEmpty(cfg.tabla)) return 0;
+
+        if (cfg.usaFolio)
+        {
+            cmd.CommandText = $"""
+                SELECT COALESCE(SUM({cfg.colCantidad}), 0)
+                FROM {cfg.tabla}
+                WHERE oc = @odc
+                  AND {cfg.colFolio} = @folio
+                  AND (activo IS NULL OR activo = true)
+                """;
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        else
+        {
+            // Solo OC (ej. Tintas)
+            cmd.CommandText = $"""
+                SELECT COALESCE(SUM({cfg.colCantidad}), 0)
+                FROM {cfg.tabla}
+                WHERE oc = @odc
+                  AND (activo IS NULL OR activo = true)
+                """;
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+        }
+
+        var result = cmd.ExecuteScalar();
+        return result is DBNull or null ? 0 : Convert.ToDecimal(result);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // RECALCULAR ORDENES AFECTADAS POR CAMBIO EN TABLA HIJA
+    //
+    // Llamar desde CUALQUIER servicio hijo cada vez que se modifique
+    // la columna "cantidad" de un registro.
+    //
+    // Ejemplo de uso en AccesoriosNfService.Update():
+    //   _ordenesService.RecalcularPorCambioEnHija("Accesorio NF", oc, folio);
+    //
+    // El método busca todas las ordenes_de_compra cuya (hoja_control, oc, folio)
+    // coincida, recalcula cantidad_registrada y estatus_oc, y las actualiza.
+    // ═══════════════════════════════════════════════════════════════════════
+    public int RecalcularPorCambioEnHija(string hojaControl, string? oc, string? folio)
+    {
+        var hojaCanonica = NormalizarHojaControl(hojaControl) ?? hojaControl;
+
+        using var con = Abrir();
+
+        // 1. Encontrar todas las OC afectadas
+        var afectadas = new List<(int id, decimal? cantidad)>();
+        using (var cmd = con.CreateCommand())
+        {
+            cmd.CommandText = """
+                SELECT id, cantidad
+                FROM ordenes_de_compra
+                WHERE (activo IS NULL OR activo = true)
+                  AND hoja_control = @hc
+                  AND oc           = @oc
+                  AND folio        = @fo
+                """;
+            cmd.Parameters.AddWithValue("hc", hojaCanonica);
+            cmd.Parameters.AddWithValue("oc", (object?)oc ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("fo", (object?)folio ?? DBNull.Value);
+
+            using var dr = cmd.ExecuteReader();
+            while (dr.Read())
+                afectadas.Add((dr.GetInt32(0), dr.IsDBNull(1) ? null : dr.GetDecimal(1)));
+        }
+
+        // 2. Recalcular y actualizar cada una
+        int actualizados = 0;
+        foreach (var (id, cantidad) in afectadas)
+        {
+            decimal cantReg = SumarCantidadRegistrada(con, oc, folio, hojaCanonica);
+            string estatus = CalcularEstatusOC(cantidad, cantReg);
+
+            using var upd = con.CreateCommand();
+            upd.CommandText = """
+                UPDATE ordenes_de_compra
+                SET cantidad_registrada = @cr,
+                    estatus_oc          = @es
+                WHERE id = @id
+                """;
+            upd.Parameters.AddWithValue("cr", cantReg);
+            upd.Parameters.AddWithValue("es", estatus);
+            upd.Parameters.AddWithValue("id", id);
+            actualizados += upd.ExecuteNonQuery();
+        }
+
+        return actualizados;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // ESTATUS OC
+    // =SI(I=S,"COMPLETA", SI(Y(S>0,S<I),"PARCIAL","PENDIENTE"))
+    // ═══════════════════════════════════════════════════════════════════════
+    private static string CalcularEstatusOC(decimal? cantidad, decimal cantidadRegistrada)
+    {
+        if (cantidad.HasValue && cantidad.Value > 0)
+        {
+            if (cantidadRegistrada >= cantidad.Value) return "COMPLETA";
+            if (cantidadRegistrada > 0) return "PARCIAL";
+        }
+        return "PENDIENTE";
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // BUSCARV en Req VS OC
+    // ═══════════════════════════════════════════════════════════════════════
+    private (string? ordenDeCompra, string? fechaOc) BuscarEnReqVsOC(NpgsqlConnection con, string? requisicion)
+    {
+        if (string.IsNullOrWhiteSpace(requisicion)) return (null, null);
+
+        using var cmd = con.CreateCommand();
+        cmd.CommandText = """
+            SELECT orden_compra, fecha_compra
+            FROM req_vs_oc
+            WHERE no_requisicion = @req
+              AND (activo IS NULL OR activo = true)
+            LIMIT 1
+            """;
+        cmd.Parameters.AddWithValue("req", requisicion.Trim());
+
+        using var dr = cmd.ExecuteReader();
+        if (!dr.Read()) return (null, null);
+
+        string? oc = dr.IsDBNull(0) ? null : dr.GetString(0);
+        string? foc = dr.IsDBNull(1) ? null : ((DateTime)dr.GetValue(1)).ToString("yyyy-MM-dd");
+
+        if (oc == "0" || string.IsNullOrWhiteSpace(oc)) oc = null;
+        return (oc, foc);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // GET PAGINADO + FILTROS
+    // ═══════════════════════════════════════════════════════════════════════
     public (List<OrdenDeCompraRow> data, int total) GetAll(
-        int page = 1,
-        int limit = 10,
-        string? ORDEN_DE_COMPRA = null,
-        string? FOLIO = null,
-        string? SOLICITANTE = null,
-        string? PRESUPUESTO_MES = null,
-        string? SERIE_UBICACION_NO_EMPLEADO = null,
-        string? ACCESORIO_SOLICITADO = null,
-        string? PROVEEDOR_ELEGIDO = null,
-        string? PIEZA_SERVICIO = null,
-        string? MONEDA = null,
-        string? REQUISICION = null,
-        string? OC = null,
-        string? ESTATUS_OC = null)
+        int page = 1, int limit = 10,
+        string? ORDEN_DE_COMPRA = null, string? FOLIO = null,
+        string? SOLICITANTE = null, string? PRESUPUESTO_MES = null,
+        string? SERIE_UBICACION_NO_EMPLEADO = null, string? ACCESORIO_SOLICITADO = null,
+        string? PROVEEDOR_ELEGIDO = null, string? PIEZA_SERVICIO = null,
+        string? MONEDA = null, string? REQUISICION = null,
+        string? OC = null, string? ESTATUS_OC = null)
     {
         using var con = Abrir();
 
-        var whereConditions = new List<string>();
+        var where = new List<string> { "(activo IS NULL OR activo = true)" };
+        var parms = new List<(string name, string value)>();
 
-        whereConditions.Add("(activo IS NULL OR activo = true)");
-
-        var paramValues = new List<(string name, string value)>();
-
-        void AddFilter(string column, string? value, string param)
+        void F(string col, string? val, string p)
         {
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                whereConditions.Add($"{column} ILIKE @{param}");
-                paramValues.Add((param, $"%{value}%"));
-            }
+            if (!string.IsNullOrWhiteSpace(val))
+            { where.Add($"{col} ILIKE @{p}"); parms.Add((p, $"%{val}%")); }
         }
 
-        AddFilter("orden_de_compra", ORDEN_DE_COMPRA, "odc");
-        AddFilter("folio", FOLIO, "fo");
-        AddFilter("solicitante", SOLICITANTE, "sol");
-        AddFilter("presupuesto_mes", PRESUPUESTO_MES, "pm");
-        AddFilter("serie_ubicacion_no_empleado", SERIE_UBICACION_NO_EMPLEADO, "su");
-        AddFilter("accesorio_solicitado", ACCESORIO_SOLICITADO, "ac");
-        AddFilter("proveedor_elegido", PROVEEDOR_ELEGIDO, "pr");
-        AddFilter("pieza_servicio", PIEZA_SERVICIO, "ps");
-        AddFilter("moneda", MONEDA, "mo");
-        AddFilter("requisicion", REQUISICION, "re");
-        AddFilter("oc", OC, "oc");
-        AddFilter("estatus_oc", ESTATUS_OC, "es");
+        F("orden_de_compra", ORDEN_DE_COMPRA, "odc");
+        F("folio", FOLIO, "fo");
+        F("solicitante", SOLICITANTE, "sol");
+        F("presupuesto_mes", PRESUPUESTO_MES, "pm");
+        F("serie_ubicacion_no_empleado", SERIE_UBICACION_NO_EMPLEADO, "su");
+        F("accesorio_solicitado", ACCESORIO_SOLICITADO, "ac");
+        F("proveedor_elegido", PROVEEDOR_ELEGIDO, "pr");
+        F("pieza_servicio", PIEZA_SERVICIO, "ps");
+        F("moneda", MONEDA, "mo");
+        F("requisicion", REQUISICION, "re");
+        F("oc", OC, "oc");
+        F("estatus_oc", ESTATUS_OC, "es");
 
-        string filtro = whereConditions.Count > 0
-            ? "WHERE " + string.Join(" AND ", whereConditions)
-            : "";
+        string filtro = "WHERE " + string.Join(" AND ", where);
 
-        // ── COUNT ─────────────────────────────────────────────────────────
         int total;
-        using (var cmdCount = con.CreateCommand())
+        using (var c = con.CreateCommand())
         {
-            cmdCount.CommandText = $"SELECT COUNT(*) FROM ordenes_de_compra {filtro}";
-            foreach (var (name, value) in paramValues)
-                cmdCount.Parameters.AddWithValue(name, value);
-            total = Convert.ToInt32(cmdCount.ExecuteScalar());
+            c.CommandText = $"SELECT COUNT(*) FROM ordenes_de_compra {filtro}";
+            foreach (var (n, v) in parms) c.Parameters.AddWithValue(n, v);
+            total = Convert.ToInt32(c.ExecuteScalar());
         }
 
-        // ── SELECT paginado ───────────────────────────────────────────────
         int offset = (page - 1) * limit;
         var list = new List<OrdenDeCompraRow>();
 
-        using (var cmdSelect = con.CreateCommand())
+        using (var c = con.CreateCommand())
         {
-            cmdSelect.CommandText = $"""
+            c.CommandText = $"""
                 SELECT id, orden_de_compra, folio, solicitante, presupuesto_mes,
                        serie_ubicacion_no_empleado, accesorio_solicitado, proveedor_elegido,
                        pieza_servicio, cantidad, precio_unitario, total_sin_iva,
@@ -132,16 +370,9 @@ public class OrdenesDeCompraService
                 ORDER BY id DESC
                 OFFSET {offset} LIMIT {limit}
                 """;
-
-            foreach (var (name, value) in paramValues)
-                cmdSelect.Parameters.AddWithValue(name, value);
-
-            using var dr = cmdSelect.ExecuteReader();
-            while (dr.Read())
-            {
-                var ruta = dr.IsDBNull(21) ? null : dr.GetString(21);
-                list.Add(MapRow(dr, ruta));
-            }
+            foreach (var (n, v) in parms) c.Parameters.AddWithValue(n, v);
+            using var dr = c.ExecuteReader();
+            while (dr.Read()) list.Add(MapRow(dr));
         }
 
         return (list, total);
@@ -152,29 +383,24 @@ public class OrdenesDeCompraService
     {
         using var con = Abrir();
         using var cmd = con.CreateCommand();
-
         cmd.CommandText = """
             SELECT id, orden_de_compra, folio, solicitante, presupuesto_mes,
                    serie_ubicacion_no_empleado, accesorio_solicitado, proveedor_elegido,
                    pieza_servicio, cantidad, precio_unitario, total_sin_iva,
                    moneda, comentarios, hoja_control, requisicion,
                    fecha_oc, oc, fecha_entrada, cantidad_registrada, estatus_oc, pdf
-            FROM ordenes_de_compra
-            WHERE id = @id
+            FROM ordenes_de_compra WHERE id = @id
             """;
-
         cmd.Parameters.AddWithValue("id", id);
-
         using var dr = cmd.ExecuteReader();
         if (!dr.Read()) return null;
-
-        var ruta = dr.IsDBNull(21) ? null : dr.GetString(21);
-        return MapRow(dr, ruta);
+        return MapRow(dr);
     }
 
     // ── MAP ROW ───────────────────────────────────────────────────────────
-    private OrdenDeCompraRow MapRow(NpgsqlDataReader dr, string? ruta)
+    private static OrdenDeCompraRow MapRow(NpgsqlDataReader dr)
     {
+        string? ruta = dr.IsDBNull(21) ? null : dr.GetString(21);
         return new OrdenDeCompraRow
         {
             ID = dr.GetInt32(0),
@@ -203,220 +429,6 @@ public class OrdenesDeCompraService
         };
     }
 
-    // ── CREATE ────────────────────────────────────────────────────────────
-    // ═══════════════════════════════════════════════════════════════════════
-    // FÓRMULAS (equivalentes a las fórmulas del Excel "Ordenes de Compra")
-    // ═══════════════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Equivale a las fórmulas de columnas A (ORDEN DE COMPRA), Q (OC) y P (FECHA OC):
-    ///   =SI(ESBLANCO($O), " ",
-    ///      SI(BUSCARV($O, 'Req VS OC'!$A:$C, 2, FALSO) = 0, " ",
-    ///         BUSCARV($O, 'Req VS OC'!$A:$C, 2, FALSO)))
-    /// La tabla req_vs_oc tiene: no_requisicion (col A), orden_compra (col B), fecha_compra (col C).
-    /// </summary>
-    private (string? ordenDeCompra, string? fechaOc) BuscarEnReqVsOC(NpgsqlConnection con, string? requisicion)
-    {
-        if (string.IsNullOrWhiteSpace(requisicion))
-            return (null, null);
-
-        using var cmd = con.CreateCommand();
-        cmd.CommandText = """
-            SELECT orden_compra, fecha_compra
-            FROM req_vs_oc
-            WHERE no_requisicion = @req
-            LIMIT 1
-            """;
-        cmd.Parameters.AddWithValue("req", requisicion.Trim());
-
-        using var dr = cmd.ExecuteReader();
-        if (!dr.Read()) return (null, null);
-
-        // SI(...=0, " ", ...) → si el valor es 0 o vacío lo tratamos como null
-        string? oc = dr.IsDBNull(0) ? null : dr.GetString(0);
-        string? foc = dr.IsDBNull(1) ? null : ((DateTime)dr.GetValue(1)).ToString("yyyy-MM-dd");
-
-        if (oc == "0" || string.IsNullOrWhiteSpace(oc)) oc = null;
-
-        return (oc, foc);
-    }
-
-    /// <summary>
-    /// Equivale a la fórmula de columna S (CANTIDAD REGISTRADA):
-    ///   =SUMIFS(INDIRECT("'"&N&"'!J:J"), INDIRECT("'"&N&"'!A:A"), A&B)
-    ///
-    /// Donde N = HOJA_CONTROL → decide en qué tabla buscar.
-    /// Cada tabla tiene nombres de columnas distintos para OC y folio,
-    /// por eso se usa un query específico por tabla en lugar de uno genérico.
-    ///
-    /// Mapeo HOJA_CONTROL (Excel) → tabla PostgreSQL:
-    ///   Accesorio NF / ACCESORIOS NF → accesorios_nf       (oc, folio)
-    ///   Consumibles NF / CONSUMIBLES NF → consumibles_nf   (oc, folio_cantidad)
-    ///   Dispositivos NF               → dispositivos_nf    (oc, folio)
-    ///   IMPRESORAS NF                 → impresoras_nf      (oc, folio_inventario)
-    ///   PANTALLAS NF                  → pantallas_nf       (oc, folio)
-    ///   PERIFERICOS NF                → perifericos_nf     (oc, folio_inventario)
-    ///   Refacciones NF / REFACCIONES NF → refacciones_nf   (oc, folio_correctivo)
-    ///   Radio NF / RADIOS             → radios_nf          (oc, folio)
-    ///   HERRAMIENTA NF / HERRAMIENTAS NF → herramientas_nf (oc, folio_correctivo)
-    ///   EQUIPO DE RED                 → equipo_red_nf      (oc, folio_correctivo)
-    ///   Camaras_Audio / CAMARAS AUDIO → camaras_audio      (oc, folio_inventario)
-    ///   FIRECOM / BITACORA FIRECOM    → bitacora_firecom   (oc, orden_servicio)
-    ///   Tintas,Toner,Ribon NF         → tintas_toner_ribon_nf (oc, sin folio → solo oc)
-    ///   Servicios por Proveedores NF  → servicios_proveedores  (sin oc directo → retorna 0)
-    /// </summary>
-    private decimal SumarCantidadRegistrada(
-        NpgsqlConnection con,
-        string? ordenDeCompra,
-        string? folio,
-        string? hojaControl)
-    {
-        if (string.IsNullOrWhiteSpace(hojaControl))
-            return 0;
-
-        var hoja = hojaControl.Trim();
-
-        // Builds the query string and parameters according to each table's schema.
-        // Table name is from a controlled mapping (not user input) → interpolation is safe.
-        string? sql = null;
-
-        using var cmd = con.CreateCommand();
-
-        // ── Accesorio NF ──────────────────────────────────────────────────
-        if (hoja.Equals("Accesorio NF", StringComparison.OrdinalIgnoreCase) ||
-            hoja.Equals("ACCESORIOS NF", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad),0) FROM accesorios_nf WHERE oc=@odc AND folio=@folio";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
-        }
-        // ── Consumibles NF ────────────────────────────────────────────────
-        else if (hoja.Equals("Consumibles NF", StringComparison.OrdinalIgnoreCase) ||
-                 hoja.Equals("CONSUMIBLES NF", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad),0) FROM consumibles_nf WHERE oc=@odc AND folio_cantidad=@folio";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
-        }
-        // ── Dispositivos NF ───────────────────────────────────────────────
-        else if (hoja.Equals("Dispositivos NF", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad),0) FROM dispositivos_nf WHERE oc=@odc AND folio=@folio";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
-        }
-        // ── Impresoras NF ─────────────────────────────────────────────────
-        else if (hoja.Equals("IMPRESORAS NF", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad),0) FROM impresoras_nf WHERE oc=@odc AND folio_inventario=@folio";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
-        }
-        // ── Pantallas NF ──────────────────────────────────────────────────
-        else if (hoja.Equals("PANTALLAS NF", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad),0) FROM pantallas_nf WHERE oc=@odc AND folio=@folio";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
-        }
-        // ── Periféricos NF ────────────────────────────────────────────────
-        else if (hoja.Equals("PERIFERICOS NF", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad),0) FROM perifericos_nf WHERE oc=@odc AND folio_inventario=@folio";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
-        }
-        // ── Refacciones NF ────────────────────────────────────────────────
-        else if (hoja.Equals("Refacciones NF", StringComparison.OrdinalIgnoreCase) ||
-                 hoja.Equals("REFACCIONES NF", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad),0) FROM refacciones_nf WHERE oc=@odc AND folio_correctivo=@folio";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
-        }
-        // ── Radios NF ─────────────────────────────────────────────────────
-        else if (hoja.Equals("Radio NF", StringComparison.OrdinalIgnoreCase) ||
-                 hoja.Equals("RADIOS", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad),0) FROM radios_nf WHERE oc=@odc AND folio=@folio";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
-        }
-        // ── Herramientas NF ───────────────────────────────────────────────
-        else if (hoja.Equals("HERRAMIENTA NF", StringComparison.OrdinalIgnoreCase) ||
-                 hoja.Equals("HERRAMIENTAS NF", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad),0) FROM herramientas_nf WHERE oc=@odc AND folio_correctivo=@folio";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
-        }
-        // ── Equipo de Red ─────────────────────────────────────────────────
-        else if (hoja.Equals("EQUIPO DE RED", StringComparison.OrdinalIgnoreCase) ||
-                 hoja.Equals("EQUIPO RED", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad),0) FROM equipo_red_nf WHERE oc=@odc AND folio_correctivo=@folio";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
-        }
-        // ── Cámaras / Audio ───────────────────────────────────────────────
-        else if (hoja.Equals("Camaras_Audio", StringComparison.OrdinalIgnoreCase) ||
-                 hoja.Equals("CAMARAS AUDIO", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad),0) FROM camaras_audio WHERE oc=@odc AND folio_inventario=@folio";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
-        }
-        // ── Bitácora FIRECOM ──────────────────────────────────────────────
-        // En Excel: col A = oc & orden_de_servicio (no folio convencional)
-        else if (hoja.Equals("FIRECOM", StringComparison.OrdinalIgnoreCase) ||
-                 hoja.Equals("BITACORA FIRECOM", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad),0) FROM bitacora_firecom WHERE oc=@odc AND orden_servicio=@folio";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
-        }
-        // ── Tintas / Tóner / Ribón ────────────────────────────────────────
-        // No tiene columna folio → se filtra solo por OC
-        else if (hoja.Equals("Tintas,Toner,Ribon NF", StringComparison.OrdinalIgnoreCase))
-        {
-            sql = "SELECT COALESCE(SUM(cantidad_recibida),0) FROM tintas_toner_ribon_nf WHERE oc=@odc";
-            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-        }
-        // ── Servicios por Proveedores NF ──────────────────────────────────
-        // No tiene columna OC directa ligada a ordenes_de_compra → retorna 0
-        else if (hoja.Equals("Servicios por Proveedores NF", StringComparison.OrdinalIgnoreCase))
-        {
-            return 0;
-        }
-        // ── Hoja no reconocida ────────────────────────────────────────────
-        else
-        {
-            return 0;
-        }
-
-        cmd.CommandText = sql;
-        var result = cmd.ExecuteScalar();
-        return result is DBNull or null ? 0 : Convert.ToDecimal(result);
-    }
-
-    /// <summary>
-    /// Equivale a la fórmula de columna T (ESTATUS OC):
-    ///   =SI(I = S, "COMPLETA",
-    ///      SI(Y(S > 0, S < I), "PARCIAL", "PENDIENTE"))
-    /// donde I = CANTIDAD, S = CANTIDAD_REGISTRADA.
-    /// </summary>
-    private static string CalcularEstatusOC(decimal? cantidad, decimal cantidadRegistrada)
-    {
-        if (cantidad.HasValue && cantidad.Value > 0)
-        {
-            if (cantidadRegistrada == cantidad.Value)
-                return "COMPLETA";
-            if (cantidadRegistrada > 0 && cantidadRegistrada < cantidad.Value)
-                return "PARCIAL";
-        }
-        return "PENDIENTE";
-    }
-
     // ═══════════════════════════════════════════════════════════════════════
     // CREATE
     // ═══════════════════════════════════════════════════════════════════════
@@ -424,34 +436,21 @@ public class OrdenesDeCompraService
     {
         using var con = Abrir();
 
-        // ── Fórmula: TOTAL (NO INCLUYE IVA) = CANTIDAD * PRECIO UNITARIO ──
-        // Equivale a: =I*J  (col I = CANTIDAD, col J = PRECIO_UNITARIO)
+        string? hojaControl = NormalizarHojaControl(d.HOJA_CONTROL) ?? d.HOJA_CONTROL;
         decimal? total = (d.CANTIDAD.HasValue && d.PRECIO_UNITARIO.HasValue)
-            ? d.CANTIDAD.Value * d.PRECIO_UNITARIO.Value
-            : d.TOTAL_SIN_IVA;
+                                 ? d.CANTIDAD.Value * d.PRECIO_UNITARIO.Value
+                                 : d.TOTAL_SIN_IVA;
 
-        // ── Fórmulas: ORDEN DE COMPRA (col A) y FECHA OC (col P) ──────────
-        // Lookup en Req VS OC usando la REQUISICIÓN capturada por el usuario
         var (ocLookup, fechaOcLookup) = BuscarEnReqVsOC(con, d.REQUISICION);
-
-        // Si el usuario ya llenó el campo, se respeta; si está vacío, usa el lookup
         string? ordenDeCompra = !string.IsNullOrWhiteSpace(d.ORDEN_DE_COMPRA) ? d.ORDEN_DE_COMPRA : ocLookup;
         string? fechaOc = !string.IsNullOrWhiteSpace(d.FECHA_OC) ? d.FECHA_OC : fechaOcLookup;
-
-        // ── Fórmula: OC (col Q) ────────────────────────────────────────────
-        // =SI(ESBLANCO($O), " ", BUSCARV($O, 'Req VS OC'!$A:$C, 2, FALSO))
-        // OC es la misma columna 2 de Req VS OC, igual que ORDEN DE COMPRA
         string? oc = !string.IsNullOrWhiteSpace(d.OC) ? d.OC : ocLookup;
 
-        // ── Fórmula: CANTIDAD REGISTRADA (col S) ──────────────────────────
-        decimal cantidadRegistrada = d.CANTIDAD_REGISTRADA
-            ?? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO, d.HOJA_CONTROL);
-
-        // ── Fórmula: ESTATUS OC (col T) ───────────────────────────────────
-        string estatusOc = CalcularEstatusOC(d.CANTIDAD, cantidadRegistrada);
+        decimal cantReg = d.CANTIDAD_REGISTRADA
+                           ?? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO, hojaControl);
+        string estatus = CalcularEstatusOC(d.CANTIDAD, cantReg);
 
         using var cmd = con.CreateCommand();
-
         cmd.CommandText = """
             INSERT INTO ordenes_de_compra
             (orden_de_compra, folio, solicitante, presupuesto_mes,
@@ -464,57 +463,33 @@ public class OrdenesDeCompraService
              @mo,@co,@hc,@re,@foc,@oc,@fen,@cr,@es)
             """;
 
-        cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("fo", (object?)d.FOLIO ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("sol", (object?)d.SOLICITANTE ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("pm", (object?)d.PRESUPUESTO_MES ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("su", (object?)d.SERIE_UBICACION_NO_EMPLEADO ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("ac", (object?)d.ACCESORIO_SOLICITADO ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("pr", (object?)d.PROVEEDOR_ELEGIDO ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("ps", (object?)d.PIEZA_SERVICIO ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("ca", (object?)d.CANTIDAD ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("pu", (object?)d.PRECIO_UNITARIO ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("tot", (object?)total ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("mo", (object?)d.MONEDA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("co", (object?)d.COMENTARIOS ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("hc", (object?)d.HOJA_CONTROL ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("re", (object?)d.REQUISICION ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("foc", ParseFecha(fechaOc));
-        cmd.Parameters.AddWithValue("oc", (object?)oc ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("fen", ParseFecha(d.FECHA_ENTRADA));
-        cmd.Parameters.AddWithValue("cr", (object?)cantidadRegistrada);
-        cmd.Parameters.AddWithValue("es", (object?)estatusOc);
-
+        Bind(cmd, ordenDeCompra, d, hojaControl, total, fechaOc, oc, cantReg, estatus);
         cmd.ExecuteNonQuery();
     }
 
-    // ── UPDATE ────────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════════════════════
+    // UPDATE
+    // ═══════════════════════════════════════════════════════════════════════
     public void Update(int id, OrdenDeCompraDto d, string? usuario = null)
     {
         var anterior = GetById(id);
         using var con = Abrir();
 
-        // ── Fórmula: TOTAL (NO INCLUYE IVA) = CANTIDAD * PRECIO UNITARIO ──
+        string? hojaControl = NormalizarHojaControl(d.HOJA_CONTROL) ?? d.HOJA_CONTROL;
         decimal? total = (d.CANTIDAD.HasValue && d.PRECIO_UNITARIO.HasValue)
-            ? d.CANTIDAD.Value * d.PRECIO_UNITARIO.Value
-            : d.TOTAL_SIN_IVA;
+                                 ? d.CANTIDAD.Value * d.PRECIO_UNITARIO.Value
+                                 : d.TOTAL_SIN_IVA;
 
-        // ── Fórmulas: ORDEN DE COMPRA (col A), FECHA OC (col P) y OC (col Q) ──
         var (ocLookup, fechaOcLookup) = BuscarEnReqVsOC(con, d.REQUISICION);
-
         string? ordenDeCompra = !string.IsNullOrWhiteSpace(d.ORDEN_DE_COMPRA) ? d.ORDEN_DE_COMPRA : ocLookup;
         string? fechaOc = !string.IsNullOrWhiteSpace(d.FECHA_OC) ? d.FECHA_OC : fechaOcLookup;
         string? oc = !string.IsNullOrWhiteSpace(d.OC) ? d.OC : ocLookup;
 
-        // ── Fórmula: CANTIDAD REGISTRADA (col S) ──────────────────────────
-        decimal cantidadRegistrada = d.CANTIDAD_REGISTRADA
-            ?? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO, d.HOJA_CONTROL);
-
-        // ── Fórmula: ESTATUS OC (col T) ───────────────────────────────────
-        string estatusOc = CalcularEstatusOC(d.CANTIDAD, cantidadRegistrada);
+        // Siempre recalcula al actualizar (no usa el valor del DTO)
+        decimal cantReg = SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO, hojaControl);
+        string estatus = CalcularEstatusOC(d.CANTIDAD, cantReg);
 
         using var cmd = con.CreateCommand();
-
         cmd.CommandText = """
             UPDATE ordenes_de_compra SET
                 orden_de_compra             = @odc,
@@ -540,6 +515,21 @@ public class OrdenesDeCompraService
             WHERE id = @id
             """;
 
+        Bind(cmd, ordenDeCompra, d, hojaControl, total, fechaOc, oc, cantReg, estatus);
+        cmd.Parameters.AddWithValue("id", id);
+        cmd.ExecuteNonQuery();
+
+        if (anterior != null)
+            GuardarAuditoria(id, anterior, d, usuario);
+    }
+
+    // ── Utilidad: BindParameters compartido entre Create y Update ─────────
+    private static void Bind(
+        NpgsqlCommand cmd,
+        string? ordenDeCompra, OrdenDeCompraDto d, string? hojaControl,
+        decimal? total, string? fechaOc, string? oc,
+        decimal cantReg, string estatus)
+    {
         cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
         cmd.Parameters.AddWithValue("fo", (object?)d.FOLIO ?? DBNull.Value);
         cmd.Parameters.AddWithValue("sol", (object?)d.SOLICITANTE ?? DBNull.Value);
@@ -553,46 +543,37 @@ public class OrdenesDeCompraService
         cmd.Parameters.AddWithValue("tot", (object?)total ?? DBNull.Value);
         cmd.Parameters.AddWithValue("mo", (object?)d.MONEDA ?? DBNull.Value);
         cmd.Parameters.AddWithValue("co", (object?)d.COMENTARIOS ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("hc", (object?)d.HOJA_CONTROL ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("hc", (object?)hojaControl ?? DBNull.Value);
         cmd.Parameters.AddWithValue("re", (object?)d.REQUISICION ?? DBNull.Value);
         cmd.Parameters.AddWithValue("foc", ParseFecha(fechaOc));
         cmd.Parameters.AddWithValue("oc", (object?)oc ?? DBNull.Value);
         cmd.Parameters.AddWithValue("fen", ParseFecha(d.FECHA_ENTRADA));
-        cmd.Parameters.AddWithValue("cr", (object?)cantidadRegistrada);
-        cmd.Parameters.AddWithValue("es", estatusOc);
-        cmd.Parameters.AddWithValue("id", id);
-
-        cmd.ExecuteNonQuery();
-
-        if (anterior != null)
-            GuardarAuditoria(id, anterior, d, usuario);
+        cmd.Parameters.AddWithValue("cr", cantReg);
+        cmd.Parameters.AddWithValue("es", estatus);
     }
 
-    /// <summary>
-    /// Recalcula los campos derivados por fórmula en todos los registros existentes.
-    /// Útil para sincronizar datos legacy que fueron insertados sin las fórmulas.
-    /// </summary>
+    // ═══════════════════════════════════════════════════════════════════════
+    // RECALCULAR TODO (endpoint POST /ORDENES_DE_COMPRA/RECALCULAR)
+    // ═══════════════════════════════════════════════════════════════════════
     public int RecalcularFormulas()
     {
         using var con = Abrir();
 
-        // Leer todos los registros
-        var todos = new List<(int id, string? requisicion, string? ordenDeCompra, string? folio,
-                               string? fechaOc, string? oc, decimal? cantidad,
-                               decimal? precioUnitario, decimal? cantidadRegistrada,
-                               string? hojaControl)>();
+        var todos = new List<(int id, string? req, string? odc, string? folio,
+                               string? foc, string? oc, decimal? cant,
+                               decimal? pu, string? hoja)>();
 
         using (var cmd = con.CreateCommand())
         {
             cmd.CommandText = """
                 SELECT id, requisicion, orden_de_compra, folio, fecha_oc, oc,
-                       cantidad, precio_unitario, cantidad_registrada, hoja_control
+                       cantidad, precio_unitario, hoja_control
                 FROM ordenes_de_compra
+                WHERE (activo IS NULL OR activo = true)
                 ORDER BY id
                 """;
             using var dr = cmd.ExecuteReader();
             while (dr.Read())
-            {
                 todos.Add((
                     dr.GetInt32(0),
                     dr.IsDBNull(1) ? null : dr.GetString(1),
@@ -602,43 +583,41 @@ public class OrdenesDeCompraService
                     dr.IsDBNull(5) ? null : dr.GetString(5),
                     dr.IsDBNull(6) ? null : dr.GetDecimal(6),
                     dr.IsDBNull(7) ? null : dr.GetDecimal(7),
-                    dr.IsDBNull(8) ? null : dr.GetDecimal(8),
-                    dr.IsDBNull(9) ? null : dr.GetString(9)
+                    dr.IsDBNull(8) ? null : dr.GetString(8)
                 ));
-            }
         }
 
         int actualizados = 0;
         foreach (var r in todos)
         {
-            var (ocLookup, fechaOcLookup) = BuscarEnReqVsOC(con, r.requisicion);
+            var (ocLookup, fechaOcLookup) = BuscarEnReqVsOC(con, r.req);
 
-            string? ordenDeCompra = !string.IsNullOrWhiteSpace(r.ordenDeCompra) ? r.ordenDeCompra : ocLookup;
-            string? fechaOc = !string.IsNullOrWhiteSpace(r.fechaOc) ? r.fechaOc : fechaOcLookup;
+            string? odc = !string.IsNullOrWhiteSpace(r.odc) ? r.odc : ocLookup;
+            string? foc = !string.IsNullOrWhiteSpace(r.foc) ? r.foc : fechaOcLookup;
             string? oc = !string.IsNullOrWhiteSpace(r.oc) ? r.oc : ocLookup;
+            string? hoja = NormalizarHojaControl(r.hoja) ?? r.hoja;
+            decimal? total = (r.cant.HasValue && r.pu.HasValue) ? r.cant.Value * r.pu.Value : null;
 
-            decimal? total = (r.cantidad.HasValue && r.precioUnitario.HasValue)
-                ? r.cantidad.Value * r.precioUnitario.Value
-                : null;
-
-            decimal cantReg = SumarCantidadRegistrada(con, ordenDeCompra, r.folio, r.hojaControl);
-            string estatus = CalcularEstatusOC(r.cantidad, cantReg);
+            decimal cantReg = SumarCantidadRegistrada(con, odc, r.folio, hoja);
+            string estatus = CalcularEstatusOC(r.cant, cantReg);
 
             using var upd = con.CreateCommand();
             upd.CommandText = """
                 UPDATE ordenes_de_compra SET
-                    orden_de_compra   = COALESCE(@odc, orden_de_compra),
-                    fecha_oc          = COALESCE(@foc, fecha_oc),
-                    oc                = COALESCE(@oc,  oc),
-                    total_sin_iva     = COALESCE(@tot, total_sin_iva),
+                    orden_de_compra     = COALESCE(@odc, orden_de_compra),
+                    fecha_oc            = COALESCE(@foc, fecha_oc),
+                    oc                  = COALESCE(@oc,  oc),
+                    total_sin_iva       = COALESCE(@tot, total_sin_iva),
+                    hoja_control        = COALESCE(@hc,  hoja_control),
                     cantidad_registrada = @cr,
                     estatus_oc          = @es
                 WHERE id = @id
                 """;
-            upd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
-            upd.Parameters.AddWithValue("foc", ParseFecha(fechaOc));
+            upd.Parameters.AddWithValue("odc", (object?)odc ?? DBNull.Value);
+            upd.Parameters.AddWithValue("foc", ParseFecha(foc));
             upd.Parameters.AddWithValue("oc", (object?)oc ?? DBNull.Value);
             upd.Parameters.AddWithValue("tot", (object?)total ?? DBNull.Value);
+            upd.Parameters.AddWithValue("hc", (object?)hoja ?? DBNull.Value);
             upd.Parameters.AddWithValue("cr", cantReg);
             upd.Parameters.AddWithValue("es", estatus);
             upd.Parameters.AddWithValue("id", r.id);
@@ -688,7 +667,7 @@ public class OrdenesDeCompraService
         cmd.ExecuteNonQuery();
     }
 
-    // ── EXCEL ─────────────────────────────────────────────────────────────
+    // ── EXPORTAR EXCEL ────────────────────────────────────────────────────
     public byte[] GenerarExcel(IEnumerable<OrdenDeCompraRow> rows)
     {
         using var wb = new XLWorkbook();
@@ -739,7 +718,6 @@ public class OrdenesDeCompraService
         }
 
         ws.Columns().AdjustToContents();
-
         using var ms = new MemoryStream();
         wb.SaveAs(ms);
         return ms.ToArray();
@@ -750,7 +728,6 @@ public class OrdenesDeCompraService
     {
         using var con = Abrir();
         using var cmd = con.CreateCommand();
-
         cmd.CommandText = """
             SELECT id, orden_de_compra, folio, solicitante, presupuesto_mes,
                    serie_ubicacion_no_empleado, accesorio_solicitado, proveedor_elegido,
@@ -758,21 +735,14 @@ public class OrdenesDeCompraService
                    moneda, comentarios, hoja_control, requisicion,
                    fecha_oc, oc, fecha_entrada, cantidad_registrada, estatus_oc, pdf
             FROM ordenes_de_compra
-            WHERE EXTRACT(YEAR FROM fecha_oc::date) = @anio
+            WHERE (activo IS NULL OR activo = true)
+              AND EXTRACT(YEAR FROM fecha_oc::date) = @anio
             ORDER BY id DESC
             """;
-
         cmd.Parameters.AddWithValue("anio", anio);
-
         var list = new List<OrdenDeCompraRow>();
         using var dr = cmd.ExecuteReader();
-
-        while (dr.Read())
-        {
-            var ruta = dr.IsDBNull(21) ? null : dr.GetString(21);
-            list.Add(MapRow(dr, ruta));
-        }
-
+        while (dr.Read()) list.Add(MapRow(dr));
         return list;
     }
 
@@ -781,19 +751,16 @@ public class OrdenesDeCompraService
     {
         using var con = Abrir();
         using var cmd = con.CreateCommand();
-
         cmd.CommandText = """
             SELECT id, fecha_cambio, usuario, registro_anterior, registro_nuevo
             FROM auditoria_ordenes_de_compra
             WHERE registro_id = @id
             ORDER BY fecha_cambio DESC
             """;
-
         cmd.Parameters.AddWithValue("id", id);
 
         var list = new List<object>();
         using var dr = cmd.ExecuteReader();
-
         while (dr.Read())
         {
             list.Add(new
@@ -805,7 +772,6 @@ public class OrdenesDeCompraService
                 registro_nuevo = dr.IsDBNull(4) ? null : dr.GetString(4)
             });
         }
-
         return list;
     }
 
@@ -814,35 +780,33 @@ public class OrdenesDeCompraService
     {
         using var con = Abrir();
         using var cmd = con.CreateCommand();
-
         cmd.CommandText = """
             INSERT INTO auditoria_ordenes_de_compra
             (registro_id, fecha_cambio, usuario, registro_anterior, registro_nuevo)
             VALUES (@rid, NOW(), @usr, @ant, @nvo)
             """;
-
         cmd.Parameters.AddWithValue("rid", id);
         cmd.Parameters.AddWithValue("usr", (object?)usuario ?? DBNull.Value);
         cmd.Parameters.AddWithValue("ant", System.Text.Json.JsonSerializer.Serialize(anterior));
         cmd.Parameters.AddWithValue("nvo", System.Text.Json.JsonSerializer.Serialize(nuevo));
-
         cmd.ExecuteNonQuery();
     }
+
+    // ── SOLICITANTES ÚNICOS ───────────────────────────────────────────────
     public List<string> GetSolicitantesUnicos()
     {
-        using var conn = _db.Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = @"
-        SELECT DISTINCT SOLICITANTE 
-        FROM ORDENES_DE_COMPRA 
-        WHERE SOLICITANTE IS NOT NULL AND SOLICITANTE <> ''
-        ORDER BY SOLICITANTE";
-
+        using var con = Abrir();
+        using var cmd = con.CreateCommand();
+        cmd.CommandText = """
+            SELECT DISTINCT solicitante
+            FROM ordenes_de_compra
+            WHERE solicitante IS NOT NULL AND solicitante <> ''
+              AND (activo IS NULL OR activo = true)
+            ORDER BY solicitante
+            """;
         var lista = new List<string>();
-        using var reader = cmd.ExecuteReader();
-        while (reader.Read())
-            lista.Add(reader.GetString(0));
-
+        using var dr = cmd.ExecuteReader();
+        while (dr.Read()) lista.Add(dr.GetString(0));
         return lista;
     }
 }

@@ -1596,7 +1596,27 @@
                         <select id="n_MONEDA"><option value="">— Seleccionar —</option><option>PESOS</option><option>DOLARES</option><option>EUROS</option></select>
                     </div>
                     <div class="field field-wide"><label>Comentarios</label><textarea id="n_COMENTARIOS" rows="2" placeholder="Observaciones adicionales"></textarea></div>
-                    <div class="field"><label>Hoja Control</label><input id="n_HOJA_CONTROL" placeholder="Núm. hoja de control"></div>
+                    <div class="field">
+                        <label>Hoja Control</label>
+                        <select id="n_HOJA_CONTROL">
+                            <option value="">— Seleccionar módulo —</option>
+                            <option value="Accesorio NF">Accesorio NF</option>
+                            <option value="Consumibles NF">Consumibles NF</option>
+                            <option value="Dispositivos NF">Dispositivos NF</option>
+                            <option value="IMPRESORAS NF">IMPRESORAS NF</option>
+                            <option value="PANTALLAS NF">PANTALLAS NF</option>
+                            <option value="PERIFERICOS NF">PERIFERICOS NF</option>
+                            <option value="Refacciones NF">Refacciones NF</option>
+                            <option value="Radio NF">Radio NF</option>
+                            <option value="HERRAMIENTAS NF">HERRAMIENTAS NF</option>
+                            <option value="EQUIPO DE RED">EQUIPO DE RED</option>
+                            <option value="CAMARAS AUDIO">CAMARAS AUDIO</option>
+                            <option value="BITACORA FIRECOM">BITACORA FIRECOM</option>
+                            <option value="Tintas,Toner,Ribon NF">Tintas,Toner,Ribon NF</option>
+                            <option value="Servicios por Proveedores NF">Servicios por Proveedores NF</option>
+                            <option value="Inventarios NF">Inventarios NF</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -2133,45 +2153,45 @@
 
                 const solCell = row.SOLICITANTE
                     ? `<span style="display:inline-flex;align-items:center;gap:5px;">
-                         <span style="width:7px;height:7px;border-radius:50%;background:${colorSolicitante(row.SOLICITANTE)};box-shadow:0 0 5px ${colorSolicitante(row.SOLICITANTE)};flex-shrink:0;"></span>
-                         ${row.SOLICITANTE}
-                       </span>` : '';
+                             <span style="width:7px;height:7px;border-radius:50%;background:${colorSolicitante(row.SOLICITANTE)};box-shadow:0 0 5px ${colorSolicitante(row.SOLICITANTE)};flex-shrink:0;"></span>
+                             ${row.SOLICITANTE}
+                           </span>` : '';
 
                 tbody.innerHTML += `
-                <tr style="${rowStyle}">
-                    <td class="mono">${row.ID}</td>
-                    <td class="auto" style="font-family:'JetBrains Mono',monospace;">${row.ORDEN_DE_COMPRA ?? ''}</td>
-                    <td class="auto mono">${row.FECHA_OC ?? ''}</td>
-                    <td class="auto mono">${row.OC ?? ''}</td>
-                    <td>${row.FOLIO ?? ''}</td>
-                    <td>${solCell}</td>
-                    <td style="font-size:10px;">${row.PRESUPUESTO_MES ?? ''}</td>
-                    <td class="mono" style="font-size:10px;">${row.SERIE_UBICACION_NO_EMPLEADO ?? ''}</td>
-                    <td class="wrap">${row.ACCESORIO_SOLICITADO ?? ''}</td>
-                    <td>${row.PROVEEDOR_ELEGIDO ?? ''}</td>
-                    <td>${row.PIEZA_SERVICIO ?? ''}</td>
-                    <td class="num">${row.CANTIDAD ?? ''}</td>
-                    <td class="num">${fmtNum(row.PRECIO_UNITARIO)}</td>
-                    <td class="num auto">${fmtNum(row.TOTAL_SIN_IVA)}</td>
-                    <td><span class="pill ${row.MONEDA === 'DOLARES' ? 'pill-amber' : row.MONEDA === 'EUROS' ? 'pill-purple' : row.MONEDA ? 'pill-blue' : 'pill-gray'}" style="font-size:9px;">${row.MONEDA ?? ''}</span></td>
-                    <td class="wrap" style="color:var(--text2);">${row.COMENTARIOS ?? ''}</td>
-                    <td class="mono">${row.HOJA_CONTROL ?? ''}</td>
-                    <td class="mono">${row.REQUISICION ?? ''}</td>
-                    <td class="auto mono">${row.FECHA_ENTRADA ?? ''}</td>
-                    <td class="num">${row.CANTIDAD_REGISTRADA ?? ''}</td>
-                    <td>${estatusPill(row.ESTATUS_OC)}</td>
-                    <td>
-                        ${row.TIENE_PDF
+                    <tr style="${rowStyle}">
+                        <td class="mono">${row.ID}</td>
+                        <td class="auto" style="font-family:'JetBrains Mono',monospace;">${row.ORDEN_DE_COMPRA ?? ''}</td>
+                        <td class="auto mono">${row.FECHA_OC ?? ''}</td>
+                        <td class="auto mono">${row.OC ?? ''}</td>
+                        <td>${row.FOLIO ?? ''}</td>
+                        <td>${solCell}</td>
+                        <td style="font-size:10px;">${row.PRESUPUESTO_MES ?? ''}</td>
+                        <td class="mono" style="font-size:10px;">${row.SERIE_UBICACION_NO_EMPLEADO ?? ''}</td>
+                        <td class="wrap">${row.ACCESORIO_SOLICITADO ?? ''}</td>
+                        <td>${row.PROVEEDOR_ELEGIDO ?? ''}</td>
+                        <td>${row.PIEZA_SERVICIO ?? ''}</td>
+                        <td class="num">${row.CANTIDAD ?? ''}</td>
+                        <td class="num">${fmtNum(row.PRECIO_UNITARIO)}</td>
+                        <td class="num auto">${fmtNum(row.TOTAL_SIN_IVA)}</td>
+                        <td><span class="pill ${row.MONEDA === 'DOLARES' ? 'pill-amber' : row.MONEDA === 'EUROS' ? 'pill-purple' : row.MONEDA ? 'pill-blue' : 'pill-gray'}" style="font-size:9px;">${row.MONEDA ?? ''}</span></td>
+                        <td class="wrap" style="color:var(--text2);">${row.COMENTARIOS ?? ''}</td>
+                        <td class="mono">${row.HOJA_CONTROL ?? ''}</td>
+                        <td class="mono">${row.REQUISICION ?? ''}</td>
+                        <td class="auto mono">${row.FECHA_ENTRADA ?? ''}</td>
+                        <td class="num">${row.CANTIDAD_REGISTRADA ?? ''}</td>
+                        <td>${estatusPill(row.ESTATUS_OC)}</td>
+                        <td>
+                            ${row.TIENE_PDF
                         ? `<button class="btn btn-primary btn-xs" onclick="verPDF(${row.ID})" title="Ver PDF">📄</button>
-                               <button class="btn btn-danger btn-xs"  onclick="eliminarPDF(${row.ID})" title="Eliminar PDF">✕</button>`
+                                   <button class="btn btn-danger btn-xs"  onclick="eliminarPDF(${row.ID})" title="Eliminar PDF">✕</button>`
                         : `<label class="file-label" style="font-size:10px;padding:4px 8px;">📎 Subir<input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)"></label>`}
-                    </td>
-                    <td style="white-space:nowrap;display:flex;gap:4px;padding:6px 8px;">
-                        ${puedeEditar ? `<button class="btn btn-amber btn-xs" onclick="abrirEditar(${row.ID})" title="Editar">✏️</button>` : ''}
-                        ${puedeEliminar ? `<button class="btn btn-danger btn-xs" onclick="eliminar(${row.ID})" title="Eliminar">🗑️</button>` : ''}
-                        <button class="btn btn-cyan btn-xs" onclick="verHistorial(${row.ID})" title="Historial">📋</button>
-                    </td>
-                </tr>`;
+                        </td>
+                        <td style="white-space:nowrap;display:flex;gap:4px;padding:6px 8px;">
+                            ${puedeEditar ? `<button class="btn btn-amber btn-xs" onclick="abrirEditar(${row.ID})" title="Editar">✏️</button>` : ''}
+                            ${puedeEliminar ? `<button class="btn btn-danger btn-xs" onclick="eliminar(${row.ID})" title="Eliminar">🗑️</button>` : ''}
+                            <button class="btn btn-cyan btn-xs" onclick="verHistorial(${row.ID})" title="Historial">📋</button>
+                        </td>
+                    </tr>`;
             });
 
             // Leyenda
@@ -2181,17 +2201,17 @@
             if (unicos.length) {
                 leyenda.style.display = 'block';
                 contenido.innerHTML += `
-                    <div class="legend-chip" style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);">
-                        <span class="legend-dot" style="background:#10B981;box-shadow:0 0 6px #10B981;"></span>
-                        <span style="color:#34D399;">COMPLETA</span>
-                    </div>`;
+                        <div class="legend-chip" style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);">
+                            <span class="legend-dot" style="background:#10B981;box-shadow:0 0 6px #10B981;"></span>
+                            <span style="color:#34D399;">COMPLETA</span>
+                        </div>`;
                 unicos.forEach(s => {
                     const c = colorSolicitante(s);
                     contenido.innerHTML += `
-                        <div class="legend-chip" style="background:${hexToRgba(c, .12)};border:1px solid ${hexToRgba(c, .35)};">
-                            <span class="legend-dot" style="background:${c};box-shadow:0 0 5px ${c};"></span>
-                            <span style="color:${c};">${s}</span>
-                        </div>`;
+                            <div class="legend-chip" style="background:${hexToRgba(c, .12)};border:1px solid ${hexToRgba(c, .35)};">
+                                <span class="legend-dot" style="background:${c};box-shadow:0 0 5px ${c};"></span>
+                                <span style="color:${c};">${s}</span>
+                            </div>`;
                 });
             } else {
                 leyenda.style.display = 'none';
@@ -2331,24 +2351,24 @@
                 const vD = despues && key in despues ? despues[key] : '';
                 const cambiado = cambios.has(key);
                 filas += `<tr class="${cambiado ? 'row-changed' : ''}">
-                    <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                    <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
-                    <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
-                </tr>`;
+                        <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                        <td>${(!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA)}</td>
+                        <td>${(!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD)}</td>
+                    </tr>`;
             });
             return `<div class="ev-wrap">
-                <div class="ev-header">
-                    <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                    <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                    <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;">
-                        ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-                    </span>
-                </div>
-                <table class="ev-table">
-                    <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
-                    <tbody>${filas}</tbody>
-                </table>
-            </div>`;
+                    <div class="ev-header">
+                        <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                        <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                        <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;">
+                            ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                    <table class="ev-table">
+                        <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
+                        <tbody>${filas}</tbody>
+                    </table>
+                </div>`;
         }
 
         function verHistorial(id) {
@@ -2364,8 +2384,8 @@
                     document.getElementById('contenidoHistorial').innerHTML = !lista.length
                         ? '<p class="sin-hist">📭 Sin ediciones registradas.</p>'
                         : `<p style="color:var(--muted);font-size:12px;margin-bottom:14px;font-family:'JetBrains Mono',monospace;">
-                             ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                           </p>` + lista.map(renderEvento).join('');
+                                 ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                               </p>` + lista.map(renderEvento).join('');
                 })
                 .catch(() => {
                     document.getElementById('contenidoHistorial').innerHTML =
@@ -2486,16 +2506,16 @@
             if (!data) return;
 
             tooltipDiv.innerHTML = `
-        <div class="tt-module ${getModuloClass(data.modulo)}">
-            ${data.modulo.toUpperCase()}
-        </div>
-        <div class="tt-title">${data.titulo}</div>
-        <div class="tt-desc">${data.desc}</div>
-        <div class="tt-path">
-            <span class="tt-path-arrow">→</span>
-            ${data.path}
-        </div>
-    `;
+            <div class="tt-module ${getModuloClass(data.modulo)}">
+                ${data.modulo.toUpperCase()}
+            </div>
+            <div class="tt-title">${data.titulo}</div>
+            <div class="tt-desc">${data.desc}</div>
+            <div class="tt-path">
+                <span class="tt-path-arrow">→</span>
+                ${data.path}
+            </div>
+        `;
 
             // Posición inteligente
             let x = e.clientX + 12;
