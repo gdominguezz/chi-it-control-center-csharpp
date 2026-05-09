@@ -28,7 +28,7 @@ public class PresupuestosReqVsOcService
     private NpgsqlConnection Abrir() => _db.Open();
 
     // ── BUSCARV: verifica si NO_REQUISICION existe en ordenes_de_compra ───
-    private string? BuscarRequisicionEnOC(NpgsqlConnection con}, {string? noRequisicion)
+    private string? BuscarRequisicionEnOC(NpgsqlConnection con, string? noRequisicion)
     {
         if (string.IsNullOrWhiteSpace(noRequisicion)) return null;
 
@@ -39,7 +39,7 @@ public class PresupuestosReqVsOcService
         WHERE requisicion = @nr
         LIMIT 1
         """;
-        cmd.Parameters.AddWithValue("nr"}, {noRequisicion.Trim());
+        cmd.Parameters.AddWithValue("nr", noRequisicion.Trim());
 
         var result = cmd.ExecuteScalar();
         return result is DBNull or null ? null : (string)result;}
@@ -56,9 +56,9 @@ public class PresupuestosReqVsOcService
 
         whereConditions.Add("(activo IS NULL OR activo = true)");
 
-        var paramValues = new List<(string name}, {string value)>();
+        var paramValues = new List<(string name, string value)>();
 
-        void CollectFilter(string column}, {string? value}, {string param)
+        void CollectFilter(string column, string? value, string param)
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
@@ -92,7 +92,7 @@ public class PresupuestosReqVsOcService
 
         using (var cmdSelect = con.CreateCommand())
         {cmdSelect.CommandText = $"""
-                SELECT id}, {no_requisicion}, {orden_compra}, {fecha_compra}, {po_subtotal}, {moneda}, {oc_subtotal}, {registrada_en_oc}, {pdf
+                SELECT id, no_requisicion, orden_compra, fecha_compra, po_subtotal, moneda, oc_subtotal, registrada_en_oc, pdf
                 FROM req_vs_oc
                 {filtro}
                 ORDER BY id DESC
@@ -107,7 +107,7 @@ public class PresupuestosReqVsOcService
             {var ruta = dr.IsDBNull(8) ? null : dr.GetString(8);
                 list.Add(new ReqVsOcRow
                 {
-                    ID = dr.GetInt32(0)}, {NO_REQUISICION = dr.IsDBNull(1) ? null : dr.GetString(1)}, {ORDEN_COMPRA = dr.IsDBNull(2) ? null : dr.GetString(2)}, {FECHA_COMPRA = dr.IsDBNull(3) ? null : dr.GetValue(3).ToString()}, {PO_SUBTOTAL = dr.IsDBNull(4) ? null : dr.GetDecimal(4)}, {MONEDA = dr.IsDBNull(5) ? null : dr.GetString(5)}, {OC_SUBTOTAL = dr.IsDBNull(6) ? null : dr.GetString(6)}, {REGISTRADA_EN_OC = dr.IsDBNull(7) ? null : dr.GetString(7)}, {PDF_RUTA = ruta}, {TIENE_PDF = ruta != null});
+                    ID = dr.GetInt32(0), NO_REQUISICION = dr.IsDBNull(1) ? null : dr.GetString(1), ORDEN_COMPRA = dr.IsDBNull(2) ? null : dr.GetString(2), FECHA_COMPRA = dr.IsDBNull(3) ? null : dr.GetValue(3).ToString(), PO_SUBTOTAL = dr.IsDBNull(4) ? null : dr.GetDecimal(4), MONEDA = dr.IsDBNull(5) ? null : dr.GetString(5), OC_SUBTOTAL = dr.IsDBNull(6) ? null : dr.GetString(6), REGISTRADA_EN_OC = dr.IsDBNull(7) ? null : dr.GetString(7), PDF_RUTA = ruta, TIENE_PDF = ruta != null});
             }
         }
 
@@ -119,21 +119,21 @@ public class PresupuestosReqVsOcService
     {using var con = Abrir();
         using var cmd = con.CreateCommand();
 
-        var registradaEnOC = BuscarRequisicionEnOC(con}, {d.NO_REQUISICION);
+        var registradaEnOC = BuscarRequisicionEnOC(con, d.NO_REQUISICION);
 
         cmd.CommandText = """
             INSERT INTO req_vs_oc
-            (no_requisicion}, {orden_compra}, {fecha_compra}, {po_subtotal}, {moneda}, {oc_subtotal}, {registrada_en_oc)
-            VALUES (@nr}, {@oc}, {@fc}, {@ps}, {@mo}, {@os}, {@re)
+            (no_requisicion, orden_compra, fecha_compra, po_subtotal, moneda, oc_subtotal, registrada_en_oc)
+            VALUES (@nr, @oc, @fc, @ps, @mo, @os, @re)
             """;
 
-        cmd.Parameters.AddWithValue("nr"}, {(object?)d.NO_REQUISICION ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("oc"}, {(object?)d.ORDEN_COMPRA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("fc"}, {(object?)d.FECHA_COMPRA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("ps"}, {(object?)d.PO_SUBTOTAL ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("mo"}, {(object?)d.MONEDA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("os"}, {(object?)d.OC_SUBTOTAL ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("re"}, {(object?)registradaEnOC ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("nr", (object?)d.NO_REQUISICION ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("oc", (object?)d.ORDEN_COMPRA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("fc", (object?)d.FECHA_COMPRA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("ps", (object?)d.PO_SUBTOTAL ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("mo", (object?)d.MONEDA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("os", (object?)d.OC_SUBTOTAL ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("re", (object?)registradaEnOC ?? DBNull.Value);
 
         cmd.ExecuteNonQuery();}
 
@@ -142,22 +142,22 @@ public class PresupuestosReqVsOcService
     {using var con = Abrir();
         using var cmd = con.CreateCommand();
 
-        var registradaEnOC = BuscarRequisicionEnOC(con}, {d.NO_REQUISICION);
+        var registradaEnOC = BuscarRequisicionEnOC(con, d.NO_REQUISICION);
 
         cmd.CommandText = """
             UPDATE req_vs_oc SET
-                no_requisicion   = @nr}, {orden_compra     = @oc}, {fecha_compra     = @fc}, {po_subtotal      = @ps}, {moneda           = @mo}, {oc_subtotal      = @os}, {registrada_en_oc = @re
+                no_requisicion   = @nr, orden_compra     = @oc, fecha_compra     = @fc, po_subtotal      = @ps, moneda           = @mo, oc_subtotal      = @os, registrada_en_oc = @re
             WHERE id = @id
             """;
 
-        cmd.Parameters.AddWithValue("nr"}, {(object?)d.NO_REQUISICION ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("oc"}, {(object?)d.ORDEN_COMPRA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("fc"}, {(object?)d.FECHA_COMPRA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("ps"}, {(object?)d.PO_SUBTOTAL ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("mo"}, {(object?)d.MONEDA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("os"}, {(object?)d.OC_SUBTOTAL ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("re"}, {(object?)registradaEnOC ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("id"}, {id);
+        cmd.Parameters.AddWithValue("nr", (object?)d.NO_REQUISICION ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("oc", (object?)d.ORDEN_COMPRA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("fc", (object?)d.FECHA_COMPRA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("ps", (object?)d.PO_SUBTOTAL ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("mo", (object?)d.MONEDA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("os", (object?)d.OC_SUBTOTAL ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("re", (object?)registradaEnOC ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("id", id);
 
         cmd.ExecuteNonQuery();}
 
@@ -166,7 +166,7 @@ public class PresupuestosReqVsOcService
     {using var con = Abrir();
         using var cmd = con.CreateCommand();
         cmd.CommandText = "DELETE FROM req_vs_oc WHERE id = @id";
-        cmd.Parameters.AddWithValue("id"}, {id);
+        cmd.Parameters.AddWithValue("id", id);
         cmd.ExecuteNonQuery();}
 
     // ── PDF: guardar ruta ─────────────────────────────
@@ -174,8 +174,8 @@ public class PresupuestosReqVsOcService
     {using var con = Abrir();
         using var cmd = con.CreateCommand();
         cmd.CommandText = "UPDATE req_vs_oc SET pdf = @ruta WHERE id = @id";
-        cmd.Parameters.AddWithValue("ruta"}, {ruta);
-        cmd.Parameters.AddWithValue("id"}, {id);
+        cmd.Parameters.AddWithValue("ruta", ruta);
+        cmd.Parameters.AddWithValue("id", id);
         cmd.ExecuteNonQuery();}
 
     // ── PDF: obtener ruta ─────────────────────────────
@@ -183,7 +183,7 @@ public class PresupuestosReqVsOcService
     {using var con = Abrir();
         using var cmd = con.CreateCommand();
         cmd.CommandText = "SELECT pdf FROM req_vs_oc WHERE id = @id";
-        cmd.Parameters.AddWithValue("id"}, {id);
+        cmd.Parameters.AddWithValue("id", id);
         var r = cmd.ExecuteScalar();
         return r is DBNull or null ? null : (string)r;}
 
@@ -192,7 +192,7 @@ public class PresupuestosReqVsOcService
     {using var con = Abrir();
         using var cmd = con.CreateCommand();
         cmd.CommandText = "UPDATE req_vs_oc SET pdf = NULL WHERE id = @id";
-        cmd.Parameters.AddWithValue("id"}, {id);
+        cmd.Parameters.AddWithValue("id", id);
         cmd.ExecuteNonQuery();}
 
     // ── EXCEL ────────────────────────────────────────
@@ -200,21 +200,21 @@ public class PresupuestosReqVsOcService
     {using var wb = new XLWorkbook();
         var ws = wb.Worksheets.Add("REQ vs OC");
 
-        string[] headers = { "No Requisicion"}, {"Orden Compra"}, {"Fecha Compra"}, {"PO Subtotal"}, {"Moneda"}, {"OC Subtotal"}, {"Registrada en OC"};
+        string[] headers = { "No Requisicion", "Orden Compra", "Fecha Compra", "PO Subtotal", "Moneda", "OC Subtotal", "Registrada en OC"};
 
         for (int i = 0; i < headers.Length; i++)
-        {ws.Cell(1}, {i + 1).Value = headers[i];
-            ws.Cell(1}, {i + 1).Style.Font.Bold = true;}
+        {ws.Cell(1, i + 1).Value = headers[i];
+            ws.Cell(1, i + 1).Style.Font.Bold = true;}
 
         int row = 2;
         foreach (var r in rows)
-        {ws.Cell(row}, {1).Value = r.NO_REQUISICION;
-            ws.Cell(row}, {2).Value = r.ORDEN_COMPRA;
-            ws.Cell(row}, {3).Value = r.FECHA_COMPRA;
-            ws.Cell(row}, {4).Value = r.PO_SUBTOTAL;
-            ws.Cell(row}, {5).Value = r.MONEDA;
-            ws.Cell(row}, {6).Value = r.OC_SUBTOTAL;
-            ws.Cell(row}, {7).Value = r.REGISTRADA_EN_OC;
+        {ws.Cell(row, 1).Value = r.NO_REQUISICION;
+            ws.Cell(row, 2).Value = r.ORDEN_COMPRA;
+            ws.Cell(row, 3).Value = r.FECHA_COMPRA;
+            ws.Cell(row, 4).Value = r.PO_SUBTOTAL;
+            ws.Cell(row, 5).Value = r.MONEDA;
+            ws.Cell(row, 6).Value = r.OC_SUBTOTAL;
+            ws.Cell(row, 7).Value = r.REGISTRADA_EN_OC;
             row++;}
 
         ws.Columns().AdjustToContents();
@@ -229,14 +229,14 @@ public class PresupuestosReqVsOcService
         using var cmd = con.CreateCommand();
 
         cmd.CommandText = """
-            SELECT id}, {no_requisicion}, {orden_compra}, {fecha_compra}, {po_subtotal}, {moneda}, {oc_subtotal}, {registrada_en_oc}, {pdf
+            SELECT id, no_requisicion, orden_compra, fecha_compra, po_subtotal, moneda, oc_subtotal, registrada_en_oc, pdf
             FROM req_vs_oc
             WHERE EXTRACT(YEAR FROM fecha_compra) = @anio
             AND (activo IS NULL OR activo = true)
             ORDER BY id DESC
             """;
 
-        cmd.Parameters.AddWithValue("anio"}, {anio);
+        cmd.Parameters.AddWithValue("anio", anio);
 
         var list = new List<ReqVsOcRow>();
         using var dr = cmd.ExecuteReader();
@@ -245,7 +245,7 @@ public class PresupuestosReqVsOcService
             var ruta = dr.IsDBNull(8) ? null : dr.GetString(8);
             list.Add(new ReqVsOcRow
             {
-                ID = dr.GetInt32(0)}, {NO_REQUISICION = dr.IsDBNull(1) ? null : dr.GetString(1)}, {ORDEN_COMPRA = dr.IsDBNull(2) ? null : dr.GetString(2)}, {FECHA_COMPRA = dr.IsDBNull(3) ? null : dr.GetValue(3).ToString()}, {PO_SUBTOTAL = dr.IsDBNull(4) ? null : dr.GetDecimal(4)}, {MONEDA = dr.IsDBNull(5) ? null : dr.GetString(5)}, {OC_SUBTOTAL = dr.IsDBNull(6) ? null : dr.GetString(6)}, {REGISTRADA_EN_OC = dr.IsDBNull(7) ? null : dr.GetString(7)}, {PDF_RUTA = ruta}, {TIENE_PDF = ruta != null});
+                ID = dr.GetInt32(0), NO_REQUISICION = dr.IsDBNull(1) ? null : dr.GetString(1), ORDEN_COMPRA = dr.IsDBNull(2) ? null : dr.GetString(2), FECHA_COMPRA = dr.IsDBNull(3) ? null : dr.GetValue(3).ToString(), PO_SUBTOTAL = dr.IsDBNull(4) ? null : dr.GetDecimal(4), MONEDA = dr.IsDBNull(5) ? null : dr.GetString(5), OC_SUBTOTAL = dr.IsDBNull(6) ? null : dr.GetString(6), REGISTRADA_EN_OC = dr.IsDBNull(7) ? null : dr.GetString(7), PDF_RUTA = ruta, TIENE_PDF = ruta != null});
         }
         return list;
     }
@@ -256,13 +256,13 @@ public class PresupuestosReqVsOcService
         using var cmd = con.CreateCommand();
 
         cmd.CommandText = """
-            SELECT id}, {fecha_cambio}, {usuario}, {registro_anterior}, {registro_nuevo
+            SELECT id, fecha_cambio, usuario, registro_anterior, registro_nuevo
             FROM auditoria_req_vs_oc
             WHERE registro_id = @id
             ORDER BY fecha_cambio DESC
             """;
 
-        cmd.Parameters.AddWithValue("id"}, {id);
+        cmd.Parameters.AddWithValue("id", id);
 
         var list = new List<object>();
         using var dr = cmd.ExecuteReader();
@@ -270,7 +270,7 @@ public class PresupuestosReqVsOcService
         {
             list.Add(new
             {
-                id = dr.GetInt32(0)}, {fecha = dr.IsDBNull(1) ? null : dr.GetDateTime(1).ToString("yyyy-MM-dd HH:mm:ss")}, {usuario = dr.IsDBNull(2) ? null : dr.GetString(2)}, {registro_anterior = dr.IsDBNull(3) ? null : dr.GetString(3)}, {registro_nuevo = dr.IsDBNull(4) ? null : dr.GetString(4)});
+                id = dr.GetInt32(0), fecha = dr.IsDBNull(1) ? null : dr.GetDateTime(1).ToString("yyyy-MM-dd HH:mm:ss"), usuario = dr.IsDBNull(2) ? null : dr.GetString(2), registro_anterior = dr.IsDBNull(3) ? null : dr.GetString(3), registro_nuevo = dr.IsDBNull(4) ? null : dr.GetString(4)});
         }
         return list;
     }
