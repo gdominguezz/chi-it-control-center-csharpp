@@ -143,11 +143,12 @@ public class OrdenesDeCompraService
     //  Servicios Proveedores  servicios_proveedores    —        —                —  → 0
     // ═══════════════════════════════════════════════════════════════════════
     private decimal SumarCantidadRegistrada(
-        NpgsqlConnection con,
         string? ordenDeCompra,
         string? folio,
         string? hojaControl)
     {
+        using var con = Abrir();
+
         var hoja = NormalizarHojaControl(hojaControl);
         if (hoja == null) return 0;
 
@@ -186,23 +187,27 @@ public class OrdenesDeCompraService
                   AND {cfg.colFolio} = @folio
                   AND (activo IS NULL OR activo = true)
                 """;
+
             cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
             cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
         }
         else
         {
-            // Solo OC (ej. Tintas)
             cmd.CommandText = $"""
                 SELECT COALESCE(SUM({cfg.colCantidad}), 0)
                 FROM {cfg.tabla}
                 WHERE oc = @odc
                   AND (activo IS NULL OR activo = true)
                 """;
+
             cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
         }
 
         var result = cmd.ExecuteScalar();
-        return result is DBNull or null ? 0 : Convert.ToDecimal(result);
+
+        return result is DBNull or null
+            ? 0
+            : Convert.ToDecimal(result);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -223,55 +228,55 @@ public class OrdenesDeCompraService
 
         using var con = Abrir();
 
-        // 1. Encontrar todas las OC afectadas
         var afectadas = new List<(int id, decimal? cantidad)>();
+
         using (var cmd = con.CreateCommand())
         {
             cmd.CommandText = """
-        SELECT id, requisicion, orden_de_compra, folio, fecha_oc, oc,
-               cantidad, precio_unitario, hoja_control, cantidad_registrada
-        FROM ordenes_de_compra
-        WHERE (activo IS NULL OR activo = true)
-        ORDER BY id
-        """;
+                SELECT id, cantidad
+                FROM ordenes_de_compra
+                WHERE oc = @oc
+                  AND folio = @folio
+                  AND hoja_control = @hc
+                  AND (activo IS NULL OR activo = true)
+                """;
 
-            using (var dr = cmd.ExecuteReader())
+            cmd.Parameters.AddWithValue("oc", (object?)oc ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("hc", (object?)hojaCanonica ?? DBNull.Value);
+
+            using var dr = cmd.ExecuteReader();
+
+            while (dr.Read())
             {
-                while (dr.Read())
-                {
-                    todos.Add((
-                        dr.GetInt32(0),
-                        dr.IsDBNull(1) ? null : dr.GetString(1),
-                        dr.IsDBNull(2) ? null : dr.GetString(2),
-                        dr.IsDBNull(3) ? null : dr.GetString(3),
-                        dr.IsDBNull(4) ? null : ((DateTime)dr.GetValue(4)).ToString("yyyy-MM-dd"),
-                        dr.IsDBNull(5) ? null : dr.GetString(5),
-                        dr.IsDBNull(6) ? (decimal?)null : dr.GetDecimal(6),
-                        dr.IsDBNull(7) ? (decimal?)null : dr.GetDecimal(7),
-                        dr.IsDBNull(8) ? null : dr.GetString(8),
-                        dr.IsDBNull(9) ? (decimal?)null : dr.GetDecimal(9)
-                    ));
-                }
+                afectadas.Add((
+                    dr.GetInt32(0),
+                    dr.IsDBNull(1) ? (decimal?)null : dr.GetDecimal(1)
+                ));
             }
         }
 
-        // 2. Recalcular y actualizar cada una
         int actualizados = 0;
+
         foreach (var (id, cantidad) in afectadas)
         {
-            decimal cantReg = SumarCantidadRegistrada(con, oc, folio, hojaCanonica);
+            decimal cantReg = SumarCantidadRegistrada(oc, folio, hojaCanonica);
+
             string estatus = CalcularEstatusOC(cantidad, cantReg);
 
             using var upd = con.CreateCommand();
+
             upd.CommandText = """
                 UPDATE ordenes_de_compra
                 SET cantidad_registrada = @cr,
                     estatus_oc          = @es
                 WHERE id = @id
                 """;
+
             upd.Parameters.AddWithValue("cr", cantReg);
             upd.Parameters.AddWithValue("es", estatus);
             upd.Parameters.AddWithValue("id", id);
+
             actualizados += upd.ExecuteNonQuery();
         }
 
@@ -295,11 +300,15 @@ public class OrdenesDeCompraService
     // ═══════════════════════════════════════════════════════════════════════
     // BUSCARV en Req VS OC
     // ═══════════════════════════════════════════════════════════════════════
-    private (string? ordenDeCompra, string? fechaOc) BuscarEnReqVsOC(NpgsqlConnection con, string? requisicion)
+    private (string? ordenDeCompra, string? fechaOc) BuscarEnReqVsOC(string? requisicion)
     {
-        if (string.IsNullOrWhiteSpace(requisicion)) return (null, null);
+        using var con = Abrir();
+
+        if (string.IsNullOrWhiteSpace(requisicion))
+            return (null, null);
 
         using var cmd = con.CreateCommand();
+
         cmd.CommandText = """
             SELECT orden_compra, fecha_compra
             FROM req_vs_oc
@@ -307,15 +316,25 @@ public class OrdenesDeCompraService
               AND (activo IS NULL OR activo = true)
             LIMIT 1
             """;
+
         cmd.Parameters.AddWithValue("req", requisicion.Trim());
 
         using var dr = cmd.ExecuteReader();
-        if (!dr.Read()) return (null, null);
 
-        string? oc = dr.IsDBNull(0) ? null : dr.GetString(0);
-        string? foc = dr.IsDBNull(1) ? null : ((DateTime)dr.GetValue(1)).ToString("yyyy-MM-dd");
+        if (!dr.Read())
+            return (null, null);
 
-        if (oc == "0" || string.IsNullOrWhiteSpace(oc)) oc = null;
+        string? oc = dr.IsDBNull(0)
+            ? null
+            : dr.GetString(0);
+
+        string? foc = dr.IsDBNull(1)
+            ? null
+            : ((DateTime)dr.GetValue(1)).ToString("yyyy-MM-dd");
+
+        if (oc == "0" || string.IsNullOrWhiteSpace(oc))
+            oc = null;
+
         return (oc, foc);
     }
 
@@ -510,7 +529,7 @@ public class OrdenesDeCompraService
                                  ? d.CANTIDAD.Value * d.PRECIO_UNITARIO.Value
                                  : d.TOTAL_SIN_IVA;
 
-        var (ocLookup, fechaOcLookup) = BuscarEnReqVsOC(con, d.REQUISICION);
+        var (ocLookup, fechaOcLookup) = BuscarEnReqVsOC(d.REQUISICION);
         string? ordenDeCompra = !string.IsNullOrWhiteSpace(d.ORDEN_DE_COMPRA) ? d.ORDEN_DE_COMPRA : ocLookup;
         string? fechaOc = !string.IsNullOrWhiteSpace(d.FECHA_OC) ? d.FECHA_OC : fechaOcLookup;
         string? oc = !string.IsNullOrWhiteSpace(d.OC) ? d.OC : ocLookup;
@@ -522,7 +541,7 @@ public class OrdenesDeCompraService
                                 && NormalizarHojaControl(hojaControl) != null;
 
         decimal cantReg = puedeCalcularCreate
-            ? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO, hojaControl)
+            ? SumarCantidadRegistrada(ordenDeCompra, d.FOLIO, hojaControl)
             : (d.CANTIDAD_REGISTRADA ?? 0);
 
         string estatus = CalcularEstatusOC(d.CANTIDAD, cantReg);
@@ -557,7 +576,7 @@ public class OrdenesDeCompraService
                                  ? d.CANTIDAD.Value * d.PRECIO_UNITARIO.Value
                                  : d.TOTAL_SIN_IVA;
 
-        var (ocLookup, fechaOcLookup) = BuscarEnReqVsOC(con, d.REQUISICION);
+        var (ocLookup, fechaOcLookup) = BuscarEnReqVsOC(d.REQUISICION);
         string? ordenDeCompra = !string.IsNullOrWhiteSpace(d.ORDEN_DE_COMPRA) ? d.ORDEN_DE_COMPRA : ocLookup;
         string? fechaOc = !string.IsNullOrWhiteSpace(d.FECHA_OC) ? d.FECHA_OC : fechaOcLookup;
         string? oc = !string.IsNullOrWhiteSpace(d.OC) ? d.OC : ocLookup;
@@ -569,7 +588,7 @@ public class OrdenesDeCompraService
                                 && NormalizarHojaControl(hojaControl) != null;
 
         decimal cantReg = puedeCalcularUpdate
-            ? SumarCantidadRegistrada(con, ordenDeCompra, d.FOLIO, hojaControl)
+            ? SumarCantidadRegistrada(ordenDeCompra, d.FOLIO, hojaControl)
             : (anterior?.CANTIDAD_REGISTRADA ?? d.CANTIDAD_REGISTRADA ?? 0);
 
         string estatus = CalcularEstatusOC(d.CANTIDAD, cantReg);
@@ -657,26 +676,30 @@ public class OrdenesDeCompraService
                 WHERE (activo IS NULL OR activo = true)
                 ORDER BY id
                 """;
-            using var dr = cmd.ExecuteReader();
-            while (dr.Read())
-                todos.Add((
-                    dr.GetInt32(0),
-                    dr.IsDBNull(1) ? null : dr.GetString(1),
-                    dr.IsDBNull(2) ? null : dr.GetString(2),
-                    dr.IsDBNull(3) ? null : dr.GetString(3),
-                    dr.IsDBNull(4) ? null : ((DateTime)dr.GetValue(4)).ToString("yyyy-MM-dd"),
-                    dr.IsDBNull(5) ? null : dr.GetString(5),
-                    dr.IsDBNull(6) ? null : dr.GetDecimal(6),
-                    dr.IsDBNull(7) ? null : dr.GetDecimal(7),
-                    dr.IsDBNull(8) ? null : dr.GetString(8),
-                    dr.IsDBNull(9) ? null : dr.GetDecimal(9)
-                ));
+            using (var dr = cmd.ExecuteReader())
+            {
+                while (dr.Read())
+                {
+                    todos.Add((
+                        dr.GetInt32(0),
+                        dr.IsDBNull(1) ? null : dr.GetString(1),
+                        dr.IsDBNull(2) ? null : dr.GetString(2),
+                        dr.IsDBNull(3) ? null : dr.GetString(3),
+                        dr.IsDBNull(4) ? null : ((DateTime)dr.GetValue(4)).ToString("yyyy-MM-dd"),
+                        dr.IsDBNull(5) ? null : dr.GetString(5),
+                        dr.IsDBNull(6) ? (decimal?)null : dr.GetDecimal(6),
+                        dr.IsDBNull(7) ? (decimal?)null : dr.GetDecimal(7),
+                        dr.IsDBNull(8) ? null : dr.GetString(8),
+                        dr.IsDBNull(9) ? (decimal?)null : dr.GetDecimal(9)
+                    ));
+                }
+            }
         }
 
         int actualizados = 0;
         foreach (var r in todos)
         {
-            var (ocLookup, fechaOcLookup) = BuscarEnReqVsOC(con, r.req);
+            var (ocLookup, fechaOcLookup) = BuscarEnReqVsOC(r.req);
 
             string? odc = !string.IsNullOrWhiteSpace(r.odc) ? r.odc : ocLookup;
             string? foc = !string.IsNullOrWhiteSpace(r.foc) ? r.foc : fechaOcLookup;
@@ -692,7 +715,7 @@ public class OrdenesDeCompraService
 
             if (!puedeCalcular) continue;
 
-            decimal cantReg = SumarCantidadRegistrada(con, odc, r.folio, hoja);
+            decimal cantReg = SumarCantidadRegistrada(odc, r.folio, hoja);
             string estatus = CalcularEstatusOC(r.cant, cantReg);
 
             using var upd = con.CreateCommand();
