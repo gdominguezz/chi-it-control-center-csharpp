@@ -1518,6 +1518,7 @@
         let editandoId = null;
         let usuarioActual = 'SISTEMA';
         let rolActual = '';
+        let esAdmin = false;
 
         // ═══ INACTIVIDAD 30 min ═══
         let _inacTimer = null;
@@ -1537,17 +1538,39 @@
             resetInactividad();
 
             fetch('/obtener-usuario', { credentials: 'include' })
-                .then(r => { if (!r.ok) { window.location.href = '/static/login.html'; return null; } return r.json(); })
+                .then(r => {
+                    if (!r.ok) {
+                        window.location.href = '/static/login.html';
+                        return null;
+                    }
+                    return r.json();
+                })
                 .then(d => {
                     if (!d) return;
-                    if (!d.usuario) { window.location.href = '/static/login.html'; return; }
+
+                    if (!d.usuario) {
+                        window.location.href = '/static/login.html';
+                        return;
+                    }
+
                     usuarioActual = d.usuario || 'SISTEMA';
+
                     rolActual = (d.rol || '').trim().toUpperCase();
-                    document.getElementById('usuarioDisplay').textContent = d.nombre || usuarioActual;
-                    document.getElementById('dropdownNombre').textContent = d.nombre || usuarioActual;
-                    document.getElementById('dropdownRol').textContent = rolActual;
+
+                    esAdmin = rolActual === 'ADMIN';
+
+                    document.getElementById('usuarioDisplay').textContent =
+                        d.nombre || usuarioActual;
+
+                    document.getElementById('dropdownNombre').textContent =
+                        d.nombre || usuarioActual;
+
+                    document.getElementById('dropdownRol').textContent =
+                        rolActual;
                 })
-                .catch(() => { window.location.href = '/static/login.html'; });
+                .catch(() => {
+                    window.location.href = '/static/login.html';
+                });
 
             cargar();
         });
