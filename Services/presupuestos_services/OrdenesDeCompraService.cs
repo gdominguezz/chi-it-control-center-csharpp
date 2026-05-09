@@ -283,6 +283,87 @@ public class OrdenesDeCompraService
         return actualizados;
     }
 
+    // Versiones internas que reutilizan una conexión ya abierta (para RecalcularFormulas)
+    private (string? ordenDeCompra, string? fechaOc) BuscarEnReqVsOC(NpgsqlConnection con, string? requisicion)
+    {
+        if (string.IsNullOrWhiteSpace(requisicion)) return (null, null);
+
+        using var cmd = con.CreateCommand();
+        cmd.CommandText = """
+            SELECT orden_compra, fecha_compra
+            FROM req_vs_oc
+            WHERE no_requisicion = @req
+              AND (activo IS NULL OR activo = true)
+            LIMIT 1
+            """;
+        cmd.Parameters.AddWithValue("req", requisicion.Trim());
+
+        using var dr = cmd.ExecuteReader();
+        if (!dr.Read()) return (null, null);
+
+        string? oc = dr.IsDBNull(0) ? null : dr.GetString(0);
+        string? foc = dr.IsDBNull(1) ? null : ((DateTime)dr.GetValue(1)).ToString("yyyy-MM-dd");
+
+        if (oc == "0" || string.IsNullOrWhiteSpace(oc)) oc = null;
+        return (oc, foc);
+    }
+
+    private decimal SumarCantidadRegistrada(NpgsqlConnection con, string? ordenDeCompra, string? folio, string? hojaControl)
+    {
+        var hoja = NormalizarHojaControl(hojaControl);
+        if (hoja == null) return 0;
+        if (hoja == "Servicios por Proveedores NF") return 0;
+
+        using var cmd = con.CreateCommand();
+
+        (string tabla, string colFolio, string colCantidad, bool usaFolio) cfg = hoja switch
+        {
+            "Accesorio NF" => ("accesorios_nf", "folio", "cantidad", true),
+            "Consumibles NF" => ("consumibles_nf", "folio_cantidad", "cantidad", true),
+            "Dispositivos NF" => ("dispositivos_nf", "folio", "cantidad", true),
+            "IMPRESORAS NF" => ("impresoras_nf", "folio_inventario", "cantidad", true),
+            "PANTALLAS NF" => ("pantallas_nf", "folio", "cantidad", true),
+            "PERIFERICOS NF" => ("perifericos_nf", "folio_inventario", "cantidad", true),
+            "Refacciones NF" => ("refacciones_nf", "folio_correctivo", "cantidad", true),
+            "Radio NF" => ("radios_nf", "folio", "cantidad", true),
+            "HERRAMIENTAS NF" => ("herramientas_nf", "folio_correctivo", "cantidad", true),
+            "EQUIPO DE RED" => ("equipo_red_nf", "folio_correctivo", "cantidad", true),
+            "CAMARAS AUDIO" => ("camaras_audio", "folio_inventario", "cantidad", true),
+            "BITACORA FIRECOM" => ("bitacora_firecom", "orden_servicio", "cantidad", true),
+            "Tintas,Toner,Ribon NF" => ("tintas_toner_ribon_nf", "", "cantidad_recibida", false),
+            "Inventarios NF" => ("inventarios_nf", "inv_folio", "cantidad", true),
+            _ => ("", "", "", false)
+        };
+
+        if (string.IsNullOrEmpty(cfg.tabla)) return 0;
+
+        if (cfg.usaFolio)
+        {
+            cmd.CommandText = $"""
+                SELECT COALESCE(SUM({cfg.colCantidad}), 0)
+                FROM {cfg.tabla}
+                WHERE oc = @odc
+                  AND {cfg.colFolio} = @folio
+                  AND (activo IS NULL OR activo = true)
+                """;
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
+        }
+        else
+        {
+            cmd.CommandText = $"""
+                SELECT COALESCE(SUM({cfg.colCantidad}), 0)
+                FROM {cfg.tabla}
+                WHERE oc = @odc
+                  AND (activo IS NULL OR activo = true)
+                """;
+            cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
+        }
+
+        var result = cmd.ExecuteScalar();
+        return result is DBNull or null ? 0 : Convert.ToDecimal(result);
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     // ESTATUS OC
     // =SI(I=S,"COMPLETA", SI(Y(S>0,S<I),"PARCIAL","PENDIENTE"))
@@ -699,7 +780,7 @@ public class OrdenesDeCompraService
         int actualizados = 0;
         foreach (var r in todos)
         {
-            var (ocLookup, fechaOcLookup) = BuscarEnReqVsOC(r.req);
+            var (ocLookup, fechaOcLookup) = BuscarEnReqVsOC(con, r.req);
 
             string? odc = !string.IsNullOrWhiteSpace(r.odc) ? r.odc : ocLookup;
             string? foc = !string.IsNullOrWhiteSpace(r.foc) ? r.foc : fechaOcLookup;
@@ -715,7 +796,7 @@ public class OrdenesDeCompraService
 
             if (!puedeCalcular) continue;
 
-            decimal cantReg = SumarCantidadRegistrada(odc, r.folio, hoja);
+            decimal cantReg = SumarCantidadRegistrada(con, odc, r.folio, hoja);
             string estatus = CalcularEstatusOC(r.cant, cantReg);
 
             using var upd = con.CreateCommand();
