@@ -209,6 +209,7 @@ public class RadiosNFService
 
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Radio NF", dto.OC, dto.FOLIO);
         return id;
     }
@@ -254,6 +255,7 @@ public class RadiosNFService
 
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Radio NF", dto.OC, dto.FOLIO);
         return true;
     }
@@ -280,6 +282,8 @@ public class RadiosNFService
             "DELETE FROM radios_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        await conn.CloseAsync();
 
         if (deleted)
             _ordenesService.RecalcularPorCambioEnHija("Radio NF", ocVal, folioVal);

@@ -205,6 +205,7 @@ public class PerifeicosNFService
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
 
         
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("PERIFERICOS NF", dto.OC, dto.FOLIO_INVENTARIO);
 
         var snap = await SnapshotAsync(conn, id);
@@ -260,6 +261,7 @@ public class PerifeicosNFService
                 await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo);
         }
 
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("PERIFERICOS NF", dto.OC, dto.FOLIO_INVENTARIO);
 
         return rows > 0;
@@ -287,6 +289,8 @@ public class PerifeicosNFService
             "DELETE FROM perifericos_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        await conn.CloseAsync();
 
         if (deleted)
             _ordenesService.RecalcularPorCambioEnHija("PERIFERICOS NF", ocVal, folioVal);

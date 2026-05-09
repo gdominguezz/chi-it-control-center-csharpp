@@ -190,6 +190,7 @@ public class ConsumiblesNFService
 
         // Historial: registro nuevo
         
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Consumibles NF", dto.OC, dto.FOLIO_CANTIDAD);
 
         var snap = await SnapshotAsync(conn, id);
@@ -237,6 +238,7 @@ public class ConsumiblesNFService
         if (nuevo != null)
             await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo);
 
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Consumibles NF", dto.OC, dto.FOLIO_CANTIDAD);
         return true;
     }
@@ -263,6 +265,8 @@ public class ConsumiblesNFService
             "DELETE FROM consumibles_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        await conn.CloseAsync();
 
         if (deleted)
             _ordenesService.RecalcularPorCambioEnHija("Consumibles NF", ocVal, folioVal);

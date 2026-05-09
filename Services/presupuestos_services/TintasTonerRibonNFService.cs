@@ -177,6 +177,7 @@ public class TintasTonerRibonNFService
 
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Tintas,Toner,Ribon NF", dto.OC, null);
         return id;
     }
@@ -215,6 +216,7 @@ public class TintasTonerRibonNFService
 
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Tintas,Toner,Ribon NF", dto.OC, null);
         return true;
     }
@@ -240,6 +242,8 @@ public class TintasTonerRibonNFService
             "DELETE FROM tintas_toner_ribon_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        await conn.CloseAsync();
 
         if (deleted)
             _ordenesService.RecalcularPorCambioEnHija("Tintas,Toner,Ribon NF", ocVal, null);

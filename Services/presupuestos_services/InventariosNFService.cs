@@ -180,6 +180,7 @@ public class InventariosNFService
 
         // Historial: snapshot nuevo
         
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Inventarios NF", dto.OC, dto.INV_FOLIO);
 
         var snap = await SnapshotAsync(conn, id);
@@ -230,6 +231,7 @@ public class InventariosNFService
                 await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo);
         }
 
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Inventarios NF", dto.OC, dto.INV_FOLIO);
 
         return rows > 0;
@@ -257,6 +259,8 @@ public class InventariosNFService
             "DELETE FROM inventarios_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        await conn.CloseAsync();
 
         if (deleted)
             _ordenesService.RecalcularPorCambioEnHija("Inventarios NF", ocVal, folioVal);

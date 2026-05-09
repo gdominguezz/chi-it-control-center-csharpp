@@ -179,6 +179,7 @@ public class PantallasNfService
         var newId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
 
         // Historial: registrar creación
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("PANTALLAS NF", dto.oc, dto.folio);
 
         var snap = await SnapshotAsync(conn, newId);
@@ -242,6 +243,7 @@ public class PantallasNfService
         if (nuevo != null)
             await RegistrarHistorialAsync(conn, id, usuario ?? "sistema", anterior, nuevo);
 
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("PANTALLAS NF", dto.oc, dto.folio);
         return true;
     }
@@ -268,6 +270,8 @@ public class PantallasNfService
             "DELETE FROM pantallas_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        await conn.CloseAsync();
 
         if (deleted)
             _ordenesService.RecalcularPorCambioEnHija("PANTALLAS NF", ocVal, folioVal);

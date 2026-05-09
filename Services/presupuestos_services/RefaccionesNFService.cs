@@ -184,6 +184,7 @@ public class RefaccionesNFService
 
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Refacciones NF", dto.OC, dto.FOLIO_CORRECTIVO);
         return id;
     }
@@ -226,6 +227,7 @@ public class RefaccionesNFService
         await using (var conn4 = await _pool.OpenAsync())
             await RegistrarHistorialAsync(conn4, id, usuario, anterior, nuevo!);
 
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Refacciones NF", dto.OC, dto.FOLIO_CORRECTIVO);
         return true;
     }
@@ -252,6 +254,8 @@ public class RefaccionesNFService
             "DELETE FROM refacciones_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        await conn.CloseAsync();
 
         if (deleted)
             _ordenesService.RecalcularPorCambioEnHija("Refacciones NF", ocVal, folioVal);

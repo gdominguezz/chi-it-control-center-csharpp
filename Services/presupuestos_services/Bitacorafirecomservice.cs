@@ -220,6 +220,7 @@ public class BitacoraFirecomService
 
         // Historial: inserción inicial
         
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("BITACORA FIRECOM", dto.OC, dto.ORDEN_SERVICIO);
 
         var snap = await SnapshotAsync(conn, id);
@@ -272,6 +273,7 @@ public class BitacoraFirecomService
         if (nuevo is not null)
             await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo);
 
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("BITACORA FIRECOM", dto.OC, dto.ORDEN_SERVICIO);
         return true;
     }
@@ -298,6 +300,8 @@ public class BitacoraFirecomService
             "DELETE FROM bitacora_firecom WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        await conn.CloseAsync();
 
         if (deleted)
             _ordenesService.RecalcularPorCambioEnHija("BITACORA FIRECOM", ocVal, folioVal);

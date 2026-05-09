@@ -231,6 +231,7 @@ public class ImpresorasNFService
 
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("IMPRESORAS NF", dto.OC, dto.FOLIO_INVENTARIO);
         return id;
     }
@@ -281,6 +282,7 @@ public class ImpresorasNFService
 
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("IMPRESORAS NF", dto.OC, dto.FOLIO_INVENTARIO);
         return true;
     }
@@ -307,6 +309,8 @@ public class ImpresorasNFService
             "DELETE FROM impresoras_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        await conn.CloseAsync();
 
         if (deleted)
             _ordenesService.RecalcularPorCambioEnHija("IMPRESORAS NF", ocVal, folioVal);

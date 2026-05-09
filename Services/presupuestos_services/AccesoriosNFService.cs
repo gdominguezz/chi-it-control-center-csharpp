@@ -202,6 +202,7 @@ public class AccesoriosNFService
 
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Accesorio NF", dto.OC, dto.FOLIO);
         return id;
     }
@@ -246,6 +247,7 @@ public class AccesoriosNFService
 
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Accesorio NF", dto.OC, dto.FOLIO);
         return true;
     }
@@ -272,6 +274,8 @@ public class AccesoriosNFService
             "DELETE FROM accesorios_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        await conn.CloseAsync();
 
         if (deleted)
             _ordenesService.RecalcularPorCambioEnHija("Accesorio NF", ocVal, folioVal);

@@ -205,6 +205,7 @@ public class CamarasAudioService
 
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("CAMARAS AUDIO", dto.OC, dto.FOLIO_INVENTARIO);
         return id;
     }
@@ -249,6 +250,7 @@ public class CamarasAudioService
 
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
+        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("CAMARAS AUDIO", dto.OC, dto.FOLIO_INVENTARIO);
         return true;
     }
@@ -275,6 +277,8 @@ public class CamarasAudioService
             "DELETE FROM camaras_audio WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        await conn.CloseAsync();
 
         if (deleted)
             _ordenesService.RecalcularPorCambioEnHija("CAMARAS AUDIO", ocVal, folioVal);
