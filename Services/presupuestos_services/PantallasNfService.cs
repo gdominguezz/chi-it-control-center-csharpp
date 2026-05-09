@@ -41,6 +41,7 @@ public class PantallaNfDto
 public class PantallasNfService
 {
     private readonly DbConnectionPool _pool;
+    private readonly OrdenesDeCompraService _ordenesService;
 
     private static readonly string[] COLS =
     [
@@ -51,9 +52,10 @@ public class PantallasNfService
         "personal_it_que_asigna"
     ];
 
-    public PantallasNfService(DbConnectionPool pool)
+    public PantallasNfService(DbConnectionPool pool, OrdenesDeCompraService ordenesService)
     {
         _pool = pool;
+        _ordenesService = ordenesService;
         _ = InicializarTablaAsync();
     }
 
@@ -177,6 +179,8 @@ public class PantallasNfService
         var newId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
 
         // Historial: registrar creación
+        _ordenesService.RecalcularPorCambioEnHija("PANTALLAS NF", dto.oc, dto.folio);
+
         var snap = await SnapshotAsync(conn, newId);
         if (snap != null)
             await RegistrarHistorialAsync(conn, newId, usuario ?? "sistema",
@@ -238,6 +242,7 @@ public class PantallasNfService
         if (nuevo != null)
             await RegistrarHistorialAsync(conn, id, usuario ?? "sistema", anterior, nuevo);
 
+        _ordenesService.RecalcularPorCambioEnHija("PANTALLAS NF", dto.oc, dto.folio);
         return true;
     }
 
@@ -245,10 +250,29 @@ public class PantallasNfService
     public async Task<bool> EliminarAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
+
+        string? ocVal = null, folioVal = null;
+        await using (var qSnap = new NpgsqlCommand(
+            "SELECT oc, folio FROM pantallas_nf WHERE id = @id", conn))
+        {
+            qSnap.Parameters.AddWithValue("id", id);
+            await using var r = await qSnap.ExecuteReaderAsync();
+            if (await r.ReadAsync())
+            {
+                ocVal = r.IsDBNull(0) ? null : r.GetString(0);
+                folioVal = r.IsDBNull(1) ? null : r.GetString(1);
+            }
+        }
+
         await using var cmd = new NpgsqlCommand(
             "DELETE FROM pantallas_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
-        return await cmd.ExecuteNonQueryAsync() > 0;
+        var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        if (deleted)
+            _ordenesService.RecalcularPorCambioEnHija("PANTALLAS NF", ocVal, folioVal);
+
+        return deleted;
     }
 
     // ── Historial ─────────────────────────────────────────────────────────

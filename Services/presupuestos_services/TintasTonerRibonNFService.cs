@@ -47,6 +47,7 @@ public class TintaTonerRibonNFFiltros
 public class TintasTonerRibonNFService
 {
     private readonly DbConnectionPool _pool;
+    private readonly OrdenesDeCompraService _ordenesService;
 
     private static readonly string[] COLS =
     [
@@ -55,9 +56,10 @@ public class TintasTonerRibonNFService
         "CANTIDAD_RECIBIDA","FECHA_INSTALACION","UBICACION","IMPRESORA","INSTALADO_POR"
     ];
 
-    public TintasTonerRibonNFService(DbConnectionPool pool)
+    public TintasTonerRibonNFService(DbConnectionPool pool, OrdenesDeCompraService ordenesService)
     {
         _pool = pool;
+        _ordenesService = ordenesService;
         _ = InicializarTablaAsync();
     }
 
@@ -174,7 +176,9 @@ public class TintasTonerRibonNFService
             """, conn);
 
         AgregarParametros(cmd, dto);
-        return Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        _ordenesService.RecalcularPorCambioEnHija("Tintas,Toner,Ribon NF", dto.OC, null);
+        return id;
     }
 
     // ── Editar ────────────────────────────────────────────────────────────
@@ -211,6 +215,7 @@ public class TintasTonerRibonNFService
 
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
+        _ordenesService.RecalcularPorCambioEnHija("Tintas,Toner,Ribon NF", dto.OC, null);
         return true;
     }
 
@@ -218,10 +223,28 @@ public class TintasTonerRibonNFService
     public async Task<bool> EliminarAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
+
+        string? ocVal = null, folioVal = null;
+        await using (var qSnap = new NpgsqlCommand(
+            "SELECT oc FROM tintas_toner_ribon_nf WHERE id = @id", conn))
+        {
+            qSnap.Parameters.AddWithValue("id", id);
+            await using var r = await qSnap.ExecuteReaderAsync();
+            if (await r.ReadAsync())
+            {
+                ocVal = r.IsDBNull(0) ? null : r.GetString(0);
+            }
+        }
+
         await using var cmd = new NpgsqlCommand(
             "DELETE FROM tintas_toner_ribon_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
-        return await cmd.ExecuteNonQueryAsync() > 0;
+        var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        if (deleted)
+            _ordenesService.RecalcularPorCambioEnHija("Tintas,Toner,Ribon NF", ocVal, null);
+
+        return deleted;
     }
 
     // ── Historial ─────────────────────────────────────────────────────────

@@ -53,6 +53,7 @@ public class ConsumibleNFFiltros
 public class ConsumiblesNFService
 {
     private readonly DbConnectionPool _pool;
+    private readonly OrdenesDeCompraService _ordenesService;
 
     private static readonly string[] COLS =
     [
@@ -61,9 +62,10 @@ public class ConsumiblesNFService
         "PROVEEDOR","COSTO","MONEDA","PLANTA","UBICACION","DESTINO"
     ];
 
-    public ConsumiblesNFService(DbConnectionPool pool)
+    public ConsumiblesNFService(DbConnectionPool pool, OrdenesDeCompraService ordenesService)
     {
         _pool = pool;
+        _ordenesService = ordenesService;
         _ = InicializarTablaAsync();
     }
 
@@ -187,6 +189,9 @@ public class ConsumiblesNFService
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
 
         // Historial: registro nuevo
+        
+        _ordenesService.RecalcularPorCambioEnHija("Consumibles NF", dto.OC, dto.FOLIO_CANTIDAD);
+
         var snap = await SnapshotAsync(conn, id);
         if (snap != null)
             await RegistrarHistorialAsync(conn, id, usuario,
@@ -232,6 +237,7 @@ public class ConsumiblesNFService
         if (nuevo != null)
             await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo);
 
+        _ordenesService.RecalcularPorCambioEnHija("Consumibles NF", dto.OC, dto.FOLIO_CANTIDAD);
         return true;
     }
 
@@ -239,10 +245,29 @@ public class ConsumiblesNFService
     public async Task<bool> EliminarAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
+
+        string? ocVal = null, folioVal = null;
+        await using (var qSnap = new NpgsqlCommand(
+            "SELECT oc, folio_cantidad FROM consumibles_nf WHERE id = @id", conn))
+        {
+            qSnap.Parameters.AddWithValue("id", id);
+            await using var r = await qSnap.ExecuteReaderAsync();
+            if (await r.ReadAsync())
+            {
+                ocVal = r.IsDBNull(0) ? null : r.GetString(0);
+                folioVal = r.IsDBNull(1) ? null : r.GetString(1);
+            }
+        }
+
         await using var cmd = new NpgsqlCommand(
             "DELETE FROM consumibles_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
-        return await cmd.ExecuteNonQueryAsync() > 0;
+        var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        if (deleted)
+            _ordenesService.RecalcularPorCambioEnHija("Consumibles NF", ocVal, folioVal);
+
+        return deleted;
     }
 
     // ── Historial ─────────────────────────────────────────────────────────

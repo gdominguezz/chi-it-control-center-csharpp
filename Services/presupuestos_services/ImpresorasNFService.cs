@@ -69,6 +69,7 @@ public class ImpresoraNFFiltros
 public class ImpresorasNFService
 {
     private readonly DbConnectionPool _pool;
+    private readonly OrdenesDeCompraService _ordenesService;
 
     private static readonly string[] COLS =
     [
@@ -80,9 +81,10 @@ public class ImpresorasNFService
         "PERSONAL_IT_QUE_ASIGNA", "FECHA_DE_MANTENIMIENTO"
     ];
 
-    public ImpresorasNFService(DbConnectionPool pool)
+    public ImpresorasNFService(DbConnectionPool pool, OrdenesDeCompraService ordenesService)
     {
         _pool = pool;
+        _ordenesService = ordenesService;
         _ = InicializarTablaAsync();
     }
 
@@ -228,7 +230,9 @@ public class ImpresorasNFService
             """, conn);
 
         AgregarParametros(cmd, dto);
-        return Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        _ordenesService.RecalcularPorCambioEnHija("IMPRESORAS NF", dto.OC, dto.FOLIO_INVENTARIO);
+        return id;
     }
 
     // ── Editar ────────────────────────────────────────────────────────────
@@ -277,6 +281,7 @@ public class ImpresorasNFService
 
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
+        _ordenesService.RecalcularPorCambioEnHija("IMPRESORAS NF", dto.OC, dto.FOLIO_INVENTARIO);
         return true;
     }
 
@@ -284,10 +289,29 @@ public class ImpresorasNFService
     public async Task<bool> EliminarAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
+
+        string? ocVal = null, folioVal = null;
+        await using (var qSnap = new NpgsqlCommand(
+            "SELECT oc, folio_inventario FROM impresoras_nf WHERE id = @id", conn))
+        {
+            qSnap.Parameters.AddWithValue("id", id);
+            await using var r = await qSnap.ExecuteReaderAsync();
+            if (await r.ReadAsync())
+            {
+                ocVal = r.IsDBNull(0) ? null : r.GetString(0);
+                folioVal = r.IsDBNull(1) ? null : r.GetString(1);
+            }
+        }
+
         await using var cmd = new NpgsqlCommand(
             "DELETE FROM impresoras_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
-        return await cmd.ExecuteNonQueryAsync() > 0;
+        var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        if (deleted)
+            _ordenesService.RecalcularPorCambioEnHija("IMPRESORAS NF", ocVal, folioVal);
+
+        return deleted;
     }
 
     // ── Historial ─────────────────────────────────────────────────────────

@@ -50,6 +50,7 @@ public class InventarioNFFiltros
 public class InventariosNFService
 {
     private readonly DbConnectionPool _pool;
+    private readonly OrdenesDeCompraService _ordenesService;
 
     private static readonly string[] COLS =
     [
@@ -58,9 +59,10 @@ public class InventariosNFService
         "PRESUPUESTO","STATUS","ANIO","OC","NUMERO_SERIE","UBICACION_ACTUAL"
     ];
 
-    public InventariosNFService(DbConnectionPool pool)
+    public InventariosNFService(DbConnectionPool pool, OrdenesDeCompraService ordenesService)
     {
         _pool = pool;
+        _ordenesService = ordenesService;
         _ = InicializarTablaAsync();
     }
 
@@ -177,6 +179,9 @@ public class InventariosNFService
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
 
         // Historial: snapshot nuevo
+        
+        _ordenesService.RecalcularPorCambioEnHija("Inventarios NF", dto.OC, dto.INV_FOLIO);
+
         var snap = await SnapshotAsync(conn, id);
         if (snap is not null)
         {
@@ -225,6 +230,8 @@ public class InventariosNFService
                 await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo);
         }
 
+        _ordenesService.RecalcularPorCambioEnHija("Inventarios NF", dto.OC, dto.INV_FOLIO);
+
         return rows > 0;
     }
 
@@ -232,10 +239,29 @@ public class InventariosNFService
     public async Task<bool> EliminarAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
+
+        string? ocVal = null, folioVal = null;
+        await using (var qSnap = new NpgsqlCommand(
+            "SELECT oc, inv_folio FROM inventarios_nf WHERE id = @id", conn))
+        {
+            qSnap.Parameters.AddWithValue("id", id);
+            await using var r = await qSnap.ExecuteReaderAsync();
+            if (await r.ReadAsync())
+            {
+                ocVal = r.IsDBNull(0) ? null : r.GetString(0);
+                folioVal = r.IsDBNull(1) ? null : r.GetString(1);
+            }
+        }
+
         await using var cmd = new NpgsqlCommand(
             "DELETE FROM inventarios_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
-        return await cmd.ExecuteNonQueryAsync() > 0;
+        var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        if (deleted)
+            _ordenesService.RecalcularPorCambioEnHija("Inventarios NF", ocVal, folioVal);
+
+        return deleted;
     }
 
     // ── Historial ─────────────────────────────────────────────────────────

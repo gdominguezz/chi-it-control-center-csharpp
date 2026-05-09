@@ -1,4 +1,4 @@
-﻿using ChiIT.Data;
+using ChiIT.Data;
 using Npgsql;
 
 using OfficeOpenXml;
@@ -62,6 +62,7 @@ public class BitacoraFirecomFiltros
 public class BitacoraFirecomService
 {
     private readonly DbConnectionPool _pool;
+    private readonly OrdenesDeCompraService _ordenesService;
 
     private static readonly string[] COLS =
     [
@@ -74,9 +75,10 @@ public class BitacoraFirecomService
         "PERSONAL_QUE_RECIBIO", "PAGADO", "OC2"
     ];
 
-    public BitacoraFirecomService(DbConnectionPool pool)
+    public BitacoraFirecomService(DbConnectionPool pool, OrdenesDeCompraService ordenesService)
     {
         _pool = pool;
+        _ordenesService = ordenesService;
         _ = InicializarTablaAsync();
     }
 
@@ -217,6 +219,9 @@ public class BitacoraFirecomService
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
 
         // Historial: inserción inicial
+        
+        _ordenesService.RecalcularPorCambioEnHija("BITACORA FIRECOM", dto.OC, dto.ORDEN_SERVICIO);
+
         var snap = await SnapshotAsync(conn, id);
         if (snap is not null)
             await RegistrarHistorialAsync(conn, id, usuario,
@@ -267,6 +272,7 @@ public class BitacoraFirecomService
         if (nuevo is not null)
             await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo);
 
+        _ordenesService.RecalcularPorCambioEnHija("BITACORA FIRECOM", dto.OC, dto.ORDEN_SERVICIO);
         return true;
     }
 
@@ -274,10 +280,29 @@ public class BitacoraFirecomService
     public async Task<bool> EliminarAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
+
+        string? ocVal = null, folioVal = null;
+        await using (var qSnap = new NpgsqlCommand(
+            "SELECT oc, orden_servicio FROM bitacora_firecom WHERE id = @id", conn))
+        {
+            qSnap.Parameters.AddWithValue("id", id);
+            await using var r = await qSnap.ExecuteReaderAsync();
+            if (await r.ReadAsync())
+            {
+                ocVal = r.IsDBNull(0) ? null : r.GetString(0);
+                folioVal = r.IsDBNull(1) ? null : r.GetString(1);
+            }
+        }
+
         await using var cmd = new NpgsqlCommand(
             "DELETE FROM bitacora_firecom WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
-        return await cmd.ExecuteNonQueryAsync() > 0;
+        var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        if (deleted)
+            _ordenesService.RecalcularPorCambioEnHija("BITACORA FIRECOM", ocVal, folioVal);
+
+        return deleted;
     }
 
     // ── Historial ─────────────────────────────────────────────────────────

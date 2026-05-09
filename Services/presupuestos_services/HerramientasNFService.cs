@@ -54,6 +54,7 @@ public class HerramientaNFFiltros
 public class HerramientasNFService
 {
     private readonly DbConnectionPool _pool;
+    private readonly OrdenesDeCompraService _ordenesService;
 
     private static readonly string[] COLS =
     [
@@ -63,9 +64,10 @@ public class HerramientasNFService
         "PROVEEDOR","UBICACION","COMENTARIOS"
     ];
 
-    public HerramientasNFService(DbConnectionPool pool)
+    public HerramientasNFService(DbConnectionPool pool, OrdenesDeCompraService ordenesService)
     {
         _pool = pool;
+        _ordenesService = ordenesService;
         _ = InicializarTablaAsync();
     }
 
@@ -186,7 +188,9 @@ public class HerramientasNFService
             """, conn);
 
         AgregarParametros(cmd, dto);
-        return Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        _ordenesService.RecalcularPorCambioEnHija("HERRAMIENTAS NF", dto.OC, dto.FOLIO_CORRECTIVO);
+        return id;
     }
 
     // ── Editar ────────────────────────────────────────────────────────────
@@ -226,6 +230,7 @@ public class HerramientasNFService
 
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
+        _ordenesService.RecalcularPorCambioEnHija("HERRAMIENTAS NF", dto.OC, dto.FOLIO_CORRECTIVO);
         return true;
     }
 
@@ -233,10 +238,29 @@ public class HerramientasNFService
     public async Task<bool> EliminarAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
+
+        string? ocVal = null, folioVal = null;
+        await using (var qSnap = new NpgsqlCommand(
+            "SELECT oc, folio_correctivo FROM herramientas_nf WHERE id = @id", conn))
+        {
+            qSnap.Parameters.AddWithValue("id", id);
+            await using var r = await qSnap.ExecuteReaderAsync();
+            if (await r.ReadAsync())
+            {
+                ocVal = r.IsDBNull(0) ? null : r.GetString(0);
+                folioVal = r.IsDBNull(1) ? null : r.GetString(1);
+            }
+        }
+
         await using var cmd = new NpgsqlCommand(
             "DELETE FROM herramientas_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
-        return await cmd.ExecuteNonQueryAsync() > 0;
+        var deleted = await cmd.ExecuteNonQueryAsync() > 0;
+
+        if (deleted)
+            _ordenesService.RecalcularPorCambioEnHija("HERRAMIENTAS NF", ocVal, folioVal);
+
+        return deleted;
     }
 
     // ── Historial ─────────────────────────────────────────────────────────
