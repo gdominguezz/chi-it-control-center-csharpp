@@ -2447,7 +2447,7 @@
             cantidad_registrada: {
                 modulo: "entradas",
                 titulo: "Cantidad Registrada",
-                desc: "Suma todas las entradas registradas en el módulo del proveedor seleccionado. Solo considera registros donde coincidan la orden de compra y el folio.",
+                desc: "Suma automáticamente las cantidades registradas en la hoja de control correspondiente (Accesorios NF, Consumibles NF, Dispositivos NF, etc.) donde coincidan la Orden de Compra (OC) y el Folio. Si la cantidad registrada es igual o mayor a la cantidad solicitada el estatus cambia a COMPLETA, si es menor a PARCIAL, y si es 0 a PENDIENTE.",
                 path: "Proveedor → tabla dinámica → (orden_de_compra + folio) → SUM(cantidad)"
             },
 

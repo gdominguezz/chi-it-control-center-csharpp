@@ -1414,11 +1414,13 @@
                                <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
                             : `<label class="file-label">📎 Subir PDF<input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)"></label>`}
                     </td>
-                    <td style="white-space:nowrap;">
-                        ${puedeEditar  ? `<button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>` : ''}
-                        ${puedeEliminar ? `<button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑️</button>` : ''}
-                        <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})">📋</button>
-                    </td>
+                        <td style="white-space:nowrap">
+                            <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                            ${esAdmin ? `
+                            <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
+                            ` : ''}
+                            <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
+                        </td>
                 </tr>`;
             });
 

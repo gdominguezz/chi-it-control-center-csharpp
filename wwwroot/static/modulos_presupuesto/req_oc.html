@@ -1229,11 +1229,24 @@
                             </div>
                         </td>
                         <td style="white-space:nowrap;">
-                            <div class="td-actions">
-                                <button class="btn btn-amber btn-sm"  onclick="abrirEditar(${row.ID})">✏️ Editar</button>
-                                <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑 Eliminar</button>
-                                <button class="btn btn-cyan btn-sm"   onclick="verHistorial(${row.ID})">📋 Historial</button>
-                            </div>
+                        <div class="td-actions">
+                            <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">
+                                ✏️ Editar
+                            </button>
+
+                            ${usuarioActual?.ROL === "ADMIN"
+                                                ? `
+                                    <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">
+                                        🗑 Eliminar
+                                    </button>
+                                  `
+                                                : ""
+                                            }
+
+                            <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})">
+                                📋 Historial
+                            </button>
+                        </div>
                         </td>`;
                 tbody.appendChild(tr);
             });

@@ -1659,9 +1659,11 @@
                     <td class="mono td-formula">${e(r.REQUISICION)}</td>
                     <td class="mono td-formula">${e(r.OC)}</td>
                     <td style="white-space:nowrap">
-                        <button class="btn btn-amber btn-sm" onclick='abrirEditar(${JSON.stringify(r)})'>✏️</button>
-                        <button class="btn btn-danger btn-sm" onclick="eliminar(${r.ID})">🗑</button>
-                        <button class="btn btn-cyan btn-sm" onclick="verHistorial(${r.ID})" title="Ver historial">📋</button>
+                        <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                        ${esAdmin ? `
+                        <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
+                        ` : ''}
+                        <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
                     </td>
                 </tr>`).join('');
         }

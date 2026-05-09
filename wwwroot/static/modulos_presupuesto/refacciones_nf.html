@@ -1178,8 +1178,8 @@
                     <td><span class="disponible-pill ${dispPill.cls}">${esc(row.DISPONIBLE) || '—'}</span></td>
                     <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(row.COMENTARIOS) || ''}">${esc(row.COMENTARIOS) || '—'}</td>
                     <td style="white-space:nowrap">
-                        ${esAdmin ? `
                         <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                        ${esAdmin ? `
                         <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
                         ` : ''}
                         <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>

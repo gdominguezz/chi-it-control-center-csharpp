@@ -1924,11 +1924,13 @@
                         <td>${esc(r.destino_planta) || '—'}</td>
                         <td>${esc(r.asignado_a) || '—'}</td>
                         <td>${esc(r.personal_it_que_asigna) || '—'}</td>
-                        <td class="td-acciones" style="display:flex;gap:5px;padding:6px 10px;">
-                            <button class="btn btn-amber btn-sm" title="Editar" onclick="abrirEditar(${r.id})">✏️</button>
-                            <button class="btn btn-primary btn-sm" title="Historial" onclick="verHistorial(${r.id})">📄</button>
-                            <button class="btn btn-danger btn-sm" title="Eliminar" onclick="eliminarRegistro(${r.id})">🗑</button>
-                        </td>
+                            <td style="white-space:nowrap">
+                                <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                ${esAdmin ? `
+                                <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
+                                ` : ''}
+                                <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
+                            </td>
                     </tr>`;
             }).join('');
         }
