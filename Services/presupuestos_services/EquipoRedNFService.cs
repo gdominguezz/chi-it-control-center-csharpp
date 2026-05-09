@@ -213,7 +213,9 @@ public class EquipoRedNFService
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("EQUIPO DE RED", dto.OC, dto.FOLIO_CORRECTIVO);
+        Console.WriteLine("[EquipoRedNF] RecalcularPorCambioEnHija EQUIPO DE RED " + dto.OC, dto.FOLIO_CORRECTIVO);
+        try { _ordenesService.RecalcularPorCambioEnHija("EQUIPO DE RED", dto.OC, dto.FOLIO_CORRECTIVO); }
+        catch (Exception ex) { Console.WriteLine("[EquipoRedNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return id;
     }
 
@@ -260,7 +262,9 @@ public class EquipoRedNFService
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("EQUIPO DE RED", dto.OC, dto.FOLIO_CORRECTIVO);
+        Console.WriteLine("[EquipoRedNF] RecalcularPorCambioEnHija EQUIPO DE RED " + dto.OC, dto.FOLIO_CORRECTIVO);
+        try { _ordenesService.RecalcularPorCambioEnHija("EQUIPO DE RED", dto.OC, dto.FOLIO_CORRECTIVO); }
+        catch (Exception ex) { Console.WriteLine("[EquipoRedNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return true;
     }
 
@@ -290,7 +294,9 @@ public class EquipoRedNFService
         await conn.CloseAsync();
 
         if (deleted)
-            _ordenesService.RecalcularPorCambioEnHija("EQUIPO DE RED", ocVal, folioVal);
+            Console.WriteLine("[EquipoRedNF] RecalcularPorCambioEnHija EQUIPO DE RED " + ocVal, folioVal);
+            try { _ordenesService.RecalcularPorCambioEnHija("EQUIPO DE RED", ocVal, folioVal); }
+            catch (Exception ex) { Console.WriteLine("[EquipoRedNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return deleted;
     }

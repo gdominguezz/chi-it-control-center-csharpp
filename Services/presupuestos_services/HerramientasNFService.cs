@@ -190,7 +190,9 @@ public class HerramientasNFService
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("HERRAMIENTAS NF", dto.OC, dto.FOLIO_CORRECTIVO);
+        Console.WriteLine("[HerramientasNF] RecalcularPorCambioEnHija HERRAMIENTAS NF " + dto.OC, dto.FOLIO_CORRECTIVO);
+        try { _ordenesService.RecalcularPorCambioEnHija("HERRAMIENTAS NF", dto.OC, dto.FOLIO_CORRECTIVO); }
+        catch (Exception ex) { Console.WriteLine("[HerramientasNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return id;
     }
 
@@ -232,7 +234,9 @@ public class HerramientasNFService
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("HERRAMIENTAS NF", dto.OC, dto.FOLIO_CORRECTIVO);
+        Console.WriteLine("[HerramientasNF] RecalcularPorCambioEnHija HERRAMIENTAS NF " + dto.OC, dto.FOLIO_CORRECTIVO);
+        try { _ordenesService.RecalcularPorCambioEnHija("HERRAMIENTAS NF", dto.OC, dto.FOLIO_CORRECTIVO); }
+        catch (Exception ex) { Console.WriteLine("[HerramientasNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return true;
     }
 
@@ -262,7 +266,9 @@ public class HerramientasNFService
         await conn.CloseAsync();
 
         if (deleted)
-            _ordenesService.RecalcularPorCambioEnHija("HERRAMIENTAS NF", ocVal, folioVal);
+            Console.WriteLine("[HerramientasNF] RecalcularPorCambioEnHija HERRAMIENTAS NF " + ocVal, folioVal);
+            try { _ordenesService.RecalcularPorCambioEnHija("HERRAMIENTAS NF", ocVal, folioVal); }
+            catch (Exception ex) { Console.WriteLine("[HerramientasNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return deleted;
     }

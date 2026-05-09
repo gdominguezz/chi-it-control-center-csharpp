@@ -203,7 +203,9 @@ public class AccesoriosNFService
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("Accesorio NF", dto.OC, dto.FOLIO);
+        Console.WriteLine("[AccesoriosNF] RecalcularPorCambioEnHija Accesorio NF " + dto.OC, dto.FOLIO);
+        try { _ordenesService.RecalcularPorCambioEnHija("Accesorio NF", dto.OC, dto.FOLIO); }
+        catch (Exception ex) { Console.WriteLine("[AccesoriosNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return id;
     }
 
@@ -248,7 +250,9 @@ public class AccesoriosNFService
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("Accesorio NF", dto.OC, dto.FOLIO);
+        Console.WriteLine("[AccesoriosNF] RecalcularPorCambioEnHija Accesorio NF " + dto.OC, dto.FOLIO);
+        try { _ordenesService.RecalcularPorCambioEnHija("Accesorio NF", dto.OC, dto.FOLIO); }
+        catch (Exception ex) { Console.WriteLine("[AccesoriosNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return true;
     }
 
@@ -278,7 +282,9 @@ public class AccesoriosNFService
         await conn.CloseAsync();
 
         if (deleted)
-            _ordenesService.RecalcularPorCambioEnHija("Accesorio NF", ocVal, folioVal);
+            Console.WriteLine("[AccesoriosNF] RecalcularPorCambioEnHija Accesorio NF " + ocVal, folioVal);
+            try { _ordenesService.RecalcularPorCambioEnHija("Accesorio NF", ocVal, folioVal); }
+            catch (Exception ex) { Console.WriteLine("[AccesoriosNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return deleted;
     }

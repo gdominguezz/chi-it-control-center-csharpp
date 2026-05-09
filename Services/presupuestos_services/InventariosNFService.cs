@@ -181,7 +181,9 @@ public class InventariosNFService
         // Historial: snapshot nuevo
         
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("Inventarios NF", dto.OC, dto.INV_FOLIO);
+        Console.WriteLine("[InventariosNF] RecalcularPorCambioEnHija Inventarios NF " + dto.OC, dto.INV_FOLIO);
+        try { _ordenesService.RecalcularPorCambioEnHija("Inventarios NF", dto.OC, dto.INV_FOLIO); }
+        catch (Exception ex) { Console.WriteLine("[InventariosNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         var snap = await SnapshotAsync(conn, id);
         if (snap is not null)
@@ -232,7 +234,9 @@ public class InventariosNFService
         }
 
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("Inventarios NF", dto.OC, dto.INV_FOLIO);
+        Console.WriteLine("[InventariosNF] RecalcularPorCambioEnHija Inventarios NF " + dto.OC, dto.INV_FOLIO);
+        try { _ordenesService.RecalcularPorCambioEnHija("Inventarios NF", dto.OC, dto.INV_FOLIO); }
+        catch (Exception ex) { Console.WriteLine("[InventariosNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return rows > 0;
     }
@@ -263,7 +267,9 @@ public class InventariosNFService
         await conn.CloseAsync();
 
         if (deleted)
-            _ordenesService.RecalcularPorCambioEnHija("Inventarios NF", ocVal, folioVal);
+            Console.WriteLine("[InventariosNF] RecalcularPorCambioEnHija Inventarios NF " + ocVal, folioVal);
+            try { _ordenesService.RecalcularPorCambioEnHija("Inventarios NF", ocVal, folioVal); }
+            catch (Exception ex) { Console.WriteLine("[InventariosNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return deleted;
     }

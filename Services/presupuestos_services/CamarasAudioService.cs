@@ -206,7 +206,9 @@ public class CamarasAudioService
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("CAMARAS AUDIO", dto.OC, dto.FOLIO_INVENTARIO);
+        Console.WriteLine("[CamarasAudio] RecalcularPorCambioEnHija CAMARAS AUDIO " + dto.OC, dto.FOLIO_INVENTARIO);
+        try { _ordenesService.RecalcularPorCambioEnHija("CAMARAS AUDIO", dto.OC, dto.FOLIO_INVENTARIO); }
+        catch (Exception ex) { Console.WriteLine("[CamarasAudio] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return id;
     }
 
@@ -251,7 +253,9 @@ public class CamarasAudioService
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("CAMARAS AUDIO", dto.OC, dto.FOLIO_INVENTARIO);
+        Console.WriteLine("[CamarasAudio] RecalcularPorCambioEnHija CAMARAS AUDIO " + dto.OC, dto.FOLIO_INVENTARIO);
+        try { _ordenesService.RecalcularPorCambioEnHija("CAMARAS AUDIO", dto.OC, dto.FOLIO_INVENTARIO); }
+        catch (Exception ex) { Console.WriteLine("[CamarasAudio] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return true;
     }
 
@@ -281,7 +285,9 @@ public class CamarasAudioService
         await conn.CloseAsync();
 
         if (deleted)
-            _ordenesService.RecalcularPorCambioEnHija("CAMARAS AUDIO", ocVal, folioVal);
+            Console.WriteLine("[CamarasAudio] RecalcularPorCambioEnHija CAMARAS AUDIO " + ocVal, folioVal);
+            try { _ordenesService.RecalcularPorCambioEnHija("CAMARAS AUDIO", ocVal, folioVal); }
+            catch (Exception ex) { Console.WriteLine("[CamarasAudio] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return deleted;
     }

@@ -221,7 +221,9 @@ public class BitacoraFirecomService
         // Historial: inserción inicial
         
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("BITACORA FIRECOM", dto.OC, dto.ORDEN_SERVICIO);
+        Console.WriteLine("[BitacoraFirecom] RecalcularPorCambioEnHija BITACORA FIRECOM " + dto.OC, dto.ORDEN_SERVICIO);
+        try { _ordenesService.RecalcularPorCambioEnHija("BITACORA FIRECOM", dto.OC, dto.ORDEN_SERVICIO); }
+        catch (Exception ex) { Console.WriteLine("[BitacoraFirecom] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         var snap = await SnapshotAsync(conn, id);
         if (snap is not null)
@@ -274,7 +276,9 @@ public class BitacoraFirecomService
             await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo);
 
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("BITACORA FIRECOM", dto.OC, dto.ORDEN_SERVICIO);
+        Console.WriteLine("[BitacoraFirecom] RecalcularPorCambioEnHija BITACORA FIRECOM " + dto.OC, dto.ORDEN_SERVICIO);
+        try { _ordenesService.RecalcularPorCambioEnHija("BITACORA FIRECOM", dto.OC, dto.ORDEN_SERVICIO); }
+        catch (Exception ex) { Console.WriteLine("[BitacoraFirecom] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return true;
     }
 
@@ -304,7 +308,9 @@ public class BitacoraFirecomService
         await conn.CloseAsync();
 
         if (deleted)
-            _ordenesService.RecalcularPorCambioEnHija("BITACORA FIRECOM", ocVal, folioVal);
+            Console.WriteLine("[BitacoraFirecom] RecalcularPorCambioEnHija BITACORA FIRECOM " + ocVal, folioVal);
+            try { _ordenesService.RecalcularPorCambioEnHija("BITACORA FIRECOM", ocVal, folioVal); }
+            catch (Exception ex) { Console.WriteLine("[BitacoraFirecom] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return deleted;
     }

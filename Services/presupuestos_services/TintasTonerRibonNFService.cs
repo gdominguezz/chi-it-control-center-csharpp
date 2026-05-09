@@ -178,7 +178,9 @@ public class TintasTonerRibonNFService
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("Tintas,Toner,Ribon NF", dto.OC, null);
+        Console.WriteLine("[TintasTonerRibonNF] RecalcularPorCambioEnHija Tintas,Toner,Ribon NF " + dto.OC, null);
+        try { _ordenesService.RecalcularPorCambioEnHija("Tintas,Toner,Ribon NF", dto.OC, null); }
+        catch (Exception ex) { Console.WriteLine("[TintasTonerRibonNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return id;
     }
 
@@ -217,7 +219,9 @@ public class TintasTonerRibonNFService
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("Tintas,Toner,Ribon NF", dto.OC, null);
+        Console.WriteLine("[TintasTonerRibonNF] RecalcularPorCambioEnHija Tintas,Toner,Ribon NF " + dto.OC, null);
+        try { _ordenesService.RecalcularPorCambioEnHija("Tintas,Toner,Ribon NF", dto.OC, null); }
+        catch (Exception ex) { Console.WriteLine("[TintasTonerRibonNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return true;
     }
 
@@ -246,7 +250,9 @@ public class TintasTonerRibonNFService
         await conn.CloseAsync();
 
         if (deleted)
-            _ordenesService.RecalcularPorCambioEnHija("Tintas,Toner,Ribon NF", ocVal, null);
+            Console.WriteLine("[TintasTonerRibonNF] RecalcularPorCambioEnHija Tintas,Toner,Ribon NF " + ocVal, null);
+            try { _ordenesService.RecalcularPorCambioEnHija("Tintas,Toner,Ribon NF", ocVal, null); }
+            catch (Exception ex) { Console.WriteLine("[TintasTonerRibonNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return deleted;
     }

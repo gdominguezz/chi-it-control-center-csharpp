@@ -191,7 +191,9 @@ public class ConsumiblesNFService
         // Historial: registro nuevo
         
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("Consumibles NF", dto.OC, dto.FOLIO_CANTIDAD);
+        Console.WriteLine("[ConsumiblesNF] RecalcularPorCambioEnHija Consumibles NF " + dto.OC, dto.FOLIO_CANTIDAD);
+        try { _ordenesService.RecalcularPorCambioEnHija("Consumibles NF", dto.OC, dto.FOLIO_CANTIDAD); }
+        catch (Exception ex) { Console.WriteLine("[ConsumiblesNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         var snap = await SnapshotAsync(conn, id);
         if (snap != null)
@@ -239,7 +241,9 @@ public class ConsumiblesNFService
             await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo);
 
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("Consumibles NF", dto.OC, dto.FOLIO_CANTIDAD);
+        Console.WriteLine("[ConsumiblesNF] RecalcularPorCambioEnHija Consumibles NF " + dto.OC, dto.FOLIO_CANTIDAD);
+        try { _ordenesService.RecalcularPorCambioEnHija("Consumibles NF", dto.OC, dto.FOLIO_CANTIDAD); }
+        catch (Exception ex) { Console.WriteLine("[ConsumiblesNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return true;
     }
 
@@ -269,7 +273,9 @@ public class ConsumiblesNFService
         await conn.CloseAsync();
 
         if (deleted)
-            _ordenesService.RecalcularPorCambioEnHija("Consumibles NF", ocVal, folioVal);
+            Console.WriteLine("[ConsumiblesNF] RecalcularPorCambioEnHija Consumibles NF " + ocVal, folioVal);
+            try { _ordenesService.RecalcularPorCambioEnHija("Consumibles NF", ocVal, folioVal); }
+            catch (Exception ex) { Console.WriteLine("[ConsumiblesNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return deleted;
     }

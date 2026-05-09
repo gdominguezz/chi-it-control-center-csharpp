@@ -180,7 +180,9 @@ public class PantallasNfService
 
         // Historial: registrar creación
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("PANTALLAS NF", dto.oc, dto.folio);
+        Console.WriteLine("[PantallasNF] RecalcularPorCambioEnHija PANTALLAS NF " + dto.oc, dto.folio);
+        try { _ordenesService.RecalcularPorCambioEnHija("PANTALLAS NF", dto.oc, dto.folio); }
+        catch (Exception ex) { Console.WriteLine("[PantallasNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         var snap = await SnapshotAsync(conn, newId);
         if (snap != null)
@@ -244,7 +246,9 @@ public class PantallasNfService
             await RegistrarHistorialAsync(conn, id, usuario ?? "sistema", anterior, nuevo);
 
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("PANTALLAS NF", dto.oc, dto.folio);
+        Console.WriteLine("[PantallasNF] RecalcularPorCambioEnHija PANTALLAS NF " + dto.oc, dto.folio);
+        try { _ordenesService.RecalcularPorCambioEnHija("PANTALLAS NF", dto.oc, dto.folio); }
+        catch (Exception ex) { Console.WriteLine("[PantallasNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return true;
     }
 
@@ -274,7 +278,9 @@ public class PantallasNfService
         await conn.CloseAsync();
 
         if (deleted)
-            _ordenesService.RecalcularPorCambioEnHija("PANTALLAS NF", ocVal, folioVal);
+            Console.WriteLine("[PantallasNF] RecalcularPorCambioEnHija PANTALLAS NF " + ocVal, folioVal);
+            try { _ordenesService.RecalcularPorCambioEnHija("PANTALLAS NF", ocVal, folioVal); }
+            catch (Exception ex) { Console.WriteLine("[PantallasNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return deleted;
     }

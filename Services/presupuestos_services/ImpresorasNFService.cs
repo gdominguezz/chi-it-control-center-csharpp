@@ -232,7 +232,9 @@ public class ImpresorasNFService
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("IMPRESORAS NF", dto.OC, dto.FOLIO_INVENTARIO);
+        Console.WriteLine("[ImpresorasNF] RecalcularPorCambioEnHija IMPRESORAS NF " + dto.OC, dto.FOLIO_INVENTARIO);
+        try { _ordenesService.RecalcularPorCambioEnHija("IMPRESORAS NF", dto.OC, dto.FOLIO_INVENTARIO); }
+        catch (Exception ex) { Console.WriteLine("[ImpresorasNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return id;
     }
 
@@ -283,7 +285,9 @@ public class ImpresorasNFService
         var nuevo = await SnapshotAsync(conn, id);
         await RegistrarHistorialAsync(conn, id, usuario, anterior, nuevo!);
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("IMPRESORAS NF", dto.OC, dto.FOLIO_INVENTARIO);
+        Console.WriteLine("[ImpresorasNF] RecalcularPorCambioEnHija IMPRESORAS NF " + dto.OC, dto.FOLIO_INVENTARIO);
+        try { _ordenesService.RecalcularPorCambioEnHija("IMPRESORAS NF", dto.OC, dto.FOLIO_INVENTARIO); }
+        catch (Exception ex) { Console.WriteLine("[ImpresorasNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return true;
     }
 
@@ -313,7 +317,9 @@ public class ImpresorasNFService
         await conn.CloseAsync();
 
         if (deleted)
-            _ordenesService.RecalcularPorCambioEnHija("IMPRESORAS NF", ocVal, folioVal);
+            Console.WriteLine("[ImpresorasNF] RecalcularPorCambioEnHija IMPRESORAS NF " + ocVal, folioVal);
+            try { _ordenesService.RecalcularPorCambioEnHija("IMPRESORAS NF", ocVal, folioVal); }
+            catch (Exception ex) { Console.WriteLine("[ImpresorasNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return deleted;
     }

@@ -185,7 +185,9 @@ public class RefaccionesNFService
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("Refacciones NF", dto.OC, dto.FOLIO_CORRECTIVO);
+        Console.WriteLine("[RefaccionesNF] RecalcularPorCambioEnHija Refacciones NF " + dto.OC, dto.FOLIO_CORRECTIVO);
+        try { _ordenesService.RecalcularPorCambioEnHija("Refacciones NF", dto.OC, dto.FOLIO_CORRECTIVO); }
+        catch (Exception ex) { Console.WriteLine("[RefaccionesNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return id;
     }
 
@@ -227,7 +229,9 @@ public class RefaccionesNFService
         await using (var conn4 = await _pool.OpenAsync())
             await RegistrarHistorialAsync(conn4, id, usuario, anterior, nuevo!);
 
-        _ordenesService.RecalcularPorCambioEnHija("Refacciones NF", dto.OC, dto.FOLIO_CORRECTIVO);
+        Console.WriteLine("[RefaccionesNF] RecalcularPorCambioEnHija Refacciones NF " + dto.OC, dto.FOLIO_CORRECTIVO);
+        try { _ordenesService.RecalcularPorCambioEnHija("Refacciones NF", dto.OC, dto.FOLIO_CORRECTIVO); }
+        catch (Exception ex) { Console.WriteLine("[RefaccionesNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
         return true;
     }
 
@@ -257,7 +261,9 @@ public class RefaccionesNFService
         await conn.CloseAsync();
 
         if (deleted)
-            _ordenesService.RecalcularPorCambioEnHija("Refacciones NF", ocVal, folioVal);
+            Console.WriteLine("[RefaccionesNF] RecalcularPorCambioEnHija Refacciones NF " + ocVal, folioVal);
+            try { _ordenesService.RecalcularPorCambioEnHija("Refacciones NF", ocVal, folioVal); }
+            catch (Exception ex) { Console.WriteLine("[RefaccionesNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return deleted;
     }

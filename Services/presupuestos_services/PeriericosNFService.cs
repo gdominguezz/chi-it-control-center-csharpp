@@ -206,7 +206,9 @@ public class PerifeicosNFService
 
         
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("PERIFERICOS NF", dto.OC, dto.FOLIO_INVENTARIO);
+        Console.WriteLine("[PeriericosNF] RecalcularPorCambioEnHija PERIFERICOS NF " + dto.OC, dto.FOLIO_INVENTARIO);
+        try { _ordenesService.RecalcularPorCambioEnHija("PERIFERICOS NF", dto.OC, dto.FOLIO_INVENTARIO); }
+        catch (Exception ex) { Console.WriteLine("[PeriericosNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         var snap = await SnapshotAsync(conn, id);
         if (snap is not null)
@@ -262,7 +264,9 @@ public class PerifeicosNFService
         }
 
         await conn.CloseAsync();
-        _ordenesService.RecalcularPorCambioEnHija("PERIFERICOS NF", dto.OC, dto.FOLIO_INVENTARIO);
+        Console.WriteLine("[PeriericosNF] RecalcularPorCambioEnHija PERIFERICOS NF " + dto.OC, dto.FOLIO_INVENTARIO);
+        try { _ordenesService.RecalcularPorCambioEnHija("PERIFERICOS NF", dto.OC, dto.FOLIO_INVENTARIO); }
+        catch (Exception ex) { Console.WriteLine("[PeriericosNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return rows > 0;
     }
@@ -293,7 +297,9 @@ public class PerifeicosNFService
         await conn.CloseAsync();
 
         if (deleted)
-            _ordenesService.RecalcularPorCambioEnHija("PERIFERICOS NF", ocVal, folioVal);
+            Console.WriteLine("[PeriericosNF] RecalcularPorCambioEnHija PERIFERICOS NF " + ocVal, folioVal);
+            try { _ordenesService.RecalcularPorCambioEnHija("PERIFERICOS NF", ocVal, folioVal); }
+            catch (Exception ex) { Console.WriteLine("[PeriericosNF] ERROR RecalcularPorCambioEnHija: " + ex.Message); }
 
         return deleted;
     }
