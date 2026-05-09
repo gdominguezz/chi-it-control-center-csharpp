@@ -21,7 +21,10 @@ public class OrdenesDeCompraController : ControllerBase
     public IActionResult GetAll(
         [FromQuery] int page = 1,
         [FromQuery] int limit = 10,
+        [FromQuery] string? ID = null,
         [FromQuery] string? ORDEN_DE_COMPRA = null,
+        [FromQuery] string? FECHA_OC = null,
+        [FromQuery] string? OC = null,
         [FromQuery] string? FOLIO = null,
         [FromQuery] string? SOLICITANTE = null,
         [FromQuery] string? PRESUPUESTO_MES = null,
@@ -29,17 +32,28 @@ public class OrdenesDeCompraController : ControllerBase
         [FromQuery] string? ACCESORIO_SOLICITADO = null,
         [FromQuery] string? PROVEEDOR_ELEGIDO = null,
         [FromQuery] string? PIEZA_SERVICIO = null,
+        [FromQuery] string? CANTIDAD = null,
+        [FromQuery] string? PRECIO_UNITARIO = null,
+        [FromQuery] string? TOTAL_SIN_IVA = null,
         [FromQuery] string? MONEDA = null,
+        [FromQuery] string? COMENTARIOS = null,
+        [FromQuery] string? HOJA_CONTROL = null,
         [FromQuery] string? REQUISICION = null,
-        [FromQuery] string? OC = null,
-        [FromQuery] string? ESTATUS_OC = null)
+        [FromQuery] string? FECHA_ENTRADA = null,
+        [FromQuery] string? CANTIDAD_REGISTRADA = null,
+        [FromQuery] string? ESTATUS_OC = null,
+        [FromQuery] string? sort_col = null,
+        [FromQuery] string? sort_dir = null)
     {
         var (data, total) = _service.GetAll(
             page, limit,
             ORDEN_DE_COMPRA, FOLIO, SOLICITANTE, PRESUPUESTO_MES,
             SERIE_UBICACION_NO_EMPLEADO, ACCESORIO_SOLICITADO,
             PROVEEDOR_ELEGIDO, PIEZA_SERVICIO, MONEDA,
-            REQUISICION, OC, ESTATUS_OC);
+            REQUISICION, OC, ESTATUS_OC,
+            ID, FECHA_OC, FECHA_ENTRADA, COMENTARIOS, HOJA_CONTROL,
+            CANTIDAD, PRECIO_UNITARIO, TOTAL_SIN_IVA, CANTIDAD_REGISTRADA,
+            sort_col, sort_dir);
 
         return Ok(new { data, total });
     }
@@ -139,7 +153,10 @@ public class OrdenesDeCompraController : ControllerBase
     // ── EXPORTAR filtrado ─────────────────────────────────────────────────
     [HttpGet("EXPORTAR")]
     public IActionResult ExportarFiltrado(
+        [FromQuery] string? ID = null,
         [FromQuery] string? ORDEN_DE_COMPRA = null,
+        [FromQuery] string? FECHA_OC = null,
+        [FromQuery] string? OC = null,
         [FromQuery] string? FOLIO = null,
         [FromQuery] string? SOLICITANTE = null,
         [FromQuery] string? PRESUPUESTO_MES = null,
@@ -147,17 +164,28 @@ public class OrdenesDeCompraController : ControllerBase
         [FromQuery] string? ACCESORIO_SOLICITADO = null,
         [FromQuery] string? PROVEEDOR_ELEGIDO = null,
         [FromQuery] string? PIEZA_SERVICIO = null,
+        [FromQuery] string? CANTIDAD = null,
+        [FromQuery] string? PRECIO_UNITARIO = null,
+        [FromQuery] string? TOTAL_SIN_IVA = null,
         [FromQuery] string? MONEDA = null,
+        [FromQuery] string? COMENTARIOS = null,
+        [FromQuery] string? HOJA_CONTROL = null,
         [FromQuery] string? REQUISICION = null,
-        [FromQuery] string? OC = null,
-        [FromQuery] string? ESTATUS_OC = null)
+        [FromQuery] string? FECHA_ENTRADA = null,
+        [FromQuery] string? CANTIDAD_REGISTRADA = null,
+        [FromQuery] string? ESTATUS_OC = null,
+        [FromQuery] string? sort_col = null,
+        [FromQuery] string? sort_dir = null)
     {
         var (data, _) = _service.GetAll(
             1, int.MaxValue,
             ORDEN_DE_COMPRA, FOLIO, SOLICITANTE, PRESUPUESTO_MES,
             SERIE_UBICACION_NO_EMPLEADO, ACCESORIO_SOLICITADO,
             PROVEEDOR_ELEGIDO, PIEZA_SERVICIO, MONEDA,
-            REQUISICION, OC, ESTATUS_OC);
+            REQUISICION, OC, ESTATUS_OC,
+            ID, FECHA_OC, FECHA_ENTRADA, COMENTARIOS, HOJA_CONTROL,
+            CANTIDAD, PRECIO_UNITARIO, TOTAL_SIN_IVA, CANTIDAD_REGISTRADA,
+            sort_col, sort_dir);
 
         var bytes = _service.GenerarExcel(data);
         return File(bytes,
