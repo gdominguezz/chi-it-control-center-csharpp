@@ -228,20 +228,31 @@ public class OrdenesDeCompraService
         using (var cmd = con.CreateCommand())
         {
             cmd.CommandText = """
-                SELECT id, cantidad
-                FROM ordenes_de_compra
-                WHERE (activo IS NULL OR activo = true)
-                  AND hoja_control = @hc
-                  AND oc           = @oc
-                  AND folio        = @fo
-                """;
-            cmd.Parameters.AddWithValue("hc", hojaCanonica);
-            cmd.Parameters.AddWithValue("oc", (object?)oc ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("fo", (object?)folio ?? DBNull.Value);
+        SELECT id, requisicion, orden_de_compra, folio, fecha_oc, oc,
+               cantidad, precio_unitario, hoja_control, cantidad_registrada
+        FROM ordenes_de_compra
+        WHERE (activo IS NULL OR activo = true)
+        ORDER BY id
+        """;
 
-            using var dr = cmd.ExecuteReader();
-            while (dr.Read())
-                afectadas.Add((dr.GetInt32(0), dr.IsDBNull(1) ? null : dr.GetDecimal(1)));
+            using (var dr = cmd.ExecuteReader())
+            {
+                while (dr.Read())
+                {
+                    todos.Add((
+                        dr.GetInt32(0),
+                        dr.IsDBNull(1) ? null : dr.GetString(1),
+                        dr.IsDBNull(2) ? null : dr.GetString(2),
+                        dr.IsDBNull(3) ? null : dr.GetString(3),
+                        dr.IsDBNull(4) ? null : ((DateTime)dr.GetValue(4)).ToString("yyyy-MM-dd"),
+                        dr.IsDBNull(5) ? null : dr.GetString(5),
+                        dr.IsDBNull(6) ? (decimal?)null : dr.GetDecimal(6),
+                        dr.IsDBNull(7) ? (decimal?)null : dr.GetDecimal(7),
+                        dr.IsDBNull(8) ? null : dr.GetString(8),
+                        dr.IsDBNull(9) ? (decimal?)null : dr.GetDecimal(9)
+                    ));
+                }
+            }
         }
 
         // 2. Recalcular y actualizar cada una
