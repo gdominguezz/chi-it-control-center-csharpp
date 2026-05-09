@@ -318,18 +318,38 @@ public class OrdenesDeCompraService
         string? SERIE_UBICACION_NO_EMPLEADO = null, string? ACCESORIO_SOLICITADO = null,
         string? PROVEEDOR_ELEGIDO = null, string? PIEZA_SERVICIO = null,
         string? MONEDA = null, string? REQUISICION = null,
-        string? OC = null, string? ESTATUS_OC = null)
+        string? OC = null, string? ESTATUS_OC = null,
+        string? ID = null,
+        string? FECHA_OC = null,
+        string? FECHA_ENTRADA = null,
+        string? COMENTARIOS = null,
+        string? HOJA_CONTROL = null,
+        string? CANTIDAD = null,
+        string? PRECIO_UNITARIO = null,
+        string? TOTAL_SIN_IVA = null,
+        string? CANTIDAD_REGISTRADA = null,
+        string? sort_col = null,
+        string? sort_dir = null)
     {
         using var con = Abrir();
 
         var where = new List<string> { "(activo IS NULL OR activo = true)" };
-        var parms = new List<(string name, string value)>();
+        var parms = new List<(string name, object value)>();
 
         void F(string col, string? val, string p)
         {
             if (!string.IsNullOrWhiteSpace(val))
             { where.Add($"{col} ILIKE @{p}"); parms.Add((p, $"%{val}%")); }
         }
+
+        void FNum(string col, string? val, string p)
+        {
+            if (!string.IsNullOrWhiteSpace(val) && decimal.TryParse(val, out var num))
+            { where.Add($"{col} = @{p}"); parms.Add((p, num)); }
+        }
+
+        if (!string.IsNullOrWhiteSpace(ID) && int.TryParse(ID, out var idVal))
+        { where.Add("id = @id_f"); parms.Add(("id_f", idVal)); }
 
         F("orden_de_compra", ORDEN_DE_COMPRA, "odc");
         F("folio", FOLIO, "fo");
@@ -340,11 +360,36 @@ public class OrdenesDeCompraService
         F("proveedor_elegido", PROVEEDOR_ELEGIDO, "pr");
         F("pieza_servicio", PIEZA_SERVICIO, "ps");
         F("moneda", MONEDA, "mo");
+        F("comentarios", COMENTARIOS, "co_f");
+        F("hoja_control", HOJA_CONTROL, "hc_f");
         F("requisicion", REQUISICION, "re");
-        F("oc", OC, "oc");
+        F("oc", OC, "oc_f");
         F("estatus_oc", ESTATUS_OC, "es");
 
+        if (!string.IsNullOrWhiteSpace(FECHA_OC))
+        { where.Add("fecha_oc::text ILIKE @foc_f"); parms.Add(("foc_f", $"%{FECHA_OC}%")); }
+        if (!string.IsNullOrWhiteSpace(FECHA_ENTRADA))
+        { where.Add("fecha_entrada::text ILIKE @fen_f"); parms.Add(("fen_f", $"%{FECHA_ENTRADA}%")); }
+
+        FNum("cantidad", CANTIDAD, "ca_f");
+        FNum("precio_unitario", PRECIO_UNITARIO, "pu_f");
+        FNum("total_sin_iva", TOTAL_SIN_IVA, "tot_f");
+        FNum("cantidad_registrada", CANTIDAD_REGISTRADA, "cr_f");
+
         string filtro = "WHERE " + string.Join(" AND ", where);
+
+        var colsPermitidas = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "id","orden_de_compra","fecha_oc","oc","folio","solicitante",
+            "presupuesto_mes","serie_ubicacion_no_empleado","accesorio_solicitado",
+            "proveedor_elegido","pieza_servicio","cantidad","precio_unitario",
+            "total_sin_iva","moneda","comentarios","hoja_control","requisicion",
+            "fecha_entrada","cantidad_registrada","estatus_oc"
+        };
+
+        string orderCol = (sort_col != null && colsPermitidas.Contains(sort_col))
+            ? sort_col.ToLowerInvariant() : "id";
+        string orderDir = (sort_dir?.ToLower() == "asc") ? "ASC" : "DESC";
 
         int total;
         using (var c = con.CreateCommand())
@@ -367,7 +412,7 @@ public class OrdenesDeCompraService
                        fecha_oc, oc, fecha_entrada, cantidad_registrada, estatus_oc, pdf
                 FROM ordenes_de_compra
                 {filtro}
-                ORDER BY id DESC
+                ORDER BY {orderCol} {orderDir}
                 OFFSET {offset} LIMIT {limit}
                 """;
             foreach (var (n, v) in parms) c.Parameters.AddWithValue(n, v);
@@ -401,6 +446,19 @@ public class OrdenesDeCompraService
     private static OrdenDeCompraRow MapRow(NpgsqlDataReader dr)
     {
         string? ruta = dr.IsDBNull(21) ? null : dr.GetString(21);
+
+        // estatus_oc puede ser texto ("COMPLETA") o boolean (true/false) en registros viejos
+        string? estatusRaw = null;
+        if (!dr.IsDBNull(20))
+        {
+            var v = dr.GetValue(20);
+            estatusRaw = v switch
+            {
+                bool b => b ? "COMPLETA" : "PENDIENTE",
+                _ => v.ToString()
+            };
+        }
+
         return new OrdenDeCompraRow
         {
             ID = dr.GetInt32(0),
@@ -423,7 +481,7 @@ public class OrdenesDeCompraService
             OC = dr.IsDBNull(17) ? null : dr.GetString(17),
             FECHA_ENTRADA = dr.IsDBNull(18) ? null : ((DateTime)dr.GetValue(18)).ToString("yyyy-MM-dd"),
             CANTIDAD_REGISTRADA = dr.IsDBNull(19) ? null : dr.GetDecimal(19),
-            ESTATUS_OC = dr.IsDBNull(20) ? null : dr.GetString(20),
+            ESTATUS_OC = estatusRaw,
             PDF_RUTA = ruta,
             TIENE_PDF = ruta != null
         };
@@ -447,7 +505,7 @@ public class OrdenesDeCompraService
         string? oc = !string.IsNullOrWhiteSpace(d.OC) ? d.OC : ocLookup;
 
         // Aplica la fórmula solo si hay oc + folio + hoja_control reconocida.
-        // Si faltan datos no sobreescribe: respeta lo que venga en el DTO o deja 0.
+        // Si faltan datos respeta el valor del DTO; si tampoco hay, deja 0.
         bool puedeCalcularCreate = !string.IsNullOrWhiteSpace(ordenDeCompra)
                                 && !string.IsNullOrWhiteSpace(d.FOLIO)
                                 && NormalizarHojaControl(hojaControl) != null;
@@ -494,7 +552,7 @@ public class OrdenesDeCompraService
         string? oc = !string.IsNullOrWhiteSpace(d.OC) ? d.OC : ocLookup;
 
         // Aplica la fórmula solo si hay oc + folio + hoja_control reconocida.
-        // Si faltan datos respeta el valor que ya tiene el registro en BD (anterior).
+        // Si faltan datos respeta el valor que ya tiene el registro en BD.
         bool puedeCalcularUpdate = !string.IsNullOrWhiteSpace(ordenDeCompra)
                                 && !string.IsNullOrWhiteSpace(d.FOLIO)
                                 && NormalizarHojaControl(hojaControl) != null;
@@ -616,7 +674,7 @@ public class OrdenesDeCompraService
             decimal? total = (r.cant.HasValue && r.pu.HasValue) ? r.cant.Value * r.pu.Value : null;
 
             // Solo recalcula si tiene los 3 datos que requiere la fórmula.
-            // Si no, deja cantidad_registrada y estatus_oc tal como están en BD.
+            // Si no, salta el registro y deja cantidad_registrada y estatus_oc intactos.
             bool puedeCalcular = !string.IsNullOrWhiteSpace(odc)
                               && !string.IsNullOrWhiteSpace(r.folio)
                               && NormalizarHojaControl(hoja) != null;
