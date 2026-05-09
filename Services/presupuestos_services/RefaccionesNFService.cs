@@ -227,7 +227,6 @@ public class RefaccionesNFService
         await using (var conn4 = await _pool.OpenAsync())
             await RegistrarHistorialAsync(conn4, id, usuario, anterior, nuevo!);
 
-        await conn.CloseAsync();
         _ordenesService.RecalcularPorCambioEnHija("Refacciones NF", dto.OC, dto.FOLIO_CORRECTIVO);
         return true;
     }
