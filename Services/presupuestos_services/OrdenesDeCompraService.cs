@@ -617,12 +617,12 @@ public class OrdenesDeCompraService
 
         // Aplica la fórmula solo si hay oc + folio + hoja_control reconocida.
         // Si faltan datos respeta el valor del DTO; si tampoco hay, deja 0.
-        bool puedeCalcularCreate = !string.IsNullOrWhiteSpace(ordenDeCompra)
+        bool puedeCalcularCreate = !string.IsNullOrWhiteSpace(oc)
                                 && !string.IsNullOrWhiteSpace(d.FOLIO)
                                 && NormalizarHojaControl(hojaControl) != null;
 
         decimal cantReg = puedeCalcularCreate
-            ? SumarCantidadRegistrada(ordenDeCompra, d.FOLIO, hojaControl)
+            ? SumarCantidadRegistrada(oc, d.FOLIO, hojaControl)
             : (d.CANTIDAD_REGISTRADA ?? 0);
 
         string estatus = CalcularEstatusOC(d.CANTIDAD, cantReg);
@@ -664,12 +664,12 @@ public class OrdenesDeCompraService
 
         // Aplica la fórmula solo si hay oc + folio + hoja_control reconocida.
         // Si faltan datos respeta el valor que ya tiene el registro en BD.
-        bool puedeCalcularUpdate = !string.IsNullOrWhiteSpace(ordenDeCompra)
+        bool puedeCalcularUpdate = !string.IsNullOrWhiteSpace(oc)
                                 && !string.IsNullOrWhiteSpace(d.FOLIO)
                                 && NormalizarHojaControl(hojaControl) != null;
 
         decimal cantReg = puedeCalcularUpdate
-            ? SumarCantidadRegistrada(ordenDeCompra, d.FOLIO, hojaControl)
+            ? SumarCantidadRegistrada(oc, d.FOLIO, hojaControl)
             : (anterior?.CANTIDAD_REGISTRADA ?? d.CANTIDAD_REGISTRADA ?? 0);
 
         string estatus = CalcularEstatusOC(d.CANTIDAD, cantReg);
@@ -790,13 +790,13 @@ public class OrdenesDeCompraService
 
             // Solo recalcula si tiene los 3 datos que requiere la fórmula.
             // Si no, salta el registro y deja cantidad_registrada y estatus_oc intactos.
-            bool puedeCalcular = !string.IsNullOrWhiteSpace(odc)
+            bool puedeCalcular = !string.IsNullOrWhiteSpace(oc)
                               && !string.IsNullOrWhiteSpace(r.folio)
                               && NormalizarHojaControl(hoja) != null;
 
             if (!puedeCalcular) continue;
 
-            decimal cantReg = SumarCantidadRegistrada(con, odc, r.folio, hoja);
+            decimal cantReg = SumarCantidadRegistrada(con, oc, r.folio, hoja);
             string estatus = CalcularEstatusOC(r.cant, cantReg);
 
             using var upd = con.CreateCommand();
