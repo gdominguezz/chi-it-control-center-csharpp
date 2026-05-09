@@ -1719,6 +1719,8 @@
         let paginaActual = 1;
         let editandoID = null;
         let usuarioActual = 'USUARIO';
+        let rolActual = '';
+        let esAdmin = false;
 
         const CAMPOS = [
             { key: 'oc', label: 'OC' },
@@ -1766,8 +1768,12 @@
             document.getElementById('dropdownNombre').textContent = nombre;
             document.getElementById('dropdownRol').textContent = rolActual;
 
-            const rol = getCookie('rol') || 'USER';
-            document.getElementById('dropRol').textContent = rol;
+            rolActual = (getCookie('rol') || 'USER').trim().toUpperCase();
+
+            esAdmin = rolActual === 'ADMIN';
+
+            document.getElementById('dropdownRol').textContent = rolActual;
+            document.getElementById('dropRol').textContent = rolActual;
 
         }
         function getCookie(nombre) {
@@ -1924,13 +1930,13 @@
                         <td>${esc(r.destino_planta) || '—'}</td>
                         <td>${esc(r.asignado_a) || '—'}</td>
                         <td>${esc(r.personal_it_que_asigna) || '—'}</td>
-                            <td style="white-space:nowrap">
-                                <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
-                                ${esAdmin ? `
-                                <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
-                                ` : ''}
-                                <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
-                            </td>
+                        <td style="white-space:nowrap">
+                            <button class="btn btn-amber btn-sm" onclick="abrirEditar(${r.id})">✏️</button>
+                            ${esAdmin ? `
+                            <button class="btn btn-danger btn-sm" onclick="eliminar(${r.id})">🗑</button>
+                            ` : ''}
+                            <button class="btn btn-cyan btn-sm" onclick="verHistorial(${r.id})" title="Ver historial">📋</button>
+                        </td>
                     </tr>`;
             }).join('');
         }
