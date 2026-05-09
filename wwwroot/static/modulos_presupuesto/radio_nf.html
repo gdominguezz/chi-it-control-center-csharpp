@@ -1513,8 +1513,8 @@
                         <td>${esc(row.DESTINO_PLANTA) || '—'}</td>
                         <td>${esc(row.PERSONAL_IT_ASIGNA) || '—'}</td>
                         <td style="white-space:nowrap">
-                            ${esAdmin ? `
                             <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                            ${esAdmin ? `
                             <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
                             ` : ''}
                             <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
