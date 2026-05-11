@@ -1251,27 +1251,27 @@
         let usuarioActual = 'SISTEMA', rolActual = 'USER';
 
         const CAMPOS = [
-            { key: 'ID_REGISTRO',    label: 'ID Registro' },
-            { key: 'ID_OC',          label: 'ID OC' },
-            { key: 'SERIE',          label: 'Serie' },
-            { key: 'FOLIO',          label: 'Folio' },
-            { key: 'OC',             label: 'OC' },
-            { key: 'FECHA_INGRESO',  label: 'Fecha Ingreso' },
-            { key: 'PROVEEDOR',      label: 'Proveedor' },
-            { key: 'RECIBIDO_POR',   label: 'Recibido Por' },
-            { key: 'CATEGORIA',      label: 'Categoría' },
-            { key: 'SUBCATEGORIA',   label: 'Subcategoría' },
-            { key: 'TIPO',           label: 'Tipo' },
-            { key: 'MARCA',          label: 'Marca' },
-            { key: 'MODELO',         label: 'Modelo' },
-            { key: 'UBICACION',      label: 'Ubicación' },
-            { key: 'COMENTARIOS',    label: 'Comentarios' },
-            { key: 'PRECIO_UNITARIO',label: 'Precio Unitario' },
-            { key: 'MONEDA',         label: 'Moneda' },
+            { key: 'ID_REGISTRO', label: 'ID Registro' },
+            { key: 'ID_OC', label: 'ID OC' },
+            { key: 'SERIE', label: 'Serie' },
+            { key: 'FOLIO', label: 'Folio' },
+            { key: 'OC', label: 'OC' },
+            { key: 'FECHA_INGRESO', label: 'Fecha Ingreso' },
+            { key: 'PROVEEDOR', label: 'Proveedor' },
+            { key: 'RECIBIDO_POR', label: 'Recibido Por' },
+            { key: 'CATEGORIA', label: 'Categoría' },
+            { key: 'SUBCATEGORIA', label: 'Subcategoría' },
+            { key: 'TIPO', label: 'Tipo' },
+            { key: 'MARCA', label: 'Marca' },
+            { key: 'MODELO', label: 'Modelo' },
+            { key: 'UBICACION', label: 'Ubicación' },
+            { key: 'COMENTARIOS', label: 'Comentarios' },
+            { key: 'PRECIO_UNITARIO', label: 'Precio Unitario' },
+            { key: 'MONEDA', label: 'Moneda' },
             { key: 'STATUS_ENTRADA', label: 'Status Entrada' },
-            { key: 'FECHA_SALIDA',   label: 'Fecha Salida' },
-            { key: 'DESTINO',        label: 'Destino' },
-            { key: 'RESPONSABLE',    label: 'Responsable' },
+            { key: 'FECHA_SALIDA', label: 'Fecha Salida' },
+            { key: 'DESTINO', label: 'Destino' },
+            { key: 'RESPONSABLE', label: 'Responsable' },
         ];
 
         // ── Init ───────────────────────────────────────────────────────────
@@ -1307,7 +1307,7 @@
         }
 
         async function cerrarSesion() {
-            try { await fetch('/LOGOUT', { method: 'POST', credentials: 'include' }); } catch {}
+            try { await fetch('/LOGOUT', { method: 'POST', credentials: 'include' }); } catch { }
             sessionStorage.clear();
             window.location.href = '/static/login.html';
         }
@@ -1319,54 +1319,90 @@
         });
 
         // ── Parámetros filtro ──────────────────────────────────────────────
+        function getVal(id) {
+            const el = document.getElementById(id);
+            if (!el) { console.warn('[FILTRO] Elemento no encontrado:', id); return ''; }
+            return el.value || '';
+        }
+
         function obtenerParametros() {
-            return new URLSearchParams({
-                page: paginaActual, limit: limite,
-                ID_REGISTRO:    document.getElementById('f_ID_REGISTRO').value,
-                ID_OC:          document.getElementById('f_ID_OC').value,
-                SERIE:          document.getElementById('f_SERIE').value,
-                FOLIO:          document.getElementById('f_FOLIO').value,
-                OC:             document.getElementById('f_OC').value,
-                FECHA_INGRESO:  document.getElementById('f_FECHA_INGRESO').value,
-                PROVEEDOR:      document.getElementById('f_PROVEEDOR').value,
-                RECIBIDO_POR:   document.getElementById('f_RECIBIDO_POR').value,
-                CATEGORIA:      document.getElementById('f_CATEGORIA').value,
-                SUBCATEGORIA:   document.getElementById('f_SUBCATEGORIA').value,
-                TIPO:           document.getElementById('f_TIPO').value,
-                MARCA:          document.getElementById('f_MARCA').value,
-                MODELO:         document.getElementById('f_MODELO').value,
-                UBICACION:      document.getElementById('f_UBICACION').value,
-                MONEDA:         document.getElementById('f_MONEDA').value,
-                STATUS_ENTRADA: document.getElementById('f_STATUS_ENTRADA').value,
-            });
+            try {
+                return new URLSearchParams({
+                    page: paginaActual, limit: limite,
+                    ID_REGISTRO: getVal('f_ID_REGISTRO'),
+                    ID_OC: getVal('f_ID_OC'),
+                    SERIE: getVal('f_SERIE'),
+                    FOLIO: getVal('f_FOLIO'),
+                    OC: getVal('f_OC'),
+                    FECHA_INGRESO: getVal('f_FECHA_INGRESO'),
+                    PROVEEDOR: getVal('f_PROVEEDOR'),
+                    RECIBIDO_POR: getVal('f_RECIBIDO_POR'),
+                    CATEGORIA: getVal('f_CATEGORIA'),
+                    SUBCATEGORIA: getVal('f_SUBCATEGORIA'),
+                    TIPO: getVal('f_TIPO'),
+                    MARCA: getVal('f_MARCA'),
+                    MODELO: getVal('f_MODELO'),
+                    UBICACION: getVal('f_UBICACION'),
+                    MONEDA: getVal('f_MONEDA'),
+                    STATUS_ENTRADA: getVal('f_STATUS_ENTRADA'),
+                });
+            } catch (e) {
+                console.error('[obtenerParametros] Error construyendo parámetros:', e);
+                return new URLSearchParams({ page: paginaActual, limit: limite });
+            }
         }
 
         // ── Cargar ─────────────────────────────────────────────────────────
-        function cargar() {
-            fetch(`/REGISTRO_ENTRADAS_TEMPORAL?${obtenerParametros()}`)
-                .then(r => r.json())
-                .then(resp => {
-                    totalRegistros = resp.total;
-                    datosActuales = resp.data;
-                    renderizar();
-                })
-                .catch(() => {
-                    document.getElementById('tabla').innerHTML =
-                        `<tr><td colspan="24" style="text-align:center;padding:30px;color:var(--muted)">⚠️ Error al cargar datos</td></tr>`;
-                });
+        async function cargar() {
+            const url = `/REGISTRO_ENTRADAS_TEMPORAL?${obtenerParametros()}`;
+            console.log('[cargar] GET', url);
+            try {
+                const r = await fetch(url);
+                console.log('[cargar] HTTP status:', r.status);
+
+                const texto = await r.text();
+                console.log('[cargar] Respuesta raw (primeros 300 chars):', texto.slice(0, 300));
+
+                if (!r.ok) {
+                    throw new Error(`HTTP ${r.status}: ${texto.slice(0, 200)}`);
+                }
+
+                let resp;
+                try {
+                    resp = JSON.parse(texto);
+                } catch (jsonErr) {
+                    throw new Error('Respuesta no es JSON válido: ' + texto.slice(0, 200));
+                }
+
+                if (!resp || !Array.isArray(resp.data)) {
+                    throw new Error('Estructura inesperada: ' + JSON.stringify(resp).slice(0, 200));
+                }
+
+                totalRegistros = resp.total;
+                datosActuales = resp.data;
+                renderizar();
+
+            } catch (e) {
+                console.error('[cargar] ERROR DETALLADO:', e);
+                document.getElementById('tabla').innerHTML =
+                    `<tr><td colspan="24" style="text-align:center;padding:30px;color:var(--red)">
+                            ⚠️ Error al cargar datos<br>
+                            <span style="font-size:11px;color:var(--muted);font-family:monospace">${e.message}</span>
+                        </td></tr>`;
+            }
         }
 
         function filtrar() { paginaActual = 1; cargar(); }
         function siguiente() { if (paginaActual * limite < totalRegistros) { paginaActual++; cargar(); } }
-        function anterior()  { if (paginaActual > 1) { paginaActual--; cargar(); } }
+        function anterior() { if (paginaActual > 1) { paginaActual--; cargar(); } }
 
         // ── Render ─────────────────────────────────────────────────────────
         function statusPill(s) {
             if (!s) return '';
             const v = s.toUpperCase();
-            if (v === 'REGISTRADO')    return `<span class="pill pill-green">${s}</span>`;
+            if (v === 'REGISTRADO') return `<span class="pill pill-green">${s}</span>`;
             if (v === 'NO REGISTRADO') return `<span class="pill pill-red">${s}</span>`;
-            if (v === 'PENDIENTE')     return `<span class="pill pill-amber">${s}</span>`;
+            if (v === 'PENDIENTE') return `<span class="pill pill-amber">${s}</span>`;
             return `<span class="pill pill-gray">${s}</span>`;
         }
 
@@ -1380,48 +1416,48 @@
                 return;
             }
 
-            const puedeEditar  = rolActual === 'ADMIN' || rolActual === 'ENCARGADO_CORRECTIVOS';
+            const puedeEditar = rolActual === 'ADMIN' || rolActual === 'ENCARGADO_CORRECTIVOS';
             const puedeEliminar = rolActual === 'ADMIN';
 
             datosActuales.forEach(row => {
                 tbody.innerHTML += `
-                <tr>
-                    <td class="mono">${row.ID}</td>
-                    <td class="mono">${row.ID_REGISTRO ?? ''}</td>
-                    <td class="mono">${row.ID_OC ?? ''}</td>
-                    <td class="mono">${row.SERIE ?? ''}</td>
-                    <td>${row.FOLIO ?? ''}</td>
-                    <td class="mono">${row.OC ?? ''}</td>
-                    <td class="mono">${row.FECHA_INGRESO ?? ''}</td>
-                    <td>${row.PROVEEDOR ?? ''}</td>
-                    <td>${row.RECIBIDO_POR ?? ''}</td>
-                    <td>${row.CATEGORIA ?? ''}</td>
-                    <td>${row.SUBCATEGORIA ?? ''}</td>
-                    <td>${row.TIPO ?? ''}</td>
-                    <td>${row.MARCA ?? ''}</td>
-                    <td>${row.MODELO ?? ''}</td>
-                    <td>${row.UBICACION ?? ''}</td>
-                    <td class="wrap">${row.COMENTARIOS ?? ''}</td>
-                    <td class="mono">${row.PRECIO_UNITARIO ?? ''}</td>
-                    <td>${row.MONEDA ?? ''}</td>
-                    <td>${statusPill(row.STATUS_ENTRADA)}</td>
-                    <td class="mono">${row.FECHA_SALIDA ?? ''}</td>
-                    <td>${row.DESTINO ?? ''}</td>
-                    <td>${row.RESPONSABLE ?? ''}</td>
-                    <td>
-                        ${row.TIENE_PDF
-                            ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
-                               <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
-                            : `<label class="file-label">📎 Subir PDF<input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)"></label>`}
-                    </td>
-                        <td style="white-space:nowrap">
-                            <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
-                            ${esAdmin ? `
-                            <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
-                            ` : ''}
-                            <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
+                    <tr>
+                        <td class="mono">${row.ID}</td>
+                        <td class="mono">${row.ID_REGISTRO ?? ''}</td>
+                        <td class="mono">${row.ID_OC ?? ''}</td>
+                        <td class="mono">${row.SERIE ?? ''}</td>
+                        <td>${row.FOLIO ?? ''}</td>
+                        <td class="mono">${row.OC ?? ''}</td>
+                        <td class="mono">${row.FECHA_INGRESO ?? ''}</td>
+                        <td>${row.PROVEEDOR ?? ''}</td>
+                        <td>${row.RECIBIDO_POR ?? ''}</td>
+                        <td>${row.CATEGORIA ?? ''}</td>
+                        <td>${row.SUBCATEGORIA ?? ''}</td>
+                        <td>${row.TIPO ?? ''}</td>
+                        <td>${row.MARCA ?? ''}</td>
+                        <td>${row.MODELO ?? ''}</td>
+                        <td>${row.UBICACION ?? ''}</td>
+                        <td class="wrap">${row.COMENTARIOS ?? ''}</td>
+                        <td class="mono">${row.PRECIO_UNITARIO ?? ''}</td>
+                        <td>${row.MONEDA ?? ''}</td>
+                        <td>${statusPill(row.STATUS_ENTRADA)}</td>
+                        <td class="mono">${row.FECHA_SALIDA ?? ''}</td>
+                        <td>${row.DESTINO ?? ''}</td>
+                        <td>${row.RESPONSABLE ?? ''}</td>
+                        <td>
+                            ${row.TIENE_PDF
+                        ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.ID})">📄 Ver</button>
+                                   <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.ID})">✕</button>`
+                        : `<label class="file-label">📎 Subir PDF<input type="file" accept=".pdf" onchange="subirPDF(${row.ID},this)"></label>`}
                         </td>
-                </tr>`;
+                            <td style="white-space:nowrap">
+                                <button class="btn btn-amber btn-sm" onclick="abrirEditar(${row.ID})">✏️</button>
+                                ${esAdmin ? `
+                                <button class="btn btn-danger btn-sm" onclick="eliminar(${row.ID})">🗑</button>
+                                ` : ''}
+                                <button class="btn btn-cyan btn-sm" onclick="verHistorial(${row.ID})" title="Ver historial">📋</button>
+                            </td>
+                    </tr>`;
             });
 
             const totalPags = Math.ceil(totalRegistros / limite) || 1;
@@ -1446,8 +1482,8 @@
                 headers: { 'Content-Type': 'application/json', 'X-Usuario': usuarioActual },
                 body: JSON.stringify(data)
             }).then(r => r.json())
-              .then(() => { limpiarForm(); cargar(); })
-              .catch(e => alert('Error al guardar: ' + e.message));
+                .then(() => { limpiarForm(); cargar(); })
+                .catch(e => alert('Error al guardar: ' + e.message));
         }
 
         function limpiarForm() {
@@ -1484,7 +1520,7 @@
 
         // ── Exportar ───────────────────────────────────────────────────────
         function exportarFiltrado() { window.open(`/REGISTRO_ENTRADAS_TEMPORAL/EXPORTAR?${obtenerParametros()}`); }
-        function exportarTodo()     { window.open('/REGISTRO_ENTRADAS_TEMPORAL/EXPORTAR_TODO'); }
+        function exportarTodo() { window.open('/REGISTRO_ENTRADAS_TEMPORAL/EXPORTAR_TODO'); }
         function exportarPorAnio() {
             const a = document.getElementById('anioExportar').value;
             if (!a) { alert('Ingresa un año'); return; }
@@ -1541,23 +1577,23 @@
         // ── Historial ──────────────────────────────────────────────────────
         function esc(v) {
             if (v == null) return '';
-            return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
         function formatFecha(f) {
             try {
                 const d = new Date(f);
                 if (!isNaN(d)) return d.toLocaleString('es-MX', {
-                    year:'numeric', month:'2-digit', day:'2-digit',
-                    hour:'2-digit', minute:'2-digit', second:'2-digit'
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
                 });
-            } catch {}
+            } catch { }
             return f ?? '';
         }
 
         function renderEvento(ev) {
             let antes = ev.registro_anterior, despues = ev.registro_nuevo;
-            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch {}
-            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch {}
+            try { if (typeof antes === 'string') antes = JSON.parse(antes); } catch { }
+            try { if (typeof despues === 'string') despues = JSON.parse(despues); } catch { }
 
             const cambios = new Set();
             CAMPOS.forEach(({ key }) => {
@@ -1573,23 +1609,23 @@
                 const mA = (!vA || vA === null) ? '<span class="empty-val">vacío</span>' : esc(vA);
                 const mD = (!vD || vD === null) ? '<span class="empty-val">vacío</span>' : esc(vD);
                 filas += `<tr class="${cambiado ? 'row-changed' : ''}">
-                    <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
-                    <td>${mA}</td><td>${mD}</td></tr>`;
+                        <td><strong>${label}</strong>${cambiado ? '<span class="badge-cambio">cambio</span>' : ''}</td>
+                        <td>${mA}</td><td>${mD}</td></tr>`;
             });
 
             return `<div class="ev-wrap">
-                <div class="ev-header">
-                    <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
-                    <span>👤 <strong>${esc(ev.usuario)}</strong></span>
-                    <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
-                        ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
-                    </span>
-                </div>
-                <table class="ev-table">
-                    <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
-                    <tbody>${filas}</tbody>
-                </table>
-            </div>`;
+                    <div class="ev-header">
+                        <span>🕒 <strong>${formatFecha(ev.fecha)}</strong></span>
+                        <span>👤 <strong>${esc(ev.usuario)}</strong></span>
+                        <span style="margin-left:auto;background:var(--amber);color:#111;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">
+                            ${cambios.size} campo${cambios.size !== 1 ? 's' : ''} modificado${cambios.size !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                    <table class="ev-table">
+                        <thead><tr><th>Campo</th><th style="color:#FCA5A5">⬅ Antes</th><th style="color:#6EE7B7">➡ Después</th></tr></thead>
+                        <tbody>${filas}</tbody>
+                    </table>
+                </div>`;
         }
 
         function verHistorial(id) {
@@ -1609,8 +1645,8 @@
                     } else {
                         document.getElementById('contenidoHistorial').innerHTML =
                             `<p style="color:var(--muted);font-size:12px;margin-bottom:14px">
-                                ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
-                            </p>` + lista.map(renderEvento).join('');
+                                    ${lista.length} edición${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}
+                                </p>` + lista.map(renderEvento).join('');
                     }
                 })
                 .catch(() => {
@@ -1627,8 +1663,8 @@
 
         // ── Sincronizar scrollbar superior ─────────────────────────────────
         (function () {
-            const top    = document.getElementById('scrollTop');
-            const inner  = document.getElementById('scrollTopInner');
+            const top = document.getElementById('scrollTop');
+            const inner = document.getElementById('scrollTopInner');
             const scroll = document.getElementById('tableScroll');
 
             function syncWidth() { inner.style.width = scroll.scrollWidth + 'px'; }
@@ -1637,7 +1673,7 @@
             window.addEventListener('resize', syncWidth);
             syncWidth();
 
-            top.addEventListener('scroll',    () => { scroll.scrollLeft = top.scrollLeft; });
+            top.addEventListener('scroll', () => { scroll.scrollLeft = top.scrollLeft; });
             scroll.addEventListener('scroll', () => { top.scrollLeft = scroll.scrollLeft; });
         })();
     </script>
