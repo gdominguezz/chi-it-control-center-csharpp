@@ -1771,6 +1771,8 @@ function elegirLineaExistente()
     toast('📍 Selecciona la ubicación destino en el campo de nueva ubicación', true);
 }
 
+");
+sb.AppendLine(@"
 // ── Código de colores al confirmar nueva ubicación ───────────────────────────
 function calcularColorUbicacion(nombreUbicacion, esSoloEnUbicacion)
 {
