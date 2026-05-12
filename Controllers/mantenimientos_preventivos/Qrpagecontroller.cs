@@ -2278,3 +2278,4 @@ public class RegistrarBajaRequest
     /// <summary>Usuario que realiza la baja</summary>
     public string? Usuario { get; set; }
 }
+//xx
