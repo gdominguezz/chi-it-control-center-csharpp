@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════════════════════
 // MIGRACIÓN SQL REQUERIDA — ejecutar una sola vez en la base de datos:
 //
 //   ALTER TABLE public.mantenimientos_preventivos
