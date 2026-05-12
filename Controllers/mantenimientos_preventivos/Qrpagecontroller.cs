@@ -836,41 +836,7 @@ public class QrPageController : ControllerBase
         sb.AppendLine("    </div>");
         sb.AppendLine("  </div>");
         sb.AppendLine("</div>");
-        sb.AppendLine("<!-- Modal: Stock Soporte Site -->");
-        sb.AppendLine("<div class=\"modal\" id=\"modalStock\">");
-        sb.AppendLine("  <div class=\"modal-box\" style=\"width:min(400px,95vw);\">");
-        sb.AppendLine("    <h3>🗄️ Mover a Soporte Site (stock)</h3>");
-        sb.AppendLine("    <p>Selecciona el rack y el espacio donde se colocará el equipo</p>");
-        sb.AppendLine("    <div class=\"modal-field\">");
-        sb.AppendLine("      <label>Rack</label>");
-        sb.AppendLine("      <select id=\"stock-rack\">");
-        sb.AppendLine("        <option value=\"A\">A (Planta 1)</option>");
-        sb.AppendLine("        <option value=\"T\">T (Planta 1)</option>");
-        sb.AppendLine("        <option value=\"C\">C (Planta 1)</option>");
-        sb.AppendLine("        <option value=\"D\">D (Planta 1)</option>");
-        sb.AppendLine("        <option value=\"E\">E (Planta 2)</option>");
-        sb.AppendLine("        <option value=\"F\">F (Planta satelite)</option>");
-        sb.AppendLine("        <option value=\"G\">G (Planta mixing)</option>");
-        sb.AppendLine("      </select>");
-        sb.AppendLine("    </div>");
-        sb.AppendLine("    <div class=\"modal-field\">");
-        sb.AppendLine("      <label>Espacio</label>");
-        sb.AppendLine("      <select id=\"stock-espacio\">");
-        sb.AppendLine("        <option value=\"1\">1</option>");
-        sb.AppendLine("        <option value=\"2\">2</option>");
-        sb.AppendLine("        <option value=\"3\">3</option>");
-        sb.AppendLine("        <option value=\"4\">4</option>");
-        sb.AppendLine("        <option value=\"5\">5</option>");
-        sb.AppendLine("        <option value=\"6\">6</option>");
-        sb.AppendLine("      </select>");
-        sb.AppendLine("    </div>");
-        sb.AppendLine("    <div id=\"stock-error\" style=\"color:#fca5a5;font-size:12px;margin-bottom:10px;display:none;\"></div>");
-        sb.AppendLine("    <div class=\"modal-footer\">");
-        sb.AppendLine("      <button class=\"btn btn-ghost\" onclick=\"cerrarStockModal()\">Cancelar</button>");
-        sb.AppendLine("      <button class=\"btn btn-primary\" id=\"btnStockGuardar\" onclick=\"guardarStock()\">💾 Guardar</button>");
-        sb.AppendLine("    </div>");
-        sb.AppendLine("  </div>");
-        sb.AppendLine("</div>");
+        sb.AppendLine("<!-- modalStock, modalStockSi, modalSiteStockPregunta, modalUbicarOtraLinea se añaden al final del HtmlPage -->");
         sb.AppendLine("</div>");
         sb.AppendLine("<script>");
         sb.AppendLine("let usuarioActual=null,nombreActual=null,usuarioTarjeta={};");
@@ -1253,6 +1219,7 @@ function descargarFormatoPM(){
 
         // ── Recalendarización JS ──
         sb.AppendLine("let recalIdDispositivo=null,recalIdOcupante=null,recalIdEquipo=null,recalUbicacion=null,recalPlanta=null;");
+        // Note: confirmarRecal is defined in the Stock section below, replacing the old version.
         sb.AppendLine("let todasUbicaciones=[];");
         sb.AppendLine("async function cargarUbicacionesRecal(){");
         sb.AppendLine("  try{const r=await fetch('/PREVENTIVO/UBICACIONES_TODAS');const d=await r.json();todasUbicaciones=d.ubicaciones||[];");
@@ -1278,32 +1245,7 @@ function descargarFormatoPM(){
         sb.AppendLine("  setTimeout(()=>document.getElementById('recal-nueva-ub').focus(),100);");
         sb.AppendLine("}");
         sb.AppendLine("function cerrarRecal(){document.getElementById('modalRecal').classList.remove('show');}");
-        sb.AppendLine("async function confirmarRecal(){");
-        sb.AppendLine("  const errEl=document.getElementById('recal-error');");
-        sb.AppendLine("  errEl.style.display='none';");
-        sb.AppendLine("  const nuevaUb=document.getElementById('recal-nueva-ub').value.trim();");
-        sb.AppendLine("  if(!nuevaUb){errEl.textContent='Ingresa la nueva ubicación';errEl.style.display='block';return;}");
-        sb.AppendLine("  const recalObs=document.getElementById('recal-observaciones').value.trim();");
-        sb.AppendLine("  if(!recalObs){errEl.textContent='Las observaciones de recalendarización son obligatorias';errEl.style.display='block';document.getElementById('recal-observaciones').focus();return;}");
-        sb.AppendLine("  const ubOcupante=document.getElementById('recal-ub-ocupante').value.trim();");
-        sb.AppendLine("  const paso2=document.getElementById('recal-paso2').style.display!=='none';");
-        sb.AppendLine("  if(paso2&&!ubOcupante){errEl.textContent='Ingresa dónde mover el dispositivo existente';errEl.style.display='block';return;}");
-        sb.AppendLine("  const btn=document.getElementById('btnRecalConfirmar');");
-        sb.AppendLine("  btn.disabled=true;btn.textContent='Guardando...';");
-        sb.AppendLine("  try{");
-        sb.AppendLine("    const body={idDispositivo:recalIdDispositivo,nuevaUbicacion:nuevaUb,usuario:usuarioActual,observacionesRecal:recalObs};");
-        sb.AppendLine("    if(paso2)body.ubicacionOcupante=ubOcupante;");
-        sb.AppendLine("    const res=await fetch('/PREVENTIVO/RECALENDARIZAR',{method:'POST',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(body)});");
-        sb.AppendLine("    const data=await res.json();");
-        sb.AppendLine("    if(data.ok){toast('Recalendarización completada ✅',true);cerrarRecal();}");
-        sb.AppendLine("    else if(data.ocupada){");
-        sb.AppendLine("      // Mostrar paso 2");
-        sb.AppendLine("      document.getElementById('recal-ocupante-info').textContent=(data.dispositivo_ocupante||'')+(data.equipo_ocupante?' ('+data.equipo_ocupante+')':'');");
-        sb.AppendLine("      document.getElementById('recal-paso2').style.display='block';");
-        sb.AppendLine("      btn.disabled=false;btn.textContent='Confirmar →';");
-        sb.AppendLine("    }else{errEl.textContent=data.error||'Error desconocido';errEl.style.display='block';btn.disabled=false;btn.textContent='Confirmar →';}");
-        sb.AppendLine("  }catch(e){errEl.textContent='Error de conexión';errEl.style.display='block';btn.disabled=false;btn.textContent='Confirmar →';}");
-        sb.AppendLine("}");
+        sb.AppendLine("// confirmarRecal is defined after the Stock section with color logic.");
         sb.AppendLine("// Animación de botones");
         sb.AppendLine("document.addEventListener('click',function(e){");
         sb.AppendLine("  const btn=e.target.closest('.btn');");
@@ -1651,44 +1593,51 @@ async function guardarCambioPlanta(){
 
         // ── Stock Soporte Site ───────────────────────────────────────────────
         sb.AppendLine(@"
+// ── PASO 1: ¿La línea seguirá existiendo? ────────────────────────────────────
 function abrirStockModal(){
-  document.getElementById('stock-error').style.display='none';
-  document.getElementById('stock-rack').value='A';
-  document.getElementById('stock-espacio').value='1';
-  document.getElementById('btnStockGuardar').disabled=false;
-  document.getElementById('btnStockGuardar').textContent='💾 Guardar';
-  document.getElementById('modalStock').classList.add('show');
+  // En lugar de abrir el modal de rack/espacio directamente,
+  // primero preguntamos si la línea donde estaba el equipo seguirá existiendo.
+  document.getElementById('modalSiteStockPregunta').classList.add('show');
 }
-function cerrarStockModal(){
-  document.getElementById('modalStock').classList.remove('show');
+function cerrarSiteStockPregunta(){
+  document.getElementById('modalSiteStockPregunta').classList.remove('show');
 }
-async function guardarStock(){
-  const errEl=document.getElementById('stock-error');
+
+// ── RAMA SÍ: la línea seguirá existiendo ────────────────────────────────────
+function lineaSiExistira(){
+  cerrarSiteStockPregunta();
+  // Limpiar campos del modal de reemplazo (rama Sí)
+  document.getElementById('stock-si-id-reemplazo').value='';
+  document.getElementById('stock-si-observaciones').value='';
+  document.getElementById('stock-si-error').style.display='none';
+  document.getElementById('stock-si-rack').value='A';
+  document.getElementById('stock-si-espacio').value='1';
+  document.getElementById('modalStockSi').classList.add('show');
+}
+function cerrarStockSi(){
+  document.getElementById('modalStockSi').classList.remove('show');
+}
+async function guardarStockSi(){
+  const errEl=document.getElementById('stock-si-error');
   errEl.style.display='none';
-
-  const rack=document.getElementById('stock-rack').value.trim();
-  const espacio=document.getElementById('stock-espacio').value.trim();
+  const idReemplazo=document.getElementById('stock-si-id-reemplazo').value.trim();
+  const obs=document.getElementById('stock-si-observaciones').value.trim();
+  const rack=document.getElementById('stock-si-rack').value.trim();
+  const espacio=document.getElementById('stock-si-espacio').value.trim();
+  if(!idReemplazo){errEl.textContent='El ID del dispositivo de reemplazo es obligatorio';errEl.style.display='block';return;}
+  if(!obs){errEl.textContent='Las observaciones son obligatorias';errEl.style.display='block';return;}
   const nuevaUbicacion='Soporte Site ('+rack+') '+espacio;
-
-  // 4.1 Pedir ID de dispositivo de reemplazo (obligatorio)
-  const idReemplazo=prompt('Ingresa el ID del dispositivo de reemplazo (id_dispositivo_reemplazo):');
-  if(!idReemplazo||!idReemplazo.trim()){
-    errEl.textContent='El ID de reemplazo es obligatorio';
-    errEl.style.display='block';
-    return;
-  }
-
-  const btn=document.getElementById('btnStockGuardar');
-  btn.disabled=true; btn.textContent='⏳ Guardando...';
-
+  const btn=document.getElementById('btnStockSiGuardar');
+  btn.disabled=true;btn.textContent='⏳ Guardando...';
   try{
     const body={
-      idDispositivo: recalIdDispositivo,
-      idReemplazo: idReemplazo.trim(),
-      rack,
-      espacio,
+      idDispositivo:recalIdDispositivo,
+      idReemplazo:idReemplazo,
+      rack,espacio,
       nuevaUbicacion,
-      usuario: usuarioActual
+      usuario:usuarioActual,
+      observaciones:obs,
+      lineaSigueSiendoExistente:true
     };
     const res=await fetch('/PREVENTIVO/STOCK',{
       method:'POST',
@@ -1697,36 +1646,257 @@ async function guardarStock(){
     });
     const data=await res.json();
     if(data.ok){
-      // 4.6 Actualizar frontend
+      // Actualizar tarjeta visualmente: color ROSA (en stock)
       const card=document.getElementById('equipo_'+recalIdDispositivo)?.closest('.card');
       if(card){
-        // Actualizar ubicación visible
-        const ubEl=card.querySelector('.card-ubicacion');
-        if(ubEl) ubEl.textContent=nuevaUbicacion;
-        // Cambiar color de la tarjeta a rosa
-        card.style.borderColor='rgba(244,114,182,.5)';
         const badge=card.querySelector('.color-badge');
-        if(badge){ badge.style.background='rgba(244,114,182,.15)'; badge.style.color='#f472b6'; badge.style.borderColor='rgba(244,114,182,.4)'; badge.textContent='Rosa'; }
+        if(badge){badge.style.background='rgba(244,114,182,.15)';badge.style.color='#f472b6';badge.style.borderColor='rgba(244,114,182,.4)';badge.textContent='Rosa';}
+        card.style.borderColor='rgba(244,114,182,.5)';
       }
-      // Rellenar campo nueva ubicación en modalRecal
-      document.getElementById('recal-nueva-ub').value=nuevaUbicacion;
-      cerrarStockModal();
-      toast('✅ Equipo movido a '+nuevaUbicacion+' | Reemplazo: '+idReemplazo.trim(), true);
+      cerrarStockSi();
+      cerrarRecal();
+      toast('✅ Equipo en stock: '+nuevaUbicacion+' | Reemplazo registrado: '+idReemplazo,true);
     }else{
       errEl.textContent=data.error||'Error desconocido';
       errEl.style.display='block';
-      btn.disabled=false; btn.textContent='💾 Guardar';
+      btn.disabled=false;btn.textContent='💾 Guardar';
     }
   }catch(e){
     errEl.textContent='Error de conexión';
     errEl.style.display='block';
-    btn.disabled=false; btn.textContent='💾 Guardar';
+    btn.disabled=false;btn.textContent='💾 Guardar';
   }
+}
+
+// ── RAMA NO: la línea NO seguirá existiendo ──────────────────────────────────
+function lineaNoExistira(){
+  cerrarSiteStockPregunta();
+  // Mostrar el modal de rack/espacio original + campo observaciones
+  document.getElementById('stock-error').style.display='none';
+  document.getElementById('stock-rack').value='A';
+  document.getElementById('stock-espacio').value='1';
+  document.getElementById('stock-obs-no').value='';
+  document.getElementById('btnStockGuardar').disabled=false;
+  document.getElementById('btnStockGuardar').textContent='💾 Guardar';
+  document.getElementById('modalStock').classList.add('show');
+}
+function cerrarStockModal(){
+  document.getElementById('modalStock').classList.remove('show');
+}
+
+// ── Función guardarStock: rama NO (llamada desde modalStock) ─────────────────
+async function guardarStock(){
+  const errEl=document.getElementById('stock-error');
+  errEl.style.display='none';
+  const rack=document.getElementById('stock-rack').value.trim();
+  const espacio=document.getElementById('stock-espacio').value.trim();
+  const nuevaUbicacion='Soporte Site ('+rack+') '+espacio;
+  const obs=document.getElementById('stock-obs-no').value.trim();
+  if(!obs){errEl.textContent='Las observaciones son obligatorias';errEl.style.display='block';return;}
+
+  // Para la rama NO: no hay ID de reemplazo en este paso,
+  // el sistema moverá el equipo al stock y luego pedirá "¿ubicar en otra línea?"
+  const btn=document.getElementById('btnStockGuardar');
+  btn.disabled=true; btn.textContent='⏳ Guardando...';
+
+  // Primero mover el equipo actual al stock (sin reemplazo en línea)
+  try{
+    const body={
+      idDispositivo:recalIdDispositivo,
+      idReemplazo:'',  // Sin reemplazo — la línea desaparece
+      rack,espacio,
+      nuevaUbicacion,
+      usuario:usuarioActual,
+      observaciones:obs,
+      lineaSigueSiendoExistente:false
+    };
+    const res=await fetch('/PREVENTIVO/STOCK',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Usuario':usuarioActual||''},
+      body:JSON.stringify(body)
+    });
+    const data=await res.json();
+    if(data.ok){
+      // Actualizar tarjeta: color ROSA
+      const card=document.getElementById('equipo_'+recalIdDispositivo)?.closest('.card');
+      if(card){
+        const badge=card.querySelector('.color-badge');
+        if(badge){badge.style.background='rgba(244,114,182,.15)';badge.style.color='#f472b6';badge.style.borderColor='rgba(244,114,182,.4)';badge.textContent='Rosa';}
+        card.style.borderColor='rgba(244,114,182,.5)';
+      }
+      // Rellenar campo nueva ubicación en modalRecal para contexto
+      document.getElementById('recal-nueva-ub').value=nuevaUbicacion;
+      cerrarStockModal();
+      // Mostrar modal "Ubicar en otra línea"
+      abrirUbicacionOtraLinea();
+    }else{
+      errEl.textContent=data.error||'Error desconocido';
+      errEl.style.display='block';
+      btn.disabled=false;btn.textContent='💾 Guardar';
+    }
+  }catch(e){
+    errEl.textContent='Error de conexión';
+    errEl.style.display='block';
+    btn.disabled=false;btn.textContent='💾 Guardar';
+  }
+}
+
+// ── Modal "Ubicar en otra línea" (rama NO seguirá existiendo) ────────────────
+function abrirUbicacionOtraLinea(){
+  document.getElementById('modalUbicarOtraLinea').classList.add('show');
+}
+function cerrarUbicacionOtraLinea(){
+  document.getElementById('modalUbicarOtraLinea').classList.remove('show');
+}
+function elegirLineaNueva(){
+  cerrarUbicacionOtraLinea();
+  // Abrir modal de nuevo registro (igual que preventivos.html — redirigir a preventivos)
+  toast('📋 Redirigiendo a Nuevo Registro de Preventivo…',true);
+  setTimeout(()=>window.open('/static/preventivos.html','_blank'),1200);
+}
+function elegirLineaExistente(){
+  cerrarUbicacionOtraLinea();
+  // Abrir el modal de cambio de ubicación estándar, pre-llenado con la nueva ubicación del equipo
+  abrirCambioUbicacionRecal();
+  toast('📍 Selecciona la ubicación destino en el campo de nueva ubicación',true);
+}
+
+// ── Código de colores al confirmar nueva ubicación ───────────────────────────
+function calcularColorUbicacion(nombreUbicacion,esSoloEnUbicacion){
+  const ub=(nombreUbicacion||'').toUpperCase();
+  if(ub.includes('FUERA DE PRODUCCION')||ub.includes('FUERA DE PRODUCCIÓN'))return{color:'AZUL',label:'Azul',bg:'rgba(59,130,246,.15)',fg:'#93c5fd',border:'rgba(59,130,246,.4)'};
+  if(esSoloEnUbicacion)return{color:'AMARILLO',label:'Amarillo',bg:'rgba(245,158,11,.12)',fg:'#fcd34d',border:'rgba(245,158,11,.35)'};
+  if(ub.includes('SRK'))return{color:'VERDE',label:'Verde',bg:'rgba(16,185,129,.12)',fg:'#6ee7b7',border:'rgba(16,185,129,.4)'};
+  return{color:'GRIS',label:'Gris',bg:'rgba(148,163,184,.10)',fg:'#94A3B8',border:'rgba(148,163,184,.3)'};
+}
+function aplicarColorTarjeta(idDispositivo,colorInfo){
+  const card=document.getElementById('equipo_'+idDispositivo)?.closest('.card');
+  if(!card)return;
+  const badge=card.querySelector('.color-badge');
+  if(badge){badge.style.background=colorInfo.bg;badge.style.color=colorInfo.fg;badge.style.borderColor=colorInfo.border;badge.textContent=colorInfo.label;}
+  card.style.borderColor=colorInfo.border;
+  // Actualizar select color en la tarjeta si existe
+  const sel=document.getElementById('color_'+idDispositivo);
+  if(sel)sel.value=colorInfo.label;
+}
+
+// ── Override confirmarRecal: aplicar código de colores al confirmar ───────────
+const _confirmarRecalOrig=confirmarRecal;
+
+// ── Patch confirmarRecal para aplicar colores al completar cambio de ubicación ──
+async function confirmarRecal(){
+  const errEl=document.getElementById('recal-error');
+  errEl.style.display='none';
+  const nuevaUb=document.getElementById('recal-nueva-ub').value.trim();
+  if(!nuevaUb){errEl.textContent='Ingresa la nueva ubicación';errEl.style.display='block';return;}
+  const recalObs=document.getElementById('recal-observaciones').value.trim();
+  if(!recalObs){errEl.textContent='Las observaciones de recalendarización son obligatorias';errEl.style.display='block';document.getElementById('recal-observaciones').focus();return;}
+  const ubOcupante=document.getElementById('recal-ub-ocupante').value.trim();
+  const paso2=document.getElementById('recal-paso2').style.display!=='none';
+  if(paso2&&!ubOcupante){errEl.textContent='Ingresa dónde mover el dispositivo existente';errEl.style.display='block';return;}
+  const btn=document.getElementById('btnRecalConfirmar');
+  btn.disabled=true;btn.textContent='Guardando...';
+  try{
+    const body={idDispositivo:recalIdDispositivo,nuevaUbicacion:nuevaUb,usuario:usuarioActual,observacionesRecal:recalObs};
+    if(paso2)body.ubicacionOcupante=ubOcupante;
+    const res=await fetch('/PREVENTIVO/RECALENDARIZAR',{method:'POST',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(body)});
+    const data=await res.json();
+    if(data.ok){
+      // ── Aplicar código de colores según nueva ubicación ──
+      const esSolo=data.es_solo_en_ubicacion||false;
+      const colorInfo=calcularColorUbicacion(nuevaUb,esSolo);
+      aplicarColorTarjeta(recalIdDispositivo,colorInfo);
+      // Si había ocupante y se movió, aplicar colores al ocupante también
+      if(paso2&&recalIdOcupante){
+        const colorOcup=calcularColorUbicacion(ubOcupante,false);
+        aplicarColorTarjeta(recalIdOcupante,colorOcup);
+      }
+      toast('Recalendarización completada ✅',true);
+      cerrarRecal();
+    }else if(data.ocupada){
+      document.getElementById('recal-ocupante-info').textContent=(data.dispositivo_ocupante||'')+(data.equipo_ocupante?' ('+data.equipo_ocupante+')':'');
+      recalIdOcupante=data.id_ocupante||null;
+      document.getElementById('recal-paso2').style.display='block';
+      btn.disabled=false;btn.textContent='Confirmar →';
+    }else{errEl.textContent=data.error||'Error desconocido';errEl.style.display='block';btn.disabled=false;btn.textContent='Confirmar →';}
+  }catch(e){errEl.textContent='Error de conexión';errEl.style.display='block';btn.disabled=false;btn.textContent='Confirmar →';}
 }
 ");
 
         sb.AppendLine("</script>");
+
+        // ── Modal: ¿La línea seguirá existiendo? ───────────────────────────
+        sb.AppendLine("<div class=\"modal\" id=\"modalSiteStockPregunta\">");
+        sb.AppendLine("  <div class=\"modal-box\" style=\"width:min(440px,95vw);\">");
+        sb.AppendLine("    <h3>🗄️ Site Stock — Mover equipo</h3>");
+        sb.AppendLine("    <p style=\"margin-bottom:20px;\">El equipo se moverá al stock de Soporte Site. Primero dinos: <b>¿la línea donde estaba el equipo seguirá existiendo?</b></p>");
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;margin-bottom:8px;\">");
+        sb.AppendLine("      <button class=\"btn\" style=\"flex:1;padding:14px 10px;font-size:12px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);color:#6ee7b7;border-radius:10px;font-weight:700;\" onclick=\"lineaSiExistira()\">✅ Sí, seguirá existiendo<br><span style=\"font-size:10px;font-weight:400;color:var(--muted2);\">Se asignará un equipo de reemplazo</span></button>");
+        sb.AppendLine("      <button class=\"btn\" style=\"flex:1;padding:14px 10px;font-size:12px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#fca5a5;border-radius:10px;font-weight:700;\" onclick=\"lineaNoExistira()\">❌ No, se elimina la línea<br><span style=\"font-size:10px;font-weight:400;color:var(--muted2);\">Se ubicará el equipo en otra línea</span></button>");
+        sb.AppendLine("    </div>");
+        sb.AppendLine("    <div class=\"modal-footer\" style=\"margin-top:10px;\"><button class=\"btn btn-ghost\" onclick=\"cerrarSiteStockPregunta()\">Cancelar</button></div>");
+        sb.AppendLine("  </div>");
+        sb.AppendLine("</div>");
+
+        // ── Modal: Rama SÍ — ID reemplazo + obs + rack ─────────────────────
+        sb.AppendLine("<div class=\"modal\" id=\"modalStockSi\">");
+        sb.AppendLine("  <div class=\"modal-box\" style=\"width:min(460px,95vw);\">");
+        sb.AppendLine("    <h3>✅ Línea seguirá existiendo</h3>");
+        sb.AppendLine("    <p>Ingresa el ID del equipo de reemplazo que quedará en la línea y el rack/espacio donde se almacenará el equipo actual.</p>");
+        sb.AppendLine("    <div class=\"modal-field\"><label>🔄 ID Dispositivo de Reemplazo <span style=\"color:#ef4444;\">*</span></label>");
+        sb.AppendLine("      <input id=\"stock-si-id-reemplazo\" type=\"text\" placeholder=\"ID del equipo que sustituye en la línea\" style=\"width:100%;background:var(--surface2);border:1px solid rgba(16,185,129,.4);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);\"></div>");
+        sb.AppendLine("    <div class=\"modal-field\"><label>Rack</label>");
+        sb.AppendLine("    <div class=\"modal-field\"><label>Rack</label>");
+        sb.AppendLine("      <select id=\"stock-si-rack\" style=\"width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);\">");
+        sb.AppendLine("        <option value=\"A\">A (Planta 1)</option><option value=\"T\">T (Planta 1)</option><option value=\"C\">C (Planta 1)</option><option value=\"D\">D (Planta 1)</option><option value=\"E\">E (Planta 2)</option><option value=\"F\">F (Planta satelite)</option><option value=\"G\">G (Planta mixing)</option>");
+        sb.AppendLine("      </select></div>");
+        sb.AppendLine("    <div class=\"modal-field\"><label>Espacio</label>");
+        sb.AppendLine("      <select id=\"stock-si-espacio\" style=\"width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);\">");
+        sb.AppendLine("        <option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option><option value=\"5\">5</option><option value=\"6\">6</option>");
+        sb.AppendLine("      </select></div>");
+        sb.AppendLine("    <div class=\"modal-field\"><label>📝 Observaciones <span style=\"color:#ef4444;\">*</span></label>");
+        sb.AppendLine("      <textarea id=\"stock-si-observaciones\" placeholder=\"Motivo del movimiento al stock...\" style=\"width:100%;min-height:60px;resize:vertical;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:13px;color:var(--text);\"></textarea></div>");
+        sb.AppendLine("    <div id=\"stock-si-error\" style=\"color:#fca5a5;font-size:12px;margin-bottom:10px;display:none;\"></div>");
+        sb.AppendLine("    <div class=\"modal-footer\"><button class=\"btn btn-ghost\" onclick=\"cerrarStockSi()\">Cancelar</button><button class=\"btn btn-success\" id=\"btnStockSiGuardar\" onclick=\"guardarStockSi()\">💾 Guardar</button></div>");
+        sb.AppendLine("  </div>");
+        sb.AppendLine("</div>");
+
+        // ── Modal: Rack/Espacio + obs (Rama NO) ─────────────────────────────
+        sb.AppendLine("<div class=\"modal\" id=\"modalStock\">");
+        sb.AppendLine("  <div class=\"modal-box\" style=\"width:min(420px,95vw);\">");
+        sb.AppendLine("    <h3>🗄️ Mover a Soporte Site (stock)</h3>");
+        sb.AppendLine("    <p>La línea se eliminará. Selecciona el rack y espacio donde se almacenará el equipo.</p>");
+        sb.AppendLine("    <div class=\"modal-field\"><label>Rack</label>");
+        sb.AppendLine("      <select id=\"stock-rack\" style=\"width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);\">");
+        sb.AppendLine("        <option value=\"A\">A (Planta 1)</option><option value=\"T\">T (Planta 1)</option><option value=\"C\">C (Planta 1)</option><option value=\"D\">D (Planta 1)</option><option value=\"E\">E (Planta 2)</option><option value=\"F\">F (Planta satelite)</option><option value=\"G\">G (Planta mixing)</option>");
+        sb.AppendLine("      </select></div>");
+        sb.AppendLine("    <div class=\"modal-field\"><label>Espacio</label>");
+        sb.AppendLine("      <select id=\"stock-espacio\" style=\"width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);\">");
+        sb.AppendLine("        <option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option><option value=\"5\">5</option><option value=\"6\">6</option>");
+        sb.AppendLine("      </select></div>");
+        sb.AppendLine("    <div class=\"modal-field\"><label>📝 Observaciones <span style=\"color:#ef4444;\">*</span></label>");
+        sb.AppendLine("      <textarea id=\"stock-obs-no\" placeholder=\"Motivo del movimiento al stock...\" style=\"width:100%;min-height:60px;resize:vertical;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:13px;color:var(--text);\"></textarea></div>");
+        sb.AppendLine("    <div id=\"stock-error\" style=\"color:#fca5a5;font-size:12px;margin-bottom:10px;display:none;\"></div>");
+        sb.AppendLine("    <div class=\"modal-footer\"><button class=\"btn btn-ghost\" onclick=\"cerrarStockModal()\">Cancelar</button><button class=\"btn btn-primary\" id=\"btnStockGuardar\" onclick=\"guardarStock()\">💾 Guardar y continuar →</button></div>");
+        sb.AppendLine("  </div>");
+        sb.AppendLine("</div>");
+
+        // ── Modal: Ubicar en otra línea (post-stock rama NO) ────────────────
+        sb.AppendLine("<div class=\"modal\" id=\"modalUbicarOtraLinea\">");
+        sb.AppendLine("  <div class=\"modal-box\" style=\"width:min(460px,95vw);\">");
+        sb.AppendLine("    <h3>📍 Ubicar en otra línea</h3>");
+        sb.AppendLine("    <p style=\"margin-bottom:20px;\">El equipo ya está en stock. ¿Cómo reasignarlo?</p>");
+        sb.AppendLine("    <div style=\"display:flex;gap:12px;margin-bottom:8px;\">");
+        sb.AppendLine("      <button class=\"btn\" style=\"flex:1;padding:16px 10px;font-size:12px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.35);color:#67e8f9;border-radius:10px;font-weight:700;\" onclick=\"elegirLineaNueva()\">🆕 Línea / Persona nueva<br><span style=\"font-size:10px;font-weight:400;color:var(--muted2);\">Crear nuevo registro de preventivo</span></button>");
+        sb.AppendLine("      <button class=\"btn\" style=\"flex:1;padding:16px 10px;font-size:12px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.35);color:#93c5fd;border-radius:10px;font-weight:700;\" onclick=\"elegirLineaExistente()\">🔄 Línea / Persona existente<br><span style=\"font-size:10px;font-weight:400;color:var(--muted2);\">Mover a ubicación ya registrada</span></button>");
+        sb.AppendLine("    </div>");
+        sb.AppendLine("    <div class=\"modal-footer\" style=\"margin-top:10px;\"><button class=\"btn btn-ghost\" onclick=\"cerrarUbicacionOtraLinea();cerrarRecal();\">Cerrar</button></div>");
+        sb.AppendLine("  </div>");
+        sb.AppendLine("</div>");
+
         sb.AppendLine("</body></html>");
+
+        // ── Nuevos modales Site Stock ────────────────────────────────────────
         return sb.ToString();
     }
 
@@ -1745,8 +1915,9 @@ async function guardarStock(){
 
             if (data.IdDispositivo <= 0)
                 return Ok(new { ok = false, error = "ID de dispositivo requerido" });
-            if (string.IsNullOrWhiteSpace(data.IdReemplazo))
-                return Ok(new { ok = false, error = "ID de reemplazo es obligatorio" });
+            // Rama Sí: reemplazo obligatorio. Rama No: puede estar vacío.
+            if (data.LineaSigueSiendoExistente && string.IsNullOrWhiteSpace(data.IdReemplazo))
+                return Ok(new { ok = false, error = "ID de reemplazo es obligatorio cuando la línea seguirá existiendo" });
             if (string.IsNullOrWhiteSpace(data.Rack) || string.IsNullOrWhiteSpace(data.Espacio))
                 return Ok(new { ok = false, error = "Rack y espacio son requeridos" });
 
@@ -1783,35 +1954,41 @@ async function guardarStock(){
                 anioOrig = r.IsDBNull(9) ? (int?)null : Convert.ToInt32(r.GetValue(9));
             }
 
-            // 4.2 Crear nuevo registro (equipo de reemplazo) con toda la info del actual
-            using var ins = conn.CreateCommand();
-            ins.CommandText = """
-                INSERT INTO public.mantenimientos_preventivos
-                (id_equipo, ubicacion, plazo, realizado_por, fecha_realizacion,
-                 observaciones, nombre_dispositivo, planta, categoria_color, anio_creacion)
-                VALUES (@e, @u, @p, @rp, @fr, @o, @nd, @pl, @cc, @ac)
-                RETURNING id
-                """;
-            ins.Parameters.AddWithValue("e", (object?)data.IdReemplazo ?? DBNull.Value);
-            ins.Parameters.AddWithValue("u", (object?)ubicOrig ?? DBNull.Value);
-            ins.Parameters.AddWithValue("p", (object?)plazoOrig ?? DBNull.Value);
-            ins.Parameters.AddWithValue("rp", (object?)realPorOrig ?? DBNull.Value);
-            ins.Parameters.AddWithValue("fr", (object?)fechaOrig ?? DBNull.Value);
-            ins.Parameters.AddWithValue("o", (object?)obsOrig ?? DBNull.Value);
-            ins.Parameters.AddWithValue("nd", (object?)nomDispOrig ?? DBNull.Value);
-            ins.Parameters.AddWithValue("pl", (object?)plantaOrig ?? DBNull.Value);
-            ins.Parameters.AddWithValue("cc", (object?)colorOrig ?? DBNull.Value);
-            ins.Parameters.AddWithValue("ac", (object?)anioOrig ?? DBNull.Value);
-            var nuevoId = ins.ExecuteScalar();
+            // 4.2 Crear nuevo registro (equipo de reemplazo) SOLO en rama Sí
+            object? nuevoId = null;
+            if (data.LineaSigueSiendoExistente && !string.IsNullOrWhiteSpace(data.IdReemplazo))
+            {
+                using var ins = conn.CreateCommand();
+                ins.CommandText = """
+                    INSERT INTO public.mantenimientos_preventivos
+                    (id_equipo, ubicacion, plazo, realizado_por, fecha_realizacion,
+                     observaciones, nombre_dispositivo, planta, categoria_color, anio_creacion)
+                    VALUES (@e, @u, @p, @rp, @fr, @o, @nd, @pl, @cc, @ac)
+                    RETURNING id
+                    """;
+                ins.Parameters.AddWithValue("e", data.IdReemplazo.Trim());
+                ins.Parameters.AddWithValue("u", (object?)ubicOrig ?? DBNull.Value);
+                ins.Parameters.AddWithValue("p", (object?)plazoOrig ?? DBNull.Value);
+                ins.Parameters.AddWithValue("rp", (object?)realPorOrig ?? DBNull.Value);
+                ins.Parameters.AddWithValue("fr", (object?)fechaOrig ?? DBNull.Value);
+                ins.Parameters.AddWithValue("o", (object?)(data.Observaciones ?? obsOrig) ?? DBNull.Value);
+                ins.Parameters.AddWithValue("nd", (object?)nomDispOrig ?? DBNull.Value);
+                ins.Parameters.AddWithValue("pl", (object?)plantaOrig ?? DBNull.Value);
+                ins.Parameters.AddWithValue("cc", (object?)colorOrig ?? DBNull.Value);
+                ins.Parameters.AddWithValue("ac", (object?)anioOrig ?? DBNull.Value);
+                nuevoId = ins.ExecuteScalar();
+            }
 
             // 4.3 + 4.4 + 4.5 Actualizar dispositivo actual: nueva ubicacion y color ROSA
             using var upd = conn.CreateCommand();
             upd.CommandText = """
                 UPDATE public.mantenimientos_preventivos
-                SET ubicacion = @u, categoria_color = 'ROSA'
+                SET ubicacion = @u, categoria_color = 'ROSA',
+                    observaciones = COALESCE(@obs, observaciones)
                 WHERE id = @id
                 """;
             upd.Parameters.AddWithValue("u", nuevaUbicacion);
+            upd.Parameters.AddWithValue("obs", (object?)data.Observaciones ?? DBNull.Value);
             upd.Parameters.AddWithValue("id", data.IdDispositivo);
             upd.ExecuteNonQuery();
 
@@ -1820,7 +1997,10 @@ async function guardarStock(){
                 ok = true,
                 nueva_ubicacion = nuevaUbicacion,
                 id_nuevo_registro = nuevoId,
-                mensaje = $"Equipo movido a {nuevaUbicacion}. Reemplazo registrado con ID {data.IdReemplazo}."
+                linea_sigue = data.LineaSigueSiendoExistente,
+                mensaje = data.LineaSigueSiendoExistente
+                    ? $"Equipo en stock: {nuevaUbicacion}. Reemplazo: {data.IdReemplazo}."
+                    : $"Equipo en stock: {nuevaUbicacion}. Sin reemplazo — línea eliminada."
             });
         }
         catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
@@ -1868,6 +2048,9 @@ async function guardarStock(){
         public string Espacio { get; set; } = "";
         public string NuevaUbicacion { get; set; } = "";
         public string? Usuario { get; set; }
+        public string? Observaciones { get; set; }
+        /// <summary>true = rama Sí (línea sigue existiendo, hay reemplazo); false = rama No (línea desaparece)</summary>
+        public bool LineaSigueSiendoExistente { get; set; } = true;
     }
 
     private static DateTime LunesDeSemanaISO(int anio, int semana)
