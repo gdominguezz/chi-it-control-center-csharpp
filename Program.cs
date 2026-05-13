@@ -19,7 +19,8 @@ builder.Services.AddScoped<ExcelService>();                             // SERVI
 builder.Services.AddScoped<QrService>();                               // QRS
 builder.Services.AddScoped<BajasService>();                           // BAJAS
 builder.Services.AddScoped<SoftDeleteService>();                     // SOFT DELETE GENÉRICO
-
+builder.Services.AddScoped<QrService>();                            // QRS
+builder.Services.AddScoped<QrPageService>();                       // QR PAGE HTML SEPARADO
 ///////////////////////////////////////////////////////// PRESUPUESTO //////////////////////////////////////
 builder.Services.AddScoped<PresupuestosReqVsOcService>();            //SERVICIO DEL MODULO REQ VS OC
 builder.Services.AddScoped<RegistroEntradasTemporalService>();      // REGISTRO ENTRADAS TEMPORAL

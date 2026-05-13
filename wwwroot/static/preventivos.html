@@ -3749,7 +3749,7 @@
                     const barColor = pmPct >= 80 ? 'var(--green)' : pmPct >= 40 ? 'var(--amber)' : 'var(--red)';
                     const ubEnc = encodeURIComponent(u.ubicacion);
 
-                    html += `<div class="ub-card" onclick="window.open('/preventivos/qr/${ubEnc}','_blank')">
+                    html += `<div class="ub-card" onclick="window.open('/static/qr-preventivo.html?ubicacion=${ubEnc}','_blank')">
                                                       <div class="ub-card-top">
                                                         <div class="ub-card-icon">📍</div>
                                                         <div class="ub-card-info">

@@ -1,158 +1,136 @@
-﻿< !DOCTYPE html >
-< html lang = "es" >
-< head >
-< meta charset = "UTF-8" >
-< meta name = "viewport" content = "width=device-width,initial-scale=1" >
-< title > PM — Preventivos </ title >
-< link href = "https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel = "stylesheet" >
-< script src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" ></ script >
-< style >
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PM — Preventivos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
 :root{--bg:#0B0F1A;--surface:#111827;--surface2:#1a2235;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--accent:#3B82F6;--text:#F1F5F9;--muted:#64748B;--muted2:#94A3B8;--green:#10B981;--red:#EF4444;--amber:#F59E0B;--radius:14px;}
-*{ box - sizing:border - box; margin: 0; padding: 0; }
-body{font-family:'DM Sans',sans - serif; background: var(--bg); color: var(--text); min - height:100vh; padding - bottom:40px;}
-.top - bar{
-background: linear - gradient(135deg,#0f1e35,#0B0F1A);border-bottom:1px solid var(--border2);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
-.top - icon{
-    width: 42px; height: 42px; border - radius:10px; background: linear - gradient(135deg,#1D4ED8,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-.top - title{ flex: 1; }.top - title h1{ font - size:15px; font - weight:700; }.top - title p{ font - size:11px; color: var(--muted2); margin - top:2px; }
-.user - chip{
-        display: none; align - items:center; gap: 8px; padding: 7px 14px; border - radius:999px; background: rgba(16, 185, 129, .15); border: 1px solid rgba(16, 185, 129, .3); font - size:12px; font - weight:600; color:#6ee7b7;cursor:pointer;position:relative;user-select:none;}
-.chip - arrow{
-                font - size:9px; color:#6ee7b7;transition:transform .2s;}
-.user - chip.open.chip - arrow{ transform: rotate(180deg); }
-.user - dropdown{
-                display: none; position: absolute; top: calc(100 % +10px); right: 0; min - width:190px; background:#111827;border:1px solid rgba(255,255,255,.13);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.6);padding:8px;z-index:999;}
-.user - chip.open.user - dropdown{ display: block; }
-.drop - item{
-                    display: flex; align - items:center; gap: 10px; padding: 9px 12px; border - radius:8px; font - size:12px; font - weight:500; cursor: pointer; color:#94A3B8;background:none;border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;transition:background .15s,color .15s;}
-.drop - item:hover{
-                        background: rgba(255, 255, 255, .06); color:#F1F5F9;}
-.drop - item.danger{
-                            color:#FCA5A5;}
-.drop - item.danger:hover{
-                                background: rgba(239, 68, 68, .1); color:#fff;}
-.drop - sep{ height: 1px; background: rgba(255, 255, 255, .07); margin: 6px 0; }
-                                    @keyframes pop{ 0 %{ transform: scale(1)} 30 %{ transform: scale(.88)} 65 %{ transform: scale(1.08)} 100 %{ transform: scale(1)} }
-                                    @keyframes ripple{ 0 %{ transform: translate(-50 %, -50 %) scale(0); opacity: .5} 100 %{ transform: translate(-50 %, -50 %) scale(4); opacity: 0} }
-.btn{ display: inline - flex; align - items:center; gap: 6px; padding: 9px 16px; border: none; border - radius:8px; font - family:'DM Sans',sans - serif; font - size:13px; font - weight:600; cursor: pointer; transition: transform .15s,filter .15s; position: relative; overflow: hidden; }
-.btn.animating{ animation: pop .35s cubic-bezier(.36, .07, .19, .97) forwards; }
-.btn - ripple{ position: absolute; width: 40px; height: 40px; border - radius:50 %; background: rgba(255, 255, 255, .4); pointer - events:none; animation: ripple .5s ease forwards; }
-.btn: hover{ transform: translateY(-2px); filter: brightness(1.1); }
-.btn - primary{ background: var(--accent); color: white; }.btn - success{ background: var(--green); color: white; }
-.btn - ghost{ background: var(--surface2); color: var(--muted2); border: 1px solid var(--border2); }
-.btn - blue{
-                                    background:#3B82F6;color:white;}.btn-green{background:#10B981;color:white;}
-.btn - amber{
-                                        background: var(--amber); color:#1c1400;}.btn-danger{background:var(--red);color:white;}
-.btn - cyan{
-                                            background:#06B6D4;color:#001a1f;}.btn-purple{background:#8B5CF6;color:white;}
-.btn - recal{
-                                                background: linear - gradient(135deg,#0f766e,#14b8a6);color:white;}
-.btn - login{
-                                                    background: linear - gradient(135deg,#1D4ED8,#3B82F6);color:white;}
-.btn - print - all{
-                                                        background: linear - gradient(135deg,#065f46,#10B981);color:white;font-size:12px;padding:8px 14px;}
-.grid{ display: grid; grid - template - columns:repeat(auto - fill, minmax(320px, 1fr)); gap: 14px; padding: 16px 20px; }
-.card{ background: var(--surface); border: 1px solid var(--border); border - radius:var(--radius); overflow: hidden; transition: border - color .2s; }
-.card - top{ display: flex; align - items:center; gap: 12px; padding: 14px 16px; border - bottom:1px solid var(--border); background: var(--surface2); }
-.dev - icon{ width: 38px; height: 38px; border - radius:9px; background: rgba(59, 130, 246, .12); border: 1px solid rgba(59, 130, 246, .2); display: flex; align - items:center; justify - content:center; font - size:18px; flex - shrink:0; }
-.dev - name{ flex: 1; }.dev - name h3{ font - size:13px; font - weight:700; }.dev - name span{ font - size:11px; color: var(--muted2); }
-.color - badge{ padding: 4px 10px; border - radius:999px; font - size:10px; font - weight:700; text - transform:uppercase; }
-.card - body{ padding: 14px 16px; }
-.info - row{ display: grid; grid - template - columns:1fr 1fr 1fr; gap: 10px; margin - bottom:12px; }
-.info - item label{ font - size:9px; font - weight:600; text - transform:uppercase; letter - spacing:.1em; color: var(--muted); display: block; margin - bottom:4px; }
-.info - item input,.info - item select{ width: 100 %; background: var(--surface2); border: 1px solid var(--border2); border - radius:6px; padding: 7px 9px; font - size:12px; color: var(--text); opacity: .6; font - family:'DM Sans',sans - serif; }
-.info - item select{ cursor: pointer; appearance: none; padding - right:22px; background - image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2364748B' d='M5 7L0 2h10z'/%3E%3C/svg%3E"); background - repeat:no - repeat; background - position:right 7px center; }
-.info - item select option{
-                                                            background:#1a2235;color:#F1F5F9;}
-.card.editing.info - item select: not([disabled]){ border - color:rgba(245, 158, 11, .5); background: rgba(245, 158, 11, .06); opacity: 1; }
-.status - row{ display: flex; align - items:center; gap: 8px; padding: 9px 12px; background: rgba(255, 255, 255, .03); border: 1px solid var(--border); border - radius:8px; margin - bottom:12px; font - size:11px; color: var(--muted2); }
-.pm - btn{ font - size:12px!important; padding: 7px 13px!important; }
-.card - actions{ padding: 12px 16px; border - top:1px solid var(--border); background: rgba(0, 0, 0, .15); display: flex; flex - direction:column; gap: 10px; }
-.ca - edit - row{ display: flex; flex - wrap:wrap; gap: 6px; }
-.ca - edit - row.btn{ font - size:11px; padding: 7px 12px; }
-.pm - section{ display: flex; flex - direction:column; gap: 6px; border - top:1px solid var(--border); padding - top:10px; }
-.pm - row{ display: flex; align - items:center; gap: 6px; }
-.pm - row - label{ font - size:10px; font - weight:700; text - transform:uppercase; letter - spacing:.08em; color: var(--muted); min - width:60px; flex - shrink:0; }
-.pm - row.btn{ font - size:11px; padding: 7px 12px; flex - shrink:0; }
-.mini - form{ border - top:1px solid var(--border); padding - top:12px; margin - top:4px; }
-.form - sep{ font - size:10px; font - weight:700; text - transform:uppercase; letter - spacing:.1em; color: var(--accent); margin - bottom:8px; }
-.acts - list{ display: flex; flex - direction:column; gap: 3px; margin - bottom:4px; max - height:220px; overflow - y:auto; }
-.act - item{ display: flex; align - items:flex - start; gap: 8px; padding: 5px 8px; border - radius:6px; cursor: pointer; transition: background .15s; font - size:12px; color: var(--muted2); }
-.act - item input[type = checkbox]{ display: none; }
-.act - check{ width: 16px; height: 16px; border - radius:4px; border: 1.5px solid rgba(59, 130, 246, .3); background: var(--surface2); flex - shrink:0; margin - top:2px; display: flex; align - items:center; justify - content:center; font - size:10px; color: transparent; transition: all .15s; }
-.act - item input: checked ~ .act - check{ background: var(--accent); border - color:var(--accent); color: white; }
-.act - item input: checked ~ .act - check::after{ content: '\2713'; }
-.act - item input: checked ~ .act - text{ color: var(--text); }
-.date - input{ width: 100 %; background: var(--surface2); border: 1px solid var(--border2); border - radius:6px; padding: 8px 10px; font - size:12px; color: var(--text); color - scheme:dark; margin - bottom:8px; }
-.obs - label{ font - size:9px; font - weight:600; text - transform:uppercase; letter - spacing:.1em; color: var(--muted); margin - bottom:4px; }
-.obs - edit - field{ width: 100 %; background: var(--surface2); border: 1px solid var(--border2); border - radius:6px; padding: 8px 10px; font - size:12px; color: var(--text); resize: vertical; min - height:52px; }
-.card.editing{ border - color:rgba(245, 158, 11, .55); box - shadow:0 0 0 2px rgba(245,158,11,.18); }
-.card.editing.card - top{ background: rgba(245, 158, 11, .08); }
-.edit - mode - badge{ display: none; align - items:center; gap: 5px; padding: 3px 10px; border - radius:999px; background: rgba(245, 158, 11, .15); border: 1px solid rgba(245, 158, 11, .4); font - size:10px; font - weight:700; color: var(--amber); text - transform:uppercase; letter - spacing:.07em; }
-.card.editing.edit - mode - badge{ display: inline - flex; }
-.card.editing.info - item input: not([disabled]),.card.editing textarea:not([disabled]){ border - color:rgba(245, 158, 11, .5); background: rgba(245, 158, 11, .06); opacity: 1; }
-.form - actions{ display: flex; gap: 8px; justify - content:flex - end; }
-.modal{ display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, .7); backdrop - filter:blur(4px); justify - content:center; align - items:center; z - index:9999; }
-.modal.show{ display: flex; }
-.modal - box{ background: var(--surface); border: 1px solid var(--border2); border - radius:16px; padding: 28px; width: min(360px, 95vw); }
-.modal - box h3{ font - size:16px; font - weight:700; margin - bottom:6px; }.modal - box p{ font - size:12px; color: var(--muted2); margin - bottom:20px; }
-.modal - field{ margin - bottom:16px; }.modal - field label{ font - size:10px; font - weight:600; text - transform:uppercase; color: var(--muted); display: block; margin - bottom:5px; }
-.modal - field input,.modal - field select{ width: 100 %; background: var(--surface2); border: 1px solid var(--border2); border - radius:7px; padding: 10px 12px; font - size:14px; color: var(--text); }
-.modal - field - row{ display: flex; gap: 8px; align - items:flex - end; }
-.modal - field - row.modal - field{ flex: 1; margin - bottom:0; }
-.modal - footer{ display: flex; gap: 8px; justify - content:flex - end; }
-.toast{ position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border - radius:10px; font - size:13px; font - weight:600; z - index:99999; pointer - events:none; }
-.toast - ok{
-                                                                background:#052e16;border:1px solid #10B981;color:#6ee7b7;}
-.toast - err{
-                                                                    background:#1f0000;border:1px solid #EF4444;color:#fca5a5;}
-.periodos - estado{ display: flex; gap: 8px; margin: 8px 0; flex - wrap:wrap; }
-.periodo - badge{ padding: 4px 12px; border - radius:999px; font - size:11px; font - weight:600; font - family:'DM Mono',monospace; }
-.periodo - ok{
-                                                                        background: rgba(16, 185, 129, .12); border: 1px solid rgba(16, 185, 129, .4); color:#6ee7b7;}
-.periodo - pend{
-                                                                            background: rgba(245, 158, 11, .10); border: 1px solid rgba(245, 158, 11, .35); color:#fcd34d;}
-.qr - section{ border - top:1px solid var(--border); padding - top:10px; margin - top:4px; }
-.auto - tag{
-                                                                                    font - size:9px; font - weight:700; padding: 1px 6px; border - radius:4px; background: rgba(59, 130, 246, .18); color:#60a5fa;letter-spacing:.06em;vertical-align:middle;margin-left:4px;}
-.input - auto{ background: rgba(59, 130, 246, .06)!important; border - color:rgba(59, 130, 246, .3)!important; color: var(--muted2)!important; cursor: not - allowed!important; }
-.btn - baja{
-                                                                                    background: linear - gradient(135deg,#7c2d12,#ea580c);color:white;}
-.modal - baja - box{ background: var(--surface); border: 1px solid var(--border2); border - radius:16px; padding: 28px; width: min(560px, 95vw); max - height:90vh; overflow - y:auto; }
-.baja - grid{ display: grid; grid - template - columns:1fr 1fr; gap: 12px; margin - bottom:14px; }
-.baja - field{ display: flex; flex - direction:column; gap: 4px; }
-.baja - field label{ font - size:9px; font - weight:600; text - transform:uppercase; letter - spacing:.1em; color: var(--muted); }
-.baja - field input,.baja - field select,.baja - field textarea{ width: 100 %; background: var(--surface2); border: 1px solid var(--border2); border - radius:7px; padding: 8px 10px; font - size:13px; color: var(--text); font - family:'DM Sans',sans - serif; }
-.baja - field textarea{ min - height:60px; resize: vertical; }
-.baja - field.full{ grid - column:1 / -1; }
-.baja - field input.auto - fill{ background: rgba(59, 130, 246, .06); border - color:rgba(59, 130, 246, .3); color: var(--muted2); }
-# loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px;color:var(--muted2);font-size:14px;}
-# loading-spinner{width:40px;height:40px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
-                                                                                        @keyframes spin{ to{ transform: rotate(360deg)} }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:40px;}
+.top-bar{background:linear-gradient(135deg,#0f1e35,#0B0F1A);border-bottom:1px solid var(--border2);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+.top-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#1D4ED8,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.top-title{flex:1;}.top-title h1{font-size:15px;font-weight:700;}.top-title p{font-size:11px;color:var(--muted2);margin-top:2px;}
+.user-chip{display:none;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);font-size:12px;font-weight:600;color:#6ee7b7;cursor:pointer;position:relative;user-select:none;}
+.chip-arrow{font-size:9px;color:#6ee7b7;transition:transform .2s;}
+.user-chip.open .chip-arrow{transform:rotate(180deg);}
+.user-dropdown{display:none;position:absolute;top:calc(100% + 10px);right:0;min-width:190px;background:#111827;border:1px solid rgba(255,255,255,.13);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.6);padding:8px;z-index:999;}
+.user-chip.open .user-dropdown{display:block;}
+.drop-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;color:#94A3B8;background:none;border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;transition:background .15s,color .15s;}
+.drop-item:hover{background:rgba(255,255,255,.06);color:#F1F5F9;}
+.drop-item.danger{color:#FCA5A5;}
+.drop-item.danger:hover{background:rgba(239,68,68,.1);color:#fff;}
+.drop-sep{height:1px;background:rgba(255,255,255,.07);margin:6px 0;}
+@keyframes pop{0%{transform:scale(1)}30%{transform:scale(.88)}65%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes ripple{0%{transform:translate(-50%,-50%) scale(0);opacity:.5}100%{transform:translate(-50%,-50%) scale(4);opacity:0}}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:transform .15s,filter .15s;position:relative;overflow:hidden;}
+.btn.animating{animation:pop .35s cubic-bezier(.36,.07,.19,.97) forwards;}
+.btn-ripple{position:absolute;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.4);pointer-events:none;animation:ripple .5s ease forwards;}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1);}
+.btn-primary{background:var(--accent);color:white;}.btn-success{background:var(--green);color:white;}
+.btn-ghost{background:var(--surface2);color:var(--muted2);border:1px solid var(--border2);}
+.btn-blue{background:#3B82F6;color:white;}.btn-green{background:#10B981;color:white;}
+.btn-amber{background:var(--amber);color:#1c1400;}.btn-danger{background:var(--red);color:white;}
+.btn-cyan{background:#06B6D4;color:#001a1f;}.btn-purple{background:#8B5CF6;color:white;}
+.btn-recal{background:linear-gradient(135deg,#0f766e,#14b8a6);color:white;}
+.btn-login{background:linear-gradient(135deg,#1D4ED8,#3B82F6);color:white;}
+.btn-print-all{background:linear-gradient(135deg,#065f46,#10B981);color:white;font-size:12px;padding:8px 14px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;padding:16px 20px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s;}
+.card-top{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.dev-icon{width:38px;height:38px;border-radius:9px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.dev-name{flex:1;}.dev-name h3{font-size:13px;font-weight:700;}.dev-name span{font-size:11px;color:var(--muted2);}
+.color-badge{padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;}
+.card-body{padding:14px 16px;}
+.info-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;}
+.info-item label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:4px;}
+.info-item input,.info-item select{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:7px 9px;font-size:12px;color:var(--text);opacity:.6;font-family:'DM Sans',sans-serif;}
+.info-item select{cursor:pointer;appearance:none;padding-right:22px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2364748B' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;}
+.info-item select option{background:#1a2235;color:#F1F5F9;}
+.card.editing .info-item select:not([disabled]){border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.06);opacity:1;}
+.status-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;font-size:11px;color:var(--muted2);}
+.pm-btn{font-size:12px !important;padding:7px 13px !important;}
+.card-actions{padding:12px 16px;border-top:1px solid var(--border);background:rgba(0,0,0,.15);display:flex;flex-direction:column;gap:10px;}
+.ca-edit-row{display:flex;flex-wrap:wrap;gap:6px;}
+.ca-edit-row .btn{font-size:11px;padding:7px 12px;}
+.pm-section{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border);padding-top:10px;}
+.pm-row{display:flex;align-items:center;gap:6px;}
+.pm-row-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);min-width:60px;flex-shrink:0;}
+.pm-row .btn{font-size:11px;padding:7px 12px;flex-shrink:0;}
+.mini-form{border-top:1px solid var(--border);padding-top:12px;margin-top:4px;}
+.form-sep{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:8px;}
+.acts-list{display:flex;flex-direction:column;gap:3px;margin-bottom:4px;max-height:220px;overflow-y:auto;}
+.act-item{display:flex;align-items:flex-start;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;transition:background .15s;font-size:12px;color:var(--muted2);}
+.act-item input[type=checkbox]{display:none;}
+.act-check{width:16px;height:16px;border-radius:4px;border:1.5px solid rgba(59,130,246,.3);background:var(--surface2);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent;transition:all .15s;}
+.act-item input:checked ~ .act-check{background:var(--accent);border-color:var(--accent);color:white;}
+.act-item input:checked ~ .act-check::after{content:'\2713';}
+.act-item input:checked ~ .act-text{color:var(--text);}
+.date-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--text);color-scheme:dark;margin-bottom:8px;}
+.obs-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px;}
+.obs-edit-field{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--text);resize:vertical;min-height:52px;}
+.card.editing{border-color:rgba(245,158,11,.55);box-shadow:0 0 0 2px rgba(245,158,11,.18);}
+.card.editing .card-top{background:rgba(245,158,11,.08);}
+.edit-mode-badge{display:none;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.07em;}
+.card.editing .edit-mode-badge{display:inline-flex;}
+.card.editing .info-item input:not([disabled]),.card.editing textarea:not([disabled]){border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.06);opacity:1;}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);justify-content:center;align-items:center;z-index:9999;}
+.modal.show{display:flex;}
+.modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:28px;width:min(360px,95vw);}
+.modal-box h3{font-size:16px;font-weight:700;margin-bottom:6px;}.modal-box p{font-size:12px;color:var(--muted2);margin-bottom:20px;}
+.modal-field{margin-bottom:16px;}.modal-field label{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;}
+.modal-field input,.modal-field select{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);}
+.modal-field-row{display:flex;gap:8px;align-items:flex-end;}
+.modal-field-row .modal-field{flex:1;margin-bottom:0;}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;pointer-events:none;}
+.toast-ok{background:#052e16;border:1px solid #10B981;color:#6ee7b7;}
+.toast-err{background:#1f0000;border:1px solid #EF4444;color:#fca5a5;}
+.periodos-estado{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap;}
+.periodo-badge{padding:4px 12px;border-radius:999px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace;}
+.periodo-ok{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.4);color:#6ee7b7;}
+.periodo-pend{background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.35);color:#fcd34d;}
+.qr-section{border-top:1px solid var(--border);padding-top:10px;margin-top:4px;}
+.auto-tag{font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(59,130,246,.18);color:#60a5fa;letter-spacing:.06em;vertical-align:middle;margin-left:4px;}
+.input-auto{background:rgba(59,130,246,.06)!important;border-color:rgba(59,130,246,.3)!important;color:var(--muted2)!important;cursor:not-allowed!important;}
+.btn-baja{background:linear-gradient(135deg,#7c2d12,#ea580c);color:white;}
+.modal-baja-box{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:28px;width:min(560px,95vw);max-height:90vh;overflow-y:auto;}
+.baja-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.baja-field{display:flex;flex-direction:column;gap:4px;}
+.baja-field label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}
+.baja-field input,.baja-field select,.baja-field textarea{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;}
+.baja-field textarea{min-height:60px;resize:vertical;}
+.baja-field.full{grid-column:1/-1;}
+.baja-field input.auto-fill{background:rgba(59,130,246,.06);border-color:rgba(59,130,246,.3);color:var(--muted2);}
+#loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px;color:var(--muted2);font-size:14px;}
+#loading-spinner{width:40px;height:40px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
 #empty-state{display:none;text-align:center;padding:80px 20px;color:var(--muted2);}
-</ style >
-</ head >
-< body >
+</style>
+</head>
+<body>
 
-< !--TOP BAR-- >
-< div class= "top-bar" >
-  < div class= "top-icon" >🔧</ div >
-  < div class= "top-title" >
-    < h1 > Mantenimiento Preventivo </ h1 >
-    < p id = "subtitulo" >📍 Cargando...</ p >
-  </ div >
-  < div class= "user-chip" id = "userChip" onclick = "toggleChipQr()" >
-    👤 < span id = "userNombre" ></ span > < span class= "chip-arrow" >▼</ span >
-    < div class= "user-dropdown" >
-      < button class= "drop-item" onclick = "window.location.href='/static/menu.html'" >🏠 &nbsp; Menu principal</button>
-      <div class= "drop-sep" ></ div >
-      < button class= "drop-item danger" onclick = "cerrarSesionQr()" >⏻ &nbsp; Cerrar sesión</button>
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-icon">🔧</div>
+  <div class="top-title">
+    <h1>Mantenimiento Preventivo</h1>
+    <p id="subtitulo">📍 Cargando...</p>
+  </div>
+  <div class="user-chip" id="userChip" onclick="toggleChipQr()">
+    👤 <span id="userNombre"></span> <span class="chip-arrow">▼</span>
+    <div class="user-dropdown">
+      <button class="drop-item" onclick="window.location.href='/static/menu.html'">🏠 &nbsp;Menu principal</button>
+      <div class="drop-sep"></div>
+      <button class="drop-item danger" onclick="cerrarSesionQr()">⏻ &nbsp;Cerrar sesión</button>
     </div>
   </div>
-  <button class= "btn btn-login" id = "btnLogin" onclick = "abrirLogin()" >🔑 Iniciar Sesión</button>
-  <button class= "btn btn-print-all" onclick = "imprimirTodosQr()" >🖨️ Imprimir QR</button>
-  <button class= "btn" style = "background:linear-gradient(135deg,#1e3a5f,#2563eb);color:white;font-size:12px;padding:8px 14px" onclick = "descargarFormatoPM()" >📥 Descargar Formato PM</button>
+  <button class="btn btn-login" id="btnLogin" onclick="abrirLogin()">🔑 Iniciar Sesión</button>
+  <button class="btn btn-print-all" onclick="imprimirTodosQr()">🖨️ Imprimir QR</button>
+  <button class="btn" style="background:linear-gradient(135deg,#1e3a5f,#2563eb);color:white;font-size:12px;padding:8px 14px" onclick="descargarFormatoPM()">📥 Descargar Formato PM</button>
 </div>
 
 <!-- ESTADO DE CARGA -->
@@ -169,9 +147,9 @@ background: linear - gradient(135deg,#0f1e35,#0B0F1A);border-bottom:1px solid va
 </div>
 
 <!-- GRID DE TARJETAS (se llena dinámicamente) -->
-<div class= "grid" id = "grid-cards" ></ div >
+<div class="grid" id="grid-cards"></div>
 
-< !--INSTRUCCIONES y MODALES se inyectan por JS después de cargar -->
+<!-- INSTRUCCIONES y MODALES se inyectan por JS después de cargar -->
 <div id="instrucciones-container"></div>
 <div id="modales-container"></div>
 
@@ -179,219 +157,213 @@ background: linear - gradient(135deg,#0f1e35,#0B0F1A);border-bottom:1px solid va
 <script>
 // ── Utilidades globales ──────────────────────────────────────────────────────
 const ubicacion = decodeURIComponent(new URLSearchParams(location.search).get('ubicacion') || '');
-let usuarioActual = null, nombreActual = null, usuarioTarjeta = { };
+let usuarioActual = null, nombreActual = null, usuarioTarjeta = {};
 let datosCargados = null; // cache de la respuesta de la API
 
-function esc(s)
-{
-    return (s || '').replace(/ &/ g, '&amp;').replace(/</ g, '&lt;').replace(/>/ g, '&gt;').replace(/ "/g,'&quot;'); }
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function toast(msg, ok){
-        const t = document.createElement('div');
-        t.className = 'toast ' + (ok ? 'toast-ok' : 'toast-err');
-        t.textContent = msg;
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), 3500);
-    }
+  const t = document.createElement('div');
+  t.className = 'toast ' + (ok ? 'toast-ok' : 'toast-err');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
 
-    function toggleChipQr() { document.getElementById('userChip').classList.toggle('open'); }
-    document.addEventListener('click', e => {
-        const c = document.getElementById('userChip');
-        if (c && !c.contains(e.target)) c.classList.remove('open');
-    });
+function toggleChipQr(){ document.getElementById('userChip').classList.toggle('open'); }
+document.addEventListener('click', e => {
+  const c = document.getElementById('userChip');
+  if (c && !c.contains(e.target)) c.classList.remove('open');
+});
 
-    // ── Actividades por tipo de dispositivo ─────────────────────────────────────
-    function getActividades(disp)
-    {
-        const d = (disp || '').toUpperCase();
-        if (d.includes('COMPUTADORA') || d.includes('CPU')) return ["Sopletear el gabinete", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del gabinete", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y mouse", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza exterior del lector óptico", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente", "Verificación vida de la pila del BIOS", "Cambiar Qr del Dispositivo"];
-        if (d.includes('PORTATIL') || d.includes('LAPTOP')) return ["Sopletear el gabinete / chasis", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y touchpad", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente", "Cambiar Qr de la Laptop"];
-        if (d.includes('IMPRESORA')) return ["Sopletear la impresora térmica", "Limpieza de rodillos (no usar alcohol)", "Limpieza del cabezal de la impresora térmica", "Limpieza exterior de la impresora", "Limpieza del cableado", "Rutear cables / anclar eliminador de impresora", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificar que los periféricos funcionen correctamente", "Cambiar Qr del Dispositivo"];
-        if (d.includes('UPS')) return ["Limpieza y verificación del UPS", "Limpieza del cableado", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificación vida de la pila del UPS", "Inspección y funcionamiento del UPS", "Verificar que solo equipo IT esté conectado al UPS"];
-        return ["Inspección general", "Limpieza exterior", "Verificación de funcionamiento"];
-    }
+// ── Actividades por tipo de dispositivo ─────────────────────────────────────
+function getActividades(disp){
+  const d = (disp||'').toUpperCase();
+  if(d.includes('COMPUTADORA')||d.includes('CPU')) return ["Sopletear el gabinete","Limpieza de contactos de memoria RAM","Sopletear fuente de poder y ventiladores","Limpieza del gabinete","Limpieza del monitor o pantalla","Limpieza y sopleteado del teclado y mouse","Sopleteado de ventiladores y ranuras de enfriamiento","Limpieza exterior del lector óptico","Limpieza del cableado","Actualizaciones del sistema operativo","Actualizaciones de Office","Eliminación de archivos temporales y vaciar reciclaje","Revisión del antivirus y escaneo","Desfragmentar las unidades de disco duro","Conectar todos los periféricos correspondientes","Verificar cables y conectores sin daños","Encender el equipo y verificar funcionamiento","Verificar que los periféricos funcionen correctamente","Verificación vida de la pila del BIOS","Cambiar Qr del Dispositivo"];
+  if(d.includes('PORTATIL')||d.includes('LAPTOP')) return ["Sopletear el gabinete / chasis","Limpieza de contactos de memoria RAM","Sopletear fuente de poder y ventiladores","Limpieza del monitor o pantalla","Limpieza y sopleteado del teclado y touchpad","Sopleteado de ventiladores y ranuras de enfriamiento","Limpieza del cableado","Actualizaciones del sistema operativo","Actualizaciones de Office","Eliminación de archivos temporales y vaciar reciclaje","Revisión del antivirus y escaneo","Desfragmentar las unidades de disco duro","Conectar todos los periféricos correspondientes","Verificar cables y conectores sin daños","Encender el equipo y verificar funcionamiento","Verificar que los periféricos funcionen correctamente","Cambiar Qr de la Laptop"];
+  if(d.includes('IMPRESORA')) return ["Sopletear la impresora térmica","Limpieza de rodillos (no usar alcohol)","Limpieza del cabezal de la impresora térmica","Limpieza exterior de la impresora","Limpieza del cableado","Rutear cables / anclar eliminador de impresora","Conectar todos los periféricos correspondientes","Verificar cables y conectores sin daños","Verificar que los periféricos funcionen correctamente","Cambiar Qr del Dispositivo"];
+  if(d.includes('UPS')) return ["Limpieza y verificación del UPS","Limpieza del cableado","Conectar todos los periféricos correspondientes","Verificar cables y conectores sin daños","Verificación vida de la pila del UPS","Inspección y funcionamiento del UPS","Verificar que solo equipo IT esté conectado al UPS"];
+  return ["Inspección general","Limpieza exterior","Verificación de funcionamiento"];
+}
 
-    function actsHtml(disp)
-    {
-        return getActividades(disp).map(a =>
-          `< label class= "act-item" >< input type = "checkbox" >< span class= "act-check" ></ span >< span class= "act-text" >${ esc(a)}</ span ></ label >`
+function actsHtml(disp){
+  return getActividades(disp).map(a =>
+    `<label class="act-item"><input type="checkbox"><span class="act-check"></span><span class="act-text">${esc(a)}</span></label>`
   ).join('');
 }
 
 // ── Renderizar tarjetas ──────────────────────────────────────────────────────
-function renderCards(data)
-{
-    const grid = document.getElementById('grid-cards');
-    grid.innerHTML = '';
+function renderCards(data){
+  const grid = document.getElementById('grid-cards');
+  grid.innerHTML = '';
 
-    if (!data.equipos || data.equipos.length === 0)
-    {
-        document.getElementById('empty-state').style.display = 'block';
-        return;
-    }
+  if(!data.equipos || data.equipos.length === 0){
+    document.getElementById('empty-state').style.display = 'block';
+    return;
+  }
 
-    data.equipos.forEach(e => {
+  data.equipos.forEach(e => {
     const acts = actsHtml(e.Dispositivo);
     const btnPm =
-      `< div class= "pm-section" id = "pm_section_${e.Id}" style = "display:none" >
-        < div class= "pm-row" >
-          < span class= "pm-row-label" > Período 1 </ span >
-          < button class= "pm-btn btn-pm btn-p1 btn btn-purple" id = "btn_hacer1_${e.Id}" onclick = "abrirForm(${e.Id},1)" >📋 Registrar </ button >
-          < button class= "pm-btn btn-ver btn-ver1 btn btn-cyan" id = "btn_ver1_${e.Id}" onclick = "verPM(${e.Id},1)" style = "display:none" >👁 Ver </ button >
-          < button class= "pm-btn btn-edit btn-edit1 btn btn-amber" id = "btn_edit1_${e.Id}" onclick = "abrirEditarPM(${e.Id},1)" style = "display:none" >✏️ Editar </ button >
-          < button class= "pm-btn btn-del btn-del1 btn btn-danger" id = "btn_del1_${e.Id}" onclick = "eliminarPreventivo(${e.Id},1)" style = "display:none" >🗑</ button >
-        </ div >
-        < div class= "pm-row" >
-          < span class= "pm-row-label" > Período 2 </ span >
-          < button class= "pm-btn btn-pm btn-p2 btn btn-purple" id = "btn_hacer2_${e.Id}" onclick = "abrirForm(${e.Id},2)" >📋 Registrar </ button >
-          < button class= "pm-btn btn-ver btn-ver2 btn btn-cyan" id = "btn_ver2_${e.Id}" onclick = "verPM(${e.Id},2)" style = "display:none" >👁 Ver </ button >
-          < button class= "pm-btn btn-edit btn-edit2 btn btn-amber" id = "btn_edit2_${e.Id}" onclick = "abrirEditarPM(${e.Id},2)" style = "display:none" >✏️ Editar </ button >
-          < button class= "pm-btn btn-del btn-del2 btn btn-danger" id = "btn_del2_${e.Id}" onclick = "eliminarPreventivo(${e.Id},2)" style = "display:none" >🗑</ button >
-        </ div >
-      </ div >`;
+      `<div class="pm-section" id="pm_section_${e.Id}" style="display:none">
+        <div class="pm-row">
+          <span class="pm-row-label">Período 1</span>
+          <button class="pm-btn btn-pm btn-p1 btn btn-purple" id="btn_hacer1_${e.Id}" onclick="abrirForm(${e.Id},1)">📋 Registrar</button>
+          <button class="pm-btn btn-ver btn-ver1 btn btn-cyan" id="btn_ver1_${e.Id}" onclick="verPM(${e.Id},1)" style="display:none">👁 Ver</button>
+          <button class="pm-btn btn-edit btn-edit1 btn btn-amber" id="btn_edit1_${e.Id}" onclick="abrirEditarPM(${e.Id},1)" style="display:none">✏️ Editar</button>
+          <button class="pm-btn btn-del btn-del1 btn btn-danger" id="btn_del1_${e.Id}" onclick="eliminarPreventivo(${e.Id},1)" style="display:none">🗑</button>
+        </div>
+        <div class="pm-row">
+          <span class="pm-row-label">Período 2</span>
+          <button class="pm-btn btn-pm btn-p2 btn btn-purple" id="btn_hacer2_${e.Id}" onclick="abrirForm(${e.Id},2)">📋 Registrar</button>
+          <button class="pm-btn btn-ver btn-ver2 btn btn-cyan" id="btn_ver2_${e.Id}" onclick="verPM(${e.Id},2)" style="display:none">👁 Ver</button>
+          <button class="pm-btn btn-edit btn-edit2 btn btn-amber" id="btn_edit2_${e.Id}" onclick="abrirEditarPM(${e.Id},2)" style="display:none">✏️ Editar</button>
+          <button class="pm-btn btn-del btn-del2 btn btn-danger" id="btn_del2_${e.Id}" onclick="eliminarPreventivo(${e.Id},2)" style="display:none">🗑</button>
+        </div>
+      </div>`;
 
-const card = document.createElement('div');
-card.className = 'card';
-card.dataset.id = e.Id;
-card.dataset.tienePm = e.TienePm ? 'true' : 'false';
-card.dataset.tienePm2 = e.TienePm2 ? 'true' : 'false';
-card.innerHTML = `
-      < input type = "hidden" id = "ubicacion_${e.Id}" value = "${esc(data.Ubicacion)}" >
-      < input type = "hidden" id = "anio_${e.Id}" value = "${e.Anio||''}" >
-      < div class= "card-top" >
-        < div class= "dev-icon" >${ esc(e.Icon)}</ div >
-        < div class= "dev-name" >< h3 >${ esc(e.Dispositivo)}</ h3 >< span >${ esc(e.IdEquipo)}</ span ></ div >
-        < span class= "color-badge" style = "background:${esc(e.ColorBg)};color:${esc(e.ColorHex)};border:1px solid ${esc(e.ColorHex)}40" >${ esc(e.ColorLabel)}</ span >
-        < span class= "edit-mode-badge" >✏️ Editando </ span >
-      </ div >
-      < div class= "card-body" >
-        < div class= "info-row" >
-          < div class= "info-item" >< label > ID Equipo </ label >< input id = "equipo_${e.Id}" value = "${esc(e.IdEquipo)}" disabled ></ div >
-          < div class= "info-item" >< label > Dispositivo </ label >
-            < select id = "disp_${e.Id}" disabled >
-              < option value = "COMPUTADORA DE ESCRITORIO"${ e.Dispositivo === 'COMPUTADORA DE ESCRITORIO' ? ' selected' : ''}>🖥️ Computadora de Escritorio</option>
-              <option value="LAPTOP"${e.Dispositivo==='LAPTOP'?' selected':''}>💻 Laptop </ option >
-              < option value = "IMPRESORA TERMICA"${ e.Dispositivo === 'IMPRESORA TERMICA' ? ' selected' : ''}>🖨️ Impresora Térmica</option>
-              <option value = "UPS"${e.Dispositivo==='UPS'?' selected':''}>🔋 UPS </ option >
-            </ select >
-          </ div >
-          < div class= "info-item" >< label > Planta </ label >
-            < select id = "planta_${e.Id}" disabled >
-              < option value = "B1"${ e.Planta === 'B1' ? ' selected' : ''}> B1 </ option >
-              < option value = "B2"${ e.Planta === 'B2' ? ' selected' : ''}> B2 </ option >
-              < option value = "PLANTA SATELITE"${ e.Planta === 'PLANTA SATELITE' ? ' selected' : ''}> Planta Satélite </ option >
-              < option value = "BODEGA"${ e.Planta === 'BODEGA' ? ' selected' : ''}> Bodega </ option >
-              < option value = "PLANTA MIXING"${ e.Planta === 'PLANTA MIXING' ? ' selected' : ''}> Planta Mixing </ option >
-            </ select >
-          </ div >
-          < div class= "info-item" >< label > Color </ label >
-            < select id = "color_${e.Id}" disabled >
-              < option value = "Verde"${ (e.ColorCat || '').toLowerCase().includes('verde') ? ' selected' : ''}>🟢 Verde </ option >
-              < option value = "Gris"${ (e.ColorCat || '').toLowerCase().includes('gris') ? ' selected' : ''}>⚫ Gris </ option >
-              < option value = "Azul"${ (e.ColorCat || '').toLowerCase().includes('azul') ? ' selected' : ''}>🔵 Azul </ option >
-              < option value = "Rojo"${ (e.ColorCat || '').toLowerCase().includes('rojo') ? ' selected' : ''}>🔴 Rojo </ option >
-              < option value = "Amarillo"${ (e.ColorCat || '').toLowerCase().includes('amarillo') ? ' selected' : ''}>🟡 Amarillo </ option >
-              < option value = "Rosa"${ (e.ColorCat || '').toLowerCase().includes('rosa') ? ' selected' : ''}>🩷 Rosa </ option >
-            </ select >
-          </ div >
-          < div class= "info-item" >< label > Año Creación </ label >
-            < select id = "anio_vis_${e.Id}" disabled >
-              < option value = "" > --</ option >
-              ${ [2022, 2023, 2024, 2025, 2026, 2027].map(y =>`< option value = "${y}"${ e.Anio === y ? ' selected' : ''}>${ y}</ option >`).join('')}
-            </ select >
-          </ div >
-        </ div >
-        < div class= "status-row" >
-          < span style = "font-family:'DM Mono',monospace;font-size:10px;color:#64748B;font-weight:600;text-transform:uppercase;letter-spacing:.06em" > Próximo PM </ span >
-          < span style = "margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#475569;display:flex;flex-direction:column;align-items:flex-end;gap:2px" >
-            < span > P1: < span id = "plazo_${e.Id}" >${ esc(e.Plazo || 'Sin plazo')}</ span ></ span >
-            < span > P2: < span id = "plazo_p2_${e.Id}" >${ esc(e.PlazoP2 || 'Sin plazo')}</ span ></ span >
-          </ span >
-        </ div >
-        < div class= "periodos-estado" >
-          < span class= "periodo-badge ${e.TienePm?'periodo-ok':'periodo-pend'}" id = "pbadge1_${e.Id}" >📋 P1: ${ e.TienePm ? '✅ Registrado' : '⏳ Pendiente'}</ span >
-          < span class= "periodo-badge ${e.TienePm2?'periodo-ok':'periodo-pend'}" id = "pbadge2_${e.Id}" >📋 P2: ${ e.TienePm2 ? '✅ Registrado' : '⏳ Pendiente'}</ span >
-        </ div >
-        < div id = "obswrap_${e.Id}" style = "display:block;margin-top:10px" >
-          < div class= "obs-label" > Observaciones </ div >
-          < textarea class= "obs-edit-field" id = "obs_${e.Id}" disabled >${ esc(e.Observaciones)}</ textarea >
-        </ div >
-        < !--Formularios P1-- >
-        < div class= "mini-form" id = "form1_${e.Id}" style = "display:none" >
-          < div class= "form-sep" style = "margin-top:12px" >📋 Período 1 — Actividades</div>
-          <div class= "acts-list" >${ acts}</ div >
-          < div class= "form-sep" style = "margin-top:10px" >📅 Fecha </ div >
-          < input type = "date" class= "date-input" id = "fecha1_${e.Id}" >
-          < div class= "form-sep" style = "margin-top:8px" >📝 Observaciones </ div >
-          < textarea class= "date-input" style = "min-height:52px;resize:vertical;" id = "obs_pm1_${e.Id}" placeholder = "Observaciones P1..." ></ textarea >
-          < div class= "form-actions" style = "margin-top:8px" >
-            < button class= "btn btn-success" onclick = "guardarPreventivo(${e.Id},1)" >💾 Guardar P1</button>
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.id      = e.Id;
+    card.dataset.tienePm  = e.TienePm  ? 'true' : 'false';
+    card.dataset.tienePm2 = e.TienePm2 ? 'true' : 'false';
+    card.innerHTML = `
+      <input type="hidden" id="ubicacion_${e.Id}" value="${esc(data.Ubicacion)}">
+      <input type="hidden" id="anio_${e.Id}" value="${e.Anio||''}">
+      <div class="card-top">
+        <div class="dev-icon">${esc(e.Icon)}</div>
+        <div class="dev-name"><h3>${esc(e.Dispositivo)}</h3><span>${esc(e.IdEquipo)}</span></div>
+        <span class="color-badge" style="background:${esc(e.ColorBg)};color:${esc(e.ColorHex)};border:1px solid ${esc(e.ColorHex)}40">${esc(e.ColorLabel)}</span>
+        <span class="edit-mode-badge">✏️ Editando</span>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <div class="info-item"><label>ID Equipo</label><input id="equipo_${e.Id}" value="${esc(e.IdEquipo)}" disabled></div>
+          <div class="info-item"><label>Dispositivo</label>
+            <select id="disp_${e.Id}" disabled>
+              <option value="COMPUTADORA DE ESCRITORIO"${e.Dispositivo==='COMPUTADORA DE ESCRITORIO'?' selected':''}>🖥️ Computadora de Escritorio</option>
+              <option value="LAPTOP"${e.Dispositivo==='LAPTOP'?' selected':''}>💻 Laptop</option>
+              <option value="IMPRESORA TERMICA"${e.Dispositivo==='IMPRESORA TERMICA'?' selected':''}>🖨️ Impresora Térmica</option>
+              <option value="UPS"${e.Dispositivo==='UPS'?' selected':''}>🔋 UPS</option>
+            </select>
+          </div>
+          <div class="info-item"><label>Planta</label>
+            <select id="planta_${e.Id}" disabled>
+              <option value="B1"${e.Planta==='B1'?' selected':''}>B1</option>
+              <option value="B2"${e.Planta==='B2'?' selected':''}>B2</option>
+              <option value="PLANTA SATELITE"${e.Planta==='PLANTA SATELITE'?' selected':''}>Planta Satélite</option>
+              <option value="BODEGA"${e.Planta==='BODEGA'?' selected':''}>Bodega</option>
+              <option value="PLANTA MIXING"${e.Planta==='PLANTA MIXING'?' selected':''}>Planta Mixing</option>
+            </select>
+          </div>
+          <div class="info-item"><label>Color</label>
+            <select id="color_${e.Id}" disabled>
+              <option value="Verde"${(e.ColorCat||'').toLowerCase().includes('verde')?' selected':''}>🟢 Verde</option>
+              <option value="Gris"${(e.ColorCat||'').toLowerCase().includes('gris')?' selected':''}>⚫ Gris</option>
+              <option value="Azul"${(e.ColorCat||'').toLowerCase().includes('azul')?' selected':''}>🔵 Azul</option>
+              <option value="Rojo"${(e.ColorCat||'').toLowerCase().includes('rojo')?' selected':''}>🔴 Rojo</option>
+              <option value="Amarillo"${(e.ColorCat||'').toLowerCase().includes('amarillo')?' selected':''}>🟡 Amarillo</option>
+              <option value="Rosa"${(e.ColorCat||'').toLowerCase().includes('rosa')?' selected':''}>🩷 Rosa</option>
+            </select>
+          </div>
+          <div class="info-item"><label>Año Creación</label>
+            <select id="anio_vis_${e.Id}" disabled>
+              <option value="">--</option>
+              ${[2022,2023,2024,2025,2026,2027].map(y=>`<option value="${y}"${e.Anio===y?' selected':''}>${y}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="status-row">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:#64748B;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Próximo PM</span>
+          <span style="margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#475569;display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+            <span>P1: <span id="plazo_${e.Id}">${esc(e.Plazo||'Sin plazo')}</span></span>
+            <span>P2: <span id="plazo_p2_${e.Id}">${esc(e.PlazoP2||'Sin plazo')}</span></span>
+          </span>
+        </div>
+        <div class="periodos-estado">
+          <span class="periodo-badge ${e.TienePm?'periodo-ok':'periodo-pend'}" id="pbadge1_${e.Id}">📋 P1: ${e.TienePm?'✅ Registrado':'⏳ Pendiente'}</span>
+          <span class="periodo-badge ${e.TienePm2?'periodo-ok':'periodo-pend'}" id="pbadge2_${e.Id}">📋 P2: ${e.TienePm2?'✅ Registrado':'⏳ Pendiente'}</span>
+        </div>
+        <div id="obswrap_${e.Id}" style="display:block;margin-top:10px">
+          <div class="obs-label">Observaciones</div>
+          <textarea class="obs-edit-field" id="obs_${e.Id}" disabled>${esc(e.Observaciones)}</textarea>
+        </div>
+        <!-- Formularios P1 -->
+        <div class="mini-form" id="form1_${e.Id}" style="display:none">
+          <div class="form-sep" style="margin-top:12px">📋 Período 1 — Actividades</div>
+          <div class="acts-list">${acts}</div>
+          <div class="form-sep" style="margin-top:10px">📅 Fecha</div>
+          <input type="date" class="date-input" id="fecha1_${e.Id}">
+          <div class="form-sep" style="margin-top:8px">📝 Observaciones</div>
+          <textarea class="date-input" style="min-height:52px;resize:vertical;" id="obs_pm1_${e.Id}" placeholder="Observaciones P1..."></textarea>
+          <div class="form-actions" style="margin-top:8px">
+            <button class="btn btn-success" onclick="guardarPreventivo(${e.Id},1)">💾 Guardar P1</button>
           </div>
         </div>
         <!-- Ver P1 -->
-        <div class= "mini-form" id = "ver1_${e.Id}" style = "display:none" >
-          < div class= "form-sep" style = "margin-top:12px;color:#06B6D4" >👁 Período 1 — Registrado</div>
-          <div class= "acts-list" id = "ver_acts1_${e.Id}" style = "max-height:180px;overflow-y:auto" ></ div >
-          < div style = "margin-top:10px;font-size:11px;color:var(--muted2);display:flex;flex-wrap:wrap;gap:8px" >
-            < span >👤 < b id = "ver_usuario1_${e.Id}" ></ b ></ span >
-            < span >📅 < b id = "ver_fecha1_${e.Id}" ></ b ></ span >
-            < span >⏭ < b id = "ver_proximo1_${e.Id}" ></ b ></ span >
-          </ div >
-          < div style = "margin-top:6px;font-size:11px;color:var(--muted2)" id = "ver_obs1_${e.Id}" ></ div >
-          < div id = "ver_correctivo1_${e.Id}" style = "display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);font-size:12px;font-weight:700;color:#fca5a5;" >⚠️ Requiere Correctivo</div>
+        <div class="mini-form" id="ver1_${e.Id}" style="display:none">
+          <div class="form-sep" style="margin-top:12px;color:#06B6D4">👁 Período 1 — Registrado</div>
+          <div class="acts-list" id="ver_acts1_${e.Id}" style="max-height:180px;overflow-y:auto"></div>
+          <div style="margin-top:10px;font-size:11px;color:var(--muted2);display:flex;flex-wrap:wrap;gap:8px">
+            <span>👤 <b id="ver_usuario1_${e.Id}"></b></span>
+            <span>📅 <b id="ver_fecha1_${e.Id}"></b></span>
+            <span>⏭ <b id="ver_proximo1_${e.Id}"></b></span>
+          </div>
+          <div style="margin-top:6px;font-size:11px;color:var(--muted2)" id="ver_obs1_${e.Id}"></div>
+          <div id="ver_correctivo1_${e.Id}" style="display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);font-size:12px;font-weight:700;color:#fca5a5;">⚠️ Requiere Correctivo</div>
         </div>
         <!-- Editar PM1 -->
-        <div class= "mini-form" id = "edit_pm1_${e.Id}" style = "display:none" >
-          < div class= "form-sep" style = "margin-top:12px;color:var(--amber)" >✏️ Editar Período 1</div>
-          <div class= "acts-list" id = "edit_acts1_${e.Id}" >${ acts}</ div >
-          < div class= "form-sep" style = "margin-top:10px" >📅 Fecha </ div >
-          < input type = "date" class= "date-input" id = "edit_fecha1_${e.Id}" >
-          < div class= "form-sep" style = "margin-top:8px" >📝 Observaciones </ div >
-          < textarea class= "date-input" style = "min-height:52px;resize:vertical;" id = "edit_obs_pm1_${e.Id}" placeholder = "Observaciones..." ></ textarea >
-          < div class= "form-actions" style = "margin-top:8px" >
-            < button class= "btn btn-amber" onclick = "guardarEditarPM(${e.Id},1)" >💾 Guardar P1</button>
+        <div class="mini-form" id="edit_pm1_${e.Id}" style="display:none">
+          <div class="form-sep" style="margin-top:12px;color:var(--amber)">✏️ Editar Período 1</div>
+          <div class="acts-list" id="edit_acts1_${e.Id}">${acts}</div>
+          <div class="form-sep" style="margin-top:10px">📅 Fecha</div>
+          <input type="date" class="date-input" id="edit_fecha1_${e.Id}">
+          <div class="form-sep" style="margin-top:8px">📝 Observaciones</div>
+          <textarea class="date-input" style="min-height:52px;resize:vertical;" id="edit_obs_pm1_${e.Id}" placeholder="Observaciones..."></textarea>
+          <div class="form-actions" style="margin-top:8px">
+            <button class="btn btn-amber" onclick="guardarEditarPM(${e.Id},1)">💾 Guardar P1</button>
           </div>
         </div>
         <!-- Formularios P2 -->
-        <div class= "mini-form" id = "form2_${e.Id}" style = "display:none" >
-          < div class= "form-sep" style = "margin-top:12px" >📋 Período 2 — Actividades</div>
-          <div class= "acts-list" >${ acts}</ div >
-          < div class= "form-sep" style = "margin-top:10px" >📅 Fecha </ div >
-          < input type = "date" class= "date-input" id = "fecha2_${e.Id}" >
-          < div class= "form-sep" style = "margin-top:8px" >📝 Observaciones </ div >
-          < textarea class= "date-input" style = "min-height:52px;resize:vertical;" id = "obs_pm2_${e.Id}" placeholder = "Observaciones P2..." ></ textarea >
-          < div class= "form-actions" style = "margin-top:8px" >
-            < button class= "btn btn-success" onclick = "guardarPreventivo(${e.Id},2)" >💾 Guardar P2</button>
+        <div class="mini-form" id="form2_${e.Id}" style="display:none">
+          <div class="form-sep" style="margin-top:12px">📋 Período 2 — Actividades</div>
+          <div class="acts-list">${acts}</div>
+          <div class="form-sep" style="margin-top:10px">📅 Fecha</div>
+          <input type="date" class="date-input" id="fecha2_${e.Id}">
+          <div class="form-sep" style="margin-top:8px">📝 Observaciones</div>
+          <textarea class="date-input" style="min-height:52px;resize:vertical;" id="obs_pm2_${e.Id}" placeholder="Observaciones P2..."></textarea>
+          <div class="form-actions" style="margin-top:8px">
+            <button class="btn btn-success" onclick="guardarPreventivo(${e.Id},2)">💾 Guardar P2</button>
           </div>
         </div>
         <!-- Ver P2 -->
-        <div class= "mini-form" id = "ver2_${e.Id}" style = "display:none" >
-          < div class= "form-sep" style = "margin-top:12px;color:#06B6D4" >👁 Período 2 — Registrado</div>
-          <div class= "acts-list" id = "ver_acts2_${e.Id}" style = "max-height:180px;overflow-y:auto" ></ div >
-          < div style = "margin-top:10px;font-size:11px;color:var(--muted2);display:flex;flex-wrap:wrap;gap:8px" >
-            < span >👤 < b id = "ver_usuario2_${e.Id}" ></ b ></ span >
-            < span >📅 < b id = "ver_fecha2_${e.Id}" ></ b ></ span >
-            < span >⏭ < b id = "ver_proximo2_${e.Id}" ></ b ></ span >
-          </ div >
-          < div style = "margin-top:6px;font-size:11px;color:var(--muted2)" id = "ver_obs2_${e.Id}" ></ div >
-          < div id = "ver_correctivo2_${e.Id}" style = "display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);font-size:12px;font-weight:700;color:#fca5a5;" >⚠️ Requiere Correctivo</div>
+        <div class="mini-form" id="ver2_${e.Id}" style="display:none">
+          <div class="form-sep" style="margin-top:12px;color:#06B6D4">👁 Período 2 — Registrado</div>
+          <div class="acts-list" id="ver_acts2_${e.Id}" style="max-height:180px;overflow-y:auto"></div>
+          <div style="margin-top:10px;font-size:11px;color:var(--muted2);display:flex;flex-wrap:wrap;gap:8px">
+            <span>👤 <b id="ver_usuario2_${e.Id}"></b></span>
+            <span>📅 <b id="ver_fecha2_${e.Id}"></b></span>
+            <span>⏭ <b id="ver_proximo2_${e.Id}"></b></span>
+          </div>
+          <div style="margin-top:6px;font-size:11px;color:var(--muted2)" id="ver_obs2_${e.Id}"></div>
+          <div id="ver_correctivo2_${e.Id}" style="display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);font-size:12px;font-weight:700;color:#fca5a5;">⚠️ Requiere Correctivo</div>
         </div>
         <!-- Editar PM2 -->
-        <div class= "mini-form" id = "edit_pm2_${e.Id}" style = "display:none" >
-          < div class= "form-sep" style = "margin-top:12px;color:var(--amber)" >✏️ Editar Período 2</div>
-          <div class= "acts-list" id = "edit_acts2_${e.Id}" >${ acts}</ div >
-          < div class= "form-sep" style = "margin-top:10px" >📅 Fecha </ div >
-          < input type = "date" class= "date-input" id = "edit_fecha2_${e.Id}" >
-          < div class= "form-sep" style = "margin-top:8px" >📝 Observaciones </ div >
-          < textarea class= "date-input" style = "min-height:52px;resize:vertical;" id = "edit_obs_pm2_${e.Id}" placeholder = "Observaciones..." ></ textarea >
-          < div class= "form-actions" style = "margin-top:8px" >
-            < button class= "btn btn-amber" onclick = "guardarEditarPM(${e.Id},2)" >💾 Guardar P2</button>
+        <div class="mini-form" id="edit_pm2_${e.Id}" style="display:none">
+          <div class="form-sep" style="margin-top:12px;color:var(--amber)">✏️ Editar Período 2</div>
+          <div class="acts-list" id="edit_acts2_${e.Id}">${acts}</div>
+          <div class="form-sep" style="margin-top:10px">📅 Fecha</div>
+          <input type="date" class="date-input" id="edit_fecha2_${e.Id}">
+          <div class="form-sep" style="margin-top:8px">📝 Observaciones</div>
+          <textarea class="date-input" style="min-height:52px;resize:vertical;" id="edit_obs_pm2_${e.Id}" placeholder="Observaciones..."></textarea>
+          <div class="form-actions" style="margin-top:8px">
+            <button class="btn btn-amber" onclick="guardarEditarPM(${e.Id},2)">💾 Guardar P2</button>
           </div>
         </div>
       </div>
-      <div class= "card-actions" >
-        < div class= "ca-edit-row" >
-          < button class= "btn btn-blue" onclick = "abrirEditar(${e.Id})" >✏️ Editar</button>
+      <div class="card-actions">
+        <div class="ca-edit-row">
+          <button class="btn btn-blue" onclick="abrirEditar(${e.Id})">✏️ Editar</button>
           <button class="btn btn-green" onclick="guardarCambios(${e.Id})">💾 Guardar</button>
           <button class="btn btn-ghost" onclick="cancelarTodo(${e.Id})">↩ Cancelar</button>
           <button class="btn btn-ghost" onclick="window.close()">✕ Salir</button>
