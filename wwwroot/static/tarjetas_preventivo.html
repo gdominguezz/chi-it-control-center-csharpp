@@ -1,0 +1,1170 @@
+﻿< !DOCTYPE html >
+< html lang = "es" >
+< head >
+< meta charset = "UTF-8" >
+< meta name = "viewport" content = "width=device-width,initial-scale=1" >
+< title > PM — Preventivos </ title >
+< link href = "https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel = "stylesheet" >
+< script src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" ></ script >
+< style >
+:root{--bg:#0B0F1A;--surface:#111827;--surface2:#1a2235;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--accent:#3B82F6;--text:#F1F5F9;--muted:#64748B;--muted2:#94A3B8;--green:#10B981;--red:#EF4444;--amber:#F59E0B;--radius:14px;}
+*{ box - sizing:border - box; margin: 0; padding: 0; }
+body{font-family:'DM Sans',sans - serif; background: var(--bg); color: var(--text); min - height:100vh; padding - bottom:40px;}
+.top - bar{
+background: linear - gradient(135deg,#0f1e35,#0B0F1A);border-bottom:1px solid var(--border2);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+.top - icon{
+    width: 42px; height: 42px; border - radius:10px; background: linear - gradient(135deg,#1D4ED8,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.top - title{ flex: 1; }.top - title h1{ font - size:15px; font - weight:700; }.top - title p{ font - size:11px; color: var(--muted2); margin - top:2px; }
+.user - chip{
+        display: none; align - items:center; gap: 8px; padding: 7px 14px; border - radius:999px; background: rgba(16, 185, 129, .15); border: 1px solid rgba(16, 185, 129, .3); font - size:12px; font - weight:600; color:#6ee7b7;cursor:pointer;position:relative;user-select:none;}
+.chip - arrow{
+                font - size:9px; color:#6ee7b7;transition:transform .2s;}
+.user - chip.open.chip - arrow{ transform: rotate(180deg); }
+.user - dropdown{
+                display: none; position: absolute; top: calc(100 % +10px); right: 0; min - width:190px; background:#111827;border:1px solid rgba(255,255,255,.13);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.6);padding:8px;z-index:999;}
+.user - chip.open.user - dropdown{ display: block; }
+.drop - item{
+                    display: flex; align - items:center; gap: 10px; padding: 9px 12px; border - radius:8px; font - size:12px; font - weight:500; cursor: pointer; color:#94A3B8;background:none;border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;transition:background .15s,color .15s;}
+.drop - item:hover{
+                        background: rgba(255, 255, 255, .06); color:#F1F5F9;}
+.drop - item.danger{
+                            color:#FCA5A5;}
+.drop - item.danger:hover{
+                                background: rgba(239, 68, 68, .1); color:#fff;}
+.drop - sep{ height: 1px; background: rgba(255, 255, 255, .07); margin: 6px 0; }
+                                    @keyframes pop{ 0 %{ transform: scale(1)} 30 %{ transform: scale(.88)} 65 %{ transform: scale(1.08)} 100 %{ transform: scale(1)} }
+                                    @keyframes ripple{ 0 %{ transform: translate(-50 %, -50 %) scale(0); opacity: .5} 100 %{ transform: translate(-50 %, -50 %) scale(4); opacity: 0} }
+.btn{ display: inline - flex; align - items:center; gap: 6px; padding: 9px 16px; border: none; border - radius:8px; font - family:'DM Sans',sans - serif; font - size:13px; font - weight:600; cursor: pointer; transition: transform .15s,filter .15s; position: relative; overflow: hidden; }
+.btn.animating{ animation: pop .35s cubic-bezier(.36, .07, .19, .97) forwards; }
+.btn - ripple{ position: absolute; width: 40px; height: 40px; border - radius:50 %; background: rgba(255, 255, 255, .4); pointer - events:none; animation: ripple .5s ease forwards; }
+.btn: hover{ transform: translateY(-2px); filter: brightness(1.1); }
+.btn - primary{ background: var(--accent); color: white; }.btn - success{ background: var(--green); color: white; }
+.btn - ghost{ background: var(--surface2); color: var(--muted2); border: 1px solid var(--border2); }
+.btn - blue{
+                                    background:#3B82F6;color:white;}.btn-green{background:#10B981;color:white;}
+.btn - amber{
+                                        background: var(--amber); color:#1c1400;}.btn-danger{background:var(--red);color:white;}
+.btn - cyan{
+                                            background:#06B6D4;color:#001a1f;}.btn-purple{background:#8B5CF6;color:white;}
+.btn - recal{
+                                                background: linear - gradient(135deg,#0f766e,#14b8a6);color:white;}
+.btn - login{
+                                                    background: linear - gradient(135deg,#1D4ED8,#3B82F6);color:white;}
+.btn - print - all{
+                                                        background: linear - gradient(135deg,#065f46,#10B981);color:white;font-size:12px;padding:8px 14px;}
+.grid{ display: grid; grid - template - columns:repeat(auto - fill, minmax(320px, 1fr)); gap: 14px; padding: 16px 20px; }
+.card{ background: var(--surface); border: 1px solid var(--border); border - radius:var(--radius); overflow: hidden; transition: border - color .2s; }
+.card - top{ display: flex; align - items:center; gap: 12px; padding: 14px 16px; border - bottom:1px solid var(--border); background: var(--surface2); }
+.dev - icon{ width: 38px; height: 38px; border - radius:9px; background: rgba(59, 130, 246, .12); border: 1px solid rgba(59, 130, 246, .2); display: flex; align - items:center; justify - content:center; font - size:18px; flex - shrink:0; }
+.dev - name{ flex: 1; }.dev - name h3{ font - size:13px; font - weight:700; }.dev - name span{ font - size:11px; color: var(--muted2); }
+.color - badge{ padding: 4px 10px; border - radius:999px; font - size:10px; font - weight:700; text - transform:uppercase; }
+.card - body{ padding: 14px 16px; }
+.info - row{ display: grid; grid - template - columns:1fr 1fr 1fr; gap: 10px; margin - bottom:12px; }
+.info - item label{ font - size:9px; font - weight:600; text - transform:uppercase; letter - spacing:.1em; color: var(--muted); display: block; margin - bottom:4px; }
+.info - item input,.info - item select{ width: 100 %; background: var(--surface2); border: 1px solid var(--border2); border - radius:6px; padding: 7px 9px; font - size:12px; color: var(--text); opacity: .6; font - family:'DM Sans',sans - serif; }
+.info - item select{ cursor: pointer; appearance: none; padding - right:22px; background - image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2364748B' d='M5 7L0 2h10z'/%3E%3C/svg%3E"); background - repeat:no - repeat; background - position:right 7px center; }
+.info - item select option{
+                                                            background:#1a2235;color:#F1F5F9;}
+.card.editing.info - item select: not([disabled]){ border - color:rgba(245, 158, 11, .5); background: rgba(245, 158, 11, .06); opacity: 1; }
+.status - row{ display: flex; align - items:center; gap: 8px; padding: 9px 12px; background: rgba(255, 255, 255, .03); border: 1px solid var(--border); border - radius:8px; margin - bottom:12px; font - size:11px; color: var(--muted2); }
+.pm - btn{ font - size:12px!important; padding: 7px 13px!important; }
+.card - actions{ padding: 12px 16px; border - top:1px solid var(--border); background: rgba(0, 0, 0, .15); display: flex; flex - direction:column; gap: 10px; }
+.ca - edit - row{ display: flex; flex - wrap:wrap; gap: 6px; }
+.ca - edit - row.btn{ font - size:11px; padding: 7px 12px; }
+.pm - section{ display: flex; flex - direction:column; gap: 6px; border - top:1px solid var(--border); padding - top:10px; }
+.pm - row{ display: flex; align - items:center; gap: 6px; }
+.pm - row - label{ font - size:10px; font - weight:700; text - transform:uppercase; letter - spacing:.08em; color: var(--muted); min - width:60px; flex - shrink:0; }
+.pm - row.btn{ font - size:11px; padding: 7px 12px; flex - shrink:0; }
+.mini - form{ border - top:1px solid var(--border); padding - top:12px; margin - top:4px; }
+.form - sep{ font - size:10px; font - weight:700; text - transform:uppercase; letter - spacing:.1em; color: var(--accent); margin - bottom:8px; }
+.acts - list{ display: flex; flex - direction:column; gap: 3px; margin - bottom:4px; max - height:220px; overflow - y:auto; }
+.act - item{ display: flex; align - items:flex - start; gap: 8px; padding: 5px 8px; border - radius:6px; cursor: pointer; transition: background .15s; font - size:12px; color: var(--muted2); }
+.act - item input[type = checkbox]{ display: none; }
+.act - check{ width: 16px; height: 16px; border - radius:4px; border: 1.5px solid rgba(59, 130, 246, .3); background: var(--surface2); flex - shrink:0; margin - top:2px; display: flex; align - items:center; justify - content:center; font - size:10px; color: transparent; transition: all .15s; }
+.act - item input: checked ~ .act - check{ background: var(--accent); border - color:var(--accent); color: white; }
+.act - item input: checked ~ .act - check::after{ content: '\2713'; }
+.act - item input: checked ~ .act - text{ color: var(--text); }
+.date - input{ width: 100 %; background: var(--surface2); border: 1px solid var(--border2); border - radius:6px; padding: 8px 10px; font - size:12px; color: var(--text); color - scheme:dark; margin - bottom:8px; }
+.obs - label{ font - size:9px; font - weight:600; text - transform:uppercase; letter - spacing:.1em; color: var(--muted); margin - bottom:4px; }
+.obs - edit - field{ width: 100 %; background: var(--surface2); border: 1px solid var(--border2); border - radius:6px; padding: 8px 10px; font - size:12px; color: var(--text); resize: vertical; min - height:52px; }
+.card.editing{ border - color:rgba(245, 158, 11, .55); box - shadow:0 0 0 2px rgba(245,158,11,.18); }
+.card.editing.card - top{ background: rgba(245, 158, 11, .08); }
+.edit - mode - badge{ display: none; align - items:center; gap: 5px; padding: 3px 10px; border - radius:999px; background: rgba(245, 158, 11, .15); border: 1px solid rgba(245, 158, 11, .4); font - size:10px; font - weight:700; color: var(--amber); text - transform:uppercase; letter - spacing:.07em; }
+.card.editing.edit - mode - badge{ display: inline - flex; }
+.card.editing.info - item input: not([disabled]),.card.editing textarea:not([disabled]){ border - color:rgba(245, 158, 11, .5); background: rgba(245, 158, 11, .06); opacity: 1; }
+.form - actions{ display: flex; gap: 8px; justify - content:flex - end; }
+.modal{ display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, .7); backdrop - filter:blur(4px); justify - content:center; align - items:center; z - index:9999; }
+.modal.show{ display: flex; }
+.modal - box{ background: var(--surface); border: 1px solid var(--border2); border - radius:16px; padding: 28px; width: min(360px, 95vw); }
+.modal - box h3{ font - size:16px; font - weight:700; margin - bottom:6px; }.modal - box p{ font - size:12px; color: var(--muted2); margin - bottom:20px; }
+.modal - field{ margin - bottom:16px; }.modal - field label{ font - size:10px; font - weight:600; text - transform:uppercase; color: var(--muted); display: block; margin - bottom:5px; }
+.modal - field input,.modal - field select{ width: 100 %; background: var(--surface2); border: 1px solid var(--border2); border - radius:7px; padding: 10px 12px; font - size:14px; color: var(--text); }
+.modal - field - row{ display: flex; gap: 8px; align - items:flex - end; }
+.modal - field - row.modal - field{ flex: 1; margin - bottom:0; }
+.modal - footer{ display: flex; gap: 8px; justify - content:flex - end; }
+.toast{ position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border - radius:10px; font - size:13px; font - weight:600; z - index:99999; pointer - events:none; }
+.toast - ok{
+                                                                background:#052e16;border:1px solid #10B981;color:#6ee7b7;}
+.toast - err{
+                                                                    background:#1f0000;border:1px solid #EF4444;color:#fca5a5;}
+.periodos - estado{ display: flex; gap: 8px; margin: 8px 0; flex - wrap:wrap; }
+.periodo - badge{ padding: 4px 12px; border - radius:999px; font - size:11px; font - weight:600; font - family:'DM Mono',monospace; }
+.periodo - ok{
+                                                                        background: rgba(16, 185, 129, .12); border: 1px solid rgba(16, 185, 129, .4); color:#6ee7b7;}
+.periodo - pend{
+                                                                            background: rgba(245, 158, 11, .10); border: 1px solid rgba(245, 158, 11, .35); color:#fcd34d;}
+.qr - section{ border - top:1px solid var(--border); padding - top:10px; margin - top:4px; }
+.auto - tag{
+                                                                                    font - size:9px; font - weight:700; padding: 1px 6px; border - radius:4px; background: rgba(59, 130, 246, .18); color:#60a5fa;letter-spacing:.06em;vertical-align:middle;margin-left:4px;}
+.input - auto{ background: rgba(59, 130, 246, .06)!important; border - color:rgba(59, 130, 246, .3)!important; color: var(--muted2)!important; cursor: not - allowed!important; }
+.btn - baja{
+                                                                                    background: linear - gradient(135deg,#7c2d12,#ea580c);color:white;}
+.modal - baja - box{ background: var(--surface); border: 1px solid var(--border2); border - radius:16px; padding: 28px; width: min(560px, 95vw); max - height:90vh; overflow - y:auto; }
+.baja - grid{ display: grid; grid - template - columns:1fr 1fr; gap: 12px; margin - bottom:14px; }
+.baja - field{ display: flex; flex - direction:column; gap: 4px; }
+.baja - field label{ font - size:9px; font - weight:600; text - transform:uppercase; letter - spacing:.1em; color: var(--muted); }
+.baja - field input,.baja - field select,.baja - field textarea{ width: 100 %; background: var(--surface2); border: 1px solid var(--border2); border - radius:7px; padding: 8px 10px; font - size:13px; color: var(--text); font - family:'DM Sans',sans - serif; }
+.baja - field textarea{ min - height:60px; resize: vertical; }
+.baja - field.full{ grid - column:1 / -1; }
+.baja - field input.auto - fill{ background: rgba(59, 130, 246, .06); border - color:rgba(59, 130, 246, .3); color: var(--muted2); }
+# loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px;color:var(--muted2);font-size:14px;}
+# loading-spinner{width:40px;height:40px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+                                                                                        @keyframes spin{ to{ transform: rotate(360deg)} }
+#empty-state{display:none;text-align:center;padding:80px 20px;color:var(--muted2);}
+</ style >
+</ head >
+< body >
+
+< !--TOP BAR-- >
+< div class= "top-bar" >
+  < div class= "top-icon" >🔧</ div >
+  < div class= "top-title" >
+    < h1 > Mantenimiento Preventivo </ h1 >
+    < p id = "subtitulo" >📍 Cargando...</ p >
+  </ div >
+  < div class= "user-chip" id = "userChip" onclick = "toggleChipQr()" >
+    👤 < span id = "userNombre" ></ span > < span class= "chip-arrow" >▼</ span >
+    < div class= "user-dropdown" >
+      < button class= "drop-item" onclick = "window.location.href='/static/menu.html'" >🏠 &nbsp; Menu principal</button>
+      <div class= "drop-sep" ></ div >
+      < button class= "drop-item danger" onclick = "cerrarSesionQr()" >⏻ &nbsp; Cerrar sesión</button>
+    </div>
+  </div>
+  <button class= "btn btn-login" id = "btnLogin" onclick = "abrirLogin()" >🔑 Iniciar Sesión</button>
+  <button class= "btn btn-print-all" onclick = "imprimirTodosQr()" >🖨️ Imprimir QR</button>
+  <button class= "btn" style = "background:linear-gradient(135deg,#1e3a5f,#2563eb);color:white;font-size:12px;padding:8px 14px" onclick = "descargarFormatoPM()" >📥 Descargar Formato PM</button>
+</div>
+
+<!-- ESTADO DE CARGA -->
+<div id="loading">
+  <div id="loading-spinner"></div>
+  <span>Cargando dispositivos...</span>
+</div>
+
+<!-- ESTADO VACÍO -->
+<div id="empty-state">
+  <div style="font-size:48px;margin-bottom:16px;">📭</div>
+  <div style="font-size:15px;font-weight:600;color:var(--text);">Sin dispositivos registrados</div>
+  <div style="font-size:12px;margin-top:6px;">No hay equipos en esta ubicación.</div>
+</div>
+
+<!-- GRID DE TARJETAS (se llena dinámicamente) -->
+<div class= "grid" id = "grid-cards" ></ div >
+
+< !--INSTRUCCIONES y MODALES se inyectan por JS después de cargar -->
+<div id="instrucciones-container"></div>
+<div id="modales-container"></div>
+
+<!-- ═══════════════════════════════════════════════ SCRIPT ═══════════════════════════════════════════ -->
+<script>
+// ── Utilidades globales ──────────────────────────────────────────────────────
+const ubicacion = decodeURIComponent(new URLSearchParams(location.search).get('ubicacion') || '');
+let usuarioActual = null, nombreActual = null, usuarioTarjeta = { };
+let datosCargados = null; // cache de la respuesta de la API
+
+function esc(s)
+{
+    return (s || '').replace(/ &/ g, '&amp;').replace(/</ g, '&lt;').replace(/>/ g, '&gt;').replace(/ "/g,'&quot;'); }
+
+function toast(msg, ok){
+        const t = document.createElement('div');
+        t.className = 'toast ' + (ok ? 'toast-ok' : 'toast-err');
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3500);
+    }
+
+    function toggleChipQr() { document.getElementById('userChip').classList.toggle('open'); }
+    document.addEventListener('click', e => {
+        const c = document.getElementById('userChip');
+        if (c && !c.contains(e.target)) c.classList.remove('open');
+    });
+
+    // ── Actividades por tipo de dispositivo ─────────────────────────────────────
+    function getActividades(disp)
+    {
+        const d = (disp || '').toUpperCase();
+        if (d.includes('COMPUTADORA') || d.includes('CPU')) return ["Sopletear el gabinete", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del gabinete", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y mouse", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza exterior del lector óptico", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente", "Verificación vida de la pila del BIOS", "Cambiar Qr del Dispositivo"];
+        if (d.includes('PORTATIL') || d.includes('LAPTOP')) return ["Sopletear el gabinete / chasis", "Limpieza de contactos de memoria RAM", "Sopletear fuente de poder y ventiladores", "Limpieza del monitor o pantalla", "Limpieza y sopleteado del teclado y touchpad", "Sopleteado de ventiladores y ranuras de enfriamiento", "Limpieza del cableado", "Actualizaciones del sistema operativo", "Actualizaciones de Office", "Eliminación de archivos temporales y vaciar reciclaje", "Revisión del antivirus y escaneo", "Desfragmentar las unidades de disco duro", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Encender el equipo y verificar funcionamiento", "Verificar que los periféricos funcionen correctamente", "Cambiar Qr de la Laptop"];
+        if (d.includes('IMPRESORA')) return ["Sopletear la impresora térmica", "Limpieza de rodillos (no usar alcohol)", "Limpieza del cabezal de la impresora térmica", "Limpieza exterior de la impresora", "Limpieza del cableado", "Rutear cables / anclar eliminador de impresora", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificar que los periféricos funcionen correctamente", "Cambiar Qr del Dispositivo"];
+        if (d.includes('UPS')) return ["Limpieza y verificación del UPS", "Limpieza del cableado", "Conectar todos los periféricos correspondientes", "Verificar cables y conectores sin daños", "Verificación vida de la pila del UPS", "Inspección y funcionamiento del UPS", "Verificar que solo equipo IT esté conectado al UPS"];
+        return ["Inspección general", "Limpieza exterior", "Verificación de funcionamiento"];
+    }
+
+    function actsHtml(disp)
+    {
+        return getActividades(disp).map(a =>
+          `< label class= "act-item" >< input type = "checkbox" >< span class= "act-check" ></ span >< span class= "act-text" >${ esc(a)}</ span ></ label >`
+  ).join('');
+}
+
+// ── Renderizar tarjetas ──────────────────────────────────────────────────────
+function renderCards(data)
+{
+    const grid = document.getElementById('grid-cards');
+    grid.innerHTML = '';
+
+    if (!data.equipos || data.equipos.length === 0)
+    {
+        document.getElementById('empty-state').style.display = 'block';
+        return;
+    }
+
+    data.equipos.forEach(e => {
+    const acts = actsHtml(e.Dispositivo);
+    const btnPm =
+      `< div class= "pm-section" id = "pm_section_${e.Id}" style = "display:none" >
+        < div class= "pm-row" >
+          < span class= "pm-row-label" > Período 1 </ span >
+          < button class= "pm-btn btn-pm btn-p1 btn btn-purple" id = "btn_hacer1_${e.Id}" onclick = "abrirForm(${e.Id},1)" >📋 Registrar </ button >
+          < button class= "pm-btn btn-ver btn-ver1 btn btn-cyan" id = "btn_ver1_${e.Id}" onclick = "verPM(${e.Id},1)" style = "display:none" >👁 Ver </ button >
+          < button class= "pm-btn btn-edit btn-edit1 btn btn-amber" id = "btn_edit1_${e.Id}" onclick = "abrirEditarPM(${e.Id},1)" style = "display:none" >✏️ Editar </ button >
+          < button class= "pm-btn btn-del btn-del1 btn btn-danger" id = "btn_del1_${e.Id}" onclick = "eliminarPreventivo(${e.Id},1)" style = "display:none" >🗑</ button >
+        </ div >
+        < div class= "pm-row" >
+          < span class= "pm-row-label" > Período 2 </ span >
+          < button class= "pm-btn btn-pm btn-p2 btn btn-purple" id = "btn_hacer2_${e.Id}" onclick = "abrirForm(${e.Id},2)" >📋 Registrar </ button >
+          < button class= "pm-btn btn-ver btn-ver2 btn btn-cyan" id = "btn_ver2_${e.Id}" onclick = "verPM(${e.Id},2)" style = "display:none" >👁 Ver </ button >
+          < button class= "pm-btn btn-edit btn-edit2 btn btn-amber" id = "btn_edit2_${e.Id}" onclick = "abrirEditarPM(${e.Id},2)" style = "display:none" >✏️ Editar </ button >
+          < button class= "pm-btn btn-del btn-del2 btn btn-danger" id = "btn_del2_${e.Id}" onclick = "eliminarPreventivo(${e.Id},2)" style = "display:none" >🗑</ button >
+        </ div >
+      </ div >`;
+
+const card = document.createElement('div');
+card.className = 'card';
+card.dataset.id = e.Id;
+card.dataset.tienePm = e.TienePm ? 'true' : 'false';
+card.dataset.tienePm2 = e.TienePm2 ? 'true' : 'false';
+card.innerHTML = `
+      < input type = "hidden" id = "ubicacion_${e.Id}" value = "${esc(data.Ubicacion)}" >
+      < input type = "hidden" id = "anio_${e.Id}" value = "${e.Anio||''}" >
+      < div class= "card-top" >
+        < div class= "dev-icon" >${ esc(e.Icon)}</ div >
+        < div class= "dev-name" >< h3 >${ esc(e.Dispositivo)}</ h3 >< span >${ esc(e.IdEquipo)}</ span ></ div >
+        < span class= "color-badge" style = "background:${esc(e.ColorBg)};color:${esc(e.ColorHex)};border:1px solid ${esc(e.ColorHex)}40" >${ esc(e.ColorLabel)}</ span >
+        < span class= "edit-mode-badge" >✏️ Editando </ span >
+      </ div >
+      < div class= "card-body" >
+        < div class= "info-row" >
+          < div class= "info-item" >< label > ID Equipo </ label >< input id = "equipo_${e.Id}" value = "${esc(e.IdEquipo)}" disabled ></ div >
+          < div class= "info-item" >< label > Dispositivo </ label >
+            < select id = "disp_${e.Id}" disabled >
+              < option value = "COMPUTADORA DE ESCRITORIO"${ e.Dispositivo === 'COMPUTADORA DE ESCRITORIO' ? ' selected' : ''}>🖥️ Computadora de Escritorio</option>
+              <option value="LAPTOP"${e.Dispositivo==='LAPTOP'?' selected':''}>💻 Laptop </ option >
+              < option value = "IMPRESORA TERMICA"${ e.Dispositivo === 'IMPRESORA TERMICA' ? ' selected' : ''}>🖨️ Impresora Térmica</option>
+              <option value = "UPS"${e.Dispositivo==='UPS'?' selected':''}>🔋 UPS </ option >
+            </ select >
+          </ div >
+          < div class= "info-item" >< label > Planta </ label >
+            < select id = "planta_${e.Id}" disabled >
+              < option value = "B1"${ e.Planta === 'B1' ? ' selected' : ''}> B1 </ option >
+              < option value = "B2"${ e.Planta === 'B2' ? ' selected' : ''}> B2 </ option >
+              < option value = "PLANTA SATELITE"${ e.Planta === 'PLANTA SATELITE' ? ' selected' : ''}> Planta Satélite </ option >
+              < option value = "BODEGA"${ e.Planta === 'BODEGA' ? ' selected' : ''}> Bodega </ option >
+              < option value = "PLANTA MIXING"${ e.Planta === 'PLANTA MIXING' ? ' selected' : ''}> Planta Mixing </ option >
+            </ select >
+          </ div >
+          < div class= "info-item" >< label > Color </ label >
+            < select id = "color_${e.Id}" disabled >
+              < option value = "Verde"${ (e.ColorCat || '').toLowerCase().includes('verde') ? ' selected' : ''}>🟢 Verde </ option >
+              < option value = "Gris"${ (e.ColorCat || '').toLowerCase().includes('gris') ? ' selected' : ''}>⚫ Gris </ option >
+              < option value = "Azul"${ (e.ColorCat || '').toLowerCase().includes('azul') ? ' selected' : ''}>🔵 Azul </ option >
+              < option value = "Rojo"${ (e.ColorCat || '').toLowerCase().includes('rojo') ? ' selected' : ''}>🔴 Rojo </ option >
+              < option value = "Amarillo"${ (e.ColorCat || '').toLowerCase().includes('amarillo') ? ' selected' : ''}>🟡 Amarillo </ option >
+              < option value = "Rosa"${ (e.ColorCat || '').toLowerCase().includes('rosa') ? ' selected' : ''}>🩷 Rosa </ option >
+            </ select >
+          </ div >
+          < div class= "info-item" >< label > Año Creación </ label >
+            < select id = "anio_vis_${e.Id}" disabled >
+              < option value = "" > --</ option >
+              ${ [2022, 2023, 2024, 2025, 2026, 2027].map(y =>`< option value = "${y}"${ e.Anio === y ? ' selected' : ''}>${ y}</ option >`).join('')}
+            </ select >
+          </ div >
+        </ div >
+        < div class= "status-row" >
+          < span style = "font-family:'DM Mono',monospace;font-size:10px;color:#64748B;font-weight:600;text-transform:uppercase;letter-spacing:.06em" > Próximo PM </ span >
+          < span style = "margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:#475569;display:flex;flex-direction:column;align-items:flex-end;gap:2px" >
+            < span > P1: < span id = "plazo_${e.Id}" >${ esc(e.Plazo || 'Sin plazo')}</ span ></ span >
+            < span > P2: < span id = "plazo_p2_${e.Id}" >${ esc(e.PlazoP2 || 'Sin plazo')}</ span ></ span >
+          </ span >
+        </ div >
+        < div class= "periodos-estado" >
+          < span class= "periodo-badge ${e.TienePm?'periodo-ok':'periodo-pend'}" id = "pbadge1_${e.Id}" >📋 P1: ${ e.TienePm ? '✅ Registrado' : '⏳ Pendiente'}</ span >
+          < span class= "periodo-badge ${e.TienePm2?'periodo-ok':'periodo-pend'}" id = "pbadge2_${e.Id}" >📋 P2: ${ e.TienePm2 ? '✅ Registrado' : '⏳ Pendiente'}</ span >
+        </ div >
+        < div id = "obswrap_${e.Id}" style = "display:block;margin-top:10px" >
+          < div class= "obs-label" > Observaciones </ div >
+          < textarea class= "obs-edit-field" id = "obs_${e.Id}" disabled >${ esc(e.Observaciones)}</ textarea >
+        </ div >
+        < !--Formularios P1-- >
+        < div class= "mini-form" id = "form1_${e.Id}" style = "display:none" >
+          < div class= "form-sep" style = "margin-top:12px" >📋 Período 1 — Actividades</div>
+          <div class= "acts-list" >${ acts}</ div >
+          < div class= "form-sep" style = "margin-top:10px" >📅 Fecha </ div >
+          < input type = "date" class= "date-input" id = "fecha1_${e.Id}" >
+          < div class= "form-sep" style = "margin-top:8px" >📝 Observaciones </ div >
+          < textarea class= "date-input" style = "min-height:52px;resize:vertical;" id = "obs_pm1_${e.Id}" placeholder = "Observaciones P1..." ></ textarea >
+          < div class= "form-actions" style = "margin-top:8px" >
+            < button class= "btn btn-success" onclick = "guardarPreventivo(${e.Id},1)" >💾 Guardar P1</button>
+          </div>
+        </div>
+        <!-- Ver P1 -->
+        <div class= "mini-form" id = "ver1_${e.Id}" style = "display:none" >
+          < div class= "form-sep" style = "margin-top:12px;color:#06B6D4" >👁 Período 1 — Registrado</div>
+          <div class= "acts-list" id = "ver_acts1_${e.Id}" style = "max-height:180px;overflow-y:auto" ></ div >
+          < div style = "margin-top:10px;font-size:11px;color:var(--muted2);display:flex;flex-wrap:wrap;gap:8px" >
+            < span >👤 < b id = "ver_usuario1_${e.Id}" ></ b ></ span >
+            < span >📅 < b id = "ver_fecha1_${e.Id}" ></ b ></ span >
+            < span >⏭ < b id = "ver_proximo1_${e.Id}" ></ b ></ span >
+          </ div >
+          < div style = "margin-top:6px;font-size:11px;color:var(--muted2)" id = "ver_obs1_${e.Id}" ></ div >
+          < div id = "ver_correctivo1_${e.Id}" style = "display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);font-size:12px;font-weight:700;color:#fca5a5;" >⚠️ Requiere Correctivo</div>
+        </div>
+        <!-- Editar PM1 -->
+        <div class= "mini-form" id = "edit_pm1_${e.Id}" style = "display:none" >
+          < div class= "form-sep" style = "margin-top:12px;color:var(--amber)" >✏️ Editar Período 1</div>
+          <div class= "acts-list" id = "edit_acts1_${e.Id}" >${ acts}</ div >
+          < div class= "form-sep" style = "margin-top:10px" >📅 Fecha </ div >
+          < input type = "date" class= "date-input" id = "edit_fecha1_${e.Id}" >
+          < div class= "form-sep" style = "margin-top:8px" >📝 Observaciones </ div >
+          < textarea class= "date-input" style = "min-height:52px;resize:vertical;" id = "edit_obs_pm1_${e.Id}" placeholder = "Observaciones..." ></ textarea >
+          < div class= "form-actions" style = "margin-top:8px" >
+            < button class= "btn btn-amber" onclick = "guardarEditarPM(${e.Id},1)" >💾 Guardar P1</button>
+          </div>
+        </div>
+        <!-- Formularios P2 -->
+        <div class= "mini-form" id = "form2_${e.Id}" style = "display:none" >
+          < div class= "form-sep" style = "margin-top:12px" >📋 Período 2 — Actividades</div>
+          <div class= "acts-list" >${ acts}</ div >
+          < div class= "form-sep" style = "margin-top:10px" >📅 Fecha </ div >
+          < input type = "date" class= "date-input" id = "fecha2_${e.Id}" >
+          < div class= "form-sep" style = "margin-top:8px" >📝 Observaciones </ div >
+          < textarea class= "date-input" style = "min-height:52px;resize:vertical;" id = "obs_pm2_${e.Id}" placeholder = "Observaciones P2..." ></ textarea >
+          < div class= "form-actions" style = "margin-top:8px" >
+            < button class= "btn btn-success" onclick = "guardarPreventivo(${e.Id},2)" >💾 Guardar P2</button>
+          </div>
+        </div>
+        <!-- Ver P2 -->
+        <div class= "mini-form" id = "ver2_${e.Id}" style = "display:none" >
+          < div class= "form-sep" style = "margin-top:12px;color:#06B6D4" >👁 Período 2 — Registrado</div>
+          <div class= "acts-list" id = "ver_acts2_${e.Id}" style = "max-height:180px;overflow-y:auto" ></ div >
+          < div style = "margin-top:10px;font-size:11px;color:var(--muted2);display:flex;flex-wrap:wrap;gap:8px" >
+            < span >👤 < b id = "ver_usuario2_${e.Id}" ></ b ></ span >
+            < span >📅 < b id = "ver_fecha2_${e.Id}" ></ b ></ span >
+            < span >⏭ < b id = "ver_proximo2_${e.Id}" ></ b ></ span >
+          </ div >
+          < div style = "margin-top:6px;font-size:11px;color:var(--muted2)" id = "ver_obs2_${e.Id}" ></ div >
+          < div id = "ver_correctivo2_${e.Id}" style = "display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);font-size:12px;font-weight:700;color:#fca5a5;" >⚠️ Requiere Correctivo</div>
+        </div>
+        <!-- Editar PM2 -->
+        <div class= "mini-form" id = "edit_pm2_${e.Id}" style = "display:none" >
+          < div class= "form-sep" style = "margin-top:12px;color:var(--amber)" >✏️ Editar Período 2</div>
+          <div class= "acts-list" id = "edit_acts2_${e.Id}" >${ acts}</ div >
+          < div class= "form-sep" style = "margin-top:10px" >📅 Fecha </ div >
+          < input type = "date" class= "date-input" id = "edit_fecha2_${e.Id}" >
+          < div class= "form-sep" style = "margin-top:8px" >📝 Observaciones </ div >
+          < textarea class= "date-input" style = "min-height:52px;resize:vertical;" id = "edit_obs_pm2_${e.Id}" placeholder = "Observaciones..." ></ textarea >
+          < div class= "form-actions" style = "margin-top:8px" >
+            < button class= "btn btn-amber" onclick = "guardarEditarPM(${e.Id},2)" >💾 Guardar P2</button>
+          </div>
+        </div>
+      </div>
+      <div class= "card-actions" >
+        < div class= "ca-edit-row" >
+          < button class= "btn btn-blue" onclick = "abrirEditar(${e.Id})" >✏️ Editar</button>
+          <button class="btn btn-green" onclick="guardarCambios(${e.Id})">💾 Guardar</button>
+          <button class="btn btn-ghost" onclick="cancelarTodo(${e.Id})">↩ Cancelar</button>
+          <button class="btn btn-ghost" onclick="window.close()">✕ Salir</button>
+          <button class="btn btn-recal" id="btn_recal_${e.Id}" style="display:none"
+            onclick="abrirRecal(${e.Id},'${esc(e.IdEquipo)}','${esc(data.Ubicacion)}','${esc(e.Planta)}','${esc(e.Dispositivo)}')">📍 Recalendarización</button>
+        </div>
+        ${btnPm}
+        <div class="qr-section">
+          <div class="form-sep" style="margin:10px 0 6px">📷 QR del Dispositivo</div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div id="qr_${e.Id}" data-equipo="${esc(e.IdEquipo)}" style="background:white;padding:8px;border-radius:8px;width:90px;height:90px;flex-shrink:0;"></div>
+            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted2);">${esc(e.IdEquipo)}</span>
+          </div>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  // Generar QRs
+  document.querySelectorAll('[id^="qr_"]').forEach(el => {
+    const eq = el.getAttribute('data-equipo') || 'SIN-ID';
+    new QRCode(el, {text: eq, width: 74, height: 74, correctLevel: QRCode.CorrectLevel.M});
+  });
+}
+
+// ── Carga inicial ─────────────────────────────────────────────────────────────
+async function cargarPagina(){
+  if(!ubicacion){
+    document.getElementById('loading').innerHTML = '<div style="color:var(--red)">⚠️ No se especificó ubicación</div>';
+    return;
+  }
+  document.getElementById('subtitulo').textContent = '📍 ' + ubicacion;
+  document.title = 'PM — ' + ubicacion;
+
+  try{
+    const res  = await fetch('/PREVENTIVO/QR_DATA/' + encodeURIComponent(ubicacion));
+    const data = await res.json();
+    datosCargados = data;
+
+    document.getElementById('loading').style.display = 'none';
+    renderCards(data);
+    restaurarSesion();
+  }catch(e){
+    document.getElementById('loading').innerHTML =
+      `<div style="color:var(--red)">⚠️ Error al cargar: ${e.message}</div>`;
+  }
+}
+
+// ── Sesión ────────────────────────────────────────────────────────────────────
+async function restaurarSesion(){
+  try{
+    const r = await fetch('/obtener-usuario', {credentials:'include'});
+    if(!r.ok) return;
+    const d = await r.json();
+    if(!d?.usuario) return;
+    aplicarSesion(d);
+  }catch(e){}
+}
+
+function aplicarSesion(d){
+  usuarioActual = d.usuario;
+  nombreActual  = d.nombre || d.usuario;
+  const esAdmin = d.rol === 'ADMIN';
+  document.getElementById('userNombre').textContent = nombreActual;
+  document.getElementById('userChip').style.display = 'flex';
+  document.getElementById('btnLogin').style.display = 'none';
+
+  document.querySelectorAll('.card').forEach(card => {
+    const p1 = card.dataset.tienePm  === 'true';
+    const p2 = card.dataset.tienePm2 === 'true';
+    const sec = card.querySelector('.pm-section');
+    if(sec) sec.style.display = 'flex';
+    const b1h = card.querySelector('.btn-p1'), b2h = card.querySelector('.btn-p2');
+    const b1v = card.querySelector('.btn-ver1'), b1e = card.querySelector('.btn-edit1'), b1d = card.querySelector('.btn-del1');
+    const b2v = card.querySelector('.btn-ver2'), b2e = card.querySelector('.btn-edit2'), b2d = card.querySelector('.btn-del2');
+    if(b1h) b1h.style.display = p1 ? 'none' : 'inline-flex';
+    if(b1v) b1v.style.display = p1 ? 'inline-flex' : 'none';
+    if(b1e) b1e.style.display = p1 ? 'inline-flex' : 'none';
+    if(b1d) b1d.style.display = (p1&&esAdmin) ? 'inline-flex' : 'none';
+    if(b2h) b2h.style.display = p2 ? 'none' : 'inline-flex';
+    if(b2v) b2v.style.display = p2 ? 'inline-flex' : 'none';
+    if(b2e) b2e.style.display = p2 ? 'inline-flex' : 'none';
+    if(b2d) b2d.style.display = (p2&&esAdmin) ? 'inline-flex' : 'none';
+  });
+  document.querySelectorAll('[id^="btn_recal_"]').forEach(b => b.style.display = 'inline-flex');
+}
+
+async function cerrarSesionQr(){
+  try{ await fetch('/LOGOUT',{method:'POST',credentials:'include'}); }catch(e){}
+  usuarioActual = null; nombreActual = null;
+  document.getElementById('userChip').style.display = 'none';
+  document.getElementById('btnLogin').style.display  = 'inline-flex';
+  document.querySelectorAll('.pm-section').forEach(s => s.style.display = 'none');
+  toast('Sesión cerrada', true);
+}
+
+// ── Login ─────────────────────────────────────────────────────────────────────
+function abrirLogin(){ document.getElementById('modalLogin').classList.add('show'); setTimeout(()=>document.getElementById('inputUsuario').focus(),100); }
+function cerrarLogin(){
+  document.getElementById('modalLogin').classList.remove('show');
+  document.getElementById('inputUsuario').value = '';
+  document.getElementById('inputPassword').value = '';
+  document.getElementById('loginError').style.display = 'none';
+}
+async function confirmarLogin(){
+  const usr = document.getElementById('inputUsuario').value.trim().toUpperCase();
+  const pwd = document.getElementById('inputPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  if(!usr||!pwd){ errEl.textContent='Ingresa usuario y contraseña'; errEl.style.display='block'; return; }
+  const btn = document.getElementById('btnConfirmar');
+  btn.disabled = true; btn.textContent = 'Verificando...';
+  const res  = await fetch('/LOGIN',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:usr,password:pwd})});
+  const data = await res.json();
+  btn.disabled = false; btn.textContent = 'Entrar →';
+  if(!data.ok){ errEl.textContent = data.mensaje||'Credenciales incorrectas'; errEl.style.display='block'; return; }
+  aplicarSesion(data);
+  cerrarLogin();
+  toast('Sesión iniciada — ' + nombreActual, true);
+}
+
+// ── Formularios PM ────────────────────────────────────────────────────────────
+function abrirForm(id,p){ if(!usuarioActual){abrirLogin();return;} document.getElementById(`form${p}_${id}`).style.display='block'; document.getElementById(`fecha${p}_${id}`).value=new Date().toISOString().split('T')[0]; }
+
+async function guardarPreventivo(id,p){
+  const fecha = document.getElementById(`fecha${p}_${id}`).value;
+  if(!fecha){toast('Selecciona la fecha',false);return;}
+  const cbs = document.querySelectorAll(`#form${p}_${id} .acts-list input[type=checkbox]`);
+  const checks = []; cbs.forEach((cb,i)=>{if(cb.checked)checks.push(i);});
+  if(!checks.length){toast('Marca al menos una actividad',false);return;}
+  const obs = document.getElementById(`obs_pm${p}_${id}`)?.value||'';
+  const reqCorr = document.getElementById(`req_correctivo${p}_${id}`)?.checked||false;
+  const btn = document.querySelector(`#form${p}_${id} .btn-success`);
+  btn.disabled=true; btn.textContent='Guardando...';
+  try{
+    const endpoint = p===2 ? `/PREVENTIVO/GUARDAR_PM_P2/${id}` : `/PREVENTIVO/GUARDAR_PM/${id}`;
+    const res  = await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:usuarioActual,fecha,checks,observaciones:obs,requiere_correctivo:reqCorr})});
+    const data = await res.json();
+    if(data.ok){
+      toast(`P${p} guardado. Próximo: ${data.proximo_pm}`,true);
+      const card = document.getElementById(`form${p}_${id}`).closest('.card');
+      document.getElementById(`form${p}_${id}`).style.display='none';
+      const badge = document.getElementById(`pbadge${p}_${id}`);
+      if(badge){badge.textContent=`📋 P${p}: ✅ Registrado`;badge.className='periodo-badge periodo-ok';}
+      const plazoEl = document.getElementById(p===2?`plazo_p2_${id}`:`plazo_${id}`);
+      if(plazoEl&&data.proximo_pm) plazoEl.textContent=data.proximo_pm;
+      if(p===1){card.dataset.tienePm='true';card.querySelector('.btn-p1').style.display='none';card.querySelector('.btn-ver1').style.display='inline-flex';card.querySelector('.btn-edit1').style.display='inline-flex';}
+      else{card.dataset.tienePm2='true';card.querySelector('.btn-p2').style.display='none';card.querySelector('.btn-ver2').style.display='inline-flex';card.querySelector('.btn-edit2').style.display='inline-flex';}
+    }else toast('Error: '+(data.error||'desconocido'),false);
+  }catch(err){toast('Error de conexión.',false);}
+  finally{btn.disabled=false;btn.textContent=`💾 Guardar P${p}`;}
+}
+
+async function verPM(id,p){
+  const endpoint = p===2?`/PREVENTIVO/DIGITAL_P2/${id}`:`/PREVENTIVO/DIGITAL/${id}`;
+  const res=await fetch(endpoint); const data=await res.json();
+  if(!data.existe){toast(`No hay PM de P${p} guardado`,false);return;}
+  const pm=data.data;
+  const actsEl=document.getElementById(`ver_acts${p}_${id}`);
+  const allActs=Array.from(document.querySelectorAll(`#edit_acts${p}_${id} .act-text`)).map(e=>e.textContent);
+  actsEl.innerHTML='';
+  allActs.forEach((act,i)=>{const m=pm.checks&&pm.checks.includes(i);actsEl.innerHTML+=`<div class="act-item" style="opacity:${m?1:.35}"><span class="act-check" style="${m?'background:var(--accent);border-color:var(--accent);color:white':''}"> ${m?'✓':''} </span><span class="act-text">${act}</span></div>`;});
+  document.getElementById(`ver_usuario${p}_${id}`).textContent=pm.usuario||'—';
+  document.getElementById(`ver_fecha${p}_${id}`).textContent=pm.fecha||'—';
+  document.getElementById(`ver_proximo${p}_${id}`).textContent=pm.proximo_pm||'—';
+  const o=document.getElementById(`ver_obs${p}_${id}`); if(o) o.textContent=pm.observaciones?'📝 '+pm.observaciones:'';
+  const rc=document.getElementById(`ver_correctivo${p}_${id}`); if(rc) rc.style.display=pm.requiere_correctivo?'block':'none';
+  document.getElementById(`ver${p}_${id}`).style.display='block';
+}
+
+async function abrirEditarPM(id,p){
+  if(!usuarioActual){abrirLogin();return;}
+  const endpoint=p===2?`/PREVENTIVO/DIGITAL_P2/${id}`:`/PREVENTIVO/DIGITAL/${id}`;
+  const res=await fetch(endpoint); const data=await res.json();
+  const cbs=document.querySelectorAll(`#edit_acts${p}_${id} input[type=checkbox]`);
+  cbs.forEach(cb=>cb.checked=false);
+  if(data.existe&&data.data.checks) data.data.checks.forEach(i=>{if(cbs[i])cbs[i].checked=true;});
+  const f=document.getElementById(`edit_fecha${p}_${id}`); if(f) f.value=data.existe?(data.data.fecha||''):'';
+  const obs=document.getElementById(`edit_obs_pm${p}_${id}`); if(obs) obs.value=data.existe?(data.data.observaciones||''):'';
+  document.getElementById(`edit_pm${p}_${id}`).style.display='block';
+}
+
+async function guardarEditarPM(id,p){
+  const fecha=document.getElementById(`edit_fecha${p}_${id}`).value;
+  if(!fecha){toast('Selecciona la fecha',false);return;}
+  const cbs=document.querySelectorAll(`#edit_acts${p}_${id} input[type=checkbox]`);
+  const checks=[]; cbs.forEach((cb,i)=>{if(cb.checked)checks.push(i);});
+  if(!checks.length){toast('Marca al menos una actividad',false);return;}
+  const obs=document.getElementById(`edit_obs_pm${p}_${id}`).value;
+  const reqCorr=document.getElementById(`req_correctivo_edit${p}_${id}`)?.checked||false;
+  const btn=document.querySelector(`#edit_pm${p}_${id} .btn-amber`);
+  btn.disabled=true;btn.textContent='Guardando...';
+  try{
+    const endpoint=p===2?`/PREVENTIVO/GUARDAR_PM_P2/${id}`:`/PREVENTIVO/GUARDAR_PM/${id}`;
+    const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:usuarioActual,fecha,checks,observaciones:obs,requiere_correctivo:reqCorr})});
+    const data=await res.json();
+    if(data.ok){
+      toast(`P${p} actualizado. Próximo: ${data.proximo_pm}`,true);
+      const badge=document.getElementById(`pbadge${p}_${id}`); if(badge){badge.textContent=`📋 P${p}: ✅ Registrado`;badge.className='periodo-badge periodo-ok';}
+      const plazoEl=document.getElementById(p===2?`plazo_p2_${id}`:`plazo_${id}`); if(plazoEl&&data.proximo_pm) plazoEl.textContent=data.proximo_pm;
+      document.getElementById(`edit_pm${p}_${id}`).style.display='none';
+    }else toast('Error: '+(data.error||'desconocido'),false);
+  }catch(err){toast('Error de conexión.',false);}
+  finally{btn.disabled=false;btn.textContent=`💾 Guardar P${p}`;}
+}
+
+async function eliminarPreventivo(id,p){
+  if(!confirm(`Eliminar el PM de Período ${p}?`))return;
+  const endpoint=p===2?`/PREVENTIVO/ELIMINAR_DIGITAL_P2/${id}`:`/PREVENTIVO/ELIMINAR_DIGITAL/${id}`;
+  const res=await fetch(endpoint,{method:'DELETE'}); const data=await res.json();
+  if(data.ok){
+    toast(`PM P${p} eliminado`,true);
+    document.getElementById(`ver${p}_${id}`).style.display='none';
+    document.getElementById(`edit_pm${p}_${id}`).style.display='none';
+    const badge=document.getElementById(`pbadge${p}_${id}`); if(badge){badge.textContent=`📋 P${p}: ⏳ Pendiente`;badge.className='periodo-badge periodo-pend';}
+    const plazoEl=document.getElementById(p===2?`plazo_p2_${id}`:`plazo_${id}`); if(plazoEl) plazoEl.textContent='Sin PM';
+    const card=document.getElementById(`btn_del${p}_${id}`).closest('.card');
+    if(p===1){card.dataset.tienePm='false';card.querySelector('.btn-p1').style.display='inline-flex';card.querySelector('.btn-ver1').style.display='none';card.querySelector('.btn-edit1').style.display='none';card.querySelector('.btn-del1').style.display='none';}
+    else{card.dataset.tienePm2='false';card.querySelector('.btn-p2').style.display='inline-flex';card.querySelector('.btn-ver2').style.display='none';card.querySelector('.btn-edit2').style.display='none';card.querySelector('.btn-del2').style.display='none';}
+  }else toast('Error al eliminar',false);
+}
+
+// ── Edición de tarjeta ────────────────────────────────────────────────────────
+function abrirEditar(id){
+  if(!usuarioActual){abrirLogin();return;}
+  usuarioTarjeta[id]=usuarioActual;
+  ['equipo_','disp_','planta_','color_','anio_vis_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=false;});
+  document.getElementById('obs_'+id).disabled=false;
+  const card=document.getElementById('equipo_'+id)?.closest('.card');
+  if(card) card.classList.add('editing');
+}
+function cancelarEditar(id){
+  ['equipo_','disp_','planta_','color_','anio_vis_'].forEach(p=>{const el=document.getElementById(p+id);if(el)el.disabled=true;});
+  document.getElementById('obs_'+id).disabled=true;
+  const card=document.getElementById('equipo_'+id)?.closest('.card');
+  if(card) card.classList.remove('editing');
+}
+function cancelarTodo(id){
+  [1,2].forEach(p=>{
+    const f=document.getElementById(`form${p}_${id}`);if(f&&f.style.display!=='none'){f.style.display='none';f.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=false);}
+    const v=document.getElementById(`ver${p}_${id}`);if(v)v.style.display='none';
+    const e=document.getElementById(`edit_pm${p}_${id}`);if(e)e.style.display='none';
+  });
+  cancelarEditar(id);
+}
+async function guardarCambios(id){
+  const anioVal=document.getElementById(`anio_vis_${id}`)?.value;
+  const datos={ID_EQUIPO:document.getElementById(`equipo_${id}`).value,UBICACION:document.getElementById(`ubicacion_${id}`).value,nombre_dispositivo:document.getElementById(`disp_${id}`).value,PLANTA:document.getElementById(`planta_${id}`).value,CATEGORIA_COLOR:document.getElementById(`color_${id}`).value,OBSERVACIONES:document.getElementById(`obs_${id}`).value,ANIO_CREACION:anioVal?parseInt(anioVal):null};
+  const usuario=usuarioTarjeta[id]||usuarioActual||'SISTEMA';
+  const res=await fetch(`/PREVENTIVO/${id}?usuario=${encodeURIComponent(usuario)}`,{method:'PUT',headers:{'Content-Type':'application/json','X-Usuario':usuario},body:JSON.stringify(datos)});
+  const data=await res.json();
+  if(data.mensaje){
+    toast('Cambios guardados',true);
+    const card=document.getElementById(`equipo_${id}`).closest('.card');
+    const h3=card.querySelector('.dev-name h3');if(h3)h3.textContent=datos.nombre_dispositivo;
+    const idSpan=card.querySelector('.dev-name span');if(idSpan)idSpan.textContent=datos.ID_EQUIPO;
+    cancelarEditar(id);
+  }else toast('Error al guardar',false);
+}
+
+// ── Recalendarización ─────────────────────────────────────────────────────────
+let recalIdDispositivo=null,recalIdOcupante=null,recalIdEquipo=null,recalUbicacion=null,recalPlanta=null;
+let todasUbicaciones=[];
+
+async function cargarUbicacionesRecal(){
+  try{
+    const r=await fetch('/PREVENTIVO/UBICACIONES_TODAS');
+    const d=await r.json();
+    todasUbicaciones=d.ubicaciones||[];
+    ['recal-ub-list','recal-ub-list2'].forEach(lid=>{
+      const dl=document.getElementById(lid);
+      if(dl) dl.innerHTML=todasUbicaciones.map(u=>`<option value="${esc(u)}">`).join('');
+    });
+  }catch(e){}
+}
+
+function abrirRecal(id,idEquipo,ubActual,planta,dispositivo){
+  if(!usuarioActual){abrirLogin();return;}
+  recalIdDispositivo=id;recalIdOcupante=null;recalIdEquipo=idEquipo;recalUbicacion=ubActual;recalPlanta=planta;
+  document.getElementById('recal-id-equipo').textContent=idEquipo;
+  document.getElementById('recal-dispositivo').textContent=dispositivo;
+  document.getElementById('recal-ub-actual').textContent=ubActual;
+  document.getElementById('recal-planta').textContent=planta;
+  document.getElementById('recal-nueva-ub').value='';
+  document.getElementById('recal-ub-ocupante').value='';
+  const recalObs=document.getElementById('recal-observaciones');if(recalObs)recalObs.value='';
+  document.getElementById('recal-paso2').style.display='none';
+  document.getElementById('recal-error').style.display='none';
+  document.getElementById('btnRecalConfirmar').disabled=false;
+  document.getElementById('btnRecalConfirmar').textContent='Confirmar →';
+  cargarUbicacionesRecal();
+  document.getElementById('modalRecal').classList.add('show');
+  setTimeout(()=>document.getElementById('recal-nueva-ub').focus(),100);
+}
+function cerrarRecal(){ document.getElementById('modalRecal').classList.remove('show'); }
+function abrirCambioUbicacionRecal(){
+  document.getElementById('recal-nueva-ub').value='';
+  document.getElementById('recal-error').style.display='none';
+  document.getElementById('recal-paso2').style.display='none';
+  document.getElementById('btnRecalConfirmar').disabled=false;
+  document.getElementById('btnRecalConfirmar').textContent='Confirmar ubicación →';
+  setTimeout(()=>document.getElementById('recal-nueva-ub').focus(),100);
+}
+
+// ── Código de colores ─────────────────────────────────────────────────────────
+function calcularColorUbicacion(nombreUbicacion,esSolo){
+  const ub=(nombreUbicacion||'').toUpperCase();
+  if(ub.includes('FUERA DE PRODUCCION')||ub.includes('FUERA DE PRODUCCIÓN')) return {label:'Azul',bg:'rgba(59,130,246,.15)',fg:'#93c5fd',border:'rgba(59,130,246,.4)'};
+  if(esSolo) return {label:'Amarillo',bg:'rgba(245,158,11,.12)',fg:'#fcd34d',border:'rgba(245,158,11,.35)'};
+  if(ub.includes('SRK')) return {label:'Verde',bg:'rgba(16,185,129,.12)',fg:'#6ee7b7',border:'rgba(16,185,129,.4)'};
+  return {label:'Gris',bg:'rgba(148,163,184,.10)',fg:'#94A3B8',border:'rgba(148,163,184,.3)'};
+}
+function aplicarColorTarjeta(idDispositivo,c){
+  const card=document.getElementById(`equipo_${idDispositivo}`)?.closest('.card');
+  if(!card)return;
+  const badge=card.querySelector('.color-badge');
+  if(badge){badge.style.background=c.bg;badge.style.color=c.fg;badge.style.borderColor=c.border;badge.textContent=c.label;}
+  card.style.borderColor=c.border;
+  const sel=document.getElementById(`color_${idDispositivo}`);if(sel)sel.value=c.label;
+}
+
+async function confirmarRecal(){
+  const errEl=document.getElementById('recal-error');
+  errEl.style.display='none';
+  const nuevaUb=document.getElementById('recal-nueva-ub').value.trim();
+  if(!nuevaUb){errEl.textContent='Ingresa la nueva ubicación';errEl.style.display='block';return;}
+  const recalObs=document.getElementById('recal-observaciones').value.trim();
+  if(!recalObs){errEl.textContent='Las observaciones son obligatorias';errEl.style.display='block';document.getElementById('recal-observaciones').focus();return;}
+  const ubOcupante=document.getElementById('recal-ub-ocupante').value.trim();
+  const paso2=document.getElementById('recal-paso2').style.display!=='none';
+  if(paso2&&!ubOcupante){errEl.textContent='Ingresa dónde mover el dispositivo existente';errEl.style.display='block';return;}
+  const btn=document.getElementById('btnRecalConfirmar');
+  btn.disabled=true;btn.textContent='Guardando...';
+  try{
+    const body={idDispositivo:recalIdDispositivo,nuevaUbicacion:nuevaUb,usuario:usuarioActual,observacionesRecal:recalObs};
+    if(paso2) body.ubicacionOcupante=ubOcupante;
+    const res=await fetch('/PREVENTIVO/RECALENDARIZAR',{method:'POST',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(body)});
+    const data=await res.json();
+    if(data.ok){
+      const colorInfo=calcularColorUbicacion(nuevaUb,data.es_solo_en_ubicacion||false);
+      aplicarColorTarjeta(recalIdDispositivo,colorInfo);
+      if(paso2&&recalIdOcupante) aplicarColorTarjeta(recalIdOcupante,calcularColorUbicacion(ubOcupante,false));
+      toast('Recalendarización completada ✅',true);
+      cerrarRecal();
+    }else if(data.ocupada){
+      document.getElementById('recal-ocupante-info').textContent=(data.dispositivo_ocupante||'')+(data.equipo_ocupante?` (${data.equipo_ocupante})`:'');
+      recalIdOcupante=data.id_ocupante||null;
+      document.getElementById('recal-paso2').style.display='block';
+      btn.disabled=false;btn.textContent='Confirmar →';
+    }else{errEl.textContent=data.error||'Error desconocido';errEl.style.display='block';btn.disabled=false;btn.textContent='Confirmar →';}
+  }catch(e){errEl.textContent='Error de conexión';errEl.style.display='block';btn.disabled=false;btn.textContent='Confirmar →';}
+}
+
+// ── Correctivo ────────────────────────────────────────────────────────────────
+let correctivoTemp={};
+function abrirModalCorrectivo(id,planta,equipo,ubicacion){
+  correctivoTemp={id};
+  document.getElementById('c_planta').value=planta||'';
+  document.getElementById('c_equipo').value=equipo||'';
+  document.getElementById('c_linea').value=ubicacion||'';
+  document.getElementById('c_reporte').value=nombreActual||'';
+  document.getElementById('c_fecha').value=new Date().toISOString().split('T')[0];
+  ['c_marca','c_modelo','c_serie','c_falla','c_accesorios'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('modalCorrectivo').classList.add('show');
+}
+function cerrarModalCorrectivo(){ document.getElementById('modalCorrectivo').classList.remove('show'); }
+async function guardarCorrectivo(){
+  const body={planta:document.getElementById('c_planta').value,fecha_solicitud:document.getElementById('c_fecha').value,linea_persona:document.getElementById('c_linea').value,equipo:document.getElementById('c_equipo').value,marca:document.getElementById('c_marca').value,modelo:document.getElementById('c_modelo').value,numero_serie:document.getElementById('c_serie').value,reporte_elaborado_por:document.getElementById('c_reporte').value,descripcion_falla:document.getElementById('c_falla').value,accesorio_solicitado:document.getElementById('c_accesorios').value};
+  await fetch('/MANTENIMIENTOS_CORRECTIVOS',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  cerrarModalCorrectivo();
+  toast('Correctivo registrado',true);
+}
+
+// ── Baja ──────────────────────────────────────────────────────────────────────
+let bajaTemp={};
+function abrirBaja(id,periodo,idEquipo,ubicacion,planta){
+  if(!usuarioActual){abrirLogin();return;}
+  bajaTemp={id,periodo,idEquipoOriginal:idEquipo};
+  document.getElementById('baja_PLANTA').value=planta||'';
+  document.getElementById('baja_EQUIPO').value=idEquipo||'';
+  document.getElementById('baja_NO_SERIE').value=idEquipo||'';
+  document.getElementById('baja_UBICACION_PERSONA').value=ubicacion||'';
+  document.getElementById('baja_FECHA').value=new Date().toISOString().split('T')[0];
+  ['baja_FOLIO','baja_MARCA','baja_MODELO','baja_ACTIVO_FIJO','baja_MOTIVO_DE_BAJA','baja_DIAGNOSTICO','baja_COMENTARIOS','baja_MOTIVO_DE_CANCELACION','baja_ID_REEMPLAZO'].forEach(fid=>{const el=document.getElementById(fid);if(el)el.value='';});
+  document.getElementById('baja-error').style.display='none';
+  document.getElementById('modalBaja').classList.add('show');
+  setTimeout(()=>document.getElementById('baja_FOLIO').focus(),100);
+}
+function cerrarBaja(){ document.getElementById('modalBaja').classList.remove('show'); }
+async function guardarBaja(){
+  const errEl=document.getElementById('baja-error');errEl.style.display='none';
+  const idReemplazo=document.getElementById('baja_ID_REEMPLAZO').value.trim();
+  if(!idReemplazo){errEl.textContent='El ID Equipo de Reemplazo es obligatorio';errEl.style.display='block';return;}
+  const fecha=document.getElementById('baja_FECHA').value;
+  if(!fecha){errEl.textContent='Selecciona la fecha';errEl.style.display='block';return;}
+  const btn=document.querySelector('#modalBaja .btn:not(.btn-ghost)');
+  btn.disabled=true;btn.textContent='Guardando...';
+  try{
+    const body={bajaDto:{FOLIO:document.getElementById('baja_FOLIO').value,ESTADO:'PENDIENTE',PLANTA:document.getElementById('baja_PLANTA').value,FECHA:fecha,EQUIPO:document.getElementById('baja_EQUIPO').value,MARCA:document.getElementById('baja_MARCA').value,MODELO:document.getElementById('baja_MODELO').value,NO_SERIE:document.getElementById('baja_NO_SERIE').value,ACTIVO_FIJO:document.getElementById('baja_ACTIVO_FIJO').value,UBICACION_PERSONA:document.getElementById('baja_UBICACION_PERSONA').value,MOTIVO_DE_BAJA:document.getElementById('baja_MOTIVO_DE_BAJA').value,DIAGNOSTICO:document.getElementById('baja_DIAGNOSTICO').value,COMENTARIOS:document.getElementById('baja_COMENTARIOS').value,MOTIVO_DE_CANCELACION:document.getElementById('baja_MOTIVO_DE_CANCELACION').value},idPreventivoDb:bajaTemp.id,idEquipoReemplazo:idReemplazo,periodo:bajaTemp.periodo,usuario:usuarioActual};
+    const res=await fetch('/PREVENTIVO/REGISTRAR_BAJA',{method:'POST',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual},body:JSON.stringify(body)});
+    const data=await res.json();
+    if(data.ok){
+      const p=bajaTemp.periodo;
+      const card=document.getElementById(`equipo_${bajaTemp.id}`)?.closest('.card');
+      if(card){
+        const eqInput=document.getElementById(`equipo_${bajaTemp.id}`);if(eqInput)eqInput.value=idReemplazo;
+        const idSpan=card.querySelector('.dev-name span');if(idSpan)idSpan.textContent=idReemplazo;
+        const badge=document.getElementById(`pbadge${p}_${bajaTemp.id}`);if(badge){badge.textContent=`📋 P${p}: ✅ Registrado`;badge.className='periodo-badge periodo-ok';}
+        const plazoEl=document.getElementById(p===2?`plazo_p2_${bajaTemp.id}`:`plazo_${bajaTemp.id}`);if(plazoEl&&data.proximo_pm)plazoEl.textContent=data.proximo_pm;
+        if(p===1){card.dataset.tienePm='true';card.querySelector('.btn-p1').style.display='none';card.querySelector('.btn-ver1').style.display='inline-flex';card.querySelector('.btn-edit1').style.display='inline-flex';}
+        else{card.dataset.tienePm2='true';card.querySelector('.btn-p2').style.display='none';card.querySelector('.btn-ver2').style.display='inline-flex';card.querySelector('.btn-edit2').style.display='inline-flex';}
+        const qrEl=document.getElementById(`qr_${bajaTemp.id}`);if(qrEl){qrEl.innerHTML='';qrEl.setAttribute('data-equipo',idReemplazo);new QRCode(qrEl,{text:idReemplazo,width:74,height:74,correctLevel:QRCode.CorrectLevel.M});const qrLabel=qrEl.nextElementSibling;if(qrLabel)qrLabel.textContent=idReemplazo;}
+      }
+      cerrarBaja();
+      toast(`Baja registrada — PM P${p} completado — Equipo: ${idReemplazo}`,true);
+    }else{errEl.textContent=data.error||'Error al registrar baja';errEl.style.display='block';}
+  }catch(e){errEl.textContent='Error de conexión.';errEl.style.display='block';}
+  finally{btn.disabled=false;btn.textContent='💾 Registrar Baja';}
+}
+
+// ── Stock / Site ──────────────────────────────────────────────────────────────
+function abrirStockModal(){ document.getElementById('modalSiteStockPregunta').classList.add('show'); }
+function cerrarSiteStockPregunta(){ document.getElementById('modalSiteStockPregunta').classList.remove('show'); }
+function lineaSiExistira(){ cerrarSiteStockPregunta(); document.getElementById('stock-si-id-reemplazo').value=''; document.getElementById('stock-si-observaciones').value=''; document.getElementById('stock-si-error').style.display='none'; document.getElementById('modalStockSi').classList.add('show'); }
+function cerrarStockSi(){ document.getElementById('modalStockSi').classList.remove('show'); }
+function lineaNoExistira(){ cerrarSiteStockPregunta(); document.getElementById('stock-error').style.display='none'; document.getElementById('stock-obs-no').value=''; document.getElementById('btnStockGuardar').disabled=false; document.getElementById('btnStockGuardar').textContent='💾 Guardar y continuar →'; document.getElementById('modalStock').classList.add('show'); }
+function cerrarStockModal(){ document.getElementById('modalStock').classList.remove('show'); }
+function abrirUbicacionOtraLinea(){ document.getElementById('modalUbicarOtraLinea').classList.add('show'); }
+function cerrarUbicacionOtraLinea(){ document.getElementById('modalUbicarOtraLinea').classList.remove('show'); }
+function elegirLineaNueva(){ cerrarUbicacionOtraLinea(); toast('📋 Redirigiendo a Nuevo Registro…',true); setTimeout(()=>window.open('/static/preventivos.html','_blank'),1200); }
+function elegirLineaExistente(){ cerrarUbicacionOtraLinea(); abrirCambioUbicacionRecal(); toast('📍 Selecciona la ubicación destino',true); }
+
+async function guardarStockSi(){
+  const errEl=document.getElementById('stock-si-error');errEl.style.display='none';
+  const idReemplazo=document.getElementById('stock-si-id-reemplazo').value.trim();
+  const obs=document.getElementById('stock-si-observaciones').value.trim();
+  const rack=document.getElementById('stock-si-rack').value;
+  const espacio=document.getElementById('stock-si-espacio').value;
+  if(!idReemplazo){errEl.textContent='El ID de reemplazo es obligatorio';errEl.style.display='block';return;}
+  if(!obs){errEl.textContent='Las observaciones son obligatorias';errEl.style.display='block';return;}
+  const nuevaUbicacion=`Soporte Site (${rack}) ${espacio}`;
+  const btn=document.getElementById('btnStockSiGuardar');btn.disabled=true;btn.textContent='⏳ Guardando...';
+  try{
+    const res=await fetch('/PREVENTIVO/STOCK',{method:'POST',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual||''},body:JSON.stringify({idDispositivo:recalIdDispositivo,idReemplazo,rack,espacio,nuevaUbicacion,usuario:usuarioActual,observaciones:obs,lineaSigueSiendoExistente:true})});
+    const data=await res.json();
+    if(data.ok){ aplicarColorTarjetaRosa(recalIdDispositivo); cerrarStockSi(); cerrarRecal(); toast('✅ Equipo en stock: '+nuevaUbicacion,true); }
+    else{errEl.textContent=data.error||'Error';errEl.style.display='block';btn.disabled=false;btn.textContent='💾 Guardar';}
+  }catch(e){errEl.textContent='Error de conexión';errEl.style.display='block';btn.disabled=false;btn.textContent='💾 Guardar';}
+}
+
+async function guardarStock(){
+  const errEl=document.getElementById('stock-error');errEl.style.display='none';
+  const rack=document.getElementById('stock-rack').value;
+  const espacio=document.getElementById('stock-espacio').value;
+  const obs=document.getElementById('stock-obs-no').value.trim();
+  if(!obs){errEl.textContent='Las observaciones son obligatorias';errEl.style.display='block';return;}
+  const nuevaUbicacion=`Soporte Site (${rack}) ${espacio}`;
+  const btn=document.getElementById('btnStockGuardar');btn.disabled=true;btn.textContent='⏳ Guardando...';
+  try{
+    const res=await fetch('/PREVENTIVO/STOCK',{method:'POST',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual||''},body:JSON.stringify({idDispositivo:recalIdDispositivo,idReemplazo:'',rack,espacio,nuevaUbicacion,usuario:usuarioActual,observaciones:obs,lineaSigueSiendoExistente:false})});
+    const data=await res.json();
+    if(data.ok){ aplicarColorTarjetaRosa(recalIdDispositivo); document.getElementById('recal-nueva-ub').value=nuevaUbicacion; cerrarStockModal(); abrirUbicacionOtraLinea(); }
+    else{errEl.textContent=data.error||'Error';errEl.style.display='block';btn.disabled=false;btn.textContent='💾 Guardar y continuar →';}
+  }catch(e){errEl.textContent='Error de conexión';errEl.style.display='block';btn.disabled=false;btn.textContent='💾 Guardar y continuar →';}
+}
+
+function aplicarColorTarjetaRosa(id){
+  const card=document.getElementById(`equipo_${id}`)?.closest('.card');
+  if(!card)return;
+  const badge=card.querySelector('.color-badge');
+  if(badge){badge.style.background='rgba(244,114,182,.15)';badge.style.color='#f472b6';badge.style.borderColor='rgba(244,114,182,.4)';badge.textContent='Rosa';}
+  card.style.borderColor='rgba(244,114,182,.5)';
+}
+
+// ── Cambio de planta ──────────────────────────────────────────────────────────
+function abrirCambioPlantaModal(){ document.getElementById('cp-error').style.display='none'; document.getElementById('cp-planta').value=''; document.getElementById('modalCambioPlanta').classList.add('show'); }
+function cerrarCambioPlantaModal(){ document.getElementById('modalCambioPlanta').classList.remove('show'); }
+async function guardarCambioPlanta(){
+  const errEl=document.getElementById('cp-error');errEl.style.display='none';
+  const planta=document.getElementById('cp-planta').value.trim();
+  if(!planta){errEl.textContent='Debes seleccionar una planta';errEl.style.display='block';return;}
+  const btn=document.getElementById('btnCpGuardar');btn.disabled=true;btn.textContent='⏳ Guardando...';
+  try{
+    const res=await fetch('/PREVENTIVO/CAMBIO_PLANTA',{method:'POST',headers:{'Content-Type':'application/json','X-Usuario':usuarioActual||''},body:JSON.stringify({idDispositivo:recalIdDispositivo,planta,usuario:usuarioActual})});
+    const data=await res.json();
+    if(data.ok){ document.getElementById('recal-planta').textContent=planta; cerrarCambioPlantaModal(); toast('✅ Planta actualizada: '+planta,true); }
+    else{errEl.textContent=data.error||'Error';errEl.style.display='block';btn.disabled=false;btn.textContent='💾 Guardar';}
+  }catch(e){errEl.textContent='Error de conexión';errEl.style.display='block';btn.disabled=false;btn.textContent='💾 Guardar';}
+}
+
+// ── Recal Reparación ──────────────────────────────────────────────────────────
+function abrirCorrectivoDesdeRecal(){
+  if(!recalIdDispositivo){toast('Sin dispositivo',false);return;}
+  const obs=document.getElementById('recal-observaciones').value.trim();
+  if(!obs){document.getElementById('recal-error').textContent='Las observaciones son obligatorias';document.getElementById('recal-error').style.display='block';document.getElementById('recal-observaciones').focus();return;}
+  document.getElementById('recal-error').style.display='none';
+  correctivoTemp._desdeRecal=true;
+  abrirModalCorrectivo(recalIdDispositivo,recalPlanta,recalIdEquipo,recalUbicacion);
+}
+function abrirBajaDesdeRecal(){
+  if(!recalIdDispositivo){toast('Sin dispositivo',false);return;}
+  const obs=document.getElementById('recal-observaciones').value.trim();
+  if(!obs){document.getElementById('recal-error').textContent='Las observaciones son obligatorias';document.getElementById('recal-error').style.display='block';document.getElementById('recal-observaciones').focus();return;}
+  document.getElementById('recal-error').style.display='none';
+  bajaTemp._desdeRecal=true;
+  abrirBaja(recalIdDispositivo,0,recalIdEquipo,recalUbicacion,recalPlanta);
+}
+
+// ── Descargar formato PM ──────────────────────────────────────────────────────
+function descargarFormatoPM(){ toast('📥 Descargando formato…',true); window.open('/static/IT-FO-002.pdf','_blank'); }
+
+// ── Imprimir QRs ──────────────────────────────────────────────────────────────
+function imprimirTodosQr(){
+  const tarjetas=[];
+  document.querySelectorAll('[id^="qr_"]').forEach(el=>{
+    const equipo=el.getAttribute('data-equipo')||'';
+    const card=el.closest('.card');
+    const disp=card?card.querySelector('.dev-name h3')?.textContent||'':'';
+    if(equipo) tarjetas.push({equipo,disp});
+  });
+  if(!tarjetas.length){alert('No hay dispositivos para imprimir.');return;}
+  const w=window.open('','_blank','width=420,height=680');
+  let html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Imprimir QR</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+  <style>@page{size:100mm 160mm;margin:0;}*{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Arial,sans-serif;background:#e5e7eb;display:flex;flex-direction:column;align-items:center;padding:20px;gap:16px;}
+  .no-print{display:flex;gap:10px;}.btn-print{padding:10px 28px;background:#3B82F6;color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
+  .etiqueta{width:100mm;background:#fff;box-shadow:0 4px 24px #0002;border-radius:6px;padding:6mm 5mm;display:flex;flex-direction:column;align-items:center;gap:4mm;}
+  .eti-titulo{font-size:8pt;font-weight:700;color:#64748b;text-transform:uppercase;text-align:center;}
+  .eti-qrs{display:flex;flex-direction:row;justify-content:center;flex-wrap:wrap;gap:4mm;width:100%;}
+  .eti-item{display:flex;flex-direction:column;align-items:center;gap:1.5mm;}
+  .eti-disp{font-size:7pt;font-weight:700;color:#1e293b;text-align:center;max-width:28mm;line-height:1.2;}
+  .eti-id{font-size:7.5pt;font-weight:700;color:#3B82F6;font-family:monospace;text-align:center;}
+  .eti-sep{width:80%;height:1px;background:#e2e8f0;margin:1mm 0;}
+  .eti-ubicacion{font-size:6.5pt;color:#94a3b8;text-align:center;}
+  @media print{body{background:#fff!important;padding:0!important;gap:0!important;}.no-print{display:none!important;}.etiqueta{width:100mm;min-height:160mm;box-shadow:none!important;border-radius:0!important;padding:6mm 5mm;}}
+  </style></head><body>
+  <div class="no-print"><button class="btn-print" onclick="window.print()">🖨️ Imprimir</button></div>
+  <div class="etiqueta">
+  <div class="eti-titulo">📋 Dispositivos — ${ubicacion}</div>
+  <div class="eti-qrs">`;
+  tarjetas.forEach((_,i)=>{ html+=`<div class="eti-item"><div id="qr${i}"></div><div class="eti-disp">${tarjetas[i].disp}</div><div class="eti-id">${tarjetas[i].equipo}</div></div>`; });
+  html+=`</div><div class="eti-sep"></div><div class="eti-ubicacion">${ubicacion}</div></div>
+  <script>`;
+  tarjetas.forEach((_,i)=>{ html+=`new QRCode(document.getElementById("qr${i}"),{text:"${tarjetas[i].equipo}",width:98,height:98,correctLevel:QRCode.CorrectLevel.M});`; });
+  html+=`<\/script></body></html>`;
+  w.document.write(html); w.document.close();
+}
+
+// ── Animación de botones ──────────────────────────────────────────────────────
+document.addEventListener('click',function(e){
+  const btn=e.target.closest('.btn');if(!btn)return;
+  btn.classList.remove('animating');void btn.offsetWidth;btn.classList.add('animating');
+  btn.addEventListener('animationend',()=>btn.classList.remove('animating'),{once:true});
+  const r=document.createElement('span');r.className='btn-ripple';
+  const rect=btn.getBoundingClientRect();r.style.left=(e.clientX-rect.left)+'px';r.style.top=(e.clientY-rect.top)+'px';
+  btn.appendChild(r);setTimeout(()=>r.remove(),500);
+});
+
+// ── INICIAR ───────────────────────────────────────────────────────────────────
+cargarPagina();
+</script>
+
+<!-- ═══════════ MODALES ═══════════ -->
+
+<!-- Login -->
+<div class="modal" id="modalLogin">
+  <div class="modal-box">
+    <h3>🔑 Iniciar Sesión</h3>
+    <p>Ingresa tus credenciales para habilitar el registro de preventivos</p>
+    <div class="modal-field"><label>Usuario</label>
+      <input id="inputUsuario" type="text" placeholder="Ej: DOMINGUEZG" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('inputPassword').focus()">
+    </div>
+    <div class="modal-field"><label>Contraseña</label>
+      <input id="inputPassword" type="password" placeholder="Contraseña" autocomplete="off" onkeydown="if(event.key==='Enter')confirmarLogin()">
+    </div>
+    <div id="loginError" style="color:#fca5a5;font-size:12px;margin-bottom:10px;display:none;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarLogin()">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmar" onclick="confirmarLogin()">Entrar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Recalendarización -->
+<div class="modal" id="modalRecal">
+  <div class="modal-box" style="width:min(820px,97vw);max-height:92vh;overflow-y:auto;">
+    <h3>📍 Recalendarización</h3>
+    <p>Selecciona el tipo de recalendarización o mueve el dispositivo</p>
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+        <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;">ID Equipo</span><br><b id="recal-id-equipo" style="font-family:'DM Mono',monospace;color:var(--accent);"></b></div>
+        <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;">Dispositivo</span><br><b id="recal-dispositivo"></b></div>
+        <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;">Ubicación actual</span><br><b id="recal-ub-actual" style="color:var(--amber);"></b></div>
+        <div><span style="color:var(--muted);font-size:10px;text-transform:uppercase;">Planta</span><br><b id="recal-planta"></b></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">
+      <button class="btn" style="padding:12px 10px;font-size:12px;background:rgba(37,99,235,.15);border:1px solid rgba(37,99,235,.4);color:#93c5fd;border-radius:8px;font-weight:700;" onclick="abrirCambioUbicacionRecal()">📍 Cambio de Ubicación</button>
+      <button class="btn" style="padding:12px 10px;font-size:12px;background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.5);color:#fca5a5;border-radius:8px;font-weight:700;" onclick="abrirCorrectivoDesdeRecal()">⚠️ Requiere Correctivo</button>
+      <button class="btn" style="padding:12px 10px;font-size:12px;background:rgba(234,88,12,.18);border:1px solid rgba(234,88,12,.5);color:#fb923c;border-radius:8px;font-weight:700;" onclick="abrirBajaDesdeRecal()">📤 Baja de Equipo</button>
+    </div>
+    <div class="modal-field">
+      <label>📝 Observaciones de recalendarización <span style="color:#ef4444;">*</span></label>
+      <textarea id="recal-observaciones" placeholder="Motivo de la recalendarización (obligatorio)..." style="width:100%;min-height:52px;resize:vertical;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:13px;color:var(--text);"></textarea>
+    </div>
+    <div class="modal-field">
+      <label>📍 Nueva ubicación (libre)</label>
+      <div class="modal-field-row" style="margin-bottom:0;">
+        <div class="modal-field" style="flex:1;margin-bottom:0;">
+          <input id="recal-nueva-ub" list="recal-ub-list" type="text" placeholder="Escribe o selecciona la ubicación" autocomplete="off">
+          <datalist id="recal-ub-list"></datalist>
+        </div>
+      </div>
+    </div>
+    <div id="recal-paso2" style="display:none;margin-bottom:14px;padding:12px;border-radius:10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);">
+      <div style="font-size:12px;font-weight:700;color:#fca5a5;margin-bottom:8px;">⚠️ Esa ubicación ya tiene un dispositivo asignado</div>
+      <div style="font-size:11px;color:var(--muted2);margin-bottom:10px;">Dispositivo existente: <b id="recal-ocupante-info" style="color:var(--text);"></b></div>
+      <label style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;">📍 ¿A dónde mover el dispositivo existente?</label>
+      <input id="recal-ub-ocupante" list="recal-ub-list2" type="text" placeholder="Nueva ubicación del dispositivo existente" autocomplete="off" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);">
+      <datalist id="recal-ub-list2"></datalist>
+    </div>
+    <div id="recal-error" style="color:#fca5a5;font-size:12px;margin-bottom:10px;display:none;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarRecal()">Cerrar</button>
+      <button class="btn btn-primary" id="btnRecalConfirmar" onclick="confirmarRecal()">Confirmar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cambio de planta -->
+<div class="modal" id="modalCambioPlanta">
+  <div class="modal-box" style="width:min(360px,95vw);">
+    <h3>🏭 Cambio de planta</h3>
+    <p>Selecciona la nueva planta para este dispositivo</p>
+    <div class="modal-field"><label>Planta</label>
+      <select id="cp-planta">
+        <option value="">-- Selecciona --</option>
+        <option value="B1">B1</option><option value="B2">B2</option>
+        <option value="Planta Satelite">Planta Satelite</option>
+        <option value="Planta Mixing">Planta Mixing</option>
+        <option value="Bodega">Bodega</option>
+      </select>
+    </div>
+    <div id="cp-error" style="color:#fca5a5;font-size:12px;margin-bottom:10px;display:none;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarCambioPlantaModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btnCpGuardar" onclick="guardarCambioPlanta()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Correctivo -->
+<div class="modal" id="modalCorrectivo">
+  <div class="modal-box" style="width:min(520px,95vw);max-height:90vh;overflow-y:auto;">
+    <h3>⚠️ Registrar Correctivo</h3><p>Completa los datos del correctivo</p>
+    <div class="modal-field"><label>Planta <span class="auto-tag">AUTO</span></label><input id="c_planta" type="text" readonly class="input-auto"></div>
+    <div class="modal-field"><label>Fecha</label><input id="c_fecha" type="date"></div>
+    <div class="modal-field"><label>Línea / Persona <span class="auto-tag">AUTO</span></label><input id="c_linea" type="text" readonly class="input-auto"></div>
+    <div class="modal-field"><label>Equipo <span class="auto-tag">AUTO</span></label><input id="c_equipo" type="text" readonly class="input-auto"></div>
+    <div class="modal-field"><label>Marca</label><input id="c_marca" type="text"></div>
+    <div class="modal-field"><label>Modelo</label><input id="c_modelo" type="text"></div>
+    <div class="modal-field"><label>No Serie</label><input id="c_serie" type="text"></div>
+    <div class="modal-field"><label>Reporte elaborado por <span class="auto-tag">AUTO</span></label><input id="c_reporte" type="text" readonly class="input-auto"></div>
+    <div class="modal-field"><label>Descripción de la falla</label><input id="c_falla" type="text"></div>
+    <div class="modal-field"><label>Accesorios solicitados</label><input id="c_accesorios" type="text"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModalCorrectivo()">Cancelar</button>
+      <button class="btn btn-danger" onclick="guardarCorrectivo()">Guardar Correctivo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Baja -->
+<div class="modal" id="modalBaja">
+  <div class="modal-baja-box">
+    <h3 style="font-size:17px;font-weight:700;margin-bottom:4px;">📤 Baja de Equipo</h3>
+    <p style="font-size:12px;color:var(--muted2);margin-bottom:18px;">Registra la baja y asigna el equipo de reemplazo</p>
+    <div class="baja-grid">
+      <div class="baja-field"><label>Folio</label><input id="baja_FOLIO" placeholder="Ej: BJ-2025-001"></div>
+      <div class="baja-field"><label>Planta <span class="auto-tag">AUTO</span></label><input id="baja_PLANTA" class="auto-fill" readonly></div>
+      <div class="baja-field"><label>Fecha</label><input id="baja_FECHA" type="date"></div>
+      <div class="baja-field"><label>Equipo <span class="auto-tag">AUTO</span></label><input id="baja_EQUIPO" class="auto-fill" readonly></div>
+      <div class="baja-field"><label>Marca</label><input id="baja_MARCA"></div>
+      <div class="baja-field"><label>Modelo</label><input id="baja_MODELO"></div>
+      <div class="baja-field"><label>No. Serie <span class="auto-tag">AUTO</span></label><input id="baja_NO_SERIE" class="auto-fill" readonly></div>
+      <div class="baja-field"><label>Activo Fijo</label><input id="baja_ACTIVO_FIJO"></div>
+      <div class="baja-field full"><label>Ubicación / Persona <span class="auto-tag">AUTO</span></label><input id="baja_UBICACION_PERSONA" class="auto-fill" readonly></div>
+      <div class="baja-field full"><label>Motivo de Baja</label><input id="baja_MOTIVO_DE_BAJA"></div>
+      <div class="baja-field full"><label>Diagnóstico</label><textarea id="baja_DIAGNOSTICO"></textarea></div>
+      <div class="baja-field full"><label>Comentarios</label><textarea id="baja_COMENTARIOS"></textarea></div>
+      <div class="baja-field full"><label>Motivo de Cancelación</label><input id="baja_MOTIVO_DE_CANCELACION"></div>
+      <div class="baja-field full" style="border-top:1px solid rgba(234,88,12,.35);padding-top:14px;margin-top:4px;">
+        <label style="color:#fb923c;">🔄 ID Equipo de Reemplazo <span style="color:#ef4444;">*</span></label>
+        <input id="baja_ID_REEMPLAZO" placeholder="ID del equipo de reemplazo (obligatorio)" style="border-color:rgba(234,88,12,.5);">
+      </div>
+    </div>
+    <div id="baja-error" style="color:#fca5a5;font-size:12px;margin-bottom:10px;display:none;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="cerrarBaja()">Cancelar</button>
+      <button class="btn" style="background:linear-gradient(135deg,#7c2d12,#ea580c);color:white;" onclick="guardarBaja()">💾 Registrar Baja</button>
+    </div>
+  </div>
+</div>
+
+<!-- Site Stock — pregunta -->
+<div class="modal" id="modalSiteStockPregunta">
+  <div class="modal-box" style="width:min(440px,95vw);">
+    <h3>🗄️ Site Stock</h3>
+    <p style="margin-bottom:20px;">¿La línea donde estaba el equipo <b>seguirá existiendo</b>?</p>
+    <div style="display:flex;gap:12px;margin-bottom:8px;">
+      <button class="btn" style="flex:1;padding:14px 10px;font-size:12px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);color:#6ee7b7;border-radius:10px;font-weight:700;" onclick="lineaSiExistira()">✅ Sí, seguirá existiendo</button>
+      <button class="btn" style="flex:1;padding:14px 10px;font-size:12px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#fca5a5;border-radius:10px;font-weight:700;" onclick="lineaNoExistira()">❌ No, se elimina</button>
+    </div>
+    <div class="modal-footer" style="margin-top:10px;"><button class="btn btn-ghost" onclick="cerrarSiteStockPregunta()">Cancelar</button></div>
+  </div>
+</div>
+
+<!-- Site Stock — Rama Sí -->
+<div class="modal" id="modalStockSi">
+  <div class="modal-box" style="width:min(460px,95vw);">
+    <h3>✅ Línea seguirá existiendo</h3>
+    <p>Ingresa el ID del equipo de reemplazo y el rack/espacio.</p>
+    <div class="modal-field"><label>🔄 ID Dispositivo de Reemplazo *</label><input id="stock-si-id-reemplazo" type="text" placeholder="ID del equipo que sustituye"></div>
+    <div class="modal-field"><label>Rack</label>
+      <select id="stock-si-rack" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);">
+        <option value="A">A</option><option value="T">T</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Espacio</label>
+      <select id="stock-si-espacio" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);">
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>📝 Observaciones *</label><textarea id="stock-si-observaciones" placeholder="Motivo del movimiento..." style="width:100%;min-height:60px;resize:vertical;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:13px;color:var(--text);"></textarea></div>
+    <div id="stock-si-error" style="color:#fca5a5;font-size:12px;margin-bottom:10px;display:none;"></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="cerrarStockSi()">Cancelar</button><button class="btn btn-success" id="btnStockSiGuardar" onclick="guardarStockSi()">💾 Guardar</button></div>
+  </div>
+</div>
+
+<!-- Site Stock — Rama No -->
+<div class="modal" id="modalStock">
+  <div class="modal-box" style="width:min(420px,95vw);">
+    <h3>🗄️ Mover a Soporte Site (stock)</h3>
+    <p>La línea se eliminará. Selecciona rack y espacio.</p>
+    <div class="modal-field"><label>Rack</label>
+      <select id="stock-rack" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);">
+        <option value="A">A</option><option value="T">T</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Espacio</label>
+      <select id="stock-espacio" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:14px;color:var(--text);">
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>📝 Observaciones *</label><textarea id="stock-obs-no" placeholder="Motivo..." style="width:100%;min-height:60px;resize:vertical;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-size:13px;color:var(--text);"></textarea></div>
+    <div id="stock-error" style="color:#fca5a5;font-size:12px;margin-bottom:10px;display:none;"></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="cerrarStockModal()">Cancelar</button><button class="btn btn-primary" id="btnStockGuardar" onclick="guardarStock()">💾 Guardar y continuar →</button></div>
+  </div>
+</div>
+
+<!-- Ubicar en otra línea -->
+<div class="modal" id="modalUbicarOtraLinea">
+  <div class="modal-box" style="width:min(460px,95vw);">
+    <h3>📍 Ubicar en otra línea</h3>
+    <p style="margin-bottom:20px;">El equipo ya está en stock. ¿Cómo reasignarlo?</p>
+    <div style="display:flex;gap:12px;margin-bottom:8px;">
+      <button class="btn" style="flex:1;padding:16px 10px;font-size:12px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.35);color:#67e8f9;border-radius:10px;font-weight:700;" onclick="elegirLineaNueva()">🆕 Línea nueva</button>
+      <button class="btn" style="flex:1;padding:16px 10px;font-size:12px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.35);color:#93c5fd;border-radius:10px;font-weight:700;" onclick="elegirLineaExistente()">🔄 Línea existente</button>
+    </div>
+    <div class="modal-footer" style="margin-top:10px;"><button class="btn btn-ghost" onclick="cerrarUbicacionOtraLinea();cerrarRecal();">Cerrar</button></div>
+  </div>
+</div>
+
+</body>
+</html>
