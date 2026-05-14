@@ -885,7 +885,7 @@ public class OrdenesDeCompraService
         for (int i = 0; i < headers.Length; i++)
         {
             ws.Cell(1, i + 1).Value = headers[i];
-            ws.Cell(1, i + 1).Style.Font.Bold = 1;
+            ws.Cell(1, i + 1).Style.Font.Bold = true;
             ws.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#1a2235");
             ws.Cell(1, i + 1).Style.Font.FontColor = XLColor.White;
         }

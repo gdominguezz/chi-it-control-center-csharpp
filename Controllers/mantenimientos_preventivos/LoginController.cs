@@ -147,15 +147,15 @@ public class LoginController : ControllerBase
         // Setear cookie HTTP segura para verificación server-side
         Response.Cookies.Append("usuario", usuario, new CookieOptions
         {
-            HttpOnly = 1,
+            HttpOnly = true,
             SameSite = SameSiteMode.Lax,
-            Secure = 1
+            Secure = true
         });
         Response.Cookies.Append("rol", rol, new CookieOptions
         {
-            HttpOnly = 0,  // el JS del menú necesita leerlo
+            HttpOnly = false,  // el JS del menú necesita leerlo
             SameSite = SameSiteMode.Lax,
-            Secure = 1
+            Secure = true
         });
 
         return Ok(new { ok = 1, usuario, nombre, rol, password_temporal = pwdTemporal });
@@ -212,15 +212,15 @@ public class LoginController : ControllerBase
         // Crear sesión después del cambio de contraseña
         Response.Cookies.Append("usuario", req.Usuario.ToUpper(), new CookieOptions
         {
-            HttpOnly = 1,
+            HttpOnly = true,
             SameSite = SameSiteMode.Lax,
-            Secure = 1
+            Secure = true
         });
         Response.Cookies.Append("rol", rolUsuario, new CookieOptions
         {
-            HttpOnly = 0,
+            HttpOnly = false,
             SameSite = SameSiteMode.Lax,
-            Secure = 1
+            Secure = true
         });
 
         return Ok(new { ok = 1, mensaje = "Contraseña actualizada correctamente", nombre = nombreUsuario, rol = rolUsuario });

@@ -454,7 +454,7 @@ public class PantallasNfService
         {
             var cell = ws.Cells[1, c + 1];
             cell.Value = headers[c];
-            cell.Style.Font.Bold = 1;
+            cell.Style.Font.Bold = true;
             cell.Style.Fill.PatternType = ExcelFillStyle.Solid;
             cell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(30, 41, 59));
             cell.Style.Font.Color.SetColor(Color.White);

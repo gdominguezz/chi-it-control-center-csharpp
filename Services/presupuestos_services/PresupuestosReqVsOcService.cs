@@ -204,7 +204,7 @@ public class PresupuestosReqVsOcService
 
         for (int i = 0; i < headers.Length; i++)
         {ws.Cell(1, i + 1).Value = headers[i];
-            ws.Cell(1, i + 1).Style.Font.Bold = 1;}
+            ws.Cell(1, i + 1).Style.Font.Bold = true;}
 
         int row = 2;
         foreach (var r in rows)

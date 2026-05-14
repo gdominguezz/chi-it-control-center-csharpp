@@ -30,7 +30,7 @@ public class ExcelService
         {
             var cell = ws.Cell(1, c + 1);
             cell.Value = dt.Columns[c].ColumnName;
-            cell.Style.Font.Bold = 1;
+            cell.Style.Font.Bold = true;
             cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#1E293B");
             cell.Style.Font.FontColor = XLColor.White;
         }
