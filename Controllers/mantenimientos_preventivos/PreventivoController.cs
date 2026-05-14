@@ -703,7 +703,7 @@ public class PreventivoController : ControllerBase
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "UPDATE mantenimientos_preventivos SET preventivo_digital=@d WHERE id=@id";
-            cmd.Parameters.Add("d", NpgsqlTypes.SqlDbType.Jsonb).Value = JsonSerializer.Serialize(data);
+            cmd.Parameters.AddWithValue("@d", JsonSerializer.Serialize(data));
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 
@@ -844,7 +844,7 @@ public class PreventivoController : ControllerBase
             cmd.Parameters.AddWithValue("fr", fechaRea.ToDateTime(TimeOnly.MinValue));
             cmd.Parameters.AddWithValue("pl", proximoPm.ToDateTime(TimeOnly.MinValue));
             cmd.Parameters.AddWithValue("rp", data.Usuario.ToUpper());
-            cmd.Parameters.Add("pd", NpgsqlTypes.SqlDbType.Jsonb).Value = json;
+            cmd.Parameters.AddWithValue("@pd", json);
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 
@@ -998,7 +998,7 @@ public class PreventivoController : ControllerBase
         catch (Exception ex) { return Ok(new { ok = 0, error = ex.Message }); }
     }
 
-    private void RegistrarHistorialRecalendarizacion(Npgsql.SqlConnection conn,
+    private void RegistrarHistorialRecalendarizacion(SqlConnection conn,
         int idDispositivo, string idEquipo, string nomDisp,
         string ubAnterior, string ubNueva, string usuario)
     {
@@ -1066,7 +1066,7 @@ public class PreventivoController : ControllerBase
             cmd.Parameters.AddWithValue("pl", proxStr);
             cmd.Parameters.AddWithValue("rp", data.Usuario.ToUpper());
             cmd.Parameters.AddWithValue("o", data.Observaciones);
-            cmd.Parameters.Add("pd", NpgsqlTypes.SqlDbType.Jsonb).Value = json;
+            cmd.Parameters.AddWithValue("@pd", json);
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 

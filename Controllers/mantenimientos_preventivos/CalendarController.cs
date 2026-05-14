@@ -1,5 +1,6 @@
 using ChiIT.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 namespace ChiIT.Controllers;
@@ -489,7 +490,7 @@ public class CalendarioController : ControllerBase
         };
     }
 
-    private void UpsertEstado(Npgsql.SqlConnection conn,
+    private void UpsertEstado(SqlConnection conn,
         string planta, int periodo, int semana, int anio, bool generado, bool terminado)
     {
         using var cmd = conn.CreateCommand();
@@ -519,7 +520,7 @@ public class CalendarioController : ControllerBase
     /// Enriquece con estado PM desde la BD.
     /// </summary>
     private List<SemanaDistribucion> CalcularDistribucion(
-        Npgsql.SqlConnection conn,
+        SqlConnection conn,
         string planta, int periodo, int semIni, int anio)
     {
         var nombreDB = PlantaNombreDB[planta];
@@ -581,7 +582,7 @@ public class CalendarioController : ControllerBase
     /// Todos los equipos en una sola semana.
     /// </summary>
     private List<SemanaDistribucion> CalcularDistribucionFija(
-        Npgsql.SqlConnection conn,
+        SqlConnection conn,
         string planta, int periodo, int semIni, int anio)
     {
         var nombreDB = PlantaNombreDB[planta];
