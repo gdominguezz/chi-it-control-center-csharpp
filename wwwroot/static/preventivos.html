@@ -469,7 +469,7 @@
         table {
             border-collapse: collapse;
             width: 100%;
-            min-width: 1280px;
+            min-width: 1605px;
             font-size: 13px;
         }
 
@@ -495,6 +495,33 @@
             background: var(--surface2);
             padding: 6px 8px;
             border-bottom: 1px solid var(--border2);
+        }
+
+        /* ── COLUMNA ACCIONES FIJA ── */
+        .th-acciones, .td-acciones {
+            position: sticky;
+            right: 0;
+            z-index: 5;
+            background: var(--surface3);
+            box-shadow: -3px 0 8px rgba(0,0,0,.35);
+        }
+        .td-acciones {
+            background: var(--surface);
+        }
+        tbody tr:hover .td-acciones {
+            background: #1a2b40;
+        }
+        thead .th-acciones {
+            background: var(--surface3);
+            z-index: 11;
+        }
+        thead .filter-row .th-acciones {
+            background: var(--surface2);
+        }
+
+        /* Tabla sin min-width fijo — el scroll lo maneja el contenedor */
+        table {
+            table-layout: fixed;
         }
 
         .filter-row input {
@@ -1697,17 +1724,18 @@
                 <div class="table-scroll">
                     <table>
                         <colgroup>
-                            <col style="width:50px">   <!-- ID -->
-                            <col style="width:110px">  <!-- ID Equipo -->
-                            <col style="width:170px">  <!-- Ubicación -->
-                            <col style="width:150px">  <!-- Nombre Dispositivo -->
-                            <col style="width:70px">   <!-- Planta -->
-                            <col style="width:110px">  <!-- Categoría/Color -->
-                            <col style="width:140px">  <!-- Observaciones -->
-                            <col style="width:75px">   <!-- Año Creación -->
-                            <col style="width:190px">  <!-- PDF -->
-
-                            <col style="width:210px">  <!-- Acciones -->
+                            <col style="width:50px">           <!-- ID -->
+                            <col style="width:110px">          <!-- ID Equipo -->
+                            <col style="width:170px">          <!-- Ubicación -->
+                            <col style="width:150px">          <!-- Nombre Dispositivo -->
+                            <col style="width:70px">           <!-- Planta -->
+                            <col style="width:120px">          <!-- Categoría/Color -->
+                            <col style="width:160px">          <!-- Observaciones -->
+                            <col style="width:75px">           <!-- Año Creación -->
+                            <col style="width:160px">          <!-- Recalendarizado Por -->
+                            <col style="width:220px">          <!-- Obs. Recal -->
+                            <col style="width:190px">          <!-- PDF -->
+                            <col style="width:130px">          <!-- Acciones -->
                         </colgroup>
                         <thead>
                             <tr>
@@ -1722,7 +1750,7 @@
                                 <th>Recalendarizado Por</th>
                                 <th>Observaciones Recalendarización</th>
                                 <th>PDF de Preventivo Fisico</th>
-                                <th>Acciones</th>
+                                <th class="th-acciones">Acciones</th>
                             </tr>
                             <tr class="filter-row">
                                 <th></th>
@@ -1736,7 +1764,7 @@
                                 <th></th>
                                 <th></th>
                                 <th></th>
-                                <th></th>
+                                <th class="th-acciones"></th>
                             </tr>
                         </thead>
                         <tbody id="tabla"></tbody>
@@ -2433,31 +2461,17 @@
                         : '<span style="color:var(--muted);font-size:11px;">—</span>'}
                                         </td>
 
-                                        ${row.tiene_pdf
-                        ? `
-                                        <button class="btn btn-primary btn-sm"
-                                        onclick="verPDF(${row.id})">
-                                        📄 Ver
-                                        </button>
-
-                                        <button class="btn btn-danger btn-sm"
-                                        onclick="eliminarPDF(${row.id})">
-                                        ✕
-                                        </button>
-                                        `
-                        : `
-                                        <label class="file-label">
-                                        📎 Subir PDF
-                                        <input type="file"
-                                        accept=".pdf"
-                                        onchange="subirPDF(${row.id},this)">
-                                        </label>
-                                        `
+                                        <td ${tdStyle} style="white-space:nowrap;">
+                                            ${row.tiene_pdf
+                        ? `<button class="btn btn-primary btn-sm" onclick="verPDF(${row.id})">📄 Ver</button>
+                           <button class="btn btn-danger btn-sm" onclick="eliminarPDF(${row.id})">✕</button>`
+                        : `<label class="file-label">📎 Subir PDF
+                             <input type="file" accept=".pdf" onchange="subirPDF(${row.id},this)">
+                           </label>`
                     }
+                                        </td>
 
-                    </td>
-
-                    <td ${tdStyle} style="white-space:nowrap">
+                    <td class="td-acciones" ${tdStyle} style="white-space:nowrap">
 
                     ${esAdmin ? `
                     <button class="btn btn-amber btn-sm"
