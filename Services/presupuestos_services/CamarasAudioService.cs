@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -82,7 +82,7 @@ public class CamarasAudioService
     private async Task InicializarTablaAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             CREATE TABLE IF NOT EXISTS camaras_audio (
                 id                      SERIAL PRIMARY KEY,
                 oc                      TEXT,
@@ -111,7 +111,7 @@ public class CamarasAudioService
                 id                SERIAL PRIMARY KEY,
                 camara_id         INTEGER NOT NULL REFERENCES camaras_audio(id) ON DELETE CASCADE,
                 usuario           TEXT    NOT NULL,
-                fecha             TIMESTAMPTZ DEFAULT NOW(),
+                fecha             TIMESTAMPTZ DEFAULT GETDATE(),
                 registro_anterior JSONB,
                 registro_nuevo    JSONB
             );
@@ -129,13 +129,13 @@ public class CamarasAudioService
         var offset = (page - 1) * limit;
 
         // Total
-        await using var cmdCount = new NpgsqlCommand(
+        await using var cmdCount = new SqlCommand(
             $"SELECT COUNT(*) FROM camaras_audio {where}", conn);
         foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
         var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
 
         // Datos
-        await using var cmdData = new NpgsqlCommand(
+        await using var cmdData = new SqlCommand(
             $@"SELECT id, oc, folio_inventario, fecha_registro, recibido_por,
                       subcategoria, tipo, marca, modelo, numero_de_serie,
                       proveedor, cantidad, costo, moneda, destino,
@@ -187,7 +187,7 @@ public class CamarasAudioService
     {
         await using var conn = await _pool.OpenAsync();
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             INSERT INTO camaras_audio
                 (oc, folio_inventario, fecha_registro, recibido_por,
                  subcategoria, tipo, marca, modelo, numero_de_serie,
@@ -195,12 +195,12 @@ public class CamarasAudioService
                  accesorios, fecha_de_salida, planta, destino2,
                  personal_it_que_asigna, folio_de_servicio)
             VALUES
-                (@oc, @folio_inventario, @fecha_registro::date, @recibido_por,
+                (@oc, @folio_inventario, @fecha_registro, @recibido_por,
                  @subcategoria, @tipo, @marca, @modelo, @numero_de_serie,
                  @proveedor, @cantidad, @costo, @moneda, @destino,
-                 @accesorios, @fecha_de_salida::date, @planta, @destino2,
+                 @accesorios, @fecha_de_salida, @planta, @destino2,
                  @personal_it_que_asigna, @folio_de_servicio)
-            RETURNING id
+            OUTPUT INSERTED.id
             """, conn);
 
         AgregarParametros(cmd, dto);
@@ -220,11 +220,11 @@ public class CamarasAudioService
         var anterior = await SnapshotAsync(conn, id);
         if (anterior is null) return false;
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             UPDATE camaras_audio SET
                 oc                     = @oc,
                 folio_inventario       = @folio_inventario,
-                fecha_registro         = @fecha_registro::date,
+                fecha_registro         = @fecha_registro,
                 recibido_por           = @recibido_por,
                 subcategoria           = @subcategoria,
                 tipo                   = @tipo,
@@ -237,7 +237,7 @@ public class CamarasAudioService
                 moneda                 = @moneda,
                 destino                = @destino,
                 accesorios             = @accesorios,
-                fecha_de_salida        = @fecha_de_salida::date,
+                fecha_de_salida        = @fecha_de_salida,
                 planta                 = @planta,
                 destino2               = @destino2,
                 personal_it_que_asigna = @personal_it_que_asigna,
@@ -265,7 +265,7 @@ public class CamarasAudioService
         await using var conn = await _pool.OpenAsync();
 
         string? ocVal = null, folioVal = null;
-        await using (var qSnap = new NpgsqlCommand(
+        await using (var qSnap = new SqlCommand(
             "SELECT oc, folio_inventario FROM camaras_audio WHERE id = @id", conn))
         {
             qSnap.Parameters.AddWithValue("id", id);
@@ -277,7 +277,7 @@ public class CamarasAudioService
             }
         }
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             "DELETE FROM camaras_audio WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
@@ -296,7 +296,7 @@ public class CamarasAudioService
     public async Task<List<object>> HistorialAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, usuario, fecha, registro_anterior, registro_nuevo
               FROM camaras_audio_historial
               WHERE camara_id = @id
@@ -326,7 +326,7 @@ public class CamarasAudioService
 
         var (where, parms) = ConstruirWhere(f);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             $@"SELECT id, oc, folio_inventario, fecha_registro, recibido_por,
                       subcategoria, tipo, marca, modelo, numero_de_serie,
                       proveedor, cantidad, costo, moneda, destino,
@@ -352,7 +352,7 @@ public class CamarasAudioService
     public async Task<byte[]> ExportarPorAnioAsync(int anio)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, oc, folio_inventario, fecha_registro, recibido_por,
                      subcategoria, tipo, marca, modelo, numero_de_serie,
                      proveedor, cantidad, costo, moneda, destino,
@@ -380,14 +380,14 @@ public class CamarasAudioService
     private static (string where, List<(string key, object? val)> parms) ConstruirWhere(CamaraAudioFiltros f)
     {
         var conds = new List<string>();
-        conds.Add("(activo IS NULL OR activo = true)");
+        conds.Add("(activo IS NULL OR activo = 1)");
         var parms = new List<(string, object?)>();
         var idx = 1;
 
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            conds.Add($"LOWER({col}::TEXT) LIKE LOWER(@p{idx})");
+            conds.Add($"LOWER({col}) LIKE LOWER(@p{idx})");
             parms.Add(($"p{idx}", $"%{val}%"));
             idx++;
         }
@@ -414,7 +414,7 @@ public class CamarasAudioService
         return (where, parms);
     }
 
-    private static void AgregarParametros(NpgsqlCommand cmd, CamaraAudioDto dto)
+    private static void AgregarParametros(SqlCommand cmd, CamaraAudioDto dto)
     {
         cmd.Parameters.AddWithValue("oc",                     (object?)dto.OC                     ?? DBNull.Value);
         cmd.Parameters.AddWithValue("folio_inventario",       (object?)dto.FOLIO_INVENTARIO        ?? DBNull.Value);
@@ -438,9 +438,9 @@ public class CamarasAudioService
         cmd.Parameters.AddWithValue("folio_de_servicio",      (object?)dto.FOLIO_DE_SERVICIO       ?? DBNull.Value);
     }
 
-    private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
+    private async Task<Dictionary<string, object?>?> SnapshotAsync(SqlConnection conn, int id)
     {
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT oc, folio_inventario, fecha_registro, recibido_por,
                      subcategoria, tipo, marca, modelo, numero_de_serie,
                      proveedor, cantidad, costo, moneda, destino,
@@ -459,16 +459,16 @@ public class CamarasAudioService
         return snap;
     }
 
-    private async Task RegistrarHistorialAsync(NpgsqlConnection conn, int camaraId,
+    private async Task RegistrarHistorialAsync(SqlConnection conn, int camaraId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {
         var antesJson   = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             """
             INSERT INTO camaras_audio_historial (camara_id, usuario, registro_anterior, registro_nuevo)
-            VALUES (@cid, @usr, @ant::jsonb, @nvo::jsonb)
+            VALUES (@cid, @usr, @ant, @nvo)
             """, conn);
 
         cmd.Parameters.AddWithValue("cid", camaraId);
@@ -497,7 +497,7 @@ public class CamarasAudioService
         for (int c = 0; c < headers.Length; c++)
         {
             ws.Cells[1, c + 1].Value = headers[c];
-            ws.Cells[1, c + 1].Style.Font.Bold = true;
+            ws.Cells[1, c + 1].Style.Font.Bold = 1;
             ws.Cells[1, c + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
             ws.Cells[1, c + 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(30, 41, 59));
             ws.Cells[1, c + 1].Style.Font.Color.SetColor(Color.White);
@@ -521,6 +521,6 @@ public class CamarasAudioService
         return pkg.GetAsByteArray();
     }
 
-    private static string? Str(NpgsqlDataReader r, int i)
+    private static string? Str(SqlDataReader r, int i)
         => r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
 }

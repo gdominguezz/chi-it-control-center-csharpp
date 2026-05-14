@@ -1,4 +1,5 @@
 ﻿using ChiIT.Data;
+using Microsoft.Data.SqlClient;
 using System.Text.Json;
 
 namespace ChiIT.Services;
@@ -10,7 +11,7 @@ public class AuditoriaServiceCorrectivos
     public AuditoriaServiceCorrectivos(DbConnectionPool db) => _db = db;
 
     public void RegistrarCorrectivo(
-        long registroId,   // como long no rompe en error 500
+        long registroId,
         string usuario,
         object anterior,
         object nuevo)
@@ -18,18 +19,17 @@ public class AuditoriaServiceCorrectivos
         try
         {
             using var conn = _db.Open();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = """
-            INSERT INTO public.auditoria_correctivos
-                (registro_id, usuario, registro_anterior, registro_nuevo, fecha_cambio)
-            VALUES
-                (@rid, @usr, @ant::jsonb, @nue::jsonb, NOW())
-            """;
-            cmd.Parameters.AddWithValue("rid", registroId);  // ahora long
-            cmd.Parameters.AddWithValue("usr", (object?)usuario ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("ant", JsonSerializer.Serialize(anterior,
+            using var cmd = new SqlCommand(@"
+                INSERT INTO auditoria_correctivos
+                    (registro_id, usuario, registro_anterior, registro_nuevo, fecha_cambio)
+                VALUES
+                    (@rid, @usr, @ant, @nue, GETDATE())", conn);
+
+            cmd.Parameters.AddWithValue("@rid", registroId);
+            cmd.Parameters.AddWithValue("@usr", (object?)usuario ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@ant", JsonSerializer.Serialize(anterior,
                 new JsonSerializerOptions { WriteIndented = false }));
-            cmd.Parameters.AddWithValue("nue", JsonSerializer.Serialize(nuevo,
+            cmd.Parameters.AddWithValue("@nue", JsonSerializer.Serialize(nuevo,
                 new JsonSerializerOptions { WriteIndented = false }));
             cmd.ExecuteNonQuery();
         }

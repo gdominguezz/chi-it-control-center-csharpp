@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Npgsql;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using ChiIT.Data;
 
 [ApiController]
@@ -28,14 +28,14 @@ public class EstatusWarehouseController : ControllerBase
         if (!string.IsNullOrEmpty(buscar))
         {
             sql += @"
-            WHERE descripcion ILIKE @buscar
-            OR CAST(estatus_id AS TEXT) ILIKE @buscar
+            WHERE descripcion LIKE @buscar
+            OR CAST(estatus_id AS TEXT) LIKE @buscar
             ";
         }
 
         sql += " ORDER BY estatus_id";
 
-        using var cmd = new NpgsqlCommand(sql, conn);
+        using var cmd = new SqlCommand(sql, conn);
 
         if (!string.IsNullOrEmpty(buscar))
         {

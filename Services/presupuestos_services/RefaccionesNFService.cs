@@ -1,6 +1,6 @@
 using ChiIT.Data;
 using ChiIT.Models;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -74,7 +74,7 @@ public class RefaccionesNFService
     private async Task InicializarTablaAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             CREATE TABLE IF NOT EXISTS refacciones_nf (
                 id               SERIAL PRIMARY KEY,
                 id_unico         TEXT,
@@ -99,7 +99,7 @@ public class RefaccionesNFService
                 id                SERIAL PRIMARY KEY,
                 refaccion_id      INTEGER NOT NULL REFERENCES refacciones_nf(id) ON DELETE CASCADE,
                 usuario           TEXT    NOT NULL,
-                fecha             TIMESTAMPTZ DEFAULT NOW(),
+                fecha             TIMESTAMPTZ DEFAULT GETDATE(),
                 registro_anterior JSONB,
                 registro_nuevo    JSONB
             );
@@ -117,13 +117,13 @@ public class RefaccionesNFService
         var offset = (page - 1) * limit;
 
         // Total
-        await using var cmdCount = new NpgsqlCommand(
+        await using var cmdCount = new SqlCommand(
             $"SELECT COUNT(*) FROM refacciones_nf {where}", conn);
         foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
         var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
 
         // Datos
-        await using var cmdData = new NpgsqlCommand(
+        await using var cmdData = new SqlCommand(
             $@"SELECT id, id_unico, oc, folio_correctivo, fecha_registro,
                       recibido_por, subcategoria, marca, modelo, serie,
                       cantidad, num_parte, costo, moneda, proveedor,
@@ -170,16 +170,16 @@ public class RefaccionesNFService
     {
         await using var conn = await _pool.OpenAsync();
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             INSERT INTO refacciones_nf
                 (id_unico, oc, folio_correctivo, fecha_registro, recibido_por,
                  subcategoria, marca, modelo, serie, cantidad,
                  num_parte, costo, moneda, proveedor, disponible, comentarios)
             VALUES
-                (@id_unico, @oc, @folio_correctivo, @fecha_registro::date, @recibido_por,
+                (@id_unico, @oc, @folio_correctivo, @fecha_registro, @recibido_por,
                  @subcategoria, @marca, @modelo, @serie, @cantidad,
                  @num_parte, @costo, @moneda, @proveedor, @disponible, @comentarios)
-            RETURNING id
+            OUTPUT INSERTED.id
             """, conn);
 
         AgregarParametros(cmd, dto);
@@ -204,10 +204,10 @@ public class RefaccionesNFService
         int rows;
         await using (var conn2 = await _pool.OpenAsync())
         {
-            await using var cmd = new NpgsqlCommand("""
+            await using var cmd = new SqlCommand("""
                 UPDATE refacciones_nf SET
                     id_unico=@id_unico, oc=@oc, folio_correctivo=@folio_correctivo,
-                    fecha_registro=@fecha_registro::date, recibido_por=@recibido_por,
+                    fecha_registro=@fecha_registro, recibido_por=@recibido_por,
                     subcategoria=@subcategoria, marca=@marca, modelo=@modelo,
                     serie=@serie, cantidad=@cantidad, num_parte=@num_parte,
                     costo=@costo, moneda=@moneda, proveedor=@proveedor,
@@ -241,7 +241,7 @@ public class RefaccionesNFService
         await using var conn = await _pool.OpenAsync();
 
         string? ocVal = null, folioVal = null;
-        await using (var qSnap = new NpgsqlCommand(
+        await using (var qSnap = new SqlCommand(
             "SELECT oc, folio_correctivo FROM refacciones_nf WHERE id = @id", conn))
         {
             qSnap.Parameters.AddWithValue("id", id);
@@ -253,7 +253,7 @@ public class RefaccionesNFService
             }
         }
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             "DELETE FROM refacciones_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
@@ -272,7 +272,7 @@ public class RefaccionesNFService
     public async Task<List<object>> HistorialAsync(int refaccionId)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             """
             SELECT id, usuario, fecha, registro_anterior, registro_nuevo
             FROM refacciones_nf_historial
@@ -304,7 +304,7 @@ public class RefaccionesNFService
         await using var conn = await _pool.OpenAsync();
         var (where, parms) = ConstruirWhere(f);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             $@"SELECT id, id_unico, oc, folio_correctivo, fecha_registro,
                       recibido_por, subcategoria, marca, modelo, serie,
                       cantidad, num_parte, costo, moneda, proveedor,
@@ -329,14 +329,14 @@ public class RefaccionesNFService
     public async Task<byte[]> ExportarPorAnioAsync(int anio)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, id_unico, oc, folio_correctivo, fecha_registro,
                      recibido_por, subcategoria, marca, modelo, serie,
                      cantidad, num_parte, costo, moneda, proveedor,
                      disponible, comentarios
               FROM refacciones_nf
               WHERE EXTRACT(YEAR FROM fecha_registro) = @anio
-              AND (activo IS NULL OR activo = true)
+              AND (activo IS NULL OR activo = 1)
               ORDER BY id DESC", conn);
         cmd.Parameters.AddWithValue("anio", anio);
 
@@ -358,7 +358,7 @@ public class RefaccionesNFService
     {
         var conds = new List<string>();
 
-        conds.Add("(activo IS NULL OR activo = true)");
+        conds.Add("(activo IS NULL OR activo = 1)");
 
         var parms = new List<(string, object?)>();
         var idx = 1;
@@ -366,7 +366,7 @@ public class RefaccionesNFService
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            conds.Add($"LOWER({col}::TEXT) LIKE LOWER(@p{idx})");
+            conds.Add($"LOWER({col}) LIKE LOWER(@p{idx})");
             parms.Add(($"p{idx}", $"%{val}%"));
             idx++;
         }
@@ -390,7 +390,7 @@ public class RefaccionesNFService
         return (where, parms);
     }
 
-    private static void AgregarParametros(NpgsqlCommand cmd, RefaccionNFDto dto)
+    private static void AgregarParametros(SqlCommand cmd, RefaccionNFDto dto)
     {
        
         var idUnicoCalculado = (!string.IsNullOrWhiteSpace(dto.OC) && !string.IsNullOrWhiteSpace(dto.FOLIO_CORRECTIVO))
@@ -417,9 +417,9 @@ public class RefaccionesNFService
         cmd.Parameters.AddWithValue("comentarios",      (object?)dto.COMENTARIOS      ?? DBNull.Value);
     }
 
-    private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
+    private async Task<Dictionary<string, object?>?> SnapshotAsync(SqlConnection conn, int id)
     {
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id_unico, oc, folio_correctivo, fecha_registro, recibido_por,
                      subcategoria, marca, modelo, serie, cantidad,
                      num_parte, costo, moneda, proveedor, disponible, comentarios
@@ -436,16 +436,16 @@ public class RefaccionesNFService
         return snap;
     }
 
-    private async Task RegistrarHistorialAsync(NpgsqlConnection conn, int refaccionId,
+    private async Task RegistrarHistorialAsync(SqlConnection conn, int refaccionId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {
         var antesJson   = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             """
             INSERT INTO refacciones_nf_historial (refaccion_id, usuario, registro_anterior, registro_nuevo)
-            VALUES (@rid, @usr, @ant::jsonb, @nvo::jsonb)
+            VALUES (@rid, @usr, @ant, @nvo)
             """, conn);
 
         cmd.Parameters.AddWithValue("rid", refaccionId);
@@ -473,7 +473,7 @@ public class RefaccionesNFService
         for (int c = 0; c < headers.Length; c++)
         {
             ws.Cells[1, c + 1].Value = headers[c];
-            ws.Cells[1, c + 1].Style.Font.Bold = true;
+            ws.Cells[1, c + 1].Style.Font.Bold = 1;
             ws.Cells[1, c + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
             ws.Cells[1, c + 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(30, 41, 59));
             ws.Cells[1, c + 1].Style.Font.Color.SetColor(Color.White);
@@ -497,6 +497,6 @@ public class RefaccionesNFService
         return pkg.GetAsByteArray();
     }
 
-    private static string? Str(NpgsqlDataReader r, int i)
+    private static string? Str(SqlDataReader r, int i)
         => r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
 }

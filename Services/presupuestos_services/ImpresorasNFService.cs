@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -92,7 +92,7 @@ public class ImpresorasNFService
     private async Task InicializarTablaAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             CREATE TABLE IF NOT EXISTS impresoras_nf (
                 id                      SERIAL PRIMARY KEY,
                 id_unico                TEXT,
@@ -127,7 +127,7 @@ public class ImpresorasNFService
                 id                SERIAL PRIMARY KEY,
                 impresora_id      INTEGER NOT NULL REFERENCES impresoras_nf(id) ON DELETE CASCADE,
                 usuario           TEXT    NOT NULL,
-                fecha             TIMESTAMPTZ DEFAULT NOW(),
+                fecha             TIMESTAMPTZ DEFAULT GETDATE(),
                 registro_anterior JSONB,
                 registro_nuevo    JSONB
             );
@@ -145,13 +145,13 @@ public class ImpresorasNFService
         var offset = (page - 1) * limit;
 
         // Total
-        await using var cmdCount = new NpgsqlCommand(
+        await using var cmdCount = new SqlCommand(
             $"SELECT COUNT(*) FROM impresoras_nf {where}", conn);
         foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
         var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
 
         // Datos
-        await using var cmdData = new NpgsqlCommand(
+        await using var cmdData = new SqlCommand(
             $@"SELECT id,
                       id_unico, oc, folio_inventario, fecha_de_entrada, recibido_por,
                       marca, modelo, numero_de_serie, tipo, cantidad,
@@ -211,7 +211,7 @@ public class ImpresorasNFService
     {
         await using var conn = await _pool.OpenAsync();
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             INSERT INTO impresoras_nf
                 (id_unico, oc, folio_inventario, fecha_de_entrada, recibido_por,
                  marca, modelo, numero_de_serie, tipo, cantidad,
@@ -220,13 +220,13 @@ public class ImpresorasNFService
                  observaciones, fecha_de_salida, destino_planta, asignado_a,
                  personal_it_que_asigna, fecha_de_mantenimiento)
             VALUES
-                (@id_unico, @oc, @folio_inventario, @fecha_de_entrada::date, @recibido_por,
+                (@id_unico, @oc, @folio_inventario, @fecha_de_entrada, @recibido_por,
                  @marca, @modelo, @numero_de_serie, @tipo, @cantidad,
                  @ip, @mac, @proveedor, @costo, @moneda,
-                 @ubicacion, @estado, @planta, @disponible, @fecha_de_asignacion::date,
-                 @observaciones, @fecha_de_salida::date, @destino_planta, @asignado_a,
-                 @personal_it_que_asigna, @fecha_de_mantenimiento::date)
-            RETURNING id
+                 @ubicacion, @estado, @planta, @disponible, @fecha_de_asignacion,
+                 @observaciones, @fecha_de_salida, @destino_planta, @asignado_a,
+                 @personal_it_que_asigna, @fecha_de_mantenimiento)
+            OUTPUT INSERTED.id
             """, conn);
 
         AgregarParametros(cmd, dto);
@@ -246,12 +246,12 @@ public class ImpresorasNFService
         var anterior = await SnapshotAsync(conn, id);
         if (anterior is null) return false;
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             UPDATE impresoras_nf SET
                 id_unico               = @id_unico,
                 oc                     = @oc,
                 folio_inventario       = @folio_inventario,
-                fecha_de_entrada       = @fecha_de_entrada::date,
+                fecha_de_entrada       = @fecha_de_entrada,
                 recibido_por           = @recibido_por,
                 marca                  = @marca,
                 modelo                 = @modelo,
@@ -267,13 +267,13 @@ public class ImpresorasNFService
                 estado                 = @estado,
                 planta                 = @planta,
                 disponible             = @disponible,
-                fecha_de_asignacion    = @fecha_de_asignacion::date,
+                fecha_de_asignacion    = @fecha_de_asignacion,
                 observaciones          = @observaciones,
-                fecha_de_salida        = @fecha_de_salida::date,
+                fecha_de_salida        = @fecha_de_salida,
                 destino_planta         = @destino_planta,
                 asignado_a             = @asignado_a,
                 personal_it_que_asigna = @personal_it_que_asigna,
-                fecha_de_mantenimiento = @fecha_de_mantenimiento::date
+                fecha_de_mantenimiento = @fecha_de_mantenimiento
             WHERE id = @id
             """, conn);
 
@@ -297,7 +297,7 @@ public class ImpresorasNFService
         await using var conn = await _pool.OpenAsync();
 
         string? ocVal = null, folioVal = null;
-        await using (var qSnap = new NpgsqlCommand(
+        await using (var qSnap = new SqlCommand(
             "SELECT oc, folio_inventario FROM impresoras_nf WHERE id = @id", conn))
         {
             qSnap.Parameters.AddWithValue("id", id);
@@ -309,7 +309,7 @@ public class ImpresorasNFService
             }
         }
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             "DELETE FROM impresoras_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
@@ -328,7 +328,7 @@ public class ImpresorasNFService
     public async Task<List<object>> HistorialAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, usuario, fecha, registro_anterior, registro_nuevo
               FROM impresoras_nf_historial
               WHERE impresora_id = @id
@@ -358,7 +358,7 @@ public class ImpresorasNFService
 
         var (where, parms) = ConstruirWhere(f);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             $@"SELECT id,
                       id_unico, oc, folio_inventario, fecha_de_entrada, recibido_por,
                       marca, modelo, numero_de_serie, tipo, cantidad,
@@ -386,7 +386,7 @@ public class ImpresorasNFService
     public async Task<byte[]> ExportarPorAnioAsync(int anio)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id,
                      id_unico, oc, folio_inventario, fecha_de_entrada, recibido_por,
                      marca, modelo, numero_de_serie, tipo, cantidad,
@@ -417,7 +417,7 @@ public class ImpresorasNFService
     {
         var conds = new List<string>();
 
-        conds.Add("(activo IS NULL OR activo = true)");
+        conds.Add("(activo IS NULL OR activo = 1)");
 
         var parms = new List<(string, object?)>();
         var idx = 1;
@@ -425,7 +425,7 @@ public class ImpresorasNFService
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            conds.Add($"LOWER({col}::TEXT) LIKE LOWER(@p{idx})");
+            conds.Add($"LOWER({col}) LIKE LOWER(@p{idx})");
             parms.Add(($"p{idx}", $"%{val}%"));
             idx++;
         }
@@ -455,7 +455,7 @@ public class ImpresorasNFService
         return (where, parms);
     }
 
-    private static void AgregarParametros(NpgsqlCommand cmd, ImpresoraNFDto dto)
+    private static void AgregarParametros(SqlCommand cmd, ImpresoraNFDto dto)
     {
         cmd.Parameters.AddWithValue("id_unico",               (object?)dto.ID_UNICO               ?? DBNull.Value);
         cmd.Parameters.AddWithValue("oc",                     (object?)dto.OC                     ?? DBNull.Value);
@@ -485,9 +485,9 @@ public class ImpresorasNFService
         cmd.Parameters.AddWithValue("fecha_de_mantenimiento", (object?)dto.FECHA_DE_MANTENIMIENTO  ?? DBNull.Value);
     }
 
-    private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
+    private async Task<Dictionary<string, object?>?> SnapshotAsync(SqlConnection conn, int id)
     {
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id_unico, oc, folio_inventario, fecha_de_entrada, recibido_por,
                      marca, modelo, numero_de_serie, tipo, cantidad,
                      ip, mac, proveedor, costo, moneda,
@@ -507,16 +507,16 @@ public class ImpresorasNFService
         return snap;
     }
 
-    private async Task RegistrarHistorialAsync(NpgsqlConnection conn, int impresoraId,
+    private async Task RegistrarHistorialAsync(SqlConnection conn, int impresoraId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {
         var antesJson   = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             """
             INSERT INTO impresoras_nf_historial (impresora_id, usuario, registro_anterior, registro_nuevo)
-            VALUES (@iid, @usr, @ant::jsonb, @nvo::jsonb)
+            VALUES (@iid, @usr, @ant, @nvo)
             """, conn);
 
         cmd.Parameters.AddWithValue("iid", impresoraId);
@@ -546,7 +546,7 @@ public class ImpresorasNFService
         for (int c = 0; c < headers.Length; c++)
         {
             ws.Cells[1, c + 1].Value = headers[c];
-            ws.Cells[1, c + 1].Style.Font.Bold = true;
+            ws.Cells[1, c + 1].Style.Font.Bold = 1;
             ws.Cells[1, c + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
             ws.Cells[1, c + 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(30, 41, 59));
             ws.Cells[1, c + 1].Style.Font.Color.SetColor(Color.White);
@@ -570,6 +570,6 @@ public class ImpresorasNFService
         return pkg.GetAsByteArray();
     }
 
-    private static string? Str(NpgsqlDataReader r, int i)
+    private static string? Str(SqlDataReader r, int i)
         => r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
 }

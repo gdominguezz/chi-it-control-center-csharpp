@@ -1,7 +1,7 @@
 using ChiIT.Data;
 using ChiIT.Models;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
@@ -74,7 +74,7 @@ public class LoginController : ControllerBase
         if (EstasBloqueado(usuarioUpper, out int minutosRestantes))
             return Ok(new
             {
-                ok = false,
+                ok = 0,
                 mensaje = $"Usuario bloqueado por demasiados intentos fallidos. Intenta en {minutosRestantes} minuto{(minutosRestantes != 1 ? "s" : "")}."
             });
 
@@ -82,7 +82,7 @@ public class LoginController : ControllerBase
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT id, usuario, nombre, rol, password_hash, password_temporal, activo
-            FROM public.usuarios
+            FROM usuarios
             WHERE usuario = @usr
             """;
         cmd.Parameters.AddWithValue("usr", usuarioUpper);
@@ -91,7 +91,7 @@ public class LoginController : ControllerBase
         if (!reader.Read())
         {
             RegistrarFallo(usuarioUpper);
-            return Ok(new { ok = false, mensaje = "Usuario o contraseña incorrectos" });
+            return Ok(new { ok = 0, mensaje = "Usuario o contraseña incorrectos" });
         }
 
         var id = reader.GetInt32(0);
@@ -104,7 +104,7 @@ public class LoginController : ControllerBase
         reader.Close();
 
         if (!activo)
-            return Ok(new { ok = false, mensaje = "Usuario desactivado" });
+            return Ok(new { ok = 0, mensaje = "Usuario desactivado" });
 
         if (HashPassword(req.Password) != pwdHash)
         {
@@ -117,7 +117,7 @@ public class LoginController : ControllerBase
                 ? $"Usuario o contraseña incorrectos. Te quedan {intentosRestantes} intento{(intentosRestantes != 1 ? "s" : "")}."
                 : $"Usuario bloqueado por {MINUTOS_BLOQUEO} minutos.";
 
-            return Ok(new { ok = false, mensaje });
+            return Ok(new { ok = 0, mensaje });
         }
 
         // Login exitoso — limpiar intentos fallidos
@@ -125,7 +125,7 @@ public class LoginController : ControllerBase
 
         // Actualizar último acceso
         using var upd = conn.CreateCommand();
-        upd.CommandText = "UPDATE public.usuarios SET ultimo_acceso = NOW() WHERE id = @id";
+        upd.CommandText = "UPDATE usuarios SET ultimo_acceso = GETDATE() WHERE id = @id";
         upd.Parameters.AddWithValue("id", id);
         upd.ExecuteNonQuery();
 
@@ -135,11 +135,11 @@ public class LoginController : ControllerBase
 
             return Ok(new
             {
-                ok = true,
+                ok = 1,
                 usuario,
                 nombre,
                 rol,
-                password_temporal = true
+                password_temporal = 1
             });
         }
 
@@ -147,18 +147,18 @@ public class LoginController : ControllerBase
         // Setear cookie HTTP segura para verificación server-side
         Response.Cookies.Append("usuario", usuario, new CookieOptions
         {
-            HttpOnly = true,
+            HttpOnly = 1,
             SameSite = SameSiteMode.Lax,
-            Secure = true
+            Secure = 1
         });
         Response.Cookies.Append("rol", rol, new CookieOptions
         {
-            HttpOnly = false,  // el JS del menú necesita leerlo
+            HttpOnly = 0,  // el JS del menú necesita leerlo
             SameSite = SameSiteMode.Lax,
-            Secure = true
+            Secure = 1
         });
 
-        return Ok(new { ok = true, usuario, nombre, rol, password_temporal = pwdTemporal });
+        return Ok(new { ok = 1, usuario, nombre, rol, password_temporal = pwdTemporal });
     }
 
     //GET PARA BLOQUEAR CACHE DEL MENU 
@@ -178,12 +178,12 @@ public class LoginController : ControllerBase
     {
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT id, password_hash FROM public.usuarios WHERE usuario = @usr";
+        cmd.CommandText = "SELECT id, password_hash FROM usuarios WHERE usuario = @usr";
         cmd.Parameters.AddWithValue("usr", req.Usuario.ToUpper());
 
         using var reader = cmd.ExecuteReader();
         if (!reader.Read())
-            return Ok(new { ok = false, mensaje = "Usuario no encontrado" });
+            return Ok(new { ok = 0, mensaje = "Usuario no encontrado" });
 
         var id = reader.GetInt32(0);
         var pwdHash = reader.GetString(1);
@@ -192,17 +192,17 @@ public class LoginController : ControllerBase
         Console.WriteLine("PasswordNuevo: " + req.PasswordNuevo);
 
         if (string.IsNullOrWhiteSpace(req.PasswordNuevo) || req.PasswordNuevo.Length < 6)
-            return Ok(new { ok = false, mensaje = "La nueva contraseña debe tener al menos 6 caracteres" });
+            return Ok(new { ok = 0, mensaje = "La nueva contraseña debe tener al menos 6 caracteres" });
 
         using var upd = conn.CreateCommand();
-        upd.CommandText = "UPDATE public.usuarios SET password_hash=@h, password_temporal=false WHERE id=@id";
+        upd.CommandText = "UPDATE usuarios SET password_hash=@h, password_temporal=0 WHERE id=@id";
         upd.Parameters.AddWithValue("h", HashPassword(req.PasswordNuevo));
         upd.Parameters.AddWithValue("id", id);
         upd.ExecuteNonQuery();
 
         // Recuperar rol del usuario para incluirlo en la cookie
         using var rolCmd = conn.CreateCommand();
-        rolCmd.CommandText = "SELECT rol, nombre FROM public.usuarios WHERE id=@id";
+        rolCmd.CommandText = "SELECT rol, nombre FROM usuarios WHERE id=@id";
         rolCmd.Parameters.AddWithValue("id", id);
         string rolUsuario = "USER"; string nombreUsuario = "";
         using var rolReader = rolCmd.ExecuteReader();
@@ -212,18 +212,18 @@ public class LoginController : ControllerBase
         // Crear sesión después del cambio de contraseña
         Response.Cookies.Append("usuario", req.Usuario.ToUpper(), new CookieOptions
         {
-            HttpOnly = true,
+            HttpOnly = 1,
             SameSite = SameSiteMode.Lax,
-            Secure = true
+            Secure = 1
         });
         Response.Cookies.Append("rol", rolUsuario, new CookieOptions
         {
-            HttpOnly = false,
+            HttpOnly = 0,
             SameSite = SameSiteMode.Lax,
-            Secure = true
+            Secure = 1
         });
 
-        return Ok(new { ok = true, mensaje = "Contraseña actualizada correctamente", nombre = nombreUsuario, rol = rolUsuario });
+        return Ok(new { ok = 1, mensaje = "Contraseña actualizada correctamente", nombre = nombreUsuario, rol = rolUsuario });
     }
 
     // ── GET /obtener-usuario ─────────────────────────────
@@ -237,7 +237,7 @@ public class LoginController : ControllerBase
 
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT nombre FROM public.usuarios WHERE usuario = @usr";
+        cmd.CommandText = "SELECT nombre FROM usuarios WHERE usuario = @usr";
         cmd.Parameters.AddWithValue("usr", usuario);
 
         var nombre = cmd.ExecuteScalar()?.ToString();
@@ -246,7 +246,7 @@ public class LoginController : ControllerBase
             return Unauthorized();
 
         using var rolCmd2 = conn.CreateCommand();
-        rolCmd2.CommandText = "SELECT rol FROM public.usuarios WHERE usuario=@u2";
+        rolCmd2.CommandText = "SELECT rol FROM usuarios WHERE usuario=@u2";
         rolCmd2.Parameters.AddWithValue("u2", usuario);
         var rolVal = rolCmd2.ExecuteScalar()?.ToString() ?? "USER";
 
@@ -259,7 +259,7 @@ public class LoginController : ControllerBase
     {
         Response.Cookies.Delete("usuario");
         Response.Cookies.Delete("rol");
-        return Ok(new { ok = true });
+        return Ok(new { ok = 1 });
     }
 
     // ── Hash SHA-256 ─────────────────────────────────────

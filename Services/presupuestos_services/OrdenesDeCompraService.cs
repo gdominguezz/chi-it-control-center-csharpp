@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 using ClosedXML.Excel;
 
 public class OrdenDeCompraDto
@@ -39,7 +39,7 @@ public class OrdenesDeCompraService
 
     public OrdenesDeCompraService(DbConnectionPool db) => _db = db;
 
-    private NpgsqlConnection Abrir() => _db.Open();
+    private SqlConnection Abrir() => _db.Open();
 
     private static object ParseFecha(string? valor)
     {
@@ -172,7 +172,7 @@ public class OrdenesDeCompraService
                     FROM {cfg.tabla}
                     WHERE oc = @odc
                       AND {cfg.colFolio} = @folio
-                      AND (activo IS NULL OR activo = true)
+                      AND (activo IS NULL OR activo = 1)
                     """;
                 cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
@@ -183,7 +183,7 @@ public class OrdenesDeCompraService
                     SELECT COALESCE(SUM({cfg.colCantidad}), 0)
                     FROM {cfg.tabla}
                     WHERE oc = @odc
-                      AND (activo IS NULL OR activo = true)
+                      AND (activo IS NULL OR activo = 1)
                     """;
                 cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
             }
@@ -238,7 +238,7 @@ public class OrdenesDeCompraService
         // NO necesariamente coincide con ordenes_de_compra.folio.  Filtrar por él
         // dejaba afectadas vacío y nunca se hacía ningún UPDATE.
         // Ahora buscamos por oc+hoja y usamos el folio propio de cada OC para el SUM.
-        NpgsqlConnection con;
+        SqlConnection con;
         try
         {
             con = Abrir();
@@ -262,7 +262,7 @@ public class OrdenesDeCompraService
                     FROM ordenes_de_compra
                     WHERE oc           = @oc
                       AND hoja_control  = @hc
-                      AND (activo IS NULL OR activo = true)
+                      AND (activo IS NULL OR activo = 1)
                     """;
 
                 cmd.Parameters.AddWithValue("oc", (object?)oc ?? DBNull.Value);
@@ -371,7 +371,7 @@ public class OrdenesDeCompraService
     }
 
     // Versiones internas que reutilizan una conexión ya abierta (para RecalcularFormulas)
-    private (string? ordenDeCompra, string? fechaOc) BuscarEnReqVsOC(NpgsqlConnection con, string? requisicion)
+    private (string? ordenDeCompra, string? fechaOc) BuscarEnReqVsOC(SqlConnection con, string? requisicion)
     {
         if (string.IsNullOrWhiteSpace(requisicion)) return (null, null);
 
@@ -380,7 +380,7 @@ public class OrdenesDeCompraService
             SELECT orden_compra, fecha_compra
             FROM req_vs_oc
             WHERE no_requisicion = @req
-              AND (activo IS NULL OR activo = true)
+              AND (activo IS NULL OR activo = 1)
             LIMIT 1
             """;
         cmd.Parameters.AddWithValue("req", requisicion.Trim());
@@ -395,7 +395,7 @@ public class OrdenesDeCompraService
         return (oc, foc);
     }
 
-    private decimal SumarCantidadRegistrada(NpgsqlConnection con, string? ordenDeCompra, string? folio, string? hojaControl)
+    private decimal SumarCantidadRegistrada(SqlConnection con, string? ordenDeCompra, string? folio, string? hojaControl)
     {
         var hoja = NormalizarHojaControl(hojaControl);
         if (hoja == null) return 0;
@@ -431,7 +431,7 @@ public class OrdenesDeCompraService
                 FROM {cfg.tabla}
                 WHERE oc = @odc
                   AND {cfg.colFolio} = @folio
-                  AND (activo IS NULL OR activo = true)
+                  AND (activo IS NULL OR activo = 1)
                 """;
             cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
             cmd.Parameters.AddWithValue("folio", (object?)folio ?? DBNull.Value);
@@ -442,7 +442,7 @@ public class OrdenesDeCompraService
                 SELECT COALESCE(SUM({cfg.colCantidad}), 0)
                 FROM {cfg.tabla}
                 WHERE oc = @odc
-                  AND (activo IS NULL OR activo = true)
+                  AND (activo IS NULL OR activo = 1)
                 """;
             cmd.Parameters.AddWithValue("odc", (object?)ordenDeCompra ?? DBNull.Value);
         }
@@ -481,7 +481,7 @@ public class OrdenesDeCompraService
             SELECT orden_compra, fecha_compra
             FROM req_vs_oc
             WHERE no_requisicion = @req
-              AND (activo IS NULL OR activo = true)
+              AND (activo IS NULL OR activo = 1)
             LIMIT 1
             """;
 
@@ -531,13 +531,13 @@ public class OrdenesDeCompraService
     {
         using var con = Abrir();
 
-        var where = new List<string> { "(activo IS NULL OR activo = true)" };
+        var where = new List<string> { "(activo IS NULL OR activo = 1)" };
         var parms = new List<(string name, object value)>();
 
         void F(string col, string? val, string p)
         {
             if (!string.IsNullOrWhiteSpace(val))
-            { where.Add($"{col} ILIKE @{p}"); parms.Add((p, $"%{val}%")); }
+            { where.Add($"{col} LIKE @{p}"); parms.Add((p, $"%{val}%")); }
         }
 
         void FNum(string col, string? val, string p)
@@ -565,9 +565,9 @@ public class OrdenesDeCompraService
         F("estatus_oc", ESTATUS_OC, "es");
 
         if (!string.IsNullOrWhiteSpace(FECHA_OC))
-        { where.Add("fecha_oc::text ILIKE @foc_f"); parms.Add(("foc_f", $"%{FECHA_OC}%")); }
+        { where.Add("fecha_oc LIKE @foc_f"); parms.Add(("foc_f", $"%{FECHA_OC}%")); }
         if (!string.IsNullOrWhiteSpace(FECHA_ENTRADA))
-        { where.Add("fecha_entrada::text ILIKE @fen_f"); parms.Add(("fen_f", $"%{FECHA_ENTRADA}%")); }
+        { where.Add("fecha_entrada LIKE @fen_f"); parms.Add(("fen_f", $"%{FECHA_ENTRADA}%")); }
 
         FNum("cantidad", CANTIDAD, "ca_f");
         FNum("precio_unitario", PRECIO_UNITARIO, "pu_f");
@@ -627,7 +627,7 @@ public class OrdenesDeCompraService
     }
 
     // ── MAP ROW ───────────────────────────────────────────────────────────
-    private static OrdenDeCompraRow MapRow(NpgsqlDataReader dr)
+    private static OrdenDeCompraRow MapRow(SqlDataReader dr)
     {
         string? ruta = dr.IsDBNull(21) ? null : dr.GetString(21);
 
@@ -735,7 +735,7 @@ public class OrdenesDeCompraService
 
     // ── Utilidad: BindParameters compartido entre Create y Update ─────────
     private static void Bind(
-        NpgsqlCommand cmd,
+        SqlCommand cmd,
         string? ordenDeCompra, OrdenDeCompraDto d, string? hojaControl,
         decimal? total, string? fechaOc, string? oc,
         decimal cantReg, string estatus)
@@ -776,7 +776,7 @@ public class OrdenesDeCompraService
             cmd.CommandText = """
                 SELECT id, requisicion, orden_de_compra, folio, fecha_oc, oc, cantidad, precio_unitario, hoja_control, cantidad_registrada
                 FROM ordenes_de_compra
-                WHERE (activo IS NULL OR activo = true)
+                WHERE (activo IS NULL OR activo = 1)
                 ORDER BY id
                 """;
             using (var dr = cmd.ExecuteReader())
@@ -885,7 +885,7 @@ public class OrdenesDeCompraService
         for (int i = 0; i < headers.Length; i++)
         {
             ws.Cell(1, i + 1).Value = headers[i];
-            ws.Cell(1, i + 1).Style.Font.Bold = true;
+            ws.Cell(1, i + 1).Style.Font.Bold = 1;
             ws.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#1a2235");
             ws.Cell(1, i + 1).Style.Font.FontColor = XLColor.White;
         }
@@ -931,8 +931,8 @@ public class OrdenesDeCompraService
         cmd.CommandText = """
             SELECT id, orden_de_compra, folio, solicitante, presupuesto_mes, serie_ubicacion_no_empleado, accesorio_solicitado, proveedor_elegido, pieza_servicio, cantidad, precio_unitario, total_sin_iva, moneda, comentarios, hoja_control, requisicion, fecha_oc, oc, fecha_entrada, cantidad_registrada, estatus_oc, pdf
             FROM ordenes_de_compra
-            WHERE (activo IS NULL OR activo = true)
-              AND EXTRACT(YEAR FROM fecha_oc::date) = @anio
+            WHERE (activo IS NULL OR activo = 1)
+              AND EXTRACT(YEAR FROM fecha_oc) = @anio
             ORDER BY id DESC
             """;
         cmd.Parameters.AddWithValue("anio", anio);
@@ -979,7 +979,7 @@ public class OrdenesDeCompraService
         cmd.CommandText = """
             INSERT INTO auditoria_ordenes_de_compra
             (registro_id, fecha_cambio, usuario, registro_anterior, registro_nuevo)
-            VALUES (@rid, NOW(), @usr, @ant, @nvo)
+            VALUES (@rid, GETDATE(), @usr, @ant, @nvo)
             """;
         cmd.Parameters.AddWithValue("rid", id);
         cmd.Parameters.AddWithValue("usr", (object?)usuario ?? DBNull.Value);
@@ -997,7 +997,7 @@ public class OrdenesDeCompraService
             SELECT DISTINCT solicitante
             FROM ordenes_de_compra
             WHERE solicitante IS NOT NULL AND solicitante <> ''
-              AND (activo IS NULL OR activo = true)
+              AND (activo IS NULL OR activo = 1)
             ORDER BY solicitante
             """;
         var lista = new List<string>();

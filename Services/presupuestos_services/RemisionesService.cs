@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -79,7 +79,7 @@ public class RemisionesService
     private async Task InicializarTablaAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             CREATE TABLE IF NOT EXISTS remisiones (
                 id                          SERIAL PRIMARY KEY,
                 id_oc                       TEXT,
@@ -108,7 +108,7 @@ public class RemisionesService
                 id                SERIAL PRIMARY KEY,
                 remision_id       INTEGER NOT NULL REFERENCES remisiones(id) ON DELETE CASCADE,
                 usuario           TEXT    NOT NULL,
-                fecha             TIMESTAMPTZ DEFAULT NOW(),
+                fecha             TIMESTAMPTZ DEFAULT GETDATE(),
                 registro_anterior JSONB,
                 registro_nuevo    JSONB
             );
@@ -126,13 +126,13 @@ public class RemisionesService
         var offset = (page - 1) * limit;
 
         // Total
-        await using var cmdCount = new NpgsqlCommand(
+        await using var cmdCount = new SqlCommand(
             $"SELECT COUNT(*) FROM remisiones {where}", conn);
         foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
         var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
 
         // Datos
-        await using var cmdData = new NpgsqlCommand(
+        await using var cmdData = new SqlCommand(
             $@"SELECT id, id_oc, id_remision, folio, solicitante,
                       fecha_solicitud, accesorio_solicitado, modelo_serie_comentarios,
                       proveedor, pieza_servicio, cantidad, precio_unitario,
@@ -183,7 +183,7 @@ public class RemisionesService
     public async Task<int> CrearAsync(RemisionDto dto, string usuario)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"INSERT INTO remisiones
                 (id_oc, id_remision, folio, solicitante, fecha_solicitud,
                  accesorio_solicitado, modelo_serie_comentarios, proveedor, pieza_servicio,
@@ -194,7 +194,7 @@ public class RemisionesService
                  @accesorio_solicitado, @modelo_serie_comentarios, @proveedor, @pieza_servicio,
                  @cantidad, @precio_unitario, @total_sin_iva, @moneda, @pagado,
                  @presupuesto, @cuenta_a_descontar, @fecha_entrada_planta, @status, @requisicion, @oc)
-              RETURNING id", conn);
+              OUTPUT INSERTED.id", conn);
 
         AgregarParametros(cmd, dto);
         var newId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
@@ -216,7 +216,7 @@ public class RemisionesService
         var anterior = await SnapshotAsync(conn, id);
         if (anterior is null) return false;
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"UPDATE remisiones SET
                 id_oc                    = @id_oc,
                 id_remision              = @id_remision,
@@ -255,7 +255,7 @@ public class RemisionesService
     public async Task<bool> EliminarAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             "DELETE FROM remisiones WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         return await cmd.ExecuteNonQueryAsync() > 0;
@@ -265,7 +265,7 @@ public class RemisionesService
     public async Task<List<object>> HistorialAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, usuario, fecha, registro_anterior, registro_nuevo
               FROM remisiones_historial
               WHERE remision_id = @id
@@ -294,7 +294,7 @@ public class RemisionesService
         await using var conn = await _pool.OpenAsync();
         var (where, parms) = ConstruirWhere(f);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             $@"SELECT id, id_oc, id_remision, folio, solicitante,
                       fecha_solicitud, accesorio_solicitado, modelo_serie_comentarios,
                       proveedor, pieza_servicio, cantidad, precio_unitario,
@@ -321,7 +321,7 @@ public class RemisionesService
     public async Task<byte[]> ExportarPorAnioAsync(int anio)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, id_oc, id_remision, folio, solicitante,
                      fecha_solicitud, accesorio_solicitado, modelo_serie_comentarios,
                      proveedor, pieza_servicio, cantidad, precio_unitario,
@@ -329,7 +329,7 @@ public class RemisionesService
                      cuenta_a_descontar, fecha_entrada_planta, status, requisicion, oc
               FROM remisiones
               WHERE EXTRACT(YEAR FROM fecha_solicitud) = @anio
-              AND (activo IS NULL OR activo = true)
+              AND (activo IS NULL OR activo = 1)
               ORDER BY id DESC", conn);
         cmd.Parameters.AddWithValue("anio", anio);
 
@@ -351,7 +351,7 @@ public class RemisionesService
     {
         var conds = new List<string>();
 
-        conds.Add("(activo IS NULL OR activo = true)");
+        conds.Add("(activo IS NULL OR activo = 1)");
 
         var parms = new List<(string, object?)>();
         var idx = 1;
@@ -359,7 +359,7 @@ public class RemisionesService
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            conds.Add($"LOWER({col}::TEXT) LIKE LOWER(@p{idx})");
+            conds.Add($"LOWER({col}) LIKE LOWER(@p{idx})");
             parms.Add(($"p{idx}", $"%{val}%"));
             idx++;
         }
@@ -374,7 +374,7 @@ public class RemisionesService
         Add("proveedor",                f.PROVEEDOR);
         Add("pieza_servicio",           f.PIEZA_SERVICIO);
         Add("moneda",                   f.MONEDA);
-        Add("pagado::TEXT",             f.PAGADO);
+        Add("pagado",             f.PAGADO);
         Add("presupuesto",              f.PRESUPUESTO);
         Add("cuenta_a_descontar",       f.CUENTA_A_DESCONTAR);
         Add("fecha_entrada_planta",     f.FECHA_ENTRADA_PLANTA);
@@ -386,7 +386,7 @@ public class RemisionesService
         return (where, parms);
     }
 
-    private static void AgregarParametros(NpgsqlCommand cmd, RemisionDto dto)
+    private static void AgregarParametros(SqlCommand cmd, RemisionDto dto)
     {
         cmd.Parameters.AddWithValue("id_oc",                    (object?)dto.ID_OC                    ?? DBNull.Value);
         cmd.Parameters.AddWithValue("id_remision",              (object?)dto.ID_REMISION              ?? DBNull.Value);
@@ -410,16 +410,16 @@ public class RemisionesService
         cmd.Parameters.AddWithValue("oc",                       (object?)dto.OC                       ?? DBNull.Value);
     }
 
-    private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
+    private async Task<Dictionary<string, object?>?> SnapshotAsync(SqlConnection conn, int id)
     {
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id_oc, id_remision, folio, solicitante, fecha_solicitud,
              accesorio_solicitado, modelo_serie_comentarios, proveedor, pieza_servicio,
              cantidad, precio_unitario, total_sin_iva, moneda, pagado,
              presupuesto, cuenta_a_descontar, fecha_entrada_planta, status, requisicion, oc
           FROM remisiones
           WHERE id = @id
-          AND (activo IS NULL OR activo = true)", conn);
+          AND (activo IS NULL OR activo = 1)", conn);
 
         cmd.Parameters.AddWithValue("id", id);
 
@@ -433,16 +433,16 @@ public class RemisionesService
         return snap;
     }
 
-    private async Task RegistrarHistorialAsync(NpgsqlConnection conn, int remisionId,
+    private async Task RegistrarHistorialAsync(SqlConnection conn, int remisionId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {
         var antesJson   = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             """
             INSERT INTO remisiones_historial (remision_id, usuario, registro_anterior, registro_nuevo)
-            VALUES (@rid, @usr, @ant::jsonb, @nvo::jsonb)
+            VALUES (@rid, @usr, @ant, @nvo)
             """, conn);
 
         cmd.Parameters.AddWithValue("rid", remisionId);
@@ -471,7 +471,7 @@ public class RemisionesService
         for (int c = 0; c < headers.Length; c++)
         {
             ws.Cells[1, c + 1].Value = headers[c];
-            ws.Cells[1, c + 1].Style.Font.Bold = true;
+            ws.Cells[1, c + 1].Style.Font.Bold = 1;
             ws.Cells[1, c + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
             ws.Cells[1, c + 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(30, 41, 59));
             ws.Cells[1, c + 1].Style.Font.Color.SetColor(Color.White);
@@ -495,6 +495,6 @@ public class RemisionesService
         return pkg.GetAsByteArray();
     }
 
-    private static string? Str(NpgsqlDataReader r, int i)
+    private static string? Str(SqlDataReader r, int i)
         => r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
 }

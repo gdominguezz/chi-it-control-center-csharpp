@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 using ClosedXML.Excel;
 
 public class ReqVsOcDto
@@ -25,10 +25,10 @@ public class PresupuestosReqVsOcService
 
     public PresupuestosReqVsOcService(DbConnectionPool db) => _db = db;
 
-    private NpgsqlConnection Abrir() => _db.Open();
+    private SqlConnection Abrir() => _db.Open();
 
     // ── BUSCARV: verifica si NO_REQUISICION existe en ordenes_de_compra ───
-    private string? BuscarRequisicionEnOC(NpgsqlConnection con, string? noRequisicion)
+    private string? BuscarRequisicionEnOC(SqlConnection con, string? noRequisicion)
     {
         if (string.IsNullOrWhiteSpace(noRequisicion)) return null;
 
@@ -54,7 +54,7 @@ public class PresupuestosReqVsOcService
     {using var con = Abrir();
         var whereConditions = new List<string>();
 
-        whereConditions.Add("(activo IS NULL OR activo = true)");
+        whereConditions.Add("(activo IS NULL OR activo = 1)");
 
         var paramValues = new List<(string name, string value)>();
 
@@ -62,15 +62,15 @@ public class PresupuestosReqVsOcService
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                whereConditions.Add($"{column} ILIKE @{param}");
+                whereConditions.Add($"{column} LIKE @{param}");
                 paramValues.Add((param, $"%{value}%"));
             }
         }
 
         CollectFilter("no_requisicion", NO_REQUISICION, "nr");
         CollectFilter("orden_compra", ORDEN_COMPRA, "oc");
-        CollectFilter("fecha_compra::text", FECHA_COMPRA, "fc");
-        CollectFilter("po_subtotal::text", PO_SUBTOTAL, "ps");
+        CollectFilter("fecha_compra", FECHA_COMPRA, "fc");
+        CollectFilter("po_subtotal", PO_SUBTOTAL, "ps");
         CollectFilter("moneda", MONEDA, "mo");
         CollectFilter("oc_subtotal", OC_SUBTOTAL, "os");
         CollectFilter("registrada_en_oc", REGISTRADA_EN_OC, "re");
@@ -204,7 +204,7 @@ public class PresupuestosReqVsOcService
 
         for (int i = 0; i < headers.Length; i++)
         {ws.Cell(1, i + 1).Value = headers[i];
-            ws.Cell(1, i + 1).Style.Font.Bold = true;}
+            ws.Cell(1, i + 1).Style.Font.Bold = 1;}
 
         int row = 2;
         foreach (var r in rows)
@@ -232,7 +232,7 @@ public class PresupuestosReqVsOcService
             SELECT id, no_requisicion, orden_compra, fecha_compra, po_subtotal, moneda, oc_subtotal, registrada_en_oc, pdf
             FROM req_vs_oc
             WHERE EXTRACT(YEAR FROM fecha_compra) = @anio
-            AND (activo IS NULL OR activo = true)
+            AND (activo IS NULL OR activo = 1)
             ORDER BY id DESC
             """;
 

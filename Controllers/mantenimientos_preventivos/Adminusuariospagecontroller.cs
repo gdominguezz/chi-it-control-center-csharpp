@@ -1,4 +1,4 @@
-﻿using ChiIT.Data;
+using ChiIT.Data;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -22,7 +22,7 @@ public class AdminUsuariosPageController : ControllerBase
 
         using var conn = _db.Open();
         using var chk = conn.CreateCommand();
-        chk.CommandText = "SELECT rol FROM public.usuarios WHERE usuario=@u AND activo=true";
+        chk.CommandText = "SELECT rol FROM usuarios WHERE usuario=@u AND activo=true";
         chk.Parameters.AddWithValue("u", usr.ToUpper());
         var rol = chk.ExecuteScalar()?.ToString();
         if (rol != "ADMIN" && rol != "AUDITOR")

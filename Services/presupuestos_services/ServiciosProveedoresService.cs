@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -77,7 +77,7 @@ public class ServiciosProveedoresService
     private async Task InicializarTablaAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             CREATE TABLE IF NOT EXISTS servicios_proveedores (
                 id                   SERIAL PRIMARY KEY,
                 id_unico             TEXT,
@@ -107,7 +107,7 @@ public class ServiciosProveedoresService
                 id                SERIAL PRIMARY KEY,
                 servicio_id       INTEGER NOT NULL REFERENCES servicios_proveedores(id) ON DELETE CASCADE,
                 usuario           TEXT    NOT NULL,
-                fecha             TIMESTAMPTZ DEFAULT NOW(),
+                fecha             TIMESTAMPTZ DEFAULT GETDATE(),
                 registro_anterior JSONB,
                 registro_nuevo    JSONB
             );
@@ -123,19 +123,19 @@ public class ServiciosProveedoresService
 
         var (where, parms) = ConstruirWhere(f);
         if (string.IsNullOrWhiteSpace(where))
-            where = "WHERE (activo IS NULL OR activo = true)";
+            where = "WHERE (activo IS NULL OR activo = 1)";
         else
-            where += " AND (activo IS NULL OR activo = true)";
+            where += " AND (activo IS NULL OR activo = 1)";
         var offset = (page - 1) * limit;
 
         // Total
-        await using var cmdCount = new NpgsqlCommand(
+        await using var cmdCount = new SqlCommand(
             $"SELECT COUNT(*) FROM servicios_proveedores {where}", conn);
         foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
         var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
 
         // Datos
-        await using var cmdData = new NpgsqlCommand(
+        await using var cmdData = new SqlCommand(
             $@"SELECT id, id_unico, folio_unico, folio_cotizacion, folio_reporte,
                       fecha, requisitor, cuenta_con_poliza, servicio_con_costo,
                       ubicacion_planta, area, cantidad, descripcion_servicio,
@@ -195,7 +195,7 @@ public class ServiciosProveedoresService
     public async Task<int> CrearAsync(ServicioProveedorDto dto, string usuario)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"INSERT INTO servicios_proveedores (
                 id_unico, folio_unico, folio_cotizacion, folio_reporte, fecha,
                 requisitor, cuenta_con_poliza, servicio_con_costo, ubicacion_planta, area,
@@ -206,7 +206,7 @@ public class ServiciosProveedoresService
                 @requisitor, @cuenta_con_poliza, @servicio_con_costo, @ubicacion_planta, @area,
                 @cantidad, @descripcion_servicio, @descripcion_trabajo, @material_equipo, @observaciones,
                 @proveedores, @panel_faceplate, @switch, @personal_recibio, @solicitud_finalizada, @costo
-              ) RETURNING id", conn);
+              ) OUTPUT INSERTED.id", conn);
 
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
@@ -228,7 +228,7 @@ public class ServiciosProveedoresService
         var anterior = await SnapshotAsync(conn, id);
         if (anterior == null) return false;
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"UPDATE servicios_proveedores SET
                 id_unico             = @id_unico,
                 folio_unico          = @folio_unico,
@@ -270,7 +270,7 @@ public class ServiciosProveedoresService
     public async Task<bool> EliminarAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             "DELETE FROM servicios_proveedores WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         return await cmd.ExecuteNonQueryAsync() > 0;
@@ -280,7 +280,7 @@ public class ServiciosProveedoresService
     public async Task<List<object>> HistorialAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, usuario, fecha, registro_anterior, registro_nuevo
               FROM servicios_proveedores_historial
               WHERE servicio_id = @id
@@ -310,10 +310,10 @@ public class ServiciosProveedoresService
         await using var conn = await _pool.OpenAsync();
         var (where, parms) = ConstruirWhere(f);
         if (string.IsNullOrWhiteSpace(where))
-            where = "WHERE (activo IS NULL OR activo = true)";
+            where = "WHERE (activo IS NULL OR activo = 1)";
         else
-            where += " AND (activo IS NULL OR activo = true)";
-        await using var cmd = new NpgsqlCommand(
+            where += " AND (activo IS NULL OR activo = 1)";
+        await using var cmd = new SqlCommand(
             $@"SELECT id, id_unico, folio_unico, folio_cotizacion, folio_reporte,
                       fecha, requisitor, cuenta_con_poliza, servicio_con_costo,
                       ubicacion_planta, area, cantidad, descripcion_servicio,
@@ -341,7 +341,7 @@ public class ServiciosProveedoresService
     public async Task<byte[]> ExportarPorAnioAsync(int anio)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, id_unico, folio_unico, folio_cotizacion, folio_reporte,
                      fecha, requisitor, cuenta_con_poliza, servicio_con_costo,
                      ubicacion_planta, area, cantidad, descripcion_servicio,
@@ -376,7 +376,7 @@ public class ServiciosProveedoresService
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            conds.Add($"LOWER({col}::TEXT) LIKE LOWER(@p{idx})");
+            conds.Add($"LOWER({col}) LIKE LOWER(@p{idx})");
             parms.Add(($"p{idx}", $"%{val}%"));
             idx++;
         }
@@ -387,20 +387,20 @@ public class ServiciosProveedoresService
         Add("folio_reporte",        f.FOLIO_REPORTE);
         Add("fecha",                f.FECHA);
         Add("requisitor",           f.REQUISITOR);
-        Add("cuenta_con_poliza::TEXT",    f.CUENTA_CON_POLIZA);
-        Add("servicio_con_costo::TEXT",   f.SERVICIO_CON_COSTO);
+        Add("cuenta_con_poliza",    f.CUENTA_CON_POLIZA);
+        Add("servicio_con_costo",   f.SERVICIO_CON_COSTO);
         Add("ubicacion_planta",     f.UBICACION_PLANTA);
         Add("area",                 f.AREA);
         Add("descripcion_servicio", f.DESCRIPCION_SERVICIO);
         Add("proveedores",          f.PROVEEDORES);
         Add("personal_recibio",     f.PERSONAL_RECIBIO);
-        Add("solicitud_finalizada::TEXT", f.SOLICITUD_FINALIZADA);
+        Add("solicitud_finalizada", f.SOLICITUD_FINALIZADA);
 
         var where = conds.Count > 0 ? "WHERE " + string.Join(" AND ", conds) : "";
         return (where, parms);
     }
 
-    private static void AgregarParametros(NpgsqlCommand cmd, ServicioProveedorDto dto)
+    private static void AgregarParametros(SqlCommand cmd, ServicioProveedorDto dto)
     {
         cmd.Parameters.AddWithValue("id_unico",             (object?)dto.ID_UNICO             ?? DBNull.Value);
         cmd.Parameters.AddWithValue("folio_unico",          (object?)dto.FOLIO_UNICO          ?? DBNull.Value);
@@ -425,16 +425,16 @@ public class ServiciosProveedoresService
         cmd.Parameters.AddWithValue("costo",                (object?)dto.COSTO                ?? DBNull.Value);
     }
 
-    private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
+    private async Task<Dictionary<string, object?>?> SnapshotAsync(SqlConnection conn, int id)
     {
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id_unico, folio_unico, folio_cotizacion, folio_reporte, fecha,
                  requisitor, cuenta_con_poliza, servicio_con_costo, ubicacion_planta, area,
                  cantidad, descripcion_servicio, descripcion_trabajo, material_equipo, observaciones,
                  proveedores, panel_faceplate, switch, personal_recibio, solicitud_finalizada, costo
           FROM servicios_proveedores
           WHERE id=@id
-          AND (activo IS NULL OR activo = true)", conn);
+          AND (activo IS NULL OR activo = 1)", conn);
 
         cmd.Parameters.AddWithValue("id", id);
 
@@ -448,16 +448,16 @@ public class ServiciosProveedoresService
         return snap;
     }
 
-    private async Task RegistrarHistorialAsync(NpgsqlConnection conn, int servicioId,
+    private async Task RegistrarHistorialAsync(SqlConnection conn, int servicioId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {
         var antesJson   = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             """
             INSERT INTO servicios_proveedores_historial (servicio_id, usuario, registro_anterior, registro_nuevo)
-            VALUES (@sid, @usr, @ant::jsonb, @nvo::jsonb)
+            VALUES (@sid, @usr, @ant, @nvo)
             """, conn);
 
         cmd.Parameters.AddWithValue("sid", servicioId);
@@ -487,7 +487,7 @@ public class ServiciosProveedoresService
         for (int c = 0; c < headers.Length; c++)
         {
             ws.Cells[1, c + 1].Value = headers[c];
-            ws.Cells[1, c + 1].Style.Font.Bold = true;
+            ws.Cells[1, c + 1].Style.Font.Bold = 1;
             ws.Cells[1, c + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
             ws.Cells[1, c + 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(30, 41, 59));
             ws.Cells[1, c + 1].Style.Font.Color.SetColor(Color.White);
@@ -511,6 +511,6 @@ public class ServiciosProveedoresService
         return pkg.GetAsByteArray();
     }
 
-    private static string? Str(NpgsqlDataReader r, int i)
+    private static string? Str(SqlDataReader r, int i)
         => r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
 }

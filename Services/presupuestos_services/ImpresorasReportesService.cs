@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -92,13 +92,13 @@ public class ImpresorasReportesService
     // ── DDL ───────────────────────────────────────────────────────────────
     private async Task InicializarTablasAsync()
     {await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             CREATE TABLE IF NOT EXISTS reportes_impresoras (
                 id                   SERIAL PRIMARY KEY, folio                TEXT, fecha                DATE, planta               TEXT, impresora            TEXT, area                 TEXT, reporte              TEXT, quien_reporta        TEXT, estatus              TEXT, fecha_de_realizacion DATE, comentarios          TEXT
             );
 
             CREATE TABLE IF NOT EXISTS reportes_impresoras_historial (
-                id                SERIAL PRIMARY KEY, reporte_id        INTEGER NOT NULL REFERENCES reportes_impresoras(id) ON DELETE CASCADE, usuario           TEXT    NOT NULL, fecha             TIMESTAMPTZ DEFAULT NOW(), registro_anterior JSONB, registro_nuevo    JSONB
+                id                SERIAL PRIMARY KEY, reporte_id        INTEGER NOT NULL REFERENCES reportes_impresoras(id) ON DELETE CASCADE, usuario           TEXT    NOT NULL, fecha             TIMESTAMPTZ DEFAULT GETDATE(), registro_anterior JSONB, registro_nuevo    JSONB
             );
 
             CREATE TABLE IF NOT EXISTS impresoras_info (
@@ -106,7 +106,7 @@ public class ImpresorasReportesService
             );
 
             CREATE TABLE IF NOT EXISTS impresoras_info_historial (
-                id                SERIAL PRIMARY KEY, impresora_id      INTEGER NOT NULL REFERENCES impresoras_info(id) ON DELETE CASCADE, usuario           TEXT    NOT NULL, fecha             TIMESTAMPTZ DEFAULT NOW(), registro_anterior JSONB, registro_nuevo    JSONB
+                id                SERIAL PRIMARY KEY, impresora_id      INTEGER NOT NULL REFERENCES impresoras_info(id) ON DELETE CASCADE, usuario           TEXT    NOT NULL, fecha             TIMESTAMPTZ DEFAULT GETDATE(), registro_anterior JSONB, registro_nuevo    JSONB
             );
             """, conn);
 
@@ -122,12 +122,12 @@ public class ImpresorasReportesService
         var (where, parms) = ConstruirWhereReporte(f);
         var offset = (page - 1) * limit;
 
-        await using var cmdCount = new NpgsqlCommand(
+        await using var cmdCount = new SqlCommand(
             $"SELECT COUNT(*) FROM reportes_impresoras {where}", conn);
         foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
         var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
 
-        await using var cmdData = new NpgsqlCommand(
+        await using var cmdData = new SqlCommand(
             $@"SELECT id, folio, fecha, planta, impresora,
                       area, reporte, quien_reporta, estatus,
                       fecha_de_realizacion, comentarios
@@ -152,12 +152,12 @@ public class ImpresorasReportesService
 
     public async Task<int> CrearReporteAsync(ReporteImpresoraDto dto, string usuario)
     {await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             INSERT INTO reportes_impresoras
                 (folio, fecha, planta, impresora, area, reporte, quien_reporta, estatus, fecha_de_realizacion, comentarios)
             VALUES
-                (@folio, @fecha::date, @planta, @impresora, @area, @reporte, @quien_reporta, @estatus, @fecha_de_realizacion::date, @comentarios)
-            RETURNING id
+                (@folio, @fecha, @planta, @impresora, @area, @reporte, @quien_reporta, @estatus, @fecha_de_realizacion, @comentarios)
+            OUTPUT INSERTED.id
             """, conn);
 
         AgregarParametrosReporte(cmd, dto);
@@ -169,9 +169,9 @@ public class ImpresorasReportesService
         var anterior = await SnapshotReporteAsync(conn, id);
         if (anterior is null) return false;
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             UPDATE reportes_impresoras SET
-                folio                = @folio, fecha                = @fecha::date, planta               = @planta, impresora            = @impresora, area                 = @area, reporte              = @reporte, quien_reporta        = @quien_reporta, estatus              = @estatus, fecha_de_realizacion = @fecha_de_realizacion::date, comentarios          = @comentarios
+                folio                = @folio, fecha                = @fecha, planta               = @planta, impresora            = @impresora, area                 = @area, reporte              = @reporte, quien_reporta        = @quien_reporta, estatus              = @estatus, fecha_de_realizacion = @fecha_de_realizacion, comentarios          = @comentarios
             WHERE id = @id
             """, conn);
 
@@ -186,14 +186,14 @@ public class ImpresorasReportesService
 
     public async Task<bool> EliminarReporteAsync(int id)
     {await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             "DELETE FROM reportes_impresoras WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         return await cmd.ExecuteNonQueryAsync() > 0;}
 
     public async Task<List<object>> HistorialReporteAsync(int id)
     {await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, usuario, fecha, registro_anterior, registro_nuevo
               FROM reportes_impresoras_historial
               WHERE reporte_id = @id
@@ -215,7 +215,7 @@ public class ImpresorasReportesService
     {await using var conn = await _pool.OpenAsync();
         var (where, parms) = ConstruirWhereReporte(f);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             $@"SELECT id, folio, fecha, planta, impresora, area, reporte, quien_reporta, estatus, fecha_de_realizacion, comentarios
                FROM reportes_impresoras {where} ORDER BY id DESC", conn);
 
@@ -231,7 +231,7 @@ public class ImpresorasReportesService
 
     public async Task<byte[]> ExportarReportesPorAnioAsync(int anio)
     {await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, folio, fecha, planta, impresora, area, reporte, quien_reporta, estatus, fecha_de_realizacion, comentarios
               FROM reportes_impresoras
               WHERE EXTRACT(YEAR FROM fecha) = @anio
@@ -255,12 +255,12 @@ public class ImpresorasReportesService
         var (where, parms) = ConstruirWhereInfo(f);
         var offset = (page - 1) * limit;
 
-        await using var cmdCount = new NpgsqlCommand(
+        await using var cmdCount = new SqlCommand(
             $"SELECT COUNT(*) FROM impresoras_info {where}", conn);
         foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
         var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
 
-        await using var cmdData = new NpgsqlCommand(
+        await using var cmdData = new SqlCommand(
             $@"SELECT id, impresora, modelo, numero_de_serie, ip,
                       ubicacion, planta, identificador, numero
                FROM impresoras_info {where}
@@ -284,12 +284,12 @@ public class ImpresorasReportesService
 
     public async Task<int> CrearInfoAsync(ImpresoraInfoDto dto, string usuario)
     {await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             INSERT INTO impresoras_info
                 (impresora, modelo, numero_de_serie, ip, ubicacion, planta, identificador, numero)
             VALUES
                 (@impresora, @modelo, @numero_de_serie, @ip, @ubicacion, @planta, @identificador, @numero)
-            RETURNING id
+            OUTPUT INSERTED.id
             """, conn);
 
         AgregarParametrosInfo(cmd, dto);
@@ -301,7 +301,7 @@ public class ImpresorasReportesService
         var anterior = await SnapshotInfoAsync(conn, id);
         if (anterior is null) return false;
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             UPDATE impresoras_info SET
                 impresora       = @impresora, modelo          = @modelo, numero_de_serie = @numero_de_serie, ip              = @ip, ubicacion       = @ubicacion, planta          = @planta, identificador   = @identificador, numero          = @numero
             WHERE id = @id
@@ -318,14 +318,14 @@ public class ImpresorasReportesService
 
     public async Task<bool> EliminarInfoAsync(int id)
     {await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             "DELETE FROM impresoras_info WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         return await cmd.ExecuteNonQueryAsync() > 0;}
 
     public async Task<List<object>> HistorialInfoAsync(int id)
     {await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, usuario, fecha, registro_anterior, registro_nuevo
               FROM impresoras_info_historial
               WHERE impresora_id = @id
@@ -347,7 +347,7 @@ public class ImpresorasReportesService
     {await using var conn = await _pool.OpenAsync();
         var (where, parms) = ConstruirWhereInfo(f);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             $@"SELECT id, impresora, modelo, numero_de_serie, ip, ubicacion, planta, identificador, numero
                FROM impresoras_info {where} ORDER BY id DESC", conn);
 
@@ -366,7 +366,7 @@ public class ImpresorasReportesService
     private static (string where, List<(string key, object? val)> parms) ConstruirWhereReporte(ReporteImpresoraFiltros f)
     {var conds = new List<string>();
 
-        conds.Add("(activo IS NULL OR activo = true)");
+        conds.Add("(activo IS NULL OR activo = 1)");
 
         var parms = new List<(string, object?)>();
         var idx = 1;
@@ -374,7 +374,7 @@ public class ImpresorasReportesService
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            conds.Add($"LOWER({col}::TEXT) LIKE LOWER(@p{idx})");
+            conds.Add($"LOWER({col}) LIKE LOWER(@p{idx})");
             parms.Add(($"p{idx}", $"%{val}%"));
             idx++;
         }
@@ -397,7 +397,7 @@ public class ImpresorasReportesService
     private static (string where, List<(string key, object? val)> parms) ConstruirWhereInfo(ImpresoraInfoFiltros f)
     {var conds = new List<string>();
 
-        conds.Add("(activo IS NULL OR activo = true)");
+        conds.Add("(activo IS NULL OR activo = 1)");
 
         var parms = new List<(string, object?)>();
         var idx = 1;
@@ -405,7 +405,7 @@ public class ImpresorasReportesService
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            conds.Add($"LOWER({col}::TEXT) LIKE LOWER(@p{idx})");
+            conds.Add($"LOWER({col}) LIKE LOWER(@p{idx})");
             parms.Add(($"p{idx}", $"%{val}%"));
             idx++;
         }
@@ -424,7 +424,7 @@ public class ImpresorasReportesService
 
     // ── Helpers privados ── AddParameters ────────────────────────────────
 
-    private static void AgregarParametrosReporte(NpgsqlCommand cmd, ReporteImpresoraDto dto)
+    private static void AgregarParametrosReporte(SqlCommand cmd, ReporteImpresoraDto dto)
     {cmd.Parameters.AddWithValue("folio", (object?)dto.FOLIO                ?? DBNull.Value);
         cmd.Parameters.AddWithValue("fecha", (object?)dto.FECHA                ?? DBNull.Value);
         cmd.Parameters.AddWithValue("planta", (object?)dto.PLANTA               ?? DBNull.Value);
@@ -436,7 +436,7 @@ public class ImpresorasReportesService
         cmd.Parameters.AddWithValue("fecha_de_realizacion", (object?)dto.FECHA_DE_REALIZACION ?? DBNull.Value);
         cmd.Parameters.AddWithValue("comentarios", (object?)dto.COMENTARIOS          ?? DBNull.Value);}
 
-    private static void AgregarParametrosInfo(NpgsqlCommand cmd, ImpresoraInfoDto dto)
+    private static void AgregarParametrosInfo(SqlCommand cmd, ImpresoraInfoDto dto)
     {cmd.Parameters.AddWithValue("impresora", (object?)dto.IMPRESORA       ?? DBNull.Value);
         cmd.Parameters.AddWithValue("modelo", (object?)dto.MODELO          ?? DBNull.Value);
         cmd.Parameters.AddWithValue("numero_de_serie", (object?)dto.NUMERO_DE_SERIE ?? DBNull.Value);
@@ -448,8 +448,8 @@ public class ImpresorasReportesService
 
     // ── Helpers privados ── Snapshots ─────────────────────────────────────
 
-    private async Task<Dictionary<string, object?>?> SnapshotReporteAsync(NpgsqlConnection conn, int id)
-    {await using var cmd = new NpgsqlCommand(
+    private async Task<Dictionary<string, object?>?> SnapshotReporteAsync(SqlConnection conn, int id)
+    {await using var cmd = new SqlCommand(
             @"SELECT folio, fecha, planta, impresora, area, reporte, quien_reporta, estatus, fecha_de_realizacion, comentarios
               FROM reportes_impresoras WHERE id=@id", conn);
         cmd.Parameters.AddWithValue("id", id);
@@ -462,8 +462,8 @@ public class ImpresorasReportesService
             snap[COLS_REPORTE[i]] = r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
         return snap;}
 
-    private async Task<Dictionary<string, object?>?> SnapshotInfoAsync(NpgsqlConnection conn, int id)
-    {await using var cmd = new NpgsqlCommand(
+    private async Task<Dictionary<string, object?>?> SnapshotInfoAsync(SqlConnection conn, int id)
+    {await using var cmd = new SqlCommand(
             @"SELECT impresora, modelo, numero_de_serie, ip, ubicacion, planta, identificador, numero
               FROM impresoras_info WHERE id=@id", conn);
         cmd.Parameters.AddWithValue("id", id);
@@ -478,14 +478,14 @@ public class ImpresorasReportesService
 
     // ── Helpers privados ── Historial writers ─────────────────────────────
 
-    private async Task RegistrarHistorialReporteAsync(NpgsqlConnection conn, int reporteId,
+    private async Task RegistrarHistorialReporteAsync(SqlConnection conn, int reporteId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {var antesJson   = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             INSERT INTO reportes_impresoras_historial (reporte_id, usuario, registro_anterior, registro_nuevo)
-            VALUES (@rid, @usr, @ant::jsonb, @nvo::jsonb)
+            VALUES (@rid, @usr, @ant, @nvo)
             """, conn);
 
         cmd.Parameters.AddWithValue("rid", reporteId);
@@ -495,14 +495,14 @@ public class ImpresorasReportesService
 
         await cmd.ExecuteNonQueryAsync();}
 
-    private async Task RegistrarHistorialInfoAsync(NpgsqlConnection conn, int impresoraId,
+    private async Task RegistrarHistorialInfoAsync(SqlConnection conn, int impresoraId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {var antesJson   = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             INSERT INTO impresoras_info_historial (impresora_id, usuario, registro_anterior, registro_nuevo)
-            VALUES (@iid, @usr, @ant::jsonb, @nvo::jsonb)
+            VALUES (@iid, @usr, @ant, @nvo)
             """, conn);
 
         cmd.Parameters.AddWithValue("iid", impresoraId);
@@ -574,13 +574,13 @@ public class ImpresorasReportesService
     {for (int c = 0; c < headers.Length; c++)
         {
             ws.Cells[1, c + 1].Value = headers[c];
-            ws.Cells[1, c + 1].Style.Font.Bold = true;
+            ws.Cells[1, c + 1].Style.Font.Bold = 1;
             ws.Cells[1, c + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
             ws.Cells[1, c + 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(30, 41, 59));
             ws.Cells[1, c + 1].Style.Font.Color.SetColor(Color.White);
             ws.Cells[1, c + 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;}
     }
 
-    private static string? Str(NpgsqlDataReader r, int i)
+    private static string? Str(SqlDataReader r, int i)
         => r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
 }

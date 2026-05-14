@@ -1,4 +1,4 @@
-﻿using ChiIT.Data;
+using ChiIT.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -67,7 +67,7 @@ public class CalendarioController : ControllerBase
         cmd.CommandText = """
             SELECT planta_key, periodo, semana_inicio, anio_inicio, terminado,
                    generado, creado_en, terminado_en
-            FROM public.calendario_estado
+            FROM calendario_estado
             ORDER BY planta_key, periodo
             """;
 
@@ -106,33 +106,33 @@ public class CalendarioController : ControllerBase
 
         // ── Validaciones básicas ──────────────────────────────────────────
         if (!PlantaNombreDB.ContainsKey(planta))
-            return Ok(new { ok = false, error = $"Planta desconocida: {req.Planta}" });
+            return Ok(new { ok = 0, error = $"Planta desconocida: {req.Planta}" });
 
         if (periodo != 1 && periodo != 2)
-            return Ok(new { ok = false, error = "Periodo debe ser 1 o 2" });
+            return Ok(new { ok = 0, error = "Periodo debe ser 1 o 2" });
 
         if (req.SemanaInicio < 1 || req.SemanaInicio > 52)
-            return Ok(new { ok = false, error = "Semana de inicio debe estar entre 1 y 52" });
+            return Ok(new { ok = 0, error = "Semana de inicio debe estar entre 1 y 52" });
 
         // ── Plantas de activación manual ──────────────────────────────────
         if (!PlantasActivacionManual.Contains(planta))
-            return Ok(new { ok = false, error = $"La planta {planta} se activa automáticamente" });
+            return Ok(new { ok = 0, error = $"La planta {planta} se activa automáticamente" });
 
         // ── Restricción semana SATELITE ───────────────────────────────────
         if (planta == "SATELITE" && req.SemanaInicio < SemanaMinimaSatelite)
-            return Ok(new { ok = false, error = $"Planta Satélite solo puede iniciar desde la semana {SemanaMinimaSatelite}." });
+            return Ok(new { ok = 0, error = $"Planta Satélite solo puede iniciar desde la semana {SemanaMinimaSatelite}." });
 
         // ── Restricción semana MIXING (aplica también si se activa via SATELITE) ──
         // (Para MIXING manual no procede porque es auto-activada, pero validamos por si acaso)
         if (planta == "MIXING" && req.SemanaInicio < SemanaMinimaMixing)
-            return Ok(new { ok = false, error = $"Planta Mixing solo puede iniciar desde la semana {SemanaMinimaMixing}." });
+            return Ok(new { ok = 0, error = $"Planta Mixing solo puede iniciar desde la semana {SemanaMinimaMixing}." });
 
         // ── Si es P2, verificar que P1 de la MISMA planta esté terminado ─
         if (periodo == 2)
         {
             var p1Terminado = ObtenerEstadoPlanta(planta, 1);
             if (p1Terminado == null || !p1Terminado.Terminado)
-                return Ok(new { ok = false, error = $"Debes terminar el Período 1 de {planta} antes de generar el Período 2." });
+                return Ok(new { ok = 0, error = $"Debes terminar el Período 1 de {planta} antes de generar el Período 2." });
         }
 
         using var conn = _db.Open();
@@ -164,7 +164,7 @@ public class CalendarioController : ControllerBase
 
         return Ok(new
         {
-            ok = true,
+            ok = 1,
             planta,
             periodo,
             semana_inicio = req.SemanaInicio,
@@ -185,19 +185,19 @@ public class CalendarioController : ControllerBase
         var planta = (req.Planta ?? "").Trim().ToUpper();
 
         if (!PlantaNombreDB.ContainsKey(planta))
-            return Ok(new { ok = false, error = "Planta desconocida" });
+            return Ok(new { ok = 0, error = "Planta desconocida" });
 
         var estado = ObtenerEstadoPlanta(planta, 1);
         if (estado == null || !estado.Generado)
-            return Ok(new { ok = false, error = "El Período 1 aún no ha sido generado." });
+            return Ok(new { ok = 0, error = "El Período 1 aún no ha sido generado." });
         if (estado.Terminado)
-            return Ok(new { ok = false, error = "El Período 1 ya está marcado como terminado." });
+            return Ok(new { ok = 0, error = "El Período 1 ya está marcado como terminado." });
 
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            UPDATE public.calendario_estado
-            SET terminado=true, terminado_en=NOW()
+            UPDATE calendario_estado
+            SET terminado=1, terminado_en=GETDATE()
             WHERE planta_key=@p AND periodo=1
             """;
         cmd.Parameters.AddWithValue("p", planta);
@@ -212,14 +212,14 @@ public class CalendarioController : ControllerBase
                 if (est != null && est.Generado && !est.Terminado)
                 {
                     using var cmd2 = conn.CreateCommand();
-                    cmd2.CommandText = "UPDATE public.calendario_estado SET terminado=true,terminado_en=NOW() WHERE planta_key=@p AND periodo=1";
+                    cmd2.CommandText = "UPDATE calendario_estado SET terminado=1,terminado_en=GETDATE() WHERE planta_key=@p AND periodo=1";
                     cmd2.Parameters.AddWithValue("p", auto);
                     cmd2.ExecuteNonQuery();
                 }
             }
         }
 
-        return Ok(new { ok = true, planta, mensaje = $"Período 1 de {planta} terminado. Período 2 habilitado." });
+        return Ok(new { ok = 1, planta, mensaje = $"Período 1 de {planta} terminado. Período 2 habilitado." });
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -232,19 +232,19 @@ public class CalendarioController : ControllerBase
         var planta = (req.Planta ?? "").Trim().ToUpper();
 
         if (!PlantaNombreDB.ContainsKey(planta))
-            return Ok(new { ok = false, error = "Planta desconocida" });
+            return Ok(new { ok = 0, error = "Planta desconocida" });
 
         var estado = ObtenerEstadoPlanta(planta, 2);
         if (estado == null || !estado.Generado)
-            return Ok(new { ok = false, error = "El Período 2 aún no ha sido generado." });
+            return Ok(new { ok = 0, error = "El Período 2 aún no ha sido generado." });
 
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "UPDATE public.calendario_estado SET terminado=true,terminado_en=NOW() WHERE planta_key=@p AND periodo=2";
+        cmd.CommandText = "UPDATE calendario_estado SET terminado=1,terminado_en=GETDATE() WHERE planta_key=@p AND periodo=2";
         cmd.Parameters.AddWithValue("p", planta);
         cmd.ExecuteNonQuery();
 
-        return Ok(new { ok = true, planta });
+        return Ok(new { ok = 1, planta });
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -254,24 +254,24 @@ public class CalendarioController : ControllerBase
     [HttpPost("CALENDARIO/RESET")]
     public IActionResult Reset([FromBody] PlantaRequest req)
     {
-        if (!EsAdmin()) return Ok(new { ok = false, error = "No autorizado" });
+        if (!EsAdmin()) return Ok(new { ok = 0, error = "No autorizado" });
 
         var planta = (req.Planta ?? "ALL").Trim().ToUpper();
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
 
         if (planta == "ALL")
-            cmd.CommandText = "DELETE FROM public.calendario_estado";
+            cmd.CommandText = "DELETE FROM calendario_estado";
         else
         {
             if (!PlantaNombreDB.ContainsKey(planta))
-                return Ok(new { ok = false, error = "Planta desconocida" });
-            cmd.CommandText = "DELETE FROM public.calendario_estado WHERE planta_key=@p";
+                return Ok(new { ok = 0, error = "Planta desconocida" });
+            cmd.CommandText = "DELETE FROM calendario_estado WHERE planta_key=@p";
             cmd.Parameters.AddWithValue("p", planta);
         }
 
         cmd.ExecuteNonQuery();
-        return Ok(new { ok = true });
+        return Ok(new { ok = 1 });
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -323,19 +323,19 @@ public class CalendarioController : ControllerBase
         // Cada tipo tiene su propio calendario independiente de 24 semanas.
         using var cntComp = conn.CreateCommand();
         cntComp.CommandText = """
-            SELECT COUNT(*) FROM public.mantenimientos_preventivos
+            SELECT COUNT(*) FROM mantenimientos_preventivos
             WHERE planta = @p
               AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
-              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
+              AND (categoria_color IS NULL OR (categoria_color NOT LIKE '%rojo%' AND categoria_color NOT LIKE '%rosa%'))
             """;
         cntComp.Parameters.AddWithValue("p", nombreDB);
         var totalComputo = Convert.ToInt64(cntComp.ExecuteScalar()!);
 
         using var cntLap = conn.CreateCommand();
         cntLap.CommandText = """
-            SELECT COUNT(*) FROM public.mantenimientos_preventivos
+            SELECT COUNT(*) FROM mantenimientos_preventivos
             WHERE planta = @p AND nombre_dispositivo = 'LAPTOP'
-              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
+              AND (categoria_color IS NULL OR (categoria_color NOT LIKE '%rojo%' AND categoria_color NOT LIKE '%rosa%'))
             """;
         cntLap.Parameters.AddWithValue("p", nombreDB);
         var totalLaptops = Convert.ToInt64(cntLap.ExecuteScalar() ?? 0);
@@ -371,10 +371,10 @@ public class CalendarioController : ControllerBase
                    CASE WHEN preventivo_digital    IS NOT NULL THEN true ELSE false END AS tiene_pm_p1,
                    CASE WHEN preventivo_digital_p2 IS NOT NULL THEN true ELSE false END AS tiene_pm_p2,
                    fecha_realizacion, fecha_realizacion_p2
-            FROM public.mantenimientos_preventivos
+            FROM mantenimientos_preventivos
             WHERE planta = @p
               AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
-              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
+              AND (categoria_color IS NULL OR (categoria_color NOT LIKE '%rojo%' AND categoria_color NOT LIKE '%rosa%'))
             ORDER BY ubicacion, id
             LIMIT @lim OFFSET @off
             """;
@@ -408,10 +408,10 @@ public class CalendarioController : ControllerBase
                    CASE WHEN preventivo_digital    IS NOT NULL THEN true ELSE false END AS tiene_pm_p1,
                    CASE WHEN preventivo_digital_p2 IS NOT NULL THEN true ELSE false END AS tiene_pm_p2,
                    fecha_realizacion, fecha_realizacion_p2
-            FROM public.mantenimientos_preventivos
+            FROM mantenimientos_preventivos
             WHERE planta = @p
               AND nombre_dispositivo = 'LAPTOP'
-              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
+              AND (categoria_color IS NULL OR (categoria_color NOT LIKE '%rojo%' AND categoria_color NOT LIKE '%rosa%'))
             ORDER BY ubicacion, id
             LIMIT @lim OFFSET @off
             """;
@@ -462,7 +462,7 @@ public class CalendarioController : ControllerBase
         if (string.IsNullOrWhiteSpace(usr)) return false;
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT rol FROM public.usuarios WHERE usuario=@u AND activo=true";
+        cmd.CommandText = "SELECT rol FROM usuarios WHERE usuario=@u AND activo=1";
         cmd.Parameters.AddWithValue("u", usr.ToUpper());
         return cmd.ExecuteScalar()?.ToString() == "ADMIN";
     }
@@ -473,7 +473,7 @@ public class CalendarioController : ControllerBase
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT semana_inicio, anio_inicio, terminado, generado
-            FROM public.calendario_estado
+            FROM calendario_estado
             WHERE planta_key=@p AND periodo=@per
             """;
         cmd.Parameters.AddWithValue("p", planta.ToUpper());
@@ -489,20 +489,20 @@ public class CalendarioController : ControllerBase
         };
     }
 
-    private void UpsertEstado(Npgsql.NpgsqlConnection conn,
+    private void UpsertEstado(Npgsql.SqlConnection conn,
         string planta, int periodo, int semana, int anio, bool generado, bool terminado)
     {
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            INSERT INTO public.calendario_estado
+            INSERT INTO calendario_estado
                 (planta_key, periodo, semana_inicio, anio_inicio, generado, terminado, creado_en)
-            VALUES (@p, @per, @sem, @anio, @gen, @term, NOW())
+            VALUES (@p, @per, @sem, @anio, @gen, @term, GETDATE())
             ON CONFLICT (planta_key, periodo) DO UPDATE
             SET semana_inicio = @sem,
                 anio_inicio   = @anio,
                 generado      = @gen,
                 terminado     = CASE WHEN EXCLUDED.terminado THEN EXCLUDED.terminado ELSE calendario_estado.terminado END,
-                creado_en     = CASE WHEN calendario_estado.creado_en IS NULL THEN NOW() ELSE calendario_estado.creado_en END
+                creado_en     = CASE WHEN calendario_estado.creado_en IS NULL THEN GETDATE() ELSE calendario_estado.creado_en END
             """;
         cmd.Parameters.AddWithValue("p", planta.ToUpper());
         cmd.Parameters.AddWithValue("per", periodo);
@@ -519,7 +519,7 @@ public class CalendarioController : ControllerBase
     /// Enriquece con estado PM desde la BD.
     /// </summary>
     private List<SemanaDistribucion> CalcularDistribucion(
-        Npgsql.NpgsqlConnection conn,
+        Npgsql.SqlConnection conn,
         string planta, int periodo, int semIni, int anio)
     {
         var nombreDB = PlantaNombreDB[planta];
@@ -527,9 +527,9 @@ public class CalendarioController : ControllerBase
         // ── Contar laptops (calendario independiente) ─────────────────────
         using var cntLap = conn.CreateCommand();
         cntLap.CommandText = """
-            SELECT COUNT(*) FROM public.mantenimientos_preventivos
+            SELECT COUNT(*) FROM mantenimientos_preventivos
             WHERE planta = @p AND nombre_dispositivo = 'LAPTOP'
-              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
+              AND (categoria_color IS NULL OR (categoria_color NOT LIKE '%rojo%' AND categoria_color NOT LIKE '%rosa%'))
             """;
         cntLap.Parameters.AddWithValue("p", nombreDB);
         var totalLaptops = Convert.ToInt64(cntLap.ExecuteScalar()!);
@@ -537,10 +537,10 @@ public class CalendarioController : ControllerBase
         // ── Contar cómputo (calendario independiente) ─────────────────────
         using var cntComp = conn.CreateCommand();
         cntComp.CommandText = """
-            SELECT COUNT(*) FROM public.mantenimientos_preventivos
+            SELECT COUNT(*) FROM mantenimientos_preventivos
             WHERE planta = @p
               AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
-              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
+              AND (categoria_color IS NULL OR (categoria_color NOT LIKE '%rojo%' AND categoria_color NOT LIKE '%rosa%'))
             """;
         cntComp.Parameters.AddWithValue("p", nombreDB);
         var totalComputo = Convert.ToInt64(cntComp.ExecuteScalar() ?? 0);
@@ -581,7 +581,7 @@ public class CalendarioController : ControllerBase
     /// Todos los equipos en una sola semana.
     /// </summary>
     private List<SemanaDistribucion> CalcularDistribucionFija(
-        Npgsql.NpgsqlConnection conn,
+        Npgsql.SqlConnection conn,
         string planta, int periodo, int semIni, int anio)
     {
         var nombreDB = PlantaNombreDB[planta];
@@ -589,9 +589,9 @@ public class CalendarioController : ControllerBase
         // Laptops: calendario independiente (semana fija, todos en una semana)
         using var cntLap = conn.CreateCommand();
         cntLap.CommandText = """
-            SELECT COUNT(*) FROM public.mantenimientos_preventivos
+            SELECT COUNT(*) FROM mantenimientos_preventivos
             WHERE planta = @p AND nombre_dispositivo = 'LAPTOP'
-              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
+              AND (categoria_color IS NULL OR (categoria_color NOT LIKE '%rojo%' AND categoria_color NOT LIKE '%rosa%'))
             """;
         cntLap.Parameters.AddWithValue("p", nombreDB);
         var totalLaptops = Convert.ToInt32(cntLap.ExecuteScalar() ?? 0);
@@ -599,10 +599,10 @@ public class CalendarioController : ControllerBase
         // Cómputo: calendario independiente (semana fija, todos en una semana)
         using var cntComp = conn.CreateCommand();
         cntComp.CommandText = """
-            SELECT COUNT(*) FROM public.mantenimientos_preventivos
+            SELECT COUNT(*) FROM mantenimientos_preventivos
             WHERE planta = @p
               AND nombre_dispositivo IN ('COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
-              AND (categoria_color IS NULL OR (categoria_color NOT ILIKE '%rojo%' AND categoria_color NOT ILIKE '%rosa%'))
+              AND (categoria_color IS NULL OR (categoria_color NOT LIKE '%rojo%' AND categoria_color NOT LIKE '%rosa%'))
             """;
         cntComp.Parameters.AddWithValue("p", nombreDB);
         var totalComputo = Convert.ToInt32(cntComp.ExecuteScalar() ?? 0);

@@ -1,5 +1,5 @@
-﻿using ChiIT.Data;
-using Npgsql;
+using ChiIT.Data;
+using Microsoft.Data.SqlClient;
 
 namespace ChiIT.Services;
 
@@ -366,7 +366,7 @@ public class BuscarGlobalService
             try
             {
                 // Verificar que la tabla existe antes de consultar
-                await using var chk = new NpgsqlCommand(
+                await using var chk = new SqlCommand(
                     "SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_name=@t)", conn);
                 chk.Parameters.AddWithValue("t", tabla);
                 var existe = (bool)(await chk.ExecuteScalarAsync() ?? false);
@@ -380,14 +380,14 @@ public class BuscarGlobalService
                 var colsSinId = colsExistentes.Where(c => c != "id").ToList();
 
                 var condiciones = colsSinId.Any()
-                    ? colsSinId.Select((c, i) => $"LOWER({c}::TEXT) LIKE LOWER(@p{i})").ToList()
-                    : colsExistentes.Select((c, i) => $"LOWER({c}::TEXT) LIKE LOWER(@p{i})").ToList();
+                    ? colsSinId.Select((c, i) => $"LOWER({c}) LIKE LOWER(@p{i})").ToList()
+                    : colsExistentes.Select((c, i) => $"LOWER({c}) LIKE LOWER(@p{i})").ToList();
 
                 var colsParaWhere = colsSinId.Any() ? colsSinId : colsExistentes;
                 var where = "WHERE " + string.Join(" OR ", condiciones);
 
                 // Total
-                await using var cmdCount = new NpgsqlCommand(
+                await using var cmdCount = new SqlCommand(
                     $"SELECT COUNT(*) FROM {tabla} {where}", conn);
                 for (int i = 0; i < colsParaWhere.Count; i++)
                     cmdCount.Parameters.AddWithValue($"p{i}", $"%{termino}%");
@@ -398,7 +398,7 @@ public class BuscarGlobalService
                 var selectCols = colsSinId.Any()
                     ? "id, " + string.Join(", ", colsSinId)
                     : "id";
-                await using var cmdData = new NpgsqlCommand(
+                await using var cmdData = new SqlCommand(
                     $"SELECT {selectCols} FROM {tabla} {where} ORDER BY id DESC LIMIT @lim", conn);
                 for (int i = 0; i < colsParaWhere.Count; i++)
                     cmdData.Parameters.AddWithValue($"p{i}", $"%{termino}%");
@@ -432,9 +432,9 @@ public class BuscarGlobalService
     }
 
     private static async Task<List<string>> ColumnasExistentesAsync(
-        NpgsqlConnection conn, string tabla, string[] columnas)
+        SqlConnection conn, string tabla, string[] columnas)
     {
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT column_name FROM information_schema.columns
               WHERE table_name = @t AND column_name = ANY(@cols)", conn);
         cmd.Parameters.AddWithValue("t", tabla);

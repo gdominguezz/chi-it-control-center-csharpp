@@ -1,7 +1,7 @@
 ﻿using ChiIT.Data;
 using ChiIT.Services;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 using System.Text.Json;
 
 namespace ChiIT.Controllers;
@@ -32,7 +32,7 @@ public class CorrectivoController : ControllerBase
 
     // ══════════════════════════════════════════════════════════════════════
     // GET /CORRECTIVOS
-    // Parámetros de filtro (todos opcionales, ILIKE): STATUS, FOLIO, PLANTA,
+    // Parámetros de filtro (todos opcionales, LIKE): STATUS, FOLIO, PLANTA,
     // LINEA_PERSONA, EQUIPO, MARCA, MODELO, NUMERO_SERIE, DESCRIPCION_FALLA,
     // ACCESORIO_SOLICITADO, FECHA_SOLICITUD, REPORTE_ELABORADO_POR,
     // TIPO_OBSERVACION, VENCIMIENTO_DIAS, FECHA_CONTEO_ACTUAL,
@@ -44,11 +44,11 @@ public class CorrectivoController : ControllerBase
     [HttpGet("CORRECTIVOS")]
     public IActionResult ObtenerCorrectivos([FromQuery] FiltrosCorrectivo f)
     {
-        var where = "WHERE (activo IS NULL OR activo = true)";
-        var parms = new List<NpgsqlParameter>();
+        var where = "WHERE (activo IS NULL OR activo = 1)";
+        var parms = new List<SqlParameter>();
         int pIdx = 1;
 
-        // Columnas que admiten filtro de texto (ILIKE)
+        // Columnas que admiten filtro de texto (LIKE)
         var filtrosTexto = new (string col, string? val)[]
         {
             ("status",                    f.STATUS),
@@ -76,8 +76,8 @@ public class CorrectivoController : ControllerBase
         {
             if (!string.IsNullOrWhiteSpace(val))
             {
-                where += $" AND {col}::text ILIKE @p{pIdx}";
-                parms.Add(new NpgsqlParameter($"p{pIdx++}", $"%{val}%"));
+                where += $" AND {col} LIKE @p{pIdx}";
+                parms.Add(new SqlParameter($"p{pIdx++}", $"%{val}%"));
             }
         }
 
@@ -85,7 +85,7 @@ public class CorrectivoController : ControllerBase
         if (f.VENCIMIENTO_DIAS.HasValue)
         {
             where += $" AND vencimiento_dias = @p{pIdx}";
-            parms.Add(new NpgsqlParameter($"p{pIdx++}", f.VENCIMIENTO_DIAS.Value));
+            parms.Add(new SqlParameter($"p{pIdx++}", f.VENCIMIENTO_DIAS.Value));
         }
 
         // Filtros de fecha (LIKE sobre el texto de la columna date)
@@ -102,27 +102,27 @@ public class CorrectivoController : ControllerBase
         {
             if (!string.IsNullOrWhiteSpace(val))
             {
-                where += $" AND {col}::text ILIKE @p{pIdx}";
-                parms.Add(new NpgsqlParameter($"p{pIdx++}", $"%{val}%"));
+                where += $" AND {col} LIKE @p{pIdx}";
+                parms.Add(new SqlParameter($"p{pIdx++}", $"%{val}%"));
             }
         }
 
         using var conn = _db.Open();
 
-        // Clonar parámetros — Npgsql no permite reusar el mismo NpgsqlParameter en dos comandos
-        NpgsqlParameter[] ClonarParams() =>
-            parms.Select(p => new NpgsqlParameter(p.ParameterName, p.Value)).ToArray();
+        // Clonar parámetros — Npgsql no permite reusar el mismo SqlParameter en dos comandos
+        SqlParameter[] ClonarParams() =>
+            parms.Select(p => new SqlParameter(p.ParameterName, p.Value)).ToArray();
 
         // Total
         using var cntCmd = conn.CreateCommand();
-        cntCmd.CommandText = $"SELECT COUNT(*) FROM public.mantenimientos_correctivos {where}";
+        cntCmd.CommandText = $"SELECT COUNT(*) FROM mantenimientos_correctivos {where}";
         cntCmd.Parameters.AddRange(ClonarParams());
         var total = Convert.ToInt64(cntCmd.ExecuteScalar()!);
 
         // Datos paginados
         int offset = (f.Page - 1) * f.Limit;
-        parms.Add(new NpgsqlParameter($"p{pIdx++}", f.Limit));
-        parms.Add(new NpgsqlParameter($"p{pIdx}", offset));
+        parms.Add(new SqlParameter($"p{pIdx++}", f.Limit));
+        parms.Add(new SqlParameter($"p{pIdx}", offset));
 
         using var cmd = conn.CreateCommand();
         cmd.CommandText = $"""
@@ -154,7 +154,7 @@ public class CorrectivoController : ControllerBase
                 observaciones             AS "OBSERVACIONES",
                 oc_factura                AS "OC_FACTURA",
                 CASE WHEN pdf IS NOT NULL THEN true ELSE false END AS "TIENE_PDF"
-            FROM public.mantenimientos_correctivos
+            FROM mantenimientos_correctivos
             {where}
             ORDER BY id DESC
             LIMIT @p{pIdx - 1} OFFSET @p{pIdx}
@@ -221,7 +221,7 @@ public class CorrectivoController : ControllerBase
                     descripcion_reparacion    AS "DESCRIPCION_REPARACION",
                     observaciones             AS "OBSERVACIONES",
                     oc_factura                AS "OC_FACTURA"
-                FROM public.mantenimientos_correctivos
+                FROM mantenimientos_correctivos
                 WHERE id = @id
                 """;
             cmd.Parameters.AddWithValue("id", id);
@@ -254,7 +254,7 @@ public class CorrectivoController : ControllerBase
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-                INSERT INTO public.mantenimientos_correctivos
+                INSERT INTO mantenimientos_correctivos
                 (
                     status, folio, planta, linea_persona, equipo, marca, modelo,
                     numero_serie, descripcion_falla, accesorio_solicitado,
@@ -278,7 +278,7 @@ public class CorrectivoController : ControllerBase
                     @validacion, @dreparacion,
                     @observaciones, @oc
                 )
-                RETURNING id
+                OUTPUT INSERTED.id
                 """;
 
             AgregarParametros(cmd, data);
@@ -310,7 +310,7 @@ public class CorrectivoController : ControllerBase
             // ── Actualizar ──
             using var upd = conn.CreateCommand();
             upd.CommandText = """
-                UPDATE public.mantenimientos_correctivos SET
+                UPDATE mantenimientos_correctivos SET
                     status                     = @status,
                     folio                      = @folio,
                     planta                     = @planta,
@@ -367,18 +367,18 @@ public class CorrectivoController : ControllerBase
 
             // Solo ADMIN puede eliminar
             using var chk = conn.CreateCommand();
-            chk.CommandText = "SELECT rol FROM public.usuarios WHERE usuario=@u";
+            chk.CommandText = "SELECT rol FROM usuarios WHERE usuario=@u";
             chk.Parameters.AddWithValue("u", usuario);
             var rol = chk.ExecuteScalar()?.ToString();
             if (rol != "ADMIN")
                 return Ok(new { error = "No tienes permiso para eliminar" });
 
             using var del = conn.CreateCommand();
-            del.CommandText = "DELETE FROM public.mantenimientos_correctivos WHERE id=@id";
+            del.CommandText = "DELETE FROM mantenimientos_correctivos WHERE id=@id";
             del.Parameters.AddWithValue("id", id);
             del.ExecuteNonQuery();
 
-            return Ok(new { ok = true });
+            return Ok(new { ok = 1 });
         }
         catch (Exception ex) { return Ok(new { error = ex.Message }); }
     }
@@ -395,7 +395,7 @@ public class CorrectivoController : ControllerBase
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
             SELECT id, fecha_cambio, usuario, registro_anterior, registro_nuevo
-            FROM public.auditoria_correctivos
+            FROM auditoria_correctivos
             WHERE registro_id = @id
             ORDER BY fecha_cambio DESC
             """;
@@ -442,7 +442,7 @@ public class CorrectivoController : ControllerBase
 
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "UPDATE public.mantenimientos_correctivos SET pdf=@p WHERE id=@id";
+            cmd.CommandText = "UPDATE mantenimientos_correctivos SET pdf=@p WHERE id=@id";
             cmd.Parameters.AddWithValue("p", path);
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
@@ -471,7 +471,7 @@ public class CorrectivoController : ControllerBase
 
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "UPDATE public.mantenimientos_correctivos SET pdf=NULL WHERE id=@id";
+            cmd.CommandText = "UPDATE mantenimientos_correctivos SET pdf=NULL WHERE id=@id";
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 
@@ -503,7 +503,7 @@ public class CorrectivoController : ControllerBase
                 fecha_reparacion, quien_realizo_reparacion,
                 validacion_funcionamiento, descripcion_reparacion,
                 observaciones, oc_factura
-            FROM public.mantenimientos_correctivos
+            FROM mantenimientos_correctivos
             {where}
             ORDER BY id DESC
             """;
@@ -532,7 +532,7 @@ public class CorrectivoController : ControllerBase
                 fecha_reparacion, quien_realizo_reparacion,
                 validacion_funcionamiento, descripcion_reparacion,
                 observaciones, oc_factura
-            FROM public.mantenimientos_correctivos
+            FROM mantenimientos_correctivos
             ORDER BY id DESC
             """;
         using var reader = cmd.ExecuteReader();
@@ -560,7 +560,7 @@ public class CorrectivoController : ControllerBase
                 fecha_reparacion, quien_realizo_reparacion,
                 validacion_funcionamiento, descripcion_reparacion,
                 observaciones, oc_factura
-            FROM public.mantenimientos_correctivos
+            FROM mantenimientos_correctivos
             WHERE EXTRACT(YEAR FROM fecha_solicitud) = @anio
             ORDER BY id DESC
             """;
@@ -579,7 +579,7 @@ public class CorrectivoController : ControllerBase
     /// <summary>
     /// Agrega todos los parámetros de datos al comando (INSERT y UPDATE comparten la misma lista).
     /// </summary>
-    private static void AgregarParametros(NpgsqlCommand cmd, CorrectivoRequest d)
+    private static void AgregarParametros(SqlCommand cmd, CorrectivoRequest d)
     {
         static object N(string? v) => string.IsNullOrWhiteSpace(v) ? DBNull.Value : v.Trim();
         static object NDate(string? v) =>
@@ -617,7 +617,7 @@ public class CorrectivoController : ControllerBase
     /// Lee todas las columnas de negocio de un registro por ID.
     /// Devuelve null si no existe.
     /// </summary>
-    private static Dictionary<string, object?>? LeerRegistro(NpgsqlConnection conn, int id)
+    private static Dictionary<string, object?>? LeerRegistro(SqlConnection conn, int id)
     {
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
@@ -631,7 +631,7 @@ public class CorrectivoController : ControllerBase
                 fecha_reparacion, quien_realizo_reparacion,
                 validacion_funcionamiento, descripcion_reparacion,
                 observaciones, oc_factura
-            FROM public.mantenimientos_correctivos
+            FROM mantenimientos_correctivos
             WHERE id = @id
             """;
         cmd.Parameters.AddWithValue("id", id);
@@ -648,17 +648,17 @@ public class CorrectivoController : ControllerBase
     /// <summary>
     /// Construye la cláusula WHERE y la lista de parámetros para las exportaciones filtradas.
     /// </summary>
-    private static (string where, List<NpgsqlParameter> parms) ConstruirWhere(FiltrosCorrectivo f)
+    private static (string where, List<SqlParameter> parms) ConstruirWhere(FiltrosCorrectivo f)
     {
         var where = "WHERE 1=1";
-        var parms = new List<NpgsqlParameter>();
+        var parms = new List<SqlParameter>();
         int pIdx = 1;
 
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            where += $" AND {col}::text ILIKE @p{pIdx}";
-            parms.Add(new NpgsqlParameter($"p{pIdx++}", $"%{val}%"));
+            where += $" AND {col} LIKE @p{pIdx}";
+            parms.Add(new SqlParameter($"p{pIdx++}", $"%{val}%"));
         }
 
         Add("status", f.STATUS);
@@ -674,11 +674,11 @@ public class CorrectivoController : ControllerBase
         Add("fecha_solicitud", f.FECHA_SOLICITUD);
         Add("reporte_elaborado_por", f.REPORTE_ELABORADO_POR);
         Add("tipo_observacion", f.TIPO_OBSERVACION);
-        // vencimiento_dias es INTEGER — filtro exacto, no ILIKE
+        // vencimiento_dias es INTEGER — filtro exacto, no LIKE
         if (f.VENCIMIENTO_DIAS.HasValue)
         {
             where += $" AND vencimiento_dias = @p{pIdx}";
-            parms.Add(new NpgsqlParameter($"p{pIdx++}", f.VENCIMIENTO_DIAS.Value));
+            parms.Add(new SqlParameter($"p{pIdx++}", f.VENCIMIENTO_DIAS.Value));
         }
         Add("categoria_correctivo", f.CATEGORIA_CORRECTIVO);
         Add("refaccion_accesorio_compra", f.REFACCION_ACCESORIO_COMPRA);
@@ -703,7 +703,7 @@ public class CorrectivoController : ControllerBase
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT DISTINCT TRIM(ubicacion)
-            FROM public.mantenimientos_preventivos
+            FROM mantenimientos_preventivos
             WHERE ubicacion IS NOT NULL AND TRIM(ubicacion) <> ''
             ORDER BY TRIM(ubicacion)
             """;
@@ -777,7 +777,7 @@ public class CorrectivoController : ControllerBase
 
             cmd.ExecuteNonQuery();
 
-            return Ok(new { ok = true, mensaje = "INSERT EJECUTADO" });
+            return Ok(new { ok = 1, mensaje = "INSERT EJECUTADO" });
         }
         catch (Exception ex)
         {
@@ -933,7 +933,7 @@ public class CorrectivoController : ControllerBase
                 FROM mantenimientos_correctivos
                 WHERE equipo IS NOT NULL
                   AND TRIM(equipo) <> ''
-                  AND (@q::text IS NULL OR equipo ILIKE '%' || @q || '%')
+                  AND (@q IS NULL OR equipo LIKE '%' || @q || '%')
             ) t
             ORDER BY val
             LIMIT 20
@@ -973,7 +973,7 @@ public class CorrectivoController : ControllerBase
                 FROM mantenimientos_correctivos
                 WHERE modelo IS NOT NULL
                   AND TRIM(modelo) <> ''
-                  AND (@q::text IS NULL OR modelo ILIKE '%' || @q || '%')
+                  AND (@q IS NULL OR modelo LIKE '%' || @q || '%')
             ) t
             ORDER BY val
             LIMIT 20
@@ -1013,7 +1013,7 @@ public class CorrectivoController : ControllerBase
                 FROM mantenimientos_correctivos
                 WHERE marca IS NOT NULL
                   AND TRIM(marca) <> ''
-                  AND (@q::text IS NULL OR marca ILIKE '%' || @q || '%')
+                  AND (@q IS NULL OR marca LIKE '%' || @q || '%')
             ) t
             ORDER BY val
             LIMIT 20
@@ -1047,7 +1047,7 @@ public class CorrectivoController : ControllerBase
     public IActionResult BuscarSerie([FromQuery] string? q)
     {
         if (string.IsNullOrWhiteSpace(q))
-            return Ok(new { duplicado = false, registros = Array.Empty<object>() });
+            return Ok(new { duplicado = 0, registros = Array.Empty<object>() });
 
         try
         {
@@ -1055,8 +1055,8 @@ public class CorrectivoController : ControllerBase
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
                 SELECT id, folio, equipo, planta, status
-                FROM public.mantenimientos_correctivos
-                WHERE (activo IS NULL OR activo = true)
+                FROM mantenimientos_correctivos
+                WHERE (activo IS NULL OR activo = 1)
                   AND TRIM(LOWER(numero_serie)) = TRIM(LOWER(@serie))
                 ORDER BY id DESC
                 LIMIT 10

@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -67,7 +67,7 @@ public class TintasTonerRibonNFService
     private async Task InicializarTablaAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             CREATE TABLE IF NOT EXISTS tintas_toner_ribon_nf (
                 id                  SERIAL PRIMARY KEY,
                 id_unico            TEXT,
@@ -90,7 +90,7 @@ public class TintasTonerRibonNFService
                 id                SERIAL PRIMARY KEY,
                 tinta_id          INTEGER NOT NULL REFERENCES tintas_toner_ribon_nf(id) ON DELETE CASCADE,
                 usuario           TEXT    NOT NULL,
-                fecha             TIMESTAMPTZ DEFAULT NOW(),
+                fecha             TIMESTAMPTZ DEFAULT GETDATE(),
                 registro_anterior JSONB,
                 registro_nuevo    JSONB
             );
@@ -106,19 +106,19 @@ public class TintasTonerRibonNFService
 
         var (where, parms) = ConstruirWhere(f);
         if (string.IsNullOrWhiteSpace(where))
-            where = "WHERE (activo IS NULL OR activo = true)";
+            where = "WHERE (activo IS NULL OR activo = 1)";
         else
-            where += " AND (activo IS NULL OR activo = true)";
+            where += " AND (activo IS NULL OR activo = 1)";
         var offset = (page - 1) * limit;
 
         // Total
-        await using var cmdCount = new NpgsqlCommand(
+        await using var cmdCount = new SqlCommand(
             $"SELECT COUNT(*) FROM tintas_toner_ribon_nf {where}", conn);
         foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
         var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
 
         // Datos
-        await using var cmdData = new NpgsqlCommand(
+        await using var cmdData = new SqlCommand(
             $@"SELECT id, id_unico, oc, modelo, recibido_por,
                       subcategoria, fecha_registro, proveedor, stock,
                       costo_mn, cantidad_recibida, fecha_instalacion,
@@ -163,16 +163,16 @@ public class TintasTonerRibonNFService
     {
         await using var conn = await _pool.OpenAsync();
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             INSERT INTO tintas_toner_ribon_nf
                 (id_unico, oc, modelo, recibido_por, subcategoria,
                  fecha_registro, proveedor, stock, costo_mn,
                  cantidad_recibida, fecha_instalacion, ubicacion, impresora, instalado_por)
             VALUES
                 (@id_unico, @oc, @modelo, @recibido_por, @subcategoria,
-                 @fecha_registro::date, @proveedor, @stock, @costo_mn,
-                 @cantidad_recibida, @fecha_instalacion::date, @ubicacion, @impresora, @instalado_por)
-            RETURNING id
+                 @fecha_registro, @proveedor, @stock, @costo_mn,
+                 @cantidad_recibida, @fecha_instalacion, @ubicacion, @impresora, @instalado_por)
+            OUTPUT INSERTED.id
             """, conn);
 
         AgregarParametros(cmd, dto);
@@ -192,19 +192,19 @@ public class TintasTonerRibonNFService
         var anterior = await SnapshotAsync(conn, id);
         if (anterior is null) return false;
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             UPDATE tintas_toner_ribon_nf SET
                 id_unico          = @id_unico,
                 oc                = @oc,
                 modelo            = @modelo,
                 recibido_por      = @recibido_por,
                 subcategoria      = @subcategoria,
-                fecha_registro    = @fecha_registro::date,
+                fecha_registro    = @fecha_registro,
                 proveedor         = @proveedor,
                 stock             = @stock,
                 costo_mn          = @costo_mn,
                 cantidad_recibida = @cantidad_recibida,
-                fecha_instalacion = @fecha_instalacion::date,
+                fecha_instalacion = @fecha_instalacion,
                 ubicacion         = @ubicacion,
                 impresora         = @impresora,
                 instalado_por     = @instalado_por
@@ -231,7 +231,7 @@ public class TintasTonerRibonNFService
         await using var conn = await _pool.OpenAsync();
 
         string? ocVal = null, folioVal = null;
-        await using (var qSnap = new NpgsqlCommand(
+        await using (var qSnap = new SqlCommand(
             "SELECT oc FROM tintas_toner_ribon_nf WHERE id = @id", conn))
         {
             qSnap.Parameters.AddWithValue("id", id);
@@ -242,7 +242,7 @@ public class TintasTonerRibonNFService
             }
         }
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             "DELETE FROM tintas_toner_ribon_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
@@ -261,7 +261,7 @@ public class TintasTonerRibonNFService
     public async Task<List<object>> HistorialAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, usuario, fecha, registro_anterior, registro_nuevo
               FROM tintas_toner_ribon_nf_historial
               WHERE tinta_id = @id
@@ -292,11 +292,11 @@ public class TintasTonerRibonNFService
         var (where, parms) = ConstruirWhere(f);
 
         if (string.IsNullOrWhiteSpace(where))
-            where = "WHERE (activo IS NULL OR activo = true)";
+            where = "WHERE (activo IS NULL OR activo = 1)";
         else
-            where += " AND (activo IS NULL OR activo = true)";
+            where += " AND (activo IS NULL OR activo = 1)";
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             $@"SELECT id, id_unico, oc, modelo, recibido_por,
                       subcategoria, fecha_registro, proveedor, stock,
                       costo_mn, cantidad_recibida, fecha_instalacion,
@@ -322,14 +322,14 @@ public class TintasTonerRibonNFService
     {
         await using var conn = await _pool.OpenAsync();
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, id_unico, oc, modelo, recibido_por,
                  subcategoria, fecha_registro, proveedor, stock,
                  costo_mn, cantidad_recibida, fecha_instalacion,
                  ubicacion, impresora, instalado_por
           FROM tintas_toner_ribon_nf
           WHERE EXTRACT(YEAR FROM fecha_registro) = @anio
-          AND (activo IS NULL OR activo = true)
+          AND (activo IS NULL OR activo = 1)
           ORDER BY id DESC", conn);
 
         cmd.Parameters.AddWithValue("anio", anio);
@@ -357,7 +357,7 @@ public class TintasTonerRibonNFService
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            conds.Add($"LOWER({col}::TEXT) LIKE LOWER(@p{idx})");
+            conds.Add($"LOWER({col}) LIKE LOWER(@p{idx})");
             parms.Add(($"p{idx}", $"%{val}%"));
             idx++;
         }
@@ -377,7 +377,7 @@ public class TintasTonerRibonNFService
         return (where, parms);
     }
 
-    private static void AgregarParametros(NpgsqlCommand cmd, TintaTonerRibonNFDto dto)
+    private static void AgregarParametros(SqlCommand cmd, TintaTonerRibonNFDto dto)
     {
         cmd.Parameters.AddWithValue("id_unico",          (object?)dto.ID_UNICO          ?? DBNull.Value);
         cmd.Parameters.AddWithValue("oc",                (object?)dto.OC                ?? DBNull.Value);
@@ -395,15 +395,15 @@ public class TintasTonerRibonNFService
         cmd.Parameters.AddWithValue("instalado_por",     (object?)dto.INSTALADO_POR     ?? DBNull.Value);
     }
 
-    private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
+    private async Task<Dictionary<string, object?>?> SnapshotAsync(SqlConnection conn, int id)
     {
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id_unico, oc, modelo, recibido_por, subcategoria,
                  fecha_registro, proveedor, stock, costo_mn,
                  cantidad_recibida, fecha_instalacion, ubicacion, impresora, instalado_por
           FROM tintas_toner_ribon_nf
           WHERE id=@id
-          AND (activo IS NULL OR activo = true)", conn);
+          AND (activo IS NULL OR activo = 1)", conn);
 
         cmd.Parameters.AddWithValue("id", id);
 
@@ -417,16 +417,16 @@ public class TintasTonerRibonNFService
         return snap;
     }
 
-    private async Task RegistrarHistorialAsync(NpgsqlConnection conn, int tintaId,
+    private async Task RegistrarHistorialAsync(SqlConnection conn, int tintaId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {
         var antesJson   = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             """
             INSERT INTO tintas_toner_ribon_nf_historial (tinta_id, usuario, registro_anterior, registro_nuevo)
-            VALUES (@tid, @usr, @ant::jsonb, @nvo::jsonb)
+            VALUES (@tid, @usr, @ant, @nvo)
             """, conn);
 
         cmd.Parameters.AddWithValue("tid", tintaId);
@@ -454,7 +454,7 @@ public class TintasTonerRibonNFService
         for (int c = 0; c < headers.Length; c++)
         {
             ws.Cells[1, c + 1].Value = headers[c];
-            ws.Cells[1, c + 1].Style.Font.Bold = true;
+            ws.Cells[1, c + 1].Style.Font.Bold = 1;
             ws.Cells[1, c + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
             ws.Cells[1, c + 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(30, 41, 59));
             ws.Cells[1, c + 1].Style.Font.Color.SetColor(Color.White);
@@ -478,6 +478,6 @@ public class TintasTonerRibonNFService
         return pkg.GetAsByteArray();
     }
 
-    private static string? Str(NpgsqlDataReader r, int i)
+    private static string? Str(SqlDataReader r, int i)
         => r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
 }

@@ -1,49 +1,49 @@
 ﻿using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 namespace ChiIT.Services;
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  TABLAS PERMITIDAS  (whitelist de seguridad — nunca aceptar tabla libre del cliente)
+//  TABLAS PERMITIDAS  (whitelist de seguridad)
 // ─────────────────────────────────────────────────────────────────────────────
 public static class TablasPermitidas
 {
     private static readonly HashSet<string> _tablas = new(StringComparer.OrdinalIgnoreCase)
-{
-    // ── Presupuestos ──
-    "req_vs_oc",
-    "ordenes_de_compra",
-    "remisiones",
-    "pantallas_nf",
-    "refacciones_nf",
-    "accesorios_nf",
-    "dispositivos_nf",
-    "inventarios_nf",
-    "perifericos_nf",
-    "herramientas_nf",
-    "impresoras_nf",
-    "consumibles_nf",
-    "radios_nf",
-    "tintas_toner_ribon_nf",
-    "equipo_red_nf",
-    "servicios_proveedores",
-    "bitacora_firecom",
-    "camaras_audio",
-    "registro_entradas_temporal",
+    {
+        // ── Presupuestos ──
+        "req_vs_oc",
+        "ordenes_de_compra",
+        "remisiones",
+        "pantallas_nf",
+        "refacciones_nf",
+        "accesorios_nf",
+        "dispositivos_nf",
+        "inventarios_nf",
+        "perifericos_nf",
+        "herramientas_nf",
+        "impresoras_nf",
+        "consumibles_nf",
+        "radios_nf",
+        "tintas_toner_ribon_nf",
+        "equipo_red_nf",
+        "servicios_proveedores",
+        "bitacora_firecom",
+        "camaras_audio",
+        "registro_entradas_temporal",
 
-    // ── PREVENTIVOS ──
-    "mantenimientos_preventivos",
-    
-    // ── CORRECTIVOS ──
-    "mantenimientos_correctivos",
+        // ── PREVENTIVOS ──
+        "mantenimientos_preventivos",
 
-    // ── Otros módulos ──
-    "bajas_equipos",
-    "control_vales",
-    "directorio_proveedores_nf",
-    "reportes_impresoras",
-    "impresoras_info",
-};
+        // ── CORRECTIVOS ──
+        "mantenimientos_correctivos",
+
+        // ── Otros módulos ──
+        "bajas_equipos",
+        "control_vales",
+        "directorio_proveedores_nf",
+        "reportes_impresoras",
+        "impresoras_info",
+    };
 
     public static bool EsValida(string tabla) => _tablas.Contains(tabla);
 }
@@ -57,20 +57,18 @@ public class SoftDeleteService
 
     public SoftDeleteService(DbConnectionPool pool) => _pool = pool;
 
-    // ── Inhabilita un registro (ACTIVO = false) ───────────────────────────
+    // ── Inhabilita un registro (activo = 0) ───────────────────────────
     public async Task<(bool ok, string? error)> InhabilitarAsync(string tabla, int id)
     {
         if (!TablasPermitidas.EsValida(tabla))
             return (false, $"Tabla '{tabla}' no permitida.");
 
         await using var conn = await _pool.OpenAsync();
-
-        // Asegura que la columna exista (idempotente)
         await AsegurarColumnaActivoAsync(conn, tabla);
 
-        await using var cmd = new NpgsqlCommand(
-            $"UPDATE {tabla} SET activo = false WHERE id = @id", conn);
-        cmd.Parameters.AddWithValue("id", id);
+        await using var cmd = new SqlCommand(
+            $"UPDATE [{tabla}] SET activo = 0 WHERE id = @id", conn);
+        cmd.Parameters.AddWithValue("@id", id);
 
         var rows = await cmd.ExecuteNonQueryAsync();
         return rows > 0
@@ -78,7 +76,7 @@ public class SoftDeleteService
             : (false, "Registro no encontrado.");
     }
 
-    // ── Restaura un registro (ACTIVO = true) ─────────────────────────────
+    // ── Restaura un registro (activo = 1) ─────────────────────────────
     public async Task<(bool ok, string? error)> RestaurarAsync(string tabla, int id)
     {
         if (!TablasPermitidas.EsValida(tabla))
@@ -87,9 +85,9 @@ public class SoftDeleteService
         await using var conn = await _pool.OpenAsync();
         await AsegurarColumnaActivoAsync(conn, tabla);
 
-        await using var cmd = new NpgsqlCommand(
-            $"UPDATE {tabla} SET activo = true WHERE id = @id", conn);
-        cmd.Parameters.AddWithValue("id", id);
+        await using var cmd = new SqlCommand(
+            $"UPDATE [{tabla}] SET activo = 1 WHERE id = @id", conn);
+        cmd.Parameters.AddWithValue("@id", id);
 
         var rows = await cmd.ExecuteNonQueryAsync();
         return rows > 0
@@ -97,7 +95,7 @@ public class SoftDeleteService
             : (false, "Registro no encontrado.");
     }
 
-    // ── Lista los registros INACTIVOS de una tabla (para el panel de restauración) ──
+    // ── Lista los registros INACTIVOS de una tabla ──
     public async Task<List<Dictionary<string, object?>>> ListarInactivosAsync(string tabla)
     {
         if (!TablasPermitidas.EsValida(tabla))
@@ -106,8 +104,8 @@ public class SoftDeleteService
         await using var conn = await _pool.OpenAsync();
         await AsegurarColumnaActivoAsync(conn, tabla);
 
-        await using var cmd = new NpgsqlCommand(
-            $"SELECT * FROM {tabla} WHERE activo = false ORDER BY id DESC LIMIT 200", conn);
+        await using var cmd = new SqlCommand(
+            $"SELECT TOP 200 * FROM [{tabla}] WHERE activo = 0 ORDER BY id DESC", conn);
 
         var lista = new List<Dictionary<string, object?>>();
         await using var r = await cmd.ExecuteReaderAsync();
@@ -121,22 +119,19 @@ public class SoftDeleteService
         return lista;
     }
 
-    // ── DDL: agrega columna 'activo' si no existe y activa todos los actuales ──
-    private static async Task AsegurarColumnaActivoAsync(NpgsqlConnection conn, string tabla)
+    // ── DDL: agrega columna 'activo' si no existe ──
+    private static async Task AsegurarColumnaActivoAsync(SqlConnection conn, string tabla)
     {
-        await using var cmd = new NpgsqlCommand($"""
-            DO $$
+        // En SQL Server usamos IF NOT EXISTS sobre information_schema
+        await using var cmd = new SqlCommand($@"
+            IF NOT EXISTS (
+                SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_NAME = '{tabla}' AND COLUMN_NAME = 'activo'
+            )
             BEGIN
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns
-                    WHERE table_name = '{tabla}' AND column_name = 'activo'
-                ) THEN
-                    ALTER TABLE {tabla} ADD COLUMN activo BOOLEAN NOT NULL DEFAULT true;
-                    UPDATE {tabla} SET activo = true WHERE activo IS NULL;
-                END IF;
-            END
-            $$;
-            """, conn);
+                ALTER TABLE [{tabla}] ADD activo BIT NOT NULL DEFAULT 1;
+                UPDATE [{tabla}] SET activo = 1 WHERE activo IS NULL;
+            END", conn);
         await cmd.ExecuteNonQueryAsync();
     }
 }

@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -70,7 +70,7 @@ public class InventariosNFService
     private async Task InicializarTablaAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             CREATE TABLE IF NOT EXISTS inventarios_nf (
                 id                SERIAL PRIMARY KEY,
                 inv_folio         TEXT,
@@ -94,7 +94,7 @@ public class InventariosNFService
                 id                SERIAL PRIMARY KEY,
                 inventario_id     INTEGER NOT NULL REFERENCES inventarios_nf(id) ON DELETE CASCADE,
                 usuario           TEXT    NOT NULL,
-                fecha             TIMESTAMPTZ DEFAULT NOW(),
+                fecha             TIMESTAMPTZ DEFAULT GETDATE(),
                 registro_anterior JSONB,
                 registro_nuevo    JSONB
             );
@@ -112,13 +112,13 @@ public class InventariosNFService
         var offset = (page - 1) * limit;
 
         // Total
-        await using var cmdCount = new NpgsqlCommand(
+        await using var cmdCount = new SqlCommand(
             $"SELECT COUNT(*) FROM inventarios_nf {where}", conn);
         foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
         var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
 
         // Datos
-        await using var cmdData = new NpgsqlCommand(
+        await using var cmdData = new SqlCommand(
             $@"SELECT id, inv_folio, equipo, marca, modelo,
                       cantidad, precio_unitario, precio_con_iva, moneda,
                       proveedor, presupuesto, status, anio, oc,
@@ -164,7 +164,7 @@ public class InventariosNFService
     {
         await using var conn = await _pool.OpenAsync();
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"INSERT INTO inventarios_nf
                 (inv_folio, equipo, marca, modelo, cantidad,
                  precio_unitario, precio_con_iva, moneda, proveedor,
@@ -173,7 +173,7 @@ public class InventariosNFService
                 (@inv_folio, @equipo, @marca, @modelo, @cantidad,
                  @precio_unitario, @precio_con_iva, @moneda, @proveedor,
                  @presupuesto, @status, @anio, @oc, @numero_serie, @ubicacion_actual)
-              RETURNING id", conn);
+              OUTPUT INSERTED.id", conn);
 
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
@@ -203,7 +203,7 @@ public class InventariosNFService
         var anterior = await SnapshotAsync(conn, id);
         if (anterior is null) return false;
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"UPDATE inventarios_nf SET
                 inv_folio        = @inv_folio,
                 equipo           = @equipo,
@@ -247,7 +247,7 @@ public class InventariosNFService
         await using var conn = await _pool.OpenAsync();
 
         string? ocVal = null, folioVal = null;
-        await using (var qSnap = new NpgsqlCommand(
+        await using (var qSnap = new SqlCommand(
             "SELECT oc, inv_folio FROM inventarios_nf WHERE id = @id", conn))
         {
             qSnap.Parameters.AddWithValue("id", id);
@@ -259,7 +259,7 @@ public class InventariosNFService
             }
         }
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             "DELETE FROM inventarios_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
@@ -278,7 +278,7 @@ public class InventariosNFService
     public async Task<List<object>> HistorialAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, usuario, fecha, registro_anterior, registro_nuevo
               FROM inventarios_nf_historial
               WHERE inventario_id = @id
@@ -307,7 +307,7 @@ public class InventariosNFService
         await using var conn = await _pool.OpenAsync();
         var (where, parms) = ConstruirWhere(f);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             $@"SELECT id, inv_folio, equipo, marca, modelo,
                       cantidad, precio_unitario, precio_con_iva, moneda,
                       proveedor, presupuesto, status, anio, oc,
@@ -333,7 +333,7 @@ public class InventariosNFService
     public async Task<byte[]> ExportarPorAnioAsync(int anio)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, inv_folio, equipo, marca, modelo,
                      cantidad, precio_unitario, precio_con_iva, moneda,
                      proveedor, presupuesto, status, anio, oc,
@@ -361,7 +361,7 @@ public class InventariosNFService
     {
         var conds = new List<string>();
 
-        conds.Add("(activo IS NULL OR activo = true)");
+        conds.Add("(activo IS NULL OR activo = 1)");
 
         var parms = new List<(string, object?)>();
         var idx   = 1;
@@ -369,7 +369,7 @@ public class InventariosNFService
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            conds.Add($"LOWER({col}::TEXT) LIKE LOWER(@p{idx})");
+            conds.Add($"LOWER({col}) LIKE LOWER(@p{idx})");
             parms.Add(($"p{idx}", $"%{val}%"));
             idx++;
         }
@@ -391,7 +391,7 @@ public class InventariosNFService
         return (where, parms);
     }
 
-    private static void AgregarParametros(NpgsqlCommand cmd, InventarioNFDto dto)
+    private static void AgregarParametros(SqlCommand cmd, InventarioNFDto dto)
     {
         cmd.Parameters.AddWithValue("inv_folio",        (object?)dto.INV_FOLIO        ?? DBNull.Value);
         cmd.Parameters.AddWithValue("equipo",           (object?)dto.EQUIPO           ?? DBNull.Value);
@@ -410,9 +410,9 @@ public class InventariosNFService
         cmd.Parameters.AddWithValue("ubicacion_actual", (object?)dto.UBICACION_ACTUAL ?? DBNull.Value);
     }
 
-    private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
+    private async Task<Dictionary<string, object?>?> SnapshotAsync(SqlConnection conn, int id)
     {
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT inv_folio, equipo, marca, modelo, cantidad,
                      precio_unitario, precio_con_iva, moneda, proveedor,
                      presupuesto, status, anio, oc, numero_serie, ubicacion_actual
@@ -429,16 +429,16 @@ public class InventariosNFService
         return snap;
     }
 
-    private async Task RegistrarHistorialAsync(NpgsqlConnection conn, int inventarioId,
+    private async Task RegistrarHistorialAsync(SqlConnection conn, int inventarioId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {
         var antesJson   = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             """
             INSERT INTO inventarios_nf_historial (inventario_id, usuario, registro_anterior, registro_nuevo)
-            VALUES (@iid, @usr, @ant::jsonb, @nvo::jsonb)
+            VALUES (@iid, @usr, @ant, @nvo)
             """, conn);
 
         cmd.Parameters.AddWithValue("iid", inventarioId);
@@ -466,7 +466,7 @@ public class InventariosNFService
         for (int c = 0; c < headers.Length; c++)
         {
             ws.Cells[1, c + 1].Value = headers[c];
-            ws.Cells[1, c + 1].Style.Font.Bold = true;
+            ws.Cells[1, c + 1].Style.Font.Bold = 1;
             ws.Cells[1, c + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
             ws.Cells[1, c + 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(30, 41, 59));
             ws.Cells[1, c + 1].Style.Font.Color.SetColor(Color.White);
@@ -490,6 +490,6 @@ public class InventariosNFService
         return pkg.GetAsByteArray();
     }
 
-    private static string? Str(NpgsqlDataReader r, int i)
+    private static string? Str(SqlDataReader r, int i)
         => r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
 }

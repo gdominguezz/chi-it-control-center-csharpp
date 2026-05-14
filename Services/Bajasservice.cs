@@ -1,6 +1,6 @@
 ﻿using ChiIT.Data;
 using ChiIT.Models;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -55,7 +55,6 @@ public class BajasService
     private readonly DbConnectionPool _pool;
     private const string PDF_DIR = "PDF_DATABASE/BAJAS";
 
-    // Columnas de datos (sin ID ni campos de sistema)
     private static readonly string[] COLS =
     [
         "FOLIO","ESTADO","PLANTA","FECHA","EQUIPO","MARCA","MODELO",
@@ -74,40 +73,49 @@ public class BajasService
     private async Task InicializarTablaAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
-            CREATE TABLE IF NOT EXISTS bajas_equipos (
-                id                  SERIAL PRIMARY KEY,
-                folio               TEXT,
-                estado              TEXT,
-                planta              TEXT,
-                fecha               TEXT,
-                equipo              TEXT,
-                marca               TEXT,
-                modelo              TEXT,
-                no_serie            TEXT,
-                activo_fijo         TEXT,
-                ubicacion_persona   TEXT,
-                motivo_de_baja      TEXT,
-                diagnostico         TEXT,
-                comentarios         TEXT,
-                motivo_de_cancelacion  TEXT,
-                tiene_pdf           BOOLEAN DEFAULT FALSE,
-                fecha_creacion      TIMESTAMPTZ DEFAULT NOW()
-            );
+        await using var cmd = new SqlCommand(@"
+            IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'bajas_equipos')
+            BEGIN
+                CREATE TABLE bajas_equipos (
+                    id                  INT IDENTITY(1,1) PRIMARY KEY,
+                    folio               NVARCHAR(MAX),
+                    estado              NVARCHAR(MAX),
+                    planta              NVARCHAR(MAX),
+                    fecha               NVARCHAR(MAX),
+                    equipo              NVARCHAR(MAX),
+                    marca               NVARCHAR(MAX),
+                    modelo              NVARCHAR(MAX),
+                    no_serie            NVARCHAR(MAX),
+                    activo_fijo         NVARCHAR(MAX),
+                    ubicacion_persona   NVARCHAR(MAX),
+                    motivo_de_baja      NVARCHAR(MAX),
+                    diagnostico         NVARCHAR(MAX),
+                    comentarios         NVARCHAR(MAX),
+                    motivo_de_cancelacion NVARCHAR(MAX),
+                    tiene_pdf           BIT DEFAULT 0,
+                    fecha_creacion      DATETIMEOFFSET DEFAULT SYSDATETIMEOFFSET()
+                );
+            END
 
-            -- Migracion: agrega columnas si la tabla ya existia sin ellas
-            ALTER TABLE bajas_equipos ADD COLUMN IF NOT EXISTS tiene_pdf      BOOLEAN     DEFAULT FALSE;
-            ALTER TABLE bajas_equipos ADD COLUMN IF NOT EXISTS fecha_creacion TIMESTAMPTZ DEFAULT NOW();
+            IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                           WHERE TABLE_NAME='bajas_equipos' AND COLUMN_NAME='tiene_pdf')
+                ALTER TABLE bajas_equipos ADD tiene_pdf BIT DEFAULT 0;
 
-            CREATE TABLE IF NOT EXISTS bajas_historial (
-                id                  SERIAL PRIMARY KEY,
-                baja_id             INTEGER NOT NULL REFERENCES bajas_equipos(id) ON DELETE CASCADE,
-                usuario             TEXT    NOT NULL,
-                fecha               TIMESTAMPTZ DEFAULT NOW(),
-                registro_anterior   JSONB,
-                registro_nuevo      JSONB
-            );
-            """, conn);
+            IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                           WHERE TABLE_NAME='bajas_equipos' AND COLUMN_NAME='fecha_creacion')
+                ALTER TABLE bajas_equipos ADD fecha_creacion DATETIMEOFFSET DEFAULT SYSDATETIMEOFFSET();
+
+            IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'bajas_historial')
+            BEGIN
+                CREATE TABLE bajas_historial (
+                    id                  INT IDENTITY(1,1) PRIMARY KEY,
+                    baja_id             INT NOT NULL REFERENCES bajas_equipos(id) ON DELETE CASCADE,
+                    usuario             NVARCHAR(MAX) NOT NULL,
+                    fecha               DATETIMEOFFSET DEFAULT SYSDATETIMEOFFSET(),
+                    registro_anterior   NVARCHAR(MAX),
+                    registro_nuevo      NVARCHAR(MAX)
+                );
+            END", conn);
 
         await cmd.ExecuteNonQueryAsync();
     }
@@ -121,23 +129,23 @@ public class BajasService
         var offset = (page - 1) * limit;
 
         // Total
-        await using var cmdCount = new NpgsqlCommand(
+        await using var cmdCount = new SqlCommand(
             $"SELECT COUNT(*) FROM bajas_equipos {where}", conn);
-        foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
+        foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue("@" + k, v ?? (object)DBNull.Value);
         var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
 
-        // Datos
-        await using var cmdData = new NpgsqlCommand(
+        // Datos paginados (SQL Server usa OFFSET/FETCH)
+        await using var cmdData = new SqlCommand(
             $@"SELECT id, folio, estado, planta, fecha, equipo, marca, modelo,
                       no_serie, activo_fijo, ubicacion_persona,
-                      MOTIVO_DE_BAJA, diagnostico, comentarios, motivo_de_cancelacion, tiene_pdf
+                      motivo_de_baja, diagnostico, comentarios, motivo_de_cancelacion, tiene_pdf
                FROM bajas_equipos {where}
                ORDER BY id DESC
-               LIMIT @lim OFFSET @off", conn);
+               OFFSET @off ROWS FETCH NEXT @lim ROWS ONLY", conn);
 
-        foreach (var (k, v) in parms) cmdData.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
-        cmdData.Parameters.AddWithValue("lim", limit);
-        cmdData.Parameters.AddWithValue("off", offset);
+        foreach (var (k, v) in parms) cmdData.Parameters.AddWithValue("@" + k, v ?? (object)DBNull.Value);
+        cmdData.Parameters.AddWithValue("@lim", limit);
+        cmdData.Parameters.AddWithValue("@off", offset);
 
         var lista = new List<object>();
         await using var reader = await cmdData.ExecuteReaderAsync();
@@ -172,17 +180,16 @@ public class BajasService
     {
         await using var conn = await _pool.OpenAsync();
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand(@"
             INSERT INTO bajas_equipos
                 (folio,estado,planta,fecha,equipo,marca,modelo,
                  no_serie,activo_fijo,ubicacion_persona,
-                 MOTIVO_DE_BAJA,diagnostico,comentarios,motivo_de_cancelacion)
+                 motivo_de_baja,diagnostico,comentarios,motivo_de_cancelacion)
+            OUTPUT INSERTED.id
             VALUES
-                (@folio,@estado,@planta,@fecha::date,@equipo,@marca,@modelo,
+                (@folio,@estado,@planta,@fecha,@equipo,@marca,@modelo,
                  @no_serie,@activo_fijo,@ubicacion_persona,
-                 @motivo_de_baja,@diagnostico,@comentarios,@motivo_de_cancelacion)
-            RETURNING id
-            """, conn);
+                 @motivo_de_baja,@diagnostico,@comentarios,@motivo_de_cancelacion)", conn);
 
         AgregarParametros(cmd, dto);
         return Convert.ToInt32(await cmd.ExecuteScalarAsync());
@@ -191,40 +198,32 @@ public class BajasService
     // ── Editar ────────────────────────────────────────────────────────────
     public async Task<bool> EditarAsync(int id, BajaDto dto, string usuario)
     {
-        // Cada operación usa su propia conexión para evitar conflictos
-        // entre readers y comandos activos sobre la misma conexión (Npgsql).
-
-        // 1. Snapshot anterior
         Dictionary<string, object?>? anterior;
         await using (var conn1 = await _pool.OpenAsync())
             anterior = await SnapshotAsync(conn1, id);
         if (anterior == null) return false;
 
-        // 2. UPDATE
         int rows;
         await using (var conn2 = await _pool.OpenAsync())
         {
-            await using var cmd = new NpgsqlCommand("""
+            await using var cmd = new SqlCommand(@"
                 UPDATE bajas_equipos SET
-                    folio=@folio, estado=@estado, planta=@planta, fecha=@fecha::date,
+                    folio=@folio, estado=@estado, planta=@planta, fecha=@fecha,
                     equipo=@equipo, marca=@marca, modelo=@modelo, no_serie=@no_serie,
                     activo_fijo=@activo_fijo, ubicacion_persona=@ubicacion_persona,
                     motivo_de_baja=@motivo_de_baja, diagnostico=@diagnostico,
                     comentarios=@comentarios, motivo_de_cancelacion=@motivo_de_cancelacion
-                WHERE id=@id
-                """, conn2);
+                WHERE id=@id", conn2);
             AgregarParametros(cmd, dto);
-            cmd.Parameters.AddWithValue("id", id);
+            cmd.Parameters.AddWithValue("@id", id);
             rows = await cmd.ExecuteNonQueryAsync();
         }
         if (rows == 0) return false;
 
-        // 3. Snapshot nuevo
         Dictionary<string, object?>? nuevo;
         await using (var conn3 = await _pool.OpenAsync())
             nuevo = await SnapshotAsync(conn3, id);
 
-        // 4. Historial
         await using (var conn4 = await _pool.OpenAsync())
             await RegistrarHistorialAsync(conn4, id, usuario, anterior, nuevo!);
 
@@ -235,9 +234,8 @@ public class BajasService
     public async Task<bool> EliminarAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
-            "DELETE FROM bajas_equipos WHERE id=@id", conn);
-        cmd.Parameters.AddWithValue("id", id);
+        await using var cmd = new SqlCommand("DELETE FROM bajas_equipos WHERE id=@id", conn);
+        cmd.Parameters.AddWithValue("@id", id);
         return await cmd.ExecuteNonQueryAsync() > 0;
     }
 
@@ -245,17 +243,13 @@ public class BajasService
     public async Task<List<object>> HistorialAsync(int bajaId)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
-            """
-                SELECT id, usuario, fecha, registro_anterior, registro_nuevo
-                FROM bajas_historial
-                WHERE baja_id = @id
-                ORDER BY fecha DESC
-                """,
-            conn
-        );
+        await using var cmd = new SqlCommand(@"
+            SELECT id, usuario, fecha, registro_anterior, registro_nuevo
+            FROM bajas_historial
+            WHERE baja_id = @id
+            ORDER BY fecha DESC", conn);
 
-        cmd.Parameters.AddWithValue("id", bajaId);
+        cmd.Parameters.AddWithValue("@id", bajaId);
 
         var lista = new List<object>();
         await using var r = await cmd.ExecuteReaderAsync();
@@ -265,7 +259,7 @@ public class BajasService
             {
                 id = r.GetInt32(0),
                 usuario = Str(r, 1),
-                fecha = r.IsDBNull(2) ? null : r.GetDateTime(2).ToString("o"),
+                fecha = r.IsDBNull(2) ? null : r.GetDateTimeOffset(2).ToString("o"),
                 registro_anterior = Str(r, 3),
                 registro_nuevo = Str(r, 4)
             });
@@ -281,9 +275,9 @@ public class BajasService
         await file.CopyToAsync(fs);
 
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
-            "UPDATE bajas_equipos SET tiene_pdf=TRUE WHERE id=@id", conn);
-        cmd.Parameters.AddWithValue("id", id);
+        await using var cmd = new SqlCommand(
+            "UPDATE bajas_equipos SET tiene_pdf=1 WHERE id=@id", conn);
+        cmd.Parameters.AddWithValue("@id", id);
         await cmd.ExecuteNonQueryAsync();
     }
 
@@ -301,9 +295,9 @@ public class BajasService
         System.IO.File.Delete(path);
 
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
-            "UPDATE bajas_equipos SET tiene_pdf=FALSE WHERE id=@id", conn);
-        cmd.Parameters.AddWithValue("id", id);
+        await using var cmd = new SqlCommand(
+            "UPDATE bajas_equipos SET tiene_pdf=0 WHERE id=@id", conn);
+        cmd.Parameters.AddWithValue("@id", id);
         await cmd.ExecuteNonQueryAsync();
         return true;
     }
@@ -314,13 +308,13 @@ public class BajasService
         await using var conn = await _pool.OpenAsync();
         var (where, parms) = ConstruirWhere(f);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             $@"SELECT id, folio, estado, planta, fecha, equipo, marca, modelo,
                       no_serie, activo_fijo, ubicacion_persona,
-                      MOTIVO_DE_BAJA, diagnostico, comentarios, motivo_de_cancelacion
+                      motivo_de_baja, diagnostico, comentarios, motivo_de_cancelacion
                FROM bajas_equipos {where} ORDER BY id DESC", conn);
 
-        foreach (var (k, v) in parms) cmd.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
+        foreach (var (k, v) in parms) cmd.Parameters.AddWithValue("@" + k, v ?? (object)DBNull.Value);
 
         var rows = new List<string?[]>();
         await using var r = await cmd.ExecuteReaderAsync();
@@ -337,14 +331,15 @@ public class BajasService
     public async Task<byte[]> ExportarPorAnioAsync(int anio)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
-            @"SELECT id, folio, estado, planta, fecha, equipo, marca, modelo,
-                     no_serie, activo_fijo, ubicacion_persona,
-                     MOTIVO_DE_BAJA, diagnostico, comentarios, motivo_de_cancelacion
-              FROM bajas_equipos
-              WHERE EXTRACT(YEAR FROM fecha::date) = @anio
-              ORDER BY id DESC", conn);
-        cmd.Parameters.AddWithValue("anio", anio);
+        // SQL Server: YEAR() en lugar de EXTRACT(YEAR FROM ...)
+        await using var cmd = new SqlCommand(@"
+            SELECT id, folio, estado, planta, fecha, equipo, marca, modelo,
+                   no_serie, activo_fijo, ubicacion_persona,
+                   motivo_de_baja, diagnostico, comentarios, motivo_de_cancelacion
+            FROM bajas_equipos
+            WHERE YEAR(TRY_CAST(fecha AS DATE)) = @anio
+            ORDER BY id DESC", conn);
+        cmd.Parameters.AddWithValue("@anio", anio);
 
         var rows = new List<string?[]>();
         await using var r = await cmd.ExecuteReaderAsync();
@@ -362,16 +357,17 @@ public class BajasService
     public async Task<List<string>> ObtenerUbicacionesAsync(string? q)
     {
         await using var conn = await _pool.OpenAsync();
+        // SQL Server: LIKE en lugar de ILIKE (case-insensitive por collation por defecto)
         var sql = string.IsNullOrWhiteSpace(q)
-            ? @"SELECT DISTINCT ubicacion FROM mantenimientos_preventivos
+            ? @"SELECT DISTINCT TOP 50 ubicacion FROM mantenimientos_preventivos
                 WHERE ubicacion IS NOT NULL AND ubicacion <> ''
-                ORDER BY ubicacion LIMIT 50"
-            : @"SELECT DISTINCT ubicacion FROM mantenimientos_preventivos
-                WHERE ubicacion ILIKE @q AND ubicacion <> ''
-                ORDER BY ubicacion LIMIT 20";
-        await using var cmd = new NpgsqlCommand(sql, conn);
+                ORDER BY ubicacion"
+            : @"SELECT DISTINCT TOP 20 ubicacion FROM mantenimientos_preventivos
+                WHERE ubicacion LIKE @q AND ubicacion <> ''
+                ORDER BY ubicacion";
+        await using var cmd = new SqlCommand(sql, conn);
         if (!string.IsNullOrWhiteSpace(q))
-            cmd.Parameters.AddWithValue("q", $"%{q}%");
+            cmd.Parameters.AddWithValue("@q", $"%{q}%");
         var lista = new List<string>();
         await using var r = await cmd.ExecuteReaderAsync();
         while (await r.ReadAsync()) lista.Add(r.GetString(0));
@@ -383,14 +379,16 @@ public class BajasService
     private static (string where, List<(string key, object? val)> parms) ConstruirWhere(BajaFiltros f)
     {
         var conds = new List<string>();
-        conds.Add("(activo IS NULL OR activo = true)");
+        // SQL Server: BIT 1/0 en lugar de true/false
+        conds.Add("(activo IS NULL OR activo = 1)");
         var parms = new List<(string, object?)>();
         var idx = 1;
 
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            conds.Add($"LOWER({col}::TEXT) LIKE LOWER(@p{idx})");
+            // SQL Server: LOWER() + LIKE es case-insensitive con collation CI
+            conds.Add($"LOWER(CAST({col} AS NVARCHAR(MAX))) LIKE LOWER(@p{idx})");
             parms.Add(($"p{idx}", $"%{val}%"));
             idx++;
         }
@@ -414,32 +412,32 @@ public class BajasService
         return (where, parms);
     }
 
-    private static void AgregarParametros(NpgsqlCommand cmd, BajaDto dto)
+    private static void AgregarParametros(SqlCommand cmd, BajaDto dto)
     {
-        cmd.Parameters.AddWithValue("folio", (object?)dto.FOLIO ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("estado", (object?)dto.ESTADO ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("planta", (object?)dto.PLANTA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("fecha", (object?)dto.FECHA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("equipo", (object?)dto.EQUIPO ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("marca", (object?)dto.MARCA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("modelo", (object?)dto.MODELO ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("no_serie", (object?)dto.NO_SERIE ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("activo_fijo", (object?)dto.ACTIVO_FIJO ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("ubicacion_persona", (object?)dto.UBICACION_PERSONA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("motivo_de_baja", (object?)dto.MOTIVO_DE_BAJA ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("diagnostico", (object?)dto.DIAGNOSTICO ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("comentarios", (object?)dto.COMENTARIOS ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("motivo_de_cancelacion", (object?)dto.MOTIVO_DE_CANCELACION ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@folio", (object?)dto.FOLIO ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@estado", (object?)dto.ESTADO ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@planta", (object?)dto.PLANTA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@fecha", (object?)dto.FECHA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@equipo", (object?)dto.EQUIPO ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@marca", (object?)dto.MARCA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@modelo", (object?)dto.MODELO ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@no_serie", (object?)dto.NO_SERIE ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@activo_fijo", (object?)dto.ACTIVO_FIJO ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@ubicacion_persona", (object?)dto.UBICACION_PERSONA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@motivo_de_baja", (object?)dto.MOTIVO_DE_BAJA ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@diagnostico", (object?)dto.DIAGNOSTICO ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@comentarios", (object?)dto.COMENTARIOS ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@motivo_de_cancelacion", (object?)dto.MOTIVO_DE_CANCELACION ?? DBNull.Value);
     }
 
-    private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
+    private async Task<Dictionary<string, object?>?> SnapshotAsync(SqlConnection conn, int id)
     {
-        await using var cmd = new NpgsqlCommand(
-            @"SELECT folio,estado,planta,fecha,equipo,marca,modelo,
-                     no_serie,activo_fijo,ubicacion_persona,
-                     MOTIVO_DE_BAJA,diagnostico,comentarios,motivo_de_cancelacion
-              FROM bajas_equipos WHERE id=@id", conn);
-        cmd.Parameters.AddWithValue("id", id);
+        await using var cmd = new SqlCommand(@"
+            SELECT folio,estado,planta,fecha,equipo,marca,modelo,
+                   no_serie,activo_fijo,ubicacion_persona,
+                   motivo_de_baja,diagnostico,comentarios,motivo_de_cancelacion
+            FROM bajas_equipos WHERE id=@id", conn);
+        cmd.Parameters.AddWithValue("@id", id);
 
         await using var r = await cmd.ExecuteReaderAsync();
         if (!await r.ReadAsync()) return null;
@@ -451,24 +449,20 @@ public class BajasService
         return snap;
     }
 
-    private async Task RegistrarHistorialAsync(NpgsqlConnection conn, int bajaId,
+    private async Task RegistrarHistorialAsync(SqlConnection conn, int bajaId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {
         var antesJson = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
-        await using var cmd = new NpgsqlCommand(
-            """
-                INSERT INTO bajas_historial (baja_id, usuario, registro_anterior, registro_nuevo)
-                VALUES (@bid, @usr, @ant::jsonb, @nvo::jsonb)
-                """,
-            conn
-        );
+        await using var cmd = new SqlCommand(@"
+            INSERT INTO bajas_historial (baja_id, usuario, registro_anterior, registro_nuevo)
+            VALUES (@bid, @usr, @ant, @nvo)", conn);
 
-        cmd.Parameters.AddWithValue("bid", bajaId);
-        cmd.Parameters.AddWithValue("usr", usuario);
-        cmd.Parameters.AddWithValue("ant", antesJson);
-        cmd.Parameters.AddWithValue("nvo", despuesJson);
+        cmd.Parameters.AddWithValue("@bid", bajaId);
+        cmd.Parameters.AddWithValue("@usr", usuario);
+        cmd.Parameters.AddWithValue("@ant", antesJson);
+        cmd.Parameters.AddWithValue("@nvo", despuesJson);
 
         await cmd.ExecuteNonQueryAsync();
     }
@@ -479,7 +473,6 @@ public class BajasService
         using var pkg = new ExcelPackage();
         var ws = pkg.Workbook.Worksheets.Add("Bajas de Equipos");
 
-        // Encabezados
         string[] headers = ["ID","FOLIO","ESTADO","PLANTA","FECHA","EQUIPO","MARCA","MODELO",
                              "NO SERIE","ACTIVO FIJO","UBICACION / PERSONA",
                              "MOTIVO DE BAJA","DIAGNOSTICO","COMENTARIOS","MOTIVO DE CANCELACION"];
@@ -494,7 +487,6 @@ public class BajasService
             ws.Cells[1, c + 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
         }
 
-        // Datos
         for (int r = 0; r < rows.Count; r++)
         {
             for (int c = 0; c < rows[r].Length; c++)
@@ -512,8 +504,11 @@ public class BajasService
         return pkg.GetAsByteArray();
     }
 
-    private static string? Str(NpgsqlDataReader r, int i)
+    private static string? Str(SqlDataReader r, int i)
         => r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
+
+    private static bool GetBoolean(SqlDataReader r, int i)
+        => !r.IsDBNull(i) && (r.GetValue(i) is bool b ? b : Convert.ToInt32(r.GetValue(i)) != 0);
 
     private static string PdfPath(int id) => Path.Combine(PDF_DIR, $"baja_{id}.pdf");
 }

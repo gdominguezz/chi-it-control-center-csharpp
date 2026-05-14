@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System.Drawing;
@@ -63,7 +63,7 @@ public class PantallasNfService
     private async Task InicializarTablaAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             CREATE TABLE IF NOT EXISTS pantallas_nf (
                 id                      SERIAL PRIMARY KEY,
                 id_unico                TEXT,
@@ -89,16 +89,16 @@ public class PantallasNfService
                 destino_planta          TEXT,
                 asignado_a              TEXT,
                 personal_it_que_asigna  TEXT,
-                fecha_creacion          TIMESTAMPTZ DEFAULT NOW()
+                fecha_creacion          TIMESTAMPTZ DEFAULT GETDATE()
             );
 
-            ALTER TABLE pantallas_nf ADD COLUMN IF NOT EXISTS fecha_creacion TIMESTAMPTZ DEFAULT NOW();
+            ALTER TABLE pantallas_nf ADD COLUMN IF NOT EXISTS fecha_creacion TIMESTAMPTZ DEFAULT GETDATE();
 
             CREATE TABLE IF NOT EXISTS pantallas_nf_historial (
                 id                  SERIAL PRIMARY KEY,
                 pantalla_id         INTEGER NOT NULL REFERENCES pantallas_nf(id) ON DELETE CASCADE,
                 usuario             TEXT NOT NULL,
-                fecha               TIMESTAMPTZ DEFAULT NOW(),
+                fecha               TIMESTAMPTZ DEFAULT GETDATE(),
                 registro_anterior   JSONB,
                 registro_nuevo      JSONB
             );
@@ -111,14 +111,14 @@ public class PantallasNfService
     public async Task<List<object>> ListarAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
         SELECT id, id_unico, oc, folio, fecha_registro, recibido_por, subcategoria,
                marca, modelo, no_serie, cantidad, tamano_pulgadas, accesorios,
                mac_wifi, mac_ethernet, proveedor, costo_usd, vida_util_meses,
                estado, disponible, fecha_salida, destino_planta, asignado_a,
                personal_it_que_asigna
         FROM pantallas_nf
-        WHERE (activo IS NULL OR activo = true)
+        WHERE (activo IS NULL OR activo = 1)
         ORDER BY id DESC
         """, conn);
 
@@ -134,7 +134,7 @@ public class PantallasNfService
     public async Task<object?> ObtenerAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             SELECT id, id_unico, oc, folio, fecha_registro, recibido_por, subcategoria,
                    marca, modelo, no_serie, cantidad, tamano_pulgadas, accesorios,
                    mac_wifi, mac_ethernet, proveedor, costo_usd, vida_util_meses,
@@ -159,7 +159,7 @@ public class PantallasNfService
             ? $"{dto.oc}{dto.folio}"
             : dto.id_unico;
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             INSERT INTO pantallas_nf
                 (id_unico, oc, folio, fecha_registro, recibido_por, subcategoria,
                  marca, modelo, no_serie, cantidad, tamano_pulgadas, accesorios,
@@ -172,7 +172,7 @@ public class PantallasNfService
                  @mac_wifi, @mac_ethernet, @proveedor, @costo_usd, @vida_util_meses,
                  @estado, @disponible, @fecha_salida, @destino_planta, @asignado_a,
                  @personal_it_que_asigna)
-            RETURNING id
+            OUTPUT INSERTED.id
             """, conn);
 
         AgregarParametros(cmd, dto, idUnico);
@@ -206,7 +206,7 @@ public class PantallasNfService
             ? $"{dto.oc}{dto.folio}"
             : dto.id_unico;
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
         UPDATE pantallas_nf SET
             id_unico                = @id_unico,
             oc                      = @oc,
@@ -258,7 +258,7 @@ public class PantallasNfService
         await using var conn = await _pool.OpenAsync();
 
         string? ocVal = null, folioVal = null;
-        await using (var qSnap = new NpgsqlCommand(
+        await using (var qSnap = new SqlCommand(
             "SELECT oc, folio FROM pantallas_nf WHERE id = @id", conn))
         {
             qSnap.Parameters.AddWithValue("id", id);
@@ -270,7 +270,7 @@ public class PantallasNfService
             }
         }
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             "DELETE FROM pantallas_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
@@ -289,7 +289,7 @@ public class PantallasNfService
     public async Task<List<object>> ObtenerHistorialAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             SELECT id, pantalla_id, usuario, fecha, registro_anterior, registro_nuevo
             FROM pantallas_nf_historial
             WHERE pantalla_id = @id
@@ -318,7 +318,7 @@ public class PantallasNfService
     public async Task<byte[]> ExportarExcelAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             SELECT id, id_unico, oc, folio, fecha_registro, recibido_por, subcategoria,
                    marca, modelo, no_serie, cantidad, tamano_pulgadas, accesorios,
                    mac_wifi, mac_ethernet, proveedor, costo_usd, vida_util_meses,
@@ -339,7 +339,7 @@ public class PantallasNfService
 
     // ── Helpers privados ──────────────────────────────────────────────────
 
-    private static object MapRow(NpgsqlDataReader r) => new
+    private static object MapRow(SqlDataReader r) => new
     {
         id                      = r.GetInt32(0),
         id_unico                = Str(r, 1),
@@ -367,7 +367,7 @@ public class PantallasNfService
         personal_it_que_asigna  = Str(r, 23),
     };
 
-    private static void AgregarParametros(NpgsqlCommand cmd, PantallaNfDto dto, string? idUnico)
+    private static void AgregarParametros(SqlCommand cmd, PantallaNfDto dto, string? idUnico)
     {
         DateTime? fr = DateTime.TryParse(dto.fecha_registro, out var frTmp) ? frTmp : null;
         DateTime? fs = DateTime.TryParse(dto.fecha_salida, out var fsTmp) ? fsTmp : null;
@@ -397,9 +397,9 @@ public class PantallasNfService
         cmd.Parameters.AddWithValue("personal_it_que_asigna", (object?)dto.personal_it_que_asigna ?? DBNull.Value);
     }
 
-    private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
+    private async Task<Dictionary<string, object?>?> SnapshotAsync(SqlConnection conn, int id)
     {
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             SELECT id_unico, oc, folio, fecha_registro, recibido_por, subcategoria,
                    marca, modelo, no_serie, cantidad, tamano_pulgadas, accesorios,
                    mac_wifi, mac_ethernet, proveedor, costo_usd, vida_util_meses,
@@ -419,13 +419,13 @@ public class PantallasNfService
         return snap;
     }
 
-    private async Task RegistrarHistorialAsync(NpgsqlConnection conn, int pantallaId,
+    private async Task RegistrarHistorialAsync(SqlConnection conn, int pantallaId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             INSERT INTO pantallas_nf_historial
                 (pantalla_id, usuario, registro_anterior, registro_nuevo)
-            VALUES (@pid, @usr, @ant::jsonb, @nvo::jsonb)
+            VALUES (@pid, @usr, @ant, @nvo)
             """, conn);
 
         cmd.Parameters.AddWithValue("pid", pantallaId);
@@ -454,7 +454,7 @@ public class PantallasNfService
         {
             var cell = ws.Cells[1, c + 1];
             cell.Value = headers[c];
-            cell.Style.Font.Bold = true;
+            cell.Style.Font.Bold = 1;
             cell.Style.Fill.PatternType = ExcelFillStyle.Solid;
             cell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(30, 41, 59));
             cell.Style.Font.Color.SetColor(Color.White);
@@ -478,6 +478,6 @@ public class PantallasNfService
         return pkg.GetAsByteArray();
     }
 
-    private static string? Str(NpgsqlDataReader r, int i)
+    private static string? Str(SqlDataReader r, int i)
         => r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
 }

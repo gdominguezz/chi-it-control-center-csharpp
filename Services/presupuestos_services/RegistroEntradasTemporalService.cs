@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 using ClosedXML.Excel;
 
 public class RegistroEntradaDto
@@ -43,7 +43,7 @@ public class RegistroEntradasTemporalService
         _db = db;
     }
 
-    private NpgsqlConnection Abrir() => _db.Open();
+    private SqlConnection Abrir() => _db.Open();
 
     // ── GET PAGINADO ──────────────────────────────────────────────────────
     public (List<RegistroEntradaRow> data, int total) GetAll(
@@ -70,7 +70,7 @@ public class RegistroEntradasTemporalService
 
         var whereConditions = new List<string>();
 
-        whereConditions.Add("(activo IS NULL OR activo = true)");
+        whereConditions.Add("(activo IS NULL OR activo = 1)");
 
         var paramValues = new List<(string name, string value)>();
 
@@ -78,7 +78,7 @@ public class RegistroEntradasTemporalService
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                whereConditions.Add($"{column} ILIKE @{param}");
+                whereConditions.Add($"{column} LIKE @{param}");
                 paramValues.Add((param, $"%{value}%"));
             }
         }
@@ -88,7 +88,7 @@ public class RegistroEntradasTemporalService
         AddFilter("serie",              SERIE,        "se");
         AddFilter("folio",              FOLIO,        "fo");
         AddFilter("oc",                 OC,           "oc");
-        AddFilter("fecha_ingreso::text",FECHA_INGRESO,"fi");
+        AddFilter("fecha_ingreso",FECHA_INGRESO,"fi");
         AddFilter("proveedor",          PROVEEDOR,    "pr");
         AddFilter("recibido_por",       RECIBIDO_POR, "rp");
         AddFilter("categoria",          CATEGORIA,    "ca");
@@ -186,7 +186,7 @@ public class RegistroEntradasTemporalService
                    fecha_salida, destino, responsable, pdf
             FROM registro_entradas_temporal
             WHERE id = @id
-            AND (activo IS NULL OR activo = true)
+            AND (activo IS NULL OR activo = 1)
             """;
 
         cmd.Parameters.AddWithValue("id", id);
@@ -391,7 +391,7 @@ public class RegistroEntradasTemporalService
         for (int i = 0; i < headers.Length; i++)
         {
             ws.Cell(1, i + 1).Value = headers[i];
-            ws.Cell(1, i + 1).Style.Font.Bold = true;
+            ws.Cell(1, i + 1).Style.Font.Bold = 1;
             ws.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#1a2235");
         }
 
@@ -443,7 +443,7 @@ public class RegistroEntradasTemporalService
                    fecha_salida, destino, responsable, pdf
             FROM registro_entradas_temporal
             WHERE EXTRACT(YEAR FROM fecha_ingreso) = @anio
-            AND (activo IS NULL OR activo = true)
+            AND (activo IS NULL OR activo = 1)
             ORDER BY id DESC
             """;
 
@@ -529,7 +529,7 @@ public class RegistroEntradasTemporalService
         cmd.CommandText = """
             INSERT INTO auditoria_registro_entradas_temporal
             (registro_id, fecha_cambio, usuario, registro_anterior, registro_nuevo)
-            VALUES (@rid, NOW(), @usr, @ant, @nvo)
+            VALUES (@rid, GETDATE(), @usr, @ant, @nvo)
             """;
 
         var antJson = System.Text.Json.JsonSerializer.Serialize(anterior);

@@ -1,6 +1,6 @@
 using ChiIT.Data;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 namespace ChiIT.Controllers;
 
@@ -17,12 +17,12 @@ public class DashboardController : ControllerBase
                 periodo,
                 (
                     DATE_TRUNC('week',
-                        (anio_inicio::TEXT || '-01-01')::date
+                        (anio_inicio || '-01-01')
                         + ((semana_inicio - 1) * 7) * INTERVAL '1 day'
                     ) + INTERVAL '4 days'
-                )::date AS plazo_cal
-            FROM public.calendario_estado
-            WHERE generado = true
+                ) AS plazo_cal
+            FROM calendario_estado
+            WHERE generado = 1
         ),
         planta_map AS (
             SELECT mp.id,
@@ -34,14 +34,14 @@ public class DashboardController : ControllerBase
                        WHEN 'BODEGA'          THEN 'BODEGA'
                        ELSE NULL
                    END AS planta_key
-            FROM public.mantenimientos_preventivos mp
+            FROM mantenimientos_preventivos mp
         ),
         equipos_con_plazo AS (
             SELECT
                 mp.*,
                 cal_p1.plazo_cal AS plazo_cal_p1,
                 cal_p2.plazo_cal AS plazo_cal_p2
-            FROM public.mantenimientos_preventivos mp
+            FROM mantenimientos_preventivos mp
             JOIN planta_map pm ON pm.id = mp.id
             LEFT JOIN cal cal_p1 ON cal_p1.planta_key = pm.planta_key AND cal_p1.periodo = 1
             LEFT JOIN cal cal_p2 ON cal_p2.planta_key = pm.planta_key AND cal_p2.periodo = 2
@@ -67,15 +67,15 @@ public class DashboardController : ControllerBase
                   COUNT(*) FILTER (WHERE preventivo_digital    IS NOT NULL
                                    AND   preventivo_digital_p2 IS NOT NULL)                            AS completos,
                   COUNT(*) FILTER (WHERE plazo_cal_p1 IS NOT NULL
-                                   AND   plazo_cal_p1 < CURRENT_DATE
+                                   AND   plazo_cal_p1 < CAST(GETDATE() AS DATE)
                                    AND   preventivo_digital IS NULL)                                   AS vencidos_p1,
                   COUNT(*) FILTER (WHERE plazo_cal_p2 IS NOT NULL
-                                   AND   plazo_cal_p2 < CURRENT_DATE
+                                   AND   plazo_cal_p2 < CAST(GETDATE() AS DATE)
                                    AND   preventivo_digital_p2 IS NULL)                               AS vencidos_p2,
-                  COUNT(*) FILTER (WHERE fecha_realizacion >= date_trunc('week', CURRENT_DATE)
-                                   AND   fecha_realizacion  <  date_trunc('week', CURRENT_DATE) + interval '7 days') AS semana_p1,
-                  COUNT(*) FILTER (WHERE fecha_realizacion_p2 >= date_trunc('week', CURRENT_DATE)
-                                   AND   fecha_realizacion_p2 <  date_trunc('week', CURRENT_DATE) + interval '7 days') AS semana_p2,
+                  COUNT(*) FILTER (WHERE fecha_realizacion >= date_trunc('week', CAST(GETDATE() AS DATE))
+                                   AND   fecha_realizacion  <  date_trunc('week', CAST(GETDATE() AS DATE)) + interval '7 days') AS semana_p1,
+                  COUNT(*) FILTER (WHERE fecha_realizacion_p2 >= date_trunc('week', CAST(GETDATE() AS DATE))
+                                   AND   fecha_realizacion_p2 <  date_trunc('week', CAST(GETDATE() AS DATE)) + interval '7 days') AS semana_p2,
                   COUNT(*) FILTER (WHERE plazo_cal_p1 IS NULL AND plazo_cal_p2 IS NULL)               AS sin_plazo_asignado
                 FROM equipos_con_plazo
                 """;
@@ -126,8 +126,8 @@ public class DashboardController : ControllerBase
                     COUNT(*) FILTER (WHERE preventivo_digital_p2 IS NOT NULL) AS con_p2,
                     MAX(plazo_cal_p1) AS plazo_p1_cal,
                     MAX(plazo_cal_p2) AS plazo_p2_cal,
-                    COUNT(*) FILTER (WHERE plazo_cal_p1 < CURRENT_DATE AND preventivo_digital    IS NULL) AS vencidos_p1,
-                    COUNT(*) FILTER (WHERE plazo_cal_p2 < CURRENT_DATE AND preventivo_digital_p2 IS NULL) AS vencidos_p2
+                    COUNT(*) FILTER (WHERE plazo_cal_p1 < CAST(GETDATE() AS DATE) AND preventivo_digital    IS NULL) AS vencidos_p1,
+                    COUNT(*) FILTER (WHERE plazo_cal_p2 < CAST(GETDATE() AS DATE) AND preventivo_digital_p2 IS NULL) AS vencidos_p2
                 FROM equipos_con_plazo
                 GROUP BY planta ORDER BY total DESC LIMIT 10
                 """;
@@ -152,11 +152,11 @@ public class DashboardController : ControllerBase
             ultimosCmd.CommandText = """
                 SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
                        fecha_realizacion AS fecha, realizado_por, 1 AS periodo
-                FROM public.mantenimientos_preventivos WHERE fecha_realizacion IS NOT NULL
+                FROM mantenimientos_preventivos WHERE fecha_realizacion IS NOT NULL
                 UNION ALL
                 SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
                        fecha_realizacion_p2, realizado_por_p2, 2
-                FROM public.mantenimientos_preventivos WHERE fecha_realizacion_p2 IS NOT NULL
+                FROM mantenimientos_preventivos WHERE fecha_realizacion_p2 IS NOT NULL
                 ORDER BY fecha DESC LIMIT 10
                 """;
             var ultimos = new List<object>();
@@ -180,15 +180,15 @@ public class DashboardController : ControllerBase
             semanaCmd.CommandText = """
                 SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
                        fecha_realizacion, realizado_por, 1
-                FROM public.mantenimientos_preventivos
-                WHERE fecha_realizacion >= date_trunc('week', CURRENT_DATE)
-                  AND fecha_realizacion <  date_trunc('week', CURRENT_DATE) + interval '7 days'
+                FROM mantenimientos_preventivos
+                WHERE fecha_realizacion >= date_trunc('week', CAST(GETDATE() AS DATE))
+                  AND fecha_realizacion <  date_trunc('week', CAST(GETDATE() AS DATE)) + interval '7 days'
                 UNION ALL
                 SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
                        fecha_realizacion_p2, realizado_por_p2, 2
-                FROM public.mantenimientos_preventivos
-                WHERE fecha_realizacion_p2 >= date_trunc('week', CURRENT_DATE)
-                  AND fecha_realizacion_p2 <  date_trunc('week', CURRENT_DATE) + interval '7 days'
+                FROM mantenimientos_preventivos
+                WHERE fecha_realizacion_p2 >= date_trunc('week', CAST(GETDATE() AS DATE))
+                  AND fecha_realizacion_p2 <  date_trunc('week', CAST(GETDATE() AS DATE)) + interval '7 days'
                 ORDER BY fecha_realizacion DESC
                 """;
             var estaSemana = new List<object>();
@@ -211,18 +211,18 @@ public class DashboardController : ControllerBase
             using var mesCmd = conn.CreateCommand();
             mesCmd.CommandText = CTE_PLAZOS + """
                 SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
-                       plazo_cal_p1::text, categoria_color, 1
+                       plazo_cal_p1, categoria_color, 1
                 FROM equipos_con_plazo
                 WHERE plazo_cal_p1 IS NOT NULL AND preventivo_digital IS NULL
-                  AND plazo_cal_p1 >= date_trunc('month', CURRENT_DATE)
-                  AND plazo_cal_p1 <  date_trunc('month', CURRENT_DATE) + interval '1 month'
+                  AND plazo_cal_p1 >= date_trunc('month', CAST(GETDATE() AS DATE))
+                  AND plazo_cal_p1 <  date_trunc('month', CAST(GETDATE() AS DATE)) + interval '1 month'
                 UNION ALL
                 SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
-                       plazo_cal_p2::text, categoria_color, 2
+                       plazo_cal_p2, categoria_color, 2
                 FROM equipos_con_plazo
                 WHERE plazo_cal_p2 IS NOT NULL AND preventivo_digital_p2 IS NULL
-                  AND plazo_cal_p2 >= date_trunc('month', CURRENT_DATE)
-                  AND plazo_cal_p2 <  date_trunc('month', CURRENT_DATE) + interval '1 month'
+                  AND plazo_cal_p2 >= date_trunc('month', CAST(GETDATE() AS DATE))
+                  AND plazo_cal_p2 <  date_trunc('month', CAST(GETDATE() AS DATE)) + interval '1 month'
                 ORDER BY plazo_cal_p1 ASC
                 """;
             var proximos = new List<object>();
@@ -245,15 +245,15 @@ public class DashboardController : ControllerBase
             using var vencidosCmd = conn.CreateCommand();
             vencidosCmd.CommandText = CTE_PLAZOS + """
                 SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
-                       plazo_cal_p1::text, fecha_realizacion, categoria_color, 1
+                       plazo_cal_p1, fecha_realizacion, categoria_color, 1
                 FROM equipos_con_plazo
-                WHERE plazo_cal_p1 IS NOT NULL AND plazo_cal_p1 < CURRENT_DATE
+                WHERE plazo_cal_p1 IS NOT NULL AND plazo_cal_p1 < CAST(GETDATE() AS DATE)
                   AND preventivo_digital IS NULL
                 UNION ALL
                 SELECT id, id_equipo, nombre_dispositivo, ubicacion, planta,
-                       plazo_cal_p2::text, fecha_realizacion_p2, categoria_color, 2
+                       plazo_cal_p2, fecha_realizacion_p2, categoria_color, 2
                 FROM equipos_con_plazo
-                WHERE plazo_cal_p2 IS NOT NULL AND plazo_cal_p2 < CURRENT_DATE
+                WHERE plazo_cal_p2 IS NOT NULL AND plazo_cal_p2 < CAST(GETDATE() AS DATE)
                   AND preventivo_digital_p2 IS NULL
                 ORDER BY plazo_cal_p1 ASC LIMIT 50
                 """;
@@ -280,12 +280,12 @@ public class DashboardController : ControllerBase
                 SELECT mes, SUM(p1), SUM(p2), SUM(p1)+SUM(p2)
                 FROM (
                     SELECT TO_CHAR(fecha_realizacion,    'YYYY-MM') AS mes, 1 AS p1, 0 AS p2
-                    FROM public.mantenimientos_preventivos
-                    WHERE fecha_realizacion    IS NOT NULL AND fecha_realizacion    >= NOW() - INTERVAL '12 months'
+                    FROM mantenimientos_preventivos
+                    WHERE fecha_realizacion    IS NOT NULL AND fecha_realizacion    >= GETDATE() - INTERVAL '12 months'
                     UNION ALL
                     SELECT TO_CHAR(fecha_realizacion_p2, 'YYYY-MM'),               0,         1
-                    FROM public.mantenimientos_preventivos
-                    WHERE fecha_realizacion_p2 IS NOT NULL AND fecha_realizacion_p2 >= NOW() - INTERVAL '12 months'
+                    FROM mantenimientos_preventivos
+                    WHERE fecha_realizacion_p2 IS NOT NULL AND fecha_realizacion_p2 >= GETDATE() - INTERVAL '12 months'
                 ) sub
                 GROUP BY mes ORDER BY mes ASC
                 """;
@@ -303,7 +303,7 @@ public class DashboardController : ControllerBase
                   COUNT(*) FILTER (WHERE preventivo_digital    IS NULL)     AS sin_digital_p1,
                   COUNT(*) FILTER (WHERE preventivo_digital_p2 IS NOT NULL) AS con_digital_p2,
                   COUNT(*) FILTER (WHERE preventivo_digital_p2 IS NULL)     AS sin_digital_p2
-                FROM public.mantenimientos_preventivos
+                FROM mantenimientos_preventivos
                 """;
             using var digitalR = digitalCmd.ExecuteReader();
             digitalR.Read();
@@ -321,18 +321,18 @@ public class DashboardController : ControllerBase
             saludCmd.CommandText = CTE_PLAZOS + """
                 SELECT
                     COUNT(*) FILTER (WHERE plazo_cal_p1 IS NOT NULL OR plazo_cal_p2 IS NOT NULL) AS total_con_plazo,
-                    COUNT(*) FILTER (WHERE (plazo_cal_p1 < CURRENT_DATE AND preventivo_digital    IS NULL)
-                                        OR (plazo_cal_p2 < CURRENT_DATE AND preventivo_digital_p2 IS NULL)) AS vencidos,
-                    COUNT(*) FILTER (WHERE (plazo_cal_p1 >= CURRENT_DATE
-                                        AND plazo_cal_p1 < date_trunc('month', CURRENT_DATE) + interval '1 month'
+                    COUNT(*) FILTER (WHERE (plazo_cal_p1 < CAST(GETDATE() AS DATE) AND preventivo_digital    IS NULL)
+                                        OR (plazo_cal_p2 < CAST(GETDATE() AS DATE) AND preventivo_digital_p2 IS NULL)) AS vencidos,
+                    COUNT(*) FILTER (WHERE (plazo_cal_p1 >= CAST(GETDATE() AS DATE)
+                                        AND plazo_cal_p1 < date_trunc('month', CAST(GETDATE() AS DATE)) + interval '1 month'
                                         AND preventivo_digital IS NULL)
-                                       OR  (plazo_cal_p2 >= CURRENT_DATE
-                                        AND plazo_cal_p2 < date_trunc('month', CURRENT_DATE) + interval '1 month'
+                                       OR  (plazo_cal_p2 >= CAST(GETDATE() AS DATE)
+                                        AND plazo_cal_p2 < date_trunc('month', CAST(GETDATE() AS DATE)) + interval '1 month'
                                         AND preventivo_digital_p2 IS NULL)) AS por_vencer_mes,
                     COUNT(*) FILTER (WHERE (preventivo_digital    IS NOT NULL OR plazo_cal_p1 IS NULL
-                                            OR plazo_cal_p1 >= date_trunc('month', CURRENT_DATE) + interval '1 month')
+                                            OR plazo_cal_p1 >= date_trunc('month', CAST(GETDATE() AS DATE)) + interval '1 month')
                                       AND  (preventivo_digital_p2 IS NOT NULL OR plazo_cal_p2 IS NULL
-                                            OR plazo_cal_p2 >= date_trunc('month', CURRENT_DATE) + interval '1 month')) AS al_corriente
+                                            OR plazo_cal_p2 >= date_trunc('month', CAST(GETDATE() AS DATE)) + interval '1 month')) AS al_corriente
                 FROM equipos_con_plazo
                 """;
             using var saludR = saludCmd.ExecuteReader();
@@ -370,11 +370,11 @@ public class DashboardController : ControllerBase
                 SELECT planta_key, periodo, semana_inicio, anio_inicio, generado, terminado,
                        (
                            DATE_TRUNC('week',
-                               (anio_inicio::TEXT || '-01-01')::date
+                               (anio_inicio || '-01-01')
                                + ((semana_inicio - 1) * 7) * INTERVAL '1 day'
                            ) + INTERVAL '4 days'
-                       )::date AS plazo_viernes
-                FROM public.calendario_estado
+                       ) AS plazo_viernes
+                FROM calendario_estado
                 ORDER BY planta_key, periodo
                 """;
             var calEstado = new List<object>();

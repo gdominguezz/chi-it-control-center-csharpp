@@ -1,6 +1,6 @@
-﻿using ChiIT.Data;
+using ChiIT.Data;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -22,7 +22,7 @@ public class AdminUsuariosApiController : ControllerBase
         if (string.IsNullOrWhiteSpace(usr)) return null;
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT rol FROM public.usuarios WHERE usuario=@u AND activo=true";
+        cmd.CommandText = "SELECT rol FROM usuarios WHERE usuario=@u AND activo=1";
         cmd.Parameters.AddWithValue("u", usr.ToUpper());
         return cmd.ExecuteScalar()?.ToString();
     }
@@ -48,7 +48,7 @@ public class AdminUsuariosApiController : ControllerBase
             SELECT id, usuario, nombre, rol,
                    password_temporal, activo,
                    creado_en, ultimo_acceso
-            FROM public.usuarios
+            FROM usuarios
             ORDER BY activo DESC, rol, nombre
             """;
 
@@ -84,7 +84,7 @@ public class AdminUsuariosApiController : ControllerBase
             SELECT id, usuario, nombre, rol,
                    password_temporal, activo,
                    creado_en, ultimo_acceso
-            FROM public.usuarios WHERE id=@id
+            FROM usuarios WHERE id=@id
             """;
         cmd.Parameters.AddWithValue("id", id);
 
@@ -108,16 +108,16 @@ public class AdminUsuariosApiController : ControllerBase
     [HttpPost("admin/usuarios/api")]
     public IActionResult Crear([FromBody] UsuarioRequest data)
     {
-        if (!EsAdmin()) return Ok(new { ok = false, error = "No autorizado" });
+        if (!EsAdmin()) return Ok(new { ok = 0, error = "No autorizado" });
 
         if (string.IsNullOrWhiteSpace(data.usuario))
-            return Ok(new { ok = false, error = "El campo usuario es requerido" });
+            return Ok(new { ok = 0, error = "El campo usuario es requerido" });
         if (string.IsNullOrWhiteSpace(data.nombre))
-            return Ok(new { ok = false, error = "El campo nombre es requerido" });
+            return Ok(new { ok = 0, error = "El campo nombre es requerido" });
         if (string.IsNullOrWhiteSpace(data.password))
-            return Ok(new { ok = false, error = "La contraseña es requerida" });
+            return Ok(new { ok = 0, error = "La contraseña es requerida" });
         if (data.password.Length < 6)
-            return Ok(new { ok = false, error = "La contraseña debe tener al menos 6 caracteres" });
+            return Ok(new { ok = 0, error = "La contraseña debe tener al menos 6 caracteres" });
 
         var usuarioUpper = data.usuario.Trim().ToUpper();
 
@@ -125,17 +125,17 @@ public class AdminUsuariosApiController : ControllerBase
 
         // Verificar que no exista
         using var chk = conn.CreateCommand();
-        chk.CommandText = "SELECT COUNT(*) FROM public.usuarios WHERE usuario=@u";
+        chk.CommandText = "SELECT COUNT(*) FROM usuarios WHERE usuario=@u";
         chk.Parameters.AddWithValue("u", usuarioUpper);
         if (Convert.ToInt64(chk.ExecuteScalar()!) > 0)
-            return Ok(new { ok = false, error = "El usuario ya existe" });
+            return Ok(new { ok = 0, error = "El usuario ya existe" });
 
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            INSERT INTO public.usuarios
+            INSERT INTO usuarios
             (usuario, nombre, password_hash, rol, password_temporal, activo)
             VALUES (@u, @n, @ph, @r, @pt, @a)
-            RETURNING id
+            OUTPUT INSERTED.id
             """;
         cmd.Parameters.AddWithValue("u", usuarioUpper);
         cmd.Parameters.AddWithValue("n", data.nombre.Trim());
@@ -145,19 +145,19 @@ public class AdminUsuariosApiController : ControllerBase
         cmd.Parameters.AddWithValue("a", data.activo ?? true);
 
         var newId = cmd.ExecuteScalar();
-        return Ok(new { ok = true, id = newId });
+        return Ok(new { ok = 1, id = newId });
     }
 
     // ── PUT /admin/usuarios/api/{id} ──────────────────────────────────────
     [HttpPut("admin/usuarios/api/{id:int}")]
     public IActionResult Editar(int id, [FromBody] UsuarioRequest data)
     {
-        if (!EsAdmin()) return Ok(new { ok = false, error = "No autorizado" });
+        if (!EsAdmin()) return Ok(new { ok = 0, error = "No autorizado" });
 
         if (string.IsNullOrWhiteSpace(data.nombre))
-            return Ok(new { ok = false, error = "El nombre es requerido" });
+            return Ok(new { ok = 0, error = "El nombre es requerido" });
         if (!string.IsNullOrWhiteSpace(data.password) && data.password.Length < 6)
-            return Ok(new { ok = false, error = "La contraseña debe tener al menos 6 caracteres" });
+            return Ok(new { ok = 0, error = "La contraseña debe tener al menos 6 caracteres" });
 
         using var conn = _db.Open();
 
@@ -166,7 +166,7 @@ public class AdminUsuariosApiController : ControllerBase
         {
             using var updFull = conn.CreateCommand();
             updFull.CommandText = """
-                UPDATE public.usuarios SET
+                UPDATE usuarios SET
                     nombre=@n, rol=@r, activo=@a,
                     password_temporal=@pt, password_hash=@ph
                 WHERE id=@id
@@ -183,7 +183,7 @@ public class AdminUsuariosApiController : ControllerBase
         {
             using var upd = conn.CreateCommand();
             upd.CommandText = """
-                UPDATE public.usuarios SET
+                UPDATE usuarios SET
                     nombre=@n, rol=@r, activo=@a, password_temporal=@pt
                 WHERE id=@id
                 """;
@@ -195,48 +195,48 @@ public class AdminUsuariosApiController : ControllerBase
             upd.ExecuteNonQuery();
         }
 
-        return Ok(new { ok = true });
+        return Ok(new { ok = 1 });
     }
 
     // ── PATCH /admin/usuarios/api/{id}/estado ─────────────────────────────
     [HttpPatch("admin/usuarios/api/{id:int}/estado")]
     public IActionResult CambiarEstado(int id, [FromBody] EstadoRequest data)
     {
-        if (!EsAdmin()) return Ok(new { ok = false, error = "No autorizado" });
+        if (!EsAdmin()) return Ok(new { ok = 0, error = "No autorizado" });
 
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "UPDATE public.usuarios SET activo=@a WHERE id=@id";
+        cmd.CommandText = "UPDATE usuarios SET activo=@a WHERE id=@id";
         cmd.Parameters.AddWithValue("a", data.activo);
         cmd.Parameters.AddWithValue("id", id);
         cmd.ExecuteNonQuery();
 
-        return Ok(new { ok = true });
+        return Ok(new { ok = 1 });
     }
 
     // ── PATCH /admin/usuarios/api/{id}/reset-password ─────────────────────
     [HttpPatch("admin/usuarios/api/{id:int}/reset-password")]
     public IActionResult ResetPassword(int id, [FromBody] ResetPasswordRequest data)
     {
-        if (!EsAdmin()) return Ok(new { ok = false, error = "No autorizado" });
+        if (!EsAdmin()) return Ok(new { ok = 0, error = "No autorizado" });
 
         if (string.IsNullOrWhiteSpace(data.password))
-            return Ok(new { ok = false, error = "La contraseña es requerida" });
+            return Ok(new { ok = 0, error = "La contraseña es requerida" });
         if (data.password.Length < 6)
-            return Ok(new { ok = false, error = "Mínimo 6 caracteres" });
+            return Ok(new { ok = 0, error = "Mínimo 6 caracteres" });
 
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            UPDATE public.usuarios
-            SET password_hash=@ph, password_temporal=true
+            UPDATE usuarios
+            SET password_hash=@ph, password_temporal=1
             WHERE id=@id
             """;
         cmd.Parameters.AddWithValue("ph", HashPassword(data.password));
         cmd.Parameters.AddWithValue("id", id);
         cmd.ExecuteNonQuery();
 
-        return Ok(new { ok = true });
+        return Ok(new { ok = 1 });
     }
 }
 

@@ -10,7 +10,7 @@ using ChiIT.Data;
 using ChiIT.Models;
 using ChiIT.Services;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 using System.Text.Json;
 
 namespace ChiIT.Controllers;
@@ -39,14 +39,14 @@ public class PreventivoController : ControllerBase
     [HttpGet("PREVENTIVOS")]
     public IActionResult ObtenerPreventivos([FromQuery] FiltrosPreventivo f)
     {
-        var where = "WHERE (activo IS NULL OR activo = true)";
-        var parms = new List<NpgsqlParameter>();
+        var where = "WHERE (activo IS NULL OR activo = 1)";
+        var parms = new List<SqlParameter>();
         int pIdx = 1;
 
         void Add(string clause, object val)
         {
-            where += $" AND {clause} ILIKE @p{pIdx}";
-            parms.Add(new NpgsqlParameter($"p{pIdx++}", $"%{val}%"));
+            where += $" AND {clause} LIKE @p{pIdx}";
+            parms.Add(new SqlParameter($"p{pIdx++}", $"%{val}%"));
         }
 
         if (!string.IsNullOrWhiteSpace(f.ID_EQUIPO)) Add("id_equipo", f.ID_EQUIPO);
@@ -59,31 +59,31 @@ public class PreventivoController : ControllerBase
         if (!string.IsNullOrWhiteSpace(f.ANIO_CREACION) && int.TryParse(f.ANIO_CREACION, out int anio))
         {
             where += $" AND anio_creacion = @p{pIdx}";
-            parms.Add(new NpgsqlParameter($"p{pIdx++}", anio));
+            parms.Add(new SqlParameter($"p{pIdx++}", anio));
         }
 
         using var conn = _db.Open();
 
         // Helper para clonar parámetros — Npgsql no permite reusar el mismo objeto en dos comandos
-        NpgsqlParameter[] ClonarParams() =>
-            parms.Select(p => new NpgsqlParameter(p.ParameterName, p.Value)).ToArray();
+        SqlParameter[] ClonarParams() =>
+            parms.Select(p => new SqlParameter(p.ParameterName, p.Value)).ToArray();
 
         // Total
         using var cntCmd = conn.CreateCommand();
-        cntCmd.CommandText = $"SELECT COUNT(*) FROM public.mantenimientos_preventivos {where}";
+        cntCmd.CommandText = $"SELECT COUNT(*) FROM mantenimientos_preventivos {where}";
         cntCmd.Parameters.AddRange(ClonarParams());
         var total = Convert.ToInt64(cntCmd.ExecuteScalar()!);
 
         // Datos paginados
         int offset = (f.Page - 1) * f.Limit;
-        parms.Add(new NpgsqlParameter($"p{pIdx++}", f.Limit));
-        parms.Add(new NpgsqlParameter($"p{pIdx}", offset));
+        parms.Add(new SqlParameter($"p{pIdx++}", f.Limit));
+        parms.Add(new SqlParameter($"p{pIdx}", offset));
 
         using var cmd = conn.CreateCommand();
         cmd.CommandText = $"""
             SELECT *,
               CASE WHEN pdf IS NOT NULL THEN true ELSE false END AS tiene_pdf
-            FROM public.mantenimientos_preventivos
+            FROM mantenimientos_preventivos
             {where}
             ORDER BY
               CASE LOWER(categoria_color)
@@ -118,7 +118,7 @@ public class PreventivoController : ControllerBase
     {
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT ubicacion, planta FROM public.mantenimientos_preventivos WHERE id=@id";
+        cmd.CommandText = "SELECT ubicacion, planta FROM mantenimientos_preventivos WHERE id=@id";
         cmd.Parameters.AddWithValue("id", id);
 
         using var r = cmd.ExecuteReader();
@@ -129,7 +129,7 @@ public class PreventivoController : ControllerBase
 
         // Equipos en la misma ubicación
         using var cmd2 = conn.CreateCommand();
-        cmd2.CommandText = "SELECT id, id_equipo, nombre_dispositivo FROM public.mantenimientos_preventivos WHERE ubicacion=@u";
+        cmd2.CommandText = "SELECT id, id_equipo, nombre_dispositivo FROM mantenimientos_preventivos WHERE ubicacion=@u";
         cmd2.Parameters.AddWithValue("u", ubicacion);
 
         string pc = "", impresora = "", ups = "", portatil = "";
@@ -159,7 +159,7 @@ public class PreventivoController : ControllerBase
         if (!string.IsNullOrWhiteSpace(usuario))
         {
             using var cu = conn.CreateCommand();
-            cu.CommandText = "SELECT nombre FROM public.usuarios WHERE usuario=@u";
+            cu.CommandText = "SELECT nombre FROM usuarios WHERE usuario=@u";
             cu.Parameters.AddWithValue("u", usuario.ToUpper());
             nombreUsuario = cu.ExecuteScalar()?.ToString() ?? "";
         }
@@ -191,12 +191,12 @@ public class PreventivoController : ControllerBase
             cmd.CommandText = """
             SELECT id,id_equipo,ubicacion,plazo,realizado_por,
                    fecha_realizacion,observaciones,nombre_dispositivo,planta,categoria_color,anio_creacion
-            FROM public.mantenimientos_preventivos WHERE id=@id
+            FROM mantenimientos_preventivos WHERE id=@id
             """;
             cmd.Parameters.AddWithValue("id", id);
 
             using var r = cmd.ExecuteReader();
-            if (!r.Read()) return Ok(new { success = false, error = "Registro no encontrado" });
+            if (!r.Read()) return Ok(new { success = 0, error = "Registro no encontrado" });
 
             var actual = new Dictionary<string, object?>();
             for (int i = 0; i < r.FieldCount; i++)
@@ -215,7 +215,7 @@ public class PreventivoController : ControllerBase
             using var cmd2 = conn.CreateCommand();
             cmd2.CommandText = """
             SELECT id, fecha_cambio, usuario, registro_anterior, registro_nuevo
-            FROM public.auditoria_preventivos
+            FROM auditoria_preventivos
             WHERE registro_id=@id ORDER BY fecha_cambio DESC
             """;
             cmd2.Parameters.AddWithValue("id", id);
@@ -241,12 +241,12 @@ public class PreventivoController : ControllerBase
                 });
             }
 
-            return Ok(new { success = true, registro_actual = actual, historial });
+            return Ok(new { success = 1, registro_actual = actual, historial });
         }
         catch (Exception ex)
         {
             // Temporalmente devuelve el mensaje para diagnosticar — quita `error` en producción
-            return StatusCode(500, new { success = false, error = ex.Message, tipo = ex.GetType().Name });
+            return StatusCode(500, new { success = 0, error = ex.Message, tipo = ex.GetType().Name });
         }
     }
 
@@ -259,10 +259,10 @@ public class PreventivoController : ControllerBase
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-                INSERT INTO public.mantenimientos_preventivos
+                INSERT INTO mantenimientos_preventivos
                 (id_equipo,ubicacion,plazo,realizado_por,fecha_realizacion,
                  observaciones,nombre_dispositivo,planta,categoria_color,anio_creacion)
-                VALUES (@e,@u,@p,@rp,@fr,@o,@nd,@pl,@cc,@ac) RETURNING id
+                VALUES (@e,@u,@p,@rp,@fr,@o,@nd,@pl,@cc,@ac) OUTPUT INSERTED.id
                 """;
             cmd.Parameters.AddWithValue("e", (object?)data.ID_EQUIPO ?? DBNull.Value);
             cmd.Parameters.AddWithValue("u", (object?)data.UBICACION ?? DBNull.Value);
@@ -298,7 +298,7 @@ public class PreventivoController : ControllerBase
             sel.CommandText = """
                 SELECT id_equipo,ubicacion,plazo,realizado_por,fecha_realizacion,
                        observaciones,nombre_dispositivo,planta,categoria_color,anio_creacion
-                FROM public.mantenimientos_preventivos WHERE id=@id
+                FROM mantenimientos_preventivos WHERE id=@id
                 """;
             sel.Parameters.AddWithValue("id", id);
 
@@ -314,7 +314,7 @@ public class PreventivoController : ControllerBase
             // si llegan null (ej: edición desde página QR que no envía esos campos)
             using var upd = conn.CreateCommand();
             upd.CommandText = """
-                UPDATE public.mantenimientos_preventivos SET
+                UPDATE mantenimientos_preventivos SET
                 id_equipo          = @e,
                 ubicacion          = @u,
                 plazo              = COALESCE(@p,  plazo),
@@ -347,7 +347,7 @@ public class PreventivoController : ControllerBase
             post.CommandText = """
                 SELECT id_equipo,ubicacion,plazo,realizado_por,fecha_realizacion,
                        observaciones,nombre_dispositivo,planta,categoria_color,anio_creacion
-                FROM public.mantenimientos_preventivos WHERE id=@id
+                FROM mantenimientos_preventivos WHERE id=@id
                 """;
             post.Parameters.AddWithValue("id", id);
             using (var rPost = post.ExecuteReader())
@@ -374,17 +374,17 @@ public class PreventivoController : ControllerBase
             using var conn = _db.Open();
 
             using var chk = conn.CreateCommand();
-            chk.CommandText = "SELECT rol FROM public.usuarios WHERE usuario=@u";
+            chk.CommandText = "SELECT rol FROM usuarios WHERE usuario=@u";
             chk.Parameters.AddWithValue("u", usuario ?? "");
             var rol = chk.ExecuteScalar()?.ToString();
             if (rol != "ADMIN") return Ok(new { error = "No tienes permiso para eliminar" });
 
             using var del = conn.CreateCommand();
-            del.CommandText = "DELETE FROM public.mantenimientos_preventivos WHERE id=@id";
+            del.CommandText = "DELETE FROM mantenimientos_preventivos WHERE id=@id";
             del.Parameters.AddWithValue("id", id);
             del.ExecuteNonQuery();
 
-            return Ok(new { ok = true });
+            return Ok(new { ok = 1 });
         }
         catch (Exception ex) { return Ok(new { error = ex.Message }); }
     }
@@ -402,7 +402,7 @@ public class PreventivoController : ControllerBase
                    CASE WHEN preventivo_digital IS NOT NULL THEN true ELSE false END AS tiene_pm_p1,
                    CASE WHEN preventivo_digital_p2 IS NOT NULL THEN true ELSE false END AS tiene_pm_p2,
                    fecha_realizacion, fecha_realizacion_p2
-            FROM public.mantenimientos_preventivos
+            FROM mantenimientos_preventivos
             WHERE nombre_dispositivo IN (
                 'COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA'
             )
@@ -510,7 +510,7 @@ public class PreventivoController : ControllerBase
 
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET pdf=@p WHERE id=@id";
+            cmd.CommandText = "UPDATE mantenimientos_preventivos SET pdf=@p WHERE id=@id";
             cmd.Parameters.AddWithValue("p", path);
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
@@ -538,7 +538,7 @@ public class PreventivoController : ControllerBase
 
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET pdf=NULL WHERE id=@id";
+            cmd.CommandText = "UPDATE mantenimientos_preventivos SET pdf=NULL WHERE id=@id";
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 
@@ -553,7 +553,7 @@ public class PreventivoController : ControllerBase
     {
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT * FROM public.mantenimientos_preventivos ORDER BY id DESC";
+        cmd.CommandText = "SELECT * FROM mantenimientos_preventivos ORDER BY id DESC";
         using var reader = cmd.ExecuteReader();
         var bytes = _excel.GenerarExcel(reader, "Preventivos");
         return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -564,14 +564,14 @@ public class PreventivoController : ControllerBase
     public IActionResult ExportarFiltrado([FromQuery] FiltrosPreventivo f)
     {
         var where = "WHERE 1=1";
-        var parms = new List<NpgsqlParameter>();
+        var parms = new List<SqlParameter>();
         int pIdx = 1;
 
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            where += $" AND {col} ILIKE @p{pIdx}";
-            parms.Add(new NpgsqlParameter($"p{pIdx++}", $"%{val}%"));
+            where += $" AND {col} LIKE @p{pIdx}";
+            parms.Add(new SqlParameter($"p{pIdx++}", $"%{val}%"));
         }
 
         Add("id_equipo", f.ID_EQUIPO);
@@ -585,7 +585,7 @@ public class PreventivoController : ControllerBase
         using var cmd = conn.CreateCommand();
         cmd.CommandText = $"""
             SELECT id,id_equipo,ubicacion,nombre_dispositivo,planta,categoria_color,observaciones
-            FROM public.mantenimientos_preventivos {where} ORDER BY id DESC
+            FROM mantenimientos_preventivos {where} ORDER BY id DESC
             """;
         cmd.Parameters.AddRange(parms.ToArray());
         using var reader = cmd.ExecuteReader();
@@ -599,7 +599,7 @@ public class PreventivoController : ControllerBase
     {
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT * FROM public.mantenimientos_preventivos WHERE anio_creacion=@a ORDER BY id DESC";
+        cmd.CommandText = "SELECT * FROM mantenimientos_preventivos WHERE anio_creacion=@a ORDER BY id DESC";
         cmd.Parameters.AddWithValue("a", anio);
         using var reader = cmd.ExecuteReader();
         var bytes = _excel.GenerarExcel(reader, "Preventivos");
@@ -617,7 +617,7 @@ public class PreventivoController : ControllerBase
         using var conn = _db.Open();
         using var chk = conn.CreateCommand();
         chk.CommandText = """
-            SELECT COUNT(*) FROM public.mantenimientos_preventivos
+            SELECT COUNT(*) FROM mantenimientos_preventivos
             WHERE TRIM(LOWER(ubicacion)) = TRIM(LOWER(@u))
             """;
         chk.Parameters.AddWithValue("u", ub);
@@ -635,7 +635,7 @@ public class PreventivoController : ControllerBase
     {
         using var conn = _db.Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT DISTINCT ubicacion FROM public.mantenimientos_preventivos WHERE ubicacion IS NOT NULL";
+        cmd.CommandText = "SELECT DISTINCT ubicacion FROM mantenimientos_preventivos WHERE ubicacion IS NOT NULL";
 
         var ubicaciones = new List<string>();
         using var r = cmd.ExecuteReader();
@@ -668,8 +668,8 @@ public class PreventivoController : ControllerBase
         var ub = Uri.UnescapeDataString(ubicacion);
         var path = Path.Combine("QR_CODES/MESAS", $"{ub}.png");
         if (!System.IO.File.Exists(path))
-            return Ok(new { success = false });
-        return Ok(new { success = true, qr_url = $"/QR_CODES/MESAS/{Uri.EscapeDataString(ub)}.png" });
+            return Ok(new { success = 0 });
+        return Ok(new { success = 1, qr_url = $"/QR_CODES/MESAS/{Uri.EscapeDataString(ub)}.png" });
     }
 
     // ── QR POR EQUIPO ─────────────────────────────────────
@@ -680,7 +680,7 @@ public class PreventivoController : ControllerBase
         {
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT id_equipo FROM public.mantenimientos_preventivos WHERE id=@id";
+            cmd.CommandText = "SELECT id_equipo FROM mantenimientos_preventivos WHERE id=@id";
             cmd.Parameters.AddWithValue("id", id);
 
             var raw = cmd.ExecuteScalar();
@@ -702,8 +702,8 @@ public class PreventivoController : ControllerBase
         {
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET preventivo_digital=@d WHERE id=@id";
-            cmd.Parameters.Add("d", NpgsqlTypes.NpgsqlDbType.Jsonb).Value = JsonSerializer.Serialize(data);
+            cmd.CommandText = "UPDATE mantenimientos_preventivos SET preventivo_digital=@d WHERE id=@id";
+            cmd.Parameters.Add("d", NpgsqlTypes.SqlDbType.Jsonb).Value = JsonSerializer.Serialize(data);
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 
@@ -713,7 +713,7 @@ public class PreventivoController : ControllerBase
             {
                 var placeholders = string.Join(",", idsValidos.Select((_, i) => $"@i{i}"));
                 using var upd = conn.CreateCommand();
-                upd.CommandText = $"UPDATE public.mantenimientos_preventivos SET fecha_realizacion=NOW() WHERE id IN ({placeholders})";
+                upd.CommandText = $"UPDATE mantenimientos_preventivos SET fecha_realizacion=GETDATE() WHERE id IN ({placeholders})";
                 for (int i = 0; i < idsValidos.Count; i++)
                     upd.Parameters.AddWithValue($"i{i}", idsValidos[i]);
                 upd.ExecuteNonQuery();
@@ -721,12 +721,12 @@ public class PreventivoController : ControllerBase
             else
             {
                 using var upd = conn.CreateCommand();
-                upd.CommandText = "UPDATE public.mantenimientos_preventivos SET fecha_realizacion=NOW() WHERE id=@id";
+                upd.CommandText = "UPDATE mantenimientos_preventivos SET fecha_realizacion=GETDATE() WHERE id=@id";
                 upd.Parameters.AddWithValue("id", id);
                 upd.ExecuteNonQuery();
             }
 
-            return Ok(new { ok = true });
+            return Ok(new { ok = 1 });
         }
         catch (Exception ex) { return Ok(new { error = ex.Message }); }
     }
@@ -738,15 +738,15 @@ public class PreventivoController : ControllerBase
         {
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT preventivo_digital FROM public.mantenimientos_preventivos WHERE id=@id";
+            cmd.CommandText = "SELECT preventivo_digital FROM mantenimientos_preventivos WHERE id=@id";
             cmd.Parameters.AddWithValue("id", id);
             var raw = cmd.ExecuteScalar();
             if (raw == null || raw == DBNull.Value)
-                return Ok(new { existe = false });
+                return Ok(new { existe = 0 });
             var data = JsonSerializer.Deserialize<object>(raw.ToString()!);
-            return Ok(new { existe = true, data });
+            return Ok(new { existe = 1, data });
         }
-        catch (Exception ex) { return Ok(new { existe = false, error = ex.Message }); }
+        catch (Exception ex) { return Ok(new { existe = 0, error = ex.Message }); }
     }
 
     [HttpDelete("PREVENTIVO/ELIMINAR_DIGITAL/{id:int}")]
@@ -757,7 +757,7 @@ public class PreventivoController : ControllerBase
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-            UPDATE public.mantenimientos_preventivos
+            UPDATE mantenimientos_preventivos
             SET preventivo_digital = NULL,
                 fecha_realizacion  = NULL,
                 realizado_por      = NULL,
@@ -766,7 +766,7 @@ public class PreventivoController : ControllerBase
             """;
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
-            return Ok(new { ok = true });
+            return Ok(new { ok = 1 });
         }
         catch (Exception ex) { return Ok(new { error = ex.Message }); }
     }
@@ -779,13 +779,13 @@ public class PreventivoController : ControllerBase
         {
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT nombre FROM public.usuarios WHERE usuario=@u AND activo=true";
+            cmd.CommandText = "SELECT nombre FROM usuarios WHERE usuario=@u AND activo=1";
             cmd.Parameters.AddWithValue("u", usuario.ToUpper());
             var nombre = cmd.ExecuteScalar()?.ToString();
-            if (nombre != null) return Ok(new { existe = true, nombre });
-            return Ok(new { existe = false });
+            if (nombre != null) return Ok(new { existe = 1, nombre });
+            return Ok(new { existe = 0 });
         }
-        catch (Exception ex) { return Ok(new { existe = false, error = ex.Message }); }
+        catch (Exception ex) { return Ok(new { existe = 0, error = ex.Message }); }
     }
     //PREVENTIVO DIGITAL DE PERIODO 2
     [HttpPost("PREVENTIVO/P2/{id:int}")]
@@ -795,9 +795,9 @@ public class PreventivoController : ControllerBase
         using var cmd = conn.CreateCommand();
 
         cmd.CommandText = """
-        UPDATE public.mantenimientos_preventivos
+        UPDATE mantenimientos_preventivos
         SET preventivo_digital_p2 = @json,
-            fecha_realizacion_p2 = NOW()
+            fecha_realizacion_p2 = GETDATE()
         WHERE id = @id
     """;
 
@@ -806,7 +806,7 @@ public class PreventivoController : ControllerBase
 
         cmd.ExecuteNonQuery();
 
-        return Ok(new { ok = true });
+        return Ok(new { ok = 1 });
     }
 
     // ── GUARDAR PM PERÍODO 2 ──────────────────────────────
@@ -816,7 +816,7 @@ public class PreventivoController : ControllerBase
         try
         {
             if (string.IsNullOrWhiteSpace(data.Fecha))
-                return Ok(new { ok = false, error = "Fecha requerida" });
+                return Ok(new { ok = 0, error = "Fecha requerida" });
 
             var fechaRea = DateOnly.Parse(data.Fecha);
             var proximoPm = fechaRea.AddMonths(6);
@@ -836,7 +836,7 @@ public class PreventivoController : ControllerBase
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-                UPDATE public.mantenimientos_preventivos
+                UPDATE mantenimientos_preventivos
                 SET fecha_realizacion_p2=@fr, plazo_p2=@pl, realizado_por_p2=@rp,
                     preventivo_digital_p2=@pd
                 WHERE id=@id
@@ -844,13 +844,13 @@ public class PreventivoController : ControllerBase
             cmd.Parameters.AddWithValue("fr", fechaRea.ToDateTime(TimeOnly.MinValue));
             cmd.Parameters.AddWithValue("pl", proximoPm.ToDateTime(TimeOnly.MinValue));
             cmd.Parameters.AddWithValue("rp", data.Usuario.ToUpper());
-            cmd.Parameters.Add("pd", NpgsqlTypes.NpgsqlDbType.Jsonb).Value = json;
+            cmd.Parameters.Add("pd", NpgsqlTypes.SqlDbType.Jsonb).Value = json;
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 
-            return Ok(new { ok = true, proximo_pm = proxStr });
+            return Ok(new { ok = 1, proximo_pm = proxStr });
         }
-        catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+        catch (Exception ex) { return Ok(new { ok = 0, error = ex.Message }); }
     }
 
     // ── OBTENER PM PERÍODO 2 ──────────────────────────────
@@ -861,15 +861,15 @@ public class PreventivoController : ControllerBase
         {
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT preventivo_digital_p2 FROM public.mantenimientos_preventivos WHERE id=@id";
+            cmd.CommandText = "SELECT preventivo_digital_p2 FROM mantenimientos_preventivos WHERE id=@id";
             cmd.Parameters.AddWithValue("id", id);
             var raw = cmd.ExecuteScalar();
             if (raw == null || raw == DBNull.Value)
-                return Ok(new { existe = false });
+                return Ok(new { existe = 0 });
             var data = JsonSerializer.Deserialize<object>(raw.ToString()!);
-            return Ok(new { existe = true, data });
+            return Ok(new { existe = 1, data });
         }
-        catch (Exception ex) { return Ok(new { existe = false, error = ex.Message }); }
+        catch (Exception ex) { return Ok(new { existe = 0, error = ex.Message }); }
     }
 
     // ── ELIMINAR PM PERÍODO 2 ─────────────────────────────
@@ -880,10 +880,10 @@ public class PreventivoController : ControllerBase
         {
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "UPDATE public.mantenimientos_preventivos SET preventivo_digital_p2=NULL, fecha_realizacion_p2=NULL, plazo_p2=NULL, realizado_por_p2=NULL WHERE id=@id";
+            cmd.CommandText = "UPDATE mantenimientos_preventivos SET preventivo_digital_p2=NULL, fecha_realizacion_p2=NULL, plazo_p2=NULL, realizado_por_p2=NULL WHERE id=@id";
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
-            return Ok(new { ok = true });
+            return Ok(new { ok = 1 });
         }
         catch (Exception ex) { return Ok(new { error = ex.Message }); }
     }
@@ -902,20 +902,20 @@ public class PreventivoController : ControllerBase
                        ?? data.Usuario ?? "SISTEMA";
 
             if (data.IdDispositivo <= 0)
-                return Ok(new { ok = false, error = "ID de dispositivo requerido" });
+                return Ok(new { ok = 0, error = "ID de dispositivo requerido" });
             if (string.IsNullOrWhiteSpace(data.NuevaUbicacion))
-                return Ok(new { ok = false, error = "Nueva ubicación requerida" });
+                return Ok(new { ok = 0, error = "Nueva ubicación requerida" });
 
             using var conn = _db.Open();
 
             // 1. Obtener datos del dispositivo a mover
             using var sel1 = conn.CreateCommand();
-            sel1.CommandText = "SELECT id, ubicacion, id_equipo, nombre_dispositivo FROM public.mantenimientos_preventivos WHERE id=@id";
+            sel1.CommandText = "SELECT id, ubicacion, id_equipo, nombre_dispositivo FROM mantenimientos_preventivos WHERE id=@id";
             sel1.Parameters.AddWithValue("id", data.IdDispositivo);
             string ubicacionAnterior = "", idEquipo1 = "", nomDisp1 = "";
             using (var r = sel1.ExecuteReader())
             {
-                if (!r.Read()) return Ok(new { ok = false, error = "Dispositivo no encontrado" });
+                if (!r.Read()) return Ok(new { ok = 0, error = "Dispositivo no encontrado" });
                 ubicacionAnterior = r.IsDBNull(1) ? "" : r.GetString(1);
                 idEquipo1 = r.IsDBNull(2) ? "" : r.GetString(2);
                 nomDisp1 = r.IsDBNull(3) ? "" : r.GetString(3);
@@ -925,11 +925,11 @@ public class PreventivoController : ControllerBase
 
             // No mover a la misma ubicación
             if (string.Equals(ubicacionAnterior, nuevaUbicacion, StringComparison.OrdinalIgnoreCase))
-                return Ok(new { ok = false, error = "El dispositivo ya está en esa ubicación" });
+                return Ok(new { ok = 0, error = "El dispositivo ya está en esa ubicación" });
 
             // 2. Verificar si la nueva ubicación está ocupada (buscar cualquier dispositivo allí)
             using var chk = conn.CreateCommand();
-            chk.CommandText = "SELECT id, ubicacion, id_equipo, nombre_dispositivo FROM public.mantenimientos_preventivos WHERE TRIM(LOWER(ubicacion))=TRIM(LOWER(@u)) LIMIT 1";
+            chk.CommandText = "SELECT id, ubicacion, id_equipo, nombre_dispositivo FROM mantenimientos_preventivos WHERE TRIM(LOWER(ubicacion))=TRIM(LOWER(@u)) LIMIT 1";
             chk.Parameters.AddWithValue("u", nuevaUbicacion);
             int idOcupante = 0; string ubicacionOcupanteAnterior = "", idEquipo2 = "", nomDisp2 = "";
             using (var r = chk.ExecuteReader())
@@ -949,8 +949,8 @@ public class PreventivoController : ControllerBase
                 if (string.IsNullOrWhiteSpace(data.UbicacionOcupante))
                     return Ok(new
                     {
-                        ok = false,
-                        ocupada = true,
+                        ok = 0,
+                        ocupada = 1,
                         id_ocupante = idOcupante,
                         equipo_ocupante = idEquipo2,
                         dispositivo_ocupante = nomDisp2,
@@ -964,7 +964,7 @@ public class PreventivoController : ControllerBase
 
                 // Mover el ocupante a su nueva ubicación
                 using var mov2 = conn.CreateCommand();
-                mov2.CommandText = "UPDATE public.mantenimientos_preventivos SET ubicacion=@u WHERE id=@id";
+                mov2.CommandText = "UPDATE mantenimientos_preventivos SET ubicacion=@u WHERE id=@id";
                 mov2.Parameters.AddWithValue("u", ubOcupante);
                 mov2.Parameters.AddWithValue("id", idOcupante);
                 mov2.ExecuteNonQuery();
@@ -977,7 +977,7 @@ public class PreventivoController : ControllerBase
             // 3. Mover el dispositivo principal
             using var mov1 = conn.CreateCommand();
             mov1.CommandText = """
-                UPDATE public.mantenimientos_preventivos
+                UPDATE mantenimientos_preventivos
                 SET ubicacion=@u,
                     recalendarizado_por=@rp,
                     observaciones_de_recalendarizacion=@obs
@@ -993,12 +993,12 @@ public class PreventivoController : ControllerBase
             RegistrarHistorialRecalendarizacion(conn, data.IdDispositivo, idEquipo1, nomDisp1,
                 ubicacionAnterior, nuevaUbicacion, usuario);
 
-            return Ok(new { ok = true, mensaje = "Recalendarización completada" });
+            return Ok(new { ok = 1, mensaje = "Recalendarización completada" });
         }
-        catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+        catch (Exception ex) { return Ok(new { ok = 0, error = ex.Message }); }
     }
 
-    private void RegistrarHistorialRecalendarizacion(Npgsql.NpgsqlConnection conn,
+    private void RegistrarHistorialRecalendarizacion(Npgsql.SqlConnection conn,
         int idDispositivo, string idEquipo, string nomDisp,
         string ubAnterior, string ubNueva, string usuario)
     {
@@ -1019,7 +1019,7 @@ public class PreventivoController : ControllerBase
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT TRIM(ubicacion) AS ubicacion
-            FROM public.mantenimientos_preventivos
+            FROM mantenimientos_preventivos
             WHERE ubicacion IS NOT NULL AND TRIM(ubicacion)<>''
             GROUP BY TRIM(ubicacion)
             ORDER BY TRIM(ubicacion)
@@ -1037,7 +1037,7 @@ public class PreventivoController : ControllerBase
         try
         {
             if (string.IsNullOrWhiteSpace(data.Fecha))
-                return Ok(new { ok = false, error = "Fecha requerida" });
+                return Ok(new { ok = 0, error = "Fecha requerida" });
 
             var fechaRea = DateOnly.Parse(data.Fecha);
             var proximoPm = fechaRea.AddMonths(6);
@@ -1057,7 +1057,7 @@ public class PreventivoController : ControllerBase
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-                UPDATE public.mantenimientos_preventivos
+                UPDATE mantenimientos_preventivos
                 SET fecha_realizacion=@fr, plazo=@pl, realizado_por=@rp,
                     observaciones=@o, preventivo_digital=@pd
                 WHERE id=@id
@@ -1066,13 +1066,13 @@ public class PreventivoController : ControllerBase
             cmd.Parameters.AddWithValue("pl", proxStr);
             cmd.Parameters.AddWithValue("rp", data.Usuario.ToUpper());
             cmd.Parameters.AddWithValue("o", data.Observaciones);
-            cmd.Parameters.Add("pd", NpgsqlTypes.NpgsqlDbType.Jsonb).Value = json;
+            cmd.Parameters.Add("pd", NpgsqlTypes.SqlDbType.Jsonb).Value = json;
             cmd.Parameters.AddWithValue("id", id);
             cmd.ExecuteNonQuery();
 
-            return Ok(new { ok = true, proximo_pm = proxStr });
+            return Ok(new { ok = 1, proximo_pm = proxStr });
         }
-        catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+        catch (Exception ex) { return Ok(new { ok = 0, error = ex.Message }); }
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -1095,7 +1095,7 @@ public class PreventivoController : ControllerBase
                 COUNT(*) FILTER (WHERE nombre_dispositivo = 'LAPTOP')   AS total_laptops,
                 COUNT(*) FILTER (WHERE preventivo_digital IS NOT NULL)  AS con_pm_p1,
                 COUNT(*) FILTER (WHERE preventivo_digital_p2 IS NOT NULL) AS con_pm_p2
-            FROM public.mantenimientos_preventivos
+            FROM mantenimientos_preventivos
             WHERE ubicacion IS NOT NULL AND TRIM(ubicacion) <> ''
               AND nombre_dispositivo IN (
                   'COMPUTADORA DE ESCRITORIO','LAPTOP','UPS','IMPRESORA TERMICA')
@@ -1138,14 +1138,14 @@ public class PreventivoController : ControllerBase
             // Leer el JSON actual del período solicitado
             using var sel = conn.CreateCommand();
             sel.CommandText = data.Periodo == 2
-                ? "SELECT preventivo_digital_p2 FROM public.mantenimientos_preventivos WHERE id=@id"
-                : "SELECT preventivo_digital   FROM public.mantenimientos_preventivos WHERE id=@id";
+                ? "SELECT preventivo_digital_p2 FROM mantenimientos_preventivos WHERE id=@id"
+                : "SELECT preventivo_digital   FROM mantenimientos_preventivos WHERE id=@id";
             sel.Parameters.AddWithValue("id", id);
 
             using (var selR = sel.ExecuteReader())
             {
                 if (!selR.Read() || selR.IsDBNull(0))
-                    return Ok(new { ok = false, error = "No hay PM registrado para este período" });
+                    return Ok(new { ok = 0, error = "No hay PM registrado para este período" });
             }
 
             // Actualizar verificado_por dentro del JSONB con jsonb_set
@@ -1153,11 +1153,11 @@ public class PreventivoController : ControllerBase
             if (data.Periodo == 2)
             {
                 upd.CommandText = """
-                    UPDATE public.mantenimientos_preventivos
+                    UPDATE mantenimientos_preventivos
                     SET preventivo_digital_p2 = jsonb_set(
                         preventivo_digital_p2,
                         '{verificado_por}',
-                        to_jsonb(@v::text)
+                        to_jsonb(@v)
                     )
                     WHERE id=@id
                     """;
@@ -1165,11 +1165,11 @@ public class PreventivoController : ControllerBase
             else
             {
                 upd.CommandText = """
-                    UPDATE public.mantenimientos_preventivos
+                    UPDATE mantenimientos_preventivos
                     SET preventivo_digital = jsonb_set(
                         preventivo_digital,
                         '{verificado_por}',
-                        to_jsonb(@v::text)
+                        to_jsonb(@v)
                     )
                     WHERE id=@id
                     """;
@@ -1178,9 +1178,9 @@ public class PreventivoController : ControllerBase
             upd.Parameters.AddWithValue("id", id);
             upd.ExecuteNonQuery();
 
-            return Ok(new { ok = true });
+            return Ok(new { ok = 1 });
         }
-        catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+        catch (Exception ex) { return Ok(new { ok = 0, error = ex.Message }); }
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -1194,13 +1194,13 @@ public class PreventivoController : ControllerBase
         using var conn = _db.Open();
 
         // ── 0. Verificar que exista al menos un calendario generado ────────
-        // Si no hay ninguna fila con generado=true en calendario_estado,
+        // Si no hay ninguna fila con generado=1 en calendario_estado,
         // no se muestra nada en auditoría aunque haya PMs activos.
         using var cmdCal = conn.CreateCommand();
-        cmdCal.CommandText = "SELECT COUNT(*) FROM public.calendario_estado WHERE generado = true";
+        cmdCal.CommandText = "SELECT COUNT(*) FROM calendario_estado WHERE generado = 1";
         var totalCalendarios = Convert.ToInt64(cmdCal.ExecuteScalar()!);
         if (totalCalendarios == 0)
-            return Ok(new { sin_calendario = true, ubicaciones = Array.Empty<object>() });
+            return Ok(new { sin_calendario = 1, ubicaciones = Array.Empty<object>() });
 
 
         // ── 1. Leer TODOS los equipos elegibles (con PM, sin laptops) ──────
@@ -1216,15 +1216,15 @@ public class PreventivoController : ControllerBase
                 (mp.preventivo_digital->>'verificado_por')            AS verificado_p1,
                 mp.preventivo_digital_p2 IS NOT NULL                  AS tiene_p2,
                 (mp.preventivo_digital_p2->>'verificado_por')         AS verificado_p2
-            FROM public.mantenimientos_preventivos mp
+            FROM mantenimientos_preventivos mp
             WHERE mp.ubicacion IS NOT NULL AND TRIM(mp.ubicacion) <> ''
               AND mp.nombre_dispositivo IN (
                   'COMPUTADORA DE ESCRITORIO','UPS','IMPRESORA TERMICA')
               AND (mp.preventivo_digital IS NOT NULL OR mp.preventivo_digital_p2 IS NOT NULL)
               AND EXISTS (
-                  SELECT 1 FROM public.calendario_estado ce
+                  SELECT 1 FROM calendario_estado ce
                   WHERE ce.planta_key = mp.planta
-                    AND ce.generado = true)
+                    AND ce.generado = 1)
             ORDER BY mp.planta, TRIM(mp.ubicacion), mp.id
             """;
 
@@ -1269,14 +1269,14 @@ public class PreventivoController : ControllerBase
                 (mp.preventivo_digital->>'verificado_por')            AS verificado_p1,
                 mp.preventivo_digital_p2 IS NOT NULL                  AS tiene_p2,
                 (mp.preventivo_digital_p2->>'verificado_por')         AS verificado_p2
-            FROM public.mantenimientos_preventivos mp
+            FROM mantenimientos_preventivos mp
             WHERE mp.ubicacion IS NOT NULL AND TRIM(mp.ubicacion) <> ''
               AND mp.nombre_dispositivo = 'LAPTOP'
               AND (mp.preventivo_digital IS NOT NULL OR mp.preventivo_digital_p2 IS NOT NULL)
               AND EXISTS (
-                  SELECT 1 FROM public.calendario_estado ce
+                  SELECT 1 FROM calendario_estado ce
                   WHERE ce.planta_key = mp.planta
-                    AND ce.generado = true)
+                    AND ce.generado = 1)
             """;
 
         var laptopConteos = new Dictionary<string, (int verP1, int pendP1, int verP2, int pendP2)>();
@@ -1335,7 +1335,7 @@ public class PreventivoController : ControllerBase
         // ── 4. Construir respuesta por ubicación ───────────────────────────
         // Si no hay ningún equipo con PM digital en ninguna planta → calendario no iniciado
         if (!porPlanta.Any())
-            return Ok(new { sin_calendario = true, ubicaciones = Array.Empty<object>() });
+            return Ok(new { sin_calendario = 1, ubicaciones = Array.Empty<object>() });
 
         var lista = new List<object>();
 
@@ -1392,9 +1392,9 @@ public class PreventivoController : ControllerBase
 
         // Si la lista quedó vacía (ningún equipo con PM digital) → sin calendario
         if (!lista.Any())
-            return Ok(new { sin_calendario = true, ubicaciones = Array.Empty<object>() });
+            return Ok(new { sin_calendario = 1, ubicaciones = Array.Empty<object>() });
 
-        return Ok(new { sin_calendario = false, ubicaciones = lista });
+        return Ok(new { sin_calendario = 0, ubicaciones = lista });
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -1440,7 +1440,7 @@ public class PreventivoController : ControllerBase
                 preventivo_digital_p2->>'usuario'             AS realizado_por_p2,
                 preventivo_digital_p2->>'fecha'               AS fecha_p2,
                 preventivo_digital_p2->>'verificado_por'      AS verificado_por_p2
-            FROM public.mantenimientos_preventivos
+            FROM mantenimientos_preventivos
             WHERE id IN ({inParams})
               AND TRIM(LOWER(ubicacion)) = TRIM(LOWER(@u))
             ORDER BY nombre_dispositivo, id_equipo
@@ -1496,14 +1496,14 @@ public class PreventivoController : ControllerBase
                        ?? data.RecalendarizadoPor ?? "SISTEMA";
 
             if (data.IdDispositivo <= 0)
-                return Ok(new { ok = false, error = "ID de dispositivo requerido" });
+                return Ok(new { ok = 0, error = "ID de dispositivo requerido" });
             if (string.IsNullOrWhiteSpace(data.ObservacionesRecal))
-                return Ok(new { ok = false, error = "Las observaciones son obligatorias" });
+                return Ok(new { ok = 0, error = "Las observaciones son obligatorias" });
 
             using var conn = _db.Open();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-                UPDATE public.mantenimientos_preventivos
+                UPDATE mantenimientos_preventivos
                 SET recalendarizado_por               = @rp,
                     observaciones_de_recalendarizacion = @obs
                 WHERE id = @id
@@ -1514,11 +1514,11 @@ public class PreventivoController : ControllerBase
             int rows = cmd.ExecuteNonQuery();
 
             if (rows == 0)
-                return Ok(new { ok = false, error = "Registro no encontrado" });
+                return Ok(new { ok = 0, error = "Registro no encontrado" });
 
-            return Ok(new { ok = true });
+            return Ok(new { ok = 1 });
         }
-        catch (Exception ex) { return Ok(new { ok = false, error = ex.Message }); }
+        catch (Exception ex) { return Ok(new { ok = 0, error = ex.Message }); }
     }
 
     // ── Modelo recalendarización ──────────────────────────────────────────────

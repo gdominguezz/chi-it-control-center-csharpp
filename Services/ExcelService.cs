@@ -1,5 +1,5 @@
 using ClosedXML.Excel;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace ChiIT.Services;
@@ -17,7 +17,7 @@ public class ExcelService
         ["azul"]     = XLColor.FromHtml("#BEDFFB"),
     };
 
-    public byte[] GenerarExcel(NpgsqlDataReader reader, string sheetName = "Preventivos")
+    public byte[] GenerarExcel(SqlDataReader reader, string sheetName = "Preventivos")
     {
         var dt = new DataTable();
         dt.Load(reader);
@@ -30,7 +30,7 @@ public class ExcelService
         {
             var cell = ws.Cell(1, c + 1);
             cell.Value = dt.Columns[c].ColumnName;
-            cell.Style.Font.Bold = true;
+            cell.Style.Font.Bold = 1;
             cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#1E293B");
             cell.Style.Font.FontColor = XLColor.White;
         }

@@ -1,4 +1,5 @@
-﻿// ═══════════════════════════════════════════════════════════════════════════
+using Microsoft.Data.SqlClient;
+// ═══════════════════════════════════════════════════════════════════════════
 // QrPageController.cs
 // Solo endpoints de datos. El HTML vive en wwwroot/static/qr-preventivo.html
 //
@@ -63,7 +64,7 @@ public class QrPageController : ControllerBase
             using var cmd = conn.CreateCommand();
             cmd.CommandText = """
                 SELECT DISTINCT TRIM(ubicacion)
-                FROM public.mantenimientos_preventivos
+                FROM mantenimientos_preventivos
                 WHERE ubicacion IS NOT NULL AND TRIM(ubicacion) <> ''
                 ORDER BY 1
                 """;
@@ -96,7 +97,7 @@ public class QrPageController : ControllerBase
             using var chk = conn.CreateCommand();
             chk.CommandText = """
                 SELECT id, id_equipo, nombre_dispositivo
-                FROM public.mantenimientos_preventivos
+                FROM mantenimientos_preventivos
                 WHERE TRIM(LOWER(ubicacion)) = TRIM(LOWER(@u))
                   AND id <> @id
                   AND (activo IS NULL OR activo = true)
@@ -135,7 +136,7 @@ public class QrPageController : ControllerBase
             {
                 using var mvOcup = conn.CreateCommand();
                 mvOcup.CommandText = """
-                    UPDATE public.mantenimientos_preventivos
+                    UPDATE mantenimientos_preventivos
                     SET ubicacion = @nu,
                         recalendarizado_por = @rp,
                         observaciones_de_recalendarizacion = @obs
@@ -151,7 +152,7 @@ public class QrPageController : ControllerBase
             // ── Mover el dispositivo solicitado ───────────────────────────
             using var upd = conn.CreateCommand();
             upd.CommandText = """
-                UPDATE public.mantenimientos_preventivos
+                UPDATE mantenimientos_preventivos
                 SET ubicacion = @nu,
                     recalendarizado_por = @rp,
                     observaciones_de_recalendarizacion = @obs
@@ -166,7 +167,7 @@ public class QrPageController : ControllerBase
             // ── Calcular si el equipo quedó solo en la ubicación ──────────
             using var cnt = conn.CreateCommand();
             cnt.CommandText = """
-                SELECT COUNT(*) FROM public.mantenimientos_preventivos
+                SELECT COUNT(*) FROM mantenimientos_preventivos
                 WHERE TRIM(LOWER(ubicacion)) = TRIM(LOWER(@u))
                   AND (activo IS NULL OR activo = true)
                 """;
@@ -196,7 +197,7 @@ public class QrPageController : ControllerBase
             using var conn = _db.Open();
             using var upd = conn.CreateCommand();
             upd.CommandText = """
-                UPDATE public.mantenimientos_preventivos
+                UPDATE mantenimientos_preventivos
                 SET recalendarizado_por = @rp,
                     observaciones_de_recalendarizacion = @obs
                 WHERE id = @id
@@ -236,7 +237,7 @@ public class QrPageController : ControllerBase
             sel.CommandText = """
                 SELECT id_equipo, ubicacion, plazo, realizado_por, fecha_realizacion,
                        observaciones, nombre_dispositivo, planta, categoria_color, anio_creacion
-                FROM public.mantenimientos_preventivos WHERE id = @id
+                FROM mantenimientos_preventivos WHERE id = @id
                 """;
             sel.Parameters.AddWithValue("id", data.IdDispositivo);
 
@@ -266,11 +267,11 @@ public class QrPageController : ControllerBase
             {
                 using var ins = conn.CreateCommand();
                 ins.CommandText = """
-                    INSERT INTO public.mantenimientos_preventivos
+                    INSERT INTO mantenimientos_preventivos
                     (id_equipo, ubicacion, plazo, realizado_por, fecha_realizacion,
                      observaciones, nombre_dispositivo, planta, categoria_color, anio_creacion)
                     VALUES (@e,@u,@p,@rp,@fr,@o,@nd,@pl,@cc,@ac)
-                    RETURNING id
+                    OUTPUT INSERTED.id
                     """;
                 ins.Parameters.AddWithValue("e", data.IdReemplazo.Trim());
                 ins.Parameters.AddWithValue("u", (object?)ubicOrig ?? DBNull.Value);
@@ -288,7 +289,7 @@ public class QrPageController : ControllerBase
             // Actualizar dispositivo original: nueva ubicación + color ROSA
             using var upd = conn.CreateCommand();
             upd.CommandText = """
-                UPDATE public.mantenimientos_preventivos
+                UPDATE mantenimientos_preventivos
                 SET ubicacion = @u, categoria_color = 'ROSA',
                     observaciones = COALESCE(@obs, observaciones)
                 WHERE id = @id
@@ -322,7 +323,7 @@ public class QrPageController : ControllerBase
 
             using var conn = _db.Open();
             using var upd = conn.CreateCommand();
-            upd.CommandText = "UPDATE public.mantenimientos_preventivos SET planta=@p WHERE id=@id";
+            upd.CommandText = "UPDATE mantenimientos_preventivos SET planta=@p WHERE id=@id";
             upd.Parameters.AddWithValue("p", data.Planta.Trim());
             upd.Parameters.AddWithValue("id", data.IdDispositivo);
             int rows = upd.ExecuteNonQuery();
@@ -359,7 +360,7 @@ public class QrPageController : ControllerBase
             sel.CommandText = """
                 SELECT id_equipo, ubicacion, plazo, realizado_por, fecha_realizacion,
                        observaciones, nombre_dispositivo, planta, categoria_color, anio_creacion
-                FROM public.mantenimientos_preventivos WHERE id = @id
+                FROM mantenimientos_preventivos WHERE id = @id
                 """;
             sel.Parameters.AddWithValue("id", data.IdDispositivo);
 
@@ -386,7 +387,7 @@ public class QrPageController : ControllerBase
             // Duplicar tarjeta con dispositivo de préstamo
             using var ins = conn.CreateCommand();
             ins.CommandText = """
-                INSERT INTO public.mantenimientos_preventivos
+                INSERT INTO mantenimientos_preventivos
                 (id_equipo, ubicacion, plazo, realizado_por, fecha_realizacion,
                  observaciones, nombre_dispositivo, planta, categoria_color, anio_creacion)
                 VALUES (@e,@u,@p,@rp,@fr,@o,@nd,@pl,@cc,@ac)
@@ -406,7 +407,7 @@ public class QrPageController : ControllerBase
             // Actualizar original: nueva ubicación + color ROJO
             using var upd = conn.CreateCommand();
             upd.CommandText = """
-                UPDATE public.mantenimientos_preventivos
+                UPDATE mantenimientos_preventivos
                 SET ubicacion = @u, categoria_color = 'ROJO'
                 WHERE id = @id
                 """;
@@ -417,10 +418,10 @@ public class QrPageController : ControllerBase
             // Insertar correctivo automático
             using var corrCmd = conn.CreateCommand();
             corrCmd.CommandText = """
-                INSERT INTO public.mantenimientos_correctivos
+                INSERT INTO mantenimientos_correctivos
                     (status, planta, linea_persona, equipo, descripcion_falla,
                      fecha_solicitud, reporte_elaborado_por, observaciones)
-                VALUES ('PENDIENTE',@planta,@linea,@equipo,@falla,CURRENT_DATE,@reporte,@obs)
+                VALUES ('PENDIENTE',@planta,@linea,@equipo,@falla,CAST(GETDATE() AS DATE),@reporte,@obs)
                 """;
             corrCmd.Parameters.AddWithValue("planta", (object?)plantaOrig ?? DBNull.Value);
             corrCmd.Parameters.AddWithValue("linea", (object?)ubicOrig ?? DBNull.Value);
@@ -450,16 +451,16 @@ public class QrPageController : ControllerBase
         {
             await using var conn = await _db.OpenAsync();
 
-            await using var cmdBaja = new Npgsql.NpgsqlCommand("""
+            await using var cmdBaja = new SqlCommand("""
                 INSERT INTO bajas_equipos
                     (folio,estado,planta,fecha,equipo,marca,modelo,
                      no_serie,activo_fijo,ubicacion_persona,
                      motivo_de_baja,diagnostico,comentarios,motivo_de_cancelacion)
                 VALUES
-                    (@folio,@estado,@planta,@fecha::date,@equipo,@marca,@modelo,
+                    (@folio,@estado,@planta,@fecha,@equipo,@marca,@modelo,
                      @no_serie,@activo_fijo,@ubicacion_persona,
                      @motivo_de_baja,@diagnostico,@comentarios,@motivo_de_cancelacion)
-                RETURNING id
+                OUTPUT INSERTED.id
                 """, conn);
 
             cmdBaja.Parameters.AddWithValue("folio", (object?)req.BajaDto.FOLIO ?? DBNull.Value);
@@ -496,20 +497,20 @@ public class QrPageController : ControllerBase
 
             string updSql = req.Periodo == 2
                 ? """
-                  UPDATE public.mantenimientos_preventivos
+                  UPDATE mantenimientos_preventivos
                   SET id_equipo=@nuevo_id, fecha_realizacion_p2=@fr,
-                      plazo_p2=@pl, realizado_por_p2=@rp, preventivo_digital_p2=@pd::jsonb
+                      plazo_p2=@pl, realizado_por_p2=@rp, preventivo_digital_p2=@pd
                   WHERE id=@prev_id
                   """
                 : """
-                  UPDATE public.mantenimientos_preventivos
+                  UPDATE mantenimientos_preventivos
                   SET id_equipo=@nuevo_id, fecha_realizacion=@fr,
                       plazo=@pl, realizado_por=@rp,
-                      observaciones=@o, preventivo_digital=@pd::jsonb
+                      observaciones=@o, preventivo_digital=@pd
                   WHERE id=@prev_id
                   """;
 
-            await using var cmdUpd = new Npgsql.NpgsqlCommand(updSql, conn);
+            await using var cmdUpd = new SqlCommand(updSql, conn);
             cmdUpd.Parameters.AddWithValue("nuevo_id", req.IdEquipoReemplazo);
             cmdUpd.Parameters.AddWithValue("fr", fechaHoy.ToDateTime(TimeOnly.MinValue));
             cmdUpd.Parameters.AddWithValue("pl", proxStr);

@@ -1,4 +1,4 @@
-﻿// ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // QrPageService.cs
 // Lógica de datos para la página QR de mantenimientos preventivos.
 // El HTML ahora vive en wwwroot/static/qr-preventivo.html
@@ -61,7 +61,7 @@ public class QrPageService
                    anio_creacion,
                    CASE WHEN preventivo_digital_p2 IS NOT NULL THEN true ELSE false END AS tiene_pm2,
                    fecha_realizacion_p2, plazo_p2::text
-            FROM public.mantenimientos_preventivos
+            FROM mantenimientos_preventivos
             WHERE TRIM(LOWER(ubicacion)) = TRIM(LOWER(@u))
             ORDER BY nombre_dispositivo
             """;
@@ -108,7 +108,7 @@ public class QrPageService
             using var calCmd = conn.CreateCommand();
             calCmd.CommandText = """
                 SELECT planta_key, periodo, semana_inicio, anio_inicio, generado
-                FROM public.calendario_estado
+                FROM calendario_estado
                 WHERE generado = true
                 """;
             using var calR = calCmd.ExecuteReader();

@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -85,7 +85,7 @@ public class EquipoRedNFService
     private async Task InicializarTablaAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             CREATE TABLE IF NOT EXISTS equipo_red_nf (
                 id                          SERIAL PRIMARY KEY,
                 id_unico                    TEXT,
@@ -116,7 +116,7 @@ public class EquipoRedNFService
                 id                SERIAL PRIMARY KEY,
                 equipo_red_id     INTEGER NOT NULL REFERENCES equipo_red_nf(id) ON DELETE CASCADE,
                 usuario           TEXT    NOT NULL,
-                fecha             TIMESTAMPTZ DEFAULT NOW(),
+                fecha             TIMESTAMPTZ DEFAULT GETDATE(),
                 registro_anterior JSONB,
                 registro_nuevo    JSONB
             );
@@ -134,13 +134,13 @@ public class EquipoRedNFService
         var offset = (page - 1) * limit;
 
         // Total
-        await using var cmdCount = new NpgsqlCommand(
+        await using var cmdCount = new SqlCommand(
             $"SELECT COUNT(*) FROM equipo_red_nf {where}", conn);
         foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
         var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
 
         // Datos
-        await using var cmdData = new NpgsqlCommand(
+        await using var cmdData = new SqlCommand(
             $@"SELECT id, id_unico, oc, folio_correctivo, fecha_registro,
                       recibido_por, subcategoria, no_parte, marca, modelo,
                       numero_serie, mac1, mac2, mac_address, cantidad,
@@ -194,7 +194,7 @@ public class EquipoRedNFService
     {
         await using var conn = await _pool.OpenAsync();
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             INSERT INTO equipo_red_nf
                 (id_unico, oc, folio_correctivo, fecha_registro, recibido_por,
                  subcategoria, no_parte, marca, modelo, numero_serie,
@@ -202,12 +202,12 @@ public class EquipoRedNFService
                  costo, moneda, ubicacion, observaciones_comentarios,
                  destino, observaciones, activo_dtr3)
             VALUES
-                (@id_unico, @oc, @folio_correctivo, @fecha_registro::date, @recibido_por,
+                (@id_unico, @oc, @folio_correctivo, @fecha_registro, @recibido_por,
                  @subcategoria, @no_parte, @marca, @modelo, @numero_serie,
                  @mac1, @mac2, @mac_address, @cantidad, @proveedor,
                  @costo, @moneda, @ubicacion, @observaciones_comentarios,
                  @destino, @observaciones, @activo_dtr3)
-            RETURNING id
+            OUTPUT INSERTED.id
             """, conn);
 
         AgregarParametros(cmd, dto);
@@ -227,12 +227,12 @@ public class EquipoRedNFService
         var anterior = await SnapshotAsync(conn, id);
         if (anterior is null) return false;
 
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             UPDATE equipo_red_nf SET
                 id_unico                  = @id_unico,
                 oc                        = @oc,
                 folio_correctivo          = @folio_correctivo,
-                fecha_registro            = @fecha_registro::date,
+                fecha_registro            = @fecha_registro,
                 recibido_por              = @recibido_por,
                 subcategoria              = @subcategoria,
                 no_parte                  = @no_parte,
@@ -274,7 +274,7 @@ public class EquipoRedNFService
         await using var conn = await _pool.OpenAsync();
 
         string? ocVal = null, folioVal = null;
-        await using (var qSnap = new NpgsqlCommand(
+        await using (var qSnap = new SqlCommand(
             "SELECT oc, folio_correctivo FROM equipo_red_nf WHERE id = @id", conn))
         {
             qSnap.Parameters.AddWithValue("id", id);
@@ -286,7 +286,7 @@ public class EquipoRedNFService
             }
         }
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             "DELETE FROM equipo_red_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
@@ -305,7 +305,7 @@ public class EquipoRedNFService
     public async Task<List<object>> HistorialAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, usuario, fecha, registro_anterior, registro_nuevo
               FROM equipo_red_nf_historial
               WHERE equipo_red_id = @id
@@ -335,7 +335,7 @@ public class EquipoRedNFService
 
         var (where, parms) = ConstruirWhere(f);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             $@"SELECT id, id_unico, oc, folio_correctivo, fecha_registro,
                       recibido_por, subcategoria, no_parte, marca, modelo,
                       numero_serie, mac1, mac2, mac_address, cantidad,
@@ -361,7 +361,7 @@ public class EquipoRedNFService
     public async Task<byte[]> ExportarPorAnioAsync(int anio)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, id_unico, oc, folio_correctivo, fecha_registro,
                      recibido_por, subcategoria, no_parte, marca, modelo,
                      numero_serie, mac1, mac2, mac_address, cantidad,
@@ -390,7 +390,7 @@ public class EquipoRedNFService
     {
         var conds = new List<string>();
 
-        conds.Add("(activo IS NULL OR activo = true)");
+        conds.Add("(activo IS NULL OR activo = 1)");
 
         var parms = new List<(string, object?)>();
         var idx = 1;
@@ -398,7 +398,7 @@ public class EquipoRedNFService
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            conds.Add($"LOWER({col}::TEXT) LIKE LOWER(@p{idx})");
+            conds.Add($"LOWER({col}) LIKE LOWER(@p{idx})");
             parms.Add(($"p{idx}", $"%{val}%"));
             idx++;
         }
@@ -426,7 +426,7 @@ public class EquipoRedNFService
         return (where, parms);
     }
 
-    private static void AgregarParametros(NpgsqlCommand cmd, EquipoRedNFDto dto)
+    private static void AgregarParametros(SqlCommand cmd, EquipoRedNFDto dto)
     {
         cmd.Parameters.AddWithValue("id_unico",                 (object?)dto.ID_UNICO                   ?? DBNull.Value);
         cmd.Parameters.AddWithValue("oc",                       (object?)dto.OC                         ?? DBNull.Value);
@@ -452,9 +452,9 @@ public class EquipoRedNFService
         cmd.Parameters.AddWithValue("activo_dtr3",              (object?)dto.ACTIVO_DTR3                ?? DBNull.Value);
     }
 
-    private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
+    private async Task<Dictionary<string, object?>?> SnapshotAsync(SqlConnection conn, int id)
     {
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id_unico, oc, folio_correctivo, fecha_registro, recibido_por,
                      subcategoria, no_parte, marca, modelo, numero_serie,
                      mac1, mac2, mac_address, cantidad, proveedor,
@@ -473,16 +473,16 @@ public class EquipoRedNFService
         return snap;
     }
 
-    private async Task RegistrarHistorialAsync(NpgsqlConnection conn, int equipoRedId,
+    private async Task RegistrarHistorialAsync(SqlConnection conn, int equipoRedId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {
         var antesJson   = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             """
             INSERT INTO equipo_red_nf_historial (equipo_red_id, usuario, registro_anterior, registro_nuevo)
-            VALUES (@eid, @usr, @ant::jsonb, @nvo::jsonb)
+            VALUES (@eid, @usr, @ant, @nvo)
             """, conn);
 
         cmd.Parameters.AddWithValue("eid", equipoRedId);
@@ -511,7 +511,7 @@ public class EquipoRedNFService
         for (int c = 0; c < headers.Length; c++)
         {
             ws.Cells[1, c + 1].Value = headers[c];
-            ws.Cells[1, c + 1].Style.Font.Bold = true;
+            ws.Cells[1, c + 1].Style.Font.Bold = 1;
             ws.Cells[1, c + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
             ws.Cells[1, c + 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(30, 41, 59));
             ws.Cells[1, c + 1].Style.Font.Color.SetColor(Color.White);
@@ -535,6 +535,6 @@ public class EquipoRedNFService
         return pkg.GetAsByteArray();
     }
 
-    private static string? Str(NpgsqlDataReader r, int i)
+    private static string? Str(SqlDataReader r, int i)
         => r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
 }

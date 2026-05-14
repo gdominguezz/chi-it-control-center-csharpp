@@ -1,5 +1,5 @@
 using ChiIT.Data;
-using Npgsql;
+using Microsoft.Data.SqlClient;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -81,7 +81,7 @@ public class PerifeicosNFService
     private async Task InicializarTablaAsync()
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand("""
+        await using var cmd = new SqlCommand("""
             CREATE TABLE IF NOT EXISTS perifericos_nf (
                 id                      SERIAL PRIMARY KEY,
                 id_unico                TEXT,
@@ -104,14 +104,14 @@ public class PerifeicosNFService
                 destino_planta          TEXT,
                 asignado_a              TEXT,
                 personal_it_que_asigna  TEXT,
-                created_at              TIMESTAMP DEFAULT NOW()
+                created_at              TIMESTAMP DEFAULT GETDATE()
             );
 
             CREATE TABLE IF NOT EXISTS perifericos_nf_historial (
                 id                SERIAL PRIMARY KEY,
                 periferico_id     INTEGER NOT NULL REFERENCES perifericos_nf(id) ON DELETE CASCADE,
                 usuario           TEXT    NOT NULL,
-                fecha             TIMESTAMPTZ DEFAULT NOW(),
+                fecha             TIMESTAMPTZ DEFAULT GETDATE(),
                 registro_anterior JSONB,
                 registro_nuevo    JSONB
             );
@@ -129,13 +129,13 @@ public class PerifeicosNFService
         var offset = (page - 1) * limit;
 
         // Total
-        await using var cmdCount = new NpgsqlCommand(
+        await using var cmdCount = new SqlCommand(
             $"SELECT COUNT(*) FROM perifericos_nf {where}", conn);
         foreach (var (k, v) in parms) cmdCount.Parameters.AddWithValue(k, v ?? (object)DBNull.Value);
         var total = Convert.ToInt64(await cmdCount.ExecuteScalarAsync());
 
         // Datos
-        await using var cmdData = new NpgsqlCommand(
+        await using var cmdData = new SqlCommand(
             $@"SELECT id, id_unico, oc, folio_inventario, fecha_entrada,
                       recibido_por, subcategoria, tipo, marca, modelo,
                       cantidad, numero_serie, proveedor, costo_pesos,
@@ -188,7 +188,7 @@ public class PerifeicosNFService
     {
         await using var conn = await _pool.OpenAsync();
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"INSERT INTO perifericos_nf
                 (id_unico, oc, folio_inventario, fecha_entrada, recibido_por,
                  subcategoria, tipo, marca, modelo, cantidad,
@@ -199,7 +199,7 @@ public class PerifeicosNFService
                  @subcategoria, @tipo, @marca, @modelo, @cantidad,
                  @numero_serie, @proveedor, @costo_pesos, @estado, @destino,
                  @disponible, @fecha_salida, @destino_planta, @asignado_a, @personal_it_que_asigna)
-              RETURNING id", conn);
+              OUTPUT INSERTED.id", conn);
 
         AgregarParametros(cmd, dto);
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
@@ -228,7 +228,7 @@ public class PerifeicosNFService
         var anterior = await SnapshotAsync(conn, id);
         if (anterior is null) return false;
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"UPDATE perifericos_nf SET
                 id_unico               = @id_unico,
                 oc                     = @oc,
@@ -277,7 +277,7 @@ public class PerifeicosNFService
         await using var conn = await _pool.OpenAsync();
 
         string? ocVal = null, folioVal = null;
-        await using (var qSnap = new NpgsqlCommand(
+        await using (var qSnap = new SqlCommand(
             "SELECT oc, folio_inventario FROM perifericos_nf WHERE id = @id", conn))
         {
             qSnap.Parameters.AddWithValue("id", id);
@@ -289,7 +289,7 @@ public class PerifeicosNFService
             }
         }
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             "DELETE FROM perifericos_nf WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("id", id);
         var deleted = await cmd.ExecuteNonQueryAsync() > 0;
@@ -308,7 +308,7 @@ public class PerifeicosNFService
     public async Task<List<object>> HistorialAsync(int id)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, usuario, fecha, registro_anterior, registro_nuevo
               FROM perifericos_nf_historial
               WHERE periferico_id = @id
@@ -337,7 +337,7 @@ public class PerifeicosNFService
         await using var conn = await _pool.OpenAsync();
         var (where, parms) = ConstruirWhere(f);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             $@"SELECT id, id_unico, oc, folio_inventario, fecha_entrada,
                       recibido_por, subcategoria, tipo, marca, modelo,
                       cantidad, numero_serie, proveedor, costo_pesos,
@@ -364,7 +364,7 @@ public class PerifeicosNFService
     public async Task<byte[]> ExportarPorAnioAsync(int anio)
     {
         await using var conn = await _pool.OpenAsync();
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id, id_unico, oc, folio_inventario, fecha_entrada,
                      recibido_por, subcategoria, tipo, marca, modelo,
                      cantidad, numero_serie, proveedor, costo_pesos,
@@ -372,7 +372,7 @@ public class PerifeicosNFService
                      destino_planta, asignado_a, personal_it_que_asigna, created_at
               FROM perifericos_nf
               WHERE EXTRACT(YEAR FROM fecha_entrada) = @anio
-              AND (activo IS NULL OR activo = true)
+              AND (activo IS NULL OR activo = 1)
               ORDER BY id DESC", conn);
         cmd.Parameters.AddWithValue("anio", anio);
 
@@ -394,7 +394,7 @@ public class PerifeicosNFService
     {
         var conds = new List<string>();
 
-        conds.Add("(activo IS NULL OR activo = true)");
+        conds.Add("(activo IS NULL OR activo = 1)");
 
         var parms = new List<(string, object?)>();
         var idx = 1;
@@ -402,7 +402,7 @@ public class PerifeicosNFService
         void Add(string col, string? val)
         {
             if (string.IsNullOrWhiteSpace(val)) return;
-            conds.Add($"LOWER({col}::TEXT) LIKE LOWER(@p{idx})");
+            conds.Add($"LOWER({col}) LIKE LOWER(@p{idx})");
             parms.Add(($"p{idx}", $"%{val}%"));
             idx++;
         }
@@ -420,7 +420,7 @@ public class PerifeicosNFService
         Add("proveedor", f.PROVEEDOR);
         Add("estado", f.ESTADO);
         Add("destino", f.DESTINO);
-        Add("disponible::TEXT", f.DISPONIBLE);
+        Add("disponible", f.DISPONIBLE);
         Add("destino_planta", f.DESTINO_PLANTA);
         Add("asignado_a", f.ASIGNADO_A);
         Add("personal_it_que_asigna", f.PERSONAL_IT_QUE_ASIGNA);
@@ -429,7 +429,7 @@ public class PerifeicosNFService
         return (where, parms);
     }
 
-    private static void AgregarParametros(NpgsqlCommand cmd, PerifericoNFDto dto)
+    private static void AgregarParametros(SqlCommand cmd, PerifericoNFDto dto)
     {
         cmd.Parameters.AddWithValue("id_unico", (object?)dto.ID_UNICO ?? DBNull.Value);
         cmd.Parameters.AddWithValue("oc", (object?)dto.OC ?? DBNull.Value);
@@ -463,9 +463,9 @@ public class PerifeicosNFService
         return DateOnly.TryParse(part, out var d) ? (object)d : DBNull.Value;
     }
 
-    private async Task<Dictionary<string, object?>?> SnapshotAsync(NpgsqlConnection conn, int id)
+    private async Task<Dictionary<string, object?>?> SnapshotAsync(SqlConnection conn, int id)
     {
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             @"SELECT id_unico, oc, folio_inventario, fecha_entrada, recibido_por,
                      subcategoria, tipo, marca, modelo, cantidad,
                      numero_serie, proveedor, costo_pesos, estado, destino,
@@ -483,16 +483,16 @@ public class PerifeicosNFService
         return snap;
     }
 
-    private async Task RegistrarHistorialAsync(NpgsqlConnection conn, int perifericoId,
+    private async Task RegistrarHistorialAsync(SqlConnection conn, int perifericoId,
         string usuario, Dictionary<string, object?> anterior, Dictionary<string, object?> nuevo)
     {
         var antesJson = System.Text.Json.JsonSerializer.Serialize(anterior);
         var despuesJson = System.Text.Json.JsonSerializer.Serialize(nuevo);
 
-        await using var cmd = new NpgsqlCommand(
+        await using var cmd = new SqlCommand(
             """
             INSERT INTO perifericos_nf_historial (periferico_id, usuario, registro_anterior, registro_nuevo)
-            VALUES (@pid, @usr, @ant::jsonb, @nvo::jsonb)
+            VALUES (@pid, @usr, @ant, @nvo)
             """, conn);
 
         cmd.Parameters.AddWithValue("pid", perifericoId);
@@ -521,7 +521,7 @@ public class PerifeicosNFService
         for (int c = 0; c < headers.Length; c++)
         {
             ws.Cells[1, c + 1].Value = headers[c];
-            ws.Cells[1, c + 1].Style.Font.Bold = true;
+            ws.Cells[1, c + 1].Style.Font.Bold = 1;
             ws.Cells[1, c + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
             ws.Cells[1, c + 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(30, 41, 59));
             ws.Cells[1, c + 1].Style.Font.Color.SetColor(Color.White);
@@ -545,6 +545,6 @@ public class PerifeicosNFService
         return pkg.GetAsByteArray();
     }
 
-    private static string? Str(NpgsqlDataReader r, int i)
+    private static string? Str(SqlDataReader r, int i)
         => r.IsDBNull(i) ? null : r.GetValue(i)?.ToString();
 }

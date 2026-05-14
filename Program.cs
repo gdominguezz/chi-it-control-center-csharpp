@@ -3,7 +3,6 @@ using ChiIT.Data;
 
 // ── Zona horaria México/Chihuahua ──
 Environment.SetEnvironmentVariable("TZ", "America/Chihuahua");
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +67,6 @@ Directory.CreateDirectory("PDF_DATABASE/BAJAS");         //  BAJAS
 Directory.CreateDirectory("QR_CODES/MESAS");
 
 
-// ── Puerto dinámico para NORTFLANK ──
+// ── Puerto dinámico para NORTHFLANK ──
 var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 app.Run($"http://0.0.0.0:{port}");
